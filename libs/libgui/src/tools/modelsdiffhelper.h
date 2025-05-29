@@ -34,18 +34,16 @@ class __libgui ModelsDiffHelper: public QObject {
 
 	private:
 		//! \brief List of attributes ignored when comparing XML code of table children objects
-		static const QStringList
-
-		TableObjsIgnoredAttribs,
+		static const QStringList TableObjsIgnoredAttribs;
 
 		//! \brief List of tags ignored when comparing XML code of roles specifically
-		RolesIgnoredTags,
+		static const QStringList RolesIgnoredTags;
 
 		//! \brief List of attributes ignored when comparing XML code of other database objects
-		ObjectsIgnoredAttribs,
+		static const QStringList ObjectsIgnoredAttribs;
 
 		//! \brief List of tags ignored when comparing XML code of other database objects
-		ObjectsIgnoredTags;
+		static const QStringList ObjectsIgnoredTags;
 
 		//! \brief Stores the SQL code that represents the diff between model and database
 		QString diff_def,

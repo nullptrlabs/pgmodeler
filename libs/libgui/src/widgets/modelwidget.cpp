@@ -1491,7 +1491,7 @@ void ModelWidget::convertRelationshipNN()
 				tab_name = tab->getName();
 
 				//Forcing the creation of the single pk column
-				if(rel->isSiglePKColumn())
+				if(rel->isSinglePKColumn())
 				{
 					col = pk->getColumn(0, Constraint::SourceCols);
 					pk_cols.push_back(col->getName());
@@ -1595,7 +1595,7 @@ void ModelWidget::convertRelationshipNN()
 						The relationship will be identifier if the single pk column attribute of the original relationship is false */
 					rel1 = new Relationship(Relationship::Relationship1n,
 																	src_tab, tab, src_mand, false,
-																	!rel->isSiglePKColumn());
+																	!rel->isSinglePKColumn());
 					rel1->setLayers(layers);
 					rel1->setCustomColor(rel_color);
 					rel1->setLayers(layers);
@@ -1607,7 +1607,7 @@ void ModelWidget::convertRelationshipNN()
 						The relationship will be identifier if the single pk column attribute of the original relationship is false */
 					rel2 = new Relationship(Relationship::Relationship1n,
 																	dst_tab, tab, dst_mand,
-																	false, !rel->isSiglePKColumn());
+																	false, !rel->isSinglePKColumn());
 					rel2->setLayers(layers);
 					rel2->setCustomColor(rel_color);
 					rel2->setLayers(layers);

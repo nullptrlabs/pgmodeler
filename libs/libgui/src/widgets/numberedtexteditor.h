@@ -40,10 +40,10 @@ class __libgui NumberedTextEditor : public QPlainTextEdit {
 		/*! \brief Controls globally line numbers visibility.
 		 *  If this flag is set to false then toggleLineNumbers will
 		 *  have no effect */
-		static bool line_nums_visible,
+		static bool line_nums_visible;
 
 		//! \brief Controls if current line must be highlighted
-		highlight_lines;
+		static bool highlight_lines;
 
 		//! \brief Line highlight color
 		static QColor line_hl_color;

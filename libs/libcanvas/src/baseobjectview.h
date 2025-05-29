@@ -136,16 +136,16 @@ class __libcanvas BaseObjectView: public QObject, public QGraphicsItemGroup {
 		void fade(bool fd_in, int duration, int loop_cnt = 1, qreal final_opacity = 1);
 
 	public:
-		static constexpr double VertSpacing=2.0,
-		HorizSpacing=2.0,
-		DefaultFontSize=10.0,
-		ObjectBorderWidth=1.00,
-		MaxDpiFactor=1.4,
-		ObjectShadowXPos=8,
-		ObjectShadowYPos=8;
+		static constexpr double VertSpacing=2.0;
+		static constexpr double HorizSpacing=2.0;
+		static constexpr double DefaultFontSize=10.0;
+		static constexpr double ObjectBorderWidth=1.00;
+		static constexpr double MaxDpiFactor=1.4;
+		static constexpr double ObjectShadowXPos=8;
+		static constexpr double ObjectShadowYPos=8;
 
-		static constexpr int ObjectAlphaChannel=128,
-		ObjectShadowAlphaChannel=50;
+		static constexpr int ObjectAlphaChannel=128;
+		static constexpr int ObjectShadowAlphaChannel=50;
 
 		BaseObjectView(BaseObject *object=nullptr);
 		virtual ~BaseObjectView();

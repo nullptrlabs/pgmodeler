@@ -32,11 +32,11 @@ class __libcore EventType: public TemplateType<EventType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned OnSelect = 1,
-		OnInsert = 2,
-		OnDelete = 3,
-		OnUpdate = 4,
-		OnTruncate = 5;
+		static constexpr unsigned OnSelect = 1;
+		static constexpr unsigned OnInsert = 2;
+		static constexpr unsigned OnDelete = 3;
+		static constexpr unsigned OnUpdate = 4;
+		static constexpr unsigned OnTruncate = 5;
 
 		EventType(const QString &type_name);
 		EventType(unsigned type_id);

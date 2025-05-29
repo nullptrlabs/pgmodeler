@@ -2,7 +2,6 @@ include(../../pgmodeler.pri)
 
 TEMPLATE = lib
 TARGET = parsers
-windows: DESTDIR = $$PWD
 
 # Enables shared library symbols exporting
 DEFINES += PARSERS_SYMBOLS

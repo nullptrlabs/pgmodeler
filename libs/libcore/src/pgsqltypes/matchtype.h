@@ -32,9 +32,9 @@ class __libcore MatchType: public TemplateType<MatchType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned Simple = 1,
-		Full = 2,
-		Partial = 3;
+		static constexpr unsigned Simple = 1;
+		static constexpr unsigned Full = 2;
+		static constexpr unsigned Partial = 3;
 
 		MatchType(unsigned type_id);
 		MatchType(const QString &type_name);

@@ -16,7 +16,6 @@ isEqual(PRIVATE_PLUGINS, false) {
 RESOURCES += res/resources.qrc
 
 windows:RCC_DIR += src
-windows:DESTDIR = $$PWD
 
 # Enables shared library symbols exporting
 DEFINES += GUI_SYMBOLS
@@ -382,7 +381,8 @@ INCLUDEPATH += $$LIBCANVAS_INC \
 	       $$PWD/src/settings \
 	       $$PWD/src/tools \
 	       $$PWD/src/utils \
-	       $$PWD/src/widgets
+	       $$PWD/src/widgets \
+	       $$PWD/src
 
 DEPENDPATH += $$LIBCANVAS_ROOT \
 	      $$LIBCONNECTOR_ROOT \

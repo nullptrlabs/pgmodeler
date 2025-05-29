@@ -32,9 +32,9 @@ class __libcore ParallelType: public TemplateType<ParallelType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned Unsafe = 1,
-		Restricted = 2,
-		Safe = 3;
+		static constexpr unsigned Unsafe = 1;
+		static constexpr unsigned Restricted = 2;
+		static constexpr unsigned Safe = 3;
 
 		ParallelType(const QString &type_name);
 		ParallelType(unsigned type_id);

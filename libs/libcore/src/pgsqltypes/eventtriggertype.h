@@ -32,10 +32,10 @@ class __libcore EventTriggerType: public TemplateType<EventTriggerType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned DdlCommandStart = 1,
-		DdlCommandEnd = 2,
-		SqlDrop = 3,
-		TableRewrite = 4;
+		static constexpr unsigned DdlCommandStart = 1;
+		static constexpr unsigned DdlCommandEnd = 2;
+		static constexpr unsigned SqlDrop = 3;
+		static constexpr unsigned TableRewrite = 4;
 
 		EventTriggerType(const QString &type_name);
 		EventTriggerType(unsigned type_id);

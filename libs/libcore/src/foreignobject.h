@@ -37,8 +37,8 @@ class __libcore ForeignObject {
 
 	public:
 		//! \brief Store the character used to separate options/values in the XML code
-		static const QString OptionsSeparator,
-		OptionValueSeparator;
+		static const QString OptionsSeparator;
+		static const QString OptionValueSeparator;
 
 		ForeignObject();
 

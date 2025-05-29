@@ -45,9 +45,9 @@ class __libgui DatabaseExplorerWidget: public QWidget, public Ui::DatabaseExplor
 		 * This attribute is used by saveTreeState() and restoreTreeState() */
 		QStringList items_state;
 
-		static const QString DepNotDefined,
-		DepNotFound,
-		DefaultSourceCode;
+		static const QString DepNotDefined;
+		static const QString DepNotFound;
+		static const QString DefaultSourceCode;
 		
 		//! \brief Stores the translations of all used attributes at properties panel
 		static const attribs_map attribs_i18n;

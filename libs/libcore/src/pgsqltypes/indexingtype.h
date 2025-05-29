@@ -32,12 +32,12 @@ class __libcore IndexingType: public TemplateType<IndexingType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned Btree = 1,
-		Brin = 2,
-		Gist = 3,
-		Gin = 4,
-		Hash = 5,
-		Spgist = 6;
+		static constexpr unsigned Btree = 1;
+		static constexpr unsigned Brin = 2;
+		static constexpr unsigned Gist = 3;
+		static constexpr unsigned Gin = 4;
+		static constexpr unsigned Hash = 5;
+		static constexpr unsigned Spgist = 6;
 
 		IndexingType(const QString &type_name);
 		IndexingType(unsigned type_id);

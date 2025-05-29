@@ -867,7 +867,7 @@ void ModelExportHelper::exportBufferToDBMS(const QString &buffer, Connection &co
    to permit the user, in case of error, identify what object is wrongly configured. */
 	ts.setString(&sql_buf);
 
-	if(!conn.isStablished())
+	if(!conn.isEstablished())
 	{
 		orig_conn_db_name = conn.getConnectionParam(Connection::ParamDbName);
 
@@ -1141,7 +1141,7 @@ void ModelExportHelper::exportBufferToDBMS(const QString &buffer, Connection &co
 		}
 		catch(Exception &e)
 		{
-			if(conn.isStablished() && in_transaction)
+			if(conn.isEstablished() && in_transaction)
 			{
 				try
 				{

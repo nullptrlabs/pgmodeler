@@ -34,9 +34,9 @@
 class __libcanvas TextPolygonItem : public QGraphicsPolygonItem {
 	private:
 
-	 QGraphicsTextItem *text_item;
+		QGraphicsTextItem *text_item;
 
-	 bool word_wrap;
+		bool word_wrap;
 
 	public:
 		TextPolygonItem(QGraphicsItem *parent = nullptr);

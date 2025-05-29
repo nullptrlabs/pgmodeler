@@ -36,7 +36,7 @@
 #include "exception.h"
 #include "pgsqlversions.h"
 
-enum class ObjectType: unsigned {
+enum class __libcore ObjectType: unsigned {
 	Column,
 	Constraint,
 	Function,
@@ -91,10 +91,10 @@ class __libcore BaseObject {
 		//! \brief Current PostgreSQL version used in SQL code generation
 		static QString pgsql_ver;
 
-		static bool escape_comments,
+		static bool escape_comments;
 
 		//! \brief Indicates if the dependences/references of the object must be erased on the destructor
-		clear_deps_in_dtor;
+		static bool clear_deps_in_dtor;
 
 		//! \brief Stores the set of special (valid) chars that forces the object's name quoting
 		static const QByteArray special_chars;
@@ -192,15 +192,15 @@ class __libcore BaseObject {
 		 *
 		 * CAUTION: If both amount and order of the object type enumerations are modified
 		 * then the order and amount of the elements of this vector must also be modified */
-		static const QString objs_schemas[ObjectTypeCount],
+		static const QString objs_schemas[ObjectTypeCount];
 
 		/*! \brief This map associates the object type to a keyword on
 		 SQL language that represents the object */
-		objs_sql[ObjectTypeCount],
+		static const QString objs_sql[ObjectTypeCount];
 
 		/*! \brief Stores the name of the type of objects to be used in error messages formatting
 		 and others operations that envolves object type name */
-		obj_type_names[ObjectTypeCount];
+		static const QString obj_type_names[ObjectTypeCount];
 
 		//! \brief This map stores the translate human readable names of each search attribute use by the object
 		static const attribs_map search_attribs_i18n;
@@ -600,19 +600,19 @@ class __libcore BaseObject {
 		bool isCodeInvalidated();
 
 		/*! \brief Compares the xml code between the "this" object and another one. The user can specify which attributes
-		and tags must be ignored when makin the comparison. NOTE: only the name for attributes and tags must be informed */
+		 * and tags must be ignored when makin the comparison. NOTE: only the name for attributes and tags must be informed */
 		virtual bool isCodeDiffersFrom(BaseObject *object, const QStringList &ignored_attribs={}, const QStringList &ignored_tags={});
 
 		/*! \brief Returns the valid object types in a vector. The types
-		ObjectType::ObjBaseObject, TYPE_ATTRIBUTE and ObjectType::ObjBaseTable aren't included in return vector.
-		By default table objects (columns, trigger, constraints, etc) are included. To
-		avoid the insertion of these types set the boolean param to false. */
+		 * ObjectType::ObjBaseObject, TYPE_ATTRIBUTE and ObjectType::ObjBaseTable aren't included in return vector.
+		 * By default table objects (columns, trigger, constraints, etc) are included. To
+		 * avoid the insertion of these types set the boolean param to false. */
 		static std::vector<ObjectType> getObjectTypes(bool inc_table_objs=true, std::vector<ObjectType> exclude_types={});
 
 		/*! \brief Returns the valid object types that are child or grouped under the specified type.
-	This method works a litte different from getObjectTypes() since this latter returns all valid types
-	and this one returns only the valid types for the current specified type. For now the only accepted
-	types are ObjectType::Database, ObjectType::Schema, ObjectType::Table, ObjectType::ForeignTable */
+		 * This method works a litte different from getObjectTypes() since this latter returns all valid types
+		 * and this one returns only the valid types for the current specified type. For now the only accepted
+		 * types are ObjectType::Database, ObjectType::Schema, ObjectType::Table, ObjectType::ForeignTable */
 		static std::vector<ObjectType> getChildObjectTypes(ObjectType obj_type);
 
 		//! \brief Returns true when the child_type is in the list of children types of the parent_type

@@ -982,7 +982,7 @@ void ObjectsScene::handleChildrenSelectionChanged()
 	if(!tab_view)
 		return;
 
-	if(tab_view->getSelectedChidren().empty())
+	if(tab_view->getSelectedChildren().empty())
 		tabs_sel_children.removeAll(tab_view);
 	else if(!tabs_sel_children.contains(tab_view))
 		tabs_sel_children.append(tab_view);
@@ -1897,7 +1897,7 @@ QList<QGraphicsItem *> ObjectsScene::selectedItems() const
 
 	for(auto &tab_view :tabs_sel_children)
 	{
-		for(auto &tab_obj : tab_view->getSelectedChidren())
+		for(auto &tab_obj : tab_view->getSelectedChildren())
 			items.append(tab_obj);
 	}
 

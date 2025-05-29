@@ -195,92 +195,92 @@ class __libcli PgModelerCliApp: public Application {
 
 	public:
 		//! \brief Option names constants
-		static const QString AllChildren,
-		Input,
-		Output,
-		InputDb,
-		ExportToFile,
-		ExportToPng,
-		ExportToSvg,
-		ExportToDbms,
-		ExportToDict,
-		ImportDb,
-		NoIndex,
-		Split,
-		Markdown,
-		DependenciesSql,
-		ChildrenSql,
-		GroupByType,
-		GenDropScript,
-		Diff,
-		DropDatabase,
-		DropObjects,
-		NonTransactional,
-		PgSqlVer,
-		Help,
-		ShowGrid,
-		ShowDelimiters,
-		PageByPage,
-		OverrideBgColor,
-		IgnoreDuplicates,
-		IgnoreErrorCodes,
-		ConnAlias,
-		Host,
-		Port,
-		User,
-		Passwd,
-		InitialDb,
-		Silent,
-		ListConns,
-		Simulate,
-		FixModel,
-		FixTries,
-		ZoomFactor,
-		UseTmpNames,
-		DbmMimeType,
-		Install,
-		Uninstall,
-		SystemWide,
-		IgnoreImportErrors,
-		ImportSystemObjs,
-		ImportExtensionObjs,
-		DebugMode,
-		FilterObjects,
-		MatchByName,
-		ForceChildren,
-		OnlyMatching,
-		CommentsAsAliases,
-		PartialDiff,
-		Force,
-		StartDate,
-		EndDate,
-		CompareTo,
-		SaveDiff,
-		ApplyDiff,
-		NoDiffPreview,
-		DropClusterObjs,
-		RevokePermissions,
-		DropMissingObjs,
-		ForceDropColsConstrs,
-		RenameDb,
-		NoSequenceReuse,
-		NoCascadeDrop,
-		RecreateUnmod,
-		ReplaceModified,
-		ForceReCreateObjs,
-		CreateConfigs,
-		MissingOnly,
-		IgnoreFaultyPlugins,
-		ListPlugins,
+		static const QString AllChildren;
+		static const QString Input;
+		static const QString Output;
+		static const QString InputDb;
+		static const QString ExportToFile;
+		static const QString ExportToPng;
+		static const QString ExportToSvg;
+		static const QString ExportToDbms;
+		static const QString ExportToDict;
+		static const QString ImportDb;
+		static const QString NoIndex;
+		static const QString Split;
+		static const QString Markdown;
+		static const QString DependenciesSql;
+		static const QString ChildrenSql;
+		static const QString GroupByType;
+		static const QString GenDropScript;
+		static const QString Diff;
+		static const QString DropDatabase;
+		static const QString DropObjects;
+		static const QString NonTransactional;
+		static const QString PgSqlVer;
+		static const QString Help;
+		static const QString ShowGrid;
+		static const QString ShowDelimiters;
+		static const QString PageByPage;
+		static const QString OverrideBgColor;
+		static const QString IgnoreDuplicates;
+		static const QString IgnoreErrorCodes;
+		static const QString ConnAlias;
+		static const QString Host;
+		static const QString Port;
+		static const QString User;
+		static const QString Passwd;
+		static const QString InitialDb;
+		static const QString Silent;
+		static const QString ListConns;
+		static const QString Simulate;
+		static const QString FixModel;
+		static const QString FixTries;
+		static const QString ZoomFactor;
+		static const QString UseTmpNames;
+		static const QString DbmMimeType;
+		static const QString Install;
+		static const QString Uninstall;
+		static const QString SystemWide;
+		static const QString IgnoreImportErrors;
+		static const QString ImportSystemObjs;
+		static const QString ImportExtensionObjs;
+		static const QString DebugMode;
+		static const QString FilterObjects;
+		static const QString MatchByName;
+		static const QString ForceChildren;
+		static const QString OnlyMatching;
+		static const QString CommentsAsAliases;
+		static const QString PartialDiff;
+		static const QString Force;
+		static const QString StartDate;
+		static const QString EndDate;
+		static const QString CompareTo;
+		static const QString SaveDiff;
+		static const QString ApplyDiff;
+		static const QString NoDiffPreview;
+		static const QString DropClusterObjs;
+		static const QString RevokePermissions;
+		static const QString DropMissingObjs;
+		static const QString ForceDropColsConstrs;
+		static const QString RenameDb;
+		static const QString NoSequenceReuse;
+		static const QString NoCascadeDrop;
+		static const QString RecreateUnmod;
+		static const QString ReplaceModified;
+		static const QString ForceReCreateObjs;
+		static const QString CreateConfigs;
+		static const QString MissingOnly;
+		static const QString IgnoreFaultyPlugins;
+		static const QString ListPlugins;
 
-		ConnOptions,
-		TagExpr,
-		EndTagExpr,
-		AttributeExpr,
-		ModelFixLog,
+		static const QString ConnOptions;
+		static const QString TagExpr;
+		static const QString EndTagExpr;
+		static const QString AttributeExpr;
+		static const QString ModelFixLog;
 
-		MsgFileAssociated,
-		MsgNoFileAssociation;
+		static const QString MsgFileAssociated;
+		static const QString MsgNoFileAssociation;
 
 		PgModelerCliApp(int argc, char **argv);
 
@@ -289,7 +289,7 @@ class __libcli PgModelerCliApp: public Application {
 		//! \brief Shows the options menu
 		void showMenu();
 
-					 //! \brief Shows the version info
+		//! \brief Shows the version info
 		void showVersionInfo();
 
 		/*! \brief Prints to the stdout the provided text appending a \n on the string

@@ -32,8 +32,8 @@ class __libcore DeferralType: public TemplateType<DeferralType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned Immediate = 1,
-		Deferred = 2;
+		static constexpr unsigned Immediate = 1;
+		static constexpr unsigned Deferred = 2;
 
 		DeferralType(unsigned type_id);
 		DeferralType(const QString &type_name);

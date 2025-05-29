@@ -32,9 +32,9 @@ class __libcore FunctionType: public TemplateType<FunctionType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned Volatile = 1,
-		Stable = 2,
-		Immutable= 3;
+		static constexpr unsigned Volatile = 1;
+		static constexpr unsigned Stable = 2;
+		static constexpr unsigned Immutable= 3;
 
 		FunctionType(const QString &type_name);
 		FunctionType(unsigned type_id);

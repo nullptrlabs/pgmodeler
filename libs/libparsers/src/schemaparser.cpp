@@ -734,8 +734,8 @@ bool SchemaParser::evaluateComparisonExpr()
 				}
 				else if(attributes.count(attrib)==0 && !ignore_unk_atribs)
 				{
-					throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
-													ErrorCode::UnkownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+					throw Exception(getParseError(ErrorCode::UnknownAttribute, "", attrib),
+													ErrorCode::UnknownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
 				}
 				else
 				{
@@ -853,8 +853,8 @@ void SchemaParser::defineAttribute()
 
 					if(attributes.count(attrib)==0 && !ignore_unk_atribs)
 					{
-						throw Exception(getParseError(ErrorCode::UnkownAttribute),
-														ErrorCode::UnkownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+						throw Exception(getParseError(ErrorCode::UnknownAttribute),
+														ErrorCode::UnknownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
 					}
 
 					value += to_xml_entity ? UtilsNs::convertToXmlEntities(attributes[attrib]) : attributes[attrib];
@@ -942,8 +942,8 @@ void SchemaParser::unsetAttribute()
 
 				if(attributes.count(attrib)==0 && !ignore_unk_atribs)
 				{
-					throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
-													 ErrorCode::UnkownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+					throw Exception(getParseError(ErrorCode::UnknownAttribute, "", attrib),
+													 ErrorCode::UnknownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
 				}
 				else if(!AttribRegExp.match(attrib).hasMatch())
 				{
@@ -1037,8 +1037,8 @@ bool SchemaParser::evaluateExpression()
 							 //Raises an error if the attribute does is unknown
 				if(attributes.count(attrib)==0 && !ignore_unk_atribs)
 				{
-					throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
-													ErrorCode::UnkownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+					throw Exception(getParseError(ErrorCode::UnknownAttribute, "", attrib),
+													ErrorCode::UnknownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
 				}
 
 				//Error 1: A conditional token other than %or %not %and if found on conditional expression
@@ -1232,7 +1232,7 @@ QString SchemaParser::getSourceCode(const QString & obj_name, attribs_map &attri
 	}
 }
 
-void SchemaParser::ignoreUnkownAttributes(bool ignore)
+void SchemaParser::ignoreUnknownAttributes(bool ignore)
 {
 	ignore_unk_atribs=ignore;
 }
@@ -1330,8 +1330,8 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 				{
 					if(!ignore_unk_atribs)
 					{
-						throw Exception(getParseError(ErrorCode::UnkownAttribute, "", atrib),
-														ErrorCode::UnkownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+						throw Exception(getParseError(ErrorCode::UnknownAttribute, "", atrib),
+														ErrorCode::UnknownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
 					}
 					else
 						attributes[atrib]	= "";

@@ -76,12 +76,12 @@ class __libgui SyntaxHighlighter: public QSyntaxHighlighter {
 		static QFont default_font;
 
 		//! \brief Indicates that the current block has no special meaning
-		static constexpr int SimpleBlock = -1,
+		static constexpr int SimpleBlock = -1;
 
 		/*! \brief Indicates that the current block was last formatted by a persistent group,
 		 * Indicating that the highlight was applied to the start position of the group
 		 * until the end of the block. */
-		PersistentBlock = 0,
+		static constexpr int PersistentBlock = 0;
 
 		/*! \brief Indicates that the current block has an open (but still to close) expression (e.g. multline comments)
 		* When the highlighter finds this const it'll do special operation like highlight next blocks with the same
@@ -89,7 +89,7 @@ class __libgui SyntaxHighlighter: public QSyntaxHighlighter {
 		* calls using this as parameter will always use the group index as extra value. For example, say we have a
 		* "multi-line-comment" group which index is 1 and was applied to the current block, then the block state will
 		* be set as OpenExprBlock + 1 */
-		OpenExprBlock = 1;
+		static constexpr int OpenExprBlock = 1;
 
 		//! \brief Stores the order in which the groups must be applied
 		QStringList groups_order, multilines_order;

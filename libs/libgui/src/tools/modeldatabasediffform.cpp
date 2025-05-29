@@ -1229,10 +1229,10 @@ void ModelDatabaseDiffForm::saveConfiguration()
 
 		for(auto &conf : config_params)
 		{
-			schparser.ignoreUnkownAttributes(true);
+			schparser.ignoreUnknownAttributes(true);
 			schparser.ignoreEmptyAttributes(true);
 			presets += schparser.getSourceCode(preset_sch, conf.second);
-			schparser.ignoreUnkownAttributes(false);
+			schparser.ignoreUnknownAttributes(false);
 			schparser.ignoreEmptyAttributes(false);
 		}
 

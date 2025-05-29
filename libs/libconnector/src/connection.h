@@ -61,7 +61,7 @@ class __libconnector Connection {
 
 		/*! \brief This static method disable the notice messages when executing commands.
 		By default all connections are created with notice disabled. To enable it the user
-		must call Connection::setNoticeEnabled(). Note: connections already stablished
+		must call Connection::setNoticeEnabled(). Note: already established connections 
 		aren't affected when calling this method the user must disconnect then connect again
 		to enable output. */
 		static void disableNoticeOutput(void *, const PGresult *){}
@@ -72,17 +72,17 @@ class __libconnector Connection {
 		static void noticeProcessor(void *, const char *message);
 
 		//! \brief Indicates if notices are enabled
-		static bool notice_enabled,
+		static bool notice_enabled;
 
 		//! \brief Indicates if executed sql must be printed (stdout) [default is false]
-		print_sql,
+		static bool print_sql;
 
 		//! \brief Indicates if error silence is enabled
-		silence_conn_err,
+		static bool silence_conn_err;
 
 		/*! \brief Indicates if the PostgreSQL version checking must be ignored during connection.
 		 * This flag allows connecting (poorly and error-prone!) to older versions ( < 10). */
-		ignore_db_version;
+		static bool ignore_db_version;
 
 		/*! \brief Indicates that the initial database configured in the connection can be automatically
 		browsed after connect the server. This attribute is useful only in SQLTool */
@@ -99,40 +99,41 @@ class __libconnector Connection {
 
 	public:
 		//! \brief Constants used to reference the connections parameters
-		static const QString	ParamAlias,
-		ParamApplicationName,
-		ParamServerFqdn,
-		ParamServerIp,
-		ParamPort,
-		ParamDbName,
-		ParamUser,
-		ParamPassword,
-		ParamConnTimeout,
-		ParamOthers,
-		ParamSslMode,
-		ParamSslCert,
-		ParamSslKey,
-		ParamSslRootCert,
-		ParamSslCrl,
-		ParamKerberosServer,
-		ParamLibGssapi,
+		static const QString ParamAlias;
+		static const QString ParamApplicationName;
+		static const QString ParamService;
+		static const QString ParamServerFqdn;
+		static const QString ParamServerIp;
+		static const QString ParamPort;
+		static const QString ParamDbName;
+		static const QString ParamUser;
+		static const QString ParamPassword;
+		static const QString ParamConnTimeout;
+		static const QString ParamOthers;
+		static const QString ParamSslMode;
+		static const QString ParamSslCert;
+		static const QString ParamSslKey;
+		static const QString ParamSslRootCert;
+		static const QString ParamSslCrl;
+		static const QString ParamKerberosServer;
+		static const QString ParamLibGssapi;
 
 		/*! \brief Special parameter that store the name of the role
 		 *  to be switched in case of a successful connection */
-		ParamSetRole,
+		static const QString ParamSetRole;
 
 		//! \brief Constants used to reference the connection ssl mode
-		SslDisable,
-		SslAllow,
-		SslPrefer,
-		SslRequire,
-		SslCaVerify,
-		SslFullVerify,
+		static const QString SslDisable;
+		static const QString SslAllow;
+		static const QString SslPrefer;
+		static const QString SslRequire;
+		static const QString SslCaVerify;
+		static const QString SslFullVerify;
 
 		//! \brief Constants used to reference the server info details (see getServerInfo())
-		ServerVersion,
-		ServerProtocol,
-		ServerPid;
+		static const QString ServerVersion;
+		static const QString ServerProtocol;
+		static const QString ServerPid;
 
 		//! \brief Constants used to reference the default usage in model operations (see setDefaultForOperation())
 		enum ConnOperation: unsigned {
@@ -233,13 +234,13 @@ class __libconnector Connection {
 		static QStringList getNotices();
 
 		/*! \brief Change the current database to the specified db name using the parameters from the current
-		stablished connection causing the connection to be reset and moved to the new database.
+		established connection causing the connection to be reset and moved to the new database.
 		The effect of this is the same by type \c dbname on psql console. In case of errors the method will
 		raise an exception and switch back to the previous database. */
 		void switchToDatabase(const QString &dbname);
 
-		//! \brief Returns if the connection is stablished
-		bool isStablished();
+		//! \brief Returns if the connection is established
+		bool isEstablished();
 
 		//! \brief Returns if the connection is configured (has some attributes set)
 		bool isConfigured();

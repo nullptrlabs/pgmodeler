@@ -53,23 +53,22 @@ class __libutils GlobalAttributes {
 		 PGMODELER_SE_PATH  --> Full path to pgmodeler-se executable
 		 PGMODELER_PATH     --> Full path to pgmodeler executable */
 
-		static QString
-		SchemasRootPath,
-		LanguagesPath,
-		PluginsPath,
-		TemporaryPath,
-		SamplesPath,
-		TmplConfigurationPath,
-		ConfigurationsPath,
-		SQLHighlightConfPath,
-		XMLHighlightConfPath,
-		SchHighlightConfPath,
-		PatternHighlightConfPath,
-		PgModelerCHandlerPath,
-		PgModelerCLIPath,
-		PgModelerAppPath,
-		PgModelerSchemaEditorPath,
-		PgModelerBaseVersion;
+		static QString SchemasRootPath;
+		static QString LanguagesPath;
+		static QString PluginsPath;
+		static QString TemporaryPath;
+		static QString SamplesPath;
+		static QString TmplConfigurationPath;
+		static QString ConfigurationsPath;
+		static QString SQLHighlightConfPath;
+		static QString XMLHighlightConfPath;
+		static QString SchHighlightConfPath;
+		static QString PatternHighlightConfPath;
+		static QString PgModelerCHandlerPath;
+		static QString PgModelerCLIPath;
+		static QString PgModelerAppPath;
+		static QString PgModelerSchemaEditorPath;
+		static QString PgModelerBaseVersion;
 
 		//! \brief Stores the custom paths retrieved either from pgmpaths.conf or from environment variables
 		static attribs_map CustomPaths;
@@ -137,92 +136,91 @@ class __libutils GlobalAttributes {
 		}
 
 	public:
-		static const QString
-		PgModelerVersion,
-		PgModelerAppName,
-		PgModelerOldAppName,
+		static const QString PgModelerVersion;
+		static const QString PgModelerAppName;
+		static const QString PgModelerOldAppName;
 
-		PgModelerURI,
-		PgModelerBuildNumber,
-		PgModelerSite,
-		PgModelerSupport,
-		PgModelerSourceURL,
-		PgModelerDownloadURL,
-		PgModelerDonateURL,
-		PgModelerUpdateCheckURL,
+		static const QString PgModelerURI;
+		static const QString PgModelerBuildNumber;
+		static const QString PgModelerSite;
+		static const QString PgModelerSupport;
+		static const QString PgModelerSourceURL;
+		static const QString PgModelerDownloadURL;
+		static const QString PgModelerDonateURL;
+		static const QString PgModelerUpdateCheckURL;
 
-		EnvSchemasPath,
-		EnvConfPath,
-		EnvTmplConfPath,
-		EnvLangPath,
-		EnvPluginsPath,
-		EnvTmpPath,
-		EnvSamplesPath,
-		EnvPgModelerChPath,
-		EnvPgModelerCliPath,
-		EnvPgModelerSePath,
-		EnvPgModelerPath,
+		static const QString EnvSchemasPath;
+		static const QString EnvConfPath;
+		static const QString EnvTmplConfPath;
+		static const QString EnvLangPath;
+		static const QString EnvPluginsPath;
+		static const QString EnvTmpPath;
+		static const QString EnvSamplesPath;
+		static const QString EnvPgModelerChPath;
+		static const QString EnvPgModelerCliPath;
+		static const QString EnvPgModelerSePath;
+		static const QString EnvPgModelerPath;
 
-		PgmPathsConfFile, //! \brief An ini-like (key=value) file that holds custom values for the pgModeler's enviroment variables
-		BugReportEmail,
-		BugReportFile,
-		StacktraceFile,
-		LastModelFile,
+		static const QString PgmPathsConfFile;     //! \brief An ini-like (key=value) file that holds custom values for the pgModeler's enviroment variables
+		static const QString BugReportEmail;
+		static const QString BugReportFile;
+		static const QString StacktraceFile;
+		static const QString LastModelFile;
 
-		DbModelExt,
-		DbModelBkpExt,
-		ObjMetadataExt,
-		DirSeparator,
-		ResourcesDir,				 //! \brief Directory name which holds the pgModeler's plug-ins resources directory (res)
-		ConfigurationsDir,	 //! \brief Default name for the configurations directory
-		DefaultConfsDir,		 //! \brief Default name for the default configurations directory
-		ConfsBackupsDir,		 //! \brief Directory name which holds the pgModeler configuration backups
-		SchemasDir,					 //! \brief Default name for the schemas directory
-		SQLSchemaDir,				 //! \brief Default name for the sql schemas directory
-		XMLSchemaDir,				 //! \brief Default name for the xml schemas directory
-		CatalogSchemasDir,	 //! \brief Default name for the catalog schemas directory
-		DataDictSchemaDir,	 //! \brief Default name for the data dictionary schemas root directory
-		DataDictHtmlDir,		 //! \brief Default name for the data dictionary schemas directory (HTML format)
-		DataDictMdDir,			 //! \brief Default name for the dictionary schemas directory (Markdown format)
-		AlterSchemaDir,			 //! \brief Default name for the alter schemas directory
-		LanguagesDir,				 //! \brief Default name for the translation files directory
-		SamplesDir,					 //! \brief Default name for the samples database models directory
-		PluginsDir,					 //! \brief Default name for the plug-ins directory
-		SchemaExt,					 //! \brief Default extension for schema files
-		ObjectDTDDir,				 //! \brief Default directory for dtd files
-		ObjectDTDExt,				 //! \brief Default extension for dtd files
-		RootDTD,						 //! \brief Root DTD of model xml files
-		MetadataDTD,				 //! \brief Root DTD of objects metadata xml files
-		ConfigurationExt,		 //! \brief Default extension for configuration files
-		HighlightFileSuffix, //! \brief Suffix of language highlight configuration files
-		ThemesDir,					 //! \brief Default name for the ui style directory
+		static const QString DbModelExt;
+		static const QString DbModelBkpExt;
+		static const QString ObjMetadataExt;
+		static const QString DirSeparator;
+		static const QString ResourcesDir;				 //! \brief Directory name which holds the pgModeler's plug-ins resources directory (res)
+		static const QString ConfigurationsDir;		 //! \brief Default name for the configurations directory
+		static const QString DefaultConfsDir;			 //! \brief Default name for the default configurations directory
+		static const QString ConfsBackupsDir;			 //! \brief Directory name which holds the pgModeler configuration backups
+		static const QString SchemasDir;					 //! \brief Default name for the schemas directory
+		static const QString SQLSchemaDir;				 //! \brief Default name for the sql schemas directory
+		static const QString XMLSchemaDir;				 //! \brief Default name for the xml schemas directory
+		static const QString CatalogSchemasDir;	   //! \brief Default name for the catalog schemas directory
+		static const QString DataDictSchemaDir;	   //! \brief Default name for the data dictionary schemas root directory
+		static const QString DataDictHtmlDir;		   //! \brief Default name for the data dictionary schemas directory (HTML format)
+		static const QString DataDictMdDir;			   //! \brief Default name for the dictionary schemas directory (Markdown format)
+		static const QString AlterSchemaDir;			 //! \brief Default name for the alter schemas directory
+		static const QString LanguagesDir;				 //! \brief Default name for the translation files directory
+		static const QString SamplesDir;					 //! \brief Default name for the samples database models directory
+		static const QString PluginsDir;					 //! \brief Default name for the plug-ins directory
+		static const QString SchemaExt;					   //! \brief Default extension for schema files
+		static const QString ObjectDTDDir;				 //! \brief Default directory for dtd files
+		static const QString ObjectDTDExt;				 //! \brief Default extension for dtd files
+		static const QString RootDTD;						   //! \brief Root DTD of model xml files
+		static const QString MetadataDTD;				   //! \brief Root DTD of objects metadata xml files
+		static const QString ConfigurationExt;		 //! \brief Default extension for configuration files
+		static const QString HighlightFileSuffix;  //! \brief Suffix of language highlight configuration files
+		static const QString ThemesDir;					   //! \brief Default name for the ui style directory
 
-		CodeHighlightConf,		 //! \brief Default name for the language highlight dtd
-		AppearanceConf,				 //! \brief Default name for the appearance configuration file
-		GeneralConf,					 //! \brief Default name for the general pgModeler configuration
-		ConnectionsConf,			 //! \brief Default name for the DBMS connection configuration file
-		RelationshipsConf,		 //! \brief Default name for the relationships configuration file
-		SnippetsConf,					 //! \brief Default name for the code snippets configuration file
-		DiffPresetsConf,			 //! \brief Default name for the diff presets configuration file
+		static const QString CodeHighlightConf;		 //! \brief Default name for the language highlight dtd
+		static const QString AppearanceConf;			 //! \brief Default name for the appearance configuration file
+		static const QString GeneralConf;					 //! \brief Default name for the general pgModeler configuration
+		static const QString ConnectionsConf;			 //! \brief Default name for the DBMS connection configuration file
+		static const QString RelationshipsConf;		 //! \brief Default name for the relationships configuration file
+		static const QString SnippetsConf;				 //! \brief Default name for the code snippets configuration file
+		static const QString DiffPresetsConf;			 //! \brief Default name for the diff presets configuration file
 
-		SQLHighlightConf,			 //! \brief Configuration file for SQL language highlight
-		XMLHighlightConf,			 //! \brief Configuration file for XML language highlight
-		SchHighlightConf,			 //! \brief Configuration file for Schema micro-language highlight
-		PatternHighlightConf,	 //! \brief Configuration file for name patterns highlight (relationship editing form)
-		SQLHistoryConf,				 //! \brief Default name for the SQL commands history configuration file
+		static const QString SQLHighlightConf;		 //! \brief Configuration file for SQL language highlight
+		static const QString XMLHighlightConf;		 //! \brief Configuration file for XML language highlight
+		static const QString SchHighlightConf;		 //! \brief Configuration file for Schema micro-language highlight
+		static const QString PatternHighlightConf; //! \brief Configuration file for name patterns highlight (relationship editing form)
+		static const QString SQLHistoryConf;			 //! \brief Default name for the SQL commands history configuration file
 
-		ExampleModel,		 //! \brief Default name for the sample model loaded on appearence configuration form
-		UiStyleConf,		 //! \brief Configuration file ui style
-		IconsMediumConf, //! \brief Extra configuration file that defines medium icons size
-		IconsSmallConf,	 //! \brief Extra configuration file that defines small icons size
-		IconsBigConf,		 //! \brief Extra configuration file that defines big icons size
+		static const QString ExampleModel;		     //! \brief Default name for the sample model loaded on appearence configuration form
+		static const QString UiStyleConf;		 	     //! \brief Configuration file ui style
+		static const QString IconsMediumConf;      //! \brief Extra configuration file that defines medium icons size
+		static const QString IconsSmallConf;	     //! \brief Extra configuration file that defines small icons size
+		static const QString IconsBigConf;		     //! \brief Extra configuration file that defines big icons size
 
-		FileDialogConf, //! \brief Default name for the file used to save/restore QFileDialog last geometry
+		static const QString FileDialogConf;       //! \brief Default name for the file used to save/restore QFileDialog last geometry
 
 		/*! \brief Fusion is the default widget style for pgModeler. User can change this by calling
 		the executable using -style option. This same style is applied to crash handler. */
-		DefaultQtStyle,
-		UiStyleOption;
+		static const QString DefaultQtStyle;
+		static const QString UiStyleOption;
 
 		/*! \brief Performs the initialization of the global attributes by setting the
 		 * application's search path (and all assets/executable paths based upon search_path).

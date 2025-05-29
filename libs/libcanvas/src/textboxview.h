@@ -53,7 +53,7 @@ class __libcanvas TextboxView: public BaseObjectView {
 	public:
 		TextboxView(Textbox *txtbox, bool override_style = false);
 
-	 virtual ~TextboxView();
+		virtual ~TextboxView();
 
 		/*! \brief Sets the fill and border color for the text box. This method has effect only when
 		 the style can be overriden (via constructor) */

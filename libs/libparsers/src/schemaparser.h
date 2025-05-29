@@ -241,58 +241,58 @@ class __libparsers SchemaParser {
 		}
 
 	public:
-		static const QChar CharComment, //! \brief Character that starts a comment
-		CharLineEnd, //! \brief Character that indicates end of line
-		CharSpace, //! \brief Character that indicates spacing
-		CharTabulation, //! \brief Character that indicates tabulation
-		CharStartAttribute, //! \brief Character that indicates a reference to an attribute
-		CharEndAttribute, //! \brief Character that delimits on the right the attribute name
-		CharStartConditional, //! \brief Character that starts a conditional instruction
-		CharStartMetachar, //! \brief Character that starts a metacharacter
-		CharStartPlainText, //! \brief Character that starts a plain text
-		CharEndPlainText, //! \brief Character that ends a plain text
-		CharStartCompExpr, //! \brief Character that starts a comparison expression
-		CharEndCompExpr, //! \brief Character that ends a comparison expression
-		CharValueDelim, //! \brief Character that delimiters a value (string)
-		CharValueOf, //! \brief Character that is used on %set instructions to create an attribute name based upon another attribute value
-		CharToXmlEntity, //! \brief Character that is used on attributes, e.g. &{attribute}, to indicate that their content must be converted to xml entities
-		CharStartEscaped; //! \brief Character that is used on escapade special characters, e.g. \# \$ \% #\$ \& \] \[ \{ \}
+		static const QChar CharComment; //! \brief Character that starts a comment
+		static const QChar CharLineEnd; //! \brief Character that indicates end of line
+		static const QChar CharSpace; //! \brief Character that indicates spacing
+		static const QChar CharTabulation; //! \brief Character that indicates tabulation
+		static const QChar CharStartAttribute; //! \brief Character that indicates a reference to an attribute
+		static const QChar CharEndAttribute; //! \brief Character that delimits on the right the attribute name
+		static const QChar CharStartConditional; //! \brief Character that starts a conditional instruction
+		static const QChar CharStartMetachar; //! \brief Character that starts a metacharacter
+		static const QChar CharStartPlainText; //! \brief Character that starts a plain text
+		static const QChar CharEndPlainText; //! \brief Character that ends a plain text
+		static const QChar CharStartCompExpr; //! \brief Character that starts a comparison expression
+		static const QChar CharEndCompExpr; //! \brief Character that ends a comparison expression
+		static const QChar CharValueDelim; //! \brief Character that delimiters a value (string)
+		static const QChar CharValueOf; //! \brief Character that is used on %set instructions to create an attribute name based upon another attribute value
+		static const QChar CharToXmlEntity; //! \brief Character that is used on attributes, e.g. &{attribute}, to indicate that their content must be converted to xml entities
+		static const QChar CharStartEscaped; //! \brief Character that is used on escapade special characters, e.g. \# \$ \% #\$ \& \] \[ \{ \}
 
 		//! \brief Tokens related to conditional instructions and operators
-		static const QString	TokenIf,
-		TokenThen,
-		TokenElse,
-		TokenEnd,
-		TokenOr,
-		TokenAnd,
-		TokenNot,
-		TokenSet,
-		TokenUnset,
-		TokenInclude,
+		static const QString TokenIf;
+		static const QString TokenThen;
+		static const QString TokenElse;
+		static const QString TokenEnd;
+		static const QString TokenOr;
+		static const QString TokenAnd;
+		static const QString TokenNot;
+		static const QString TokenSet;
+		static const QString TokenUnset;
+		static const QString TokenInclude;
 
 		//! \brief Tokens related to metacharacters
-		TokenMetaSp,// $sp (space)
-		TokenMetaBr, // $br (line break)
-		TokenMetaTb, // $tb (tabulation)
-		TokenMetaOb, // $ob (open square bracket '[')
-		TokenMetaCb, // $cb (close square bracket ']')
-		TokenMetaOc, // $oc (open curly bracket '{')
-		TokenMetaCc, // $cc (close curly bracket '}')
-		TokenMetaMs, // $ms (money sign '$')
-		TokenMetaHs, // $hs (hash/number sign '#')
-		TokenMetaPs, // $ps (percentage sign '%')
-		TokenMetaAt, // $at (at character '@')
-		TokenMetaDs, // $ds (special data separator character '•')
-		TokenMetaAm, // $am (ampersand character '&')
-		TokenMetaBs, // $bs (backslash character '\')
+		static const QString TokenMetaSp; // $sp (space)
+		static const QString TokenMetaBr; // $br (line break)
+		static const QString TokenMetaTb; // $tb (tabulation)
+		static const QString TokenMetaOb; // $ob (open square bracket '[')
+		static const QString TokenMetaCb; // $cb (close square bracket ']')
+		static const QString TokenMetaOc; // $oc (open curly bracket '{')
+		static const QString TokenMetaCc; // $cc (close curly bracket '}')
+		static const QString TokenMetaMs; // $ms (money sign '$')
+		static const QString TokenMetaHs; // $hs (hash/number sign '#')
+		static const QString TokenMetaPs; // $ps (percentage sign '%')
+		static const QString TokenMetaAt; // $at (at character '@')
+		static const QString TokenMetaDs; // $ds (special data separator character '•')
+		static const QString TokenMetaAm; // $am (ampersand character '&')
+		static const QString TokenMetaBs; // $bs (backslash character '\')
 
 		//! \brief Tokens related to comparison expressions
-		TokenEqOper, // == (equal)
-		TokenNeOper, // != (not equal)
-		TokenGtOper, // > (greater than)
-		TokenLtOper, // < (less than)
-		TokenGtEqOper, // >= (greater or equal to)
-		TokenLtEqOper; // <= (less or equal to)
+		static const QString TokenEqOper; // == (equal)
+		static const QString TokenNeOper; // != (not equal)
+		static const QString TokenGtOper; // > (greater than)
+		static const QString TokenLtOper; // < (less than)
+		static const QString TokenGtEqOper; // >= (greater or equal to)
+		static const QString TokenLtEqOper; // <= (less or equal to)
 
 		//! \brief Token related to schema files inclusion (@include)
 		static const QRegularExpression TokenIncludeRegexp;
@@ -336,7 +336,7 @@ class __libparsers SchemaParser {
 		void restartParser();
 
 		//! \brief Set if the parser must ignore unknown attributes avoiding exception throwing
-		void ignoreUnkownAttributes(bool ignore);
+		void ignoreUnknownAttributes(bool ignore);
 
 		//! \brief Set if the parser must ignore empty attributes avoiding exception throwing
 		void ignoreEmptyAttributes(bool ignore);

@@ -32,11 +32,11 @@ class __libcore PolicyCmdType: public TemplateType<PolicyCmdType> {
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned All = 1,
-		Select = 2,
-		Insert = 3,
-		Update = 4,
-		Delete = 5;
+		static constexpr unsigned All = 1;
+		static constexpr unsigned Select = 2;
+		static constexpr unsigned Insert = 3;
+		static constexpr unsigned Update = 4;
+		static constexpr unsigned Delete = 5;
 
 		PolicyCmdType(const QString &type_name);
 		PolicyCmdType(unsigned type_id);

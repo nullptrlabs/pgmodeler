@@ -477,7 +477,7 @@ QString Catalog::getCatalogQuery(const QString &qry_type, ObjectType obj_type, b
 	}
 
 	loadCatalogQuery(BaseObject::getSchemaName(obj_type));
-	schparser.ignoreUnkownAttributes(true);
+	schparser.ignoreUnknownAttributes(true);
 	schparser.ignoreEmptyAttributes(true);
 
 	attribs[Attributes::PgSqlVersion]=schparser.getPgSQLVersion();
@@ -841,7 +841,7 @@ std::vector<attribs_map> Catalog::getMultipleAttributes(const QString &catalog_s
 		std::vector<attribs_map> obj_attribs;
 
 		loadCatalogQuery(catalog_sch);
-		schparser.ignoreUnkownAttributes(true);
+		schparser.ignoreUnknownAttributes(true);
 		schparser.ignoreEmptyAttributes(true);
 
 		attribs[Attributes::PgSqlVersion]=schparser.getPgSQLVersion();
@@ -1026,7 +1026,7 @@ attribs_map Catalog::getServerAttributes()
 		attribs_map tuple, attribs_aux;
 
 		loadCatalogQuery("server");
-		schparser.ignoreUnkownAttributes(true);
+		schparser.ignoreUnknownAttributes(true);
 		schparser.ignoreEmptyAttributes(true);
 		sql = schparser.getSourceCode(attribs).simplified();
 		connection.executeDMLCommand(sql, res);

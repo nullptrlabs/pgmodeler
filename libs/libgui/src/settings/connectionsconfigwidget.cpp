@@ -47,6 +47,7 @@ ConnectionsConfigWidget::ConnectionsConfigWidget(QWidget * parent) : BaseConfigW
 	connect(add_tb, &QPushButton::clicked, this, __slot(this, ConnectionsConfigWidget::handleConnection));
 
 	connect(alias_edt, &QLineEdit::textChanged, this, &ConnectionsConfigWidget::enableConnectionTest);
+	connect(service_edt, &QLineEdit::textChanged, this, &ConnectionsConfigWidget::enableConnectionTest);
 	connect(host_edt, &QLineEdit::textChanged, this, &ConnectionsConfigWidget::enableConnectionTest);
 	connect(user_edt, &QLineEdit::textChanged, this, &ConnectionsConfigWidget::enableConnectionTest);
 	connect(passwd_edt, &QLineEdit::textChanged, this, &ConnectionsConfigWidget::enableConnectionTest);
@@ -67,6 +68,7 @@ void ConnectionsConfigWidget::hideEvent(QHideEvent *event)
 	{
 		newConnection();
 		one_time_conn_edit = false;
+		service_edt->setEnabled(true);
 		host_edt->setEnabled(true);
 		port_sbp->setEnabled(true);
 		conn_btns_wgt->setVisible(true);
@@ -160,14 +162,16 @@ void ConnectionsConfigWidget::loadConfiguration()
 	}
 }
 
-void ConnectionsConfigWidget::setOneTimeEditMode(bool one_time_edit, const QString &conn_alias, const QString &dbname, const QString &host, int port, const QString &username, const QString &password)
+void ConnectionsConfigWidget::setOneTimeEditMode(bool one_time_edit, const QString &conn_alias, const QString &service, const QString &host, int port, const QString &dbname, const QString &username, const QString &password)
 {
 	one_time_conn_edit = one_time_edit;
 	conn_btns_wgt->setVisible(!one_time_edit);
 	add_tb->setVisible(!one_time_edit);
+	service_edt->setDisabled(one_time_edit && !service.isEmpty());
 	host_edt->setDisabled(one_time_edit && !host.isEmpty());
 	port_sbp->setDisabled(one_time_edit && port > 0);
 	alias_edt->setText(conn_alias);
+	service_edt->setText(service);
 	conn_db_edt->setText(dbname);
 	host_edt->setText(host);
 	port_sbp->setValue(port);
@@ -189,10 +193,7 @@ void ConnectionsConfigWidget::enableCertificates()
 
 void ConnectionsConfigWidget::enableConnectionTest()
 {
-	test_tb->setEnabled(!alias_edt->text().isEmpty() &&
-						!host_edt->text().isEmpty() &&
-						!user_edt->text().isEmpty() &&
-						!conn_db_edt->text().isEmpty());
+	test_tb->setEnabled(!alias_edt->text().isEmpty());
 	add_tb->setEnabled(test_tb->isEnabled());
 	update_tb->setEnabled(test_tb->isEnabled());
 
@@ -211,6 +212,7 @@ void ConnectionsConfigWidget::newConnection()
 		conn_db_edt->clear();
 		alias_edt->clear();
 		user_edt->clear();
+		service_edt->clear();
 		host_edt->clear();
 		port_sbp->setValue(5432);
 		passwd_edt->clear();
@@ -336,6 +338,8 @@ void ConnectionsConfigWidget::editConnection()
 		import_chk->setChecked(conn->isDefaultForOperation(Connection::OpImport));
 		validation_chk->setChecked(conn->isDefaultForOperation(Connection::OpValidation));
 
+		service_edt->setText(conn->getConnectionParam(Connection::ParamService));
+
 		if(!conn->getConnectionParam(Connection::ParamServerFqdn).isEmpty())
 			host_edt->setText(conn->getConnectionParam(Connection::ParamServerFqdn));
 		else
@@ -400,6 +404,7 @@ void ConnectionsConfigWidget::configureConnection(Connection *conn, bool is_upda
 		}
 
 		conn->setConnectionParam(Connection::ParamAlias, alias);
+		conn->setConnectionParam(Connection::ParamService, service_edt->text());
 		conn->setConnectionParam(Connection::ParamServerIp, "");
 		conn->setConnectionParam(Connection::ParamServerFqdn, host_edt->text());
 		conn->setConnectionParam(Connection::ParamPort, QString("%1").arg(port_sbp->value()));
@@ -543,19 +548,19 @@ void ConnectionsConfigWidget::saveConfiguration()
 				attribs[DefaultFor.arg(Attributes::Diff)]=(conn->isDefaultForOperation(Connection::OpDiff) ? Attributes::True : "");
 				attribs[DefaultFor.arg(Attributes::Validation)]=(conn->isDefaultForOperation(Connection::OpValidation) ? Attributes::True : "");
 
-				schparser.ignoreUnkownAttributes(true);
+				schparser.ignoreUnknownAttributes(true);
 				config_params[GlobalAttributes::ConnectionsConf][Attributes::Connections]+=
 						schparser.getSourceCode(GlobalAttributes::getTmplConfigurationFilePath(GlobalAttributes::SchemasDir,
 																																											 GlobalAttributes::ConnectionsConf +
 																																											 GlobalAttributes::SchemaExt), attribs);
 
-				schparser.ignoreUnkownAttributes(false);
+				schparser.ignoreUnknownAttributes(false);
 			}
 		}
 
-		schparser.ignoreUnkownAttributes(true);
+		schparser.ignoreUnknownAttributes(true);
 		BaseConfigWidget::saveConfiguration(GlobalAttributes::ConnectionsConf, config_params);
-		schparser.ignoreUnkownAttributes(false);
+		schparser.ignoreUnknownAttributes(false);
 		//setConfigurationChanged(false);
 	}
 	catch(Exception &e)
@@ -630,8 +635,11 @@ void ConnectionsConfigWidget::fillConnectionsComboBox(QComboBox *combo, bool inc
 }
 
 bool ConnectionsConfigWidget::openConnectionsConfiguration(bool one_time_edit,
-																													 const QString &conn_alias, const QString &dbname, const QString &host,
-																													 int port, const QString &username, const QString &password)
+																													 const QString &conn_alias,
+																													 const QString &service,
+																													 const QString &host, int port,
+																													 const QString &dbname,
+																													 const QString &username, const QString &password)
 {
 	BaseForm parent_form;
 	ConnectionsConfigWidget conn_cfg_wgt;
@@ -656,7 +664,7 @@ bool ConnectionsConfigWidget::openConnectionsConfiguration(bool one_time_edit,
 		)
 	});
 
-	conn_cfg_wgt.setOneTimeEditMode(one_time_edit, conn_alias, dbname, host, port, username, password);
+	conn_cfg_wgt.setOneTimeEditMode(one_time_edit, conn_alias, service, host, port, dbname, username, password);
 	parent_form.setWindowTitle(tr("Edit database connections"));
 	parent_form.setWindowFlags(Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
 	parent_form.setMainWidget(&conn_cfg_wgt);
