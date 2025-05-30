@@ -2,7 +2,6 @@ include(../../pgmodeler.pri)
 
 TEMPLATE = lib
 TARGET = cli
-windows: DESTDIR = $$PWD
 
 # Enables shared library symbols exporting
 DEFINES += CLI_SYMBOLS

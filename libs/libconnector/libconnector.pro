@@ -2,7 +2,6 @@ include(../../pgmodeler.pri)
 
 TEMPLATE = lib
 TARGET = connector
-windows: DESTDIR = $$PWD
 
 # Enables shared library symbols exporting
 DEFINES += CONNECTOR_SYMBOLS
