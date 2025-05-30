@@ -31,6 +31,7 @@ bool Connection::ignore_db_version {false};
 
 const QString	Connection::ParamAlias {"alias"};
 const QString	Connection::ParamApplicationName {"application_name"};
+const QString	Connection::ParamService {"service"};
 const QString	Connection::ParamServerFqdn {"host"};
 const QString	Connection::ParamServerIp {"hostaddr"};
 const QString	Connection::ParamPort {"port"};
@@ -158,11 +159,6 @@ void Connection::generateConnectionString()
 				connection_str += value;
 		}
 	}
-
-	if(!connection_str.contains(ParamDbName) ||
-		 (!connection_str.contains(ParamServerFqdn) &&
-			!connection_str.contains(ParamServerIp)))
-		connection_str.clear();
 }
 
 void Connection::noticeProcessor(void *, const char *message)
@@ -186,8 +182,10 @@ void Connection::validateConnectionStatus()
 
 	if(PQstatus(connection)==CONNECTION_BAD)
 		throw Exception(Exception::getErrorMessage(ErrorCode::ConnectionBroken)
-										.arg(connection_params[ParamServerFqdn].isEmpty() ? connection_params[ParamServerIp] : connection_params[ParamServerFqdn])
-										.arg(connection_params[ParamPort]),
+										.arg(connection_params[ParamService].isEmpty()
+									       ? QString(QT_TR_NOOP("`%1` at port `%2`")).arg(connection_params[ParamServerFqdn].isEmpty() ? connection_params[ParamServerIp] : connection_params[ParamServerFqdn], connection_params[ParamPort])
+										     : QString(QT_TR_NOOP("server %1")).arg(connection_params[ParamService])
+										),
 										ErrorCode::ConnectionBroken, __PRETTY_FUNCTION__, __FILE__, __LINE__);
 }
 
@@ -349,13 +347,18 @@ QString Connection::getConnectionId(bool host_port_only, bool incl_db_name, bool
 	if(!isConfigured())
 		return "";
 
-	if(!connection_params[ParamServerFqdn].isEmpty())
-		addr=connection_params[ParamServerFqdn];
+	if(!connection_params[ParamService].isEmpty())
+		addr = connection_params[ParamService];
 	else
-		addr=connection_params[ParamServerIp];
+	{
+		if(!connection_params[ParamServerFqdn].isEmpty())
+			addr=connection_params[ParamServerFqdn];
+		else
+			addr=connection_params[ParamServerIp];
 
-	if(!connection_params[ParamPort].isEmpty())
-		port = QString(":%1").arg(connection_params[ParamPort]);
+		if(!connection_params[ParamPort].isEmpty())
+			port = QString(":%1").arg(connection_params[ParamPort]);
+	}
 
 	if(incl_db_name)
 		db_name = QString("%1@").arg(connection_params[ParamDbName]);
