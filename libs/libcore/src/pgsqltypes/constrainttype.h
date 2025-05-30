@@ -32,11 +32,11 @@ class __libcore ConstraintType: public TemplateType<ConstraintType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned PrimaryKey = 1,
-		ForeignKey = 2,
-		Check = 3,
-		Unique = 4,
-		Exclude= 5;
+		static constexpr unsigned PrimaryKey = 1;
+		static constexpr unsigned ForeignKey = 2;
+		static constexpr unsigned Check = 3;
+		static constexpr unsigned Unique = 4;
+		static constexpr unsigned Exclude= 5;
 
 		ConstraintType(const QString &type_name);
 		ConstraintType(unsigned type_id);

@@ -32,11 +32,11 @@ class __libcore ActionType: public TemplateType<ActionType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned NoAction = 1,
-		Restrict = 2,
-		Cascade = 3,
-		SetNull = 4,
-		SetDefault = 5;
+		static constexpr unsigned NoAction = 1;
+		static constexpr unsigned Restrict = 2;
+		static constexpr unsigned Cascade = 3;
+		static constexpr unsigned SetNull = 4;
+		static constexpr unsigned SetDefault = 5;
 
 		ActionType(const QString &type_name);
 		ActionType(unsigned type_id);

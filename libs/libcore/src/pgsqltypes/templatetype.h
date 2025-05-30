@@ -43,7 +43,7 @@ https://www.fluentcpp.com/2017/05/12/curiously-recurring-template-pattern/
 #include "exception.h"
 
 template<class Class>
-class __libcore TemplateType {
+class TemplateType {
 	protected:	
 		//! \brief Index of the type on the type_list vector
 		unsigned type_idx;

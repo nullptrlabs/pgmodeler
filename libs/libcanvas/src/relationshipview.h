@@ -52,13 +52,13 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		static constexpr double ConnLineLength=20.0;
 
 		//! \brief Indicates that the relationship labels must be hidden
-		static bool hide_name_label,
+		static bool hide_name_label;
 
 		//! \brief Indicates that the relationship lines should be curved
-		use_curved_lines,
+		static bool use_curved_lines;
 
 		//! \brief Indicates that the relationship should be drawn in Crow's foot notation
-		use_crows_foot;
+		static bool use_crows_foot;
 
 		/*! \brief Specify the type of connection used by the lines. The first (classical)
 		is to connect the line to tables through their central points. The second (better semantics)

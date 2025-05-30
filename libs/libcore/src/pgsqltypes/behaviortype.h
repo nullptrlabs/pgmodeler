@@ -32,9 +32,9 @@ class __libcore BehaviorType: public TemplateType<BehaviorType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned CalledOnNullInput = 1,
-		ReturnsNullOnNullInput = 2;//,
-		//Strict = 3;
+		static constexpr unsigned CalledOnNullInput = 1;
+		static constexpr unsigned ReturnsNullOnNullInput = 2;
+		// static constexpr unsigned Strict = 3;
 
 		BehaviorType(const QString &type_name);
 		BehaviorType(unsigned type_id);

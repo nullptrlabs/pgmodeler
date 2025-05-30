@@ -32,8 +32,8 @@ class __libcore ProviderType: public TemplateType<ProviderType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned 	LibC = 1,
-		Icu = 2;
+		static constexpr unsigned LibC = 1;
+		static constexpr unsigned Icu = 2;
 
 		ProviderType(const QString &type_name);
 		ProviderType(unsigned type_id);

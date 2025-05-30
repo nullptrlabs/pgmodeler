@@ -32,19 +32,19 @@ class __libcore IntervalType: public TemplateType<IntervalType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned Year = 1,
-		Month = 2,
-		Day = 3,
-		Hour= 4,
-		Minute = 5,
-		Second = 6,
-		YearToMonth = 7,
-		DayToHour = 8,
-		DayToMinute = 9,
-		DayToSecond = 10,
-		HourToMinute = 11,
-		HourToSecond = 12,
-		MinuteToSecond = 13;
+		static constexpr unsigned Year = 1;
+		static constexpr unsigned Month = 2;
+		static constexpr unsigned Day = 3;
+		static constexpr unsigned Hour= 4;
+		static constexpr unsigned Minute = 5;
+		static constexpr unsigned Second = 6;
+		static constexpr unsigned YearToMonth = 7;
+		static constexpr unsigned DayToHour = 8;
+		static constexpr unsigned DayToMinute = 9;
+		static constexpr unsigned DayToSecond = 10;
+		static constexpr unsigned HourToMinute = 11;
+		static constexpr unsigned HourToSecond = 12;
+		static constexpr unsigned MinuteToSecond = 13;
 
 		IntervalType(const QString &type_name);
 		IntervalType(unsigned type_id);

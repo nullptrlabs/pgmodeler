@@ -32,20 +32,20 @@ class __libcore CategoryType: public TemplateType<CategoryType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned UserDefined = 1,
-		Array = 2,
-		Boolean = 3,
-		Composite = 4,
-		DateTime = 5,
-		Enumeration = 6,
-		Geometric = 7,
-		NetworkAddr = 8,
-		Numeric = 9,
-		PseudoTypes = 10,
-		Stringt = 11,
-		Timespan = 12,
-		BitString = 13,
-		Unknown = 14;
+		static constexpr unsigned UserDefined = 1;
+		static constexpr unsigned Array = 2;
+		static constexpr unsigned Boolean = 3;
+		static constexpr unsigned Composite = 4;
+		static constexpr unsigned DateTime = 5;
+		static constexpr unsigned Enumeration = 6;
+		static constexpr unsigned Geometric = 7;
+		static constexpr unsigned NetworkAddr = 8;
+		static constexpr unsigned Numeric = 9;
+		static constexpr unsigned PseudoTypes = 10;
+		static constexpr unsigned Stringt = 11;
+		static constexpr unsigned Timespan = 12;
+		static constexpr unsigned BitString = 13;
+		static constexpr unsigned Unknown = 14;
 
 		CategoryType(unsigned type_id);
 		CategoryType(const QString &type_name);

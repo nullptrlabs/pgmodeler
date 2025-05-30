@@ -32,9 +32,9 @@ class __libcore FiringType: public TemplateType<FiringType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned Before = 1,
-		After = 2,
-		InsteadOf = 3;
+		static constexpr unsigned Before = 1;
+		static constexpr unsigned After = 2;
+		static constexpr unsigned InsteadOf = 3;
 
 		FiringType(const QString &type_name);
 		FiringType(unsigned type_id);

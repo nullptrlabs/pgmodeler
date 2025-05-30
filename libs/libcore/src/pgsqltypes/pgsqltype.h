@@ -36,16 +36,16 @@ class __libcore PgSqlType: public TemplateType<PgSqlType>{
 		static const QStringList type_names;
 
 		//! \brief Offset for all PostGiS types
-		static constexpr unsigned PostGiSStart = 64,
-		PostGiSEnd = 82;
+		static constexpr unsigned PostGiSStart = 64;
+		static constexpr unsigned PostGiSEnd = 82;
 
 		//! \brief Offset for oid types
-		static constexpr unsigned OidStart = 94,
-		OidEnd = 108;
+		static constexpr unsigned OidStart = 94;
+		static constexpr unsigned OidEnd = 108;
 
 		//! \brief Offset for pseudo types
-		static constexpr unsigned PseudoStart = 109,
-		PseudoEnd = 133;
+		static constexpr unsigned PseudoStart = 109;
+		static constexpr unsigned PseudoEnd = 133;
 
 		//! \brief Configuration for user defined types
 		static std::vector<UserTypeConfig> user_types;

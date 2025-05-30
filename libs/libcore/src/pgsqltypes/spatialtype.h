@@ -47,14 +47,14 @@ class __libcore SpatialType: public TemplateType<SpatialType>{
 		int srid;
 
 	public:
-		static constexpr unsigned Point = 1,
-		LineString = 2,
-		Polygon = 3,
-		MultiPoint = 4,
-		MultiLineString = 5,
-		MultiPolygon = 6,
-		Geometry = 7,
-		GeometryCollection = 8;
+		static constexpr unsigned Point = 1;
+		static constexpr unsigned LineString = 2;
+		static constexpr unsigned Polygon = 3;
+		static constexpr unsigned MultiPoint = 4;
+		static constexpr unsigned MultiLineString = 5;
+		static constexpr unsigned MultiPolygon = 6;
+		static constexpr unsigned Geometry = 7;
+		static constexpr unsigned GeometryCollection = 8;
 
 		SpatialType(const QString &type_name, int srid, VariationId variation_id=SpatialType::NoVar);
 		SpatialType(unsigned type_id, int srid, VariationId var_id=SpatialType::NoVar);

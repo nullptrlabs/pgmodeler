@@ -128,9 +128,9 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 			
 	public:
 		//! \brief Constants used to generate version intervals for version alert frame
-		static constexpr unsigned UntilVersion=0,
-		VersionsInterval=1,
-		AfterVersion=2;
+		static constexpr unsigned UntilVersion=0;
+		static constexpr unsigned VersionsInterval=1;
+		static constexpr unsigned AfterVersion=2;
 		
 		BaseObjectWidget(QWidget * parent = nullptr, ObjectType obj_type=ObjectType::BaseObject);
 		

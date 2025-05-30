@@ -32,10 +32,10 @@ class __libcore StorageType: public TemplateType<StorageType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned Plain = 1,
-		External = 2,
-		Extended = 3,
-		Main = 4;
+		static constexpr unsigned Plain = 1;
+		static constexpr unsigned External = 2;
+		static constexpr unsigned Extended = 3;
+		static constexpr unsigned Main = 4;
 
 		StorageType();
 		StorageType(const QString &type_name);

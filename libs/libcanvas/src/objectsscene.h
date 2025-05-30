@@ -44,25 +44,25 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		};
 
 		//! \brief Stores the default grid line color
-		static const QColor DefaultGridColor,
+		static const QColor DefaultGridColor;
 
 		//! \brief Stores the default grid line color
-		DefaultCanvasColor,
+		static const QColor DefaultCanvasColor;
 
 		//! \brief Stores the default page delimiter lines color
-		DefaultDelimitersColor;
+		static const QColor DefaultDelimitersColor;
 
 	private:
 		static GridPattern grid_pattern;
 
 		//! \brief Stores the grid line color
-		static QColor grid_color,
+		static QColor grid_color;
 
 		//! \brief Stores the canvas background color
-		canvas_color,
+		static QColor canvas_color;
 
 		//! \brief Stores the page delimiter lines color
-		delimiters_color;
+		static QColor delimiters_color;
 
 		//! \brief Holds the names of the layers on the scene used to separate in the objects on the canvas
 		QStringList layers,
@@ -83,9 +83,9 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		show_scene_limits;
 
-		static constexpr int SceneMoveStep=20,
-		SceneMoveTimeout=20,
-		SceneMoveThreshold=100;
+		static constexpr int SceneMoveStep=20;
+		static constexpr int SceneMoveTimeout=20;
+		static constexpr int SceneMoveThreshold=100;
 
 		//! \brief Timer responsible to move the scene
 		QTimer scene_move_timer,
@@ -107,37 +107,36 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		int scene_move_dx, scene_move_dy;
 
 		//! \brief Object alignemnt, grid showing, page delimiter showing options
-		static bool align_objs_grid,
+		static bool align_objs_grid;
+		static bool show_grid;
 
-		show_grid,
-
-		show_page_delim,
+		static bool show_page_delim;
 
 		//! \brief Indicates if the corner move is enabled for the scene
-		corner_move,
+		static bool corner_move;
 
 		/*! \brief Indicates that panning mode and range selection model are activate in inverse mode.
 		By default panning model is activated with a single left-click and range selection with SHIFT + left-click */
-		invert_rangesel_trigger,
+		static bool invert_rangesel_trigger;
 
-		lock_delim_scale;
+		static bool lock_delim_scale;
 
 		//! \brief Scene grid size
-		static unsigned grid_size,
+		static unsigned grid_size;
 
 		//! \brief The number of pages in which the scene rect is expanded
-		expansion_factor;
+		static unsigned expansion_factor;
 
 		//! \brief Used to store the canvas/printer page layout (size, orientation, margins)
 		static QPageLayout page_layout;
 
-		static double delimiter_scale,
+		static double delimiter_scale;
 
 		//! \brief The minimum scene width is defined to be width of the current page layout * 2
-		min_scene_width,
+		static double min_scene_width;
 
 		//! \brief The minimum scene height is defined to be height of the current page layout * 2
-		min_scene_height;
+		static double min_scene_height;
 
 		//! \brief Indicates that there are objects being moved and the signal s_objectsMoved must be emitted
 		bool moving_objs,
@@ -227,8 +226,8 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 			LayerRectColor
 		};
 
-		static constexpr double MinScaleFactor = 0.100000,
-		MaxScaleFactor = 5.000001;
+		static constexpr double MinScaleFactor = 0.100000;
+		static constexpr double MaxScaleFactor = 5.000001;
 
 		static constexpr unsigned DefaultLayer = 0;
 

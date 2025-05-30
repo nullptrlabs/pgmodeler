@@ -75,9 +75,8 @@ class __libgui ModelWidget: public QWidget {
 		};
 
 		//! \brief Constants used to control the object stacking method
-		static constexpr int BringToFront = 1,
-
-		SendToBack = -1;
+		static constexpr int BringToFront = 1;
+		static constexpr int SendToBack = -1;
 
 		XmlParser *xmlparser;
 
@@ -111,15 +110,15 @@ class __libgui ModelWidget: public QWidget {
 
 		/*! \brief Indicates if the cut operation is currently activated. This flag modifies
 		the way the methods copyObjects() and removeObject() works. */
-		static bool cut_operation,
+		static bool cut_operation;
 
 		//! \brief Indicates if the last position and zoom must be saved/restored
-		save_restore_pos,
+		static bool save_restore_pos;
 
 		//! \brief Indicates that graphical objects like table, view and textboxes can be created without click canvas (direclty from their editing form)
-		simple_obj_creation,
+		static bool simple_obj_creation;
 
-		disable_render_smooth;
+		static bool disable_render_smooth;
 
 		//! \brief Indicates if the minimum object opacity used when appliyng fade out to objects
 		static double min_object_opacity;
@@ -129,10 +128,10 @@ class __libgui ModelWidget: public QWidget {
 		static ModelWidget *src_model;
 
 		//! \brief Copied object on the source model
-		static std::vector<BaseObject *> copied_objects,
+		static std::vector<BaseObject *> copied_objects;
 
 		//! \brief Stores the cutted object on source model (only when executing cut command)
-		cut_objects;
+		static std::vector<BaseObject *> cut_objects;
 
 		//! \brief Frame that indicates if the model is protected
 		QFrame *protected_model_frm;
@@ -384,9 +383,9 @@ class __libgui ModelWidget: public QWidget {
 		void setAllCollapseMode(BaseTable::CollapseMode mode);
 
 	public:
-		static constexpr double MinimumZoom = ObjectsScene::MinScaleFactor,
-		MaximumZoom = ObjectsScene::MaxScaleFactor,
-		ZoomIncrement = 0.050000;
+		static constexpr double MinimumZoom = ObjectsScene::MinScaleFactor;
+		static constexpr double MaximumZoom = ObjectsScene::MaxScaleFactor;
+		static constexpr double ZoomIncrement = 0.050000;
 
 		ModelWidget(QWidget *parent = nullptr);
 		virtual ~ModelWidget();
