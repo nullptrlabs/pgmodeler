@@ -312,7 +312,7 @@ void RelationshipWidget::setAttributes(DatabaseModel *model, OperationList *op_l
 
 	if(aux_rel)
 	{
-		single_pk_chk->setChecked(aux_rel->isSiglePKColumn());
+		single_pk_chk->setChecked(aux_rel->isSinglePKColumn());
 		table1_mand_chk->setChecked(aux_rel->isTableMandatory(BaseRelationship::SrcTable));
 		table2_mand_chk->setChecked(aux_rel->isTableMandatory(BaseRelationship::DstTable));
 		identifier_chk->setChecked(aux_rel->isIdentifier());
@@ -1183,7 +1183,7 @@ void RelationshipWidget::applyConfiguration()
 				rel->setFKIndexType(index_type_cmb->currentIndex() != 0 ? IndexingType(index_type_cmb->currentText()) : IndexingType::Null);
 
 				if(rel_type == BaseRelationship::RelationshipNn)
-					rel->setSiglePKColumn(single_pk_chk->isChecked());
+					rel->setSinglePKColumn(single_pk_chk->isChecked());
 			}
 
 			count=rel_columns_lst->count();

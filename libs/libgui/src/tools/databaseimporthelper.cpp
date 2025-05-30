@@ -21,7 +21,7 @@
 #include "utilsns.h"
 #include "coreutilsns.h"
 
-const QString DatabaseImportHelper::UnkownObjectOidXml {"\t<!--[ unknown object OID=%1 ]-->\n"};
+const QString DatabaseImportHelper::UnknownObjectOidXml {"\t<!--[ unknown object OID=%1 ]-->\n"};
 
 DatabaseImportHelper::DatabaseImportHelper(QObject *parent) : QObject(parent)
 {
@@ -954,9 +954,9 @@ QString DatabaseImportHelper::getDependencyObject(const QString &oid, ObjectType
 			if(generate_xml)
 			{
 				obj_attr[Attributes::ReducedForm] = Attributes::True;
-				schparser.ignoreUnkownAttributes(true);
+				schparser.ignoreUnknownAttributes(true);
 				xml_def = schparser.getSourceCode(BaseObject::getSchemaName(obj_type), obj_attr, SchemaParser::XmlCode);
-				schparser.ignoreUnkownAttributes(false);
+				schparser.ignoreUnknownAttributes(false);
 			}
 			else
 				xml_def = obj_name;
@@ -964,7 +964,7 @@ QString DatabaseImportHelper::getDependencyObject(const QString &oid, ObjectType
 		else
 			/* If the object oid is valid but there is no attribute set to it creates a xml definition
 				 containing an alert indicating that the object is unknown */
-			xml_def = UnkownObjectOidXml.arg(oid);
+			xml_def = UnknownObjectOidXml.arg(oid);
 
 		return xml_def;
 	}
@@ -980,10 +980,10 @@ void DatabaseImportHelper::loadObjectXML(ObjectType obj_type, attribs_map &attri
 
 	try
 	{
-		schparser.ignoreUnkownAttributes(true);
+		schparser.ignoreUnknownAttributes(true);
 		xml_buf=schparser.getSourceCode(BaseObject::getSchemaName(obj_type), attribs, SchemaParser::XmlCode);
 
-		schparser.ignoreUnkownAttributes(false);
+		schparser.ignoreUnknownAttributes(false);
 		xmlparser->restartParser();
 
 		if(debug_mode)
@@ -1197,7 +1197,7 @@ Extension *DatabaseImportHelper::createExtension(attribs_map &attribs)
 			aux_attrs[Attributes::Type] = BaseObject::getSchemaName(ObjectType::Schema);
 
 			schparser.ignoreEmptyAttributes(true);
-			schparser.ignoreUnkownAttributes(true);
+			schparser.ignoreUnknownAttributes(true);
 			attribs[Attributes::Objects] += schparser.getSourceCode(Attributes::Object, aux_attrs, SchemaParser::XmlCode);
 		}
 
@@ -1227,7 +1227,7 @@ Extension *DatabaseImportHelper::createExtension(attribs_map &attribs)
 			aux_attrs[Attributes::Type] = BaseObject::getSchemaName(ObjectType::Type);
 
 			schparser.ignoreEmptyAttributes(true);
-			schparser.ignoreUnkownAttributes(true);
+			schparser.ignoreUnknownAttributes(true);
 			attribs[Attributes::Objects] += schparser.getSourceCode(Attributes::Object, aux_attrs, SchemaParser::XmlCode);
 		}
 
@@ -1564,9 +1564,9 @@ OperatorClass *DatabaseImportHelper::createOperatorClass(attribs_map &attribs)
 		//Generating the complete XML code for operator class elements
 		for(unsigned i=0; i < elems.size(); i++)
 		{
-			schparser.ignoreUnkownAttributes(true);
+			schparser.ignoreUnknownAttributes(true);
 			attribs[Attributes::Elements]+=schparser.getSourceCode(Attributes::Element, elems[i], SchemaParser::XmlCode);
-			schparser.ignoreUnkownAttributes(false);
+			schparser.ignoreUnknownAttributes(false);
 		}
 
 		loadObjectXML(ObjectType::OpClass, attribs);
@@ -3666,9 +3666,9 @@ QString DatabaseImportHelper::getType(const QString &oid_str, bool generate_xml,
 			extra_attribs[Attributes::Name]=obj_name;
 			extra_attribs[Attributes::Dimension]=(dimension > 0 ? QString::number(dimension) : "");
 
-			schparser.ignoreUnkownAttributes(true);
+			schparser.ignoreUnknownAttributes(true);
 			xml_def = schparser.getSourceCode(Attributes::PgSqlBaseType, extra_attribs, SchemaParser::XmlCode);
-			schparser.ignoreUnkownAttributes(false);
+			schparser.ignoreUnknownAttributes(false);
 
 			return xml_def;
 		}

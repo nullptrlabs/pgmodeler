@@ -518,11 +518,11 @@ void GeneralConfigWidget::saveConfiguration()
 							itr->first==Attributes::SqlTool ||
 							itr->first==Attributes::LayersConfig)
 			{
-				schparser.ignoreUnkownAttributes(true);
+				schparser.ignoreUnknownAttributes(true);
 				schparser.ignoreEmptyAttributes(true);
 				config_params[Attributes::Configuration][Attributes::DockWidgets]+=
 						schparser.getSourceCode(widget_sch, itr->second);
-				schparser.ignoreUnkownAttributes(false);
+				schparser.ignoreUnknownAttributes(false);
 				schparser.ignoreEmptyAttributes(false);
 			}
 
@@ -547,10 +547,10 @@ void GeneralConfigWidget::saveConfiguration()
 				attribs[Attributes::Height] = QString::number(itr.second.geometry.height());
 				attribs[Attributes::Maximized] = itr.second.maximized ? Attributes::True : "";
 
-				schparser.ignoreUnkownAttributes(true);
+				schparser.ignoreUnknownAttributes(true);
 				config_params[Attributes::Configuration][Attributes::WidgetsGeometry]+=
 						schparser.getSourceCode(widget_sch, attribs);
-				schparser.ignoreUnkownAttributes(false);
+				schparser.ignoreUnknownAttributes(false);
 			}
 		}
 

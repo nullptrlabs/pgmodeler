@@ -172,7 +172,7 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		void configureObjectShadow();
 
 		//! \brief Returns a list of selected children objects
-		QList<TableObjectView *> getSelectedChidren();
+		QList<TableObjectView *> getSelectedChildren();
 
 		//! \brief Clear the selection over all selected children
 		void clearChildrenSelection();

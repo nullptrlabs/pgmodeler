@@ -536,9 +536,9 @@ class __libcore Relationship: public BaseRelationship {
 		 has 2 reference tables, which may be obtained by the method BaseRelationship::getTable() */
 		PhysicalTable *getReferenceTable();
 
-		void setSiglePKColumn(bool value);
+		void setSinglePKColumn(bool value);
 
-		bool isSiglePKColumn();
+		bool isSinglePKColumn();
 
 		//! \brief Returns SQL / XML definition for the relationship.
 		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;

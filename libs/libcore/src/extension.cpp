@@ -162,7 +162,7 @@ QString Extension::getSourceCode(SchemaParser::CodeType def_type)
 				obj_attr[Attributes::Type] = BaseObject::getSchemaName(ext_obj.getType());
 				obj_attr[Attributes::Parent] = ext_obj.getParent();
 
-				schparser.ignoreUnkownAttributes(true);
+				schparser.ignoreUnknownAttributes(true);
 				schparser.ignoreEmptyAttributes(true);
 				attributes[Attributes::Objects] += schparser.getSourceCode(Attributes::Object, obj_attr, def_type);
 			}

@@ -893,7 +893,7 @@ QString View::getDataDictionary(bool split, bool md_format, const attribs_map &e
 			aux_attrs[Attributes::Name] = col.getName();
 			aux_attrs[Attributes::Type] = col.getType();
 
-			schparser.ignoreUnkownAttributes(true);
+			schparser.ignoreUnknownAttributes(true);
 			attribs[Attributes::Columns] += schparser.getSourceCode(GlobalAttributes::getDictSchemaFilePath(md_format, BaseObject::getSchemaName(ObjectType::Column)), aux_attrs);
 			aux_attrs.clear();
 		}
@@ -907,7 +907,7 @@ QString View::getDataDictionary(bool split, bool md_format, const attribs_map &e
 		for(auto &obj : indexes)
 			attribs[Attributes::Indexes] +=  dynamic_cast<Index *>(obj)->getDataDictionary(md_format);
 
-		schparser.ignoreUnkownAttributes(true);
+		schparser.ignoreUnknownAttributes(true);
 		attribs[Attributes::Objects] += schparser.getSourceCode(GlobalAttributes::getDictSchemaFilePath(md_format, Attributes::Objects), attribs);
 
 		schparser.ignoreEmptyAttributes(true);

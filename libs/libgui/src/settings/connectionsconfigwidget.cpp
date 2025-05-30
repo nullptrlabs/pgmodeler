@@ -543,19 +543,19 @@ void ConnectionsConfigWidget::saveConfiguration()
 				attribs[DefaultFor.arg(Attributes::Diff)]=(conn->isDefaultForOperation(Connection::OpDiff) ? Attributes::True : "");
 				attribs[DefaultFor.arg(Attributes::Validation)]=(conn->isDefaultForOperation(Connection::OpValidation) ? Attributes::True : "");
 
-				schparser.ignoreUnkownAttributes(true);
+				schparser.ignoreUnknownAttributes(true);
 				config_params[GlobalAttributes::ConnectionsConf][Attributes::Connections]+=
 						schparser.getSourceCode(GlobalAttributes::getTmplConfigurationFilePath(GlobalAttributes::SchemasDir,
 																																											 GlobalAttributes::ConnectionsConf +
 																																											 GlobalAttributes::SchemaExt), attribs);
 
-				schparser.ignoreUnkownAttributes(false);
+				schparser.ignoreUnknownAttributes(false);
 			}
 		}
 
-		schparser.ignoreUnkownAttributes(true);
+		schparser.ignoreUnknownAttributes(true);
 		BaseConfigWidget::saveConfiguration(GlobalAttributes::ConnectionsConf, config_params);
-		schparser.ignoreUnkownAttributes(false);
+		schparser.ignoreUnknownAttributes(false);
 		//setConfigurationChanged(false);
 	}
 	catch(Exception &e)
