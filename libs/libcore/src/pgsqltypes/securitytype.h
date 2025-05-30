@@ -32,8 +32,8 @@ class __libcore SecurityType: public TemplateType<SecurityType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned Invoker = 1,
-		Definer = 2;
+		static constexpr unsigned Invoker = 1;
+		static constexpr unsigned Definer = 2;
 
 		SecurityType(unsigned type_id);
 		SecurityType(const QString &type_name);

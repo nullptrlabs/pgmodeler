@@ -83,8 +83,8 @@ class __libcore BaseGraphicObject: public QObject, public BaseObject {
 		void setLayersAttribute();
 
 	public:
-		static constexpr int MaxZValue = 50,
-		MinZValue = -50;
+		static constexpr int MaxZValue = 50;
+		static constexpr int MinZValue = -50;
 
 		BaseGraphicObject();
 

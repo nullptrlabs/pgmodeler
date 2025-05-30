@@ -64,10 +64,10 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		*ext_attribs;
 
 		//! brief Indicates if the extended attributes body should be hidden
-		static bool hide_ext_attribs,
+		static bool hide_ext_attribs;
 
 		//! brief Indicates if the tag object should be hidden
-		hide_tags;
+		static bool hide_tags;
 
 		//! brief Controls the maximum amount of attributes visible per page (columns/references + extended attributes)
 		static unsigned attribs_per_page[2];

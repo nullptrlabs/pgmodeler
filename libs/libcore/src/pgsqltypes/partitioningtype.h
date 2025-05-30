@@ -32,9 +32,9 @@ class __libcore PartitioningType: public TemplateType<PartitioningType> {
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned Range = 1,
-		List = 2,
-		Hash = 3;
+		static constexpr unsigned Range = 1;
+		static constexpr unsigned List = 2;
+		static constexpr unsigned Hash = 3;
 
 		PartitioningType(const QString &type_name);
 		PartitioningType(unsigned type_id);

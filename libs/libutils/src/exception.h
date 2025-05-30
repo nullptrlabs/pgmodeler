@@ -311,7 +311,8 @@ class __libutils Exception {
 		static constexpr unsigned ErrorCount=271;
 
 		//! \brief Constants used to access the error details
-		static constexpr unsigned ErrorCodeId=0, ErrorMessage=1;
+		static constexpr unsigned ErrorCodeId=0;
+		static constexpr unsigned ErrorMessage=1;
 
 		/*! \brief Stores other exceptions before raise the 'this' exception.
 		 This structure can be used to simulate a stack trace to improve the debug */

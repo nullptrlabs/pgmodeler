@@ -63,16 +63,16 @@ class __libcanvas TableObjectView: public BaseObjectView {
 		QString formatUserTypeName(PgSqlType type);
 
 	public:
-		static const QString	TypeSeparator,
-		ConstrSeparator,
-		TextUnique,
-		TextExclude,
-		TextCheck,
-		TextPrimaryKey,
-		TextForeignKey,
-		TextNotNull,
-		ConstrDelimStart,
-		ConstrDelimEnd;
+		static const QString TypeSeparator;
+		static const QString ConstrSeparator;
+		static const QString TextUnique;
+		static const QString TextExclude;
+		static const QString TextCheck;
+		static const QString TextPrimaryKey;
+		static const QString TextForeignKey;
+		static const QString TextNotNull;
+		static const QString ConstrDelimStart;
+		static const QString ConstrDelimEnd;
 
 		enum ChildObjectId: unsigned {
 			ObjDescriptor,

@@ -32,8 +32,8 @@ class __libcore IdentityType: public TemplateType<IdentityType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned Always = 1,
-		ByDefault = 2;
+		static constexpr unsigned Always = 1;
+		static constexpr unsigned ByDefault = 2;
 
 		IdentityType(const QString &type_name);
 		IdentityType(unsigned type_id);

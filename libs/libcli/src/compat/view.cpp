@@ -18,7 +18,7 @@
 
 #include "view.h"
 
-using namespace CompatNs;
+namespace CompatNs {
 
 View::View() : BaseTable()
 {
@@ -607,4 +607,6 @@ QString View::getDropCode(bool cascade)
 {
 	setSQLObjectAttribute();
 	return BaseObject::getDropCode(cascade);
+}
+
 }

@@ -66,17 +66,16 @@ class __libcore Sequence: public BaseObject {
 	public:
 		//! \brief Constants that indicates the maximum and minimum values accepted by sequence
 		//For serial sequences
-		static const QString
-		MaxPositiveValue,
-		MaxNegativeValue,
+		static const QString MaxPositiveValue;
+		static const QString MaxNegativeValue;
 
 		//For smallserial sequences
-		MaxSmallPositiveValue,
-		MaxSmallNegativeValue,
+		static const QString MaxSmallPositiveValue;
+		static const QString MaxSmallNegativeValue;
 
 		//For bigserial sequences
-		MaxBigPositiveValue,
-		MaxBigNegativeValue;
+		static const QString MaxBigPositiveValue;
+		static const QString MaxBigNegativeValue;
 
 		Sequence();
 

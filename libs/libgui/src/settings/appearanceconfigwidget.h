@@ -49,21 +49,21 @@ class __libgui AppearanceConfigWidget: public BaseConfigWidget, public Ui::Appea
 		/*! \brief Holds the QPalette settings that defines dark theme.
 		 * This map key is a color role which value is a string list that
 		 * contains 3 elements: active color, inactive color and disabled color. */
-		static std::map<QPalette::ColorRole, QStringList> dark_ui_colors,
+		static std::map<QPalette::ColorRole, QStringList> dark_ui_colors;
 
 		/*! \brief Holds the QPalette settings that defines light theme.
 		 * This map key is a color role which value is a string list that
 		 * contains 3 elements: active color, inactive color and disabled color. */
-		light_ui_colors,
+		static std::map<QPalette::ColorRole, QStringList> light_ui_colors;
 
 		//! \brief Holds the default/system QPalette settings.
-		system_ui_colors;
+		static std::map<QPalette::ColorRole, QStringList> system_ui_colors;
 
 		//! \brief Colors used for ObjectTableWidget items when in dark theme
-		static QStringList dark_tab_item_colors,
+		static QStringList dark_tab_item_colors;
 
 		//! \brief Colors used for ObjectTableWidget items when in light theme
-		light_tab_item_colors;
+		static QStringList light_tab_item_colors;
 
 		//! \brief Holds the current user interface theme id (light/dark)
 		static QString UiThemeId;

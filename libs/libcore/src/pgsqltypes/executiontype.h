@@ -32,8 +32,8 @@ class __libcore ExecutionType: public TemplateType<ExecutionType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned Also = 1,
-		Instead = 2;
+		static constexpr unsigned Also = 1;
+		static constexpr unsigned Instead = 2;
 
 		ExecutionType(const QString &type_name);
 		ExecutionType(unsigned type_id);

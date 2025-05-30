@@ -32,9 +32,8 @@ class __libcore CheckOptionType: public TemplateType<CheckOptionType>{
 		static const QStringList type_names;
 
 	public:
-		static constexpr unsigned
-		Local = 2,
-		Cascaded = 3;
+		static constexpr unsigned Local = 2;
+		static constexpr unsigned Cascaded = 3;
 
 		CheckOptionType(const QString &type_name);
 		CheckOptionType(unsigned type_id);

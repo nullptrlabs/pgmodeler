@@ -67,9 +67,8 @@ class __libgui ObjectsListModel: public QAbstractTableModel {
 
 	QList<ItemData> header_data;
 
-	static const QStringList HeaderTexts,
-
-	HeaderIcons;
+	static const QStringList HeaderTexts;
+	static const QStringList HeaderIcons;
 
 	inline QVariant getItemData(const ItemData &item_dt, int role) const;
 	static std::tuple<int, int, int> getIndexMargins();

@@ -58,32 +58,32 @@ class __libconnector Catalog {
 		SchemaParser schparser;
 
 		//! \brief Executes a list command on catalog
-		static const QString QueryList,
+		static const QString QueryList;
 
 		//! \brief Executes a attribute retrieving command on catalog
-		QueryAttribs,
+		static const QString QueryAttribs;
 
 		//! \brief Replacement for true 't' boolean value
-		PgSqlTrue,
+		static const QString PgSqlTrue;
 
 		//! \brief Replacement for false 'f' boolean value
-		PgSqlFalse,
+		static const QString PgSqlFalse;
 
 		//! \brief Suffix for boolean fields.
-		BoolField,
+		static const QString BoolField;
 
 		/*! \brief Query used to retrieve extension objects.
 		 * This query retrieve all extension child object except for data types because
 		 * they are handled in extension catalog query */
-		GetExtensionObjsSql,
+		static const QString GetExtensionObjsSql;
 
 		//! \brief This pattern matches the PostgreSQL array values in format [n:n]={a,b,c,d,...} or {a,b,c,d,...}
-		ArrayPattern,
+		static const QString ArrayPattern;
 
 		//! \brief Holds a constant string used to mark invalid filter patterns
-		InvFilterPattern,
+		static const QString InvFilterPattern;
 
-		AliasPlaceholder;
+		static const QString AliasPlaceholder;
 
 		/*! \brief Stores the oid of objects that are created by extension.
 		 * The keys of this map are the names of the extensions that hold objects in the database,
@@ -105,23 +105,23 @@ class __libconnector Catalog {
 
 		/*! \brief This map stores the oid field name for each object type. The oid field name can be
 		composed by the pg_[OBJECT_TYPE] table alias. Refer to catalog query schema files for details */
-		static const std::map<ObjectType, QString> oid_fields,
+		static const std::map<ObjectType, QString> oid_fields;
 
 		//! \brief This map stores the relation names in catalogs for each object type
-		obj_relnames,
+		static const std::map<ObjectType, QString> obj_relnames;
 		
 		/*! \brief This map stores the name field for each object type. Refer to catalog query schema files for details */
-		name_fields,
+		static const std::map<ObjectType, QString> name_fields;
 
 		/*! \brief This map stores the oid field name that is used to check if the object (or its parent) is part of a extension
 		(see getNotExtObjectQuery()). By default the attribute oid_fields is used instead for that purpose, but, for some objects,
 		there are different fields that tells if the object (or its parent) is part of extension. */
-		ext_oid_fields,
+		static const std::map<ObjectType, QString> ext_oid_fields;
 
 		/*! \brief This map stores the aliases that are used to reference the table (parent) on each table object catalog query.
 		 * This is mainly used to force the filter of constraints/indexes/triggers/rules/policies in presence of one or more table
 		 * filter (see setObjectFilter) */
-		parent_aliases;
+		static const std::map<ObjectType, QString> parent_aliases;
 
 		//! \brief Store the cached catalog queries
 		static attribs_map catalog_queries;
@@ -184,10 +184,10 @@ class __libconnector Catalog {
 
 	public:
 		//! \brief Stores the prefix of any temp object (in pg_temp) created during catalog reading by pgModeler
-		static const QString PgModelerTempDbObj,
+		static const QString PgModelerTempDbObj;
 
 		//! \brief Stores the null char escaped in format \000
-		EscapedNullChar;
+		static const QString EscapedNullChar;
 
 		Catalog();
 
