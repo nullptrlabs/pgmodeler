@@ -336,7 +336,7 @@ class __libparsers SchemaParser {
 		void restartParser();
 
 		//! \brief Set if the parser must ignore unknown attributes avoiding exception throwing
-		void ignoreUnkownAttributes(bool ignore);
+		void ignoreUnknownAttributes(bool ignore);
 
 		//! \brief Set if the parser must ignore empty attributes avoiding exception throwing
 		void ignoreEmptyAttributes(bool ignore);

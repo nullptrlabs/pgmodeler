@@ -7199,7 +7199,7 @@ BaseRelationship *DatabaseModel::createRelationship()
 			rel->setActionType(upd_action, Constraint::UpdateAction);
 			rel->setActionType(del_action, Constraint::DeleteAction);
 			rel->setSQLDisabled(sql_disabled);
-			rel->setSiglePKColumn(single_pk_col);
+			rel->setSinglePKColumn(single_pk_col);
 			rel->setDeferrable(deferrable);
 			rel->setDeferralType(defer_type);
 			rel->setCopyOptions(CopyOptions(static_cast<CopyOptions::CopyMode>(attribs[Attributes::CopyMode].toUInt()),
@@ -9339,7 +9339,7 @@ void DatabaseModel::saveObjectsMetadata(const QString &filename, MetaAttrOptions
 
 					if(obj_type!=ObjectType::Schema || !attribs[Attributes::XPos].isEmpty())
 					{
-						schparser.ignoreUnkownAttributes(true);
+						schparser.ignoreUnknownAttributes(true);
 						attribs[Attributes::Position]=
 								schparser.getSourceCode(GlobalAttributes::getSchemaFilePath(GlobalAttributes::XMLSchemaDir, Attributes::Position),
 																						attribs);
@@ -9365,7 +9365,7 @@ void DatabaseModel::saveObjectsMetadata(const QString &filename, MetaAttrOptions
 						attribs[Attributes::XPos]=QString::number(pnt.x());
 						attribs[Attributes::YPos]=QString::number(pnt.y());
 
-						schparser.ignoreUnkownAttributes(true);
+						schparser.ignoreUnknownAttributes(true);
 						attribs[Attributes::Position]+=
 								schparser.getSourceCode(GlobalAttributes::getSchemaFilePath(GlobalAttributes::XMLSchemaDir, Attributes::Position),
 																						attribs);
@@ -9430,7 +9430,7 @@ void DatabaseModel::saveObjectsMetadata(const QString &filename, MetaAttrOptions
 														tr("Saving metadata of the object `%1' (%2)")
 														.arg(object->getSignature()).arg(object->getTypeName()), enum_t(obj_type));
 
-				schparser.ignoreUnkownAttributes(true);
+				schparser.ignoreUnknownAttributes(true);
 
 				objs_def +=	schparser.getSourceCode(
 											GlobalAttributes::getSchemaFilePath(GlobalAttributes::XMLSchemaDir,

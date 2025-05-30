@@ -520,7 +520,7 @@ void BaseTableView::configureObjectShadow()
 	BaseObjectView::configureObjectShadow();
 }
 
-QList<TableObjectView *> BaseTableView::getSelectedChidren()
+QList<TableObjectView *> BaseTableView::getSelectedChildren()
 {
 	return sel_child_objs;
 }

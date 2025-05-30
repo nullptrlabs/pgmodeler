@@ -174,7 +174,7 @@ void RelationshipConfigWidget::saveConfiguration()
 
 		for(auto &itr : patterns)
 		{
-			schparser.ignoreUnkownAttributes(true);
+			schparser.ignoreUnknownAttributes(true);
 			schparser.ignoreEmptyAttributes(true);
 			config_params[itr.first] = itr.second;
 			config_params[Attributes::NamePatterns][Attributes::Patterns] += schparser.getSourceCode(patterns_sch, itr.second);

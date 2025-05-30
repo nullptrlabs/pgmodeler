@@ -162,12 +162,12 @@ void PhysicalTable::setCommentAttribute(TableObject *tab_obj)
 		attribs[Attributes::EscapeComment]=BaseObject::isEscapeComments() ? Attributes::True : "";
 		attribs[Attributes::Comment]=comment;
 
-		schparser.ignoreUnkownAttributes(true);
+		schparser.ignoreUnknownAttributes(true);
 		if(tab_obj->isSQLDisabled())
 			attributes[Attributes::ColsComment]+="-- ";
 
 		attributes[Attributes::ColsComment]+=schparser.getSourceCode(Attributes::Comment, attribs, SchemaParser::SqlCode);
-		schparser.ignoreUnkownAttributes(false);
+		schparser.ignoreUnknownAttributes(false);
 	}
 }
 
@@ -201,7 +201,7 @@ void PhysicalTable::setRelObjectsIndexesAttribute()
 				aux_attribs[Attributes::Name]=obj_idx.first;
 				aux_attribs[Attributes::Index]=QString::number(obj_idx.second);
 
-				schparser.ignoreUnkownAttributes(true);
+				schparser.ignoreUnknownAttributes(true);
 				aux_attribs[Attributes::Objects]+=schparser.getSourceCode(Attributes::Object, aux_attribs, SchemaParser::XmlCode);
 			}
 

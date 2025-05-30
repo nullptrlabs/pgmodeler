@@ -2295,7 +2295,7 @@ PhysicalTable *Relationship::getReferenceTable()
 	}
 }
 
-void Relationship::setSiglePKColumn(bool value)
+void Relationship::setSinglePKColumn(bool value)
 {
 	if(rel_type==RelationshipNn)
 	{
@@ -2304,7 +2304,7 @@ void Relationship::setSiglePKColumn(bool value)
 	}
 }
 
-bool Relationship::isSiglePKColumn()
+bool Relationship::isSinglePKColumn()
 {
 	return single_pk_column;
 }

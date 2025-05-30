@@ -61,7 +61,7 @@ class __libconnector Connection {
 
 		/*! \brief This static method disable the notice messages when executing commands.
 		By default all connections are created with notice disabled. To enable it the user
-		must call Connection::setNoticeEnabled(). Note: connections already stablished
+		must call Connection::setNoticeEnabled(). Note: already established connections
 		aren't affected when calling this method the user must disconnect then connect again
 		to enable output. */
 		static void disableNoticeOutput(void *, const PGresult *){}
@@ -233,13 +233,13 @@ class __libconnector Connection {
 		static QStringList getNotices();
 
 		/*! \brief Change the current database to the specified db name using the parameters from the current
-		stablished connection causing the connection to be reset and moved to the new database.
+		established connection causing the connection to be reset and moved to the new database.
 		The effect of this is the same by type \c dbname on psql console. In case of errors the method will
 		raise an exception and switch back to the previous database. */
 		void switchToDatabase(const QString &dbname);
 
-		//! \brief Returns if the connection is stablished
-		bool isStablished();
+		//! \brief Returns if the connection is established
+		bool isEstablished();
 
 		//! \brief Returns if the connection is configured (has some attributes set)
 		bool isConfigured();

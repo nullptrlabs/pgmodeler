@@ -66,7 +66,7 @@ void SQLExecutionHelper::executeCommand()
 		result_model = nullptr;
 		cancelled = false;
 
-		if(!connection.isStablished())
+		if(!connection.isEstablished())
 		{
 			connection.setNoticeEnabled(true);
 			connection.connect();
@@ -92,7 +92,7 @@ void SQLExecutionHelper::executeCommand()
 
 void SQLExecutionHelper::cancelCommand()
 {
-	if(connection.isStablished())
+	if(connection.isEstablished())
 	{
 		connection.requestCancel();
 		cancelled = true;

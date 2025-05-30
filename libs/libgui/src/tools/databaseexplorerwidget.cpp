@@ -1428,7 +1428,7 @@ void DatabaseExplorerWidget::dropObject(QTreeWidgetItem *item, bool cascade)
 
 				//Generate the drop command
 				schparser.ignoreEmptyAttributes(true);
-				schparser.ignoreUnkownAttributes(true);
+				schparser.ignoreUnknownAttributes(true);
 				drop_cmd=schparser.getSourceCode(Attributes::Drop, attribs, SchemaParser::SqlCode);
 
 				if(cascade)
@@ -1495,7 +1495,7 @@ bool DatabaseExplorerWidget::truncateTable(const QString &sch_name, const QStrin
 
 			//Generate the truncate command
 			schparser.ignoreEmptyAttributes(true);
-			schparser.ignoreUnkownAttributes(true);
+			schparser.ignoreUnknownAttributes(true);
 
 			truc_cmd=schparser.getSourceCode(GlobalAttributes::getSchemaFilePath(GlobalAttributes::AlterSchemaDir, Attributes::Truncate),
 																					 attribs);
@@ -2015,7 +2015,7 @@ void DatabaseExplorerWidget::finishObjectRename()
 
 			//Generate the drop command
 			schparser.ignoreEmptyAttributes(true);
-			schparser.ignoreUnkownAttributes(true);
+			schparser.ignoreUnknownAttributes(true);
 
 			rename_cmd=schparser.getSourceCode(GlobalAttributes::getSchemaFilePath(GlobalAttributes::AlterSchemaDir, Attributes::Rename),
 													 attribs);

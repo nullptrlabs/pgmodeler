@@ -40,7 +40,7 @@ class __libgui DatabaseImportHelper: public QObject {
 		//! \brief Random number generator engine used to generate random colors for imported schemas
 		std::default_random_engine rand_num_engine;
 		
-		static const QString UnkownObjectOidXml;
+		static const QString UnknownObjectOidXml;
 		
 		/*! \brief File handle to log the import process. This file is opened for writing only when
 		the 'ignore_errors' is true */
