@@ -30,12 +30,12 @@ DEPENDPATH += ../pgmodeler \
 # Forcing the linker to use the objects files generated
 # during the compilation of the main executable since
 # pgmodeler-se uses the same application class
-OBJECTS += ../pgmodeler/obj/pgmodelerapp.o \
-../pgmodeler/obj/moc_pgmodelerapp.o
+windows: OBJECTS += ../pgmodeler/obj/pgmodelerapp.obj ../pgmodeler/obj/moc_pgmodelerapp.obj
+else: OBJECTS += ../pgmodeler/obj/pgmodelerapp.o ../pgmodeler/obj/moc_pgmodelerapp.o
 
 # Deployment settings
 target.path = $$PRIVATEBINDIR
 INSTALLS = target
 
-# Print the current build settins (see pgmodeler.pri)
+# Print the current build settings (see pgmodeler.pri)
 printBuildDetails()

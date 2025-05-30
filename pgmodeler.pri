@@ -9,11 +9,13 @@ OBJECTS_DIR = obj
 UI_DIR = src
 
 contains(CONFIG, debug):{
-	DEFINES+=PGMODELER_DEBUG
+  DEFINES+=PGMODELER_DEBUG
 
-	# Enabling ccache (https://ccache.dev) in debug mode to speed up recompilations
-	isEqual(USE_CCACHE, true):CONFIG+=ccache
+  # Enabling ccache (https://ccache.dev) in debug mode to speed up recompilations
+  isEqual(USE_CCACHE, true):CONFIG+=ccache
 }
+
+msvc:DEFINES+=__PRETTY_FUNCTION__=__FUNCTION__
 
 # Disables all the APIs deprecated before Qt 6.4.0
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060400
@@ -21,47 +23,63 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060400
 
 # Forcing the compilation using Qt 6.4.x
 !versionAtLeast(QT_VERSION, "6.4.0") {
-	 error("Unsupported Qt version detected: $${QT_VERSION}! pgModeler must be compiled with at least Qt 6.4.0")
+  error("Unsupported Qt version detected: $${QT_VERSION}! pgModeler must be compiled with at least Qt 6.4.0")
 }
 
 # Store the absolute paths to library subprojects to be referenced in other .pro files
 # *_ROOT -> the path to the root folder of the subproject
-# *_LIB -> the libary flags (-L -l) (LIBS on qmake) passed to the compiler that points to the library generated from a subproject
+# *_LIB -> the library flags (-L -l) (LIBS on qmake) passed to the compiler that points to the library generated from a subproject
 # *_INC -> the path to the source code folder (src), used by the flag -I (INCLUDEPATH on qmake) passed to the compiler
+
 LIBCANVAS = libcanvas
 LIBCANVAS_ROOT = $$absolute_path($$PWD/libs/$$LIBCANVAS)
-LIBCANVAS_LIB = -L$$LIBCANVAS_ROOT -lcanvas
-LIBCANVAS_INC = $$LIBCANVAS_ROOT/src
+LIBCANVAS_INC = $$LIBCANVAS_ROOT/src $$top_builddir/libs/$$LIBCANVAS/src
 
 LIBCONNECTOR = libconnector
 LIBCONNECTOR_ROOT = $$absolute_path($$PWD/libs/$$LIBCONNECTOR)
-LIBCONNECTOR_LIB = -L$$LIBCONNECTOR_ROOT -lconnector
-LIBCONNECTOR_INC = $$LIBCONNECTOR_ROOT/src
+LIBCONNECTOR_INC = $$LIBCONNECTOR_ROOT/src $$top_builddir/libs/$$LIBCONNECTOR/src
 
 LIBCORE = libcore
 LIBCORE_ROOT = $$absolute_path($$PWD/libs/$$LIBCORE)
-LIBCORE_LIB = -L$$LIBCORE_ROOT -lcore
-LIBCORE_INC = $$LIBCORE_ROOT/src
+LIBCORE_INC = $$LIBCORE_ROOT/src $$top_builddir/libs/$$LIBCORE/src
 
 LIBPARSERS = libparsers
 LIBPARSERS_ROOT = $$absolute_path($$PWD/libs/$$LIBPARSERS)
-LIBPARSERS_LIB = -L$$LIBPARSERS_ROOT -lparsers
-LIBPARSERS_INC = $$LIBPARSERS_ROOT/src
+LIBPARSERS_INC = $$LIBPARSERS_ROOT/src $$top_builddir/libs/$$LIBPARSERS/src
 
 LIBGUI = libgui
 LIBGUI_ROOT = $$absolute_path($$PWD/libs/$$LIBGUI)
-LIBGUI_LIB = -L$$LIBGUI_ROOT -lgui
-LIBGUI_INC = $$LIBGUI_ROOT/src
+LIBGUI_INC = $$LIBGUI_ROOT/src $$top_builddir/libs/$$LIBGUI/src
 
 LIBUTILS = libutils
 LIBUTILS_ROOT = $$absolute_path($$PWD/libs/$$LIBUTILS)
-LIBUTILS_LIB = -L$$LIBUTILS_ROOT -lutils
-LIBUTILS_INC = $$LIBUTILS_ROOT/src
+LIBUTILS_INC = $$LIBUTILS_ROOT/src $$top_builddir/libs/$$LIBUTILS/src
 
 LIBCLI = libcli
 LIBCLI_ROOT = $$absolute_path($$PWD/libs/$$LIBCLI)
-LIBCLI_LIB = -L$$LIBCLI_ROOT -lcli
-LIBCLI_INC = $$LIBCLI_ROOT/src
+LIBCLI_INC = $$LIBCLI_ROOT/src $$top_builddir/libs/$$LIBCLI
+
+macx|unix {
+	LIBCANVAS_LIB = -L$$LIBCANVAS_ROOT -lcanvas
+	LIBCONNECTOR_LIB = -L$$LIBCONNECTOR_ROOT -lconnector
+	LIBCORE_LIB = -L$$LIBCORE_ROOT -lcore
+	LIBPARSERS_LIB = -L$$LIBPARSERS_ROOT -lparsers
+	LIBGUI_LIB = -L$$LIBGUI_ROOT -lgui
+	LIBUTILS_LIB = -L$$LIBUTILS_ROOT -lutils
+	LIBCLI_LIB = -L$$LIBCLI_ROOT -lcli
+}
+windows {
+	CONFIG(release): c = release
+	CONFIG(debug, debug|release): c = debug
+
+	LIBCANVAS_LIB = -L$$top_builddir/libs/libcanvas/$$c -lcanvas
+	LIBCONNECTOR_LIB = -L$$top_builddir/libs/libconnector/$$c -lconnector
+	LIBCORE_LIB = -L$$top_builddir/libs/libcore/$$c -lcore
+	LIBPARSERS_LIB = -L$$top_builddir/libs/libparsers/$$c -lparsers
+	LIBGUI_LIB = -L$$top_builddir/libs/libgui/$$c -lgui
+	LIBUTILS_LIB = -L$$top_builddir/libs/libutils/$$c -lutils
+	LIBCLI_LIB = -L$$top_builddir/libs/libcli/$$c -lcli
+}
 
 # Set the flag passed to compiler to indicate a snapshot build
 isEqual(SNAPSHOT_BUILD, true): DEFINES+=SNAPSHOT_BUILD
@@ -80,7 +98,7 @@ PLUGINS_FOLDER=plugins
 isEqual(PRIVATE_PLUGINS, true) {
   DEFINES+=PRIVATE_PLUGINS_SYMBOLS
   PLUGINS_FOLDER=priv-plugins
-	PRIV_RES_FOLDER=$$PWD/$$PLUGINS_FOLDER/res
+  PRIV_RES_FOLDER=$$PWD/$$PLUGINS_FOLDER/res
 }
 
 # Include the plugins subprojects only if exists
@@ -125,36 +143,36 @@ linux {
   # If the AppImage generation option is set
   isEqual(APPIMAGE_BUILD, true):{
 
-	# Set the flag passed to compiler to indicate a appimage build
-	DEFINES+=APPIMAGE_BUILD
+  # Set the flag passed to compiler to indicate a appimage build
+  DEFINES+=APPIMAGE_BUILD
 
-	!defined(PREFIX, var): PREFIX = /usr/local/pgmodeler-appimage
-	BINDIR = $$PREFIX
-	PRIVATEBINDIR = $$PREFIX
-	PRIVATELIBDIR = $$PREFIX/lib
-	PLUGINSDIR = $$PREFIX/lib/pgmodeler/plugins
-	SHAREDIR = $$PREFIX
-	CONFDIR = $$SHAREDIR/conf
-	DOCDIR = $$SHAREDIR
-	LANGDIR = $$SHAREDIR/lang
-	SAMPLESDIR = $$SHAREDIR/samples
-	SCHEMASDIR = $$SHAREDIR/schemas
+  !defined(PREFIX, var): PREFIX = /usr/local/pgmodeler-appimage
+  BINDIR = $$PREFIX
+  PRIVATEBINDIR = $$PREFIX
+  PRIVATELIBDIR = $$PREFIX/lib
+  PLUGINSDIR = $$PREFIX/lib/pgmodeler/plugins
+  SHAREDIR = $$PREFIX
+  CONFDIR = $$SHAREDIR/conf
+  DOCDIR = $$SHAREDIR
+  LANGDIR = $$SHAREDIR/lang
+  SAMPLESDIR = $$SHAREDIR/samples
+  SCHEMASDIR = $$SHAREDIR/schemas
   }
 
   !isEqual(APPIMAGE_BUILD, true):{
-	# Default configuration for package pgModeler.
-	# The default prefix is /usr/local
-	!defined(PREFIX, var):        PREFIX = /usr/local
-	!defined(BINDIR, var):        BINDIR = $$PREFIX/bin
-	!defined(PRIVATEBINDIR, var): PRIVATEBINDIR = $$PREFIX/bin
-	!defined(PRIVATELIBDIR, var): PRIVATELIBDIR = $$PREFIX/lib/pgmodeler
-	!defined(PLUGINSDIR, var):    PLUGINSDIR = $$PREFIX/lib/pgmodeler/plugins
-	!defined(SHAREDIR, var):      SHAREDIR = $$PREFIX/share/pgmodeler
-	!defined(CONFDIR, var):       CONFDIR = $$SHAREDIR/conf
-	!defined(DOCDIR, var):        DOCDIR = $$SHAREDIR
-	!defined(LANGDIR, var):       LANGDIR = $$SHAREDIR/lang
-	!defined(SAMPLESDIR, var):    SAMPLESDIR = $$SHAREDIR/samples
-	!defined(SCHEMASDIR, var):    SCHEMASDIR = $$SHAREDIR/schemas
+  # Default configuration for package pgModeler.
+  # The default prefix is /usr/local
+  !defined(PREFIX, var):        PREFIX = /usr/local
+  !defined(BINDIR, var):        BINDIR = $$PREFIX/bin
+  !defined(PRIVATEBINDIR, var): PRIVATEBINDIR = $$PREFIX/bin
+  !defined(PRIVATELIBDIR, var): PRIVATELIBDIR = $$PREFIX/lib/pgmodeler
+  !defined(PLUGINSDIR, var):    PLUGINSDIR = $$PREFIX/lib/pgmodeler/plugins
+  !defined(SHAREDIR, var):      SHAREDIR = $$PREFIX/share/pgmodeler
+  !defined(CONFDIR, var):       CONFDIR = $$SHAREDIR/conf
+  !defined(DOCDIR, var):        DOCDIR = $$SHAREDIR
+  !defined(LANGDIR, var):       LANGDIR = $$SHAREDIR/lang
+  !defined(SAMPLESDIR, var):    SAMPLESDIR = $$SHAREDIR/samples
+  !defined(SCHEMASDIR, var):    SCHEMASDIR = $$SHAREDIR/schemas
  }
 
   # Specifies where to find the libraries at runtime
@@ -176,8 +194,8 @@ windows {
   # (e.g. inline static class members). Maybe it's a bug in the code is wrong (more likely)
   # or is a bug in the compiler? The fact is that reducing the executable/libs code
   # optmization causes the tool to work as expected.
-  QMAKE_CXXFLAGS_RELEASE -= -O2
-  QMAKE_CXXFLAGS_RELEASE *= -O0
+  gcc:QMAKE_CXXFLAGS_RELEASE -= -O2
+  gcc:QMAKE_CXXFLAGS_RELEASE *= -O0
 
   # The default prefix is ./build
   !defined(PREFIX, var):        PREFIX = $$PWD/build
@@ -225,7 +243,7 @@ DEFINES += BINDIR=\\\"$${BINDIR}\\\" \
            DOCDIR=\\\"$${DOCDIR}\\\" \
            LANGDIR=\\\"$${LANGDIR}\\\" \
            SAMPLESDIR=\\\"$${SAMPLESDIR}\\\" \
-		   SCHEMASDIR=\\\"$${SCHEMASDIR}\\\"
+           SCHEMASDIR=\\\"$${SCHEMASDIR}\\\"
 
 
 # pgModeler depends on libpq and libxml2 this way to variables
@@ -243,22 +261,22 @@ linux: {
   dep_paths = "$$PGSQL_LIB" "$$XML_LIB" "$$PGSQL_INC" "$$XML_INC"
   if(count(dep_paths, 4)):{
     INCLUDEPATH += "$$PGSQL_INC" "$$XML_INC"
-	has_dep_paths = true
+    has_dep_paths = true
   }
 
   # If not all of the PGSQL_??? and XML_??? vars are defined
   # Then we default to use pkg-config for libpq and libxml-2.0
   !defined(has_dep_paths,var): {
     CONFIG += link_pkgconfig
-	PKGCONFIG = libpq libxml-2.0
-	PGSQL_LIB = -lpq
-	XML_LIB = -lxml2
+    PKGCONFIG = libpq libxml-2.0
+    PGSQL_LIB = -lpq
+    XML_LIB = -lxml2
   }
 }
 
 macx {
-	!defined(PGSQL_LIB, var): PGSQL_LIB = /Library/PostgreSQL/15/lib/libpq.dylib
-	!defined(PGSQL_INC, var): PGSQL_INC = /Library/PostgreSQL/15/include
+  !defined(PGSQL_LIB, var): PGSQL_LIB = /Library/PostgreSQL/15/lib/libpq.dylib
+  !defined(PGSQL_INC, var): PGSQL_INC = /Library/PostgreSQL/15/include
   !defined(XML_INC, var): XML_INC = /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libxml2
   !defined(XML_LIB, var): XML_LIB = /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/libxml2.tbd
   INCLUDEPATH += "$$PGSQL_INC" "$$XML_INC"

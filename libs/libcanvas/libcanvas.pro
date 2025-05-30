@@ -2,7 +2,6 @@ include(../../pgmodeler.pri)
 
 TEMPLATE = lib
 TARGET = canvas
-windows: DESTDIR = $$PWD
 
 # Enables shared library symbols exporting
 DEFINES += CANVAS_SYMBOLS

@@ -29,7 +29,6 @@ DEPENDPATH += $$LIBGUI_ROOT \
 
 unix:LIBS += $$QMAKE_LIBS_EXECINFO
 windows:RCC_DIR=src/
-windows:DESTDIR=$$PWD
 
 isEqual(PRIVATE_PLUGINS, false) {
   windows:RC_FILE=res/windows_ico.qrc

@@ -2,7 +2,6 @@ include(../../pgmodeler.pri)
 
 TEMPLATE = lib
 TARGET = core
-windows: DESTDIR = $$PWD
 
 # Enables shared library symbols exporting
 DEFINES += CORE_SYMBOLS
