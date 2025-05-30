@@ -101,6 +101,7 @@ class __libconnector Connection {
 		//! \brief Constants used to reference the connections parameters
 		static const QString	ParamAlias,
 		ParamApplicationName,
+		ParamService,
 		ParamServerFqdn,
 		ParamServerIp,
 		ParamPort,

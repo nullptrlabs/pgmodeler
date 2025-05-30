@@ -65,8 +65,10 @@ class __libgui ConnectionsConfigWidget: public BaseConfigWidget, public Ui::Conn
 		 *  for them. Once the user accepts or rejects the editions the form
 		 *  returns to the original operation mode */
 		void setOneTimeEditMode(bool one_time_edit,
-														const QString &conn_alias, const QString &dbname,
+														const QString &conn_alias,
+														const QString &service,
 														const QString &host, int port,
+														const QString &dbname,
 														const QString &username, const QString &password);
 		
 		static std::map<QString, attribs_map> getConfigurationParams();
@@ -96,8 +98,10 @@ class __libgui ConnectionsConfigWidget: public BaseConfigWidget, public Ui::Conn
 		 *  Returns true when the connection were changed somehow, either by restoring the defaults, adding new connections
 		 *  or removing current ones. Default values for connection alias, dbname, host, port and user can be provided. */
 		static bool openConnectionsConfiguration(bool one_time_edit = false,
-																						 const QString &conn_alias = "", const QString &dbname = "",
+																						 const QString &conn_alias = "",
+																						 const QString &service= "",
 																						 const QString &host = "", int port = 5432,
+																						 const QString &dbname = "",
 																						 const QString &username = "", const QString &password = "");
 
 		//! \brief Returns the first connection found which is defined as the default for the specified operation

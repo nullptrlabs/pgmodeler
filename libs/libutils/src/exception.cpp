@@ -245,7 +245,7 @@ QString Exception::messages[Exception::ErrorCount][2]={
 	{"AsgEnumInvalidChars", QT_TR_NOOP("The enumeration `%1' can't be assigned to the type `%2' because contains invalid characters!")},
 	{"AsgEnumLongName", QT_TR_NOOP("The enumeration `%1' can't be assigned to the type `%2' because is too long!")},
 	{"ConnectionTimeout", QT_TR_NOOP("The connection was idle for too long and was automatically closed!")},
-	{"ConnectionBroken", QT_TR_NOOP("The connection was unexpectedly closed by the database server `%1' at port `%2'!")},
+	{"ConnectionBroken", QT_TR_NOOP("The connection was unexpectedly closed by the database server %1!")},
 	{"DropCurrentDBDefault", QT_TR_NOOP("Failed to drop the database `%1' because it is defined as the default database for the connection `%2'!")},
 	{"NullPrimaryKeyColumn", QT_TR_NOOP("The column `%1' must be `NOT NULL' because it composes the primary key of the table `%2'. You need to remove the column from the mentioned contraint in order to disable the `NOT NULL' on it!")},
 	{"InvalidIdentityColumn", QT_TR_NOOP("The identity column `%1' has an invalid data type! The data type must be `smallint', `integer' or `bigint'.")},
