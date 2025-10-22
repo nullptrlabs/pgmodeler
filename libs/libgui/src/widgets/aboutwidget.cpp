@@ -41,8 +41,3 @@ AboutWidget::AboutWidget(QWidget *parent) : QWidget(parent)
 	this->adjustSize();
 	this->resize(this->minimumWidth() * factor, this->minimumHeight() * factor);
 }
-
-void AboutWidget::showEvent(QShowEvent *)
-{
-	GuiUtilsNs::configureTextEditFont<QTextEdit>(license_txt);
-}

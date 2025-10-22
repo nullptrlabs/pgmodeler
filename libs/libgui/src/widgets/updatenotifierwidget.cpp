@@ -81,11 +81,6 @@ bool UpdateNotifierWidget::eventFilter(QObject *obj, QEvent *event)
 	return QWidget::eventFilter(obj, event);
 }
 
-void UpdateNotifierWidget::showEvent(QShowEvent *)
-{
-	GuiUtilsNs::configureTextEditFont<QTextEdit>(changelog_txt);
-}
-
 void UpdateNotifierWidget::activateLink(const QString &link)
 {
 	QDesktopServices::openUrl(QUrl(link));

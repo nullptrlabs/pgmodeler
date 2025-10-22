@@ -511,7 +511,7 @@ void MainWindow::createMainWidgets()
 		restoration_form = new ModelRestorationForm(nullptr, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
 
 	#ifdef NO_UPDATE_CHECK
-		update_notifier_wgt=nullptr;
+		update_notifier_wgt = nullptr;
 	#else
 		update_notifier_wgt = new UpdateNotifierWidget(this);
 		update_notifier_wgt->setVisible(false);
