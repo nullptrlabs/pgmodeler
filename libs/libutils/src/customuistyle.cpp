@@ -18,6 +18,7 @@
 
 #include "customuistyle.h"
 #include "enumtype.h"
+#include <QAbstractItemView>
 #include <QAbstractSpinBox>
 #include <QApplication>
 #include <QComboBox>
@@ -31,6 +32,7 @@
 #include <QSplitter>
 #include <QStyleOption>
 #include <QStyleOptionSpinBox>
+#include <QStyleOptionViewItem>
 #include <QTabWidget>
 #include <QToolBar>
 #include <QToolButton>
@@ -695,6 +697,24 @@ int CustomUiStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *o
 
 	// Use the default pixel metric attribute value if there's no custom value defined
 	return QProxyStyle::pixelMetric(metric, option, widget);
+}
+
+void CustomUiStyle::polish(QWidget *widget)
+{
+	QProxyStyle::polish(widget);
+
+	/* Apply custom styling to QTableView/QTableWidget
+   * this is necessary to ensure that the grid lines
+	 * adapt to the current theme (light/dark) */
+	if(widget->metaObject()->className() == QString("QTableView") ||
+		 widget->metaObject()->className() == QString("QTableWidget"))
+	{
+		QPalette pal = widget->palette();
+		QColor grid_color = getAdjustedColor(pal.color(QPalette::Mid), NoFactor, MaxFactor);
+		pal.setColor(QPalette::Window, grid_color);
+		widget->setPalette(pal);
+		widget->setAutoFillBackground(true);
+	}
 }
 
 QPolygonF CustomUiStyle::rotatePolygon(const QPolygonF &polygon, qreal degrees)
@@ -1472,19 +1492,13 @@ void CustomUiStyle::drawCEHeaderSection(ControlElement element, const QStyleOpti
 	{
 		// Pressed state (for sorting interaction)
 		bg_color = getStateColor(QPalette::Button, header_opt).darker(MinFactor);
-		border_color = bg_color.lighter(MidFactor);
-	}
-	else if(wgt_st.is_hovered)
-	{
-		// Hover state
-		bg_color = getStateColor(QPalette::Button, header_opt).lighter(MidFactor);
-		border_color = bg_color.lighter(MidFactor);
+		border_color = getStateColor(QPalette::Midlight, header_opt).lighter(MinFactor);
 	}
 	else
 	{
 		// Normal state
 		bg_color = getStateColor(QPalette::Button, header_opt);
-		border_color = bg_color.lighter(MinFactor);
+		border_color = getStateColor(QPalette::Midlight, header_opt);
 	}
 
 	// Try to determine column information from the header widget

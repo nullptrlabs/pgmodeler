@@ -185,19 +185,17 @@ class __libutils CustomUiStyle : public QProxyStyle {
 		// Draws primitive elements (PE) of header sort arrows
 		void drawPEHeaderArrow(const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
 
-		// Draws control elements (CE) of header sections (table/tree headers)
-		void drawCEHeaderSection(ControlElement element, const QStyleOption *option,
-														 QPainter *painter, const QWidget *widget) const;
+	// Draws control elements (CE) of header sections (table/tree headers)
+	void drawCEHeaderSection(ControlElement element, const QStyleOption *option,
+													 QPainter *painter, const QWidget *widget) const;
 
-		// Draws control elements (CE) of splitters with custom styling
-		void drawCESplitter(ControlElement element, const QStyleOption *option,
-												QPainter *painter, const QWidget *widget) const;
+	// Draws control elements (CE) of splitters with custom styling
+	void drawCESplitter(ControlElement element, const QStyleOption *option,
+											QPainter *painter, const QWidget *widget) const;
 
-		// Draws primitive elements (PE) of tabs, group boxes and other framed elements
-		void drawPETabWidgetFrame(PrimitiveElement element, const QStyleOption *option,
-															QPainter *painter, const QWidget *widget) const;
-
-		// Draws complex control (CC) scroll bars
+	// Draws primitive elements (PE) of tabs, group boxes and other framed elements
+	void drawPETabWidgetFrame(PrimitiveElement element, const QStyleOption *option,
+														QPainter *painter, const QWidget *widget) const;
 		void drawCCScrollBar(const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
 
 		// Draws control elements (CE) of scroll bars
@@ -266,25 +264,27 @@ class __libutils CustomUiStyle : public QProxyStyle {
 
 		void drawItemPixmap(QPainter *painter, const QRect &rect, int alignment, const QPixmap &pixmap) const override;
 
-		void drawPrimitive(PrimitiveElement element, const QStyleOption *option,
-											 QPainter *painter, const QWidget *widget) const override;
+	void drawPrimitive(PrimitiveElement element, const QStyleOption *option,
+										 QPainter *painter, const QWidget *widget) const override;
 
-		QPixmap generatedIconPixmap(QIcon::Mode icon_mode, const QPixmap &pixmap, const QStyleOption *option) const override;
+	void polish(QWidget *widget) override;
 
-	int pixelMetric(PixelMetric metric, const QStyleOption * option = nullptr, const QWidget * widget = nullptr) const override;
+	QPixmap generatedIconPixmap(QIcon::Mode icon_mode, const QPixmap &pixmap, const QStyleOption *option) const override;	int pixelMetric(PixelMetric metric, const QStyleOption * option = nullptr, const QWidget * widget = nullptr) const override;
 
 	/*! \brief Sets a style hint on a QFrame to customize its border color and radius
 	 * So it can be rendered as a inlined alert/info/error frame. 
 	 * This method forces the frame shape to StyledPanel. */
-	static void setStyleHint(StyleHint hint, QFrame *frame);		//! \brief Checks if the current application palette is dark (dark theme)
-		static bool isDarkPalette();
+	static void setStyleHint(StyleHint hint, QFrame *frame);
 
-		//! \brief Checks if the current palette is dark (dark theme)
-		static bool isDarkPalette(const QPalette& pal);
+	//! \brief Checks if the current application palette is dark (dark theme)
+	static bool isDarkPalette();
 
-		/*! \brief Defines a custom pixel metric attribute value globally.
-		 * Which means, all instances of this class will share the same pixel metrics values */
-		static void setPixelMetricValue(PixelMetric metric, int value);
+	//! \brief Checks if the current palette is dark (dark theme)
+	static bool isDarkPalette(const QPalette& pal);
+
+	/*! \brief Defines a custom pixel metric attribute value globally.
+	* Which means, all instances of this class will share the same pixel metrics values */
+	static void setPixelMetricValue(PixelMetric metric, int value);
 };
 
 #endif
