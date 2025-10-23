@@ -1299,7 +1299,7 @@ void DataGridWidget::saveChanges()
 	Messagebox msg_box;
 	msg_box.show(tr("Warning"),
 				 tr("You're running a demonstration version! The save feature of the data manipulation form is available only in the full version!"),
-				 Messagebox::AlertIcon, Messagebox::OkButton);
+				 Messagebox::Alert, Messagebox::OkButton);
 #else
 	int row = 0;
 	Connection conn_sql { conn_params };
