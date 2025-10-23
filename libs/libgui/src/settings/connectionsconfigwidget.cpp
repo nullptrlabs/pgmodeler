@@ -31,6 +31,7 @@ ConnectionsConfigWidget::ConnectionsConfigWidget(QWidget * parent) : BaseConfigW
 	GuiUtilsNs::createPasswordShowAction(passwd_edt);
 
 	one_time_conn_edit = false;
+	one_time_test_tb->setVisible(false);
 
 	connect(ssl_mode_cmb, &QComboBox::currentIndexChanged, this, &ConnectionsConfigWidget::enableCertificates);
 
@@ -44,6 +45,7 @@ ConnectionsConfigWidget::ConnectionsConfigWidget(QWidget * parent) : BaseConfigW
 	connect(remove_tb, &QToolButton::clicked, this, &ConnectionsConfigWidget::removeConnection);
 
 	connect(test_tb, &QPushButton::clicked, this, &ConnectionsConfigWidget::testConnection);
+	connect(one_time_test_tb, &QPushButton::clicked, this, &ConnectionsConfigWidget::testConnection);
 	connect(add_tb, &QPushButton::clicked, this, __slot(this, ConnectionsConfigWidget::handleConnection));
 
 	connect(alias_edt, &QLineEdit::textChanged, this, &ConnectionsConfigWidget::enableConnectionTest);
@@ -158,6 +160,7 @@ void ConnectionsConfigWidget::setOneTimeEditMode(bool one_time_edit, const QStri
 {
 	one_time_conn_edit = one_time_edit;
 	conn_btns_grp->setVisible(!one_time_edit);
+	one_time_test_tb->setVisible(one_time_edit);
 	add_tb->setVisible(!one_time_edit);
 	host_edt->setDisabled(one_time_edit && !host.isEmpty());
 	port_sbp->setDisabled(one_time_edit && port > 0);
@@ -187,6 +190,8 @@ void ConnectionsConfigWidget::enableConnectionTest()
 											!host_edt->text().isEmpty() &&
 											!user_edt->text().isEmpty() &&
 											!conn_db_edt->text().isEmpty());
+
+	one_time_test_tb->setEnabled(test_tb->isEnabled());
 
 	add_tb->setEnabled(test_tb->isEnabled());
 	update_tb->setEnabled(test_tb->isEnabled());
