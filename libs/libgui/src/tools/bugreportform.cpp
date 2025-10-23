@@ -17,6 +17,7 @@
 */
 
 #include "bugreportform.h"
+#include "customuistyle.h"
 #include "exception.h"
 #include "globalattributes.h"
 #include "messagebox.h"
@@ -30,6 +31,8 @@ BugReportForm::BugReportForm(QWidget *parent, Qt::WindowFlags f) : QDialog(paren
 								 Qt::WindowTitleHint |
 								 Qt::WindowMinMaxButtonsHint |
 								 Qt::WindowCloseButtonHint);
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, hint_frm);
 
 	output_sel = new FileSelectorWidget(this);
 	output_sel->setWindowTitle(tr("Select report output folder"));

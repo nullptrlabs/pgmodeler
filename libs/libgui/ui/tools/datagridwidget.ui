@@ -162,7 +162,7 @@
         </size>
        </property>
        <property name="shortcut">
-        <string>Ctrl+D</string>
+        <string>Ctrl+Shift+D</string>
        </property>
        <property name="checkable">
         <bool>false</bool>
