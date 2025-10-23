@@ -23,7 +23,7 @@
 
 const QString GlobalAttributes::PgModelerVersion {
 	/** Base version number **/
-	QString("1.2.2")
+	QString("1.2.3")
 
 /* Appending the snapshot build number to the version number
  * when the external variable SNAPSHOT_BUILD is defined */
