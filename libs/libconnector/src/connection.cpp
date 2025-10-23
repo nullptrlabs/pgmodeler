@@ -146,7 +146,7 @@ void Connection::generateConnectionString()
 		value.replace("'","\\'");
 
 		if(itr.first==ParamPassword && (value.contains(' ') || value.isEmpty()))
-			value=QString("'%1'").arg(value);
+			value = QString("'%1'").arg(value);
 
 		if(!value.isEmpty())
 		{
@@ -155,7 +155,7 @@ void Connection::generateConnectionString()
 			else if(itr.first != ParamOthers)
 				connection_str += param_str.arg(itr.first, value);
 			else
-				connection_str += value;
+				connection_str += value + " ";
 		}
 	}
 
