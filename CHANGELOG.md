@@ -3,19 +3,62 @@ Changelog
 
 v2.0.0-alpha
 ------
-*Release date: September 12, 2025*
+*Release date: October 30, 2025*
 
+* [New] Added initial support for PostgreSQL 18.
+* [New] Added the message box type Success and the static method Messagebox::success.
+* [New] Added the enum StyleHint and the method setStyleHint in CustomUiStyle that renders frames background and border in a contextual way.
+* [New] Added support for hiding empty object groups in database object trees in DatabaseExplorerWidget and DatabaseImportWidget. The hidden status is persisted in general.conf file.
+* [New] Added a button in ModelFixWidget to generate output filename based on the input filename.
+* [New] Added support for grid duplication in DataGridWidget.
+* [New] Added a button to browse the selected table in DataHandlingForm.
 * [New] Moved the entire build system from qmake to CMake on all platforms.
-* [New] Added support for diff two models in CLI and GUI.
+* [New] Added support for diffing two models in CLI and GUI.
 * [New] Added the method ModelDbSelectorWidget::clearSelection.
 * [New] Added the method Catalog::getServerVersion.
-* [New] Created the method updateConnections on ModelValidationWidget, DatabaseImportWidget, DiffToolWidget and SQLToolWidget.
-* [New] Added the class ModelDbSelectorWidget that encapsulates features to select model or databases to be used where models or database need to be selected.
+* [New] Created the method updateConnections in ModelValidationWidget, DatabaseImportWidget, DiffToolWidget and SQLToolWidget.
+* [New] Added the class ModelDbSelectorWidget that encapsulates features to select models or databases to be used where models or databases need to be selected.
 * [New] Created the function GuiUtilsNs::createWidgetInParent.
 * [New] Added the method ModelWidget::setInteractive that toggles the interaction over the model.
-* [New] Created aliases PGM_FILE, PGM_LINE and PGM_FUNC that refers respectively to macros __FILE__, __LINE__ and __PRETTY_FUNCTION__.
+* [New] Created aliases PGM_FILE, PGM_LINE and PGM_FUNC that refer respectively to macros __FILE__, __LINE__ and __PRETTY_FUNCTION__.
 * [New] Added a dedicated icon for the Welcome view.
-* [New] Added the widget FixToolsWidget, integrated to main window, that runs both the model fix and metadata handling operations.
+* [New] Added the widget FixToolsWidget, integrated into main window, that runs both the model fix and metadata handling operations.
+* [Change] Adjusted the build to use clang-tidy to identify where code can be modernized.
+* [Change] Applied a full refactor to the code based on clang-tidy checks.
+* [Change] Refactored the class ResultSet to avoid copying the PGresult; instead, it will reuse it during initialization.
+* [Change] Renamed the files palette.conf to theme.conf.
+* [Change] Removed the method AppearanceConfigWidget::isDarkUiTheme and replaced its usage with CustomUiStyle::isDarkPalette.
+* [Change] Moved the usage of CustomUiStyle to Application class.
+* [Change] Renamed the enum IconType in Messagebox to MessageType.
+* [Change] Removed the method Messagebox::setMessageFrameColor.
+* [Change] Allowed tool/config widgets to be resized via splitter.
+* [Change] Changed the attributes foreground-color and background-color to fg-color and bg-color in *-highlight.conf files.
+* [Change] Replaced the filter options checkboxes in SQLExecutionWidget with tool buttons.
+* [Change] Adjusted the column filter routine when filtering using regular expressions.
+* [Change] Improved English grammar in internationalization strings across multiple files.
+* [Change] Adjusted the rendering of QTableWidget/QTableView grids via polish.
+* [Change] Rearranged the UI of AboutWidget and UpdateNotifierWidget.
+* [Change] Adjusted the position and size of tab bar scroll buttons.
+* [Change] Adjusted the minimum size of MainWindow.
+* [Change] Adjusted the rendering of arrows in scroll buttons of tab bars.
+* [Change] Fixed the position of scroll buttons of the SQL execution tab widget.
+* [Change] Added missing SQL keywords to sql-highlight.conf.
+* [Change] Added the style hint SuccessFrmHint in CustomUiStyle.
+* [Change] Adjusted the rendering of frames with hint DefaultFrmHint.
+* [Change] Adjusted the themes stylesheets.
+* [Change] Adjusted CustomUiStyle and AppearanceConfigWidget for better theme detection.
+* [Change] Added custom rendering routines for multiple Qt widgets in CustomUiStyle including QToolTips, QScrollBars, QTabBar, QProgressBar, QHeaderView, and others.
+* [Change] Refactored various rendering methods in CustomUiStyle to improve code reusability and maintainability.
+* [Change] Added support for smart theme detection in AppearanceConfigWidget.
+* [Change] Added support for loading color palette from theme folder, file theme.conf.
+* [Change] Adjusted the rendering of disabled checkboxes and radio buttons.
+* [Change] Fixed the rendering of editable comboboxes.
+* [Change] Adjusted the dark palette colors and rendering of various UI components.
+* [Change] Implemented enhanced CustomUiStyle with bitwise corner flags for flexible corner control.
+* [Change] Added custom disabled icon styling with dynamic theme color blending in CustomUiStyle.
+* [Change] Adjusted the UI of GeneralConfigWidget.
+* [Change] Adjusted the initial sizes of splitters in tools/config widgets.
+* [Change] Refactored the ui-style.conf to remove duplicate styles.
 * [Change] Forcing the Qt version to >= 6.4.3 in find_packages().
 * [Change] Refactored parts of the UI in ModelExportWidget to include a ModelDbSelectorWidget instance.
 * [Change] Renamed MetadataHandlingForm to MetadataHandlingWidget.
@@ -32,11 +75,11 @@ v2.0.0-alpha
 * [Change] Minor UI adjustment in AppearanceConfigWidget.
 * [Change] Minor UI adjustment in GeneralConfigWidget.
 * [Change] Minor UI adjustment in MainWindow.
-* [Change] Renamed the class ModelFixForm to ModelFixWidget since it now run integrated to FixToolsWidget.
-* [Change] Adjusted the display of the view Fix in MainWindow.
+* [Change] Renamed the class ModelFixForm to ModelFixWidget since it now runs integrated into FixToolsWidget.
+* [Change] Adjusted the display of the Fix view in MainWindow.
 * [Change] Minor size adjustment in ConfigurationWidget.
-* [Change] Minor adjustment in DatabaseImportWidget::s_importFinished to send a bool flag indicating if the signal was sent during import error.
-* [Change] Minor adjustment in DiffToolWidget to disable the import options group when user selects model -> model diff.
+* [Change] Minor adjustment in DatabaseImportWidget::s_importFinished to send a bool flag indicating whether the signal was sent during import error.
+* [Change] Minor adjustment in DiffToolWidget to disable the import options group when the user selects model -> model diff.
 * [Change] Adjusted the method Application::copyFilesRecursively to ignore the diff-presets.conf from previous versions of pgModeler.
 * [Change] Minor improvement in DiffToolWidget presets saving and loading.
 * [Change] Adjusted the invalidated model alert display in ModelExportWidget.
@@ -44,49 +87,59 @@ v2.0.0-alpha
 * [Change] Reorganized the diff widget UI.
 * [Change] Removed unused components in DiffToolWidget.
 * [Change] Minor adjustment in DatabaseImportWidget and ModelExportWidget to block changes in the model while the operations are running.
-* [Change] Adjustments on MainWindow to start/stop timers when a diff, import or export operation starts/stops.
-* [Change] The diff tool is now integrated to the main window via "Diff view".
-* [Change] The import tool is now integrated to the main window via "Import view".
-* [Change] The export tool is now integrated to the main window via "Export view".
-* [Change] Ajusted some icon sizes in icons-*.conf.
-* [Change] Converted ModelExportWidget export mode radio boxes into tool buttons.
+* [Change] Adjustments to MainWindow to start/stop timers when a diff, import or export operation starts/stops.
+* [Change] The diff tool is now integrated into the main window via "Diff view".
+* [Change] The import tool is now integrated into the main window via "Import view".
+* [Change] The export tool is now integrated into the main window via "Export view".
+* [Change] Adjusted some icon sizes in icons-*.conf files.
+* [Change] Converted ModelExportWidget export mode radio buttons into tool buttons.
 * [Change] Renamed the method exec() to setModel() in ModelExportWidget.
-* [Change] Adjusted MainWindow::updateConnections to update to diff, import and export widgets connections.
+* [Change] Adjusted MainWindow::updateConnections to update the diff, import and export widgets connections.
 * [Change] Adjusted the UI of ModelObjectsWidget and OperationListWidget.
-* [Change] Changed some key QToolButton to QPushButton for better semantics.
+* [Change] Changed some QToolButtons to QPushButton for better semantics.
 * [Change] Adjustments in the light themes.
 * [Change] Finished the UI adjustments in DataHandlingForm.
-* [Change] Starting the adjustments of DataHandlingForm.
+* [Change] Started the adjustments to DataHandlingForm.
 * [Change] Adjusted the ui-style.conf.
 * [Change] Adjusted the behavior of MainWindow::closeEvent to discard any unchanged models.
-* [Change] Adjusted some class destructors declarations.
+* [Change] Adjusted some class destructor declarations.
 * [Change] Removed the class ConfigurationForm.
 * [Change] Minor adjustment in ConnectionsConfigWidget::openConnectionsConfiguration.
-* [Change] Removed the use of deprecated method ConfigurationWidget::getConfigurationWidget(int).
-* [Change] Minor improvement on BaseConfigWidget.
-* [Change] In MainWindow, if the user changes the settings without applying, a confirmation message will be displayed so the changes can be applied or reverted before switching the current view.
+* [Change] Removed the use of the deprecated method ConfigurationWidget::getConfigurationWidget(int).
+* [Change] Minor improvement to BaseConfigWidget.
+* [Change] In MainWindow, if the user changes the settings without applying them, a confirmation message will be displayed so the changes can be applied or reverted before switching the current view.
 * [Change] Adjusted the tab close button icon.
 * [Change] Adjusted the border radius of table objects.
 * [Change] Modified the default color of canvas objects in dark theme.
 * [Change] Adjusted the layout classes used to arrange the view widgets in MainWindow's stack widget.
-* [Change] Ajusted the default colors of the dark pallete.
-* [Change] Updated the windows icons of all app subprojects.
+* [Change] Adjusted the default colors of the dark palette.
+* [Change] Updated the window icons of all app subprojects.
 * [Change] Minor adjustment in logo images.
 * [Change] Adjusted the splash screen display.
-* [Change] Adjusted the logo design/color to match icon set colors.
+* [Change] Adjusted the logo design/color to match the icon set colors.
 * [Change] Minor adjustment in resource files.
-* [Change] Updated the icon colors for a more flatty and vivid style.
-* [Change] Adjusted the windows version build.
-* [Change] Changed deprecated define Q_OS_MAC to Q_OS_MACOS.
+* [Change] Updated the icon colors for a flatter and more vivid style.
+* [Change] Adjusted the Windows version build.
+* [Change] Changed the deprecated define Q_OS_MAC to Q_OS_MACOS.
+* [Fix] Fixed a bug in the connection class that was creating an invalid connection string when other params were manually specified.
+* [Fix] Fixed a bug that was causing collations assigned to columns not to be reflected in SQL and XML codes.
+* [Fix] Fixed a bug that was causing collations to be saved always as deterministic even when the user unchecked the option in the editing form.
+* [Fix] Fixed the function PgSqlVersions::parseString to return the default version as a fallback when a major server version is not yet recognized by the tool.
+* [Fix] Fixed a bug in XMLParser that was not configuring the DTD file path correctly.
+* [Fix] Fixed a bug in ObjectsScene that was causing value overflow when aligning points to grid in some cases.
+* [Fix] Fixed a bug in ModelWidget::protectObject.
+* [Fix] Fixed the rendering of QTableView/QTableWidget item borders.
+* [Fix] Minor fix in the crash handler to load the appearance settings and keep the UI uniform.
+* [Fix] Fixed the method CustomUiStyle::setStyleHint to accept only QFrames.
 * [Fix] Minor fix in DiffToolWidget.
 * [Fix] Minor fix in relationshipconfigwidget.ui.
 * [Fix] Minor fix in databaseimportwidget.ui.
 * [Fix] Fixed the warning icon display in FileSelectorWidget.
 * [Fix] Fixed a bug that was causing columns that were part of PKs not to be removed by the user.
 * [Fix] Minor fix in difftoolwidget.ui.
-* [Fix] Fixed a bug in DatabaseImportWidget that was allocating threads everytime the showEvent was triggered.
-* [Fix] Minor fix in build process.
-* [Fix] Fixed the catalog query for constraint for PostgreSQL 17.
+* [Fix] Fixed a bug in DatabaseImportWidget that was allocating threads every time the showEvent was triggered.
+* [Fix] Minor fix in the build process.
+* [Fix] Fixed the catalog query for constraints for PostgreSQL 17.
 * [Fix] Minor fix in libcli/CMakeLists.txt.
 
 v1.2.0
