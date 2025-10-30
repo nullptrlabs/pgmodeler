@@ -32,8 +32,7 @@ class MatchInfo {
 	public:
 		MatchInfo();
 		MatchInfo(int start, int end);
-
-		virtual ~MatchInfo(){}
+		~MatchInfo() = default;
 
 		int getStart() const;
 		int getEnd() const;

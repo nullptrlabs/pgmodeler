@@ -59,8 +59,7 @@ class __libcore BaseTable: public BaseGraphicObject {
 		};
 
 		BaseTable();
-
-		virtual ~BaseTable() {}
+		~BaseTable() override = default;
 
 		QString getHashCode();
 
@@ -102,9 +101,9 @@ class __libcore BaseTable: public BaseGraphicObject {
 		//! \brief Returns all children objects of the table but excluding the ones of the provided type
 		virtual std::vector<BaseObject *> getObjects(const std::vector<ObjectType> &excl_types = {})=0;
 
-		virtual QString getSourceCode(SchemaParser::CodeType tipo_def) override = 0;
+		QString getSourceCode(SchemaParser::CodeType tipo_def) override = 0;
 
-		virtual QString getAlterCode(BaseObject *object) override;
+		QString getAlterCode(BaseObject *object) override;
 
 		/*! \brief Set the initial capacity of the objects list for a optimized memory usage.
 		 * This method should be called prior to adding the first object to the table because, depending o the capacity,
@@ -131,7 +130,7 @@ class __libcore BaseTable: public BaseGraphicObject {
 
 		bool isPaginationEnabled();
 
-		virtual void setZValue(int z_value) override;
+		void setZValue(int z_value) override;
 
 		/*! \brief Defines the current page visible on the table. Calling this method direclty
 		 * will not update the geometry of the graphical representation of this object. For that,
@@ -145,21 +144,21 @@ class __libcore BaseTable: public BaseGraphicObject {
 		 * saved in separated files. This changes the way links are generated inside the data dictionaries */
 		virtual QString getDataDictionary(bool split, bool md_format, const attribs_map &extra_attribs = {}) = 0;
 
-		virtual void setCodeInvalidated(bool value) override;
+		void setCodeInvalidated(bool value) override;
 
-		virtual void setModified(bool value) override;
+		void setModified(bool value) override;
 
 		virtual void generateHashCode();
 
 		void resetHashCode();
 
-		virtual void setPosition(const QPointF &pos) override;
+		void setPosition(const QPointF &pos) override;
 
-		virtual void updateDependencies() override = 0;
+		void updateDependencies() override = 0;
 
-		virtual std::vector<BaseObject *> getDependencies(bool inc_indirect_deps = false,
-																											 const std::vector<ObjectType> &excl_types = {},
-																											 bool rem_duplcates = false) override;
+		std::vector<BaseObject *> getDependencies(bool inc_indirect_deps = false,
+																							const std::vector<ObjectType> &excl_types = {},
+																							bool rem_duplicates = false) override;
 
 		void updateDependencies(const std::vector<BaseObject *> &deps, const std::vector<BaseObject *> &old_deps = {});
 

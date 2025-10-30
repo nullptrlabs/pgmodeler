@@ -29,14 +29,13 @@
 class __libcore Procedure: public BaseFunction {
 	public:
 		Procedure();
+		~Procedure() override = default;
 
-		virtual ~Procedure(){}
+		QString getSourceCode(SchemaParser::CodeType def_type, bool) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getAlterCode(BaseObject *object) final;
 
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool) final;
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
-		virtual QString getAlterCode(BaseObject *object) final;
-
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 };
 
 #endif

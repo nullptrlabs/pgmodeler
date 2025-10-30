@@ -75,28 +75,28 @@ bool Sequence::isValidValue(const QString &value)
 		it's length must not exceed the MAX_POSITIVE_VALUE length */
 	if(value.size() > MaxBigPositiveValue.size())
 		return false;
-	else
+
+	unsigned i = 0, count = 0;
+	bool is_oper=false, is_num=false, is_valid=true;
+
+	count = value.size();
+	for(i=0; i < count && is_valid; i++)
 	{
-		unsigned i, count;
-		bool is_oper=false, is_num=false, is_valid=true;
-
-		count=value.size();
-		for(i=0; i < count && is_valid; i++)
+		if((value[i]=='-' || value[i]=='+') && !is_num)
 		{
-			if((value[i]=='-' || value[i]=='+') && !is_num)
-			{
-				if(!is_oper) is_oper=true;
-			}
-			else if((value[i]>='0' && value[i]<='9'))
-			{
-				if(!is_num) is_num=true;
-			}
-			else is_valid=false;
+			if(!is_oper) is_oper=true;
 		}
-
-		if(!is_num) is_valid=false;
-		return is_valid;
+		else if((value[i]>='0' && value[i]<='9'))
+		{
+			if(!is_num) is_num=true;
+		}
+		else is_valid=false;
 	}
+
+	if(!is_num)
+		is_valid = false;
+
+	return is_valid;
 }
 
 QString Sequence::formatValue(const QString &value)
@@ -133,50 +133,50 @@ int Sequence::compareValues(QString value1, QString value2)
 {
 	if(value1==value2 || value1.isEmpty() || value2.isEmpty())
 		return 0;
-	else
+
+	char ops[2]={'\0','\0'};
+	unsigned i, idx, count;
+	QString *vet_values[2]={&value1, &value2}, aux_value;
+
+	if(value1.size() < value2.size())
+		value1=value1.rightJustified(value1.size() + (value2.size()-value1.size()),'0');
+	else if(value1.size() > value2.size())
+		value2=value2.rightJustified(value2.size() + (value1.size()-value2.size()),'0');
+
+	for(i=0; i < 2; i++)
 	{
-		char ops[2]={'\0','\0'};
-		unsigned i, idx, count;
-		QString *vet_values[2]={&value1, &value2}, aux_value;
+		//Gets the value signal
+		ops[i]=vet_values[i]->at(0).toLatin1();
 
-		if(value1.size() < value2.size())
-			value1=value1.rightJustified(value1.size() + (value2.size()-value1.size()),'0');
-		else if(value1.size() > value2.size())
-			value2=value2.rightJustified(value2.size() + (value1.size()-value2.size()),'0');
+		//Case the value doesn't has a + it will be append
+		if(ops[i]!='-' && ops[i]!='+') ops[i]='+';
 
-		for(i=0; i < 2; i++)
+		idx=0;
+		count=vet_values[i]->size();
+		while(idx < count)
 		{
-			//Gets the value signal
-			ops[i]=vet_values[i]->at(0).toLatin1();
+			if(vet_values[i]->at(idx)!='+' &&
+					vet_values[i]->at(idx)!='-')
+				aux_value+=vet_values[i]->at(idx);
+			else
+				aux_value+='0';
 
-			//Case the value doesn't has a + it will be append
-			if(ops[i]!='-' && ops[i]!='+') ops[i]='+';
-
-			idx=0;
-			count=vet_values[i]->size();
-			while(idx < count)
-			{
-				if(vet_values[i]->at(idx)!='+' &&
-						vet_values[i]->at(idx)!='-')
-					aux_value+=vet_values[i]->at(idx);
-				else
-					aux_value+='0';
-
-				idx++;
-			}
-			(*vet_values[i])=aux_value;
-			aux_value="";
+			idx++;
 		}
 
-		if(ops[0]==ops[1] && value1==value2)
-			return 0;
-		else if((ops[0]=='-' && ops[1]=='-' && value1 > value2) ||
-				(ops[0]=='+' && ops[1]=='+' && value1 < value2) ||
-				(ops[0]=='-' && ops[1]=='+'))
-			return -1;
-		else
-			return 1;
+		(*vet_values[i])=aux_value;
+		aux_value="";
 	}
+
+	if(ops[0]==ops[1] && value1==value2)
+		return 0;
+
+	if((ops[0]=='-' && ops[1]=='-' && value1 > value2) ||
+			(ops[0]=='+' && ops[1]=='+' && value1 < value2) ||
+			(ops[0]=='-' && ops[1]=='+'))
+		return -1;
+
+	return 1;
 }
 
 void Sequence::setDefaultValues(PgSqlType serial_type)
@@ -225,7 +225,7 @@ void Sequence::setSchema(BaseObject *schema)
 
 		//Raises an error when the passed schema differs from the table schema
 		if(table && table->getSchema()!=schema)
-			throw Exception(ErrorCode::AsgSchemaSequenceDiffersTableSchema,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgSchemaSequenceDiffersTableSchema,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	BaseObject::setSchema(schema);
@@ -247,16 +247,19 @@ void Sequence::setValues(QString minv, QString maxv, QString inc, QString start,
 	cache=formatValue(cache);
 
 	if(compareValues(minv,maxv) > 0)
-		throw Exception(ErrorCode::AsgInvalidSequenceMinValue,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidSequenceMinValue,PGM_FUNC,PGM_FILE,PGM_LINE);
+
 	//Raises an error when the start value is less that min value or grater than max value
-	else if(compareValues(start, minv) < 0 ||	compareValues(start, maxv) > 0)
-		throw Exception(ErrorCode::AsgInvalidSequenceStartValue,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+	if(compareValues(start, minv) < 0 ||	compareValues(start, maxv) > 0)
+		throw Exception(ErrorCode::AsgInvalidSequenceStartValue,PGM_FUNC,PGM_FILE,PGM_LINE);
+
 	//Raises an error when the increment value is null (0)
-	else if(isZeroValue(inc))
-		throw Exception(ErrorCode::AsgInvalidSequenceIncrementValue,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+	if(isZeroValue(inc))
+		throw Exception(ErrorCode::AsgInvalidSequenceIncrementValue,PGM_FUNC,PGM_FILE,PGM_LINE);
+
 	//Raises an error when the cache value is null (0)
-	else if(isZeroValue(cache))
-		throw Exception(ErrorCode::AsgInvalidSequenceCacheValue,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+	if(isZeroValue(cache))
+		throw Exception(ErrorCode::AsgInvalidSequenceCacheValue,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	this->min_value=minv;
 	this->max_value=maxv;
@@ -277,13 +280,13 @@ void Sequence::setOwnerColumn(PhysicalTable *table, const QString &col_name)
 		if(table->getSchema()!=this->schema)
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgSeqOwnerTableDifferentSchema)
 							.arg(this->getName(true)),
-							ErrorCode::AsgSeqOwnerTableDifferentSchema,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+							ErrorCode::AsgSeqOwnerTableDifferentSchema,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		//Raises an error when the table owner role differs from the sequence owner
 		if(table->getOwner()!=this->owner)
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgSeqOwnerTableDifferentRole)
 							.arg(this->getName(true)),
-							ErrorCode::AsgSeqOwnerTableDifferentRole,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+							ErrorCode::AsgSeqOwnerTableDifferentRole,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		//Gets the column with the passed name
 		this->owner_col=table->getColumn(col_name);
@@ -292,7 +295,7 @@ void Sequence::setOwnerColumn(PhysicalTable *table, const QString &col_name)
 		if(!this->owner_col)
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgInexistentSeqOwnerColumn)
 							.arg(this->getName(true)),
-							ErrorCode::AsgInexistentSeqOwnerColumn,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+							ErrorCode::AsgInexistentSeqOwnerColumn,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		/* If the onwer column was added by relationship and the column id is greater than
 		 sequence id, change the sequence id to be greater to avoid reference errors */
@@ -318,19 +321,19 @@ void Sequence::setOwnerColumn(Column *column)
 		if(!table)
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgInvalidSeqOwnerColumn)
 							.arg(this->getName(true)),
-							ErrorCode::AsgInvalidSeqOwnerColumn,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+							ErrorCode::AsgInvalidSeqOwnerColumn,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		//Raises an error if the table schema differs from the sequence schema
 		if(table->getSchema()!=this->schema)
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgSeqOwnerTableDifferentSchema)
 							.arg(this->getName(true)),
-							ErrorCode::AsgSeqOwnerTableDifferentSchema,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+							ErrorCode::AsgSeqOwnerTableDifferentSchema,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		//Raises an error when the table owner role differs from the sequence owner
 		if(table->getOwner()!=this->owner)
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgSeqOwnerTableDifferentRole)
 							.arg(this->getName(true)),
-							ErrorCode::AsgSeqOwnerTableDifferentRole,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+							ErrorCode::AsgSeqOwnerTableDifferentRole,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		this->owner_col=column;
 
@@ -418,7 +421,7 @@ QString Sequence::getAlterCode(BaseObject *object)
 	Sequence *seq=dynamic_cast<Sequence *>(object);
 
 	if(!seq)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
@@ -470,7 +473,7 @@ QString Sequence::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -509,7 +512,7 @@ QString Sequence::getDataDictionary(bool md_format, const attribs_map &extra_att
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 

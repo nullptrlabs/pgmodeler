@@ -58,12 +58,12 @@ class __libgui ModelOverviewWidget: public QWidget, public Ui::ModelOverviewWidg
 		//! \brief The screen size threshold used to determine if the scroll area must be displayed or not
 		static constexpr double ScreenSzThreshold = 0.50;
 
-		void mousePressEvent(QMouseEvent *event);
-		void mouseReleaseEvent(QMouseEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void closeEvent(QCloseEvent *event);
-		void showEvent(QShowEvent *event);
-		bool eventFilter(QObject *object, QEvent *event);
+		void mousePressEvent(QMouseEvent *event) override;
+		void mouseReleaseEvent(QMouseEvent *event) override;
+		void mouseMoveEvent(QMouseEvent *event) override;
+		void closeEvent(QCloseEvent *event) override;
+		void showEvent(QShowEvent *event) override;
+		bool eventFilter(QObject *object, QEvent *event) override;
 
 		/*! \brief Updates the overview with the last modifications on the scene. The bool parameter
 		is used to force the update even if the overview widget is not visible */

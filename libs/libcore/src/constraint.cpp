@@ -89,7 +89,7 @@ bool Constraint::isColumnExists(Column *column, ColumnsId cols_id)
 
 	//Raises an error if the column is not allocated
 	if(!column)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Gets the iterators from the specified internal list
 	if(cols_id==SourceCols)
@@ -167,7 +167,7 @@ void Constraint::addColumn(Column *column, ColumnsId cols_id)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgNotAllocatedColumn)
 						.arg(this->getName())
 						.arg(BaseObject::getTypeName(ObjectType::Constraint)),
-						ErrorCode::AsgNotAllocatedColumn,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgNotAllocatedColumn,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(constr_type!=ConstraintType::Check)
 	{
@@ -201,7 +201,7 @@ void Constraint::addColumns(const std::vector<Column *> &cols, ColumnsId cols_id
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -212,13 +212,13 @@ void Constraint::setTablespace(BaseObject *tabspc)
 		if(tabspc &&
 				constr_type!=ConstraintType::PrimaryKey &&
 				constr_type!=ConstraintType::Unique)
-			throw Exception(ErrorCode::AsgTablespaceInvalidConstraintType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgTablespaceInvalidConstraintType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		BaseObject::setTablespace(tabspc);
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -333,7 +333,7 @@ Column *Constraint::getColumn(unsigned col_idx, ColumnsId cols_id)
 
 	//Raises an error if the column index is invalid (out of bound)
 	if(col_idx>=col_list->size())
-		throw Exception(ErrorCode::RefColumnInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefColumnInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return col_list->at(col_idx);
 }
@@ -356,8 +356,10 @@ Column *Constraint::getColumn(const QString &name, ColumnsId cols_id)
 		else break;
 	}
 
-	if(found) return *itr_col;
-	else return nullptr;
+	if(found)
+		return *itr_col;
+
+	return nullptr;
 }
 
 BaseTable *Constraint::getReferencedTable()
@@ -411,7 +413,8 @@ void Constraint::removeColumn(const QString &name, ColumnsId cols_id)
 			setCodeInvalidated(true);
 			break;
 		}
-		else itr++;
+		
+		itr++;
 	}
 }
 
@@ -529,17 +532,17 @@ void Constraint::addExcludeElements(std::vector<ExcludeElement> &elems)
 		for(auto &elem : elems_bkp)
 			addExcludeElement(elem);
 
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
 void Constraint::addExcludeElement(ExcludeElement elem)
 {
 	if(getExcludeElementIndex(elem) >= 0)
-		throw Exception(ErrorCode::InsDuplicatedElement,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::InsDuplicatedElement,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(elem.getExpression().isEmpty() && !elem.getColumn())
-		throw Exception(ErrorCode::AsgInvalidExpressionObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidExpressionObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	excl_elements.push_back(elem);
 	setCodeInvalidated(true);
@@ -574,7 +577,7 @@ bool Constraint::isNullsNotDistinct()
 ExcludeElement Constraint::getExcludeElement(unsigned elem_idx)
 {
 	if(elem_idx >= excl_elements.size())
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return excl_elements[elem_idx];
 }
@@ -746,16 +749,17 @@ QString Constraint::getDataDictionary(bool md_format, const attribs_map &extra_a
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
 bool Constraint::isCodeDiffersFrom(BaseObject *object, const QStringList &ignored_attribs, const QStringList &ignored_tags)
 {
 	if(!object)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else if(object->getObjectType()!=this->getObjectType())
-		throw Exception(ErrorCode::OprObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+	
+	if(object->getObjectType()!=this->getObjectType())
+		throw Exception(ErrorCode::OprObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
@@ -765,7 +769,7 @@ bool Constraint::isCodeDiffersFrom(BaseObject *object, const QStringList &ignore
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

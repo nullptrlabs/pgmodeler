@@ -61,7 +61,7 @@ class __libparsers CsvParser {
 	public:
 		CsvParser();
 
-		void setSpecialChars(const QChar &separator, const QChar &text_delim, const QChar &ln_break);
+		void setSpecialChars(const QChar &sep, const QChar &txt_delim, const QChar &ln_break);
 
 		void setColumnInFirstRow(bool value);
 

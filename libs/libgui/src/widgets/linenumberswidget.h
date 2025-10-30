@@ -59,10 +59,10 @@ class __libgui LineNumbersWidget : public QWidget {
 		bg_color;
 
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void mousePressEvent(QMouseEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void mouseReleaseEvent(QMouseEvent *);
+		void paintEvent(QPaintEvent *event) override;
+		void mousePressEvent(QMouseEvent *event) override;
+		void mouseMoveEvent(QMouseEvent *event) override;
+		void mouseReleaseEvent(QMouseEvent *) override;
 
 	public:
 		explicit LineNumbersWidget(QPlainTextEdit *parent);

@@ -24,11 +24,11 @@ ObjectsDiffInfo::ObjectsDiffInfo()
 	diff_type=NoDifference;
 }
 
-ObjectsDiffInfo::ObjectsDiffInfo(DiffType diff_type, BaseObject *object, BaseObject *new_object)
+ObjectsDiffInfo::ObjectsDiffInfo(DiffType diff_type, BaseObject *object, BaseObject *old_obj)
 {
 	this->diff_type=diff_type;
 	this->object=object;
-	this->old_object=new_object;
+	this->old_object=old_obj;
 }
 
 ObjectsDiffInfo::DiffType ObjectsDiffInfo::getDiffType()
@@ -59,32 +59,32 @@ QString ObjectsDiffInfo::getInfoMessage()
 	else
 		obj_name=ref_obj->getSignature();
 
-	if(diff_type==NoDifference)
+	if(diff_type == NoDifference)
 		return "";
-	else if(diff_type==DropObject)
+
+	if(diff_type==DropObject)
 	{
 		msg=msg.arg("<font color=\"#e00000\"><strong>DROP</strong></font>")
-			.arg(obj_name)
-			.arg(ref_obj->getTypeName());
+				.arg(obj_name)
+				.arg(ref_obj->getTypeName());
 	}
 	else if(diff_type==CreateObject)
 	{
 		msg=msg.arg("<font color=\"#008000\"><strong>CREATE</strong></font>")
-			.arg(obj_name)
-			.arg(ref_obj->getTypeName());
+				.arg(obj_name)
+				.arg(ref_obj->getTypeName());
 	}
 	else if(diff_type==AlterObject)
 	{
 		msg=msg.arg("<font color=\"#ff8000\"><strong>ALTER</strong></font>")
-			.arg(obj_name)
-			.arg(ref_obj->getTypeName());
-
+				.arg(obj_name)
+				.arg(ref_obj->getTypeName());
 	}
 	else if(diff_type==IgnoreObject)
 	{
 		msg=msg.arg("<font color=\"#606060\"><strong>IGNORE</strong></font>")
-			.arg(obj_name)
-			.arg(ref_obj->getTypeName());
+				.arg(obj_name)
+				.arg(ref_obj->getTypeName());
 
 	}
 
@@ -93,16 +93,13 @@ QString ObjectsDiffInfo::getInfoMessage()
 
 QString ObjectsDiffInfo::getDiffTypeString()
 {
-	if(diff_type==NoDifference)
-		return "";
-	else if(diff_type==DropObject)
-		return "DROP";
-	else if(diff_type==CreateObject)
-		return "CREATE";
-	else if(diff_type==AlterObject)
-		return "ALTER";
-	else
-		return "IGNORE";
+	static const std::map<DiffType, QString> type_map {
+		{ NoDifference, ""}, { DropObject, "DROP" },
+		{ CreateObject, "CREATE"}, { AlterObject, "ALTER" },
+		{ IgnoreObject, "IGNORE" }
+	};
+
+	return type_map.at(diff_type);
 }
 
 BaseObject *ObjectsDiffInfo::getObject()

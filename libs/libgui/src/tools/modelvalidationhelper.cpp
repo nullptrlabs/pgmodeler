@@ -17,6 +17,7 @@
 */
 
 #include "modelvalidationhelper.h"
+#include "messagebox.h"
 #include <QThread>
 
 const QString ModelValidationHelper::SignalMsg { "`%1' (%2)" };
@@ -154,8 +155,8 @@ void ModelValidationHelper::resolveConflict(ValidationInfo &info)
 
 			if(rename_obj)
 			{
-				table=dynamic_cast<BaseTable *>(dynamic_cast<TableObject *>(obj)->getParentTable());
-				obj_type=obj->getObjectType();
+				table = dynamic_cast<TableObject *>(obj)->getParentTable();
+				obj_type = obj->getObjectType();
 
 				do
 				{
@@ -180,12 +181,12 @@ void ModelValidationHelper::resolveConflict(ValidationInfo &info)
 				//Tables and view aren't renamed only table child objects (constraints, indexes)
 				if(tab_obj && !tab_obj->isAddedByRelationship())
 				{
-					table=dynamic_cast<BaseTable *>(tab_obj->getParentTable());
+					table = tab_obj->getParentTable();
 
 					do
 					{
 						//Configures a new name for the object [name]_[suffix]
-						new_name=QString("%1_%2").arg(tab_obj->getName()).arg(suffix);
+						new_name = QString("%1_%2").arg(tab_obj->getName()).arg(suffix);
 						suffix++;
 					}
 					//Generates a new name until no object is found on parent table
@@ -211,7 +212,7 @@ void ModelValidationHelper::resolveConflict(ValidationInfo &info)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -233,7 +234,7 @@ unsigned ModelValidationHelper::getErrorCount()
 void ModelValidationHelper::setValidationParams(DatabaseModel *model, Connection *conn, const QString &pgsql_ver, bool use_tmp_names)
 {
 	if(!model)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	fix_mode=false;
 	valid_canceled=false;
@@ -259,7 +260,7 @@ bool ModelValidationHelper::isInFixMode()
 void ModelValidationHelper::validateModel()
 {
 	if(!db_model)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
@@ -369,14 +370,14 @@ void ModelValidationHelper::validateModel()
 				{
 					warn_count++;
 					emitValidationFinished();
-					emit s_validationInfoGenerated(ValidationInfo(tr("There are pending errors! SQL validation will not be executed.")));
+					emit s_validationInfoGenerated(ValidationInfo(tr("There are pending errors! SQL validation will not be performed.")));
 				}
 			}
 		}
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -712,7 +713,8 @@ void ModelValidationHelper::checkInvalidatedRels()
 void ModelValidationHelper::checkUselessUqConstrs()
 {
 	PhysicalTable *table = nullptr;
-	Constraint *pk = nullptr, *uq = nullptr;
+	Constraint *pk = nullptr;
+	Constraint *uq = nullptr;
 	std::vector<BaseObject *> tabs;
 
 	tabs.assign(db_model->getObjectList(ObjectType::Table)->begin(),
@@ -727,7 +729,7 @@ void ModelValidationHelper::checkUselessUqConstrs()
 		if(valid_canceled)
 			break;
 
-		table = dynamic_cast<Table *>(tab);
+		table = dynamic_cast<PhysicalTable *>(tab);
 		pk = table->getPrimaryKey();
 
 		if(!pk)

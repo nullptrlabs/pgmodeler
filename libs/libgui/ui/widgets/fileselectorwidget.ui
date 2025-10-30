@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="focusPolicy">
-   <enum>Qt::TabFocus</enum>
+   <enum>Qt::FocusPolicy::TabFocus</enum>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -68,7 +68,7 @@
       </size>
      </property>
      <property name="focusPolicy">
-      <enum>Qt::TabFocus</enum>
+      <enum>Qt::FocusPolicy::TabFocus</enum>
      </property>
      <property name="toolTip">
       <string>Clear field</string>
@@ -89,7 +89,14 @@
     </widget>
    </item>
    <item row="0" column="0">
-    <widget class="QLineEdit" name="filename_edt"/>
+    <widget class="QLineEdit" name="filename_edt">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
    </item>
    <item row="0" column="2">
     <widget class="QToolButton" name="sel_file_tb">
@@ -106,7 +113,7 @@
       </size>
      </property>
      <property name="focusPolicy">
-      <enum>Qt::TabFocus</enum>
+      <enum>Qt::FocusPolicy::TabFocus</enum>
      </property>
      <property name="toolTip">
       <string>Select file</string>
@@ -134,7 +141,6 @@
   <tabstop>sel_file_tb</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

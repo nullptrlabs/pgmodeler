@@ -42,7 +42,7 @@ class __libgui SchemaWidget: public BaseObjectWidget, public Ui::SchemaWidget {
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

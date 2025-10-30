@@ -50,7 +50,7 @@ class __libgui RuleWidget: public BaseObjectWidget, public Ui::RuleWidget {
 		void editCommand(int row);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

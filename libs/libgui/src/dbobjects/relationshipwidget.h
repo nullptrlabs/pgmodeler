@@ -108,8 +108,8 @@ class __libgui RelationshipWidget: public BaseObjectWidget, public Ui::Relations
 		void generateBoundingExpr();
 
 	public slots:
-		void applyConfiguration();
-		void cancelConfiguration();
+		void applyConfiguration() override;
+		void cancelConfiguration() override;
 
 		friend class ModelWidget;
 };

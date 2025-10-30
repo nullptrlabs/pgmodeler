@@ -65,20 +65,19 @@ class __libcore BaseFunction: public BaseObject {
 		//! \brief Returns a code snippet that is used to configure atler commands in order to change configuration parameters
 		attribs_map getAlterCodeAttributes(BaseFunction *func);
 
-		virtual void configureSearchAttributes();
+		void configureSearchAttributes() override;
 
 	public:
 		static const QRegularExpression ConfigParamPattern;
 
 		BaseFunction();
-
-		virtual ~BaseFunction() {}
+		~BaseFunction() override = default;
 
 		//! \brief Sets the function name updating its signature
-		void setName(const QString &name);
+		void setName(const QString &name) override;
 
 		//! \brief Sets the function schema updating its signature
-		void setSchema(BaseObject *schema);
+		void setSchema(BaseObject *schema) override;
 
 		//! \brief Adds a parameter to the function
 		virtual void addParameter(Parameter param);
@@ -158,22 +157,22 @@ class __libcore BaseFunction: public BaseObject {
 		bool isTransformTypeExists(PgSqlType type);
 
 		//! \brief Returns the complete function signature
-		virtual QString getSignature(bool=true);
+		QString getSignature(bool = true) override;
 
 		/*! \brief Generates the function's signature. The 'format' parameter is used
 		 to adequately format the function and parameters names. By default
 		 this formating is always done. */
-		void createSignature(bool format=true, bool prepend_schema=true);
+		void createSignature(bool format = true, bool prepend_schema = true);
 
-		virtual void updateDependencies() = 0 ;
+		void updateDependencies() override = 0 ;
 
 		void updateDependencies(const std::vector<BaseObject *> &deps, const std::vector<BaseObject *> &old_deps = {});
 
 		static bool isBaseFunction(ObjectType obj_tp);
 
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool) = 0;
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) = 0;
-		virtual QString getAlterCode(BaseObject *object) = 0;
+		QString getSourceCode(SchemaParser::CodeType def_type, bool) override = 0;
+		QString getSourceCode(SchemaParser::CodeType def_type) override = 0;
+		QString getAlterCode(BaseObject *object) override = 0;
 };
 
 #endif

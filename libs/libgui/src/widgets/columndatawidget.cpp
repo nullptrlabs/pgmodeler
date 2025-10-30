@@ -36,8 +36,7 @@ ColumnDataWidget::ColumnDataWidget(bool use_syntax_hl, const QString &hl_conf, Q
 	}
 
 	vbox->addWidget(value_txt);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin,
-													 GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
+	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 }
 
 void ColumnDataWidget::setData(const QString &data)

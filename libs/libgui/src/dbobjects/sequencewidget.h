@@ -47,7 +47,7 @@ class __libgui SequenceWidget: public BaseObjectWidget, public Ui::SequenceWidge
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, Sequence *sequence);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 
 	private slots:
 		void setDefaultValues();

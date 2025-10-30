@@ -110,9 +110,9 @@ QPointF BaseGraphicObject::getPosition()
 
 void BaseGraphicObject::operator = (BaseGraphicObject &obj)
 {
-	*(dynamic_cast<BaseObject *>(this))=dynamic_cast<BaseObject &>(obj);
-	this->position=obj.position;
-	this->z_value=obj.z_value;
+	*(dynamic_cast<BaseObject *>(this)) = dynamic_cast<BaseObject &>(obj);
+	this->position = obj.position;
+	this->z_value = obj.z_value;
 }
 
 void BaseGraphicObject::setReceiverObject(QObject *obj)

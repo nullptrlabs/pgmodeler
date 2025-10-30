@@ -39,7 +39,7 @@ class __libgui SQLToolWidget: public QWidget, public Ui::SQLToolWidget {
 
 		QList<QToolButton *> plugins_btns;
 
-		QToolButton *sql_exec_corner_btn;
+		QToolButton *sql_exec_corner_tb;
 
 		NumberedTextEditor *sourcecode_txt;
 
@@ -54,19 +54,17 @@ class __libgui SQLToolWidget: public QWidget, public Ui::SQLToolWidget {
 		(see addSQLExecutionTab and closeSQLExecutionTab for deitails) */
 		QMap<QWidget *, QWidgetList> sql_exec_wgts;
 
-		bool eventFilter(QObject *object, QEvent *event);
+		bool eventFilter(QObject *object, QEvent *event) override;
 
 	protected:
-		//void setPluginsButtons(const QList<QToolButton *> &list);
-
-		void resizeEvent(QResizeEvent *);
+		void resizeEvent(QResizeEvent *) override;
 
 		void setCornerButtonPos();
 
 	public:
 		SQLToolWidget(QWidget * parent = nullptr);
 
-		virtual ~SQLToolWidget();
+		~SQLToolWidget() override;
 
 		//! \brief Force the update of the sql command input field and the syntax highligter attached to the opened tabs
 		void updateTabs();
@@ -89,6 +87,9 @@ class __libgui SQLToolWidget: public QWidget, public Ui::SQLToolWidget {
 		 * the maintanance database. Also, it causes the selected database in database_cmb to not
 		 * create an empty SQL explorer tab */
 		void ignoreAutoBrowseFlag(bool value);
+
+		//! \brief Updates the connections combo with the latest loaded connection settings
+		void updateConnections();
 
 	public slots:
 		void configureSnippets();
@@ -133,7 +134,7 @@ class __libgui SQLToolWidget: public QWidget, public Ui::SQLToolWidget {
 	signals:
 		/*! \brief This signal is emitted whenever the user changes the connections settings
 		within this widget without use the main configurations dialog */
-		void s_connectionsUpdateRequest();
+		void s_connectionsUpdateRequested();
 
 		friend class MainWindow;
 };

@@ -71,8 +71,7 @@ class __libcore TableObject: public BaseObject {
 
 	public:
 		TableObject();
-
-		virtual ~TableObject(){}
+		~TableObject() override = default;
 
 		//! \brief Defines the parent table for the object
 		virtual void setParentTable(BaseTable *table);
@@ -87,15 +86,15 @@ class __libcore TableObject: public BaseObject {
 		/*! \brief This method is purely virtual to force the derived classes
 		 *  overload this method. This also makes class TableObject
 		 *  not instantiable */
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) override = 0;
+		QString getSourceCode(SchemaParser::CodeType def_type) override = 0;
 
-		virtual QString getDropCode(bool cascade) override;
+		QString getDropCode(bool cascade) override;
 
 		/*! \brief This version compares only the comments of two TableObject instances
 		 *  returning the proper command to modify the comment, when needed */
-		virtual QString getAlterCode(BaseObject *object) override;
+		QString getAlterCode(BaseObject *object) override;
 
-		virtual QString getSignature(bool format = true) override;
+		QString getSignature(bool format = true) override;
 
 		//! \brief Returns whether the object was added by relationship 1-1, 1-n, n-n
 		bool isAddedByLinking();
@@ -115,7 +114,7 @@ class __libcore TableObject: public BaseObject {
 		//! \brief Returns if the passed type is a table child object (column, constraint, index, rule, trigger)
 		static bool isTableObject(ObjectType type);
 
-		virtual void setCodeInvalidated(bool value) override;
+		void setCodeInvalidated(bool value) override;
 
 		void operator = (TableObject &object);
 

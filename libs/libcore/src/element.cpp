@@ -66,7 +66,7 @@ void Element::setSimpleColumn(const SimpleColumn &col)
 void Element::setSortingAttribute(SortOrder attrib, bool value)
 {
 	if(attrib > NullsFirst)
-		throw Exception(ErrorCode::RefAttributeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefAttributeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	sorting_attibs[attrib]=value;
 }
@@ -84,7 +84,7 @@ bool Element::isSortingEnabled()
 bool Element::getSortingAttribute(SortOrder attrib)
 {
 	if(attrib > NullsFirst)
-		throw Exception(ErrorCode::RefAttributeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefAttributeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return sorting_attibs[attrib];
 }

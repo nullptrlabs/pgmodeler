@@ -295,7 +295,7 @@
           </size>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Sunken</enum>
+          <enum>QFrame::Shadow::Sunken</enum>
          </property>
          <property name="lineWidth">
           <number>1</number>
@@ -304,10 +304,10 @@
           <number>0</number>
          </property>
          <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarAsNeeded</enum>
+          <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
          </property>
          <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAsNeeded</enum>
+          <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
          </property>
         </widget>
        </item>
@@ -335,7 +335,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Refer. Table:</string>
+          <string>Reference Table:</string>
          </property>
         </widget>
        </item>
@@ -726,7 +726,6 @@
   <tabstop>cond_expr_txt</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

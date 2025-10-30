@@ -31,42 +31,32 @@
 #include "objectsscene.h"
 #include "databasemodel.h"
 #include "widgets/numberedtexteditor.h"
+#include "widgets/customtablewidget.h"
 #include "utils/syntaxhighlighter.h"
-#include <algorithm>
 
 class __libgui AppearanceConfigWidget: public BaseConfigWidget, public Ui::AppearanceConfigWidget  {
 	Q_OBJECT
 
 	private:
-		/*! \brief This palette instance holds the current system palette. It is used
-		 * to detect if the system uses dark or light theme and helps pgModeler to
-		 * determine the proper colors when user used System default theme setting */
-		static QPalette system_pal;
-		
 		//! \brief Holds the currently loaded config params
 		static std::map<QString, attribs_map> config_params;
 
-		/*! \brief Holds the QPalette settings that defines dark theme.
-		 * This map key is a color role which value is a string list that
-		 * contains 3 elements: active color, inactive color and disabled color. */
-		static std::map<QPalette::ColorRole, QStringList> dark_ui_colors,
+		//! \brief Holds the QPalette instances for each available theme
+		static std::map<QString, QPalette> theme_palettes;
 
-		/*! \brief Holds the QPalette settings that defines light theme.
-		 * This map key is a color role which value is a string list that
-		 * contains 3 elements: active color, inactive color and disabled color. */
-		light_ui_colors,
+		//! \brief Holds the table widget item colors for each available theme
+		static std::map<QString, std::map<CustomTableWidget::TableItemColor, QColor>> theme_tab_item_colors;
 
-		//! \brief Holds the default/system QPalette settings.
-		system_ui_colors;
-
-		//! \brief Colors used for ObjectTableWidget items when in dark theme
+		//! \brief Colors used for CustomTableWidget items when in system default dark theme
 		static QStringList dark_tab_item_colors,
 
-		//! \brief Colors used for ObjectTableWidget items when in light theme
+		//! \brief Colors used for CustomTableWidget items when in system default light theme
 		light_tab_item_colors;
 
 		//! \brief Holds the current user interface theme id (light/dark)
 		static QString UiThemeId;
+
+		static QPalette system_pal;
 
 		//! \brief Auxiliary class that stores the formating data of each element
 		class AppearanceConfigItem {
@@ -77,6 +67,8 @@ class __libgui AppearanceConfigWidget: public BaseConfigWidget, public Ui::Appea
 				bool obj_conf;
 		};
 		
+		QButtonGroup *ico_sz_btn_grp;
+
 		NumberedTextEditor *font_preview_txt;
 
 		SyntaxHighlighter *font_preview_hl;
@@ -114,6 +106,8 @@ class __libgui AppearanceConfigWidget: public BaseConfigWidget, public Ui::Appea
 		
 		bool show_grid, show_delimiters;
 
+		void loadThemesConfiguration();
+
 		//! \brief Loads the example model from file (conf/exampledb.dbm)
 		void loadExampleModel();
 		
@@ -126,38 +120,31 @@ class __libgui AppearanceConfigWidget: public BaseConfigWidget, public Ui::Appea
 		//! \brief Applies the design and code settings loaded from file
 		void applyDesignCodeStyle();
 
-		//! \brief Stores in system_ui_colors the default colors of ui elements
-		void storeSystemUiColors();
-
 		void applyDesignCodeTheme();
 
 		void applyUiStyleSheet();
 
-		//! \brief Returns the theme id (light/dark) depending on the selection in ui_theme_cmb
-		QString __getUiThemeId();
+		//! \brief Returns the theme id depending on the selection in theme_cmb
+		QString getThemeId();
+
+	protected:
+		bool eventFilter(QObject *object, QEvent *event) override;
 
 	public:
 		AppearanceConfigWidget(QWidget * parent = nullptr);
 
-		virtual ~AppearanceConfigWidget();
-		
-		virtual void showEvent(QShowEvent *) override;
+		~AppearanceConfigWidget() override;
 
-		virtual void hideEvent(QHideEvent *) override;
+		void showEvent(QShowEvent *) override;
 
-		virtual void saveConfiguration() override;
+		void hideEvent(QHideEvent *) override;
 
-		virtual void loadConfiguration() override;
+		void saveConfiguration() override;
+
+		void loadConfiguration() override;
 
 		//! \brief Applies the selected ui theme to the whole application
 		void applyUiTheme();
-
-		//! \brief Returns whether the currently used theme is a dark one
-		static bool isDarkUiTheme();
-
-		/*! \brief Returns the currently UI palette lightness.
-		 * Return values can Attributes::Light or Attributes::Dark */
-		static QString getUiLightness(const QPalette &pal);
 
 		static std::map<QString, attribs_map> getConfigurationParams();
 
@@ -169,13 +156,13 @@ class __libgui AppearanceConfigWidget: public BaseConfigWidget, public Ui::Appea
 		void previewCanvasColors();
 		void applySyntaxHighlightTheme();
 
-		virtual void applyConfiguration() override;
+		void applyConfiguration() override;
 
 		//! \brief Applies temporarily all the settings related to the UI
 		void previewUiSettings();
 
 	public slots:
-		virtual void restoreDefaults() override;
+		void restoreDefaults() override;
 };
 
 #endif

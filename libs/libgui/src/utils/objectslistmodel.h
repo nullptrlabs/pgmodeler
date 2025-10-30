@@ -49,7 +49,7 @@ class __libgui ObjectsListModel: public QAbstractTableModel {
 			clear();
 		}
 
-		inline void clear() {
+		void clear() {
 			id = 0;
 			text = icon = "";
 			fg_color = bg_color = "";
@@ -94,13 +94,13 @@ class __libgui ObjectsListModel: public QAbstractTableModel {
 
 	explicit ObjectsListModel(const std::vector<BaseObject *> &obj_list, const QString &search_attr =  "", QObject *parent = nullptr);
 	explicit ObjectsListModel(const std::vector<attribs_map> &attr_list, QObject *parent = nullptr);
-	virtual int rowCount(const QModelIndex & = QModelIndex()) const;
-	virtual int columnCount(const QModelIndex &) const;
-	virtual QModelIndex index(int row, int column, const QModelIndex &parent) const;
-	virtual QModelIndex parent(const QModelIndex &) const;
-	virtual QVariant data(const QModelIndex &index, int role) const;
-	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-	virtual Qt::ItemFlags flags(const QModelIndex &) const;
+	int rowCount(const QModelIndex & = QModelIndex()) const override;
+	int columnCount(const QModelIndex &) const override;
+	QModelIndex index(int row, int column, const QModelIndex &parent) const override;
+	QModelIndex parent(const QModelIndex &) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
+	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+	Qt::ItemFlags flags(const QModelIndex &) const override;
 	bool isEmpty();
 };
 

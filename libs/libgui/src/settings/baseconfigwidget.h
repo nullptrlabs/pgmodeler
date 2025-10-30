@@ -88,28 +88,31 @@ class __libgui BaseConfigWidget: public QWidget {
 		//! \brief Appends/overwrites the configuration parameters of the provided section_id.
 		static void appendConfigurationSection(std::map<QString, attribs_map> &config_params, const QString &section_id, const attribs_map &params);
 
-		virtual void showEvent(QShowEvent *) override;
+		void showEvent(QShowEvent *) override;
 
 	public:
 		BaseConfigWidget(QWidget *parent = nullptr);
-		~BaseConfigWidget(){}
-		
+		~BaseConfigWidget() override = default;
+
 		bool isConfigurationChanged();
 		
 		//! \brief Applies the configuration to object
-		virtual void applyConfiguration(void)=0;
+		virtual void applyConfiguration()=0;
 		
 		//! \brief Loads a set of configurations from a file
-		virtual void loadConfiguration(void)=0;
+		virtual void loadConfiguration()=0;
 		
 		//! \brief Saves the current settings to a file
-		virtual void saveConfiguration(void)=0;
+		virtual void saveConfiguration()=0;
 		
 		//! \brief Destroy the current configuration file and makes a copy of the default one located at conf/defaults
-		virtual void restoreDefaults(void)=0;
+		virtual void restoreDefaults()=0;
 		
 	public slots:
 		virtual void setConfigurationChanged(bool changed = true);
+
+	signals:
+		void s_configurationChanged(bool);
 };
 
 #endif

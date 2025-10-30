@@ -26,22 +26,22 @@ An example of that chars are:
 
 open-char: the character that indicates the open delimitation
 close-char: the character that indicates the close delimitation
-background-color: the color of the background of enclosing chars
-foreground-color: the color of the foreground of enclosing chars
+bg-color: the color of the background of enclosing chars
+fg-color: the color of the foreground of enclosing chars
 -->
 <!ELEMENT enclosing-chars EMPTY>
 <!ATTLIST enclosing-chars open-char CDATA #REQUIRED>
 <!ATTLIST enclosing-chars close-char CDATA #REQUIRED>
-<!ATTLIST enclosing-chars background-color CDATA #REQUIRED>
-<!ATTLIST enclosing-chars foreground-color CDATA #REQUIRED>
+<!ATTLIST enclosing-chars bg-color CDATA #REQUIRED>
+<!ATTLIST enclosing-chars fg-color CDATA #REQUIRED>
 
 <!--
 The configuration of a highlight group. The group itself contains a set of formatting attributes and elements which 
 store the expressions that are matched against the captured words.
 
 name: the name of the group
-background-color: the color of the background of words matching the group (omitting this attribute causes transparent background to be applied).
-foreground-color: the color of the foreground of words matching the group (omitting this attribute causes the default foreground color to be applied)
+bg-color: the color of the background of words matching the group (omitting this attribute causes transparent background to be applied).
+fg-color: the color of the foreground of words matching the group (omitting this attribute causes the default foreground color to be applied)
 case-sensitive: indicates if the expressions matching must be case sensitive or not.
 bold: words matching the group will have a bold style.
 italic: words matching the group will have a italic style.
@@ -52,8 +52,8 @@ persistent: indicates that once found this group in a block, the highlight will 
 -->
 <!ELEMENT group (element*)>
 <!ATTLIST group name CDATA #REQUIRED>
-<!ATTLIST group background-color CDATA #IMPLIED>
-<!ATTLIST group foreground-color CDATA #IMPLIED>
+<!ATTLIST group bg-color CDATA #IMPLIED>
+<!ATTLIST group fg-color CDATA #IMPLIED>
 <!ATTLIST group case-sensitive (false|true) "false">
 <!ATTLIST group bold (false|true) "false">
 <!ATTLIST group italic (false|true) "false">

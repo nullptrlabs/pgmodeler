@@ -3,7 +3,7 @@
            Unexpected results may occur if the code is changed deliberately.
 -->
 <!ELEMENT appearance (design, code, objects)>
-<!ATTLIST appearance ui-theme (system|dark|light|inksaver) "system">
+<!ATTLIST appearance ui-theme CDATA #IMPLIED>
 <!ATTLIST appearance icons-size (big|medium|small) "big">
 <!ATTLIST appearance custom-scale CDATA #IMPLIED>
 

@@ -17,6 +17,7 @@
 */
 
 #include "debugoutputwidget.h"
+#include "customuistyle.h"
 #include "guiutilsns.h"
 #include "application.h"
 #include "settings/appearanceconfigwidget.h"
@@ -68,7 +69,7 @@ void DebugOutputWidget::logMessage(const QString &msg, const QColor &fg_color)
 		tc.setPosition(ini_pos, QTextCursor::MoveAnchor);
 		tc.setPosition(curr_pos, QTextCursor::KeepAnchor);
 
-		if(!AppearanceConfigWidget::isDarkUiTheme())
+		if(!CustomUiStyle::isDarkPalette())
 			fmt.setForeground(fg_color.darker(130));
 		else
 			fmt.setForeground(fg_color);

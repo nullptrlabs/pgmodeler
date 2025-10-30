@@ -88,7 +88,7 @@ void ColorPickerWidget::setColor(int color_idx, const QColor &color)
 	QString cl_name;
 
 	if(color_idx < 0 || color_idx >=  colors.size())
-		throw Exception(ErrorCode::RefElementInvalidIndex ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(this->isEnabled())
 		cl_name=color.name();
@@ -102,7 +102,7 @@ void ColorPickerWidget::setColor(int color_idx, const QColor &color)
 QColor ColorPickerWidget::getColor(int color_idx)
 {
 	if(color_idx < 0 || color_idx >= colors.size())
-		throw Exception(ErrorCode::RefElementInvalidIndex ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return colors[color_idx];
 }
@@ -115,7 +115,7 @@ unsigned ColorPickerWidget::getColorCount()
 bool ColorPickerWidget::isButtonVisible(unsigned idx)
 {
 	if(idx >= static_cast<unsigned>(buttons.size()))
-		throw Exception(ErrorCode::RefElementInvalidIndex ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return buttons[idx]->isVisible();
 }
@@ -123,7 +123,7 @@ bool ColorPickerWidget::isButtonVisible(unsigned idx)
 void ColorPickerWidget::setButtonToolTip(unsigned button_idx, const QString &tooltip)
 {
 	if(button_idx >= static_cast<unsigned>(buttons.size()))
-		throw Exception(ErrorCode::RefElementInvalidIndex ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	buttons[button_idx]->setToolTip(tooltip);
 }
@@ -142,7 +142,7 @@ void ColorPickerWidget::setEnabled(bool value)
 void ColorPickerWidget::setButtonVisible(unsigned idx, bool value)
 {
 	if(idx >= static_cast<unsigned>(buttons.size()))
-		throw Exception(ErrorCode::RefElementInvalidIndex ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	buttons[idx]->setVisible(value);
 }

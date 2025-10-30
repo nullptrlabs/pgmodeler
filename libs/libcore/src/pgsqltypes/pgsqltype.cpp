@@ -135,24 +135,19 @@ PgSqlType PgSqlType::parseString(const QString &str)
 	unsigned dim=0, srid=0;
 	int prec=-1, len = -1;
 	int start=-1, end=-1;
-	QStringList value, intervals;
+	QStringList value;
 	PgSqlType type;
 
 	//Checking if the string contains one of interval types
-	intervals = IntervalType::getTypes();
-	while(!intervals.isEmpty())
+	for(auto &interv : IntervalType::getTypes())
 	{
-		interv=intervals.back();
-		intervals.pop_back();
+		start = type_str.indexOf(QRegularExpression("( )" + interv.toLower()));
 
-		start=type_str.indexOf(QRegularExpression("( )" + interv.toLower()));
-		if(start>=0)
+		if(start >= 0)
 		{
 			type_str.remove(start, interv.size()+1);
 			break;
 		}
-		else
-			interv.clear();
 	}
 
 	//Check if the type contains "with time zone" descriptor
@@ -248,7 +243,7 @@ PgSqlType PgSqlType::parseString(const QString &str)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e, str);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e, str);
 	}
 }
 
@@ -308,7 +303,7 @@ PgSqlType::TypeCategory PgSqlType::getCategory()
 unsigned PgSqlType::setType(unsigned type_id)
 {
 	if(type_id == Null)
-		throw Exception(ErrorCode::AsgInvalidTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidTypeObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(type_id >= static_cast<unsigned>(type_names.size()))
 		return setUserType(type_id);
@@ -324,7 +319,7 @@ unsigned PgSqlType::setType(const QString &type_name)
 	usr_type_id = getUserTypeIndex(type_name, nullptr);
 
 	if(type_id == Null && usr_type_id == Null)
-		throw Exception(ErrorCode::AsgInvalidTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidTypeObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(type_id != Null)
 		return TemplateType<PgSqlType>::setType(type_id, type_names);
@@ -346,8 +341,10 @@ BaseObject *PgSqlType::getObject()
 {
 	if(this->isUserType())
 	{
-		return reinterpret_cast<BaseObject *>(
-				user_types[this->type_idx - (PseudoEnd + 1)].ptype);
+		/* return reinterpret_cast<BaseObject *>(
+				user_types[this->type_idx - (PseudoEnd + 1)].ptype);*/
+
+		return user_types[this->type_idx - (PseudoEnd + 1)].ptype;
 	}
 
 	return nullptr;
@@ -540,16 +537,16 @@ void PgSqlType::setWithTimezone(bool with_tz)
 unsigned PgSqlType::setUserType(unsigned type_id)
 {
 	unsigned lim1 = PseudoEnd + 1,
-			lim2 = lim1 + PgSqlType::user_types.size();
+					 lim2 = lim1 + PgSqlType::user_types.size();
 
 	if(user_types.size() > 0 &&
-		(type_id >= lim1 && type_id < lim2))
+		 (type_id >= lim1 && type_id < lim2))
 	{
 		type_idx = type_id;
 		return type_idx;
 	}
-	else
-		throw Exception(ErrorCode::AsgInvalidTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+
+	throw Exception(ErrorCode::AsgInvalidTypeObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 }
 
 unsigned PgSqlType::setUserType(BaseObject *ptype)
@@ -557,7 +554,7 @@ unsigned PgSqlType::setUserType(BaseObject *ptype)
 	int idx = getUserTypeIndex("", ptype);
 
 	if(idx <= 0)
-		throw Exception(ErrorCode::AsgInvalidTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidTypeObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	type_idx = idx;
 	return type_idx;
@@ -592,8 +589,10 @@ void PgSqlType::removeUserType(const QString &type_name, BaseObject *ptype)
 
 		while(itr!=itr_end)
 		{
-			if(itr->name==type_name && itr->ptype==ptype) break;
-			else itr++;
+			if(itr->name==type_name && itr->ptype==ptype)
+				break;
+
+			itr++;
 		}
 
 		if(itr!=itr_end)
@@ -727,15 +726,13 @@ QString PgSqlType::operator ~ ()
 {
 	if(type_idx >= PseudoEnd + 1)
 		return (user_types[type_idx - (PseudoEnd + 1)].name);
-	else
-	{
-		QString name = type_names[type_idx];
 
-		if(with_timezone && (name=="time" || name=="timestamp"))
-			 name+=" with time zone";
+	QString name = type_names[type_idx];
 
-		return name;
-	}
+	if(with_timezone && (name=="time" || name=="timestamp"))
+		 name+=" with time zone";
+
+	return name;
 }
 
 bool PgSqlType::isArrayType()
@@ -1080,18 +1077,18 @@ PgSqlType PgSqlType::getAliasType()
 	if(!isUserType())
 	{
 		if(type_names[this->type_idx]=="serial")
-			return (PgSqlType("integer"));
+			return { "integer" };
 
 		if(type_names[this->type_idx]=="smallserial")
-			return (PgSqlType("smallint"));
+			return { "smallint" };
 
 		if(type_names[this->type_idx]=="bigserial")
-			return (PgSqlType("bigint"));
+			return { "bigint" };
 
-		return (PgSqlType(type_names[this->type_idx]));
+		return { type_names[this->type_idx] };
 	}
-	else
-		return *this;
+
+	return *this;
 }
 
 void PgSqlType::setDimension(unsigned dim)
@@ -1101,7 +1098,7 @@ void PgSqlType::setDimension(unsigned dim)
 		int idx=getUserTypeIndex(~(*this), nullptr) - (PseudoEnd + 1);
 		if(static_cast<unsigned>(idx) < user_types.size() &&
 				user_types[idx].type_conf==UserTypeConfig::SequenceType)
-			throw Exception(ErrorCode::AsgInvalidSequenceTypeArray,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgInvalidSequenceTypeArray,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	dimension=dim;
@@ -1119,13 +1116,13 @@ void PgSqlType::setPrecision(int prec)
 		//Raises an error if the user tries to specify a precision > length
 		if(((type_names[type_idx]=="numeric" ||
 			 type_names[type_idx]=="decimal") && prec > static_cast<int>(length)))
-			throw Exception(ErrorCode::AsgInvalidPrecision,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgInvalidPrecision,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		//Raises an error if the precision is greater thant 6
 		if(((type_names[type_idx]=="time" ||
 					type_names[type_idx]=="timestamp" ||
 					type_names[type_idx]=="interval") && prec > 6))
-			throw Exception(ErrorCode::AsgInvalidPrecisionTimestamp,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgInvalidPrecisionTimestamp,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		this->precision=prec;
 	}

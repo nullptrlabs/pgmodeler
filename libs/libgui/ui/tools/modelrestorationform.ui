@@ -3,7 +3,7 @@
  <class>ModelRestorationForm</class>
  <widget class="QDialog" name="ModelRestorationForm">
   <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
+   <enum>Qt::WindowModality::ApplicationModal</enum>
   </property>
   <property name="geometry">
    <rect>
@@ -35,7 +35,7 @@
    <string>Model restoration</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../res/resources.qrc">
+   <iconset resource="../../../../priv-plugins/res/logoicons.qrc">
     <normaloff>:/icons/icons/pgmodeler_logo.png</normaloff>:/icons/icons/pgmodeler_logo.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
@@ -99,7 +99,7 @@
      </property>
      <property name="maximumSize">
       <size>
-       <width>169</width>
+       <width>180</width>
        <height>35</height>
       </size>
      </property>
@@ -126,10 +126,10 @@
       </sizepolicy>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
       <property name="leftMargin">
@@ -162,10 +162,10 @@
          </size>
         </property>
         <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+         <enum>QFrame::Shape::StyledPanel</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+         <enum>QFrame::Shadow::Raised</enum>
         </property>
         <layout class="QGridLayout" name="gridLayout">
          <property name="leftMargin">
@@ -201,7 +201,7 @@
             <string/>
            </property>
            <property name="textFormat">
-            <enum>Qt::AutoText</enum>
+            <enum>Qt::TextFormat::AutoText</enum>
            </property>
            <property name="pixmap">
             <pixmap resource="../../res/resources.qrc">:/icons/icons/alert.png</pixmap>
@@ -270,16 +270,16 @@
       <item row="1" column="0">
        <widget class="QTableWidget" name="tmp_files_tbw">
         <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
+         <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
         </property>
         <property name="alternatingRowColors">
          <bool>true</bool>
         </property>
         <property name="selectionMode">
-         <enum>QAbstractItemView::MultiSelection</enum>
+         <enum>QAbstractItemView::SelectionMode::MultiSelection</enum>
         </property>
         <property name="selectionBehavior">
-         <enum>QAbstractItemView::SelectRows</enum>
+         <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
         </property>
         <property name="iconSize">
          <size>
@@ -380,7 +380,7 @@
    <item row="1" column="1" colspan="3">
     <spacer name="spacer">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -400,7 +400,7 @@
  </tabstops>
  <resources>
   <include location="../../res/resources.qrc"/>
-  <include location="../../res/resources.qrc"/>
+  <include location="../../../../priv-plugins/res/logoicons.qrc"/>
  </resources>
  <connections/>
 </ui>

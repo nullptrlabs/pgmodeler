@@ -23,11 +23,6 @@ PgModelerCliPlugin::PgModelerCliPlugin()
 	cli_app = nullptr;
 }
 
-PgModelerCliPlugin::~PgModelerCliPlugin()
-{
-
-}
-
 bool PgModelerCliPlugin::isOpModeOption(const QString &opt)
 {
 	return getOpModeOptions().contains(opt);

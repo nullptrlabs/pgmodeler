@@ -81,7 +81,7 @@ void XmlParser::loadXMLFile(const QString &filename)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__,__FILE__,__LINE__, &e, filename);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC,PGM_FILE,PGM_LINE, &e, filename);
 	}
 }
 
@@ -92,7 +92,7 @@ void XmlParser::loadXMLBuffer(const QString &xml_buf)
 		int pos1=-1, pos2=-1, tam=0;
 
 		if(xml_buf.isEmpty())
-			throw Exception(ErrorCode::AsgEmptyXMLBuffer,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgEmptyXMLBuffer,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		pos1=xml_buf.indexOf(QLatin1String("<?xml"));
 		pos2=xml_buf.indexOf(QLatin1String("?>"));
@@ -112,7 +112,7 @@ void XmlParser::loadXMLBuffer(const QString &xml_buf)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -121,27 +121,25 @@ void XmlParser::setDTDFile(const QString &dtd_file, const QString &dtd_name)
 	QString fmt_dtd_file;
 
 	if(dtd_file.isEmpty())
-		throw Exception(ErrorCode::AsgEmptyDTDFile,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgEmptyDTDFile,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(dtd_name.isEmpty())
-		throw Exception(ErrorCode::AsgEmptyDTDName,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgEmptyDTDName,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 #ifndef Q_OS_WIN
-	fmt_dtd_file="file://";
+	fmt_dtd_file = "file://";
 #else
-	fmt_dtd_file="file:///";
+	fmt_dtd_file = "file:///";
 #endif
 
 	//Formats the dtd file path to URL style (converting to percentage format the non reserved chars)
-	fmt_dtd_file=QUrl::toPercentEncoding(QFileInfo(dtd_file).absoluteFilePath(), "/:");
-	dtd_decl="<!DOCTYPE " + dtd_name +
-			" SYSTEM " + "\"" + fmt_dtd_file + "\">\n";
+	fmt_dtd_file += QUrl::toPercentEncoding(QFileInfo(dtd_file).absoluteFilePath(), "/:");
+	dtd_decl = "<!DOCTYPE " + dtd_name + " SYSTEM " + "\"" + fmt_dtd_file + "\">\n";
 }
 
 void XmlParser::readBuffer()
 {
 	QByteArray buffer;
-	QString msg, file;
 	int parser_opt;
 
 	if(!xml_buffer.isEmpty())
@@ -173,19 +171,28 @@ void XmlParser::readBuffer()
 		//If some error is set
 		if(xml_error)
 		{
+			QString msg, file, extra_info {
+								QString(QT_TR_NOOP("XML file: %1")).arg(xml_doc_filename) + "\n" +
+								QString(QT_TR_NOOP("DTD decl: %1")).arg(dtd_decl) };
+
 			//Formats the error
-			msg=xml_error->message;
-			file=xml_error->file;
-			if(!file.isEmpty()) file=QString("(%1)").arg(file);
+			msg = xml_error->message;
+			file = xml_error->file;
+
+			if(!file.isEmpty())
+				file = QString("(%1)").arg(file);
+
 			msg.replace("\n"," ");
 
 			//Restarts the parser
-			if(xml_doc) restartParser();
+			if(xml_doc)
+				restartParser();
 
 			//Raise an exception with the error massege from the parser xml
 			throw Exception(Exception::getErrorMessage(ErrorCode::LibXMLError)
 							.arg(xml_error->line).arg(xml_error->int2).arg(msg).arg(file),
-							ErrorCode::LibXMLError,__PRETTY_FUNCTION__,__FILE__,__LINE__,nullptr, xml_doc_filename);
+							ErrorCode::LibXMLError, PGM_FUNC, PGM_FILE, PGM_LINE, nullptr,
+							extra_info);
 		}
 
 		//Gets the referênce to the root element on the document
@@ -196,7 +203,7 @@ void XmlParser::readBuffer()
 void XmlParser::savePosition()
 {
 	if(!root_elem)
-		throw Exception(ErrorCode::OprNotAllocatedElementTree,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedElementTree,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	elems_stack.push(curr_elem);
 }
@@ -204,7 +211,7 @@ void XmlParser::savePosition()
 void XmlParser::restorePosition()
 {
 	if(!root_elem)
-		throw Exception(ErrorCode::OprNotAllocatedElementTree,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedElementTree,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(elems_stack.empty())
 		curr_elem=root_elem;
@@ -218,20 +225,21 @@ void XmlParser::restorePosition()
 void XmlParser::restorePosition(const xmlNode *elem)
 {
 	if(!elem)
-		throw Exception(ErrorCode::OprNotAllocatedElement,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else if(elem->doc!=xml_doc)
-		throw Exception(ErrorCode::OprInexistentElement,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedElement, PGM_FUNC, PGM_FILE, PGM_LINE);
+
+	if(elem->doc != xml_doc)
+		throw Exception(ErrorCode::OprInexistentElement, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	restartNavigation();
-	curr_elem=const_cast<xmlNode *>(elem);
+	curr_elem = const_cast<xmlNode *>(elem);
 }
 
 void XmlParser::restartNavigation()
 {
 	if(!root_elem)
-		throw Exception(ErrorCode::OprNotAllocatedElementTree,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedElementTree, PGM_FUNC, PGM_FILE, PGM_LINE);
 
-	curr_elem=root_elem;
+	curr_elem = root_elem;
 
 	while(!elems_stack.empty())
 		elems_stack.pop();
@@ -247,12 +255,13 @@ void XmlParser::restartParser()
 		xmlFreeDoc(xml_doc);
 		xml_doc=nullptr;
 	}
-	dtd_decl=xml_buffer=xml_decl="";
+
+	dtd_decl = xml_buffer = xml_decl= "";
+	xml_doc_filename = "";
 
 	while(!elems_stack.empty())
 		elems_stack.pop();
 
-	xml_doc_filename="";
 	xmlResetLastError();
 }
 
@@ -262,7 +271,7 @@ bool XmlParser::accessElement(ElementType elem_type)
 	xmlNode *elems[4];
 
 	if(!root_elem)
-		throw Exception(ErrorCode::OprNotAllocatedElementTree,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedElementTree,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	elems[RootElement]=curr_elem->parent;
 	elems[ChildElement]=curr_elem->children;
@@ -302,38 +311,44 @@ bool XmlParser::accessElement(ElementType elem_type)
 bool XmlParser::hasElement(ElementType elem_type, xmlElementType xml_node_type)
 {
 	if(!root_elem)
-		throw Exception(ErrorCode::OprNotAllocatedElementTree,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedElementTree, PGM_FUNC, PGM_FILE, PGM_LINE);
 
-	if(elem_type==RootElement)
+	if(elem_type == RootElement)
 	{
 		/* Returns the verification if the current element has a parent.
 		 The element must be different from the root, because the root element
 		 is not connected to a parent */
-		return (curr_elem!=root_elem && curr_elem->parent!=nullptr &&
-						(xml_node_type==0 || (xml_node_type!=0 && curr_elem->parent->type==xml_node_type)));
+		return (curr_elem != root_elem && curr_elem->parent != nullptr &&
+						(xml_node_type == 0 ||
+						 (xml_node_type != 0 && curr_elem->parent->type == xml_node_type)));
 	}
-	else if(elem_type==ChildElement)
+
+	if(elem_type == ChildElement)
 	{
 		//Returns the verification if the current element has children
-		return (curr_elem->children!=nullptr &&
-						(xml_node_type==0 || (xml_node_type!=0 && curr_elem->children->type==xml_node_type)));
+		return (curr_elem->children != nullptr &&
+						(xml_node_type == 0 ||
+						 (xml_node_type != 0 && curr_elem->children->type == xml_node_type)));
 	}
-	else if(elem_type==NextElement)
+
+	if(elem_type == NextElement)
 	{
-		return (curr_elem->next!=nullptr &&
-						(xml_node_type==0 || (xml_node_type!=0 && curr_elem->next->type==xml_node_type)));
+		return (curr_elem->next != nullptr &&
+						(xml_node_type==0 ||
+						 (xml_node_type != 0 && curr_elem->next->type == xml_node_type)));
 	}
-	else
-		/* The second comparison in the expression is made for the root element
-		 * because libxml2 places the previous element as the root itself */
-		return (curr_elem->prev!=nullptr && curr_elem->prev!=root_elem &&
-						(xml_node_type==0 || (xml_node_type!=0 && curr_elem->prev->type==xml_node_type)));
+
+	/* The second comparison in the expression is made for the root element
+	 * because libxml2 places the previous element as the root itself */
+	return (curr_elem->prev != nullptr && curr_elem->prev != root_elem &&
+					(xml_node_type == 0 ||
+					 (xml_node_type != 0 && curr_elem->prev->type == xml_node_type)));
 }
 
 bool XmlParser::hasAttributes()
 {
 	if(!root_elem)
-		throw Exception(ErrorCode::OprNotAllocatedElementTree,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedElementTree,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return (curr_elem->properties != nullptr);
 }
@@ -341,29 +356,29 @@ bool XmlParser::hasAttributes()
 QString XmlParser::getElementContent()
 {
 	if(!root_elem)
-		throw Exception(ErrorCode::OprNotAllocatedElementTree,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedElementTree, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	/* If the current element has  <![CDATA[]]> node returns the content of the CDATA instead
 	of return the content of the element itself */
 	if(curr_elem->next && curr_elem->next->type == XML_CDATA_SECTION_NODE)
-		return QString(reinterpret_cast<char *>(curr_elem->next->content));
-	else
-		//Return the content of the element when is not a CDATA node
-		return QString(reinterpret_cast<char *>(curr_elem->content));
+		return { reinterpret_cast<char *>(curr_elem->next->content) };
+
+	//Return the content of the element when is not a CDATA node
+	return { reinterpret_cast<char *>(curr_elem->content) };
 }
 
 QString XmlParser::getElementName()
 {
 	if(!root_elem)
-		throw Exception(ErrorCode::OprNotAllocatedElementTree,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedElementTree, PGM_FUNC, PGM_FILE, PGM_LINE);
 
-	return QString(reinterpret_cast<const char *>(curr_elem->name));
+	return { reinterpret_cast<const char *>(curr_elem->name) };
 }
 
 xmlElementType XmlParser::getElementType()
 {
 	if(!root_elem)
-		throw Exception(ErrorCode::OprNotAllocatedElementTree,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedElementTree, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	return curr_elem->type;
 }
@@ -379,7 +394,7 @@ void XmlParser::getElementAttributes(attribs_map &attributes)
 	QString attrib, value;
 
 	if(!root_elem)
-		throw Exception(ErrorCode::OprNotAllocatedElementTree,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedElementTree,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Always clears the passed attributes maps
 	attributes.clear();
@@ -417,8 +432,8 @@ int XmlParser::getCurrentBufferLine()
 {
 	if(curr_elem)
 		return curr_line;
-	else
-		return 0;
+
+	return 0;
 }
 
 int XmlParser::getBufferLineCount()
@@ -440,6 +455,6 @@ int XmlParser::getBufferLineCount()
 
 		return xml_doc->last->last->line;
 	}
-	else
-		return 0;
+
+	return 0;
 }

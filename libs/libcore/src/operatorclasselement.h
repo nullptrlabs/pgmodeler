@@ -67,8 +67,7 @@ class __libcore OperatorClassElement {
 
 	public:
 		OperatorClassElement();
-
-		virtual ~OperatorClassElement(){}
+		~OperatorClassElement() = default;
 
 		//! \brief Defines the element as a function clause
 		void setFunction(Function *func, unsigned stg_number);

@@ -31,11 +31,11 @@ void OperatorClassElement::setFunction(Function *func, unsigned stg_number)
 {
 	//Raises an exception case the function is not allocated
 	if(!func)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Raises an error case the stratagy number is zero (invalid)
-	else if(stg_number==0)
-		throw Exception(ErrorCode::AsgInvalidSupportStrategyNumber,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+	if(stg_number == 0)
+		throw Exception(ErrorCode::AsgInvalidSupportStrategyNumber,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Clear the attributes not related to the FUNCTION element type
 	this->_operator=nullptr;
@@ -51,11 +51,11 @@ void OperatorClassElement::setOperator(Operator *oper, unsigned stg_number)
 {
 	//Raises an error in case the operator is not allocated
 	if(!oper)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Raises an error case the stratagy number is zero (invalid)
-	else if(stg_number==0)
-		throw Exception(ErrorCode::AsgInvalidSupportStrategyNumber,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+	if(stg_number==0)
+		throw Exception(ErrorCode::AsgInvalidSupportStrategyNumber,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Clear the attributes not related to the OPERATOR element type
 	this->function=nullptr;
@@ -71,7 +71,7 @@ void OperatorClassElement::setOperatorFamily(OperatorFamily *op_family)
 	if(this->element_type==OperatorElem)
 	{
 		if(op_family && op_family->getIndexingType()!=IndexingType::Btree)
-			throw Exception(ErrorCode::AsgInvalidOpFamilyOpClassElem,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgInvalidOpFamilyOpClassElem,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		this->op_family=op_family;
 	}

@@ -40,14 +40,30 @@
 #include "widgets/updatenotifierwidget.h"
 #include "widgets/modelnavigationwidget.h"
 #include "widgets/welcomewidget.h"
-#include "settings/configurationform.h"
 #include "widgets/donatewidget.h"
 #include "widgets/sceneinfowidget.h"
 #include "widgets/layersconfigwidget.h"
 #include "widgets/changelogwidget.h"
+#include "settings/configurationwidget.h"
+#include "tools/databaseimportwidget.h"
+#include "tools/modelexportwidget.h"
+#include "tools/difftoolwidget.h"
+#include "tools/fixtoolswidget.h"
 
 class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 	Q_OBJECT
+
+	public:
+		enum MWViewsId {
+			WelcomeView,
+			DesignView,
+			ManageView,
+			ImportView,
+			ExportView,
+			DiffView,
+			FixView,
+			ConfigureView,
+		};
 
 	private:
 		static int ToolsActionsCount;
@@ -64,6 +80,9 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 			PendingExportOp,
 			PendingDiffOp
 		};
+
+		//! \brief Store the actions related to views in the main window (Manage, Design, Welcome, etc)
+		static QList<QAction *> view_actions;
 
 		PendingOpId pending_op;
 
@@ -98,6 +117,21 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		//! \brief SQL tool widget widget
 		SQLToolWidget *sql_tool_wgt;
 
+		//! \brief pgModeler configuration widget
+		ConfigurationWidget *configuration_wgt;
+
+		//! \brief Reverse engineering widget
+		DatabaseImportWidget *db_import_wgt;
+
+		//! \brief Model export widget
+		ModelExportWidget *model_export_wgt;
+
+		//! \brief Diff tool widget
+		DiffToolWidget *diff_tool_wgt;
+
+		//! \brief Fix tools widget
+		FixToolsWidget *fix_tools_wgt;
+
 		//! \brief Operation list dock widget
 		OperationListWidget *oper_list_wgt;
 
@@ -112,9 +146,6 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		//! \brief Update notifier popup widget
 		UpdateNotifierWidget *update_notifier_wgt;
-
-		//! \brief Configuration form
-		ConfigurationForm *configuration_form;
 
 		//! \brief Stores the currently focused model
 		ModelWidget *current_model;
@@ -147,8 +178,6 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		more_actions_menu,
 
-		fix_menu,
-
 		plugins_config_menu,
 
 		expand_canvas_menu;
@@ -171,7 +200,7 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		//! \brief Set the postion of a floating widget based upon an action at a tool bar
 		void setFloatingWidgetPos(QWidget *widget, QAction *act, QToolBar *toolbar, bool map_to_window);
 
-		void setBottomFloatingWidgetPos(QWidget *widget, QToolButton *btn);
+		void setBottomFloatingWidgetPos(QWidget *widget, QAbstractButton *btn);
 
 		void configureSamplesMenu();
 
@@ -209,16 +238,14 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		 *  in case of any configuration file is broken or missing */
 		void handleInitializationFailure(Exception &e);
 
-public:
-		enum MWViewsId {
-			WelcomeView,
-			DesignView,
-			ManageView
-		};
+		//! \brief Creates a view widget in insert its in the stacked widget at view_id index
+		template <class WgtClass>
+		WgtClass *createViewWidget(MWViewsId view_id, const QString &view_name);
 
+	public:
 		MainWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::Widget);
 
-		virtual ~MainWindow();
+		~MainWindow() override;
 
 		//! \brief Loads a set of models from string list
 		void loadModels(const QStringList &files);
@@ -249,9 +276,6 @@ public:
 
 		//! \brief Returns the model at given index
 		ModelWidget *getModel(int idx);
-
-		//! \brief Switches the currently opened view (Design, Manage, Welcome)
-		void switchView(MWViewsId view);
 
 		/*! \brief This is a convenience method to make able the addition of execution tabs in SQL tool without
 		 *  expose the SQL Tool widget itself (useful for plugin developers) */
@@ -311,14 +335,11 @@ public:
 		//! \brief Prints the currently focused model
 		void printModel();
 
-		//! \brief Executes the export of the currently focused model
-		void exportModel();
-
-		//! \brief Executes the reverse engineering
-		void importDatabase();
+		//! \brief Executes the validation before the export process
+		void validateBeforeOperation();
 
 		//! \brief Executes the model <> database comparison
-		void diffModelDatabase();
+		//void diffModelDatabase();
 
 		//! \brief Updates the opened models with new configurations
 		void applyConfigurations();
@@ -359,7 +380,6 @@ public:
 		//! \brief Configures the "More" actions in the general toolbar by usinge the current_model's popup menu
 		void configureMoreActionsMenu();
 
-		void fixModel(const QString &filename = "");
 		void showRightWidgetsBar();
 		void showBottomWidgetsBar();
 		void restoreLastSession();
@@ -370,13 +390,11 @@ public:
 		void changeCurrentView(bool checked);
 		void reportBug();
 		void removeOperations();
-		void handleObjectsMetadata();
 		void restoreTemporaryModels();
 		void arrangeObjects();
 		void toggleCompactView();
 		void toggleLayersWidget(bool show);
 		void toggleChangelogWidget(bool show);
-
 		void expandSceneRect();
 
 		#ifdef	DEMO_VERSION
@@ -386,6 +404,8 @@ public:
 		bool mimeDataHasModelFiles(const QMimeData *mime_data);
 		void loadModelsFromMimeData(const QMimeData *mime_data);
 		void addNewLayer(const QString &layer_name);
+		void handleImportFinished(bool aborted_by_error);
+		void loadDiffInSQLTool(const QString &conn_id, const QString &database, const QString &filename);
 
 	signals:
 		void s_currentModelChanged(ModelWidget *model_wgt);

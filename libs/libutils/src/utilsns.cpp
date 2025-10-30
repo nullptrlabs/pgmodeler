@@ -33,7 +33,7 @@ namespace UtilsNs {
 		if(!output.isOpen())
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotWritten).arg(output.fileName()),
-											ErrorCode::FileDirectoryNotWritten,__PRETTY_FUNCTION__,__FILE__,__LINE__,
+											ErrorCode::FileDirectoryNotWritten,PGM_FUNC,PGM_FILE,PGM_LINE,
 											nullptr, output.errorString());
 		}
 
@@ -51,7 +51,7 @@ namespace UtilsNs {
 		if(!input.isOpen())
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotAccessed).arg(input.fileName()),
-											ErrorCode::FileDirectoryNotAccessed,__PRETTY_FUNCTION__,__FILE__,__LINE__,
+											ErrorCode::FileDirectoryNotAccessed,PGM_FUNC,PGM_FILE,PGM_LINE,
 											nullptr, input.errorString());
 		}
 

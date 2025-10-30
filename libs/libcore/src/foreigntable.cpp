@@ -18,7 +18,7 @@
 
 #include "foreigntable.h"
 
-ForeignTable::ForeignTable() : PhysicalTable()
+ForeignTable::ForeignTable()
 {
 	obj_type = ObjectType::ForeignTable;
 	attributes[Attributes::Server] = "";
@@ -59,7 +59,7 @@ void ForeignTable::addObject(BaseObject *object, int obj_idx)
 											.arg(object->getName(true))
 											.arg(object->getTypeName())
 											.arg(this->getName(true)),
-											ErrorCode::AsgInvalidObjectForeignTable,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											ErrorCode::AsgInvalidObjectForeignTable,PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
 	}
 
@@ -111,7 +111,7 @@ QString ForeignTable::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 

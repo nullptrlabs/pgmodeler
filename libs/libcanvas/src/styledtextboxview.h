@@ -42,12 +42,12 @@ class __libcanvas StyledTextboxView: public TextboxView {
 
 		StyledTextboxView(Textbox *txtbox, bool override_style=false);
 
-		virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+		void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
 
-		virtual ~StyledTextboxView();
+		~StyledTextboxView() override;
 
-	 protected slots:
-		virtual void configureObject() override;
+	protected slots:
+		void configureObject() override;
 };
 
 #endif

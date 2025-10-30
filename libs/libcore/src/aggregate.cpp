@@ -36,14 +36,14 @@ void Aggregate::setFunction(FunctionId func_id, Function *func)
 {
 	//Case the function index is invalid raises an error
 	if(func_id > TransitionFunc)
-		throw Exception(ErrorCode::RefFunctionInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefFunctionInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Checks if the function is valid, if not the case raises an error
 	if(!isValidFunction(func_id, func))
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidConfiguration)
 						.arg(this->getName())
 						.arg(BaseObject::getTypeName(ObjectType::Aggregate)),
-						ErrorCode::AsgFunctionInvalidConfiguration,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgFunctionInvalidConfiguration,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(functions[func_id]!=func);
 	functions[func_id]=func;
@@ -63,35 +63,34 @@ bool Aggregate::isValidFunction(unsigned func_idx, Function *func)
 			return (func->getParameterCount() > 0 &&
 							func->getParameter(0).getType().canCastTo(state_type));
 		}
-		else
-		{
-			unsigned qtd, i;
-			bool cond1,cond2=true;
 
-			/* The transition function must have n+1 parameters, where n is the accepted data types list size.
-			Also, the first parameter of the function and the return type must be the same as the 'state_type'
-			attribute. Lastly, the other parameters must be the same as the accepted data types (the appearece order
-			is important here).
+		unsigned qtd, i;
+		bool cond1,cond2=true;
 
-			IMPORTANT: this is not documented by aggregate docs but when trying to import some catalog aggregates the
-			majority of the functions used by them has polymorphic parameters so in order to accept that situation
-			and recreate aggregates in the model we enable the usage of polymorphic functions here */
+		/* The transition function must have n+1 parameters, where n is the accepted data types list size.
+		Also, the first parameter of the function and the return type must be the same as the 'state_type'
+		attribute. Lastly, the other parameters must be the same as the accepted data types (the appearece order
+		is important here).
 
-			cond1=(func->getReturnType().canCastTo(state_type)) &&
-					((func->getParameterCount()==data_types.size() + 1) ||
-						(func->getParameterCount() > 0 &&
-							func->getParameter(func->getParameterCount()-1).getType().isPolymorphicType())) &&
-					(func->getParameter(0).getType().canCastTo(state_type));
+		IMPORTANT: this is not documented by aggregate docs but when trying to import some catalog aggregates the
+		majority of the functions used by them has polymorphic parameters so in order to accept that situation
+		and recreate aggregates in the model we enable the usage of polymorphic functions here */
 
-			qtd=func->getParameterCount();
-			for(i=1 ; i < qtd && cond2; i++)
-				cond2=(func->getParameter(i).getType().isPolymorphicType() ||
-							 ((i-1) < data_types.size() && func->getParameter(i).getType().canCastTo(data_types[i-1])));
+		cond1=(func->getReturnType().canCastTo(state_type)) &&
+				((func->getParameterCount()==data_types.size() + 1) ||
+					(func->getParameterCount() > 0 &&
+						func->getParameter(func->getParameterCount()-1).getType().isPolymorphicType())) &&
+				(func->getParameter(0).getType().canCastTo(state_type));
 
-			return (cond1 && cond2);
-		}
+		qtd=func->getParameterCount();
+		for(i=1 ; i < qtd && cond2; i++)
+			cond2=(func->getParameter(i).getType().isPolymorphicType() ||
+							((i-1) < data_types.size() && func->getParameter(i).getType().canCastTo(data_types[i-1])));
+
+		return (cond1 && cond2);
 	}
-	else return true;
+
+	return true;
 }
 
 void Aggregate::setStateType(PgSqlType st_type)
@@ -119,14 +118,16 @@ void Aggregate::setSortOperator(Operator *sort_op)
 		 1) The aggregate accepts only one data type
 		 2) The function that defines the operator has the parameter types identical
 				as the input data type of the aggregate  */
-		func=sort_op->getFunction(Operator::FuncOperator);
+		func = sort_op->getFunction(Operator::FuncOperator);
+		
 		//Validating the condition 1
 		if(data_types.size()!=1)
-			throw Exception(ErrorCode::AsgInvalidOperatorArguments,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgInvalidOperatorArguments,PGM_FUNC,PGM_FILE,PGM_LINE);
+
 		//Validating the condition 2
-		else if(func->getParameter(0).getType()!=data_types[0] ||
-				(func->getParameterCount()==2 && func->getParameter(1).getType()!=data_types[0]))
-			throw Exception(ErrorCode::AsgInvalidOperatorTypes,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		if(func->getParameter(0).getType() != data_types[0] ||
+			(func->getParameterCount()==2 && func->getParameter(1).getType()!=data_types[0]))
+			throw Exception(ErrorCode::AsgInvalidOperatorTypes,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	setCodeInvalidated(sort_operator != sort_op);
@@ -167,7 +168,7 @@ void Aggregate::removeDataType(unsigned type_idx)
 {
 	//Raises an exception if the type index is out of bound
 	if(type_idx >= data_types.size())
-		throw Exception(ErrorCode::RefTypeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefTypeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Removes the type at the specified position
 	auto type_itr = data_types.begin() + type_idx;
@@ -190,7 +191,7 @@ Function *Aggregate::getFunction(FunctionId func_id)
 {
 	//Raises an exception if the function index is invalid
 	if(func_id > TransitionFunc)
-		throw Exception(ErrorCode::RefFunctionInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefFunctionInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return functions[func_id];
 }
@@ -214,7 +215,7 @@ PgSqlType Aggregate::getDataType(unsigned type_idx)
 {
 	//Raises an exception if the type index is out of bound
 	if(type_idx >= data_types.size())
-		throw Exception(ErrorCode::RefTypeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefTypeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return data_types[type_idx];
 }
@@ -283,7 +284,7 @@ QString Aggregate::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 

@@ -43,7 +43,7 @@ class __libgui ForeignDataWrapperWidget: public BaseObjectWidget, public Ui::For
 		void setAttributes(DatabaseModel *model, OperationList *op_list, ForeignDataWrapper *fdw);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

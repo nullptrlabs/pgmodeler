@@ -49,7 +49,7 @@ class __libgui SwapObjectsIdsWidget: public QWidget, public Ui::SwapObjectsIdsWi
 		ObjectSelectorWidget *src_object_sel, *dst_object_sel;
 
 		void fillCreationOrderGrid();
-		bool eventFilter(QObject *object, QEvent *event);
+		bool eventFilter(QObject *object, QEvent *event) override;
 
 	public:
 		SwapObjectsIdsWidget(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::Widget);

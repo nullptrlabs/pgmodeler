@@ -41,7 +41,7 @@ class __libgui PgSQLTypeWidget: public QWidget, public Ui::PgSQLTypeWidget {
 
 		bool allow_qualifiers;
 
-		bool eventFilter(QObject *watched, QEvent *event);
+		bool eventFilter(QObject *object, QEvent *event) override;
 
 		static const QString InvalidType;
 

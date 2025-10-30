@@ -71,7 +71,7 @@ namespace CoreUtilsNs {
 
 		//Raises an error if the copy object is not allocated
 		if(!copy_obj)
-			throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		//Allocates the source object if its not allocated
 		if(!orig_obj)
@@ -207,13 +207,13 @@ namespace CoreUtilsNs {
 				copyObject(psrc_obj, dynamic_cast<Procedure *>(copy_obj));
 			break;
 			default:
-				throw Exception(ErrorCode::OprObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+				throw Exception(ErrorCode::OprObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
 	}
 
 	bool isReservedKeyword(const QString &word)
 	{
-		static QHash<QChar, QStringList> keywords={
+		static const QHash<QChar, QStringList> keywords {
 			{QChar('A'), {"ALL", "ANALYSE", "ANALYZE", "AND",
 										"ANY", "AS",      "ASC",     "AUTHORIZATION"}},
 
@@ -276,14 +276,12 @@ namespace CoreUtilsNs {
 
 		if(word.isEmpty())
 			return false;
-		else
-		{
-			QChar chr=word.at(0).toUpper();
+		
+		QChar chr = word.at(0).toUpper();
 
-			if(!keywords.contains(chr))
-				return false;
-			else
-				return keywords[chr].contains(word.toUpper());
-		}
+		if(!keywords.contains(chr))
+			return false;
+		
+		return keywords[chr].contains(word.toUpper());
 	}
 }

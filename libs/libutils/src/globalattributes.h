@@ -204,6 +204,7 @@ class __libutils GlobalAttributes {
 		RelationshipsConf,		 //! \brief Default name for the relationships configuration file
 		SnippetsConf,					 //! \brief Default name for the code snippets configuration file
 		DiffPresetsConf,			 //! \brief Default name for the diff presets configuration file
+		ThemeConf,					   //! \brief Default name for the UI theme color palette configuration file
 
 		SQLHighlightConf,			 //! \brief Configuration file for SQL language highlight
 		XMLHighlightConf,			 //! \brief Configuration file for XML language highlight

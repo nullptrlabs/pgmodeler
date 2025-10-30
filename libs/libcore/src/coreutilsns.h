@@ -75,8 +75,9 @@ namespace CoreUtilsNs {
 
 		if(!obj)
 			return("");
+		
 		//Cast objects will not have the name changed since their name are automatically generated
-		else if(obj->getObjectType()==ObjectType::Cast || obj->getObjectType()==ObjectType::Database)
+		if(obj->getObjectType()==ObjectType::Cast || obj->getObjectType()==ObjectType::Database)
 			return(obj->getName());
 
 		obj_name = obj->getName(false);

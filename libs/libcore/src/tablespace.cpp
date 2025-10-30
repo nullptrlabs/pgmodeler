@@ -35,7 +35,7 @@ void Tablespace::setName(const QString &name)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgReservedName)
 						.arg(this->getName())
 						.arg(BaseObject::getTypeName(ObjectType::Tablespace)),
-						ErrorCode::AsgReservedName,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgReservedName,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	BaseObject::setName(name);
 }
@@ -50,7 +50,7 @@ void Tablespace::setDirectory(const QString &dir)
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgEmptyDirectoryName).arg(obj_name),
 										ErrorCode::AsgEmptyDirectoryName,
-										__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	setCodeInvalidated(this->directory != dir_aux);

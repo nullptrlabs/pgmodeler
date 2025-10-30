@@ -36,7 +36,7 @@ class __libgui OperatorFamilyWidget: public BaseObjectWidget, public Ui::Operato
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, OperatorFamily *op_family);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

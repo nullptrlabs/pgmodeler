@@ -68,12 +68,11 @@ class __libcore Function: public BaseFunction {
 		void setTableReturnTypeAttribute(SchemaParser::CodeType def_type);
 
 	protected:
-		virtual void configureSearchAttributes() override;
+		void configureSearchAttributes() override;
 
 	public:
 		Function();
-
-		virtual ~Function(){}
+		~Function() override = default;
 
 		//! \brief Adds a column to the function returned table
 		void addReturnedTableColumn(const QString &name, PgSqlType type);
@@ -148,13 +147,13 @@ class __libcore Function: public BaseFunction {
 		void removeReturnedTableColumns();
 
 		//! \brief Returns the SQL / XML code definition for the function
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
+		QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
 
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
-		virtual QString getAlterCode(BaseObject *object) final;
+		QString getAlterCode(BaseObject *object) final;
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 };
 
 #endif

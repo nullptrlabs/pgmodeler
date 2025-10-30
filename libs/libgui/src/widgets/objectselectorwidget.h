@@ -48,14 +48,14 @@ class __libgui ObjectSelectorWidget: public QWidget, public Ui::ObjectSelectorWi
 		//! \brief Configures the selectors attributes at construction time
 		void configureSelector();
 
-		bool eventFilter(QObject *obj, QEvent *evnt);
+		bool eventFilter(QObject *obj, QEvent *evnt) override;
 
 	public:
 		ObjectSelectorWidget(ObjectType sel_obj_type, QWidget * parent = nullptr);
 
 		ObjectSelectorWidget(std::vector<ObjectType> sel_obj_types, QWidget * parent = nullptr);
 
-		virtual ~ObjectSelectorWidget();
+		~ObjectSelectorWidget() override;
 
 		//! \brief Enables the creation of new objects from withing the object selector dialog
 		void enableObjectCreation(bool value);

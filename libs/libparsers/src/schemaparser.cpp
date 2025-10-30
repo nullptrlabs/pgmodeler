@@ -98,7 +98,7 @@ void SchemaParser::setPgSQLVersion(const QString &pgsql_ver, bool ignore_db_vers
 	catch(Exception &e)
 	{
 		throw Exception(e.getErrorMessage(), e.getErrorCode(),
-										__PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+										PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -132,7 +132,7 @@ QStringList SchemaParser::extractAttributes()
 				break;
 		}
 
-		start = end = 0;
+		start = /* end = */ 0;
 	}
 
 	attribs.removeDuplicates();
@@ -227,7 +227,7 @@ void SchemaParser::loadBuffer(const QString &buf)
 		catch(Exception &e)
 		{
 			QDir::setCurrent(orig_cwd);
-			throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+			throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 		}
 
 		// Add the treated line in the buffer
@@ -257,72 +257,70 @@ bool SchemaParser::parseInclude(const QString &include_ln, QString &src_buf, qin
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvalidSyntax)
 										.arg(filename).arg(getCurrentLine()).arg(getCurrentColumn()) + " " +
 										QString(QT_TR_NOOP("Expected a valid include statement in the form `%1 \"file.sch\"'.")).arg(TokenInclude),
-										ErrorCode::InvalidSyntax, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
-	else
+
+	QDir dir;
+	QStringList texts = match.capturedTexts();
+	QString incl_file = dir.absoluteFilePath(texts.last());
+	QFileInfo fi(incl_file);
+
+	/* If the user specificed the include file without the extension
+	 * we set the default extension .sch in order to locate the file */
+	if(fi.suffix().isEmpty())
+		fi.setFile(incl_file + GlobalAttributes::SchemaExt);
+
+	// Check if the included file exists, if not, abort the parsing
+	if(!fi.isFile() || !fi.isReadable())
 	{
-		QDir dir;
-		QStringList texts = match.capturedTexts();
-		QString incl_file = dir.absoluteFilePath(texts.last());
-		QFileInfo fi(incl_file);
+		throw Exception(Exception::getErrorMessage(ErrorCode::InvalidInclude)
+										.arg(filename).arg(getCurrentLine()).arg(getCurrentColumn()) + " " +
+										QString(QT_TR_NOOP("Include file `%1' not found.")).arg(fi.absoluteFilePath()),
+										ErrorCode::InvalidInclude, PGM_FUNC, PGM_FILE, PGM_LINE,
+										nullptr, fi.absoluteFilePath());
+	}
 
-		/* If the user specificed the include file without the extension
-		 * we set the default extension .sch in order to locate the file */
-		if(fi.suffix().isEmpty())
-			fi.setFile(incl_file + GlobalAttributes::SchemaExt);
+	try
+	{
+		// Load the code of the included file
+		QString incl_buf = UtilsNs::loadFile(fi.absoluteFilePath());
 
-		// Check if the included file exists, if not, abort the parsing
-		if(!fi.isFile() || !fi.isReadable())
+		/* Appending a line feed char to the loaded include file to avoid
+		 * errors when the loaded include is followed by another @include */
+		incl_buf.append(QChar::LineFeed);
+
+		/* If the loaded code contains one or more @include statements we abort
+		 * the parsing because chained/nested file inclusion is not yet supported. */
+		if(incl_buf.contains(TokenIncludeRegexp))
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::InvalidInclude)
 											.arg(filename).arg(getCurrentLine()).arg(getCurrentColumn()) + " " +
-											QString(QT_TR_NOOP("No such include file `%1'.")).arg(fi.absoluteFilePath()),
-											ErrorCode::InvalidInclude, __PRETTY_FUNCTION__, __FILE__, __LINE__,
+											QString(QT_TR_NOOP("The included file `%1' contains one or more `%2' statements. Nested file inclusion is not currently supported!")).arg(fi.absoluteFilePath(), TokenInclude),
+											ErrorCode::InvalidInclude, PGM_FUNC, PGM_FILE, PGM_LINE,
 											nullptr, fi.absoluteFilePath());
 		}
 
-		try
-		{
-			// Load the code of the included file
-			QString incl_buf = UtilsNs::loadFile(fi.absoluteFilePath());
+		src_buf.insert(curr_stream_pos, incl_buf);
 
-			/* Appending a line feed char to the loaded include file to avoid
-			 * errors when the loaded include is followed by another @include */
-			incl_buf.append(QChar::LineFeed);
+		/* Registering the included buffer start and end lines based upon
+		 * the current number of lines in the main buffer where @include was found
+		 * and by counting the number of line breaks in the included buffer, this is
+		 * enough to know where the included buffer starts and ends */
+		include_infos.push_back(IncludeInfo { fi.absoluteFilePath(),
+																					static_cast<int>(buffer.size()),
+																					static_cast<int>(buffer.size() + incl_buf.count(QChar::LineFeed)),
+																					static_cast<int>(include_ln.length()) });
 
-			/* If the loaded code contains one or more @include statements we abort
-			 * the parsing because chained/nested file inclusion is not yet supported. */
-			if(incl_buf.contains(TokenIncludeRegexp))
-			{
-				throw Exception(Exception::getErrorMessage(ErrorCode::InvalidInclude)
-												.arg(filename).arg(getCurrentLine()).arg(getCurrentColumn()) + " " +
-												QString(QT_TR_NOOP("The included file `%1' contains one or more `%2' statements. This isn't currently supported!")).arg(fi.absoluteFilePath(), TokenInclude),
-												ErrorCode::InvalidInclude, __PRETTY_FUNCTION__, __FILE__, __LINE__,
-												nullptr, fi.absoluteFilePath());
-			}
+		/* Reset the line/column values so the parser can start the parsing of
+		 * the loaded buffer as soon as it exits this methods and no lines is left
+		 * to be loaded from the source file */
+		line = column = 0;
 
-			src_buf.insert(curr_stream_pos, incl_buf);
-
-			/* Registering the included buffer start and end lines based upon
-			 * the current number of lines in the main buffer where @include was found
-			 * and by counting the number of line breaks in the included buffer, this is
-			 * enough to know where the included buffer starts and ends */
-			include_infos.push_back(IncludeInfo { fi.absoluteFilePath(),
-																						static_cast<int>(buffer.size()),
-																						static_cast<int>(buffer.size() + incl_buf.count(QChar::LineFeed)),
-																						static_cast<int>(include_ln.length()) });
-
-			/* Reset the line/column values so the parser can start the parsing of
-			 * the loaded buffer as soon as it exits this methods and no lines is left
-			 * to be loaded from the source file */
-			line = column = 0;
-
-			return true;
-		}
-		catch(Exception &e)
-		{
-			throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
-		}
+		return true;
+	}
+	catch(Exception &e)
+	{
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -340,7 +338,7 @@ void SchemaParser::loadFile(const QString &filename)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -412,14 +410,15 @@ QString SchemaParser::getAttribute(bool &found_conv_to_xml)
 	if(error)
 	{
 		throw Exception(getParseError(ErrorCode::InvalidSyntax,
-																	 QString(QT_TR_NOOP("Expected a valid attribute token enclosed by `%1%2'."))
-																	 .arg(CharStartAttribute).arg(CharEndAttribute)),
-										ErrorCode::InvalidSyntax, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										QString(QT_TR_NOOP("Expected a valid attribute token enclosed by `%1%2'."))
+										.arg(CharStartAttribute).arg(CharEndAttribute)),
+										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
-	else if(!AttribRegExp.match(atrib).hasMatch())
+
+	if(!AttribRegExp.match(atrib).hasMatch())
 	{
 		throw Exception(getParseError(ErrorCode::InvalidAttribute),
-										ErrorCode::InvalidAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::InvalidAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	return atrib;
@@ -529,9 +528,9 @@ QString SchemaParser::getPlainText()
 		line = start_line;
 
 		throw Exception(getParseError(ErrorCode::InvalidSyntax,
-										QString(QT_TR_NOOP("Plain text expression is unbalanced or is not properly enclosed by `%1%2'."))
+										QString(QT_TR_NOOP("Plain text expression is unbalanced or not properly enclosed by `%1%2'."))
 										.arg(CharStartPlainText).arg(CharEndPlainText)),
-										ErrorCode::InvalidSyntax, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	return text;
@@ -570,8 +569,8 @@ QString SchemaParser::getConditional()
 	if(error)
 	{
 		throw Exception(getParseError(ErrorCode::InvalidSyntax,
-										QString(QT_TR_NOOP("Expected a valid conditional instruction token starting with `%1' and followed by, at least, a letter.")).arg(CharStartConditional)),
-										ErrorCode::InvalidSyntax, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										QString(QT_TR_NOOP("Expected a valid conditional instruction token starting with `%1' and followed by at least one letter.")).arg(CharStartConditional)),
+										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	return conditional;
@@ -586,7 +585,7 @@ QString SchemaParser::getMetaCharacter()
 	catch(Exception &e)
 	{
 		throw Exception(e.getErrorMessage(), e.getErrorCode(),
-										__PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+										PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -599,7 +598,7 @@ QString SchemaParser::getEscapedCharacter()
 	catch(Exception &e)
 	{
 		throw Exception(e.getErrorMessage(), e.getErrorCode(),
-										__PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+										PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -646,10 +645,10 @@ QString SchemaParser::getMetaOrEscapedToken(bool is_escaped)
 		if(is_escaped)
 			extra_msg = QString(QT_TR_NOOP("Expected a valid escaped character token starting with `%1' and followed by a single character.")).arg(start_chr);
 		else
-			extra_msg = QString(QT_TR_NOOP("Expected a valid metacharacter token starting with `%1' and followed by, at least, a letter.")).arg(start_chr);
+			extra_msg = QString(QT_TR_NOOP("Expected a valid metacharacter token starting with `%1' and followed by at least one letter.")).arg(start_chr);
 
 		throw Exception(getParseError(ErrorCode::InvalidSyntax, extra_msg),
-										ErrorCode::InvalidSyntax, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	return chr_token;
@@ -730,12 +729,12 @@ bool SchemaParser::evaluateComparisonExpr()
 				else if(!opers.contains(QString(oper).remove('f').remove('i')))
 				{
 					throw Exception(getParseError(ErrorCode::InvalidOperatorInExpression, "", oper),
-													ErrorCode::InvalidOperatorInExpression, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+													ErrorCode::InvalidOperatorInExpression, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 				else if(attributes.count(attrib)==0 && !ignore_unk_atribs)
 				{
 					throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
-													ErrorCode::UnkownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+													ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 				else
 				{
@@ -783,7 +782,7 @@ bool SchemaParser::evaluateComparisonExpr()
 					else
 					{
 						error = true;
-						extra_error_msg = QString(QT_TR_NOOP("Expected a valid operator token composed by, at least, two characters in the set `%1'.")).arg(valid_op_chrs);
+						extra_error_msg = QString(QT_TR_NOOP("Expected a valid operator token composed of at least two characters from the set `%1'.")).arg(valid_op_chrs);
 					}
 				}
 				else
@@ -794,7 +793,7 @@ bool SchemaParser::evaluateComparisonExpr()
 	catch(Exception &e)
 	{
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),
-										__PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+										PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 
 	if(error && !end_eval && extra_error_msg.isEmpty())
@@ -803,7 +802,7 @@ bool SchemaParser::evaluateComparisonExpr()
 	if(error)
 	{
 		throw Exception(getParseError(ErrorCode::InvalidSyntax, extra_error_msg),
-										ErrorCode::InvalidSyntax, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	return expr_is_true;
@@ -853,8 +852,8 @@ void SchemaParser::defineAttribute()
 
 					if(attributes.count(attrib)==0 && !ignore_unk_atribs)
 					{
-						throw Exception(getParseError(ErrorCode::UnkownAttribute),
-														ErrorCode::UnkownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+						throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
+														ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 					}
 
 					value += to_xml_entity ? UtilsNs::convertToXmlEntities(attributes[attrib]) : attributes[attrib];
@@ -892,7 +891,7 @@ void SchemaParser::defineAttribute()
 	catch(Exception &e)
 	{
 		throw Exception(e.getErrorMessage(), e.getErrorCode(),
-										__PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+										PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 
 	if(!error)
@@ -903,7 +902,7 @@ void SchemaParser::defineAttribute()
 		if(!AttribRegExp.match(attrib).hasMatch())
 		{
 			throw Exception(getParseError(ErrorCode::InvalidAttribute),
-											ErrorCode::InvalidAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+											ErrorCode::InvalidAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
 
 		/* Creates the attribute in the attribute map of the schema, making the attribute
@@ -913,7 +912,7 @@ void SchemaParser::defineAttribute()
 	else
 	{
 		throw Exception(getParseError(ErrorCode::InvalidSyntax),
-										ErrorCode::InvalidSyntax, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -943,12 +942,13 @@ void SchemaParser::unsetAttribute()
 				if(attributes.count(attrib)==0 && !ignore_unk_atribs)
 				{
 					throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
-													 ErrorCode::UnkownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+													 ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
-				else if(!AttribRegExp.match(attrib).hasMatch())
+
+				if(!AttribRegExp.match(attrib).hasMatch())
 				{
 					throw Exception(getParseError(ErrorCode::InvalidAttribute, "", attrib),
-													 ErrorCode::InvalidAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+													 ErrorCode::InvalidAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 
 				attributes[attrib]="";
@@ -956,14 +956,14 @@ void SchemaParser::unsetAttribute()
 			else
 			{
 				throw Exception(getParseError(ErrorCode::InvalidSyntax),
-												 ErrorCode::InvalidSyntax, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+												 ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 			}
 		}
 	}
 	catch(Exception &e)
 	{
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),
-										__PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+										PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 bool SchemaParser::evaluateExpression()
@@ -1038,7 +1038,7 @@ bool SchemaParser::evaluateExpression()
 				if(attributes.count(attrib)==0 && !ignore_unk_atribs)
 				{
 					throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
-													ErrorCode::UnkownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+													ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 
 				//Error 1: A conditional token other than %or %not %and if found on conditional expression
@@ -1097,13 +1097,13 @@ bool SchemaParser::evaluateExpression()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),	__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),	PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 
 	if(error)
 	{
 		throw Exception(getParseError(ErrorCode::InvalidSyntax),
-										ErrorCode::InvalidSyntax,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										ErrorCode::InvalidSyntax,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	return expr_is_true;
@@ -1136,7 +1136,7 @@ QString SchemaParser::convertMetaCharacter(const QString &meta)
 	if(metas.count(meta) == 0)
 	{
 		throw Exception(getParseError(ErrorCode::InvalidMetacharacter, "", CharStartMetachar + meta),
-										ErrorCode::InvalidMetacharacter, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::InvalidMetacharacter, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	return metas.at(meta);
@@ -1176,7 +1176,7 @@ QString SchemaParser::convertEscapedCharacter(const QString &escaped)
 	if(idx < 0)
 	{
 		throw Exception(getParseError(ErrorCode::InvalidEscapedCharacter, "", CharStartEscaped + escaped),
-										ErrorCode::InvalidEscapedCharacter, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::InvalidEscapedCharacter, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	if(idx <= 2)
@@ -1228,7 +1228,7 @@ QString SchemaParser::getSourceCode(const QString & obj_name, attribs_map &attri
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),	__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),	PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -1290,38 +1290,36 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 				if(if_level>=0 && vet_tk_if[if_level] && !vet_tk_then[if_level])
 				{
 					throw Exception(getParseError(ErrorCode::InvalidSyntax),
-													ErrorCode::InvalidSyntax, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+													ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
+				}
+
+				//Converting the metacharacter/escaped char to the character that it represents
+				meta = convertMetaOrEscaped(meta, chr == CharStartEscaped);
+
+				//If the parser is inside an 'if / else' extracting tokens
+				if(if_level>=0)
+				{
+					/* If the parser is in 'if' section,
+						 places the metacharacter on the word map of the current 'if' */
+					if(vet_tk_if[if_level] &&
+							vet_tk_then[if_level] &&
+							!vet_tk_else[if_level])
+						if_map[if_level].push_back(meta);
+
+					/* If the parser is in 'else' section,
+					 * places the metacharacter on the word map of the current 'else'*/
+					else if(vet_tk_else[if_level])
+						else_map[if_level].push_back(meta);
 				}
 				else
-				{
-					//Converting the metacharacter/escaped char to the character that it represents
-					meta = convertMetaOrEscaped(meta, chr == CharStartEscaped);
-
-					//If the parser is inside an 'if / else' extracting tokens
-					if(if_level>=0)
-					{
-						/* If the parser is in 'if' section,
-							 places the metacharacter on the word map of the current 'if' */
-						if(vet_tk_if[if_level] &&
-								vet_tk_then[if_level] &&
-								!vet_tk_else[if_level])
-							if_map[if_level].push_back(meta);
-
-						/* If the parser is in 'else' section,
-						 * places the metacharacter on the word map of the current 'else'*/
-						else if(vet_tk_else[if_level])
-							else_map[if_level].push_back(meta);
-					}
-					else
-						/* If the parsers is not in a 'if / else', puts the metacharacter
-						 * in the definition sql */
-						object_def += meta;
-				}
+					/* If the parsers is not in a 'if / else', puts the metacharacter
+					 * in the definition sql */
+					object_def += meta;
 			}
 			//Attribute extraction
 			else if(chr == CharToXmlEntity ||
-							 chr == CharStartAttribute ||
-							 chr == CharEndAttribute)
+							chr == CharStartAttribute ||
+							chr == CharEndAttribute)
 			{
 				atrib = getAttribute(to_xml_entity);
 
@@ -1331,10 +1329,10 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 					if(!ignore_unk_atribs)
 					{
 						throw Exception(getParseError(ErrorCode::UnkownAttribute, "", atrib),
-														ErrorCode::UnkownAttribute, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+														ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 					}
-					else
-						attributes[atrib]	= "";
+
+					attributes[atrib]	= "";
 				}
 
 				//If the parser is inside an 'if / else' extracting tokens
@@ -1369,7 +1367,7 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 					if(attributes[atrib].isEmpty() && !ignore_empty_atribs)
 					{
 						throw Exception(getParseError(ErrorCode::UndefinedAttributeValue, "", atrib),
-														ErrorCode::UndefinedAttributeValue, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+														ErrorCode::UndefinedAttributeValue, PGM_FUNC, PGM_FILE, PGM_LINE);
 					}
 
 					/* If the parser is not in an if / else, concatenates the value of the attribute
@@ -1392,9 +1390,10 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 					 cond != TokenUnset)
 				{
 					throw Exception(getParseError(ErrorCode::InvalidInstruction, "", cond),
-													ErrorCode::InvalidInstruction, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+													ErrorCode::InvalidInstruction, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
-				else if(cond == TokenSet || cond == TokenUnset)
+
+				if(cond == TokenSet || cond == TokenUnset)
 				{
 					bool extract = false;
 
@@ -1559,7 +1558,7 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 									if(word.isEmpty() && !ignore_empty_atribs)
 									{
 										throw Exception(getParseError(ErrorCode::UndefinedAttributeValue, "", atrib),
-																		ErrorCode::UndefinedAttributeValue, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+																		ErrorCode::UndefinedAttributeValue, PGM_FUNC, PGM_FILE, PGM_LINE);
 									}
 								}
 
@@ -1590,7 +1589,7 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 							vet_prev_level.clear();
 
 							//Resets the ifs levels
-							if_level = prev_if_level = -1;
+							if_level = /* prev_if_level = */ -1;
 						}
 					}
 					else
@@ -1610,7 +1609,7 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 					if(error)
 					{
 						throw Exception(getParseError(ErrorCode::InvalidSyntax),
-														ErrorCode::InvalidSyntax, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+														ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 					}
 				}
 			}
@@ -1630,12 +1629,13 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 					if(vet_tk_if[if_level] && !vet_tk_then[if_level])
 					{
 						throw Exception(getParseError(ErrorCode::InvalidSyntax),
-														ErrorCode::InvalidSyntax, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+														ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 					}
+
 					//Case the parser is in 'if' section
-					else if(vet_tk_if[if_level] &&
-									 vet_tk_then[if_level] &&
-									 !vet_tk_else[if_level])
+					if(vet_tk_if[if_level] &&
+						 vet_tk_then[if_level] &&
+						 !vet_tk_else[if_level])
 					{
 						//Inserts the word on the words map extracted on 'if' section
 						if_map[if_level].push_back(word);
@@ -1657,7 +1657,7 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 		if(if_cnt!=end_cnt)
 		{
 			throw Exception(getParseError(ErrorCode::InvalidSyntax),
-											ErrorCode::InvalidSyntax, __PRETTY_FUNCTION__ , __FILE__, __LINE__);
+											ErrorCode::InvalidSyntax, PGM_FUNC , PGM_FILE, PGM_LINE);
 		}
 	}
 
@@ -1677,7 +1677,7 @@ QString SchemaParser::getSourceCode(const QString &filename, attribs_map &attrib
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

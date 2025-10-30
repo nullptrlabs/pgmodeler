@@ -3,6 +3,7 @@
         <file>icons/add.png</file>
         <file>icons/addcol.png</file>
         <file>icons/adddata.png</file>
+        <file>icons/addfilter.png</file>
         <file>icons/addlayer.png</file>
         <file>icons/addrow.png</file>
         <file>icons/aggregate.png</file>
@@ -11,6 +12,7 @@
         <file>icons/appearance.png</file>
         <file>icons/arrangetables.png</file>
         <file>icons/attribute.png</file>
+        <file>icons/blogpost.png</file>
         <file>icons/bndrect.png</file>
         <file>icons/breakline_290dh.png</file>
         <file>icons/breakline_290dv.png</file>
@@ -22,22 +24,28 @@
         <file>icons/bugreport.png</file>
         <file>icons/bulkedit.png</file>
         <file>icons/cancel.png</file>
+        <file>icons/casesensitive.png</file>
         <file>icons/cast.png</file>
         <file>icons/changelog.png</file>
         <file>icons/changeowner.png</file>
+        <file>icons/clearinput.png</file>
         <file>icons/clearlayers.png</file>
         <file>icons/clearobjsel.png</file>
         <file>icons/cleartext.png</file>
         <file>icons/close.png</file>
         <file>icons/close1.png</file>
+        <file>icons/close2.png</file>
         <file>icons/codesnippet.png</file>
         <file>icons/collapse.png</file>
+        <file>icons/collapsetree.png</file>
         <file>icons/collation.png</file>
         <file>icons/column.png</file>
+        <file>icons/comment.png</file>
         <file>icons/compactview.png</file>
         <file>icons/config.png</file>
         <file>icons/confirm.png</file>
         <file>icons/connection.png</file>
+        <file>icons/connmode.png</file>
         <file>icons/constraint.png</file>
         <file>icons/constraint_ck.png</file>
         <file>icons/constraint_ex.png</file>
@@ -49,9 +57,15 @@
         <file>icons/convrelnn.png</file>
         <file>icons/copy.png</file>
         <file>icons/created.png</file>
+        <file>icons/csvfile.png</file>
+        <file>icons/csvload.png</file>
+        <file>icons/cursor.png</file>
+        <file>icons/cursortmpl.png</file>
         <file>icons/cut.png</file>
         <file>icons/database.png</file>
+        <file>icons/dbmfile.png</file>
         <file>icons/dbmodel.png</file>
+        <file>icons/debug.png</file>
         <file>icons/defaults.png</file>
         <file>icons/delcascade.png</file>
         <file>icons/delcol.png</file>
@@ -74,9 +88,13 @@
         <file>icons/duprow.png</file>
         <file>icons/edit.png</file>
         <file>icons/editdata.png</file>
+        <file>icons/editrows.png</file>
+        <file>icons/enablesql.png</file>
         <file>icons/error.png</file>
         <file>icons/eventtrigger.png</file>
         <file>icons/exit.png</file>
+        <file>icons/expandcanvas.png</file>
+        <file>icons/expandtree.png</file>
         <file>icons/export.png</file>
         <file>icons/exportdata.png</file>
         <file>icons/extension.png</file>
@@ -94,9 +112,12 @@
         <file>icons/function1.png</file>
         <file>icons/genericsql.png</file>
         <file>icons/grid.png</file>
+        <file>icons/h_menu_indicator.png</file>
         <file>icons/help.png</file>
+        <file>icons/hidepwd.png</file>
         <file>icons/ignore.png</file>
         <file>icons/import.png</file>
+        <file>icons/indent.png</file>
         <file>icons/index.png</file>
         <file>icons/info.png</file>
         <file>icons/jumptotable.png</file>
@@ -108,8 +129,12 @@
         <file>icons/lesszoom.png</file>
         <file>icons/listview.png</file>
         <file>icons/loadrecent.png</file>
+        <file>icons/lockdelim.png</file>
+        <file>icons/locker.png</file>
+        <file>icons/magnifier.png</file>
         <file>icons/mainmenu.png</file>
         <file>icons/managedb.png</file>
+        <file>icons/metatoescaped.png</file>
         <file>icons/modified.png</file>
         <file>icons/moreactions.png</file>
         <file>icons/morezoom.png</file>
@@ -120,26 +145,35 @@
         <file>icons/movetoschema.png</file>
         <file>icons/moveup.png</file>
         <file>icons/new.png</file>
+        <file>icons/newdatamanip.png</file>
         <file>icons/newobject.png</file>
         <file>icons/newtab.png</file>
         <file>icons/next.png</file>
         <file>icons/normalzoom.png</file>
+        <file>icons/objects.png</file>
+        <file>icons/objfinder.png</file>
         <file>icons/objmetadata.png</file>
         <file>icons/objselect.png</file>
         <file>icons/opclass.png</file>
         <file>icons/open.png</file>
         <file>icons/operator.png</file>
         <file>icons/opfamily.png</file>
+        <file>icons/ophistory.png</file>
+        <file>icons/ophistorypos.png</file>
+        <file>icons/oprhistory.png</file>
         <file>icons/outputpane.png</file>
         <file>icons/overview.png</file>
         <file>icons/pagedelim.png</file>
         <file>icons/pagination.png</file>
         <file>icons/parameter.png</file>
+        <file>icons/partitionkey.png</file>
         <file>icons/paste.png</file>
         <file>icons/permission.png</file>
         <file>icons/plugins.png</file>
+        <file>icons/pluginsconfig.png</file>
         <file>icons/policy.png</file>
         <file>icons/previous.png</file>
+        <file>icons/print.png</file>
         <file>icons/procedure.png</file>
         <file>icons/protect.png</file>
         <file>icons/question.png</file>
@@ -151,6 +185,7 @@
         <file>icons/referrer.png</file>
         <file>icons/refresh.png</file>
         <file>icons/refreshdb.png</file>
+        <file>icons/regexp.png</file>
         <file>icons/relationship.png</file>
         <file>icons/relationship11.png</file>
         <file>icons/relationship1n.png</file>
@@ -160,33 +195,43 @@
         <file>icons/relationshipnn.png</file>
         <file>icons/relationshippart.png</file>
         <file>icons/relationshiptv.png</file>
+        <file>icons/reloadattribs.png</file>
         <file>icons/remove.png</file>
         <file>icons/removed.png</file>
         <file>icons/removepoints.png</file>
         <file>icons/rename.png</file>
+        <file>icons/resetalerts.png</file>
+        <file>icons/resetsizes.png</file>
         <file>icons/resizecols.png</file>
         <file>icons/restore.png</file>
+        <file>icons/resultset.png</file>
         <file>icons/role.png</file>
         <file>icons/rule.png</file>
         <file>icons/run.png</file>
+        <file>icons/samples.png</file>
         <file>icons/save.png</file>
+        <file>icons/saveall.png</file>
         <file>icons/saveas.png</file>
         <file>icons/schema.png</file>
         <file>icons/schemarect.png</file>
+        <file>icons/selection.png</file>
         <file>icons/selectmove.png</file>
         <file>icons/sendtoback.png</file>
         <file>icons/sequence.png</file>
         <file>icons/server.png</file>
+        <file>icons/showpwd.png</file>
         <file>icons/sortasc.png</file>
         <file>icons/sourcecode.png</file>
         <file>icons/sqlappend.png</file>
         <file>icons/sqlcmd.png</file>
         <file>icons/sqlcode.png</file>
+        <file>icons/sqlpreview.png</file>
         <file>icons/stacking.png</file>
         <file>icons/stop.png</file>
         <file>icons/swapobjs.png</file>
         <file>icons/swapvals.png</file>
         <file>icons/table.png</file>
+        <file>icons/tablerowcnt.png</file>
         <file>icons/tablespace.png</file>
         <file>icons/tag.png</file>
         <file>icons/textbox.png</file>
@@ -195,51 +240,13 @@
         <file>icons/trigger.png</file>
         <file>icons/truncate.png</file>
         <file>icons/trunccascade.png</file>
-        <file>icons/uid.png</file>
-        <file>icons/undo.png</file>
-        <file>icons/unprotect.png</file>
-        <file>icons/uparrow.png</file>
-        <file>icons/update.png</file>
-        <file>icons/usermapping.png</file>
-        <file>icons/usertype.png</file>
-        <file>icons/validation.png</file>
-        <file>icons/view.png</file>
-        <file>icons/xmlcode.png</file>
-        <file>icons/validity.png</file>
-        <file>icons/validatesch.png</file>
-        <file>icons/saveall.png</file>
-        <file>icons/enablesql.png</file>
-        <file>icons/print.png</file>
-        <file>icons/samples.png</file>
-        <file>icons/oprhistory.png</file>
-        <file>resources.qrc</file>
-        <file>icons/cursor.png</file>
-        <file>icons/objfinder.png</file>
-        <file>icons/objects.png</file>
-        <file>icons/newdatamanip.png</file>
-        <file>icons/close2.png</file>
-        <file>icons/indent.png</file>
-        <file>icons/clearinput.png</file>
-        <file>icons/h_menu_indicator.png</file>
-        <file>icons/cursortmpl.png</file>
-        <file>icons/addfilter.png</file>
-        <file>icons/uicode.png</file>
-        <file>icons/locker.png</file>
-        <file>icons/connmode.png</file>
-        <file>icons/sqlpreview.png</file>
-        <file>icons/partitionkey.png</file>
-        <file>icons/editrows.png</file>
-        <file>icons/reloadattribs.png</file>
-        <file>icons/magnifier.png</file>
-        <file>icons/dbmfile.png</file>
-        <file>icons/pluginsconfig.png</file>
-        <file>icons/lockdelim.png</file>
-        <file>icons/csvload.png</file>
+        <file>icons/txtfile.png</file>
         <file>icons/typebinary.png</file>
         <file>icons/typebitstring.png</file>
         <file>icons/typeboolean.png</file>
         <file>icons/typecharacter.png</file>
         <file>icons/typedatetime.png</file>
+        <file>icons/typefloatpoint.png</file>
         <file>icons/typegeometric.png</file>
         <file>icons/typeinteger.png</file>
         <file>icons/typejson.png</file>
@@ -251,60 +258,50 @@
         <file>icons/typepolymorphic.png</file>
         <file>icons/typepostgis.png</file>
         <file>icons/typepseudo.png</file>
+        <file>icons/typerange.png</file>
         <file>icons/typetextsearch.png</file>
         <file>icons/typetimezone.png</file>
         <file>icons/typeuuid.png</file>
         <file>icons/typexml.png</file>
-        <file>icons/typerange.png</file>
-        <file>icons/typefloatpoint.png</file>
-        <file>icons/wordwrap.png</file>
-        <file>icons/txtfile.png</file>
-        <file>icons/csvfile.png</file>
-        <file>icons/selection.png</file>
-        <file>icons/resetalerts.png</file>
-        <file>icons/resetsizes.png</file>
-        <file>icons/blogpost.png</file>
-        <file>icons/ophistorypos.png</file>
-        <file>icons/ophistory.png</file>
-        <file>icons/expandcanvas.png</file>
-        <file>icons/showpwd.png</file>
-        <file>icons/hidepwd.png</file>
+        <file>icons/uicode.png</file>
+        <file>icons/uid.png</file>
+        <file>icons/undo.png</file>
+        <file>icons/unprotect.png</file>
+        <file>icons/uparrow.png</file>
+        <file>icons/update.png</file>
+        <file>icons/usermapping.png</file>
+        <file>icons/usertype.png</file>
+        <file>icons/validatesch.png</file>
+        <file>icons/validation.png</file>
+        <file>icons/validity.png</file>
+        <file>icons/view.png</file>
         <file>icons/wholeword.png</file>
-        <file>icons/regexp.png</file>
-        <file>icons/casesensitive.png</file>
-        <file>icons/comment.png</file>
-        <file>icons/metatoescaped.png</file>
-        <file>icons/tablerowcnt.png</file>
-        <file>icons/collapsetree.png</file>
-        <file>icons/expandtree.png</file>
-        <file>icons/debug.png</file>
-        <file>icons/resultset.png</file>
+        <file>icons/wordwrap.png</file>
+        <file>icons/xmlcode.png</file>
+        <file>icons/home.png</file>
+        <file>icons/welcome.png</file>
+        <file>icons/about.png</file>
+        <file>icons/closetab.png</file>
+        <file>icons/closetab1.png</file>
+        <file>icons/diff_dbs.png</file>
+        <file>icons/diff_models.png</file>
+        <file>icons/success.png</file>
+        <file>icons/browsedata1.png</file>
+        <file>icons/duplicategrid.png</file>
     </qresource>
     <qresource prefix="/images">
         <file>images/brazil_flag.png</file>
-        <file>images/crashhandler.png</file>
-        <file>images/pgmodeler_name.png</file>
-        <file>images/schemafile.png</file>
-        <file>images/exporttosql.png</file>
         <file>images/exporttodatadict.png</file>
         <file>images/exporttodbms.png</file>
         <file>images/exporttoimg.png</file>
-        <file>images/checkmark_white.png</file>
-        <file>images/checkmark_black.png</file>
-        <file>images/checkmark_disabled.png</file>
-        <file>images/rel_tab_edges_light.png</file>
-        <file>images/rel_tab_edges_dark.png</file>
-        <file>images/rel_fk_to_pk_light.png</file>
-        <file>images/rel_fk_to_pk_dark.png</file>
-        <file>images/rel_crows_foot_light.png</file>
-        <file>images/rel_crows_foot_dark.png</file>
-        <file>images/rel_center_pnts_light.png</file>
-        <file>images/rel_center_pnts_dark.png</file>
+        <file>images/exporttosql.png</file>
         <file>images/handle_dark.png</file>
         <file>images/handle_light.png</file>
-        <file>images/hsplitter_handle_dark.png</file>
-        <file>images/vsplitter_handle_dark.png</file>
-        <file>images/vsplitter_handle_light.png</file>
-        <file>images/hsplitter_handle_light.png</file>
+        <file>images/pgmodeler_name.png</file>
+        <file>images/schemafile.png</file>
+        <file>images/conn_crowsfoot.png</file>
+        <file>images/conn_fktopk.png</file>
+        <file>images/conn_tabcenter.png</file>
+        <file>images/conn_tabedges.png</file>
     </qresource>
 </RCC>

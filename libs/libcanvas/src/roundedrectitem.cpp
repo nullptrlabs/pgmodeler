@@ -20,7 +20,7 @@
 
 RoundedRectItem::RoundedRectItem(QGraphicsItem *parent) :  QAbstractGraphicsShapeItem(parent)
 {
-	radius = 12;
+	radius = DefaultRadius;
 	corners = AllCorners;
 }
 

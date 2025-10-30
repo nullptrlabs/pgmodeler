@@ -106,41 +106,6 @@
         </property>
        </spacer>
       </item>
-      <item row="4" column="2">
-       <widget class="QToolButton" name="apply_tb">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Rename</string>
-        </property>
-        <property name="text">
-         <string>Apply</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../../res/resources.qrc">
-          <normaloff>:/icons/icons/confirm.png</normaloff>:/icons/icons/confirm.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>28</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="autoExclusive">
-         <bool>false</bool>
-        </property>
-        <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="0" colspan="5">
        <widget class="QListWidget" name="layers_lst">
         <property name="alternatingRowColors">
@@ -151,35 +116,6 @@
           <width>28</width>
           <height>28</height>
          </size>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="3">
-       <widget class="QToolButton" name="cancel_tb">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Cancel</string>
-        </property>
-        <property name="text">
-         <string>Cancel</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../../res/resources.qrc">
-          <normaloff>:/icons/icons/close1.png</normaloff>:/icons/icons/close1.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>28</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
         </property>
        </widget>
       </item>
@@ -200,7 +136,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="add_tb">
+         <widget class="QPushButton" name="add_btn">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -235,15 +171,67 @@
           <property name="shortcut">
            <string>Ins</string>
           </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
-          </property>
-          <property name="autoRaise">
-           <bool>false</bool>
-          </property>
          </widget>
         </item>
        </layout>
+      </item>
+      <item row="4" column="3">
+       <widget class="QPushButton" name="cancel_btn">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Cancel</string>
+        </property>
+        <property name="text">
+         <string>Cancel</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../res/resources.qrc">
+          <normaloff>:/icons/icons/close1.png</normaloff>:/icons/icons/close1.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>28</width>
+          <height>28</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QPushButton" name="apply_btn">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Rename</string>
+        </property>
+        <property name="text">
+         <string>Apply</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../res/resources.qrc">
+          <normaloff>:/icons/icons/confirm.png</normaloff>:/icons/icons/confirm.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>28</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="autoExclusive">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -251,7 +239,6 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

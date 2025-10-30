@@ -41,7 +41,7 @@ class __libgui BaseForm: public QDialog, public Ui::BaseForm {
 				try to preserve the minimum width */
 		void resizeForm(QWidget *widget);
 
-		void closeEvent(QCloseEvent *);
+		void closeEvent(QCloseEvent *) override;
 
 	public:
 		BaseForm(QWidget * parent = nullptr, Qt::WindowFlags f = Qt::Widget);

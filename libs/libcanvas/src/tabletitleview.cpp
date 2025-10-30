@@ -53,10 +53,11 @@ void TableTitleView::configureObject(BaseGraphicObject *object)
 
 	//Raises an error if the object related to the title is not allocated
 	if(!object)
-		throw Exception(ErrorCode::OprNotAllocatedObject, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
+
 	//Raises an error if the object is invalid
-	else if(!BaseTable::isBaseTable(object->getObjectType()))
-		throw Exception(ErrorCode::OprObjectInvalidType, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+	if(!BaseTable::isBaseTable(object->getObjectType()))
+		throw Exception(ErrorCode::OprObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	schema=dynamic_cast<Schema *>(object->getSchema());
 	tag=dynamic_cast<BaseTable *>(object)->getTag();

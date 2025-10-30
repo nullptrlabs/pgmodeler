@@ -111,12 +111,12 @@ class __libcore Constraint: public TableObject{
 		std::vector<Column *> getRelationshipAddedColumns(bool first_col_only);
 
 	protected:
-		virtual void configureSearchAttributes() override;
+		void configureSearchAttributes() override;
 
 	public:
 		Constraint();
 
-		virtual ~Constraint();
+		~Constraint() override;
 
 		/*! \brief Adds one column to the internal column list referenced by the
 		 constants SOURCE_COLS or REFERENCED_COLS */
@@ -142,7 +142,7 @@ class __libcore Constraint: public TableObject{
 		void setDeferrable(bool value);
 
 		//! \brief Defines the matching type used by the constraint (only for foreign key)
-		void setMatchType(MatchType constr_type);
+		void setMatchType(MatchType match_type);
 
 		//! \brief Defines the indexing type used by the constraint (only for exclude)
 		void setIndexType(IndexingType index_type);
@@ -151,10 +151,10 @@ class __libcore Constraint: public TableObject{
 		void setExpression(const QString &expr);
 
 		//! \brief Defines the referenced table (only for foreign key)
-		void setReferencedTable(BaseTable *tab_ref);
+		void setReferencedTable(BaseTable *ref_tab);
 
 		//! \brief Defines the tablespace used by the constraint (only for primary keys and unique)
-		virtual void setTablespace(BaseObject *tabspc) override;
+		void setTablespace(BaseObject *tabspc) override;
 
 		/*! \brief Defines the constraint fill factor (only for primary keys and unique).
 				Values less than 10 (except 0) or above 100 will be adjusted to accepted values. To use the default
@@ -236,15 +236,15 @@ class __libcore Constraint: public TableObject{
 		IndexingType getIndexType();
 
 		/*! \brief Returns the SQL / XML definition for the constraint.
-		 This method calls getCodeDefintion(unsigned, bool) with the
-		 second parameter as false */
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		 * This method calls getCodeDefintion(unsigned, bool) with the
+		 * second parameter as false */
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
 		/*! \brief Returns the SQL / XML definition for the constraint. The boolean parameter indicates
-		 whether the columns added by relationship must appear on the code definition */
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool inc_addedbyrel) final;
+		 * whether the columns added by relationship must appear on the code definition */
+		QString getSourceCode(SchemaParser::CodeType def_type, bool inc_addedbyrel) final;
 
-		virtual QString getDropCode(bool cascade) final;
+		QString getDropCode(bool cascade) final;
 
 		//! \brief Indicates whether the column exists on the specified internal column list
 		bool isColumnExists(Column *column, ColumnsId cols_id);
@@ -281,10 +281,11 @@ class __libcore Constraint: public TableObject{
 		QString getDataDictionary(bool md_format, const attribs_map &extra_attribs);
 
 		/*! \brief Compares two constratins XML definition and returns if they differs. This methods varies a little from
-		BaseObject::isCodeDiffersFrom() because here we need to generate xml code including relationship added columns */
-		virtual bool isCodeDiffersFrom(BaseObject *object, const QStringList &ignored_attribs={}, const QStringList &ignored_tags={}) override;
+		 *  BaseObject::isCodeDiffersFrom() because here we need to generate xml code including relationship added columns */
+		bool isCodeDiffersFrom(BaseObject *object, const QStringList &ignored_attribs = {},
+													 const QStringList &ignored_tags = {}) override;
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 };
 
 #endif

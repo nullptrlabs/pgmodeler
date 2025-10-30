@@ -35,24 +35,22 @@ class __libcore UserMapping: public BaseObject, public ForeignObject {
 
 	public:
 		UserMapping();
-
-		virtual ~UserMapping(){}
+		~UserMapping() override = default;
 
 		void setForeignServer(ForeignServer *server);
 		ForeignServer *getForeignServer();
 
 		//! \brief This method has a hardcoded way to generated the usermapping's name. It'll reject any value passed by its parameter
-		virtual void setName(const QString &) override;
+		void setName(const QString &) override;
 
-		virtual void setOwner(BaseObject *role) override;
-		virtual QString getName(bool = false, bool = false) override;
-		virtual QString getSignature(bool = false)  override;
-		virtual QString getSourceCode(SchemaParser::CodeType def_type)  override;
-		virtual QString getAlterCode(BaseObject *object)  override;
-		virtual QString getDropCode(bool) override;
+		void setOwner(BaseObject *role) override;
+		QString getName(bool = false, bool = false) override;
+		QString getSignature(bool = false) override;
+		QString getSourceCode(SchemaParser::CodeType def_type) override;
+		QString getAlterCode(BaseObject *object) override;
+		QString getDropCode(bool) override;
 
-		virtual void updateDependencies() override;
-
+		void updateDependencies() override;
 };
 
 #endif

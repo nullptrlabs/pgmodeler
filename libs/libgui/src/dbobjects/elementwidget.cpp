@@ -124,12 +124,13 @@ void ElementWidget::setAttributes(DatabaseModel *model, BaseObject *parent_obj)
 	if(!model || !parent_obj)
 	{
 		this->setEnabled(false);
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
-	else if(parent_obj->getObjectType()!=ObjectType::Table &&
-					parent_obj->getObjectType()!=ObjectType::View &&
-					parent_obj->getObjectType()!=ObjectType::Relationship)
-		throw Exception(ErrorCode::OprObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+
+	if(parent_obj->getObjectType()!=ObjectType::Table &&
+		 parent_obj->getObjectType()!=ObjectType::View &&
+		 parent_obj->getObjectType()!=ObjectType::Relationship)
+		throw Exception(ErrorCode::OprObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	this->setEnabled(true);
 	this->parent_obj=parent_obj;
@@ -239,7 +240,7 @@ void ElementWidget::updateColumnsCombo()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

@@ -33,19 +33,18 @@ class __libcore PartitionKey: public Element {
 
 	public:
 		PartitionKey();
-
-		virtual ~PartitionKey(){}
+		~PartitionKey() = default;
 
 		//! \brief Defines the collation referenced by the element
-		void setCollation(Collation *collation);
+		void setCollation(Collation *collation) override;
 
 		//! \brief Get the collation referenced by the element
-		Collation *getCollation();
+		Collation *getCollation() override;
 
 		//! \brief Returns the SQL / XML code definition for the partition key
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
-		virtual std::vector<BaseObject *> getDependencies();
+		std::vector<BaseObject *> getDependencies() override;
 };
 
 /* Registering the PartitionKey class as a Qt MetaType in order to make

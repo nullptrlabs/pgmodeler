@@ -21,7 +21,7 @@
 
 const QString View::ExtraSCRegExp {"((\\;)+(\\s|\\t)*)+$"};
 
-View::View() : BaseTable()
+View::View()
 {
 	obj_type = ObjectType::View;
 	materialized = recursive = with_no_data = false;
@@ -191,7 +191,7 @@ SimpleColumn View::getColumn(const QString &name)
 			return col;
 	}
 
-	return SimpleColumn();
+	return {};
 }
 
 void View::generateColumns()
@@ -477,109 +477,105 @@ int View::getObjectIndex(BaseObject *obj)
 
 	if(!obj || (tab_obj && tab_obj->getParentTable()!=this))
 		return -1;
-	else
-	{
-		std::vector<TableObject *>::iterator itr, itr_end;
-		std::vector<TableObject *> *obj_list=getObjectList(obj->getObjectType());
-		bool found=false;
 
-		if(!obj_list)
-			return -1;
+	std::vector<TableObject *>::iterator itr, itr_end;
+	std::vector<TableObject *> *obj_list=getObjectList(obj->getObjectType());
+	bool found=false;
 
-		itr=obj_list->begin();
-		itr_end=obj_list->end();
-
-		while(itr!=itr_end && !found)
-		{
-			found=((*itr)==tab_obj);
-			if(!found) itr++;
-		}
-
-		if(found)
-			return (itr - obj_list->begin());
-
+	if(!obj_list)
 		return -1;
+
+	itr=obj_list->begin();
+	itr_end=obj_list->end();
+
+	while(itr!=itr_end && !found)
+	{
+		found=((*itr)==tab_obj);
+		if(!found) itr++;
 	}
+
+	if(found)
+		return (itr - obj_list->begin());
+
+	return -1;
 }
 
 int View::getObjectIndex(const QString &name, ObjectType obj_type)
 {
 	if(name.isEmpty())
 		return -1;
-	else
-	{
-		std::vector<TableObject *>::iterator itr, itr_end;
-		std::vector<TableObject *> *obj_list=getObjectList(obj_type);
-		bool found=false, format=name.contains('"');
 
-		if(!obj_list)
-			return -1;
+	std::vector<TableObject *>::iterator itr, itr_end;
+	std::vector<TableObject *> *obj_list=getObjectList(obj_type);
+	bool found=false, format=name.contains('"');
 
-		itr=obj_list->begin();
-		itr_end=obj_list->end();
-
-		while(itr!=itr_end && !found)
-		{
-			found=((*itr)->getName(format)==name);
-			if(!found) itr++;
-		}
-
-		if(found)
-			return (itr - obj_list->begin());
-
+	if(!obj_list)
 		return -1;
+
+	itr=obj_list->begin();
+	itr_end=obj_list->end();
+
+	while(itr!=itr_end && !found)
+	{
+		found=((*itr)->getName(format)==name);
+		if(!found) itr++;
 	}
+
+	if(found)
+		return (itr - obj_list->begin());
+
+	return -1;
 }
 
 void View::addObject(BaseObject *obj, int obj_idx)
 {
 	if(!obj)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	try
 	{
-		try
+		std::vector<TableObject *> *obj_list = getObjectList(obj->getObjectType());
+		TableObject *tab_obj=dynamic_cast<TableObject *>(obj);
+
+		//Raises an error if already exists a object with the same name and type
+		if(getObjectIndex(obj->getName(), tab_obj->getObjectType()) >= 0)
 		{
-			std::vector<TableObject *> *obj_list = getObjectList(obj->getObjectType());
-			TableObject *tab_obj=dynamic_cast<TableObject *>(obj);
-
-			//Raises an error if already exists a object with the same name and type
-			if(getObjectIndex(obj->getName(), tab_obj->getObjectType()) >= 0)
-			{
-				throw Exception(Exception::getErrorMessage(ErrorCode::AsgDuplicatedObject)
-								.arg(obj->getName(true))
-								.arg(obj->getTypeName())
-								.arg(this->getName(true))
-								.arg(this->getTypeName()),
-								ErrorCode::AsgDuplicatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-			}
-
-			//Validates the object definition
-			tab_obj->setParentTable(this);
-			tab_obj->getSourceCode(SchemaParser::SqlCode);
-
-			//Make a additional validation if the object is a trigger
-			if(tab_obj->getObjectType()==ObjectType::Trigger)
-				dynamic_cast<Trigger *>(tab_obj)->validateTrigger();
-
-			//Inserts the object at specified position
-			if(obj_idx < 0 || obj_idx >= static_cast<int>(obj_list->size()))
-				obj_list->push_back(tab_obj);
-			else
-				obj_list->insert(obj_list->begin() + obj_idx, tab_obj);
-
-			tab_obj->updateDependencies();
-			setCodeInvalidated(true);
+			throw Exception(Exception::getErrorMessage(ErrorCode::AsgDuplicatedObject)
+											.arg(obj->getName(true))
+											.arg(obj->getTypeName())
+											.arg(this->getName(true))
+											.arg(this->getTypeName()),
+											ErrorCode::AsgDuplicatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
-		catch(Exception &e)
+
+		//Validates the object definition
+		tab_obj->setParentTable(this);
+		tab_obj->getSourceCode(SchemaParser::SqlCode);
+
+		//Make a additional validation if the object is a trigger
+		if(tab_obj->getObjectType()==ObjectType::Trigger)
+			dynamic_cast<Trigger *>(tab_obj)->validateTrigger();
+
+		//Inserts the object at specified position
+		if(obj_idx < 0 || obj_idx >= static_cast<int>(obj_list->size()))
+			obj_list->push_back(tab_obj);
+		else
+			obj_list->insert(obj_list->begin() + obj_idx, tab_obj);
+
+		tab_obj->updateDependencies();
+		setCodeInvalidated(true);
+	}
+	catch(Exception &e)
+	{
+		if(e.getErrorCode()==ErrorCode::UndefinedAttributeValue)
 		{
-			if(e.getErrorCode()==ErrorCode::UndefinedAttributeValue)
-				throw Exception(Exception::getErrorMessage(ErrorCode::AsgObjectInvalidDefinition)
-								.arg(obj->getName())
-								.arg(obj->getTypeName()),
-								ErrorCode::AsgObjectInvalidDefinition,__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
-			else
-				throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+			throw Exception(Exception::getErrorMessage(ErrorCode::AsgObjectInvalidDefinition)
+											.arg(obj->getName())
+											.arg(obj->getTypeName()),
+											ErrorCode::AsgObjectInvalidDefinition,PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 		}
+
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -591,7 +587,7 @@ void View::addTrigger(Trigger *trig, int obj_idx)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -603,7 +599,7 @@ void View::addRule(Rule *rule, int obj_idx)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -615,7 +611,7 @@ void View::addIndex(Index *index, int obj_idx)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -626,7 +622,7 @@ void View::removeObject(unsigned obj_idx, ObjectType obj_type)
 
 	//Raises an error if the object index is out of bound
 	if(obj_idx >= obj_list->size())
-		throw Exception(ErrorCode::RefObjectInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefObjectInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	itr=obj_list->begin() + obj_idx;
 
@@ -645,7 +641,7 @@ void View::removeObject(BaseObject *obj)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -657,7 +653,7 @@ void View::removeObject(const QString &name, ObjectType obj_type)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -669,7 +665,7 @@ void View::removeTrigger(unsigned idx)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -681,7 +677,7 @@ void View::removeRule(unsigned idx)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -693,7 +689,7 @@ void View::removeIndex(unsigned idx)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -703,7 +699,7 @@ TableObject *View::getObject(unsigned obj_idx, ObjectType obj_type)
 
 	//Raises an error if the object index is out of bound
 	if(obj_idx >= obj_list->size())
-		throw Exception(ErrorCode::RefObjectInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefObjectInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return obj_list->at(obj_idx);
 }
@@ -712,16 +708,16 @@ TableObject *View::getObject(const QString &name, ObjectType obj_type)
 {
 	try
 	{
-		int idx=getObjectIndex(name, obj_type);
+		int idx = getObjectIndex(name, obj_type);
 
 		if(idx >= 0)
 			return getObject(idx, obj_type);
-		else
-			return nullptr;
+
+		return nullptr;
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -733,7 +729,7 @@ Trigger *View::getTrigger(unsigned obj_idx)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -745,7 +741,7 @@ Rule *View::getRule(unsigned obj_idx)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -757,7 +753,7 @@ Index *View::getIndex(unsigned obj_idx)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -915,7 +911,7 @@ QString View::getDataDictionary(bool split, bool md_format, const attribs_map &e
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -928,7 +924,7 @@ QString View::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 

@@ -26,22 +26,25 @@ UpdateNotifierWidget::UpdateNotifierWidget(QWidget *parent) : QWidget(parent)
 	setupUi(this);
 	setWindowFlags(Qt::Widget | Qt::FramelessWindowHint);
 
-	show_no_upd_msg=false;
-	update_chk_reply=nullptr;
+	show_no_upd_msg = false;
+	update_chk_reply = nullptr;
 	frame->installEventFilter(this);
+
 	GuiUtilsNs::createDropShadow(this, 5, 5, 30);
+	GuiUtilsNs::configureWidgetFont(ver_num_lbl, GuiUtilsNs::BigFontFactor);
+	GuiUtilsNs::configureWidgetFont(ver_date_lbl, GuiUtilsNs::BigFontFactor);
 
 	connect(&update_chk_manager, &QNetworkAccessManager::finished, this, &UpdateNotifierWidget::handleUpdateChecked);
 
-	connect(get_source_tb, &QToolButton::clicked, this, [this](){
+	connect(get_source_btn, &QPushButton::clicked, this, [this](){
 		activateLink(GlobalAttributes::PgModelerSourceURL);
 	});
 
-	connect(get_binary_tb, &QToolButton::clicked, this, [this](){
+	connect(get_binary_btn, &QPushButton::clicked, this, [this](){
 		activateLink(GlobalAttributes::PgModelerDownloadURL);
 	});
 
-	connect(blog_post_tb, &QToolButton::clicked, this, [this](){
+	connect(blog_post_btn, &QPushButton::clicked, this, [this](){
 		activateLink(blogpost);
 	});
 
@@ -50,9 +53,6 @@ UpdateNotifierWidget::UpdateNotifierWidget(QWidget *parent) : QWidget(parent)
 		emit s_hideRequested();
 	});
 
-	GuiUtilsNs::configureWidgetFont(changelog_txt, GuiUtilsNs::MediumFontFactor);
-	GuiUtilsNs::configureWidgetFont(ver_num_lbl, GuiUtilsNs::BigFontFactor);
-	GuiUtilsNs::configureWidgetFont(title_lbl, GuiUtilsNs::BigFontFactor);
 	this->adjustSize();
 }
 
@@ -107,7 +107,7 @@ void UpdateNotifierWidget::handleUpdateChecked(QNetworkReply *reply)
 	{
 		msg_box.show(tr("Failed to check updates"),
 								 tr("The update notifier failed to check for new versions! Please, verify your internet connectivity and try again! Connection error returned: <em>%1</em> - <strong>%2</strong>.").arg(http_status).arg(reply->errorString()),
-								 Messagebox::ErrorIcon, Messagebox::OkButton);
+								 Messagebox::Error, Messagebox::OkButton);
 	}
 	else
 	{
@@ -140,7 +140,7 @@ void UpdateNotifierWidget::handleUpdateChecked(QNetworkReply *reply)
 				if(upd_found)
 				{
 					blogpost = json_obj.value(Attributes::BlogPost).toString();
-					blog_post_tb->setVisible(!blogpost.isEmpty());
+					blog_post_btn->setVisible(!blogpost.isEmpty());
 					ver_num_lbl->setText(version);
 					changelog_txt->setText(changelog);
 					ver_date_lbl->setText(date);
@@ -149,7 +149,7 @@ void UpdateNotifierWidget::handleUpdateChecked(QNetworkReply *reply)
 				{
 					msg_box.show(tr("No updates found"),
 											 tr("You are running the most recent pgModeler version! No update needed."),
-											 Messagebox::InfoIcon, Messagebox::OkButton);
+											 Messagebox::Info, Messagebox::OkButton);
 				}
 
 				emit s_updateAvailable(upd_found);
@@ -158,7 +158,7 @@ void UpdateNotifierWidget::handleUpdateChecked(QNetworkReply *reply)
 			{
 				msg_box.show(tr("Failed to check updates"),
 										 tr("The update notifier failed to check for new versions! A HTTP status code was returned: <strong>%1</strong>").arg(http_status),
-										 Messagebox::ErrorIcon, Messagebox::OkButton);
+										 Messagebox::Error, Messagebox::OkButton);
 			}
 
 			update_chk_reply->deleteLater();

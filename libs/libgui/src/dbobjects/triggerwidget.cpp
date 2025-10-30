@@ -141,7 +141,7 @@ void TriggerWidget::setAttributes(DatabaseModel *model, OperationList *op_list, 
 	unsigned count=0, i;
 
 	if(!parent_table)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	BaseObjectWidget::setAttributes(model, op_list, trigger, parent_table);
 	ref_table_sel->setModel(model);
@@ -220,7 +220,7 @@ void TriggerWidget::applyConfiguration()
 	catch(Exception &e)
 	{
 		cancelConfiguration();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

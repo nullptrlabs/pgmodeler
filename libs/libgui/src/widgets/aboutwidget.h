@@ -37,6 +37,7 @@ class __libgui AboutWidget: public QWidget, public Ui::AboutWidget {
 		
 	signals:
 		void s_hideRequested();
+
 };
 
 #endif

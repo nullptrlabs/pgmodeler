@@ -18,7 +18,7 @@
 
 #include "indexelement.h"
 
-IndexElement::IndexElement() : Element()
+IndexElement::IndexElement()
 {
 	collation=nullptr;
 }

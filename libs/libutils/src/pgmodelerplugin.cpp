@@ -18,16 +18,6 @@
 
 #include "pgmodelerplugin.h"
 
-PgModelerPlugin::PgModelerPlugin()
-{
-
-}
-
-PgModelerPlugin::~PgModelerPlugin()
-{
-
-}
-
 void PgModelerPlugin::setLibraryName(const QString &lib)
 {
 	libname = lib;

@@ -110,34 +110,52 @@ namespace CompatNs {
 
 			/*! \brief Adds a trigger or rule into the view. If the index is specified ( obj_idx >= 0)
 			inserts the object at the position */
-			virtual void addObject(BaseObject *, int = -1) override {}
+			void addObject(BaseObject *, int = -1) override {}
 
 			//! \brief Remove a object from view using its reference
-			virtual void removeObject(BaseObject *) override {}
+			void removeObject(BaseObject *) override {}
 
 			//! \brief Removes the object using the index and type
-			virtual void removeObject(unsigned, ObjectType) override {}
+			void removeObject(unsigned, ObjectType) override {}
 
 			//! \brief Removes the object using the name and type
-			virtual void removeObject(const QString &, ObjectType) override {}
+			void removeObject(const QString &, ObjectType) override {}
 
 			//! \brief Returns the object index searching by its reference
-			virtual	int getObjectIndex(BaseObject *) override { return -1; }
+			int getObjectIndex(BaseObject *) override
+			{
+				return -1;
+			}
 
 			//! \brief Returns the object index searching by its index and type
-			virtual int getObjectIndex(const QString &, ObjectType ) override { return -1; }
+			int getObjectIndex(const QString &, ObjectType) override
+			{
+				return -1;
+			}
 
 			//! \brief Returns the children objects of the view excluding the provided children types (does not include references)
-			virtual std::vector<BaseObject *> getObjects(const std::vector<ObjectType> & = {}) override { return {}; }
+			std::vector<BaseObject *> getObjects(const std::vector<ObjectType> & = {}) override
+			{
+				return {};
+			}
 
 			//! \brief Returns the view's child object using its index and type
-			virtual TableObject *getObject(unsigned, ObjectType) override { return nullptr; }
+			TableObject *getObject(unsigned, ObjectType) override
+			{
+				return nullptr;
+			}
 
 			//! \brief Returns the view's child object using its name and type
-			virtual TableObject *getObject(const QString &, ObjectType ) override { return nullptr; }
+			TableObject *getObject(const QString &, ObjectType) override
+			{
+				return nullptr;
+			}
 
 			//! \brief Returns the view's child object count
-			virtual unsigned getObjectCount(ObjectType, bool=false) override { return 0; }
+			unsigned getObjectCount(ObjectType, bool = false) override
+			{
+				return 0;
+			}
 
 			//! \brief Sets the commom table expression for the view
 			void setCommomTableExpression(const QString &expr);
@@ -167,9 +185,9 @@ namespace CompatNs {
 			int getReferenceIndex(Reference &ref, Reference::SqlType sql_type);
 
 			//! \brief Returns the SQL / XML definition for the view
-			virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+			QString getSourceCode(SchemaParser::CodeType def_type) final;
 
-			virtual QString getDropCode(bool cascade) final;
+			QString getDropCode(bool cascade) final;
 
 			//! \brief Returns if the view is referencing the specified table
 			bool isReferencingTable(PhysicalTable *tab);
@@ -180,9 +198,12 @@ namespace CompatNs {
 			//! \brief Returns if the view has an reference expression that is used as view definition
 			bool hasDefinitionExpression();
 
-			virtual void setObjectListsCapacity(unsigned) override {}
+			void setObjectListsCapacity(unsigned) override {}
 
-			virtual unsigned getMaxObjectCount() override { return DefMaxObjectCount; }
+			unsigned getMaxObjectCount() override
+			{
+				return DefMaxObjectCount;
+			}
 
 			/*! \brief Returns a list of deduced names for view's colums (useful for recursive views).
 			 *	The names are retrieved, first, from columns aliases and lastly from table's columns
@@ -195,11 +216,17 @@ namespace CompatNs {
 
 			std::vector<Reference> getViewReferences();
 
-			virtual QString getDataDictionary(bool , bool, const attribs_map & = {}) override { return ""; }
+			QString getDataDictionary(bool, bool, const attribs_map & = {}) override
+			{
+				return "";
+			}
 
-			virtual QString getAlterCode(BaseObject *) final { return ""; }
+			QString getAlterCode(BaseObject *) final
+			{
+				return "";
+			}
 
-			virtual void updateDependencies() override {}
+			void updateDependencies() override {}
 	};
 }
 #endif

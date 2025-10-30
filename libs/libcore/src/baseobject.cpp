@@ -66,7 +66,7 @@ const QString BaseObject::obj_type_names[ObjectTypeCount] {
 	QT_TR_NOOP("Cast"), QT_TR_NOOP("Language"), QT_TR_NOOP("Type"), QT_TR_NOOP("Tablespace"),
 	QT_TR_NOOP("Operator Family"), QT_TR_NOOP("Operator Class"),
 	QT_TR_NOOP("Database"), QT_TR_NOOP("Collation"), QT_TR_NOOP("Extension"),
-	QT_TR_NOOP("Event Trigger"), QT_TR_NOOP("Policy"),	QT_TR_NOOP("Foreign-data Wrapper"),
+	QT_TR_NOOP("Event Trigger"), QT_TR_NOOP("Policy"),	QT_TR_NOOP("Foreign Data Wrapper"),
 	QT_TR_NOOP("Foreign Server"),	QT_TR_NOOP("Foreign Table"), QT_TR_NOOP("User Mapping"),
 	QT_TR_NOOP("Transform"), QT_TR_NOOP("Procedure"), QT_TR_NOOP("Relationship"),
 	QT_TR_NOOP("Textbox"),	QT_TR_NOOP("Permission"),	QT_TR_NOOP("Parameter"),
@@ -287,94 +287,92 @@ bool BaseObject::isValidName(const QString &name)
 	the name in order to validate the length. */
 	if(name.isEmpty() || aux_name.size() > ObjectNameMaxLength)
 		return false;
-	else
+
+	int i=0, len;
+	bool valid=true;
+	unsigned char chr='\0', chr1='\0', chr2='\0';
+	QByteArray raw_name;
+	bool is_sch_qualified = name.contains('.');
+
+	raw_name.append(name.toUtf8());
+	len=raw_name.size();
+
+	chr=raw_name[0];
+	if(len > 1)
+		chr1=raw_name[len-1];
+
+	//Checks if the name is enclosed in quotes
+	if(chr=='\"' && chr1=='\"')
 	{
-		int i=0, len;
-		bool valid=true;
-		unsigned char chr='\0', chr1='\0', chr2='\0';
-		QByteArray raw_name;
-		bool is_sch_qualified = name.contains('.');
-
-		raw_name.append(name.toUtf8());
-		len=raw_name.size();
-
-		chr=raw_name[0];
-		if(len > 1)
-			chr1=raw_name[len-1];
-
-		//Checks if the name is enclosed in quotes
-		if(chr=='\"' && chr1=='\"')
-		{
-			/* Validates the name but the validation will continue until the
-			end of string (or the last quote) */
-			valid=true; i++; len--;
-		}
-
-		while(valid && i < len)
-		{
-			chr = raw_name[i];
-
-			/* If the name is schema qulified [schema].[name] we just ignore the
-			 * double quotes if they appear because double quote between dot which
-			 * qualifies hierarchy is completely accepatable */
-			if(is_sch_qualified && chr == '"')
-			{
-				i++;
-				continue;
-			}
-
-			/* Validation of simple ASCI characters.
-				Checks if the name has the characters in the set [ a-z A-Z 0-9 _ . @ $ - : space () <>] */
-			if((chr >= 'a' && chr <='z') || (chr >= 'A' && chr <='Z') ||
-					(chr >= '0' && chr <='9') || special_chars.contains(chr))
-			{
-				valid=true;
-				i++;
-			}
-			else valid=false;
-
-			/* Validation of UTF8 charactes (2 and 3 bytes long).
-			Reference: http://www.fileformat.info/info/unicode/utf8.htm
-								 http://en.wikipedia.org/wiki/UTF-8
-
-			Snippet extracted from the above url:
-
-			The value of each individual byte indicates its UTF-8 function, as follows:
-			00 to 7F hex (0 to 127): first and only byte of a sequence.
-			80 to BF hex (128 to 191): continuing byte in a multi-byte sequence.
-			C2 to DF hex (194 to 223): first byte of a two-byte sequence.
-			E0 to EF hex (224 to 239): first byte of a three-byte sequence.  */
-			if(!valid && (i < len-1))
-			{
-				chr1=raw_name[i+1];
-
-				if((i + 2) <= (len-1))
-					chr2=raw_name[i+2];
-				else
-					chr2=0;
-
-				//UTF-8 character with 2 bytes length
-				if((chr  >= 0xC2 && chr <= 0xDF &&
-					chr1 >= 0x80 && chr1 <= 0xBF) ||
-
-						//UTF-8 character with 3 bytes length
-						(chr  >= 0xE0 && chr <= 0xEF &&
-						 chr1 >= 0x80 && chr1 <= 0xBF &&
-						 chr2 >= 0x80 && chr2 <= 0xBF))
-					valid=true;
-
-				//Increments the counter in the size of the validated char
-				if(chr >= 0xC2 && chr <= 0xDF)
-					//2 bytes char
-					i+=2;
-				else
-					//3 bytes char
-					i+=3;
-			}
-		}
-
-		return valid;
+		/* Validates the name but the validation will continue until the
+		end of string (or the last quote) */
+		valid=true; i++; len--;
 	}
+
+	while(valid && i < len)
+	{
+		chr = raw_name[i];
+
+		/* If the name is schema qulified [schema].[name] we just ignore the
+			* double quotes if they appear because double quote between dot which
+			* qualifies hierarchy is completely accepatable */
+		if(is_sch_qualified && chr == '"')
+		{
+			i++;
+			continue;
+		}
+
+		/* Validation of simple ASCI characters.
+			Checks if the name has the characters in the set [ a-z A-Z 0-9 _ . @ $ - : space () <>] */
+		if((chr >= 'a' && chr <='z') || (chr >= 'A' && chr <='Z') ||
+				(chr >= '0' && chr <='9') || special_chars.contains(chr))
+		{
+			valid=true;
+			i++;
+		}
+		else valid=false;
+
+		/* Validation of UTF8 charactes (2 and 3 bytes long).
+		Reference: http://www.fileformat.info/info/unicode/utf8.htm
+								http://en.wikipedia.org/wiki/UTF-8
+
+		Snippet extracted from the above url:
+
+		The value of each individual byte indicates its UTF-8 function, as follows:
+		00 to 7F hex (0 to 127): first and only byte of a sequence.
+		80 to BF hex (128 to 191): continuing byte in a multi-byte sequence.
+		C2 to DF hex (194 to 223): first byte of a two-byte sequence.
+		E0 to EF hex (224 to 239): first byte of a three-byte sequence.  */
+		if(!valid && (i < len-1))
+		{
+			chr1=raw_name[i+1];
+
+			if((i + 2) <= (len-1))
+				chr2=raw_name[i+2];
+			else
+				chr2=0;
+
+			//UTF-8 character with 2 bytes length
+			if((chr  >= 0xC2 && chr <= 0xDF &&
+				chr1 >= 0x80 && chr1 <= 0xBF) ||
+
+					//UTF-8 character with 3 bytes length
+					(chr  >= 0xE0 && chr <= 0xEF &&
+						chr1 >= 0x80 && chr1 <= 0xBF &&
+						chr2 >= 0x80 && chr2 <= 0xBF))
+				valid=true;
+
+			//Increments the counter in the size of the validated char
+			if(chr >= 0xC2 && chr <= 0xDF)
+				//2 bytes char
+				i+=2;
+			else
+				//3 bytes char
+				i+=3;
+		}
+	}
+
+	return valid;
 }
 
 void BaseObject::setDatabase(BaseObject *db)
@@ -403,12 +401,13 @@ void BaseObject::setName(const QString &name)
 	if(!isValidName(aux_name))
 	{
 		if(aux_name.isEmpty())
-			throw Exception(ErrorCode::AsgEmptyNameObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgEmptyNameObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+
 		//If the name is quoted we add 2 bytes to the maximum in order to check if it exceeds the limit
-		else if(aux_name.size() > (ObjectNameMaxLength + (is_quoted ? 2 : 0)))
-			throw Exception(ErrorCode::AsgLongNameObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-		else
-			throw Exception(ErrorCode::AsgInvalidNameObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		if(aux_name.size() > (ObjectNameMaxLength + (is_quoted ? 2 : 0)))
+			throw Exception(ErrorCode::AsgLongNameObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+		
+		throw Exception(ErrorCode::AsgInvalidNameObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	aux_name.remove('"');
@@ -419,7 +418,7 @@ void BaseObject::setName(const QString &name)
 void BaseObject::setAlias(const QString &alias)
 {
 	if(alias.size() > ObjectNameMaxLength)
-		throw Exception(ErrorCode::AsgLongNameObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgLongNameObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	this->alias = alias;
 	setCodeInvalidated(this->alias != alias);
@@ -594,13 +593,17 @@ unsigned int BaseObject::getPgOid()
 void BaseObject::setSchema(BaseObject *schema)
 {
 	if(!schema)
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgNotAllocatedSchema)
-						.arg(this->obj_name, this->getTypeName()),
-						ErrorCode::AsgNotAllocatedSchema,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else if(schema && schema->getObjectType()!=ObjectType::Schema)
-		throw Exception(ErrorCode::AsgInvalidSchemaObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else if(!acceptsSchema())
-		throw Exception(ErrorCode::AsgInvalidSchemaObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										.arg(this->obj_name, this->getTypeName()),
+						ErrorCode::AsgNotAllocatedSchema, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
+	
+	if(schema && schema->getObjectType()!=ObjectType::Schema)
+		throw Exception(ErrorCode::AsgInvalidSchemaObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(!acceptsSchema())
+		throw Exception(ErrorCode::AsgInvalidSchemaObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(this->schema != schema);
 	this->schema = schema;
@@ -609,9 +612,10 @@ void BaseObject::setSchema(BaseObject *schema)
 void BaseObject::setOwner(BaseObject *owner)
 {
 	if(owner && owner->getObjectType()!=ObjectType::Role)
-		throw Exception(ErrorCode::AsgInvalidRoleObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else if(!acceptsOwner())
-		throw Exception(ErrorCode::AsgRoleObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidRoleObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(!acceptsOwner())
+		throw Exception(ErrorCode::AsgRoleObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(this->owner != owner);
 	this->owner = owner;
@@ -620,9 +624,10 @@ void BaseObject::setOwner(BaseObject *owner)
 void BaseObject::setTablespace(BaseObject *tablespace)
 {
 	if(tablespace && tablespace->getObjectType()!=ObjectType::Tablespace)
-		throw Exception(ErrorCode::AsgInvalidTablespaceObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else if(!acceptsTablespace())
-		throw Exception(ErrorCode::AsgTablespaceInvalidObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidTablespaceObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(!acceptsTablespace())
+		throw Exception(ErrorCode::AsgTablespaceInvalidObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(this->tablespace != tablespace);
 	this->tablespace = tablespace;
@@ -631,9 +636,9 @@ void BaseObject::setTablespace(BaseObject *tablespace)
 void BaseObject::setCollation(BaseObject *collation)
 {
 	if(collation && !acceptsCollation())
-		throw Exception(ErrorCode::AsgInvalidCollationObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidCollationObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 	if(collation && collation->getObjectType()!=ObjectType::Collation)
-		throw Exception(ErrorCode::AsgInvalidCollationObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidCollationObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(this->collation != collation);
 	this->collation = collation;
@@ -642,7 +647,7 @@ void BaseObject::setCollation(BaseObject *collation)
 void BaseObject::setAppendedSQL(const QString &sql)
 {
 	if(!acceptsCustomSQL())
-		throw Exception(ErrorCode::AsgCustomSQLObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgCustomSQLObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(this->appended_sql != sql);
 	this->appended_sql=sql;
@@ -651,7 +656,7 @@ void BaseObject::setAppendedSQL(const QString &sql)
 void BaseObject::setPrependedSQL(const QString &sql)
 {
 	if(!acceptsCustomSQL())
-		throw Exception(ErrorCode::AsgCustomSQLObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgCustomSQLObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(this->prepended_sql != sql);
 	this->prepended_sql=sql;
@@ -991,13 +996,15 @@ QString BaseObject::getSourceCode(SchemaParser::CodeType def_type, bool reduced_
 			schparser.restartParser();
 			clearAttributes();
 
-			if(e.getErrorCode()==ErrorCode::UndefinedAttributeValue)
+			if(e.getErrorCode() == ErrorCode::UndefinedAttributeValue)
+			{
 				throw Exception(Exception::getErrorMessage(ErrorCode::AsgObjectInvalidDefinition)
-								.arg(this->getName(true))
-								.arg(this->getTypeName()),
-								ErrorCode::AsgObjectInvalidDefinition,__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
-			else
-				throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+												.arg(this->getName(true))
+												.arg(this->getTypeName()),
+												ErrorCode::AsgObjectInvalidDefinition, PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+			}
+
+			throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 		}
 	}
 
@@ -1027,11 +1034,11 @@ void BaseObject::swapObjectsIds(BaseObject *obj1, BaseObject *obj2, bool enable_
 {
 	//Raises an error if some of the objects aren't allocated
 	if(!obj1 || !obj2)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Raises an error if the involved objects are the same
 	if(obj1==obj2)
-		throw Exception(ErrorCode::InvIdSwapSameObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::InvIdSwapSameObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Raises an error if the some of the objects are system objects
 	if(obj1->isSystemObject())
@@ -1039,7 +1046,7 @@ void BaseObject::swapObjectsIds(BaseObject *obj1, BaseObject *obj2, bool enable_
 		throw Exception(Exception::getErrorMessage(ErrorCode::OprReservedObject)
 						.arg(obj1->getName())
 						.arg(obj1->getTypeName()),
-						ErrorCode::OprReservedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::OprReservedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	if(obj2->isSystemObject())
@@ -1047,7 +1054,7 @@ void BaseObject::swapObjectsIds(BaseObject *obj1, BaseObject *obj2, bool enable_
 		throw Exception(Exception::getErrorMessage(ErrorCode::OprReservedObject)
 						.arg(obj2->getName())
 						.arg(obj2->getTypeName()),
-						ErrorCode::OprReservedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::OprReservedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	//Raises an error if the object is object is cluster level and the swap of these types isn't enabled
@@ -1058,7 +1065,7 @@ void BaseObject::swapObjectsIds(BaseObject *obj1, BaseObject *obj2, bool enable_
 
 		 obj1->getObjectType() != obj2->getObjectType())
 	{
-		throw Exception(ErrorCode::InvIdSwapInvalidObjectType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::InvIdSwapInvalidObjectType,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	unsigned id_bkp=obj1->object_id;
@@ -1070,14 +1077,17 @@ void BaseObject::updateObjectId(BaseObject *obj)
 {
 	//Raises an error if some of the objects aren't allocated
 	if(!obj)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else  if(obj->isSystemObject())
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(obj->isSystemObject())
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::OprReservedObject)
-						.arg(obj->getName())
-						.arg(obj->getTypeName()),
-						ErrorCode::OprReservedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else
-		obj->object_id=++global_id;
+										.arg(obj->getName())
+										.arg(obj->getTypeName()),
+										ErrorCode::OprReservedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
+	
+	obj->object_id=++global_id;
 }
 
 std::vector<ObjectType> BaseObject::getObjectTypes(bool inc_table_objs, std::vector<ObjectType> exclude_types)
@@ -1166,7 +1176,7 @@ void BaseObject::setPgSQLVersion(const QString &version)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -1306,9 +1316,10 @@ bool BaseObject::isCodeDiffersFrom(const QString &xml_def1, const QString &xml_d
 bool BaseObject::isCodeDiffersFrom(BaseObject *object, const QStringList &ignored_attribs, const QStringList &ignored_tags)
 {
 	if(!object)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else if(object->getObjectType()!=this->getObjectType())
-		throw Exception(ErrorCode::OprObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
+
+	if(object->getObjectType() != this->getObjectType())
+		throw Exception(ErrorCode::OprObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	try
 	{
@@ -1318,7 +1329,7 @@ bool BaseObject::isCodeDiffersFrom(BaseObject *object, const QStringList &ignore
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -1333,11 +1344,11 @@ QString BaseObject::getCachedCode(unsigned def_type, bool reduced_form)
 	{
 		if(def_type==SchemaParser::XmlCode  && reduced_form)
 			return cached_reduced_code;
-		else
-			return cached_code[def_type];
+		
+		return cached_code[def_type];
 	}
-	else
-		return "";
+
+	return "";
 }
 
 QString BaseObject::getDropCode(bool cascade)
@@ -1364,12 +1375,12 @@ QString BaseObject::getDropCode(bool cascade)
 
 			return schparser.getSourceCode(Attributes::Drop, attribs, SchemaParser::SqlCode);
 		}
-		else
-			return "";
+		
+		return "";
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -1387,7 +1398,7 @@ QString BaseObject::getAlterCode(QString sch_name, attribs_map &attribs, bool ig
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -1411,12 +1422,12 @@ QString BaseObject::getAlterCode(BaseObject *object)
 QString BaseObject::getAlterCode(BaseObject *object, bool ignore_name_diff)
 {
 	if(!object)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	QString alter;
 
 	if(object->obj_type!=this->obj_type)
-		throw Exception(ErrorCode::OprObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setBasicAttributes(true);
 
@@ -1449,7 +1460,7 @@ QString BaseObject::getAlterCode(BaseObject *object, bool ignore_name_diff)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 
 	return alter;
@@ -1481,7 +1492,7 @@ QString BaseObject::getAlterCommentDefinition(BaseObject *object, attribs_map at
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -1633,8 +1644,16 @@ void BaseObject::updateDependencies()
 
 void BaseObject::updateDependencies(const std::vector<BaseObject *> &dep_objs, const std::vector<BaseObject *> &old_deps)
 {
-	for(auto &old_dep : old_deps)
-		unsetDependency(old_dep);
+	/* If the custom list of old dependencies is emtpy, by default,
+	 * the current dependencies will be unset */
+	if(old_deps.empty())
+		clearDependencies();
+	// Otherwise we unset only the dependencies provided in old_deps
+	else
+	{
+		for(auto &old_dep : old_deps)
+			unsetDependency(old_dep);
+	}
 
 	std::vector<BaseObject *> aux_deps = {
 		schema, tablespace, owner, collation

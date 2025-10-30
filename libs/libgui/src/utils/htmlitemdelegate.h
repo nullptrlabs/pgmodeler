@@ -42,13 +42,12 @@ class __libgui HtmlItemDelegate : public PlainTextItemDelegate {
 		static const QRegularExpression TagRegExp;
 
 		HtmlItemDelegate(QObject * parent = nullptr, bool ignore_tags_sz_hint = false);
+		~HtmlItemDelegate() override = default;
 
-		virtual ~HtmlItemDelegate();
-
-		QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+		QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 	protected:
-		virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+		void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 };
 
 #endif

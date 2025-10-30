@@ -17,6 +17,7 @@
 */
 
 #include "bugreportform.h"
+#include "customuistyle.h"
 #include "exception.h"
 #include "globalattributes.h"
 #include "messagebox.h"
@@ -30,6 +31,8 @@ BugReportForm::BugReportForm(QWidget *parent, Qt::WindowFlags f) : QDialog(paren
 								 Qt::WindowTitleHint |
 								 Qt::WindowMinMaxButtonsHint |
 								 Qt::WindowCloseButtonHint);
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, hint_frm);
 
 	output_sel = new FileSelectorWidget(this);
 	output_sel->setWindowTitle(tr("Select report output folder"));
@@ -106,7 +109,7 @@ void BugReportForm::generateReport(const QByteArray &buf)
 	if(!output.isOpen())
 	{
 		Messagebox::error(Exception::getErrorMessage(ErrorCode::FileDirectoryNotWritten).arg(filename),
-											ErrorCode::FileDirectoryNotWritten, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+											ErrorCode::FileDirectoryNotWritten, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 	else
 	{
@@ -140,6 +143,6 @@ void BugReportForm::attachModel()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }

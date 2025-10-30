@@ -74,7 +74,7 @@
         <number>5</number>
        </property>
        <item>
-        <widget class="QToolButton" name="filter_btn">
+        <widget class="QPushButton" name="filter_btn">
          <property name="enabled">
           <bool>true</bool>
          </property>
@@ -108,9 +108,6 @@
          </property>
          <property name="checkable">
           <bool>true</bool>
-         </property>
-         <property name="toolButtonStyle">
-          <enum>Qt::ToolButtonTextBesideIcon</enum>
          </property>
         </widget>
        </item>
@@ -245,16 +242,16 @@
      <item row="3" column="0" colspan="3">
       <widget class="QTableView" name="objects_view">
        <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
+        <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
        </property>
        <property name="alternatingRowColors">
         <bool>true</bool>
        </property>
        <property name="selectionMode">
-        <enum>QAbstractItemView::SingleSelection</enum>
+        <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
        </property>
        <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
+        <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
        </property>
        <property name="iconSize">
         <size>
@@ -337,7 +334,7 @@
         </size>
        </property>
        <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
+        <enum>Qt::FocusPolicy::StrongFocus</enum>
        </property>
        <property name="toolTip">
         <string>Swap the values of the fields</string>
@@ -356,7 +353,7 @@
         </size>
        </property>
        <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonIconOnly</enum>
+        <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
        </property>
       </widget>
      </item>
@@ -431,10 +428,10 @@
       </size>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
@@ -467,7 +464,7 @@
          <string/>
         </property>
         <property name="textFormat">
-         <enum>Qt::AutoText</enum>
+         <enum>Qt::TextFormat::AutoText</enum>
         </property>
         <property name="pixmap">
          <pixmap resource="../../res/resources.qrc">:/icons/icons/alert.png</pixmap>
@@ -514,7 +511,6 @@
   <tabstop>hide_rels_chk</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

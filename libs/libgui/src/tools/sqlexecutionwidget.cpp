@@ -25,6 +25,8 @@
 #include "messagebox.h"
 #include "pgmodelerguiplugin.h"
 #include <QClipboard>
+#include <QButtonGroup>
+#include <qnamespace.h>
 
 std::map<QString, QString> SQLExecutionWidget::cmd_history;
 int SQLExecutionWidget::cmd_history_max_len {1000};
@@ -35,7 +37,7 @@ SQLExecutionWidget::SQLExecutionWidget(QWidget * parent) : QWidget(parent)
 	setupUi(this);
 
 	output_wgt->setVisible(false);
-	plugins_wgts_stc->setVisible(false);
+	plugins_wgts_stw->setVisible(false);
 	sql_cmd_splitter->setSizes({800, 200});
 
 	sql_cmd_txt=GuiUtilsNs::createNumberedTextEditor(sql_cmd_wgt);
@@ -79,6 +81,9 @@ SQLExecutionWidget::SQLExecutionWidget(QWidget * parent) : QWidget(parent)
 	file_tb->setToolTip(file_tb->toolTip() + QString(" (%1)").arg(file_tb->shortcut().toString()));
 	output_tb->setToolTip(output_tb->toolTip() + QString(" (%1)").arg(output_tb->shortcut().toString()));
 	clear_all_tb->setToolTip(clear_all_tb->toolTip() + QString(" (%1)").arg(clear_all_tb->shortcut().toString()));
+
+	for(auto &btn : top_btns_wgt->findChildren<QToolButton *>())
+		GuiUtilsNs::configureWidgetFont(btn, GuiUtilsNs::MediumFontFactor);
 
 	results_tbw->setItemDelegate(new PlainTextItemDelegate(this, true));
 
@@ -140,16 +145,10 @@ SQLExecutionWidget::SQLExecutionWidget(QWidget * parent) : QWidget(parent)
 			sql_cmd_txt->setFocus();
 	});
 
-	connect(exact_chk, &QCheckBox::toggled, this, &SQLExecutionWidget::filterResults);
-	connect(exact_chk, &QCheckBox::toggled, this, [this](bool checked){
-		regexp_chk->setChecked(false);
-		regexp_chk->setEnabled(!checked);
-		case_sensitive_chk->setChecked(false);
-		case_sensitive_chk->setEnabled(!checked);
-	});
 
-	connect(regexp_chk, &QCheckBox::toggled, this, &SQLExecutionWidget::filterResults);
-	connect(case_sensitive_chk, &QCheckBox::toggled, this, &SQLExecutionWidget::filterResults);
+	connect(all_words_tb, &QCheckBox::toggled, this, &SQLExecutionWidget::filterResults);
+	connect(regexp_tb, &QCheckBox::toggled, this, &SQLExecutionWidget::filterResults);
+	connect(case_sensitive_tb, &QCheckBox::toggled, this, &SQLExecutionWidget::filterResults);
 
 	connect(action_load, &QAction::triggered, this, &SQLExecutionWidget::loadCommands);
 	connect(action_save, &QAction::triggered, this, &SQLExecutionWidget::saveCommands);
@@ -231,15 +230,17 @@ bool SQLExecutionWidget::eventFilter(QObject *object, QEvent *event)
 		output_tb->setChecked(!v_splitter->handle(1)->isEnabled());
 		return true;
 	}
-	else if(event->type()== QEvent::MouseButtonPress &&
-					dynamic_cast<QMouseEvent *>(event)->button()==Qt::MiddleButton &&
-					object == cmd_history_txt &&
-					cmd_history_txt->textCursor().hasSelection())
+
+	if(event->type()== QEvent::MouseButtonPress &&
+		 dynamic_cast<QMouseEvent *>(event)->button()==Qt::MiddleButton &&
+		 object == cmd_history_txt &&
+		 cmd_history_txt->textCursor().hasSelection())
 	{
 		sql_cmd_txt->appendPlainText(cmd_history_txt->textCursor().selectedText());
 		return true;
 	}
-	else if(event->type() == QEvent::Show && object == output_tbw->widget(2))
+
+	if(event->type() == QEvent::Show && object == output_tbw->widget(2))
 	{
 		if(cmd_history_txt->toPlainText().count(QChar('\n')) !=
 			 cmd_history[sql_cmd_conn.getConnectionId(true,true)].count(QChar('\n')))
@@ -265,7 +266,7 @@ void SQLExecutionWidget::reloadHighlightConfigs()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -279,6 +280,7 @@ void SQLExecutionWidget::installPluginWidgets(QToolButton *btn, QWidget *wgt)
 	/* Forcing the button to have the same features of all other buttons in the
 	 * top area when they lie */
 	btn->setIconSize(run_sql_tb->iconSize());
+	btn->setFont(run_sql_tb->font());
 	btn->setSizePolicy(run_sql_tb->sizePolicy());
 	btn->setToolButtonStyle(run_sql_tb->toolButtonStyle());
 	btn->setAutoRaise(run_sql_tb->autoRaise());
@@ -289,7 +291,7 @@ void SQLExecutionWidget::installPluginWidgets(QToolButton *btn, QWidget *wgt)
 	int idx = -1;
 
 	if(wgt)
-		idx = plugins_wgts_stc->addWidget(wgt);
+		idx = plugins_wgts_stw->addWidget(wgt);
 
 	btn->setProperty(Attributes::Index.toStdString().c_str(), idx);
 }
@@ -315,10 +317,10 @@ void SQLExecutionWidget::togglePluginButton(bool checked)
 	int wgt_idx = p_btn->property(Attributes::Index.toStdString().c_str()).toInt();
 
 	// Disabling updates prevents flickering when hidding the stacked widgets
-	plugins_wgts_stc->setUpdatesEnabled(false);
-	plugins_wgts_stc->setVisible(checked && wgt_idx >= 0);
-	plugins_wgts_stc->setCurrentIndex(wgt_idx);
-	plugins_wgts_stc->setUpdatesEnabled(true);
+	plugins_wgts_stw->setUpdatesEnabled(false);
+	plugins_wgts_stw->setVisible(checked && wgt_idx >= 0);
+	plugins_wgts_stw->setCurrentIndex(wgt_idx);
+	plugins_wgts_stw->setUpdatesEnabled(true);
 }
 
 void SQLExecutionWidget::setConnection(Connection conn)
@@ -375,7 +377,7 @@ void SQLExecutionWidget::resizeEvent(QResizeEvent *event)
 void SQLExecutionWidget::fillResultsTable(Catalog &catalog, ResultSet &res, QTableWidget *results_tbw, bool store_data)
 {
 	if(!results_tbw)
-		throw Exception(ErrorCode::OprNotAllocatedObject ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
@@ -463,7 +465,7 @@ void SQLExecutionWidget::fillResultsTable(Catalog &catalog, ResultSet &res, QTab
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -578,21 +580,36 @@ void SQLExecutionWidget::finishExecution(int rows_affected)
 void SQLExecutionWidget::filterResults()
 {
 	QModelIndexList list;
-	Qt::MatchFlags flags = Qt::MatchStartsWith;
 	int rows_cnt = results_tbw->model()->rowCount();
 
-	if(exact_chk->isChecked())
-		flags = Qt::MatchExactly;
-	else if(regexp_chk->isChecked())
-		flags = Qt::MatchRegularExpression;
+	// Filtering using regular expressions
+	if(regexp_tb->isChecked())
+	{
+		QRegularExpression pattern { filter_edt->text() };
+
+		if(!case_sensitive_tb->isChecked())
+			pattern.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+
+		if(all_words_tb->isChecked())
+			pattern.setPattern(QString("^%1$").arg(pattern.pattern()));
+
+		list = results_tbw->model()->match(results_tbw->model()->index(0, columns_cmb->currentIndex()),
+																			 Qt::DisplayRole, pattern, -1, Qt::MatchRegularExpression);
+	}
+	// Filtering using normal text matching
 	else
-		flags = Qt::MatchContains;
+	{
+		Qt::MatchFlags flags = Qt::MatchContains;
 
-	if(case_sensitive_chk->isChecked())
-		flags |= Qt::MatchCaseSensitive;
+		if(all_words_tb->isChecked())
+			flags = Qt::MatchExactly;
+		
+		if(case_sensitive_tb->isChecked())
+			flags |= Qt::MatchCaseSensitive;
 
-	list = results_tbw->model()->match(results_tbw->model()->index(0, columns_cmb->currentIndex()),
-																		 Qt::DisplayRole, filter_edt->text(), -1, flags);
+		list = results_tbw->model()->match(results_tbw->model()->index(0, columns_cmb->currentIndex()),
+																			 Qt::DisplayRole, filter_edt->text(), -1, flags);
+	}
 
 	results_tbw->blockSignals(true);
 	results_tbw->setUpdatesEnabled(false);
@@ -760,7 +777,7 @@ void SQLExecutionWidget::saveCommands()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -785,7 +802,7 @@ void SQLExecutionWidget::loadCommands()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -823,7 +840,7 @@ void SQLExecutionWidget::exportResults(QTableView *results_tbw, bool csv_format)
 	catch(Exception &e)
 	{
 		//qApp->restoreOverrideCursor();
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -868,11 +885,11 @@ QByteArray SQLExecutionWidget::generateTextBuffer(QTableView *results_tbw, bool 
 QByteArray SQLExecutionWidget::generateBuffer(QTableView *results_tbw, QChar separator, bool incl_col_names, bool csv_format)
 {
 	if(!results_tbw)
-		throw Exception(ErrorCode::OprNotAllocatedObject ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if((results_tbw->model() && results_tbw->model()->rowCount() == 0) ||
 		 !results_tbw->selectionModel())
-		return QByteArray();
+		return {};
 
 	QAbstractItemModel *model = results_tbw->model();
 	QModelIndexList sel_indexes;
@@ -1018,7 +1035,7 @@ void SQLExecutionWidget::copySelection(QTableView *results_tbw, bool use_popup, 
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -1083,7 +1100,7 @@ void SQLExecutionWidget::saveSQLHistory()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -1123,7 +1140,7 @@ void SQLExecutionWidget::loadSQLHistory()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -1162,7 +1179,7 @@ void SQLExecutionWidget::enableSQLExecution(bool enable)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

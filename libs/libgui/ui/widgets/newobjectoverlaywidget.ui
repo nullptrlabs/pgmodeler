@@ -59,10 +59,10 @@
       </sizepolicy>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
+      <enum>QFrame::Shadow::Sunken</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="spacing">
@@ -82,6 +82,12 @@
       </property>
       <item>
        <widget class="QGroupBox" name="db_objs_grp">
+        <property name="font">
+         <font>
+          <italic>false</italic>
+          <bold>false</bold>
+         </font>
+        </property>
         <property name="title">
          <string>Database objects</string>
         </property>
@@ -140,7 +146,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Data Wrapper</string>
@@ -159,10 +165,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -181,7 +187,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Permissions</string>
@@ -200,10 +206,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -222,7 +228,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Textbox</string>
@@ -241,10 +247,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -263,7 +269,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Language</string>
@@ -282,10 +288,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -304,7 +310,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Role</string>
@@ -323,10 +329,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -345,7 +351,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Generic SQL</string>
@@ -364,10 +370,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -386,7 +392,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>User mapping</string>
@@ -405,10 +411,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -427,7 +433,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Server</string>
@@ -446,10 +452,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -468,7 +474,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Event Trigger</string>
@@ -487,10 +493,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -509,7 +515,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Extension</string>
@@ -528,10 +534,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -550,7 +556,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Tablespace</string>
@@ -569,10 +575,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -591,7 +597,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Tag</string>
@@ -610,10 +616,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -632,7 +638,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Transform</string>
@@ -651,10 +657,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -673,7 +679,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Schema</string>
@@ -692,10 +698,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -714,7 +720,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Cast</string>
@@ -736,10 +742,10 @@
                <bool>false</bool>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -751,6 +757,12 @@
       </item>
       <item>
        <widget class="QGroupBox" name="sch_objs_grp">
+        <property name="font">
+         <font>
+          <italic>false</italic>
+          <bold>false</bold>
+         </font>
+        </property>
         <property name="title">
          <string>Schema objects</string>
         </property>
@@ -809,7 +821,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Operator</string>
@@ -825,10 +837,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -847,7 +859,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Sequence</string>
@@ -863,10 +875,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -885,7 +897,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Type</string>
@@ -901,10 +913,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -923,7 +935,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Foreign Table</string>
@@ -939,10 +951,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -961,7 +973,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Collation</string>
@@ -977,10 +989,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -999,7 +1011,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>View</string>
@@ -1015,10 +1027,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1037,7 +1049,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Table</string>
@@ -1053,10 +1065,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1075,7 +1087,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Domain</string>
@@ -1091,10 +1103,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1113,7 +1125,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Op. Family</string>
@@ -1129,10 +1141,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1151,7 +1163,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Function</string>
@@ -1167,10 +1179,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1189,7 +1201,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Op. Class</string>
@@ -1205,10 +1217,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1227,7 +1239,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Procedure</string>
@@ -1243,10 +1255,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1265,7 +1277,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Conversion</string>
@@ -1281,10 +1293,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1303,7 +1315,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Aggregate</string>
@@ -1319,10 +1331,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1392,7 +1404,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Constraint</string>
@@ -1408,10 +1420,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1430,7 +1442,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Index</string>
@@ -1446,10 +1458,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1468,7 +1480,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Policy</string>
@@ -1484,10 +1496,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1506,7 +1518,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Rule</string>
@@ -1522,10 +1534,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1544,7 +1556,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Column</string>
@@ -1560,10 +1572,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1582,7 +1594,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Trigger</string>
@@ -1598,10 +1610,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1620,7 +1632,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Permissions</string>
@@ -1636,10 +1648,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1709,7 +1721,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Many-to-many</string>
@@ -1725,10 +1737,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1747,7 +1759,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>One-to-many</string>
@@ -1763,10 +1775,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1785,7 +1797,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>One-to-one</string>
@@ -1801,10 +1813,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1823,7 +1835,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Inheritance</string>
@@ -1839,10 +1851,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1861,7 +1873,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Copy</string>
@@ -1877,10 +1889,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1899,7 +1911,7 @@
                </font>
               </property>
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string>Partitioning</string>
@@ -1915,10 +1927,10 @@
                </size>
               </property>
               <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
+               <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextUnderIcon</enum>
+               <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
               </property>
              </widget>
             </item>
@@ -1928,7 +1940,7 @@
          <item row="0" column="1">
           <spacer name="horizontalSpacer">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1991,7 +2003,6 @@
   <tabstop>relpart_tb</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

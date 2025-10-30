@@ -39,11 +39,11 @@ ObjectTypesListWidget::ObjectTypesListWidget(QWidget *parent, const std::vector<
 
 	obj_types_lst->adjustSize();
 
-	connect(check_all_tb, &QToolButton::clicked, this, [this](){
+	connect(check_all_btn, &QPushButton::clicked, this, [this](){
 		setTypesCheckState(Qt::Checked);
 	});
 
-	connect(uncheck_all_tb, &QToolButton::clicked, this, [this](){
+	connect(uncheck_all_btn, &QPushButton::clicked, this, [this](){
 		setTypesCheckState(Qt::Unchecked);
 	});
 

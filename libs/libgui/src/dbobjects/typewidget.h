@@ -77,7 +77,7 @@ class __libgui TypeWidget: public BaseObjectWidget, public Ui::TypeWidget {
 		void showAttributeData(TypeAttribute attrib, int row);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

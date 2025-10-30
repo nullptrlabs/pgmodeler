@@ -66,8 +66,7 @@ class __libcore Collation : public BaseObject {
 
 	public:
 		Collation();
-
-		virtual ~Collation(){}
+		~Collation() override = default;
 
 		/*! \brief Sets the collation locale and the base encoding. This method specifies at once the LC_CTYPE
 		and LC_COLLATE attributes. When the user calls this method with 'locale' set the use of setLocalization()
@@ -84,7 +83,7 @@ class __libcore Collation : public BaseObject {
 
 		/*! \brief Sets the collation from which this collation will copy attributes. The use of this method nullifies
 		all the other collation's attributes */
-		void setCollation(BaseObject *collation);
+		void setCollation(BaseObject *collation) override;
 
 		//! \brief Defines the base encoding for the collation
 		void setEncoding(EncodingType encoding);
@@ -100,8 +99,8 @@ class __libcore Collation : public BaseObject {
 		bool isDeterministic();
 
 		//! \brief Returns the SQL / XML definition for the collation.
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
 };
 
 #endif

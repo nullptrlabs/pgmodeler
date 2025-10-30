@@ -3,8 +3,9 @@
 CAUTION: Do not modify this file unless you know what you are doing.
  Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="1.1.2" use-changelog="false" max-obj-count="16"
-	 last-position="67,-174" last-zoom="0.7" scene-rect="0,-248.985,2615.14,1850.56"
+<dbmodel pgmodeler-ver="2.0.0-alpha" use-changelog="false" max-obj-count="16"
+	 gen-disabled-objs-code="false" show-sys-schemas-rects="false"
+	 last-position="0,0" last-zoom="0.55" scene-rect="0,-248.985,2615.14,1850.56"
 	 default-schema="public" default-owner="postgres"
 	 layers="Default layer"
 	 active-layers="0"
@@ -22,7 +23,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="categories" layers="0" collapse-mode="2" max-obj-count="4" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="50" y="1075.45"/>
+	<position x="60" y="1080"/>
 	<column name="category_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -43,7 +44,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="customer_customer_demo" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="142.59" y="95.4545"/>
+	<position x="140" y="100"/>
 	<column name="customer_id" not-null="true">
 		<type name="character varying" length="5"/>
 	</column>
@@ -58,7 +59,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="customer_demographics" layers="0" collapse-mode="2" max-obj-count="2" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1076.16" y="-8.18182"/>
+	<position x="1080" y="0"/>
 	<column name="customer_type_id" not-null="true">
 		<type name="character varying" length="5"/>
 	</column>
@@ -73,7 +74,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="customers" layers="0" collapse-mode="2" max-obj-count="13" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1599.96" y="250"/>
+	<position x="1600" y="260"/>
 	<column name="customer_id" not-null="true">
 		<type name="character varying" length="5"/>
 	</column>
@@ -115,7 +116,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="employees" layers="0" collapse-mode="2" max-obj-count="21" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="2135.66" y="317.273"/>
+	<position x="2140" y="320"/>
 	<column name="employee_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -178,7 +179,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="employee_territories" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1630" y="1059.65"/>
+	<position x="1640" y="1060"/>
 	<column name="employee_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -193,7 +194,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="order_details" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1067.31" y="436.015"/>
+	<position x="1060" y="440"/>
 	<column name="order_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -217,7 +218,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="orders" layers="0" collapse-mode="2" max-obj-count="16" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1021.71" y="897.833"/>
+	<position x="1020" y="900"/>
 	<column name="order_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -268,7 +269,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="products" layers="0" collapse-mode="2" max-obj-count="12" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="134.747" y="372.379"/>
+	<position x="140" y="380"/>
 	<column name="product_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -307,7 +308,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="region" layers="0" collapse-mode="1" max-obj-count="2" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="2198.57" y="1072.38"/>
+	<position x="2200" y="1080"/>
 	<column name="region_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -322,7 +323,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="shippers" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="584.545" y="656.83"/>
+	<position x="580" y="660"/>
 	<column name="shipper_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -340,7 +341,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="suppliers" layers="0" collapse-mode="2" max-obj-count="14" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="542.063" y="1136.83"/>
+	<position x="540" y="1140"/>
 	<column name="supplier_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -385,7 +386,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="territories" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1877.76" y="1418.65"/>
+	<position x="1880" y="1420"/>
 	<column name="territory_id" not-null="true">
 		<type name="character varying" length="20"/>
 	</column>
@@ -403,7 +404,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="us_states" layers="0" collapse-mode="2" max-obj-count="4" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1671.05" y="-10.4429"/>
+	<position x="1680" y="-20"/>
 	<column name="state_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -421,8 +422,8 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</constraint>
 </table>
 
-<textbox name="northwind_desc" layers="0" z-value="0" width="563.328" font-size="12">
-	<position x="113.333" y="-228.485"/>
+<textbox name="northwind_desc" layers="0" z-value="0" width="561.703" font-size="12">
+	<position x="120" y="-220"/>
 	<comment> <![CDATA[[ northwind sample database ]
 
 A representation of the famous northwind example database, adapted for PostgreSQL.
@@ -526,9 +527,9 @@ This model was reverse engineered from the original database available on this l
 	 dst-table="public.employees" reference-fk="fk_employees_employees"
 	 src-required="false" dst-required="false">
 	<line>
-		<position x="2518.84" y="484.581"/>
-	<position x="2518.84" y="284.273"/>
-	<position x="2369.12" y="284.273"/>
+		<position x="2512.7" y="487.308"/>
+	<position x="2512.7" y="287"/>
+	<position x="2366.46" y="287"/>
 	</line>
 </relationship>
 

@@ -41,7 +41,7 @@ class __libgui ExtensionWidget: public BaseObjectWidget, public Ui::ExtensionWid
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, Extension *ext);
 		
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

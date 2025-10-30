@@ -95,11 +95,14 @@ class __libcore BaseRelationship: public BaseGraphicObject  {
 
 		QString getCachedCode(unsigned def_type);
 
-		virtual QString getDropCode(bool) final { return ""; }
+		QString getDropCode(bool) final
+		{
+			return "";
+		}
 
-		void setReferenceForeignKey(Constraint *reference_fk);
+		void setReferenceForeignKey(Constraint *ref_fk);
 
-		virtual void configureSearchAttributes() override;
+		void configureSearchAttributes() override;
 
 	public:
 		//! \brief Constants used to reference the relationship labels
@@ -117,12 +120,12 @@ class __libcore BaseRelationship: public BaseGraphicObject  {
 
 		BaseRelationship(BaseRelationship *rel);
 
-		BaseRelationship(RelType rel_type, BaseTable *src_tab, BaseTable *dst_tab, bool dst_mandatory, bool src_mandatory);
+		BaseRelationship(RelType rel_type, BaseTable *src_tab, BaseTable *dst_tab, bool src_mandatory, bool dst_mandatory);
 
-		virtual ~BaseRelationship();
+		~BaseRelationship() override;
 
 		//! \brief Sets the name of the relationship
-		virtual void setName(const QString &name) override;
+		void setName(const QString &name) override;
 
 		//! \brief Sets the mandatory participation for the specified table (Via constants SRC_TABLE | DST_TABLE)
 		void setMandatoryTable(TableId table_id, bool value);
@@ -144,7 +147,7 @@ class __libcore BaseRelationship: public BaseGraphicObject  {
 
 		/*! \brief Since base relationships doesn't has SQL code definition this method will return a empty
 		definition whenever the user try to generate a SQL for this object. */
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) override;
+		QString getSourceCode(SchemaParser::CodeType def_type) override;
 
 		//! \brief Returns whether the table is linked to itself via relationship (self-relationship)
 		bool isSelfRelationship();
@@ -178,15 +181,18 @@ class __libcore BaseRelationship: public BaseGraphicObject  {
 
 		QString getRelTypeAttribute();
 
-		virtual void setCodeInvalidated(bool value) override;
+		void setCodeInvalidated(bool value) override;
 
-		virtual QString getAlterCode(BaseObject *) override { return ""; }
+		QString getAlterCode(BaseObject *) override
+		{
+			return "";
+		}
 
 		static QString getRelationshipTypeName(RelType rel_type, bool is_view = false);
 
 		QString getRelationshipTypeName();
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 
 		friend class DatabaseModel;
 		friend class RelationshipWidget;

@@ -51,10 +51,10 @@ class __libgui SnippetsConfigWidget: public BaseConfigWidget, public Ui::Snippet
 		//! \brief Validates the specified snippet atributes against the current loaded ones
 		bool isSnippetValid(attribs_map &attribs, const QString &orig_id="");
 
-		virtual void hideEvent(QHideEvent *) override;
+		void hideEvent(QHideEvent *) override;
 
 		/* Disable methods */
-		virtual void applyConfiguration(void) override {}
+		void applyConfiguration(void) override {}
 
 		//! \brief Parse the snippet map by using the 'attribs' attributes referenced in the snippet code (for parsable snippets)
 		static QString parseSnippet(attribs_map snippet, attribs_map attribs);
@@ -65,9 +65,9 @@ class __libgui SnippetsConfigWidget: public BaseConfigWidget, public Ui::Snippet
 	public:
 		SnippetsConfigWidget(QWidget * parent = nullptr);
 
-		virtual void saveConfiguration() override;
+		void saveConfiguration() override;
 
-		virtual void loadConfiguration() override;
+		void loadConfiguration() override;
 
 		static std::map<QString, attribs_map> getConfigurationParams();
 
@@ -110,9 +110,9 @@ class __libgui SnippetsConfigWidget: public BaseConfigWidget, public Ui::Snippet
 		void parseSnippet();
 
 	public slots:
-		virtual void restoreDefaults() override;
+		void restoreDefaults() override;
 
-		friend class ConfigurationForm;
+		friend class ConfigurationWidget;
 };
 
 #endif

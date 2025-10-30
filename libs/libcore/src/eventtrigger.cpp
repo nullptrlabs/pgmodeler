@@ -37,22 +37,31 @@ void EventTrigger::setEvent(EventTriggerType evnt_type)
 void EventTrigger::setFunction(Function *func)
 {
 	if(!func)
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgNotAllocatedFunction)
-						.arg(this->getName())
-						.arg(BaseObject::getTypeName(ObjectType::EventTrigger)),
-						ErrorCode::AsgNotAllocatedFunction,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										.arg(this->getName())
+										.arg(BaseObject::getTypeName(ObjectType::EventTrigger)),
+										ErrorCode::AsgNotAllocatedFunction, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
 	//Functions with return type other that event_trigger are not accepted
-	else if(func->getReturnType()!="event_trigger")
-		throw Exception(Exception::getErrorMessage(ErrorCode::AsgInvalidTriggerFunction).arg("event_trigger"),__PRETTY_FUNCTION__,__FILE__,__LINE__);
+	if(func->getReturnType()!="event_trigger")
+	{
+		throw Exception(Exception::getErrorMessage(ErrorCode::AsgInvalidTriggerFunction)
+										.arg("event_trigger"), PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
+
 	//Functions with one or more parameters are not accepted
-	else if(func->getParameterCount()!=0)
+	if(func->getParameterCount()!=0)
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParamCount)
-						.arg(this->getName())
-						.arg(BaseObject::getTypeName(ObjectType::EventTrigger)),
-						ErrorCode::AsgFunctionInvalidParamCount,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										.arg(this->getName())
+										.arg(BaseObject::getTypeName(ObjectType::EventTrigger)),
+										ErrorCode::AsgFunctionInvalidParamCount,PGM_FUNC,PGM_FILE,PGM_LINE);
+	}
+
 	//Functions coded in SQL lang. is not accepted by event triggers
-	else if(func->getLanguage()->getName().toLower() == DefaultLanguages::Sql)
-		throw Exception(ErrorCode::AsgEventTriggerFuncInvalidLang,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+	if(func->getLanguage()->getName().toLower() == DefaultLanguages::Sql)
+		throw Exception(ErrorCode::AsgEventTriggerFuncInvalidLang,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(function != func);
 	function=func;
@@ -61,7 +70,7 @@ void EventTrigger::setFunction(Function *func)
 void EventTrigger::setFilter(const QString &variable, const QStringList &values)
 {
 	if(variable.toLower()!=Attributes::Tag)
-		throw Exception(Exception::getErrorMessage(ErrorCode::AsgInvalidEventTriggerVariable).arg(variable),__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(Exception::getErrorMessage(ErrorCode::AsgInvalidEventTriggerVariable).arg(variable),PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(!values.isEmpty())
 	{
@@ -101,18 +110,20 @@ QStringList EventTrigger::getFilter(const QString &variable)
 {
 	if(filter.count(variable))
 		return filter.at(variable);
-	else
-		return QStringList();
+
+	return {};
 }
 
 QString EventTrigger::getSourceCode(SchemaParser::CodeType def_type)
 {
-	QString code_def=getCachedCode(def_type, false);
-	if(!code_def.isEmpty()) return code_def;
+	QString code_def = getCachedCode(def_type, false);
 
-	attributes[Attributes::Event]=~event;
+	if(!code_def.isEmpty())
+		return code_def;
 
-	if(def_type==SchemaParser::SqlCode)
+	attributes[Attributes::Event] = ~event;
+
+	if(def_type == SchemaParser::SqlCode)
 	{
 		QStringList str_list;
 
@@ -130,11 +141,13 @@ QString EventTrigger::getSourceCode(SchemaParser::CodeType def_type)
 			attributes[Attributes::Function]=function->getSourceCode(def_type, true);
 
 		for(auto &flt : filter)
+		{
 			//Creating an element <filter variable="" values=""/>
 			attributes[Attributes::Filter]+=QString("\t<%1 %2=\"%3\" %4=\"%5\"/>\n")
 												   .arg(Attributes::Filter)
 												   .arg(Attributes::Variable).arg(flt.first)
 												   .arg(Attributes::Values).arg(flt.second.join(','));
+		}
 	}
 
 	return BaseObject::__getSourceCode(def_type);

@@ -90,7 +90,7 @@ class __libgui ModelValidationHelper: public QObject {
 
 	public:
 		ModelValidationHelper();
-		virtual ~ModelValidationHelper();
+		~ModelValidationHelper() override;
 
 		/*! \brief Validates the specified model. If a connection is specifies executes the
 		SQL validation directly on DBMS */

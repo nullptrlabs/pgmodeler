@@ -183,7 +183,7 @@ class __libparsers SchemaParser {
 		 *  The "file.sch" portion in @include token is always treated as being a relative path.
 		 *  Currently, you can have includes only in the main buffer (source file). If the included
 		 *  files also have includes this method will raise an exception. This should be changed in the future. */
-		bool parseInclude(const QString &include_ln, QString &buffer, qint64 curr_stream_pos);
+		bool parseInclude(const QString &include_ln, QString &src_buf, qint64 curr_stream_pos);
 
 		/*! \brief Returns a formatted error message used prior to an exception raising.
 		 * This method take into account if the error happened in the current schema file/buffer or

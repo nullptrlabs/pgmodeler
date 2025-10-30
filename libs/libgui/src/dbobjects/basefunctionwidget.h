@@ -62,16 +62,16 @@ class __libgui BaseFunctionWidget: public BaseObjectWidget, public Ui::BaseFunct
 		Parameter getParameter(CustomTableWidget *params_tab, unsigned row, bool set_param_modes);
 
 		//! \brief Shows the parameter data on the specified table at the specified line
-		void showParameterData(CustomTableWidget *param_tab, Parameter param, unsigned row, bool show_param_modes);
+		void showParameterData(CustomTableWidget *params_tab, Parameter param, unsigned row, bool show_param_modes);
 
 		//! \brief Shows the parameter configuration form
 		void showParameterForm(CustomTableWidget *params_tab, bool enable_param_modes);
 
 		//! \brief Shows the configured parameter on the table that called the form
-		void handleParameter(CustomTableWidget *table, Parameter param, int result, bool handle_param_modes);
+		void handleParameter(CustomTableWidget *params_tab, Parameter param, int result, bool handle_param_modes);
 
 		//! \brief Duplicates the parameter in the curr_row placing it in new_row
-		void duplicateParameter(CustomTableWidget *table, int curr_row, int new_row, bool dup_param_modes);
+		void duplicateParameter(CustomTableWidget *params_tab, int curr_row, int new_row, bool dup_param_modes);
 
 		//! \brief Applies the values in the widget to the base function's instance
 		void applyBasicConfiguration(BaseFunction *func);

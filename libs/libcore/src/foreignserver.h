@@ -37,8 +37,7 @@ class __libcore ForeignServer: public BaseObject, public ForeignObject {
 
 	public:
 		ForeignServer();
-
-		virtual ~ForeignServer(){}
+		~ForeignServer() override = default;
 
 		void setType(const QString &type);
 		void setVersion(const QString &version);
@@ -48,11 +47,11 @@ class __libcore ForeignServer: public BaseObject, public ForeignObject {
 		QString getVersion();
 		ForeignDataWrapper *getForeignDataWrapper();
 
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) override;
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) override;
-		virtual QString getAlterCode(BaseObject *object) override;
+		QString getSourceCode(SchemaParser::CodeType def_type) override;
+		QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) override;
+		QString getAlterCode(BaseObject *object) override;
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 };
 
 #endif

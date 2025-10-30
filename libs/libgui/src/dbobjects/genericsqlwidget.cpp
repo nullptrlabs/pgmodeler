@@ -35,8 +35,7 @@ GenericSQLWidget::GenericSQLWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 
 	QVBoxLayout *vbox = new QVBoxLayout(references_tab);
 	vbox->addWidget(obj_refs_wgt);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin,
-													 GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
+	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 
 	definition_txt = GuiUtilsNs::createNumberedTextEditor(attribs_tbw->widget(0), true);
 	definition_hl = new SyntaxHighlighter(definition_txt);
@@ -51,10 +50,10 @@ GenericSQLWidget::GenericSQLWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	preview_hl = new SyntaxHighlighter(preview_txt);
 	preview_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
-	attribs_tbw->widget(0)->layout()->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	attribs_tbw->widget(0)->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
 	attribs_tbw->widget(0)->layout()->addWidget(definition_txt);
 
-	attribs_tbw->widget(2)->layout()->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	attribs_tbw->widget(2)->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
 	attribs_tbw->widget(2)->layout()->addWidget(preview_txt);
 
 	setMinimumSize(700, 500);
@@ -124,6 +123,6 @@ void GenericSQLWidget::applyConfiguration()
 	catch(Exception &e)
 	{
 		cancelConfiguration();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }

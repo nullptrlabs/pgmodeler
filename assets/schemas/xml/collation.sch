@@ -16,7 +16,9 @@
 	%if {lc-ctype} %then [ lc-ctype=] "{lc-ctype}" %end
 	%if {lc-ctype-mod} %then [ lc-ctype-mod=] "{lc-ctype-mod}" %end
 	%if {provider} %then [ provider=] "{provider}" %end
-	%if {deterministic} %then [ deterministic=] "true" %end
+
+	[ deterministic=] "{deterministic}"
+
 	%if {sql-disabled} %then [ sql-disabled=] "true" %end
 
 	> $br

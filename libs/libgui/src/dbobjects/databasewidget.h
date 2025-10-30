@@ -43,7 +43,7 @@ class __libgui DatabaseWidget: public BaseObjectWidget, public Ui::DatabaseWidge
 		void setAttributes(DatabaseModel *model);
 		
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

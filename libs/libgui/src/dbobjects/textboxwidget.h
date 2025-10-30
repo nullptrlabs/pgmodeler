@@ -40,7 +40,7 @@ class __libgui TextboxWidget: public BaseObjectWidget, public Ui::TextboxWidget 
 		void selectTextColor();
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

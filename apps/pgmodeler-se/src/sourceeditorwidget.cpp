@@ -100,7 +100,7 @@ void SourceEditorWidget::loadSyntaxConfig(const QString &filename)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -235,7 +235,7 @@ void SourceEditorWidget::validateSyntax()
 		schparser.loadBuffer(editor_txt->toPlainText());
 		schparser.getSourceCode({});
 
-		Messagebox::info(tr("No lexical or sytactical errors found."));
+		Messagebox::info(tr("No lexical or syntactical errors found."));
 	}
 	catch(Exception &e)
 	{
@@ -254,7 +254,7 @@ void SourceEditorWidget::validateSyntax()
 		pal.setColor(QPalette::HighlightedText, QColor("#ffffff"));
 		editor_txt->setPalette(pal);
 
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -267,7 +267,7 @@ void SourceEditorWidget::applyIndentation()
 {
 	QStringList buffer = editor_txt->toPlainText().split(QChar::LineFeed);
 	int if_level = 0, comment_pos = -1, line_count = buffer.size();
-	bool found_cond = false, found_if = false, inline_ifend = false;
+	bool found_cond = false, /* found_if = false,*/ inline_ifend = false;
 	QString cond_pattern = QString("^(( )|(\\t))*(%1)"), line,
 			tk_if = SchemaParser::CharStartConditional + SchemaParser::TokenIf,
 			tk_then = SchemaParser::CharStartConditional + SchemaParser::TokenThen,
@@ -284,7 +284,7 @@ void SourceEditorWidget::applyIndentation()
 		if(line.contains(QRegularExpression(cond_pattern.arg(tk_if))) && !inline_ifend)
 		{
 			if_level++;
-			found_if = found_cond = true;
+			/* found_if = */ found_cond = true;
 		}
 		else if(line.contains(QRegularExpression(cond_pattern.arg(tk_else))) ||
 						line.contains(QRegularExpression(cond_pattern.arg(tk_end))))
@@ -309,7 +309,7 @@ void SourceEditorWidget::applyIndentation()
 					buffer.insert(ln_idx, *itr);
 
 				ln_idx = 0;
-				found_cond = found_if = false;
+				found_cond = /* found_if = */ false;
 				if_level = 0;
 				line_count = buffer.size();
 				continue;
@@ -327,7 +327,7 @@ void SourceEditorWidget::applyIndentation()
 		}
 
 		buffer[ln_idx] = line;
-		found_cond = found_if = false;
+		found_cond /* = found_if */ = false;
 	}
 
 	QRegularExpression cond_tk_regexp(QString("^(( )|(\\t))*(%1)[a-z]+").arg(SchemaParser::CharStartConditional));

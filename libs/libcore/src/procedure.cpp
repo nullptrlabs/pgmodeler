@@ -18,7 +18,7 @@
 
 #include "procedure.h"
 
-Procedure::Procedure() : BaseFunction()
+Procedure::Procedure()
 {
 	obj_type = ObjectType::Procedure;
 }
@@ -43,7 +43,7 @@ QString Procedure::getAlterCode(BaseObject *object)
 	Procedure *proc = dynamic_cast<Procedure *>(object);
 
 	if(!proc)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
@@ -55,7 +55,7 @@ QString Procedure::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 

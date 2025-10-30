@@ -68,9 +68,9 @@ class __libgui GeneralConfigWidget: public BaseConfigWidget, public Ui::GeneralC
 
 		GeneralConfigWidget(QWidget * parent = nullptr);
 
-		virtual void saveConfiguration() override;
+		void saveConfiguration() override;
 
-		virtual void loadConfiguration() override;
+		void loadConfiguration() override;
 
 		/*! \brief Fills the configuration section section_id with the provided attributes map.
 		 *  This method replaces an entire configuration section, if you need to just append
@@ -94,8 +94,8 @@ class __libgui GeneralConfigWidget: public BaseConfigWidget, public Ui::GeneralC
 		static bool restoreWidgetGeometry(QWidget *widget, const QString &custom_wgt_name = "");
 
 	public slots:
-		virtual void applyConfiguration() override;
-		virtual void restoreDefaults() override;
+		void applyConfiguration() override;
+		void restoreDefaults() override;
 		void selectPaperSize();
 
 	private slots:

@@ -127,11 +127,11 @@ class __libcore Index: public TableObject{
 		unsigned getFillFactor();
 
 		//! \brief Returns the SQL / XML definition for the index
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
-		virtual QString getSignature(bool format=true) final ;
+		QString getSignature(bool format = true) final;
 
-		virtual QString getAlterCode(BaseObject *object) final;
+		QString getAlterCode(BaseObject *object) final;
 
 		/*! \brief Returns whether the index references columns added
 		 by relationship. This method is used as auxiliary
@@ -172,9 +172,9 @@ class __libcore Index: public TableObject{
 
 		QString getDataDictionary(bool md_format, const attribs_map &extra_attribs = {});
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 
-		virtual void generateHashCode() override;
+		void generateHashCode() override;
 };
 
 #endif

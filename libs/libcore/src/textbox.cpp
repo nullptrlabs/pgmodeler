@@ -78,7 +78,7 @@ void Textbox::operator = (Textbox &txtbox)
 void Textbox::setTextAttribute(TextAttrib attrib, bool value)
 {
 	if(attrib > UnderlineText)
-		throw Exception(ErrorCode::RefAttributeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefAttributeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	text_attributes[attrib]=value;
 }
@@ -96,7 +96,7 @@ QColor Textbox::getTextColor()
 bool Textbox::getTextAttribute(TextAttrib attrib)
 {
 	if(attrib > UnderlineText)
-		throw Exception(ErrorCode::RefAttributeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefAttributeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return text_attributes[attrib];
 }

@@ -21,10 +21,7 @@
 #include "attribsmap.h"
 #include "attributes.h"
 
-SimpleColumn::SimpleColumn()
-{
-
-}
+SimpleColumn::SimpleColumn() = default;
 
 SimpleColumn::SimpleColumn(const SimpleColumn &col) : SimpleColumn(col.name, col.type, col.alias)
 {
@@ -58,13 +55,7 @@ bool SimpleColumn::operator == (const SimpleColumn &col) const
 	return name == col.name && type == col.type && alias == col.alias;
 }
 
-SimpleColumn &SimpleColumn::operator = (const SimpleColumn &col)
-{
-	this->name = col.name;
-	this->type = col.type;
-	this->alias = col.alias;
-	return *this;
-}
+SimpleColumn &SimpleColumn::operator=(const SimpleColumn &col) = default;
 
 bool SimpleColumn::isValid() const
 {

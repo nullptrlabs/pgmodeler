@@ -33,7 +33,6 @@
 #include "widgets/searchreplacewidget.h"
 #include "widgets/codecompletionwidget.h"
 #include "widgets/numberedtexteditor.h"
-#include "widgets/searchreplacewidget.h"
 #include "sqlexecutionhelper.h"
 
 class __libgui SQLExecutionWidget: public QWidget, public Ui::SQLExecutionWidget {
@@ -100,9 +99,9 @@ class __libgui SQLExecutionWidget: public QWidget, public Ui::SQLExecutionWidget
 
 		*cmd_history_txt;
 
-		void showEvent(QShowEvent *);
-		void resizeEvent(QResizeEvent *);
-		bool eventFilter(QObject *object, QEvent *event);
+		void showEvent(QShowEvent *) override;
+		void resizeEvent(QResizeEvent *) override;
+		bool eventFilter(QObject *object, QEvent *event) override;
 		void reloadHighlightConfigs();
 
 		void installPluginWidgets(QToolButton *btn, QWidget *wgt);
@@ -112,7 +111,7 @@ class __libgui SQLExecutionWidget: public QWidget, public Ui::SQLExecutionWidget
 
 		SQLExecutionWidget(QWidget * parent = nullptr);
 
-		virtual ~SQLExecutionWidget();
+		~SQLExecutionWidget() override;
 
 		//! \brief Configures the connection to query the server
 		void setConnection(Connection conn);

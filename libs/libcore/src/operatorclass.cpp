@@ -39,7 +39,7 @@ void OperatorClass::setDataType(PgSqlType data_type)
 {
 	//A null datatype is not accepted by the operator class
 	if(data_type==PgSqlType::Null)
-		throw Exception(ErrorCode::AsgInvalidTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidTypeObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	data_type.reset();
 	setCodeInvalidated(this->data_type != data_type);
@@ -91,7 +91,7 @@ void OperatorClass::removeElement(unsigned elem_idx)
 {
 	//Raises an error in case the element index is out of bound
 	if(elem_idx >= elements.size())
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Removes the item from the elements list
 	elements.erase(elements.begin() + elem_idx);
@@ -108,7 +108,7 @@ OperatorClassElement OperatorClass::getElement(unsigned elem_idx)
 {
 	//Raises an error in case the element index is out of bound
 	if(elem_idx >= elements.size())
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Returns the element on the specified index
 	return elements[elem_idx];

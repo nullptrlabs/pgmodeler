@@ -45,7 +45,7 @@ class __libgui PolicyWidget : public BaseObjectWidget, Ui::PolicyWidget {
 		void setAttributes(DatabaseModel *model, OperationList *op_list, BaseObject *parent_obj, Policy *policy);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 
 	private slots:
 		void selectRole(BaseObject *role, bool show_wgt);

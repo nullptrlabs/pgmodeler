@@ -85,8 +85,8 @@ class __libgui ViewWidget: public BaseObjectWidget, public Ui::ViewWidget {
 		void removeObjects();
 
 	public slots:
-		void applyConfiguration();
-		void cancelConfiguration();
+		void applyConfiguration() override;
+		void cancelConfiguration() override;
 };
 
 #endif

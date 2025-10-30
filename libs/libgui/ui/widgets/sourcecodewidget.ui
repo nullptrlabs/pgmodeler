@@ -240,7 +240,6 @@
  </tabstops>
  <resources>
   <include location="../../res/resources.qrc"/>
-  <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>
 </ui>

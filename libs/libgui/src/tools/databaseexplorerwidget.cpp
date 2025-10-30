@@ -17,7 +17,8 @@
 */
 
 #include "databaseexplorerwidget.h"
-#include "databaseimportform.h"
+#include "customuistyle.h"
+#include "databaseimportwidget.h"
 #include "sqlexecutionwidget.h"
 #include "settings/snippetsconfigwidget.h"
 #include "utils/plaintextitemdelegate.h"
@@ -31,115 +32,115 @@
 const QString DatabaseExplorerWidget::DepNotDefined;
 const QString DatabaseExplorerWidget::DepNotFound { QT_TR_NOOP("(not found, OID: %1)") };
 const QString DatabaseExplorerWidget::DefaultSourceCode {
-	QString("-- %1 --").arg(QT_TR_NOOP("Source code not generated! Hit F7 or middle-click the item to load it."))
+	QString("-- %1 --").arg(QT_TR_NOOP("Source code not generated! Press F7 or middle-click the item to load it."))
 };
 
 const attribs_map DatabaseExplorerWidget::attribs_i18n {
-	{Attributes::AdminRoles, QT_TR_NOOP("Admin. roles")},	{Attributes::Alignment, QT_TR_NOOP("Alignment")},
-	{Attributes::AnalyzeFunc, QT_TR_NOOP("Analyze func.")},	{Attributes::ArgCount, QT_TR_NOOP("Arg. count")},
-	{Attributes::ArgDefCount, QT_TR_NOOP("Arg. default count")},	{Attributes::ArgDefaults, QT_TR_NOOP("Arg. defaults")},
-	{Attributes::ArgModes, QT_TR_NOOP("Arg. modes")},	{Attributes::ArgNames, QT_TR_NOOP("Arg. names")},
-	{Attributes::ArgTypes, QT_TR_NOOP("Arg. types")},	{Attributes::Attribute, QT_TR_NOOP("Attribute")},
+	{Attributes::AdminRoles, QT_TR_NOOP("Administrative roles")},	{Attributes::Alignment, QT_TR_NOOP("Alignment")},
+	{Attributes::AnalyzeFunc, QT_TR_NOOP("Analyze function")},	{Attributes::ArgCount, QT_TR_NOOP("Argument count")},
+	{Attributes::ArgDefCount, QT_TR_NOOP("Argument default count")},	{Attributes::ArgDefaults, QT_TR_NOOP("Argument defaults")},
+	{Attributes::ArgModes, QT_TR_NOOP("Argument modes")},	{Attributes::ArgNames, QT_TR_NOOP("Argument names")},
+	{Attributes::ArgTypes, QT_TR_NOOP("Argument types")},	{Attributes::Attribute, QT_TR_NOOP("Attribute")},
 	{Attributes::BehaviorType, QT_TR_NOOP("Behavior type")},	{Attributes::ByValue, QT_TR_NOOP("By value")},
 	{Attributes::CastType, QT_TR_NOOP("Cast type")},	{Attributes::Category, QT_TR_NOOP("Category")},
 	{Attributes::Collatable, QT_TR_NOOP("Collatable")},	{Attributes::Collation, QT_TR_NOOP("Collation")},
-	{Attributes::Comment, QT_TR_NOOP("Comment")},	{Attributes::CommutatorOp, QT_TR_NOOP("Commutator Op.")},
-	{Attributes::Configuration, QT_TR_NOOP("Configuration")},	{Attributes::ConnLimit, QT_TR_NOOP("Conn. limit")},
-	{Attributes::Constraint, QT_TR_NOOP("Constraint")},	{Attributes::CreateDb, QT_TR_NOOP("Create DB")},
-	{Attributes::CreateRole, QT_TR_NOOP("Create role")},	{Attributes::CurVersion, QT_TR_NOOP("Curr. version")},
+	{Attributes::Comment, QT_TR_NOOP("Comment")},	{Attributes::CommutatorOp, QT_TR_NOOP("Commutator operator")},
+	{Attributes::Configuration, QT_TR_NOOP("Configuration")},	{Attributes::ConnLimit, QT_TR_NOOP("Connection limit")},
+	{Attributes::Constraint, QT_TR_NOOP("Constraint")},	{Attributes::CreateDb, QT_TR_NOOP("Create database")},
+	{Attributes::CreateRole, QT_TR_NOOP("Create role")},	{Attributes::CurVersion, QT_TR_NOOP("Current version")},
 	{Attributes::Default, QT_TR_NOOP("Default")},	{Attributes::DefaultValue, QT_TR_NOOP("Default value")},
 	{Attributes::Definition, QT_TR_NOOP("Definition")},	{Attributes::Delimiter, QT_TR_NOOP("Delimiter")},
-	{Attributes::DestType, QT_TR_NOOP("Dest. type")},	{Attributes::Dimension, QT_TR_NOOP("Dimension")},
-	{Attributes::Directory, QT_TR_NOOP("Directory")},	{Attributes::DstEncoding, QT_TR_NOOP("Dest. encoding")},
+	{Attributes::DestType, QT_TR_NOOP("Destination type")},	{Attributes::Dimension, QT_TR_NOOP("Dimension")},
+	{Attributes::Directory, QT_TR_NOOP("Directory")},	{Attributes::DstEncoding, QT_TR_NOOP("Destination encoding")},
 	{Attributes::Element, QT_TR_NOOP("Element")},	{Attributes::Encoding, QT_TR_NOOP("Encoding")},
 	{Attributes::Encrypted, QT_TR_NOOP("Encrypted")},	{Attributes::Labels, QT_TR_NOOP("Labels")},
-	{Attributes::ExecutionCost, QT_TR_NOOP("Exec. cost")},	{Attributes::Expression, QT_TR_NOOP("Expression")},
-	{Attributes::Family, QT_TR_NOOP("Op. family")},	{Attributes::FinalFunc, QT_TR_NOOP("Final func.")},
-	{Attributes::Function, QT_TR_NOOP("Function")},	{Attributes::FunctionType, QT_TR_NOOP("Func. type")},
-	{Attributes::HandlerFunc, QT_TR_NOOP("Handler func.")},
+	{Attributes::ExecutionCost, QT_TR_NOOP("Execution cost")},	{Attributes::Expression, QT_TR_NOOP("Expression")},
+	{Attributes::Family, QT_TR_NOOP("Operator family")},	{Attributes::FinalFunc, QT_TR_NOOP("Final function")},
+	{Attributes::Function, QT_TR_NOOP("Function")},	{Attributes::FunctionType, QT_TR_NOOP("Function type")},
+	{Attributes::HandlerFunc, QT_TR_NOOP("Handler function")},
 	{Attributes::Hashes, QT_TR_NOOP("Hashes")},	{Attributes::IndexType, QT_TR_NOOP("Index type")},
-	{Attributes::Inherit, QT_TR_NOOP("Inherit")},	{Attributes::InitialCond, QT_TR_NOOP("Ini. condition")},
-	{Attributes::InlineFunc, QT_TR_NOOP("Inline func.")},	{Attributes::InputFunc, QT_TR_NOOP("Input func.")},
+	{Attributes::Inherit, QT_TR_NOOP("Inherit")},	{Attributes::InitialCond, QT_TR_NOOP("Initial condition")},
+	{Attributes::InlineFunc, QT_TR_NOOP("Inline function")},	{Attributes::InputFunc, QT_TR_NOOP("Input function")},
 	{Attributes::InternalLength, QT_TR_NOOP("Internal length")},	{Attributes::IntervalType, QT_TR_NOOP("Interval type")},
-	{Attributes::IoCast, QT_TR_NOOP("I/O cast")},	{Attributes::JoinFunc, QT_TR_NOOP("Join func.")},
+	{Attributes::IoCast, QT_TR_NOOP("I/O cast")},	{Attributes::JoinFunc, QT_TR_NOOP("Join function")},
 	{Attributes::Language, QT_TR_NOOP("Language")},	{Attributes::LcCollate, QT_TR_NOOP("LC COLLATE")},
 	{Attributes::LcCtype, QT_TR_NOOP("LC CTYPE")},	{Attributes::LeakProof, QT_TR_NOOP("Leak proof")},
 	{Attributes::LeftType, QT_TR_NOOP("Left type")},	{Attributes::Length, QT_TR_NOOP("Length")},
-	{Attributes::Library, QT_TR_NOOP("Library")},	{Attributes::Login, QT_TR_NOOP("Can login")},
+	{Attributes::Library, QT_TR_NOOP("Library")},	{Attributes::Login, QT_TR_NOOP("Login allowed")},
 	{Attributes::Materialized, QT_TR_NOOP("Materialized")},	{Attributes::MemberRoles, QT_TR_NOOP("Member roles")},
 	{Attributes::Merges, QT_TR_NOOP("Merges")},	{Attributes::Name, QT_TR_NOOP("Name")},
-	{Attributes::NegatorOp, QT_TR_NOOP("Negator op.")},	{Attributes::NotNull, QT_TR_NOOP("Not null")},
+	{Attributes::NegatorOp, QT_TR_NOOP("Negator operator")},	{Attributes::NotNull, QT_TR_NOOP("Not null")},
 	{Attributes::ObjectType, QT_TR_NOOP("Object type")},	{Attributes::Oid, QT_TR_NOOP("OID")},
 	{Attributes::Oids, QT_TR_NOOP("With OIDs")},	{Attributes::OldVersion, QT_TR_NOOP("Old version")},
-	{Attributes::Operator, QT_TR_NOOP("Operator")},	{Attributes::OperatorFunc, QT_TR_NOOP("Operator func.")},
-	{Attributes::OutputFunc, QT_TR_NOOP("Output func.")},	{Attributes::Owner, QT_TR_NOOP("Owner")},
+	{Attributes::Operator, QT_TR_NOOP("Operator")},	{Attributes::OperatorFunc, QT_TR_NOOP("Operator function")},
+	{Attributes::OutputFunc, QT_TR_NOOP("Output function")},	{Attributes::Owner, QT_TR_NOOP("Owner")},
 	{Attributes::OwnerColumn, QT_TR_NOOP("Owner column")},	{Attributes::Parents, QT_TR_NOOP("Parents")},
 	{Attributes::Password, QT_TR_NOOP("Password")},	{Attributes::Permission, QT_TR_NOOP("Permissions")},
 	{Attributes::Precision, QT_TR_NOOP("Precision")},	{Attributes::Preferred, QT_TR_NOOP("Preferred")},
-	{Attributes::RangeAttribs, QT_TR_NOOP("Range attributes")},	{Attributes::RecvFunc, QT_TR_NOOP("Receive func.")},
+	{Attributes::RangeAttribs, QT_TR_NOOP("Range attributes")},	{Attributes::RecvFunc, QT_TR_NOOP("Receive function")},
 	{Attributes::Replication, QT_TR_NOOP("Replication")},
-	{Attributes::RestrictionFunc, QT_TR_NOOP("Restriction func.")},	{Attributes::ReturnType, QT_TR_NOOP("Return type")},
+	{Attributes::RestrictionFunc, QT_TR_NOOP("Restriction function")},	{Attributes::ReturnType, QT_TR_NOOP("Return type")},
 	{Attributes::ReturnsSetOf, QT_TR_NOOP("Returns SETOF")},	{Attributes::RightType, QT_TR_NOOP("Right type")},
 	{Attributes::RowAmount, QT_TR_NOOP("Rows amount")},	{Attributes::Schema, QT_TR_NOOP("Schema")},
-	{Attributes::SecurityType, QT_TR_NOOP("Security type")},	{Attributes::SendFunc, QT_TR_NOOP("Send func.")},
-	{Attributes::SortOp, QT_TR_NOOP("Sort op.")},	{Attributes::SourceType, QT_TR_NOOP("Source type")},
-	{Attributes::SrcEncoding, QT_TR_NOOP("Src. encoding")},	{Attributes::StateType, QT_TR_NOOP("State type")},
+	{Attributes::SecurityType, QT_TR_NOOP("Security type")},	{Attributes::SendFunc, QT_TR_NOOP("Send function")},
+	{Attributes::SortOp, QT_TR_NOOP("Sort operator")},	{Attributes::SourceType, QT_TR_NOOP("Source type")},
+	{Attributes::SrcEncoding, QT_TR_NOOP("Source encoding")},	{Attributes::StateType, QT_TR_NOOP("State type")},
 	{Attributes::Storage, QT_TR_NOOP("Storage")},	{Attributes::Superuser, QT_TR_NOOP("Superuser")},
-	{Attributes::Tablespace, QT_TR_NOOP("Tablespace")},	{Attributes::TpmodInFunc, QT_TR_NOOP("Type mod. in func.")},
-	{Attributes::TpmodOutFunc, QT_TR_NOOP("Type mod. out func.")},	{Attributes::TransitionFunc, QT_TR_NOOP("Transition func.")},
+	{Attributes::Tablespace, QT_TR_NOOP("Tablespace")},	{Attributes::TpmodInFunc, QT_TR_NOOP("Type modifier input function")},
+	{Attributes::TpmodOutFunc, QT_TR_NOOP("Type modifier output function")},	{Attributes::TransitionFunc, QT_TR_NOOP("Transition function")},
 	{Attributes::Trusted, QT_TR_NOOP("Trusted")},	{Attributes::Type, QT_TR_NOOP("Type")},
 	{Attributes::TypeAttribute, QT_TR_NOOP("Type attribute")},	{Attributes::Types, QT_TR_NOOP("Types")},
-	{Attributes::Unlogged, QT_TR_NOOP("Unlogged")},	{Attributes::Validator, QT_TR_NOOP("Validator func.")},
-	{Attributes::Validity, QT_TR_NOOP("Validity")},	{Attributes::WindowFunc, QT_TR_NOOP("Windows func.")},
+	{Attributes::Unlogged, QT_TR_NOOP("Unlogged")},	{Attributes::Validator, QT_TR_NOOP("Validator function")},
+	{Attributes::Validity, QT_TR_NOOP("Validity")},	{Attributes::WindowFunc, QT_TR_NOOP("Window function")},
 	{Attributes::False, QT_TR_NOOP("false")},	{Attributes::True, QT_TR_NOOP("true")},
 	{Attributes::Cache, QT_TR_NOOP("Cache value")},	{Attributes::Cycle, QT_TR_NOOP("Cycle")},
-	{Attributes::Increment, QT_TR_NOOP("Increment")},	{Attributes::MaxValue, QT_TR_NOOP("Max. value")},
-	{Attributes::MinValue, QT_TR_NOOP("Min. value")},	{Attributes::Start, QT_TR_NOOP("Start value")},
+	{Attributes::Increment, QT_TR_NOOP("Increment")},	{Attributes::MaxValue, QT_TR_NOOP("Maximum value")},
+	{Attributes::MinValue, QT_TR_NOOP("Minimum value")},	{Attributes::Start, QT_TR_NOOP("Start value")},
 	{Attributes::LastValue, QT_TR_NOOP("Last value")},	{Attributes::Subtype, QT_TR_NOOP("Subtype")},
-	{Attributes::OpClass, QT_TR_NOOP("Op. class")},	{Attributes::CanonicalFunc, QT_TR_NOOP("Canonical func.")},
-	{Attributes::SubtypeDiffFunc, QT_TR_NOOP("Subtype diff func.")},	{Attributes::Deferrable, QT_TR_NOOP("Deferrable")},
+	{Attributes::OpClass, QT_TR_NOOP("Operator class")},	{Attributes::CanonicalFunc, QT_TR_NOOP("Canonical function")},
+	{Attributes::SubtypeDiffFunc, QT_TR_NOOP("Subtype difference function")},	{Attributes::Deferrable, QT_TR_NOOP("Deferrable")},
 	{Attributes::PerRow, QT_TR_NOOP("For each row")},	{Attributes::FiringType, QT_TR_NOOP("Firing")},
 	{Attributes::InsEvent, QT_TR_NOOP("On insert")},	{Attributes::DelEvent, QT_TR_NOOP("On delete")},
 	{Attributes::UpdEvent, QT_TR_NOOP("On update")},	{Attributes::TruncEvent, QT_TR_NOOP("On truncate")},
 	{Attributes::Arguments, QT_TR_NOOP("Arguments")},	{Attributes::Table, QT_TR_NOOP("Table")},
-	{Attributes::TriggerFunc, QT_TR_NOOP("Trigger func.")},	{Attributes::Columns, QT_TR_NOOP("Columns")},
+	{Attributes::TriggerFunc, QT_TR_NOOP("Trigger function")},	{Attributes::Columns, QT_TR_NOOP("Columns")},
 	{Attributes::Condition, QT_TR_NOOP("Condition")},	{Attributes::DeferType, QT_TR_NOOP("Deferment")},
 	{Attributes::EventType, QT_TR_NOOP("Event")},	{Attributes::ExecType, QT_TR_NOOP("Execution mode")},
 	{Attributes::Commands, QT_TR_NOOP("Commands")},	{Attributes::Position, QT_TR_NOOP("Position")},
 	{Attributes::ComparisonType, QT_TR_NOOP("Comparison type")},	{Attributes::DelAction, QT_TR_NOOP("On delete")},
-	{Attributes::DstColumns, QT_TR_NOOP("Ref. columns")},	{Attributes::Expressions, QT_TR_NOOP("Expressions")},
+	{Attributes::DstColumns, QT_TR_NOOP("Referenced columns")},	{Attributes::Expressions, QT_TR_NOOP("Expressions")},
 	{Attributes::Factor, QT_TR_NOOP("Fill factor")},	{Attributes::NoInherit, QT_TR_NOOP("No inherit")},
-	{Attributes::OpClasses, QT_TR_NOOP("Op. classes")},	{Attributes::Operators, QT_TR_NOOP("Operators")},
-	{Attributes::RefTable, QT_TR_NOOP("Ref. table")},	{Attributes::Columns, QT_TR_NOOP("Columns")},
+	{Attributes::OpClasses, QT_TR_NOOP("Operator classes")},	{Attributes::Operators, QT_TR_NOOP("Operators")},
+	{Attributes::RefTable, QT_TR_NOOP("Referenced table")},	{Attributes::Columns, QT_TR_NOOP("Columns")},
 	{Attributes::UpdAction, QT_TR_NOOP("On update")},	{Attributes::SrcColumns, QT_TR_NOOP("Columns")},
 	{Attributes::Unique, QT_TR_NOOP("Unique")},	{Attributes::Predicate, QT_TR_NOOP("Predicate")},
 	{Attributes::Collations, QT_TR_NOOP("Collations")},	{Attributes::Inherited, QT_TR_NOOP("Inherited")},
 	{Attributes::ClientEncoding, QT_TR_NOOP("Client encoding")},	{Attributes::ConfigFile, QT_TR_NOOP("Configuration file")},
 	{Attributes::DataDirectory, QT_TR_NOOP("Data directory")},	{Attributes::DynamicLibraryPath, QT_TR_NOOP("Dynamic library path")},
-	{Attributes::DynamicSharedMemory, QT_TR_NOOP("Dynamic shared memory")},	{Attributes::HbaFile, QT_TR_NOOP("Hba file")},
-	{Attributes::ListenAddresses, QT_TR_NOOP("Listen addresses")},	{Attributes::MaxConnections, QT_TR_NOOP("Max. connections")},
+	{Attributes::DynamicSharedMemory, QT_TR_NOOP("Dynamic shared memory")},	{Attributes::HbaFile, QT_TR_NOOP("HBA file")},
+	{Attributes::ListenAddresses, QT_TR_NOOP("Listen addresses")},	{Attributes::MaxConnections, QT_TR_NOOP("Maximum connections")},
 	{Attributes::Port, QT_TR_NOOP("Listen port")},	{Attributes::ServerEncoding, QT_TR_NOOP("Server encoding")},
-	{Attributes::Ssl, QT_TR_NOOP("SSL")},	{Attributes::SslCaFile, QT_TR_NOOP("SSL ca file")},
-	{Attributes::SslCertFile, QT_TR_NOOP("SSL cert file")},	{Attributes::SslCrlFile, QT_TR_NOOP("SSL crl file")},
+	{Attributes::Ssl, QT_TR_NOOP("SSL")},	{Attributes::SslCaFile, QT_TR_NOOP("SSL CA file")},
+	{Attributes::SslCertFile, QT_TR_NOOP("SSL certificate file")},	{Attributes::SslCrlFile, QT_TR_NOOP("SSL CRL file")},
 	{Attributes::SslKeyFile, QT_TR_NOOP("SSL key file")},	{Attributes::ServerVersion, QT_TR_NOOP("Server version")},
 	{Attributes::IdentFile, QT_TR_NOOP("Ident file")},	{Attributes::PasswordEncryption, QT_TR_NOOP("Password encryption")},
 	{Attributes::Connection, QT_TR_NOOP("Connection ID")},	{Attributes::ServerPid, QT_TR_NOOP("Server PID")},
 	{Attributes::ServerProtocol, QT_TR_NOOP("Server protocol")},	{Attributes::Referrers, QT_TR_NOOP("Referrers")},
 	{Attributes::IdentityType, QT_TR_NOOP("Identity")},	{Attributes::Command, QT_TR_NOOP("Command")},
-	{Attributes::UsingExp, QT_TR_NOOP("USING expr.")},	{Attributes::CheckExp, QT_TR_NOOP("CHECK expr.")},
+	{Attributes::UsingExp, QT_TR_NOOP("USING expression")},	{Attributes::CheckExp, QT_TR_NOOP("CHECK expression")},
 	{Attributes::Roles, QT_TR_NOOP("Roles")},	{Attributes::RlsEnabled, QT_TR_NOOP("RLS enabled")},
 	{Attributes::RlsForced, QT_TR_NOOP("RLS forced")},	{Attributes::LastAnalyze, QT_TR_NOOP("Last analyze")},
 	{Attributes::LastAutovacuum, QT_TR_NOOP("Last autovacuum")},	{Attributes::LastVacuum, QT_TR_NOOP("Last vacuum")},
 	{Attributes::TuplesDel, QT_TR_NOOP("Tuples deleted")},	{Attributes::TyplesUpd, QT_TR_NOOP("Tuples updated")},
 	{Attributes::TuplesIns, QT_TR_NOOP("Tuples inserted")},	{Attributes::IsPartitioned, QT_TR_NOOP("Partitioned")},
-	{Attributes::PartitionedTable, QT_TR_NOOP("Partition of")},	{Attributes::PartitionBoundExpr, QT_TR_NOOP("Partition bound expr.")},
+	{Attributes::PartitionedTable, QT_TR_NOOP("Partition of")},	{Attributes::PartitionBoundExpr, QT_TR_NOOP("Partition bound expression")},
 	{Attributes::DeadRowsAmount, QT_TR_NOOP("Dead rows amount")},	{Attributes::PartitionKey, QT_TR_NOOP("Partition keys")},
 	{Attributes::Partitioning, QT_TR_NOOP("Partitioning")}, {Attributes::Options, QT_TR_NOOP("Options")},
 	{Attributes::Fdw, QT_TR_NOOP("Foreign data wrapper")}, 	{Attributes::Server, QT_TR_NOOP("Server")},
-	{Attributes::BypassRls, QT_TR_NOOP("Bypass RLS")}, {Attributes::FromSqlFunc, QT_TR_NOOP("From SQL Func.")},
-	{Attributes::ToSqlFunc, QT_TR_NOOP("To SQL Func.")} , {Attributes::TransformTypes, QT_TR_NOOP("Transform types")},
-	{Attributes::ConfigParams, QT_TR_NOOP("Config. parameters") }, {Attributes::IsTemplate, QT_TR_NOOP("Is template")},
-	{Attributes::TemplateDb, QT_TR_NOOP("Template DB") }, {Attributes::AllowConns, QT_TR_NOOP("Allows connection")},
+	{Attributes::BypassRls, QT_TR_NOOP("Bypass RLS")}, {Attributes::FromSqlFunc, QT_TR_NOOP("From SQL function")},
+	{Attributes::ToSqlFunc, QT_TR_NOOP("To SQL function")} , {Attributes::TransformTypes, QT_TR_NOOP("Transform types")},
+	{Attributes::ConfigParams, QT_TR_NOOP("Configuration parameters") }, {Attributes::IsTemplate, QT_TR_NOOP("Is template")},
+	{Attributes::TemplateDb, QT_TR_NOOP("Template database") }, {Attributes::AllowConns, QT_TR_NOOP("Allows connection")},
 	{Attributes::Version, QT_TR_NOOP("Version")},	{Attributes::LcCollateMod, QT_TR_NOOP("LC COLLATE modifier")},
 	{Attributes::LcCtype, QT_TR_NOOP("LC CTYPE modifier")}, {Attributes::Provider, QT_TR_NOOP("Provider")},
 	{Attributes::IsExtType, QT_TR_NOOP("Is extension type")}, {Attributes::RefTables, QT_TR_NOOP("Referenced tables")},
@@ -156,6 +157,8 @@ DatabaseExplorerWidget::DatabaseExplorerWidget(QWidget *parent): QWidget(parent)
 		installPluginButton(btn);
 
 	pg_version_alert_frm->setVisible(false);
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, pg_version_alert_frm);
+
 	curr_scroll_value = 0;
 	filter_parent->setVisible(false);
 	sort_column = 0;
@@ -259,8 +262,8 @@ DatabaseExplorerWidget::DatabaseExplorerWidget(QWidget *parent): QWidget(parent)
 
 	connect(objects_trw, &QTreeWidget::itemExpanded, this, [this](QTreeWidgetItem *item) {
 		__trycatch (
-			ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportForm::ObjectTypeId, Qt::UserRole).toUInt());
-			unsigned oid=item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toUInt();
+			ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportWidget::ObjectTypeId, Qt::UserRole).toUInt());
+			unsigned oid=item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toUInt();
 
 			if((obj_type==ObjectType::Schema || BaseTable::isBaseTable(obj_type)) && oid > 0 && item->childCount() <= 1)
 			{
@@ -270,7 +273,7 @@ DatabaseExplorerWidget::DatabaseExplorerWidget(QWidget *parent): QWidget(parent)
 	});
 
 	connect(sort_by_name_tb, &QToolButton::clicked, this, [this]() {
-			sort_column = sort_by_name_tb->isChecked() ? 0 : DatabaseImportForm::ObjectId;
+			sort_column = sort_by_name_tb->isChecked() ? 0 : DatabaseImportWidget::ObjectId;
 			objects_trw->sortByColumn(sort_column, Qt::AscendingOrder);
 	});
 
@@ -304,13 +307,13 @@ bool DatabaseExplorerWidget::eventFilter(QObject *object, QEvent *event)
 
 				if(item)
 				{
-					unsigned oid=item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toUInt();
-					obj_type=static_cast<ObjectType>(item->data(DatabaseImportForm::ObjectTypeId, Qt::UserRole).toUInt());
+					unsigned oid=item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toUInt();
+					obj_type=static_cast<ObjectType>(item->data(DatabaseImportWidget::ObjectTypeId, Qt::UserRole).toUInt());
 
 					if(oid!=0 && BaseTable::isBaseTable(obj_type))
 					{
 						DataHandlingForm::openNewWindow(connection.getConnectionParams(),
-																						item->data(DatabaseImportForm::ObjectSchema, Qt::UserRole).toString(),
+																						item->data(DatabaseImportWidget::ObjectSchema, Qt::UserRole).toString(),
 																						item->text(0), obj_type);
 					}
 				}
@@ -328,10 +331,11 @@ bool DatabaseExplorerWidget::eventFilter(QObject *object, QEvent *event)
 				finishObjectRename();
 			else
 				dropObject(objects_trw->currentItem(), k_event->modifiers()==Qt::ShiftModifier);
+
 			return true;
 		}
-		else
-			return false;
+
+		return false;
 	}
 
 	return QWidget::eventFilter(object, event);
@@ -387,7 +391,7 @@ attribs_map DatabaseExplorerWidget::formatObjectAttribs(attribs_map &attribs)
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	if(attribs.count(Attributes::Permission)!=0)
@@ -452,7 +456,7 @@ void DatabaseExplorerWidget::formatOidAttribs(attribs_map &attribs, QStringList 
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -478,7 +482,7 @@ void DatabaseExplorerWidget::formatOidAttribs(attribs_map &attribs, QStringList 
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -677,7 +681,7 @@ void DatabaseExplorerWidget::formatSequenceAttribs(attribs_map &attribs)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -743,18 +747,18 @@ void DatabaseExplorerWidget::formatOperatorClassAttribs(attribs_map &attribs)
 {
 	QStringList list, array_vals, elems;
 
-	attribs[Attributes::Family]=getObjectName(ObjectType::OpFamily, attribs[Attributes::Family]);
+	attribs[Attributes::Family] = getObjectName(ObjectType::OpFamily, attribs[Attributes::Family]);
 	formatBooleanAttribs(attribs, { Attributes::Default });
 	formatOidAttribs(attribs, { Attributes::Storage,
 								Attributes::Type }, ObjectType::Type, false);
 
-	array_vals=Catalog::parseArrayValues(attribs[Attributes::Function]);
+	array_vals = Catalog::parseArrayValues(attribs[Attributes::Function]);
 
 	if(!array_vals.isEmpty())
 	{
-		for(int i=0; i < array_vals.size(); i++)
+		for(auto &array_val : array_vals)
 		{
-			list=array_vals[i].split(':');
+			list = array_val.split(':');
 			elems.push_back(QString("[%1] %2").arg(list[0], getObjectName(ObjectType::Function, list[1])));
 		}
 
@@ -766,13 +770,13 @@ void DatabaseExplorerWidget::formatOperatorClassAttribs(attribs_map &attribs)
 
 	if(!array_vals.isEmpty())
 	{
-		for(int i=0; i < array_vals.size(); i++)
+		for(auto & array_val : array_vals)
 		{
-			list=array_vals[i].split(':');
+			list = array_val.split(':');
 			elems.push_back(QString("[%1] [%2] [%3]")
-							.arg(list[0],
-							getObjectName(ObjectType::Operator, list[1]),
-					getObjectName(ObjectType::Operator, list[2])));
+											.arg(list[0],
+													 getObjectName(ObjectType::Operator, list[1]),
+													 getObjectName(ObjectType::Operator, list[2])));
 		}
 
 		attribs[Attributes::Operator]=elems.join(UtilsNs::DataSeparator);
@@ -927,67 +931,65 @@ QString DatabaseExplorerWidget::formatObjectName(attribs_map &attribs)
 				attribs[Attributes::Oid]=="0" ||
 				attribs[Attributes::Name].isEmpty())
 			return DepNotDefined;
+
+		ObjectType obj_type=static_cast<ObjectType>(attribs[Attributes::ObjectType].toUInt());
+		attribs_map aux_attribs;
+		QString oid=attribs[Attributes::Oid],
+				obj_name=DepNotFound.arg(oid), sch_name;
+
+		if(obj_type!=ObjectType::Type)
+			obj_name=BaseObject::formatName(attribs[Attributes::Name], obj_type==ObjectType::Operator);
 		else
+			obj_name=attribs[Attributes::Name];
+
+		//Retrieving the schema name
+		if(!attribs[Attributes::Schema].isEmpty() &&
+				attribs[Attributes::Schema]!="0")
 		{
-			ObjectType obj_type=static_cast<ObjectType>(attribs[Attributes::ObjectType].toUInt());
-			attribs_map aux_attribs;
-			QString oid=attribs[Attributes::Oid],
-					obj_name=DepNotFound.arg(oid), sch_name;
+			aux_attribs=catalog.getObjectAttributes(ObjectType::Schema, attribs[Attributes::Schema].toUInt());
+			sch_name=BaseObject::formatName(aux_attribs[Attributes::Name], false);
 
-			if(obj_type!=ObjectType::Type)
-				obj_name=BaseObject::formatName(attribs[Attributes::Name], obj_type==ObjectType::Operator);
-			else
-				obj_name=attribs[Attributes::Name];
-
-			//Retrieving the schema name
-			if(!attribs[Attributes::Schema].isEmpty() &&
-					attribs[Attributes::Schema]!="0")
-			{
-				aux_attribs=catalog.getObjectAttributes(ObjectType::Schema, attribs[Attributes::Schema].toUInt());
-				sch_name=BaseObject::formatName(aux_attribs[Attributes::Name], false);
-
-				if(!sch_name.isEmpty())
-					obj_name=sch_name + "." + obj_name;
-			}
-
-			//Formatting paramenter types for function
-			if(obj_type==ObjectType::Function)
-			{
-				QStringList names, arg_types=Catalog::parseArrayValues(attribs[Attributes::ArgTypes]);
-
-				for(int idx=0; idx < arg_types.size(); idx++)
-				{
-					names=getObjectName(ObjectType::Type, arg_types[idx]).split('.');
-					arg_types[idx]=names[names.size()-1];
-				}
-
-				obj_name+=QString("(%1)").arg(arg_types.join(','));
-			}
-			//Formatting paramenter types for operator
-			else if(obj_type==ObjectType::Operator)
-			{
-				QStringList arg_types, names;
-				QString type_name;
-				std::vector<QString> attrib_ids={ Attributes::LeftType, Attributes::RightType };
-
-				for(auto &attr : attrib_ids)
-				{
-					names=getObjectName(ObjectType::Type, attribs[attr]).split('.');
-					type_name=names[names.size()-1];
-
-					if(type_name.isEmpty()) type_name="-";
-					arg_types.push_back(type_name);
-				}
-
-				obj_name+=QString("(%1)").arg(arg_types.join(','));
-			}
-
-			return obj_name;
+			if(!sch_name.isEmpty())
+				obj_name=sch_name + "." + obj_name;
 		}
+
+		//Formatting paramenter types for function
+		if(obj_type==ObjectType::Function)
+		{
+			QStringList names, arg_types=Catalog::parseArrayValues(attribs[Attributes::ArgTypes]);
+
+			for(auto & arg_type : arg_types)
+			{
+				names = getObjectName(ObjectType::Type, arg_type).split('.');
+				arg_type = names[names.size() - 1];
+			}
+
+			obj_name+=QString("(%1)").arg(arg_types.join(','));
+		}
+		//Formatting paramenter types for operator
+		else if(obj_type==ObjectType::Operator)
+		{
+			QStringList arg_types, names;
+			QString type_name;
+			std::vector<QString> attrib_ids={ Attributes::LeftType, Attributes::RightType };
+
+			for(auto &attr : attrib_ids)
+			{
+				names=getObjectName(ObjectType::Type, attribs[attr]).split('.');
+				type_name=names[names.size()-1];
+
+				if(type_name.isEmpty()) type_name="-";
+				arg_types.push_back(type_name);
+			}
+
+			obj_name+=QString("(%1)").arg(arg_types.join(','));
+		}
+
+		return obj_name;
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -999,7 +1001,7 @@ QStringList DatabaseExplorerWidget::getObjectsNames(ObjectType obj_type, const Q
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -1009,36 +1011,34 @@ QStringList DatabaseExplorerWidget::getObjectsNames(const std::vector<ObjectType
 	{
 		if(oids.isEmpty())
 			return QStringList{ DepNotDefined };
-		else
+
+		std::vector<attribs_map> attribs_vect;
+		std::vector<unsigned> oids_vect;
+		std::map<QString, attribs_map> attrs_map;
+		QStringList names;
+
+		//Converting the oids to unsigned in order to filter them on Catalog
+		for(auto &oid : oids)
+			oids_vect.push_back(oid.toUInt());
+
+		//Retrieve all the objects by their oids and put them on a auxiliary map in which key is their oids
+		for(auto &type : types)
 		{
-			std::vector<attribs_map> attribs_vect;
-			std::vector<unsigned> oids_vect;
-			std::map<QString, attribs_map> attrs_map;
-			QStringList names;
+			attribs_vect = catalog.getObjectsAttributes(type, sch_name, tab_name, oids_vect);
 
-			//Converting the oids to unsigned in order to filter them on Catalog
-			for(auto &oid : oids)
-				oids_vect.push_back(oid.toUInt());
-
-			//Retrieve all the objects by their oids and put them on a auxiliary map in which key is their oids
-			for(auto &type : types)
-			{
-				attribs_vect = catalog.getObjectsAttributes(type, sch_name, tab_name, oids_vect);
-
-				for(auto & attr : attribs_vect)
-					attrs_map[attr[Attributes::Oid]] = attr;
-			}
-
-			//Retreving the names from the auxiliary map using the provided oids
-			for(auto &oid : oids)
-				names.push_back(formatObjectName(attrs_map[oid]));
-
-			return names;
+			for(auto & attr : attribs_vect)
+				attrs_map[attr[Attributes::Oid]] = attr;
 		}
+
+		//Retreving the names from the auxiliary map using the provided oids
+		for(auto &oid : oids)
+			names.push_back(formatObjectName(attrs_map[oid]));
+
+		return names;
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -1050,7 +1050,7 @@ QString DatabaseExplorerWidget::getObjectName(ObjectType obj_type, const QString
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -1060,26 +1060,24 @@ QString DatabaseExplorerWidget::getObjectName(const std::vector<ObjectType> &typ
 	{
 		if(oid=="0" || oid.isEmpty())
 			return DepNotDefined;
-		else
+
+		attribs_map attribs;
+		QString name;
+
+		for(auto &type : types)
 		{
-			attribs_map attribs;
-			QString name;
+			attribs = catalog.getObjectAttributes(type, oid.toUInt(), sch_name, tab_name);
+			name = formatObjectName(attribs);
 
-			for(auto &type : types)
-			{
-				attribs = catalog.getObjectAttributes(type, oid.toUInt(), sch_name, tab_name);
-				name = formatObjectName(attribs);
-
-				if(!name.isEmpty())
-					return name;
-			}
-
-			return DepNotDefined;
+			if(!name.isEmpty())
+				return name;
 		}
+
+		return DepNotDefined;
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -1122,7 +1120,10 @@ void DatabaseExplorerWidget::listObjects()
 		if(quick_refresh)
 			qApp->setOverrideCursor(Qt::WaitCursor);
 
-		DatabaseImportForm::listObjects(import_helper, objects_trw, false, false, true, quick_refresh, sort_column);
+		DatabaseImportWidget::listObjects(import_helper, objects_trw, false,
+																			GeneralConfigWidget::getConfigurationParam(Attributes::Configuration, Attributes::HideEmptyObjGroups) == Attributes::True ?
+																			DatabaseImportWidget::HideEmptyGrps : DatabaseImportWidget::NoGrpsFlag,
+																			true, quick_refresh, sort_column);
 
 		QTreeWidgetItem *root = new QTreeWidgetItem, *curr_root = nullptr;
 
@@ -1131,9 +1132,9 @@ void DatabaseExplorerWidget::listObjects()
 		objects_trw->takeTopLevelItem(0);
 		root->setText(0, connection.getConnectionId(true));
 		root->setIcon(0, QPixmap(GuiUtilsNs::getIconPath("server")));
-		root->setData(DatabaseImportForm::ObjectId, Qt::UserRole, -1);
-		root->setData(DatabaseImportForm::ObjectTypeId, Qt::UserRole, enum_t(ObjectType::BaseObject));
-		root->setData(DatabaseImportForm::ObjectSource, Qt::UserRole, tr("-- Source code unavailable for this kind of object --"));
+		root->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, -1);
+		root->setData(DatabaseImportWidget::ObjectTypeId, Qt::UserRole, enum_t(ObjectType::BaseObject));
+		root->setData(DatabaseImportWidget::ObjectSource, Qt::UserRole, tr("-- Source code unavailable for this kind of object --"));
 		root->addChild(curr_root);
 		objects_trw->addTopLevelItem(root);
 		root->setExpanded(true);
@@ -1151,7 +1152,7 @@ void DatabaseExplorerWidget::listObjects()
 	catch(Exception &e)
 	{
 		//qApp->restoreOverrideCursor();
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -1170,18 +1171,18 @@ void DatabaseExplorerWidget::configureImportHelper()
 
 void DatabaseExplorerWidget::handleObject(QTreeWidgetItem *item, int)
 {
-	if(item->data(DatabaseImportForm::ObjectOtherData, Qt::UserRole).toInt() < 0)
+	if(item->data(DatabaseImportWidget::ObjectOtherData, Qt::UserRole).toInt() < 0)
 	{
 		updateItem(item->parent(), true);
 	}
-	else if(QApplication::mouseButtons()==Qt::MiddleButton && item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toInt() >= 0)
+	else if(QApplication::mouseButtons()==Qt::MiddleButton && item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toInt() >= 0)
 	{
 		loadObjectSource(true);
 	}
-	else if(QApplication::mouseButtons()==Qt::RightButton && item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toInt() >= 0)
+	else if(QApplication::mouseButtons()==Qt::RightButton && item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toInt() >= 0)
 	{
-		ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportForm::ObjectTypeId, Qt::UserRole).toUInt());
-		unsigned obj_id=item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toUInt();
+		ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportWidget::ObjectTypeId, Qt::UserRole).toUInt());
+		unsigned obj_id=item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toUInt();
 
 		SnippetsConfigWidget::configureSnippetsMenu(&snippets_menu, { obj_type, ObjectType::BaseObject });
 
@@ -1237,7 +1238,7 @@ void DatabaseExplorerWidget::handleObject(QTreeWidgetItem *item, int)
 		else if(exec_action==handle_data_action)
 		{
 			DataHandlingForm::openNewWindow(connection.getConnectionParams(),
-																			item->data(DatabaseImportForm::ObjectSchema, Qt::UserRole).toString(),
+																			item->data(DatabaseImportWidget::ObjectSchema, Qt::UserRole).toString(),
 																			item->text(0), obj_type);
 		}
 		else if(exec_action)
@@ -1249,15 +1250,15 @@ void DatabaseExplorerWidget::handleSelectedSnippet(const QString &snip_id)
 {
 	attribs_map attribs;
 	QTreeWidgetItem *item=objects_trw->currentItem();
-	ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportForm::ObjectTypeId, Qt::UserRole).toUInt());
+	ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportWidget::ObjectTypeId, Qt::UserRole).toUInt());
 
 	loadObjectProperties();
-	attribs=item->data(DatabaseImportForm::ObjectOtherData, Qt::UserRole).value<attribs_map>();
+	attribs=item->data(DatabaseImportWidget::ObjectOtherData, Qt::UserRole).value<attribs_map>();
 
 	if(attribs.empty())
 	{
-		QString sch_name=item->data(DatabaseImportForm::ObjectSchema, Qt::UserRole).toString(),
-				tab_name=item->data(DatabaseImportForm::ObjectTable, Qt::UserRole).toString();
+		QString sch_name=item->data(DatabaseImportWidget::ObjectSchema, Qt::UserRole).toString(),
+				tab_name=item->data(DatabaseImportWidget::ObjectTable, Qt::UserRole).toString();
 
 		//Formatting a schema qualified "table" attribute for table children objects
 		if(TableObject::isTableObject(obj_type) && !sch_name.isEmpty() && !tab_name.isEmpty())
@@ -1296,9 +1297,9 @@ void DatabaseExplorerWidget::handleSelectedSnippet(const QString &snip_id)
 attribs_map DatabaseExplorerWidget::extractAttributesFromItem(QTreeWidgetItem *item)
 {
 	if(!item)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
-	ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportForm::ObjectTypeId, Qt::UserRole).toUInt());
+	ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportWidget::ObjectTypeId, Qt::UserRole).toUInt());
 	QString obj_name=item->text(0);
 	int idx=0, idx1=0;
 	attribs_map attribs;
@@ -1322,8 +1323,8 @@ attribs_map DatabaseExplorerWidget::extractAttributesFromItem(QTreeWidgetItem *i
 
 	//Formatting the names
 	attribs[Attributes::Name]=BaseObject::formatName(obj_name, obj_type==ObjectType::Operator);
-	attribs[Attributes::Table]=BaseObject::formatName(item->data(DatabaseImportForm::ObjectTable, Qt::UserRole).toString());
-	attribs[Attributes::Schema]=BaseObject::formatName(item->data(DatabaseImportForm::ObjectSchema, Qt::UserRole).toString());
+	attribs[Attributes::Table]=BaseObject::formatName(item->data(DatabaseImportWidget::ObjectTable, Qt::UserRole).toString());
+	attribs[Attributes::Schema]=BaseObject::formatName(item->data(DatabaseImportWidget::ObjectSchema, Qt::UserRole).toString());
 
 	//For table objects the "table" attribute must be schema qualified
 	if(obj_type!=ObjectType::Index && TableObject::isTableObject(obj_type))
@@ -1338,7 +1339,7 @@ attribs_map DatabaseExplorerWidget::extractAttributesFromItem(QTreeWidgetItem *i
 		attribs[Attributes::Signature]=QString("(%1 AS %2)").arg(types[0]).arg(types[1]);
 	else if(obj_type==ObjectType::OpFamily || obj_type==ObjectType::OpClass)
 	{
-		attribs_map aux_attribs=item->data(DatabaseImportForm::ObjectOtherData, Qt::UserRole).value<attribs_map>();
+		attribs_map aux_attribs=item->data(DatabaseImportWidget::ObjectOtherData, Qt::UserRole).value<attribs_map>();
 		attribs[Attributes::Signature]=QString("%1 USING %2").arg(attribs[Attributes::Name]).arg(aux_attribs[Attributes::IndexType]);
 	}
 	else if(obj_type == ObjectType::UserMapping)
@@ -1354,7 +1355,7 @@ attribs_map DatabaseExplorerWidget::extractAttributesFromItem(QTreeWidgetItem *i
 		 * to construct DDL commands correctly for this kind of object */
 		if(obj_type==ObjectType::View)
 		{
-			attribs_map aux_attribs=item->data(DatabaseImportForm::ObjectOtherData, Qt::UserRole).value<attribs_map>();
+			attribs_map aux_attribs=item->data(DatabaseImportWidget::ObjectOtherData, Qt::UserRole).value<attribs_map>();
 
 			if(aux_attribs[Attributes::Materialized] == Attributes::True)
 			{
@@ -1378,19 +1379,19 @@ void DatabaseExplorerWidget::dropObject(QTreeWidgetItem *item, bool cascade)
 {
 	try
 	{
-		if(item && item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toUInt() > 0)
+		if(item && item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toUInt() > 0)
 		{
 			Messagebox msg_box;
-			ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportForm::ObjectTypeId, Qt::UserRole).toUInt());
+			ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportWidget::ObjectTypeId, Qt::UserRole).toUInt());
 
 			//Roles, tablespaces and user mappings can't be removed in cascade mode
 			if(cascade && (obj_type==ObjectType::Role || obj_type==ObjectType::Tablespace || obj_type == ObjectType::UserMapping))
 				return;
 
 			QString msg,
-					parent_sch = item->data(DatabaseImportForm::ObjectSchema, Qt::UserRole).toString(),
-					parent_tab =  item->data(DatabaseImportForm::ObjectTable, Qt::UserRole).toString(),
-					obj_name = item->data(DatabaseImportForm::ObjectName, Qt::UserRole).toString(),
+					parent_sch = item->data(DatabaseImportWidget::ObjectSchema, Qt::UserRole).toString(),
+					parent_tab =  item->data(DatabaseImportWidget::ObjectTable, Qt::UserRole).toString(),
+					obj_name = item->data(DatabaseImportWidget::ObjectName, Qt::UserRole).toString(),
 					parent_name;
 
 			if(!parent_sch.isEmpty())
@@ -1441,14 +1442,14 @@ void DatabaseExplorerWidget::dropObject(QTreeWidgetItem *item, bool cascade)
 
 				//Updates the object count on the parent item
 				parent=item->parent();
-				if(parent && parent->data(DatabaseImportForm::ObjectId, Qt::UserRole).toUInt()==0)
+				if(parent && parent->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toUInt()==0)
 				{
-					unsigned cnt=parent->data(DatabaseImportForm::ObjectCount, Qt::UserRole).toUInt();
-					ObjectType parent_type=static_cast<ObjectType>(parent->data(DatabaseImportForm::ObjectTypeId, Qt::UserRole).toUInt());
+					unsigned cnt=parent->data(DatabaseImportWidget::ObjectCount, Qt::UserRole).toUInt();
+					ObjectType parent_type=static_cast<ObjectType>(parent->data(DatabaseImportWidget::ObjectTypeId, Qt::UserRole).toUInt());
 
 					cnt--;
 					parent->setText(0, BaseObject::getTypeName(parent_type) + QString(" (%1)").arg(cnt));
-					parent->setData(DatabaseImportForm::ObjectCount, Qt::UserRole, QVariant::fromValue<unsigned>(cnt));
+					parent->setData(DatabaseImportWidget::ObjectCount, Qt::UserRole, QVariant::fromValue<unsigned>(cnt));
 				}
 
 				if(parent)
@@ -1462,7 +1463,7 @@ void DatabaseExplorerWidget::dropObject(QTreeWidgetItem *item, bool cascade)
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -1479,7 +1480,7 @@ bool DatabaseExplorerWidget::truncateTable(const QString &sch_name, const QStrin
 			msg=tr("Do you really want to truncate in <strong>cascade</strong> mode the table <strong>%1.%2</strong>? This action will truncate all the tables that depends on it?").arg(sch_name).arg(obj_name);
 
 		msg_box.setCustomOptionText(tr("Also restart sequences"));
-		msg_box.show(msg, Messagebox::ConfirmIcon, Messagebox::YesNoButtons);
+		msg_box.show(msg, Messagebox::Confirm, Messagebox::YesNoButtons);
 
 		if(msg_box.isAccepted())
 		{
@@ -1510,7 +1511,7 @@ bool DatabaseExplorerWidget::truncateTable(const QString &sch_name, const QStrin
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 }
 
@@ -1523,8 +1524,8 @@ void DatabaseExplorerWidget::saveTreeState()
 	while(*itr)
 	{
 		item = *itr;
-		oid = item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toInt();
-		grp_id = item->data(DatabaseImportForm::ObjectGroupId, Qt::UserRole).toInt();
+		oid = item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toInt();
+		grp_id = item->data(DatabaseImportWidget::ObjectGroupId, Qt::UserRole).toInt();
 		items_state.append(QString("%1:%2").arg(oid > 0 ? oid : grp_id).arg(item->isExpanded()));
 		++itr;
 	}
@@ -1547,8 +1548,8 @@ void DatabaseExplorerWidget::restoreTreeState()
 	while(*itr)
 	{
 		item = *itr;
-		oid = item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toInt();
-		grp_id = item->data(DatabaseImportForm::ObjectGroupId, Qt::UserRole).toInt();
+		oid = item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toInt();
+		grp_id = item->data(DatabaseImportWidget::ObjectGroupId, Qt::UserRole).toInt();
 
 		if(grp_id < 0)
 			idx = items_state.indexOf(QRegularExpression(QString("(%1)(\\:)(.)+").arg(grp_id)));
@@ -1615,32 +1616,32 @@ void DatabaseExplorerWidget::truncateTable(QTreeWidgetItem *item, bool cascade)
 {
 	try
 	{
-		if(item && item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toUInt() > 0)
+		if(item && item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toUInt() > 0)
 		{
 			QString obj_name, sch_name;
-			obj_name=item->data(DatabaseImportForm::ObjectName, Qt::UserRole).toString();
-			sch_name=BaseObject::formatName(item->data(DatabaseImportForm::ObjectSchema, Qt::UserRole).toString());
+			obj_name=item->data(DatabaseImportWidget::ObjectName, Qt::UserRole).toString();
+			sch_name=BaseObject::formatName(item->data(DatabaseImportWidget::ObjectSchema, Qt::UserRole).toString());
 			truncateTable(sch_name, obj_name, cascade, connection);
 		}
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
 void DatabaseExplorerWidget::updateItem(QTreeWidgetItem *item, bool restore_tree_state)
 {
-	if(!item || item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toInt() < 0)
+	if(!item || item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toInt() < 0)
 		return;
 
-	ObjectType obj_type = static_cast<ObjectType>(item->data(DatabaseImportForm::ObjectTypeId, Qt::UserRole).toUInt());
+	ObjectType obj_type = static_cast<ObjectType>(item->data(DatabaseImportWidget::ObjectTypeId, Qt::UserRole).toUInt());
 	QString signature = item->text(0);
 
 	try
 	{
 		QTreeWidgetItem *root=nullptr, *parent=nullptr, *aux_item=nullptr;
-		unsigned obj_id=item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toUInt();
+		unsigned obj_id=item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toUInt();
 		std::vector<QTreeWidgetItem *> gen_items;
 		QString sch_name, tab_name;
 
@@ -1655,8 +1656,8 @@ void DatabaseExplorerWidget::updateItem(QTreeWidgetItem *item, bool restore_tree
 		{
 			clearObjectProperties();
 			parent=item->parent();
-			sch_name=item->data(DatabaseImportForm::ObjectSchema, Qt::UserRole).toString();
-			tab_name=item->data(DatabaseImportForm::ObjectTable, Qt::UserRole).toString();
+			sch_name=item->data(DatabaseImportWidget::ObjectSchema, Qt::UserRole).toString();
+			tab_name=item->data(DatabaseImportWidget::ObjectTable, Qt::UserRole).toString();
 
 			if(parent)
 			{
@@ -1694,21 +1695,23 @@ void DatabaseExplorerWidget::updateItem(QTreeWidgetItem *item, bool restore_tree
 			configureImportHelper();
 
 			//Updates the group type only
-			if(obj_id==0 || (!BaseTable::isBaseTable(obj_type) && obj_type!=ObjectType::Schema))
-				gen_items=DatabaseImportForm::updateObjectsTree(import_helper, objects_trw, { obj_type }, false, false, root, sch_name, tab_name);
+			if(obj_id == 0 || (!BaseTable::isBaseTable(obj_type) && obj_type!=ObjectType::Schema))
+				gen_items = DatabaseImportWidget::updateObjectsTree(import_helper, objects_trw, { obj_type }, false,
+																														DatabaseImportWidget::HideEmptyGrps, root, sch_name, tab_name);
 			else
 				//Updates all child objcts when the selected object is a schema or table or view
-				gen_items=DatabaseImportForm::updateObjectsTree(import_helper, objects_trw,
-																BaseObject::getChildObjectTypes(obj_type), false, false, root, sch_name, tab_name);
+				gen_items = DatabaseImportWidget::updateObjectsTree(import_helper, objects_trw,
+																														BaseObject::getChildObjectTypes(obj_type), false,
+																														DatabaseImportWidget::HideEmptyGrps, root, sch_name, tab_name);
 
 			//Creating dummy items for schemas and tables
-			if(obj_type==ObjectType::Schema || BaseTable::isBaseTable(obj_type))
+			if(obj_type == ObjectType::Schema || BaseTable::isBaseTable(obj_type))
 			{
 				for(auto &item : gen_items)
 				{
 					aux_item=new QTreeWidgetItem(item);
 					aux_item->setText(0, "...");
-					aux_item->setData(DatabaseImportForm::ObjectOtherData, Qt::UserRole, QVariant::fromValue<int>(-1));
+					aux_item->setData(DatabaseImportWidget::ObjectOtherData, Qt::UserRole, QVariant::fromValue<int>(-1));
 				}
 			}
 
@@ -1739,7 +1742,7 @@ void DatabaseExplorerWidget::updateItem(QTreeWidgetItem *item, bool restore_tree
 
 		throw Exception(tr("Failed to load the subitems of the object <strong>%1</strong> <em>(%2)</em>! Try to reload them manually by hitting <strong>F6</strong> on each one.")
 										.arg(signature, BaseObject::getTypeName(obj_type)),
-										ErrorCode::Custom, __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+										ErrorCode::Custom, PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -1748,15 +1751,15 @@ void DatabaseExplorerWidget::loadObjectProperties(bool force_reload)
 	try
 	{
 		QTreeWidgetItem *item=objects_trw->currentItem();
-		unsigned oid=item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toUInt();
+		unsigned oid=item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toUInt();
 
 		if(oid != 0 || (item == objects_trw->topLevelItem(0)))
 		{
-			ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportForm::ObjectTypeId, Qt::UserRole).toUInt());
+			ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportWidget::ObjectTypeId, Qt::UserRole).toUInt());
 			attribs_map orig_attribs, fmt_attribs;
 
 			//First, retrieve the attributes stored on the item as a result of a previous properties listing
-			orig_attribs=item->data(DatabaseImportForm::ObjectAttribs, Qt::UserRole).value<attribs_map>();
+			orig_attribs=item->data(DatabaseImportWidget::ObjectAttribs, Qt::UserRole).value<attribs_map>();
 
 			//In case of the cached attributes are empty
 			if(orig_attribs.empty() || force_reload)
@@ -1793,8 +1796,8 @@ void DatabaseExplorerWidget::loadObjectProperties(bool force_reload)
 				}
 				else
 				{
-					QString tab_name=item->data(DatabaseImportForm::ObjectTable, Qt::UserRole).toString(),
-							sch_name=item->data(DatabaseImportForm::ObjectSchema, Qt::UserRole).toString();
+					QString tab_name=item->data(DatabaseImportWidget::ObjectTable, Qt::UserRole).toString(),
+							sch_name=item->data(DatabaseImportWidget::ObjectSchema, Qt::UserRole).toString();
 					std::vector<attribs_map> vect_attribs=catalog.getObjectsAttributes(obj_type, sch_name, tab_name, { oid });
 
 					if(!vect_attribs.empty())
@@ -1806,13 +1809,13 @@ void DatabaseExplorerWidget::loadObjectProperties(bool force_reload)
 				fmt_attribs.erase(Attributes::Signature);
 
 				//Store the original attributes on the item to permit value replacements when using code snippets
-				item->setData(DatabaseImportForm::ObjectOtherData, Qt::UserRole, QVariant::fromValue<attribs_map>(orig_attribs));
+				item->setData(DatabaseImportWidget::ObjectOtherData, Qt::UserRole, QVariant::fromValue<attribs_map>(orig_attribs));
 
 				//Store the attributes on the item to avoid repeatedly query the database
-				item->setData(DatabaseImportForm::ObjectAttribs, Qt::UserRole, QVariant::fromValue<attribs_map>(fmt_attribs));
+				item->setData(DatabaseImportWidget::ObjectAttribs, Qt::UserRole, QVariant::fromValue<attribs_map>(fmt_attribs));
 
 				if(item != objects_trw->topLevelItem(0))
-					item->setData(DatabaseImportForm::ObjectSource, Qt::UserRole, DefaultSourceCode);
+					item->setData(DatabaseImportWidget::ObjectSource, Qt::UserRole, DefaultSourceCode);
 
 				catalog.closeConnection();
 				qApp->restoreOverrideCursor();
@@ -1822,7 +1825,7 @@ void DatabaseExplorerWidget::loadObjectProperties(bool force_reload)
 	catch(Exception &e)
 	{
 		//qApp->restoreOverrideCursor();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -1834,7 +1837,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 		clearObjectProperties();
 
 		if(item &&
-			 ((item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toInt() >= 0) ||
+			 ((item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toInt() >= 0) ||
 				(item == objects_trw->topLevelItem(0))))
 		{
 			attribs_map cached_attribs;
@@ -1845,7 +1848,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 
 			loadObjectProperties(force_reload);
 			cached_attribs=item->data((raw_attrib_names_chk->isChecked() ?
-										   DatabaseImportForm::ObjectOtherData : DatabaseImportForm::ObjectAttribs),
+											 DatabaseImportWidget::ObjectOtherData : DatabaseImportWidget::ObjectAttribs),
 									  Qt::UserRole).value<attribs_map>();
 
 			properties_tbw->setSortingEnabled(false);
@@ -1889,7 +1892,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 					}
 				}
 
-				cached_attribs=item->data(DatabaseImportForm::ObjectOtherData,Qt::UserRole).value<attribs_map>();
+				cached_attribs=item->data(DatabaseImportWidget::ObjectOtherData,Qt::UserRole).value<attribs_map>();
 
 				if(cached_attribs[Attributes::ObjectType]==BaseObject::getSchemaName(ObjectType::Constraint) &&  item->childCount()==0)
 				{
@@ -1902,7 +1905,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 							right-click them. */
 
 						src_item=new QTreeWidgetItem(item);
-						src_item->setData(DatabaseImportForm::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
+						src_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
 						src_item->setIcon(0, QPixmap(GuiUtilsNs::getIconPath("column")));
 						src_item->setText(0, QString("%1(%2)")
 															.arg(cached_attribs[Attributes::Table])
@@ -1913,7 +1916,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 						src_item->setFlags(Qt::ItemIsEnabled);
 
 						fk_item=new QTreeWidgetItem(item);
-						fk_item->setData(DatabaseImportForm::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
+						fk_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
 						fk_item->setIcon(0, QPixmap(GuiUtilsNs::getIconPath("referenced")));
 						fk_item->setText(0, QString("%1(%2)")
 														.arg(cached_attribs[Attributes::RefTable])
@@ -1931,7 +1934,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 						for(auto &col : columns)
 						{
 							src_item=new QTreeWidgetItem(item);
-							src_item->setData(DatabaseImportForm::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
+							src_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
 							src_item->setIcon(0, QPixmap(GuiUtilsNs::getIconPath("column")));
 							src_item->setText(0, col);
 							src_item->setFlags(Qt::ItemIsEnabled);
@@ -1950,7 +1953,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 					font.setItalic(true);
 
 					refs_item->setFont(0, font);
-					refs_item->setData(DatabaseImportForm::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
+					refs_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
 					refs_item->setIcon(0, QPixmap(GuiUtilsNs::getIconPath("referrer")));
 					refs_item->setText(0, QString("%1 (%2)")
 															.arg(attribs_i18n.at(Attributes::Referrers))
@@ -1959,7 +1962,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 					for(auto &tab_name : ref_tab_names)
 					{
 						tab_item=new QTreeWidgetItem(refs_item);
-						tab_item->setData(DatabaseImportForm::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
+						tab_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
 						tab_item->setIcon(0, QPixmap(GuiUtilsNs::getIconPath("table")));
 						tab_item->setText(0, tab_name);
 						tab_item->setFlags(Qt::ItemIsEnabled);
@@ -1967,7 +1970,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 				}
 			}
 
-			emit s_sourceCodeShowRequested(item->data(DatabaseImportForm::ObjectSource, Qt::UserRole).toString(), false);
+			emit s_sourceCodeShowRequested(item->data(DatabaseImportWidget::ObjectSource, Qt::UserRole).toString(), false);
 
 			properties_tbw->setSortingEnabled(true);
 			properties_tbw->sortByColumn(0, Qt::AscendingOrder);
@@ -1979,22 +1982,22 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 	catch(Exception &e)
 	{
 		//qApp->restoreOverrideCursor();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
 void DatabaseExplorerWidget::startObjectRename(QTreeWidgetItem *item)
 {
-	if(item && item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toUInt() > 0)
+	if(item && item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toUInt() > 0)
 	{
-		ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportForm::ObjectTypeId, Qt::UserRole).toUInt());
+		ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportWidget::ObjectTypeId, Qt::UserRole).toUInt());
 
 		if(obj_type!=ObjectType::Cast && obj_type!=ObjectType::Database)
 		{
 			item->setFlags(item->flags() | Qt::ItemIsEditable);
 			objects_trw->openPersistentEditor(item);
 			rename_item=item;
-			rename_item->setData(DatabaseImportForm::ObjectOtherData, Qt::UserRole, rename_item->text(0));
+			rename_item->setData(DatabaseImportWidget::ObjectOtherData, Qt::UserRole, rename_item->text(0));
 		}
 	}
 }
@@ -2008,7 +2011,7 @@ void DatabaseExplorerWidget::finishObjectRename()
 			QString rename_cmd;
 			Connection conn=connection;
 			attribs_map attribs=extractAttributesFromItem(rename_item);
-			ObjectType obj_type=static_cast<ObjectType>(rename_item->data(DatabaseImportForm::ObjectTypeId, Qt::UserRole).toUInt());
+			ObjectType obj_type=static_cast<ObjectType>(rename_item->data(DatabaseImportWidget::ObjectTypeId, Qt::UserRole).toUInt());
 
 			objects_trw->closePersistentEditor(rename_item);
 			attribs[Attributes::NewName]=BaseObject::formatName(rename_item->text(0), obj_type==ObjectType::Operator);
@@ -2025,14 +2028,14 @@ void DatabaseExplorerWidget::finishObjectRename()
 			conn.executeDDLCommand(rename_cmd);
 
 			rename_item->setFlags(rename_item->flags() ^ Qt::ItemIsEditable);
-			rename_item->setData(DatabaseImportForm::ObjectName, Qt::UserRole, rename_item->text(0));
+			rename_item->setData(DatabaseImportWidget::ObjectName, Qt::UserRole, rename_item->text(0));
 			rename_item=nullptr;
 		}
 	}
 	catch(Exception &e)
 	{
 		cancelObjectRename();
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -2042,7 +2045,7 @@ void DatabaseExplorerWidget::cancelObjectRename()
 	{
 		objects_trw->closePersistentEditor(rename_item);
 		rename_item->setFlags(rename_item->flags() ^ Qt::ItemIsEditable);
-		rename_item->setText(0, rename_item->data(DatabaseImportForm::ObjectOtherData, Qt::UserRole).toString());
+		rename_item->setText(0, rename_item->data(DatabaseImportWidget::ObjectOtherData, Qt::UserRole).toString());
 		rename_item=nullptr;
 	}
 }
@@ -2055,28 +2058,28 @@ void DatabaseExplorerWidget::loadObjectSource(bool show_code)
 	{
 		if(item == objects_trw->topLevelItem(0))
 		{
-			emit s_sourceCodeShowRequested(item->data(DatabaseImportForm::ObjectSource, Qt::UserRole).toString(), show_code);
+			emit s_sourceCodeShowRequested(item->data(DatabaseImportWidget::ObjectSource, Qt::UserRole).toString(), show_code);
 		}
 		else if(item)
 		{
 			DatabaseModel dbmodel;
 			DatabaseImportHelper import_hlp;
-			ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportForm::ObjectTypeId, Qt::UserRole).toUInt());
+			ObjectType obj_type=static_cast<ObjectType>(item->data(DatabaseImportWidget::ObjectTypeId, Qt::UserRole).toUInt());
 			QString sch_name, tab_name, name, source;
 			QTreeWidgetItem *sch_item=nullptr;
 			BaseObject *object=nullptr;
 			BaseObject *schema=nullptr;
-			attribs_map attribs=item->data(DatabaseImportForm::ObjectOtherData, Qt::UserRole).value<attribs_map>();
+			attribs_map attribs=item->data(DatabaseImportWidget::ObjectOtherData, Qt::UserRole).value<attribs_map>();
 			bool is_column=false;
-			unsigned oid=item->data(DatabaseImportForm::ObjectId, Qt::UserRole).toUInt(),
-					db_oid=objects_trw->topLevelItem(0)->child(0)->data(DatabaseImportForm::ObjectId, Qt::UserRole).toUInt(),
+			unsigned oid=item->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toUInt(),
+					db_oid=objects_trw->topLevelItem(0)->child(0)->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toUInt(),
 					sys_oid=0;
 			int sbar_value=(objects_trw->verticalScrollBar() ? objects_trw->verticalScrollBar()->value() : 0);
 
 			qApp->setOverrideCursor(Qt::WaitCursor);
-			sch_name=item->data(DatabaseImportForm::ObjectSchema, Qt::UserRole).toString();
-			tab_name=item->data(DatabaseImportForm::ObjectTable, Qt::UserRole).toString();
-			name=item->data(DatabaseImportForm::ObjectName, Qt::UserRole).toString();
+			sch_name=item->data(DatabaseImportWidget::ObjectSchema, Qt::UserRole).toString();
+			tab_name=item->data(DatabaseImportWidget::ObjectTable, Qt::UserRole).toString();
+			name=item->data(DatabaseImportWidget::ObjectName, Qt::UserRole).toString();
 
 			if(!sch_name.isEmpty() && obj_type!=ObjectType::Extension)
 			{
@@ -2089,7 +2092,7 @@ void DatabaseExplorerWidget::loadObjectSource(bool show_code)
 			//Special case for columns. We will retrieve the table from database and then generate the code for the column
 			if(obj_type==ObjectType::Column)
 			{
-				oid=item->parent()->parent()->data(DatabaseImportForm::ObjectId, Qt::UserRole).toUInt();
+				oid=item->parent()->parent()->data(DatabaseImportWidget::ObjectId, Qt::UserRole).toUInt();
 				is_column=true;
 				obj_type=ObjectType::Table;
 			}
@@ -2146,7 +2149,7 @@ void DatabaseExplorerWidget::loadObjectSource(bool show_code)
 						{
 							table_item=item->parent()->parent();
 							objects_trw->setCurrentItem(item->parent()->parent());
-							table_item->setData(DatabaseImportForm::ObjectSource, Qt::UserRole, getObjectSource(table, &dbmodel));
+							table_item->setData(DatabaseImportWidget::ObjectSource, Qt::UserRole, getObjectSource(table, &dbmodel));
 
 							sch_item=table_item->parent()->parent();
 							schema=table->getSchema();
@@ -2182,17 +2185,17 @@ void DatabaseExplorerWidget::loadObjectSource(bool show_code)
 			{
 				if(!sch_item) sch_item=item->parent()->parent();
 				objects_trw->setCurrentItem(sch_item);
-				sch_item->setData(DatabaseImportForm::ObjectSource, Qt::UserRole, getObjectSource(schema, &dbmodel));
+				sch_item->setData(DatabaseImportWidget::ObjectSource, Qt::UserRole, getObjectSource(schema, &dbmodel));
 			}
 
 			if(obj_type != ObjectType::Database)
 			{
 				//Generating the code for the database itself and storing it in the first child of the root item in the tree
 				objects_trw->setCurrentItem(objects_trw->topLevelItem(0));
-				objects_trw->topLevelItem(0)->child(0)->setData(DatabaseImportForm::ObjectSource, Qt::UserRole, getObjectSource(&dbmodel, &dbmodel));
+				objects_trw->topLevelItem(0)->child(0)->setData(DatabaseImportWidget::ObjectSource, Qt::UserRole, getObjectSource(&dbmodel, &dbmodel));
 			}
 
-			item->setData(DatabaseImportForm::ObjectSource, Qt::UserRole, source);
+			item->setData(DatabaseImportWidget::ObjectSource, Qt::UserRole, source);
 			objects_trw->setCurrentItem(item);
 
 			/* Restore the position of the scrollbar in the tree because the usage of setCurrentItem in previous lines
@@ -2213,8 +2216,8 @@ void DatabaseExplorerWidget::loadObjectSource(bool show_code)
 
 void DatabaseExplorerWidget::filterObjects()
 {
-	DatabaseImportForm::filterObjects(objects_trw, filter_edt->text(),
-																		(by_oid_chk->isChecked() ? DatabaseImportForm::ObjectId : 0), false);
+	DatabaseImportWidget::filterObjects(objects_trw, filter_edt->text(),
+																		(by_oid_chk->isChecked() ? DatabaseImportWidget::ObjectId : 0), false);
 }
 
 QString DatabaseExplorerWidget::getObjectSource(BaseObject *object, DatabaseModel *dbmodel)

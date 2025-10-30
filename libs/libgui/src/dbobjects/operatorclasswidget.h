@@ -65,7 +65,7 @@ class __libgui OperatorClassWidget: public BaseObjectWidget, public Ui::Operator
 		void editElement(int lin_idx);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

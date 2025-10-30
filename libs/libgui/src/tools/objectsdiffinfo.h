@@ -47,7 +47,7 @@ class __libgui ObjectsDiffInfo {
 
 	public:
 		ObjectsDiffInfo();
-		ObjectsDiffInfo(DiffType diff_type, BaseObject *ref_object, BaseObject *old_object);
+		ObjectsDiffInfo(DiffType diff_type, BaseObject *object, BaseObject *old_obj);
 
 		DiffType getDiffType();
 		QString getInfoMessage();

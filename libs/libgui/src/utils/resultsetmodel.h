@@ -46,13 +46,13 @@ class __libgui ResultSetModel: public QAbstractTableModel {
 
 	public:
 		ResultSetModel(ResultSet &res, Catalog &catalog, QObject *parent = 0);
-		virtual int rowCount(const QModelIndex & = QModelIndex()) const;
-		virtual int columnCount(const QModelIndex &) const;
-		virtual QModelIndex index(int row, int column, const QModelIndex &parent) const;
-		virtual QModelIndex parent(const QModelIndex &) const;
-		virtual QVariant data(const QModelIndex &index, int role) const;
-		virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-		virtual Qt::ItemFlags flags(const QModelIndex &) const;
+		int rowCount(const QModelIndex & = QModelIndex()) const override;
+		int columnCount(const QModelIndex &) const override;
+		QModelIndex index(int row, int column, const QModelIndex &parent) const override;
+		QModelIndex parent(const QModelIndex &) const override;
+		QVariant data(const QModelIndex &index, int role) const override;
+		QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+		Qt::ItemFlags flags(const QModelIndex &) const override;
 		void append(ResultSet &res);
 		bool isEmpty();
 

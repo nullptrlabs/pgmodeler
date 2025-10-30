@@ -1,0 +1,229 @@
+{
+   "cmake.parallelJobs": 22,
+   "cmake.buildDirectory": "${workspaceFolder}/cmake-build",
+   "cmake.generator": "Unix Makefiles",
+   "cmake.configureSettings": {
+        "PLUS_VERSION": "ON",
+        "PGM_PREFIX": "${workspaceFolder}/build",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "USE_CLANG_TIDY": "OFF",
+        "CLANG_TIDY_PATH": "/opt/qt/Tools/QtCreator/libexec/qtcreator/clang/bin/clang-tidy"
+    },
+
+    // Intelisense configurations
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/cmake-build/compile_commands.json",
+    "C_Cpp.intelliSenseEngine": "disabled",    
+    "C_Cpp.autocomplete": "disabled",           
+    "C_Cpp.autocompleteAddParentheses": true, 
+    "C_Cpp.hoverEnabled": false,                 
+    "C_Cpp.errorSquiggles": "disabled",
+    
+    // Delay para sugestões de código (menos intrusivo)
+    "editor.quickSuggestionsDelay": 1000,  // Delay de 1000ms (1s) antes de mostrar sugestões
+    "editor.suggestOnTriggerCharacters": false,  // Não mostrar sugestões ao digitar caracteres especiais
+    "editor.acceptSuggestionOnCommitCharacter": false,  // Não aceitar sugestão ao digitar . ou (
+    "editor.quickSuggestions": {
+        "other": "on",
+        "comments": "on",
+        "strings": "on"
+    },
+    
+    // Desabilitar auto-completar chaves/colchetes/parênteses
+    "editor.autoClosingBrackets": "never",
+    "editor.autoClosingQuotes": "never",
+    "editor.autoClosingDelete": "never",
+    "editor.autoSurround": "never",
+    
+    // GitHub Copilot - delays e controles
+    "github.copilot.editor.enableAutoCompletions": true,
+    "editor.inlineSuggest.enabled": true,
+    "github.copilot.enable": {
+        "*": true,
+        "yaml": false,
+        "plaintext": false,
+        "markdown": false
+    },     
+
+    "C_Cpp.commentContinuationPatterns": [
+        {
+            "begin": "/*",
+            "continue": " * "
+        }
+    ],
+
+    "C_Cpp.default.compilerPath": "/usr/bin/clang++",
+    "C_Cpp.default.cStandard": "c17",
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.intelliSenseMode": "linux-clang-x64",
+    "files.associations": {
+        "*.embeddedhtml": "html",
+        "ostream": "cpp",
+        "array": "cpp",
+        "atomic": "cpp",
+        "bit": "cpp",
+        "cctype": "cpp",
+        "charconv": "cpp",
+        "chrono": "cpp",
+        "clocale": "cpp",
+        "cmath": "cpp",
+        "codecvt": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "condition_variable": "cpp",
+        "cstdarg": "cpp",
+        "cstddef": "cpp",
+        "cstdint": "cpp",
+        "cstdio": "cpp",
+        "cstdlib": "cpp",
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "cwchar": "cpp",
+        "cwctype": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "exception": "cpp",
+        "algorithm": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "memory": "cpp",
+        "memory_resource": "cpp",
+        "numeric": "cpp",
+        "optional": "cpp",
+        "random": "cpp",
+        "ratio": "cpp",
+        "source_location": "cpp",
+        "string_view": "cpp",
+        "system_error": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "format": "cpp",
+        "fstream": "cpp",
+        "future": "cpp",
+        "initializer_list": "cpp",
+        "iomanip": "cpp",
+        "iosfwd": "cpp",
+        "iostream": "cpp",
+        "istream": "cpp",
+        "limits": "cpp",
+        "mutex": "cpp",
+        "new": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "shared_mutex": "cpp",
+        "span": "cpp",
+        "sstream": "cpp",
+        "stdexcept": "cpp",
+        "stdfloat": "cpp",
+        "stop_token": "cpp",
+        "streambuf": "cpp",
+        "thread": "cpp",
+        "cinttypes": "cpp",
+        "typeinfo": "cpp",
+        "variant": "cpp",
+        "filesystem": "cpp",
+        "qtoolbar": "cpp",
+        "bitset": "cpp"
+    },
+
+    // Hiding build artifacts and moc generated files from the explorer
+    "files.exclude": {
+        "**/moc/**": true,      
+        "**/obj/**": true, 
+        "**/CMakeFiles/**": true,
+        "**/*.o": true,         
+        "**/*.a": true,         
+        "**/*.so*": true,
+        ".qtc_clangd": true,
+        "**/build/**": true,
+        "**/cmake-build/**": true,
+        ".qt": true
+    },
+
+    "files.watcherExclude": {
+        "**/moc/**": true,      
+        "**/obj/**": true, 
+        "**/CMakeFiles/**": true,
+        "**/*.o": true,         
+        "**/*.a": true,         
+        "**/*.so*": true,
+        ".qtc_clangd": true,
+        "**/build/**": true,
+        "**/cmake-build/**": true,
+        ".qt": true
+    },
+
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": [
+                    "comment.block",      
+                    "comment.block.documentation",
+                    "comment.line.double-slash" 
+                ],
+                "settings": {
+                    "foreground": "#808080",
+                }
+            }
+        ]
+    
+    },
+
+    // Clang-format file settings (see .clang-format in project's root)
+    "C_Cpp.formatting": "clangFormat",
+    "C_Cpp.clang_format_style": "file",
+    "editor.formatOnType": false,
+    "editor.autoIndent": "none",
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools",
+        "editor.formatOnType": false,
+        "editor.formatOnSave": false,
+        "editor.autoIndent": "none",
+        "editor.insertSpaces": false,
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2
+    },
+    "[c]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools",
+        "editor.formatOnType": false,
+        "editor.formatOnSave": false,
+        "editor.autoIndent": "none",
+        "editor.insertSpaces": false,
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2
+    },
+
+    // clangd memory and performance optimizations
+    "clangd.arguments": [
+         "--compile-commands-dir=${workspaceFolder}/cmake-build",
+         
+         // Limit memory usage to prevent system freezes
+         // Adjust based on your available RAM (in MB)
+         "--limit-results=50",
+         
+         // Reduce number of worker threads (default is number of cores)
+         // Lower values = less memory but slower indexing
+         "-j=4",
+         
+         // Disable expensive background indexing features
+         "--background-index=false",
+         
+         // Limit preamble size (parsed headers cache)
+         "--pch-storage=memory",
+         
+         // Enable more aggressive memory cleanup
+         "--malloc-trim",
+         
+         // Reduce completion cache
+         "--completion-style=detailed",
+         
+         // Log memory usage (helpful for debugging)
+         "--log=error"
+    ]   
+}

@@ -9,14 +9,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1078</width>
-    <height>480</height>
+    <width>1120</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>640</width>
-    <height>480</height>
+    <width>1120</width>
+    <height>800</height>
    </size>
   </property>
   <property name="mouseTracking">
@@ -32,7 +32,7 @@
    <string>pgModeler - PostgreSQL Database Modeler</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../res/resources.qrc">
+   <iconset resource="../../../priv-plugins/res/logoicons.qrc">
     <normaloff>:/icons/icons/pgmodeler_logo.png</normaloff>:/icons/icons/pgmodeler_logo.png</iconset>
   </property>
   <property name="statusTip">
@@ -47,9 +47,6 @@
   <property name="styleSheet">
    <string notr="true"/>
   </property>
-  <property name="toolButtonStyle">
-   <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
-  </property>
   <property name="animated">
    <bool>false</bool>
   </property>
@@ -61,6 +58,9 @@
   </property>
   <widget class="QWidget" name="bg_widget">
    <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="autoFillBackground">
     <bool>true</bool>
    </property>
    <layout class="QGridLayout" name="gridLayout_6">
@@ -87,6 +87,15 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="frameShape">
+       <enum>QFrame::Shape::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>0</number>
+      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -94,16 +103,16 @@
       <widget class="QWidget" name="design_pg">
        <layout class="QGridLayout" name="gridLayout_4">
         <property name="leftMargin">
-         <number>0</number>
+         <number>2</number>
         </property>
         <property name="topMargin">
-         <number>0</number>
+         <number>3</number>
         </property>
         <property name="rightMargin">
-         <number>0</number>
+         <number>2</number>
         </property>
         <property name="bottomMargin">
-         <number>0</number>
+         <number>2</number>
         </property>
         <property name="spacing">
          <number>5</number>
@@ -226,16 +235,16 @@
                    <number>5</number>
                   </property>
                   <property name="leftMargin">
-                   <number>5</number>
+                   <number>0</number>
                   </property>
                   <property name="topMargin">
-                   <number>5</number>
+                   <number>0</number>
                   </property>
                   <property name="rightMargin">
-                   <number>5</number>
+                   <number>0</number>
                   </property>
                   <property name="bottomMargin">
-                   <number>5</number>
+                   <number>0</number>
                   </property>
                   <item>
                    <widget class="QSplitter" name="splitter">
@@ -245,7 +254,14 @@
                     <property name="childrenCollapsible">
                      <bool>false</bool>
                     </property>
-                    <widget class="QWidget" name="model_valid_parent" native="true"/>
+                    <widget class="QWidget" name="model_valid_parent" native="true">
+                     <property name="autoFillBackground">
+                      <bool>true</bool>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true"/>
+                     </property>
+                    </widget>
                     <widget class="QWidget" name="obj_search_parent" native="true">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -277,6 +293,9 @@
              </property>
              <property name="autoFillBackground">
               <bool>true</bool>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
              </property>
              <layout class="QGridLayout" name="gridLayout_3">
               <property name="leftMargin">
@@ -320,6 +339,9 @@
                    <width>270</width>
                    <height>0</height>
                   </size>
+                 </property>
+                 <property name="autoFillBackground">
+                  <bool>false</bool>
                  </property>
                 </widget>
                 <widget class="QWidget" name="oper_list_parent" native="true">
@@ -378,24 +400,30 @@
                 <number>5</number>
                </property>
                <property name="leftMargin">
-                <number>5</number>
+                <number>0</number>
                </property>
                <property name="topMargin">
                 <number>5</number>
                </property>
                <property name="bottomMargin">
-                <number>5</number>
+                <number>0</number>
                </property>
                <item>
-                <widget class="QToolButton" name="validation_btn">
+                <widget class="QPushButton" name="validation_btn">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="toolTip">
-                  <string>Toogle the model validation widget</string>
+                  <string>Toggle the model validation widget</string>
                  </property>
                  <property name="text">
                   <string>&amp;Validation</string>
@@ -413,21 +441,21 @@
                  <property name="checkable">
                   <bool>true</bool>
                  </property>
-                 <property name="toolButtonStyle">
-                  <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
-                 </property>
-                 <property name="autoRaise">
-                  <bool>false</bool>
-                 </property>
                 </widget>
                </item>
                <item>
-                <widget class="QToolButton" name="search_obj_btn">
+                <widget class="QPushButton" name="search_obj_btn">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
                  </property>
                  <property name="toolTip">
                   <string>Toggle the object search widget</string>
@@ -448,21 +476,21 @@
                  <property name="checkable">
                   <bool>true</bool>
                  </property>
-                 <property name="toolButtonStyle">
-                  <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
-                 </property>
-                 <property name="autoRaise">
-                  <bool>false</bool>
-                 </property>
                 </widget>
                </item>
                <item>
-                <widget class="QToolButton" name="layers_btn">
+                <widget class="QPushButton" name="layers_btn">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
                  </property>
                  <property name="toolTip">
                   <string>Toggle the layers editor</string>
@@ -483,24 +511,24 @@
                  <property name="checkable">
                   <bool>true</bool>
                  </property>
-                 <property name="toolButtonStyle">
-                  <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
-                 </property>
-                 <property name="autoRaise">
-                  <bool>false</bool>
-                 </property>
                 </widget>
                </item>
                <item>
-                <widget class="QToolButton" name="changelog_btn">
+                <widget class="QPushButton" name="changelog_btn">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="toolTip">
-                  <string>Handle the changelog settings</string>
+                  <string>Manage changelog settings</string>
                  </property>
                  <property name="text">
                   <string>C&amp;hangelog</string>
@@ -517,15 +545,6 @@
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
-                 </property>
-                 <property name="popupMode">
-                  <enum>QToolButton::ToolButtonPopupMode::DelayedPopup</enum>
-                 </property>
-                 <property name="toolButtonStyle">
-                  <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
-                 </property>
-                 <property name="autoRaise">
-                  <bool>false</bool>
                  </property>
                 </widget>
                </item>
@@ -553,13 +572,13 @@
                 <number>5</number>
                </property>
                <property name="rightMargin">
-                <number>5</number>
+                <number>0</number>
                </property>
                <property name="bottomMargin">
-                <number>5</number>
+                <number>0</number>
                </property>
                <item>
-                <widget class="QToolButton" name="objects_btn">
+                <widget class="QPushButton" name="objects_btn">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                    <horstretch>0</horstretch>
@@ -585,21 +604,21 @@
                  <property name="checkable">
                   <bool>true</bool>
                  </property>
-                 <property name="toolButtonStyle">
-                  <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
-                 </property>
-                 <property name="autoRaise">
-                  <bool>false</bool>
-                 </property>
                 </widget>
                </item>
                <item>
-                <widget class="QToolButton" name="operations_btn">
+                <widget class="QPushButton" name="operations_btn">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>30</height>
+                  </size>
                  </property>
                  <property name="toolTip">
                   <string>Toggle the operation history widget</string>
@@ -619,12 +638,6 @@
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
-                 </property>
-                 <property name="toolButtonStyle">
-                  <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
-                 </property>
-                 <property name="autoRaise">
-                  <bool>false</bool>
                  </property>
                 </widget>
                </item>
@@ -665,7 +678,7 @@
                   <item>
                    <widget class="QLabel" name="bg_saving_lbl">
                     <property name="text">
-                     <string>Saving temp. models</string>
+                     <string>Saving temporary models</string>
                     </property>
                    </widget>
                   </item>
@@ -724,6 +737,11 @@
        </layout>
       </widget>
       <widget class="QWidget" name="manage_pg"/>
+      <widget class="QWidget" name="import_pg"/>
+      <widget class="QWidget" name="export_pg"/>
+      <widget class="QWidget" name="diff_pg"/>
+      <widget class="QWidget" name="fix_pg"/>
+      <widget class="QWidget" name="settings_pg"/>
      </widget>
     </item>
    </layout>
@@ -736,7 +754,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1078</width>
+     <width>1120</width>
      <height>27</height>
     </rect>
    </property>
@@ -775,7 +793,7 @@
     <addaction name="action_undo"/>
     <addaction name="action_redo"/>
     <addaction name="separator"/>
-    <addaction name="action_configuration"/>
+    <addaction name="action_configure"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="about_menu">
@@ -788,14 +806,14 @@
     <addaction name="separator"/>
     <addaction name="action_about"/>
    </widget>
-   <widget class="QMenu" name="show_menu">
+   <widget class="QMenu" name="canvas_menu">
     <property name="title">
-     <string>Sho&amp;w</string>
+     <string>Ca&amp;nvas</string>
     </property>
     <addaction name="action_show_grid"/>
     <addaction name="action_show_delimiters"/>
     <addaction name="action_lock_delim"/>
-    <addaction name="action_alin_objs_grade"/>
+    <addaction name="action_align_grid"/>
     <addaction name="separator"/>
     <addaction name="action_normal_zoom"/>
     <addaction name="action_inc_zoom"/>
@@ -807,7 +825,7 @@
    </widget>
    <addaction name="file_menu"/>
    <addaction name="edit_menu"/>
-   <addaction name="show_menu"/>
+   <addaction name="canvas_menu"/>
    <addaction name="about_menu"/>
   </widget>
   <widget class="QToolBar" name="tools_acts_tb">
@@ -864,11 +882,11 @@
    <addaction name="action_welcome"/>
    <addaction name="action_design"/>
    <addaction name="action_manage"/>
-   <addaction name="separator"/>
    <addaction name="action_import"/>
    <addaction name="action_export"/>
    <addaction name="action_diff"/>
-   <addaction name="action_configuration"/>
+   <addaction name="action_fix"/>
+   <addaction name="action_configure"/>
   </widget>
   <widget class="QToolBar" name="model_acts_tb">
    <property name="enabled">
@@ -934,7 +952,7 @@
    <addaction name="action_show_grid"/>
    <addaction name="action_show_delimiters"/>
    <addaction name="action_lock_delim"/>
-   <addaction name="action_alin_objs_grade"/>
+   <addaction name="action_align_grid"/>
    <addaction name="action_compact_view"/>
    <addaction name="separator"/>
   </widget>
@@ -1134,6 +1152,9 @@
    </property>
   </action>
   <action name="action_export">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -1208,7 +1229,7 @@
     <string>Ctrl+0</string>
    </property>
   </action>
-  <action name="action_alin_objs_grade">
+  <action name="action_align_grid">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -1256,13 +1277,19 @@
     <string>Ctrl+L</string>
    </property>
   </action>
-  <action name="action_configuration">
+  <action name="action_configure">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../res/resources.qrc">
      <normaloff>:/icons/icons/config.png</normaloff>:/icons/icons/config.png</iconset>
    </property>
    <property name="text">
-    <string>Settings</string>
+    <string>Configure</string>
+   </property>
+   <property name="iconText">
+    <string>Configure</string>
    </property>
    <property name="toolTip">
     <string>Edit pgModeler settings</string>
@@ -1332,6 +1359,9 @@
    </property>
   </action>
   <action name="action_import">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../res/resources.qrc">
      <normaloff>:/icons/icons/import.png</normaloff>:/icons/icons/import.png</iconset>
@@ -1353,18 +1383,6 @@
    </property>
    <property name="text">
     <string>Restore Session</string>
-   </property>
-  </action>
-  <action name="action_fix_model">
-   <property name="icon">
-    <iconset resource="../res/resources.qrc">
-     <normaloff>:/icons/icons/fixobject.png</normaloff>:/icons/icons/fixobject.png</iconset>
-   </property>
-   <property name="text">
-    <string>Model's structure</string>
-   </property>
-   <property name="toolTip">
-    <string>Performs the model structure fix routine</string>
    </property>
   </action>
   <action name="action_update_found">
@@ -1414,6 +1432,9 @@
    </property>
   </action>
   <action name="action_diff">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="enabled">
     <bool>true</bool>
    </property>
@@ -1440,7 +1461,7 @@
    </property>
    <property name="icon">
     <iconset resource="../res/resources.qrc">
-     <normaloff>:/icons/icons/pgmodeler_logo.png</normaloff>:/icons/icons/pgmodeler_logo.png</iconset>
+     <normaloff>:/icons/icons/welcome.png</normaloff>:/icons/icons/welcome.png</iconset>
    </property>
    <property name="text">
     <string>Welcome</string>
@@ -1518,21 +1539,6 @@
     <string>Help pgModeler by donating!</string>
    </property>
   </action>
-  <action name="action_handle_metadata">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../res/resources.qrc">
-     <normaloff>:/icons/icons/objmetadata.png</normaloff>:/icons/icons/objmetadata.png</iconset>
-   </property>
-   <property name="text">
-    <string>Objects metadata</string>
-   </property>
-   <property name="toolTip">
-    <string>Perform the objects metadata handling</string>
-   </property>
-  </action>
   <action name="action_compact_view">
    <property name="checkable">
     <bool>true</bool>
@@ -1596,13 +1602,31 @@
     <string>Ctrl+K</string>
    </property>
   </action>
+  <action name="action_fix">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/icons/fix.png</normaloff>:/icons/icons/fix.png</iconset>
+   </property>
+   <property name="text">
+    <string>Fix</string>
+   </property>
+   <property name="toolTip">
+    <string>Fix model file or objects metadata</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>models_tbw</tabstop>
  </tabstops>
  <resources>
   <include location="../res/resources.qrc"/>
-  <include location="../res/resources.qrc"/>
+  <include location="../../../priv-plugins/res/logoicons.qrc"/>
  </resources>
  <connections/>
 </ui>

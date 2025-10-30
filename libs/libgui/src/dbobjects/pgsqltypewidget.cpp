@@ -224,14 +224,14 @@ void PgSQLTypeWidget::setAttributes(PgSqlType type, DatabaseModel *model, bool a
 		for(auto &wgt : child_wgts)
 			wgt->blockSignals(false);
 
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
 PgSqlType PgSQLTypeWidget::getPgSQLType()
 {
 	if(format_txt->toPlainText() == InvalidType)
-		throw Exception(ErrorCode::AsgInvalidTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidTypeObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return type;
 }

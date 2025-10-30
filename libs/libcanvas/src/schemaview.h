@@ -45,8 +45,8 @@ class __libcanvas SchemaView: public BaseObjectView {
 		//! \brief Stores the views and tables that belongs to this schema
 		QList<BaseObjectView *> children;
 
-		void mousePressEvent(QGraphicsSceneMouseEvent *event);
-		void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+		void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+		void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
 		//! \brief Fills the children vector
 		void fetchChildren();
@@ -54,11 +54,11 @@ class __libcanvas SchemaView: public BaseObjectView {
 		//! \brief Returns if all children are selected
 		bool isChildrenSelected();
 
-		QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+		QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
 	public:
 		SchemaView(Schema *schema);
-		virtual ~SchemaView();
+		~SchemaView() override;
 
 		//! \brief Visually selects all the schema children
 		void selectChildren();
@@ -67,12 +67,12 @@ class __libcanvas SchemaView: public BaseObjectView {
 
 		QList<BaseObjectView *> getChildren();
 
-		virtual void togglePlaceholder(bool visible);
+		void togglePlaceholder(bool visible) override;
 
 		void moveTo(QPointF new_pos);
 
 	public slots:
-		void configureObject();
+		void configureObject() override;
 };
 
 #endif

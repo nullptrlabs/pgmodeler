@@ -63,8 +63,7 @@ class __libcli PgModelerCliPlugin: public PgModelerPlugin {
 		};
 
 		PgModelerCliPlugin();
-
-		virtual ~PgModelerCliPlugin();
+		virtual ~PgModelerCliPlugin() = default;
 
 		//! \brief Returns the plugin's title
 		virtual QString getPluginTitle() = 0;

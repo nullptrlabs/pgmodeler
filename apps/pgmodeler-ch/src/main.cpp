@@ -20,6 +20,7 @@
 #include "application.h"
 #include <QTranslator>
 #include "guiutilsns.h"
+#include "settings/appearanceconfigwidget.h"
 
 int main(int argc, char **argv)
 {
@@ -30,8 +31,19 @@ int main(int argc, char **argv)
 		QStringList args = app.arguments();
 		app.loadTranslations(QLocale::system().name(), false);
 
+		try
+		{
+			/* Loading the appearance settings to make the UI
+			 * the same as the main GUI executable (pgmodeler).
+			 * We silently ignore the exception to avoid abort
+			 * the execution of the crash handler */
+			AppearanceConfigWidget appearance_conf;
+			appearance_conf.loadConfiguration();
+		}
+		catch(Exception &){}
+
 		CrashHandlerForm crashhandler(args.size() > 1 && args[1]==CrashHandlerForm::AnalysisMode);
-		GuiUtilsNs::resizeDialog(&crashhandler);
+		GuiUtilsNs::resizeWidget(&crashhandler);
 		crashhandler.show();
 		app.exec();
 

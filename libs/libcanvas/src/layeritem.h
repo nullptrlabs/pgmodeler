@@ -45,11 +45,6 @@ class __libcanvas LayerItem : public QGraphicsPathItem {
 		//! \brief The text to be displayed on every rectagle that composes the layer
 		QString text;
 
-		/*! \brief Forcing the non-usage of the setPath method in this class.
-		 * For the correct configuration of a LayerPathItem instance, use
-		 * setRects() instead */
-		void setPath(const QPainterPath &) = delete;
-
 	public:
 		static constexpr double LayerPadding = 10.0;
 
@@ -70,6 +65,11 @@ class __libcanvas LayerItem : public QGraphicsPathItem {
 		void setTextColor(const QColor &color);
 
 		QColor getTextColor(void);
+
+		/*! \brief Forcing the non-usage of the setPath method in this class.
+		 * For the correct configuration of a LayerPathItem instance, use
+		 * setRects() instead */
+		void setPath(const QPainterPath &) = delete;
 
 		void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
 

@@ -45,12 +45,13 @@ class __libgui Messagebox: public QDialog, public Ui::Messagebox {
 		static constexpr int Canceled = 2;
 
 		//! \brief Constants used to define the message icon
-		enum IconType: unsigned {
-			NoIcon,
-			ErrorIcon,
-			InfoIcon,
-			AlertIcon,
-			ConfirmIcon
+		enum MessageType: unsigned {
+			None,
+			Error,
+			Info,
+			Alert,
+			Confirm,
+			Success
 		};
 
 		//! \brief Constants used to configure the visible buttons
@@ -67,17 +68,17 @@ class __libgui Messagebox: public QDialog, public Ui::Messagebox {
 		/*! \brief Shows the message box defining the icons and available buttons.
 		User can specify custom button labels as well custom icons. The icons can be a path to a local file
 		or a Qt  resource icon ':/path/icon' and will be enabled only specifing custom labels for the respective button. */
-		int show(const QString &title, const QString &msg, IconType icon_type=NoIcon, ButtonsId buttons=OkButton,
+		int show(const QString &title, const QString &msg, MessageType icon_type=None, ButtonsId buttons=OkButton,
 							const QString &yes_lbl="", const QString &no_lbl="", const QString &cancel_lbl="",
 							const QString &yes_ico="", const QString &no_ico="", const QString &cancel_ico="");
 
 		//! \brief Shows the message box using an excpetion as message
-		int show(Exception e, const QString &msg="", IconType icon_type=ErrorIcon, ButtonsId buttons=OkButton,
+		int show(Exception e, const QString &msg="", MessageType icon_type=Error, ButtonsId buttons=OkButton,
 							const QString &yes_lbl="", const QString &no_lbl="", const QString &cancel_lbl="",
 							const QString &yes_ico="", const QString &no_ico="", const QString &cancel_ico="");
 
 		//! \brief Shows a simple message box with the title automatically defined by the icon type
-		int show(const QString &msg, IconType icon_type=NoIcon, ButtonsId buttons=OkButton);
+		int show(const QString &msg, MessageType icon_type=None, ButtonsId buttons=OkButton);
 
 		/*! \brief Shows an error message box in which can an error code and exact local of the code is specified.
 		 *  Additionally, a reference to a captured exception can be specified and will be used to fill up the stack trace.
@@ -108,8 +109,16 @@ class __libgui Messagebox: public QDialog, public Ui::Messagebox {
 		//! \brief Shows an info message box with the provided message, an info icon and only OK button
 		static void info(const QString &msg);
 
+		//! \brief Shows an success message box with the provided message, an success icon and only OK button
+		static void success(const QString &msg);
+
 		//! \brief Shows an confirmation message box with the provided message, a confirmation icon and the defined buttons id
 		static int confirm(const QString &msg, ButtonsId btns_id = YesNoButtons,
+											 const QString &yes_lbl="", const QString &no_lbl="", const QString &cancel_lbl="",
+											 const QString &yes_ico="", const QString &no_ico="", const QString &cancel_ico="");
+
+		//! \brief Shows an confirmation message box with the provided title, message, a confirmation icon and the defined buttons id
+		static int confirm(const QString &title, const QString &msg, ButtonsId btns_id = YesNoButtons,
 											 const QString &yes_lbl="", const QString &no_lbl="", const QString &cancel_lbl="",
 											 const QString &yes_ico="", const QString &no_ico="", const QString &cancel_ico="");
 

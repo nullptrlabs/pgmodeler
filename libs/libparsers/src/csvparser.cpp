@@ -23,8 +23,8 @@
 CsvParser::CsvParser()
 {
 	setSpecialChars(CsvDocument::Separator,
-						 CsvDocument::TextDelimiter,
-						 CsvDocument::LineBreak);
+									CsvDocument::TextDelimiter,
+									CsvDocument::LineBreak);
 	cols_in_first_row = false;
 	curr_pos = curr_row = 0;
 }
@@ -49,14 +49,14 @@ CsvDocument CsvParser::parseFile(const QString &filename)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
 CsvDocument CsvParser::parseBuffer(const QString &csv_buf)
 {
 	if(csv_buf.isEmpty())
-		return CsvDocument();
+		return {};
 
 	try
 	{
@@ -95,7 +95,7 @@ CsvDocument CsvParser::parseBuffer(const QString &csv_buf)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -161,16 +161,14 @@ QString CsvParser::extractValue()
 
 				return value;
 			}
-			else
-			{
-				value.append(chr);
-				curr_pos++;
 
-				/* If the current position reaches the end of the buffer without finding a
-				 * line break we force the return of the value and increment the current row value */
-				if(curr_pos >= buffer.length())
-					curr_row++;
-			}
+			value.append(chr);
+			curr_pos++;
+
+			/* If the current position reaches the end of the buffer without finding a
+			 * line break we force the return of the value and increment the current row value */
+			if(curr_pos >= buffer.length())
+				curr_row++;
 		}
 	}
 
@@ -179,7 +177,7 @@ QString CsvParser::extractValue()
 	if(delim_open && !delim_closed && delim_cnt != 1)
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::MalformedCsvMissingDelim).arg(text_delim).arg(curr_row +1),
-										ErrorCode::MalformedCsvMissingDelim, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::MalformedCsvMissingDelim, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	return value;

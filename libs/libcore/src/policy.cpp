@@ -18,7 +18,7 @@
 #include "policy.h"
 #include "utilsns.h"
 
-Policy::Policy() : TableObject()
+Policy::Policy()
 {
 	obj_type=ObjectType::Policy;
 	permissive = false;
@@ -39,7 +39,7 @@ void Policy::setParentTable(BaseTable *table)
 						.arg(this->obj_name)
 						.arg(this->getTypeName())
 						.arg(BaseObject::getTypeName(ObjectType::Table)),
-						ErrorCode::AsgInvalidObjectType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgInvalidObjectType,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	TableObject::setParentTable(table);
@@ -92,7 +92,7 @@ QString Policy::getCheckExpression()
 void Policy::addRole(Role *role)
 {
 	if(!role)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(std::find(roles.begin(), roles.end(), role) == roles.end())
 		roles.push_back(role);
@@ -137,7 +137,7 @@ QString Policy::getAlterCode(BaseObject *object)
 	Policy *policy=dynamic_cast<Policy *>(object);
 
 	if(!policy)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
@@ -171,7 +171,7 @@ QString Policy::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 

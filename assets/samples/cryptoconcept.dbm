@@ -3,7 +3,9 @@
 CAUTION: Do not modify this file unless you know what you are doing.
  Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="1.1.0-alpha1" use-changelog="false" last-position="88,180" last-zoom="1" max-obj-count="25"
+<dbmodel pgmodeler-ver="2.0.0-alpha" use-changelog="false" max-obj-count="25"
+	 gen-disabled-objs-code="false" show-sys-schemas-rects="false"
+	 last-position="1,0" last-zoom="0.45" scene-rect="0,0,4653.52,2286.52"
 	 default-schema="public" default-owner="postgres"
 	 layers="Default layer"
 	 active-layers="0"
@@ -566,6 +568,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#a448dd"
 	 src-table="people.users"
 	 dst-table="economy.wallets"
@@ -579,6 +582,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#7196b4"
 	 src-table="economy.currencies"
 	 dst-table="economy.prices"
@@ -592,6 +596,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#f55b5d"
 	 src-table="economy.exchanges"
 	 dst-table="economy.prices"
@@ -605,6 +610,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#1d24a5"
 	 src-table="economy.markets"
 	 dst-table="economy.sales"
@@ -615,7 +621,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </relationship>
 
 <index name="sales_fkidx_markets" table="economy.sales"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="markets_id"/>
@@ -623,7 +629,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="prices_fkidx_exchanges" table="economy.prices"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="exchanges_id"/>
@@ -631,7 +637,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="wallets_fk_users_idx" table="economy.wallets"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="users_id"/>
@@ -676,6 +682,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#816213"
 	 src-table="people.collections"
 	 dst-table="economy.assets"
@@ -686,7 +693,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </relationship>
 
 <index name="assets_fkidx_collections" table="economy.assets"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="collections_id"/>
@@ -732,6 +739,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#cf042e"
 	 src-table="people.collections"
 	 dst-table="people.contacts"
@@ -745,13 +753,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#8b5181"
 	 src-table="people.users"
 	 dst-table="people.contacts"
 	 src-required="true" dst-required="false"/>
 
 <index name="contacts_fk_users_idx" table="people.contacts"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="users_id"/>
@@ -759,7 +768,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="contacts_fk_collections_idx" table="people.contacts"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="collections_id"/>
@@ -813,6 +822,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#38c278"
 	 src-table="people.collections"
 	 dst-table="people.collection_media"
@@ -822,13 +832,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#96c91d"
 	 src-table="people.media"
 	 dst-table="people.collection_media"
 	 src-required="true" dst-required="false"/>
 
 <index name="collection_platforms_fk_platforms_idx" table="people.collection_media"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="media_id"/>
@@ -836,7 +847,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="collection_platforms_fk_collections_idx" table="people.collection_media"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="collections_id"/>
@@ -847,6 +858,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#70c4a3"
 	 src-table="people.users"
 	 dst-table="people.identities"
@@ -860,6 +872,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#cb3610"
 	 src-table="people.identities"
 	 dst-table="people.sessions"
@@ -905,6 +918,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#549004"
 	 src-table="economy.assets"
 	 dst-table="economy.asset_totals"
@@ -918,6 +932,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#763519"
 	 src-table="economy.wallets"
 	 dst-table="economy.asset_totals"
@@ -960,6 +975,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#d4b02f"
 	 src-table="economy.currencies"
 	 dst-table="economy.currency_totals"
@@ -998,6 +1014,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#f94eb5"
 	 src-table="economy.sales"
 	 dst-table="economy.sellers"
@@ -1011,6 +1028,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#e8194a"
 	 src-table="economy.sales"
 	 dst-table="economy.buyers"
@@ -1020,6 +1038,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#0b6131"
 	 src-table="economy.wallet_entries"
 	 dst-table="economy.sellers"
@@ -1029,6 +1048,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#2549f8"
 	 src-table="economy.wallet_entries"
 	 dst-table="economy.buyers"
@@ -1039,7 +1059,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </relationship>
 
 <index name="sellers_fkidx_wallet_entries" table="economy.sellers"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="wallet_entries_id"/>
@@ -1047,7 +1067,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="sellers_fkidx_sales" table="economy.sellers"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="sales_id"/>
@@ -1055,7 +1075,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="buyers_fkidx_wallet_entries" table="economy.buyers"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="wallet_entries_id"/>
@@ -1063,7 +1083,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="buyers_fkidx_sales" table="economy.buyers"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="sales_id"/>
@@ -1074,6 +1094,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#680e04"
 	 src-table="economy.wallets"
 	 dst-table="economy.wallet_entries"
@@ -1084,7 +1105,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </relationship>
 
 <index name="wallet_entries_fkidx_wallets" table="economy.wallet_entries"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="wallets_id"/>
@@ -1092,7 +1113,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="prices_fkidx_currencies" table="economy.prices"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="currencies_id"/>
@@ -1139,6 +1160,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#0da862"
 	 src-table="people.media"
 	 dst-table="people.media_identities"
@@ -1152,13 +1174,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#344de0"
 	 src-table="people.identities"
 	 dst-table="people.media_identities"
 	 src-required="true" dst-required="false"/>
 
 <index name="identities_fkidx_users" table="people.identities"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="users_id"/>
@@ -1166,7 +1189,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="sessions_idx_last_active" table="people.sessions"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="true" nulls-first="false" asc-order="false">
 			<column name="last_activity_time"/>
@@ -1174,14 +1197,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="sessions_idx_key" table="people.sessions"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="key"/>
 		</idxelement>
 </index>
 
-<textbox name="cryptoconcept_desc" layers="0" z-value="0" width="456.547" font-size="11">
+<textbox name="cryptoconcept_desc" layers="0" z-value="0" width="431.375" font-size="11">
 	<position x="120" y="200"/>
 	<comment> <![CDATA[[ cryptoconcept database ]
 

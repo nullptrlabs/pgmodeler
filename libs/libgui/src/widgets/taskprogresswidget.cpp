@@ -46,7 +46,7 @@ void TaskProgressWidget::show()
 	 isn't used the task is not shown properly and sometimes stay only on taskbar not poping up
 	 to the user. */
 	QEventLoop eventLoop;
-	GuiUtilsNs::resizeDialog(this);
+	GuiUtilsNs::resizeWidget(this);
 	QDialog::show();
 	QTimer t;
 
@@ -81,7 +81,7 @@ void TaskProgressWidget::updateProgress(int progress, QString text, unsigned ico
 	/* MacOSX workaround: The event loop below is needed because on this system
 		 the task progress is not correctly updated. The event loop causes a little
 		 delay (1ms) and it`s sufficient to update the entire widget */
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
 	QEventLoop eventLoop;
 	QTimer t;
 	//Gives 1ms to the task to be shown and update its contents

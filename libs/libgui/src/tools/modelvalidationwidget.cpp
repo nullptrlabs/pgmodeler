@@ -46,15 +46,15 @@ ModelValidationWidget::ModelValidationWidget(QWidget *parent): QWidget(parent)
 	this->setModel(nullptr);
 
 	connect(hide_tb, &QToolButton::clicked, this, &ModelValidationWidget::hide);
-	connect(options_btn, &QToolButton::toggled, options_frm, &QFrame::setVisible);
+	connect(options_btn, &QPushButton::toggled, options_frm, &QFrame::setVisible);
 	connect(sql_validation_chk, &QCheckBox::toggled, connections_cmb, &QComboBox::setEnabled);
 	connect(sql_validation_chk, &QCheckBox::toggled, version_cmb, &QComboBox::setEnabled);
 	connect(sql_validation_chk, &QCheckBox::toggled, use_tmp_names_chk, &QCheckBox::setEnabled);
-	connect(validate_btn, &QToolButton::clicked, this, &ModelValidationWidget::validateModel);
-	connect(fix_btn, &QToolButton::clicked, this, &ModelValidationWidget::applyFixes);
-	connect(cancel_btn, &QToolButton::clicked, this, &ModelValidationWidget::cancelValidation);
+	connect(validate_btn, &QPushButton::clicked, this, &ModelValidationWidget::validateModel);
+	connect(fix_btn, &QPushButton::clicked, this, &ModelValidationWidget::applyFixes);
+	connect(cancel_btn, &QPushButton::clicked, this, &ModelValidationWidget::cancelValidation);
 	connect(connections_cmb, &QComboBox::activated, this, &ModelValidationWidget::editConnections);
-	connect(swap_ids_btn, &QToolButton::clicked, this, &ModelValidationWidget::swapObjectsIds);
+	connect(swap_ids_btn, &QPushButton::clicked, this, &ModelValidationWidget::swapObjectsIds);
 
 	connect(sql_validation_chk, &QCheckBox::toggled, this, [this](){
 		configureValidation();
@@ -248,7 +248,7 @@ void ModelValidationWidget::setModel(ModelWidget *model_wgt)
 	destroyThread(true);
 }
 
-bool ModelValidationWidget::isValidationRunning()
+bool ModelValidationWidget::isThreadRunning()
 {
 	return (validation_thread && validation_thread->isRunning());
 }
@@ -322,7 +322,7 @@ void ModelValidationWidget::updateValidation(ValidationInfo val_info)
 	}
 	else if(val_info.getValidationType() == ValidationInfo::SqlValidationError)
 	{
-		label->setText(tr("SQL validation failed due to the error(s) below. <strong>NOTE:</strong><em> Errors during SQL validation don't invalidate the model but may affect operations like <strong>export</strong> and <strong>diff</strong>.</em>"));
+		label->setText(tr("SQL validation failed due to the error(s) below. <strong>NOTE:</strong><em> Errors during SQL validation do not invalidate the model but may affect operations like <strong>export</strong> and <strong>diff</strong>.</em>"));
 	}
 	else if(val_info.getValidationType() == ValidationInfo::MissingExtension)
 	{
@@ -506,9 +506,7 @@ void ModelValidationWidget::updateProgress(int prog, QString msg, ObjectType obj
 
 	validation_prog_pb->setValue(prog);
 
-	if(prog >= 100/* &&
-			validation_helper->getErrorCount() == 0 &&
-			validation_helper->getWarningCount() == 0*/)
+	if(prog >= 100)
 	{
 		int err_cnt = validation_helper->getErrorCount(),
 				warn_cnt = validation_helper->getWarningCount();
@@ -624,7 +622,7 @@ void ModelValidationWidget::validateRelationships()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -653,7 +651,7 @@ void ModelValidationWidget::editConnections()
 	if(connections_cmb->currentIndex()==connections_cmb->count()-1)
 	{
 		if(ConnectionsConfigWidget::openConnectionsConfiguration(connections_cmb, true))
-			emit s_connectionsUpdateRequest();
+			emit s_connectionsUpdateRequested();
 	}
 }
 
@@ -742,4 +740,9 @@ void ModelValidationWidget::generateOutputItemText(QTreeWidgetItem *item, QStrin
 
 	for(int child = 0; child < item->childCount(); child++)
 		generateOutputItemText(item->child(child), output, level + 1);
+}
+
+void ModelValidationWidget::updateConnections()
+{
+	ConnectionsConfigWidget::fillConnectionsComboBox(connections_cmb, true, Connection::OpValidation);
 }

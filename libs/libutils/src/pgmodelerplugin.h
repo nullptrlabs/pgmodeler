@@ -42,9 +42,8 @@ class __libutils PgModelerPlugin {
 		void setPluginName(const QString &name);
 
 	public:
-		PgModelerPlugin();
-
-		virtual ~PgModelerPlugin();
+		PgModelerPlugin() = default;
+		~PgModelerPlugin() = default;
 
 		//! \brief Returns the name of the library of the plugin
 		QString getLibraryName() const;

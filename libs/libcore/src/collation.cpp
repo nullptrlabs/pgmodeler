@@ -49,7 +49,7 @@ void Collation::setLocalization(LocaleId lc_id, QString lc_name)
 		int pos = -1;
 
 		if(lc_id > LcCollate)
-			throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		if(lc_name.contains('@'))
 		{
@@ -75,7 +75,7 @@ void Collation::setLocalization(LocaleId lc_id, QString lc_name)
 void Collation::setModifier(LocaleId lc_id, QString mod)
 {
 	if(lc_id > Locale)
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(modifier[lc_id] != mod);
 	modifier[lc_id] = mod;
@@ -84,7 +84,7 @@ void Collation::setModifier(LocaleId lc_id, QString mod)
 QString Collation::getModifier(LocaleId lc_id)
 {
 	if(lc_id > Locale)
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return modifier[lc_id];
 }
@@ -100,7 +100,7 @@ void Collation::setCollation(BaseObject *collation)
 		throw Exception(Exception::getErrorMessage(ErrorCode::ObjectReferencingItself)
 						.arg(this->getName(true))
 						.arg(this->getTypeName()),
-						ErrorCode::ObjectReferencingItself,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::ObjectReferencingItself,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	BaseObject::setCollation(collation);
 
@@ -120,7 +120,7 @@ QString Collation::getLocale()
 QString Collation::getLocalization(LocaleId lc_id)
 {
 	if(lc_id > LcCollate)
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return localization[lc_id];
 }
@@ -179,7 +179,7 @@ QString Collation::getSourceCode(SchemaParser::CodeType def_type, bool reduced_f
 		QString lc_attribs[2]={ Attributes::LcCtype, Attributes::LcCollate };
 
 		if(localization[LcCtype].isEmpty() && localization[LcCollate].isEmpty())
-			throw Exception(ErrorCode::EmptyLCCollationAttributes,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::EmptyLCCollationAttributes,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		for(unsigned i=LcCtype; i <= LcCollate; i++)
 		{

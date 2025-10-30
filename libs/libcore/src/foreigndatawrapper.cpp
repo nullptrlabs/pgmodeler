@@ -18,7 +18,7 @@
 
 #include "foreigndatawrapper.h"
 
-ForeignDataWrapper::ForeignDataWrapper() : BaseObject()
+ForeignDataWrapper::ForeignDataWrapper()
 {
 	obj_type=ObjectType::ForeignDataWrapper;
 	validator_func = handler_func = nullptr;
@@ -35,13 +35,13 @@ void ForeignDataWrapper::setHandlerFunction(Function *func)
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidReturnType)
 											.arg(this->getName(true))
 											.arg(this->getTypeName()),
-											ErrorCode::AsgFunctionInvalidReturnType, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+											ErrorCode::AsgFunctionInvalidReturnType, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 		if(func->getParameterCount() != 0)
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParamCount)
 											.arg(this->getName(true))
 											.arg(this->getTypeName()),
-											ErrorCode::AsgFunctionInvalidParamCount, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+											ErrorCode::AsgFunctionInvalidParamCount, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	handler_func = func;
@@ -55,14 +55,14 @@ void ForeignDataWrapper::setValidatorFunction(Function *func)
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParamCount)
 											.arg(this->getName(true))
 											.arg(this->getTypeName()),
-											ErrorCode::AsgFunctionInvalidParamCount, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+											ErrorCode::AsgFunctionInvalidParamCount, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 		if(!func->getParameter(0).getType().isExactTo(PgSqlType("text", 1)) ||
 			 !func->getParameter(1).getType().isExactTo(PgSqlType("oid")))
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParameters)
 											.arg(this->getName(true))
 											.arg(this->getTypeName()),
-											ErrorCode::AsgFunctionInvalidParameters, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+											ErrorCode::AsgFunctionInvalidParameters, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	validator_func = func;
@@ -141,7 +141,7 @@ QString ForeignDataWrapper::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 

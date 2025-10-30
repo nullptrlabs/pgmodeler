@@ -18,7 +18,7 @@
 
 #include "fragmentinfo.h"
 
-FragmentInfo::FragmentInfo() : MatchInfo()
+FragmentInfo::FragmentInfo()
 {
 	open = closed = allow_completion = false;
 }

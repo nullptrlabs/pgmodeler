@@ -47,7 +47,7 @@ class __libgui DomainWidget: public BaseObjectWidget, public Ui::DomainWidget {
 		void editConstraint(int row);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

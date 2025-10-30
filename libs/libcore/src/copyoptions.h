@@ -55,7 +55,7 @@ class __libcore CopyOptions {
 
 	public:
 		CopyOptions();
-		CopyOptions(CopyMode copy_mode, CopyOpts copy_op_ids);
+		CopyOptions(CopyMode copy_mode, CopyOpts copy_opts);
 
 		CopyMode getCopyMode();
 		CopyOpts getCopyOptions();

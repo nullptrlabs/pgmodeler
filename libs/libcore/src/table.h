@@ -57,7 +57,7 @@ class __libcore Table: public PhysicalTable {
 	public:
 		Table();
 
-		virtual ~Table();
+		~Table() override;
 
 		//! \brief Defines if the table is unlogged
 		void setUnlogged(bool value);
@@ -74,13 +74,13 @@ class __libcore Table: public PhysicalTable {
 		//! \brief Returns if the table is configured with oids
 		bool isWithOIDs();
 
-		virtual void addObject(BaseObject *object, int obj_idx = -1) override;
+		void addObject(BaseObject *object, int obj_idx = -1) override;
 
-		virtual void removeObject(unsigned obj_idx, ObjectType obj_type) override;
+		void removeObject(unsigned obj_idx, ObjectType obj_type) override;
 
-		virtual void removeObject(const QString &name, ObjectType obj_type) override;
+		void removeObject(const QString &name, ObjectType obj_type) override;
 
-		virtual void removeObject(BaseObject *obj) override;
+		void removeObject(BaseObject *obj) override;
 
 		//! \brief Adds a index to table (optionally the user can add the object at the specified index 'idx')
 		void addIndex(Index *ind, int idx=-1);
@@ -137,7 +137,7 @@ class __libcore Table: public PhysicalTable {
 		void removePolicy(unsigned idx);
 
 		//! \brief Returns the SQL / XML definition for table
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
 		/*! \brief Stores on the specified vector 'fks' the foreign key present on table. The
 		 boolean paramenter is used to include those foreign keys includes by relationship. The third parameter
@@ -157,14 +157,14 @@ class __libcore Table: public PhysicalTable {
 		void operator = (Table &tabela);
 
 		//! \brief Returns the specified object type list
-		virtual std::vector<TableObject *> *getObjectList(ObjectType obj_type) override;
+		std::vector<TableObject *> *getObjectList(ObjectType obj_type) override;
 
 		/*! \brief Returns if some of the foreign keys references the specified table. This method only considers the foreign keys
 		 created by the user. Relationship created foreign keys are discarded from the search. */
 		bool isReferTableOnForeignKey(Table *ref_tab);
 
 		//! \brief Returns the alter definition comparing the this table against the one provided via parameter
-		virtual QString getAlterCode(BaseObject *object) final;
+		QString getAlterCode(BaseObject *object) final;
 
 		//! \brief Returns the truncate definition for this table
 		QString getTruncateDefinition(bool cascade);
@@ -175,9 +175,9 @@ class __libcore Table: public PhysicalTable {
 		 * invalidate the tables code (see setCodeInvalidated()) after retrieving the resulting code */
 		QString __getSourceCode(SchemaParser::CodeType def_type, bool incl_rel_added_objs, bool incl_constraints = true);
 
-		virtual QString getDataDictionary(bool split, bool md_format, const attribs_map & extra_attribs = {}) override;
+		QString getDataDictionary(bool split, bool md_format, const attribs_map &extra_attribs = {}) override;
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 
 		friend class Relationship;
 		friend class OperationList;

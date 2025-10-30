@@ -43,19 +43,18 @@ TableObjectView::TableObjectView(TableObject *object) : BaseObjectView(object)
 	descriptor=nullptr;
 	fake_selection=false;
 
-	for(unsigned i=0; i < 3; i++)
-		lables[i]=new QGraphicsSimpleTextItem;
+	for(auto & label : lables)
+		label = new QGraphicsSimpleTextItem;
 
-	if(obj_selection)
-		delete obj_selection;
+	delete obj_selection;
 }
 
 TableObjectView::~TableObjectView()
 {
 	delete descriptor;
 
-	for(unsigned i=0; i < 3; i++)
-		delete lables[i];
+	for(auto & label : lables)
+		delete label;
 
 	delete obj_selection;
 }
@@ -450,11 +449,11 @@ void TableObjectView::configureObject()
 void TableObjectView::configureObject(const SimpleColumn &col)
 {
 	QTextCharFormat fmt;
-	double px;
+	double px = 0;
 
 	configureDescriptor();
 	descriptor->setPos(HorizSpacing * 3, 0);
-	px=descriptor->pos().x() + descriptor->boundingRect().width() + (2 * HorizSpacing);
+	px = descriptor->pos().x() + descriptor->boundingRect().width() + (2 * HorizSpacing);
 
 	fmt = font_config[Attributes::Column];
 
@@ -480,7 +479,7 @@ void TableObjectView::configureObject(const SimpleColumn &col)
 		lables[1]->setFont(fmt.font());
 		lables[1]->setBrush(fmt.foreground());
 		lables[1]->setPos(px, 0);
-		px+=lables[1]->boundingRect().width() + (4 * HorizSpacing);
+		//px += lables[1]->boundingRect().width() + (4 * HorizSpacing);
 	}
 	else
 		lables[1]->setText("");
@@ -498,7 +497,7 @@ void TableObjectView::configureObject(const SimpleColumn &col)
 void TableObjectView::setChildObjectXPos(ChildObjectId obj_id, double px)
 {
 	if(obj_id > ConstrAliasLabel)
-		throw Exception(ErrorCode::RefObjectInvalidIndex, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(ErrorCode::RefObjectInvalidIndex, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	if(obj_id == ObjDescriptor)
 		descriptor->setPos(px, descriptor->pos().y());
@@ -515,18 +514,18 @@ void TableObjectView::calculateBoundingRect()
 	width = descriptor->pos().x() + descriptor->boundingRect().width();
 	height = lables[0]->boundingRect().height();
 
-	for(int i = 0; i < 3; i++)
+	for(auto & label : lables)
 	{
-		if(lables[i]->text().isEmpty())
+		if(label->text().isEmpty())
 			continue;
 
-		curr_w = lables[i]->pos().x() + lables[i]->boundingRect().width();
+		curr_w = label->pos().x() + label->boundingRect().width();
 
 		if(width < curr_w)
-			width = lables[i]->pos().x() + lables[i]->boundingRect().width();
+			width = label->pos().x() + label->boundingRect().width();
 	}
 
-	bounding_rect = QRectF(QPointF(0,0), QSizeF(width + (4 * HorizSpacing), height + VertSpacing * 0.80));
+	bounding_rect = QRectF(QPointF(0,0), QSizeF(width + (4 * HorizSpacing), height + (VertSpacing * 0.80)));
 
 	//Adjusting the Y position of the objects in order to center them on the new bouding rect
 	descriptor->setPos(descriptor->pos().x(),
@@ -534,19 +533,19 @@ void TableObjectView::calculateBoundingRect()
 
 	py = (bounding_rect.height() - lables[0]->boundingRect().height())/2;
 
-	for(unsigned i = 0; i < 3; i++)
-		lables[i]->setPos(lables[i]->pos().x(), py);
+	for(auto & label : lables)
+		label->setPos(label->pos().x(), py);
 }
 
 QGraphicsItem *TableObjectView::getChildObject(ChildObjectId obj_id)
 {
 	if(obj_id > ConstrAliasLabel)
-		throw Exception(ErrorCode::RefObjectInvalidIndex, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(ErrorCode::RefObjectInvalidIndex, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	if(obj_id == ObjDescriptor)
 		return descriptor;
-	else
-		return lables[obj_id - 1];
+
+	return lables[obj_id - 1];
 }
 
 QString TableObjectView::getConstraintString(Column *column)
@@ -595,7 +594,8 @@ QString TableObjectView::getConstraintString(Column *column)
 
 		return str_constr;
 	}
-	else return "";
+
+	return "";
 }
 
 void TableObjectView::setFakeSelection(bool value)
@@ -669,14 +669,14 @@ void TableObjectView::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
 	descriptor->paint(painter, option, widget);
 	painter->restore();
 
-	for(int i = 0 ; i < 3; i++)
+	for(auto & label : lables)
 	{
-		if(lables[i]->text().isEmpty())
+		if(label->text().isEmpty())
 			continue;
 
 		painter->save();
-		painter->translate(lables[i]->pos());
-		lables[i]->paint(painter, option, widget);
+		painter->translate(label->pos());
+		label->paint(painter, option, widget);
 		painter->restore();
 	}
 

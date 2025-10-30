@@ -50,8 +50,7 @@ class __libcore GenericSQL: public BaseObject{
 
 	public:
 		GenericSQL();
-
-		virtual ~GenericSQL(){}
+		~GenericSQL() override = default;
 
 		void setDefinition(const QString &def);
 
@@ -77,9 +76,9 @@ class __libcore GenericSQL: public BaseObject{
 
 		void validateReferences(bool ignore_duplic);
 
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) override;
+		QString getSourceCode(SchemaParser::CodeType def_type) override;
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 
 		friend class GenericSQLWidget;
 };

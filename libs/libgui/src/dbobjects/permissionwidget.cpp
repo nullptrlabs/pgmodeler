@@ -51,7 +51,7 @@ PermissionWidget::PermissionWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 
 	grid=new QGridLayout;
 	grid->addWidget(roles_tab,0,0,1,1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	roles_gb->setLayout(grid);
 
 	permissions_tab=new CustomTableWidget(CustomTableWidget::RemoveButton |
@@ -67,7 +67,7 @@ PermissionWidget::PermissionWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 
 	grid=new QGridLayout;
 	grid->addWidget(permissions_tab,0,0,1,1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	permissions_gb->setLayout(grid);
 
 	for(i=Permission::PrivSelect; i<=Permission::PrivUsage; i++)
@@ -269,7 +269,7 @@ void PermissionWidget::showSelectedRoleData()
 											.arg(role->getName())
 											.arg(role->getTypeName())
 											.arg(roles_gb->title().remove('&')),
-											ErrorCode::InsDuplicatedRole,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											ErrorCode::InsDuplicatedRole,PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
 	}
 }
@@ -298,7 +298,7 @@ void PermissionWidget::addPermission()
 		}
 
 		cancelOperation();
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -333,7 +333,7 @@ void PermissionWidget::updatePermission()
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgDuplicatedPermission)
 							.arg(permission->getObject()->getName())
 							.arg(permission->getObject()->getTypeName()),
-							ErrorCode::AsgDuplicatedPermission,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+							ErrorCode::AsgDuplicatedPermission,PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
 
 		delete perm_bkp;
@@ -348,7 +348,7 @@ void PermissionWidget::updatePermission()
 		delete perm_bkp;
 
 		cancelOperation();
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -490,7 +490,8 @@ void PermissionWidget::checkPrivilege()
 				chk_priv->setChecked(chk_gop->isChecked());
 				break;
 			}
-			else if(chk==chk_priv && !chk->isChecked())
+
+			if(chk==chk_priv && !chk->isChecked())
 			{
 				chk_gop->setChecked(false);
 				break;

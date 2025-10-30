@@ -31,6 +31,7 @@ ConnectionsConfigWidget::ConnectionsConfigWidget(QWidget * parent) : BaseConfigW
 	GuiUtilsNs::createPasswordShowAction(passwd_edt);
 
 	one_time_conn_edit = false;
+	one_time_test_tb->setVisible(false);
 
 	connect(ssl_mode_cmb, &QComboBox::currentIndexChanged, this, &ConnectionsConfigWidget::enableCertificates);
 
@@ -44,6 +45,7 @@ ConnectionsConfigWidget::ConnectionsConfigWidget(QWidget * parent) : BaseConfigW
 	connect(remove_tb, &QToolButton::clicked, this, &ConnectionsConfigWidget::removeConnection);
 
 	connect(test_tb, &QPushButton::clicked, this, &ConnectionsConfigWidget::testConnection);
+	connect(one_time_test_tb, &QPushButton::clicked, this, &ConnectionsConfigWidget::testConnection);
 	connect(add_tb, &QPushButton::clicked, this, __slot(this, ConnectionsConfigWidget::handleConnection));
 
 	connect(alias_edt, &QLineEdit::textChanged, this, &ConnectionsConfigWidget::enableConnectionTest);
@@ -56,11 +58,6 @@ ConnectionsConfigWidget::ConnectionsConfigWidget(QWidget * parent) : BaseConfigW
 	cancel_tb->setVisible(false);
 }
 
-ConnectionsConfigWidget::~ConnectionsConfigWidget()
-{
-
-}
-
 void ConnectionsConfigWidget::hideEvent(QHideEvent *event)
 {
 	if(!event->spontaneous())
@@ -69,7 +66,7 @@ void ConnectionsConfigWidget::hideEvent(QHideEvent *event)
 		one_time_conn_edit = false;
 		host_edt->setEnabled(true);
 		port_sbp->setEnabled(true);
-		conn_btns_wgt->setVisible(true);
+		conn_btns_grp->setVisible(true);
 		add_tb->setVisible(true);
 	}
 }
@@ -80,7 +77,6 @@ void ConnectionsConfigWidget::showEvent(QShowEvent *event)
 	{
 		updateConnectionsCombo();
 		newConnection();
-		conn_attribs_tbw->setCurrentIndex(0);
 	}
 }
 
@@ -156,14 +152,15 @@ void ConnectionsConfigWidget::loadConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e, e.getExtraInfo());
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e, e.getExtraInfo());
 	}
 }
 
 void ConnectionsConfigWidget::setOneTimeEditMode(bool one_time_edit, const QString &conn_alias, const QString &dbname, const QString &host, int port, const QString &username, const QString &password)
 {
 	one_time_conn_edit = one_time_edit;
-	conn_btns_wgt->setVisible(!one_time_edit);
+	conn_btns_grp->setVisible(!one_time_edit);
+	one_time_test_tb->setVisible(one_time_edit);
 	add_tb->setVisible(!one_time_edit);
 	host_edt->setDisabled(one_time_edit && !host.isEmpty());
 	port_sbp->setDisabled(one_time_edit && port > 0);
@@ -190,13 +187,16 @@ void ConnectionsConfigWidget::enableCertificates()
 void ConnectionsConfigWidget::enableConnectionTest()
 {
 	test_tb->setEnabled(!alias_edt->text().isEmpty() &&
-						!host_edt->text().isEmpty() &&
-						!user_edt->text().isEmpty() &&
-						!conn_db_edt->text().isEmpty());
+											!host_edt->text().isEmpty() &&
+											!user_edt->text().isEmpty() &&
+											!conn_db_edt->text().isEmpty());
+
+	one_time_test_tb->setEnabled(test_tb->isEnabled());
+
 	add_tb->setEnabled(test_tb->isEnabled());
 	update_tb->setEnabled(test_tb->isEnabled());
 
-	if(!isConfigurationChanged())
+	if(!isConfigurationChanged() && test_tb->isEnabled())
 		setConfigurationChanged(true);
 }
 
@@ -266,10 +266,8 @@ void ConnectionsConfigWidget::duplicateConnection()
 	}
 	catch(Exception &e)
 	{
-		if(new_conn)
-			delete new_conn;
-
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		delete new_conn;
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -303,7 +301,7 @@ void ConnectionsConfigWidget::handleConnection()
 		if(add_tb->isVisible())
 			delete conn;
 
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -461,14 +459,14 @@ void ConnectionsConfigWidget::testConnection()
 		conn.connect();
 		srv_info = conn.getServerInfo();
 
-		Messagebox::info(UtilsNs::formatMessage(tr("Connection successfully established!\n\nServer details:\n\nPID: `%1'\nProtocol: `%2'\nVersion: `%3'"))
+		Messagebox::success(UtilsNs::formatMessage(tr("Connection successfully established!\n\nServer details:\n\nPID: `%1'\nProtocol: `%2'\nVersion: `%3'"))
 										 .arg(srv_info[Connection::ServerPid])
 										 .arg(srv_info[Connection::ServerProtocol])
 										 .arg(srv_info[Connection::ServerVersion]));
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -491,7 +489,7 @@ void ConnectionsConfigWidget::restoreDefaults()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -556,11 +554,11 @@ void ConnectionsConfigWidget::saveConfiguration()
 		schparser.ignoreUnkownAttributes(true);
 		BaseConfigWidget::saveConfiguration(GlobalAttributes::ConnectionsConf, config_params);
 		schparser.ignoreUnkownAttributes(false);
-		//setConfigurationChanged(false);
+		setConfigurationChanged(false);
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -597,7 +595,7 @@ void ConnectionsConfigWidget::fillConnectionsComboBox(QComboBox *combo, bool inc
 	Connection *def_conn=nullptr;
 
 	if(!combo)
-		throw Exception(ErrorCode::OprNotAllocatedObject ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	getConnections(connections);
 
@@ -657,6 +655,11 @@ bool ConnectionsConfigWidget::openConnectionsConfiguration(bool one_time_edit,
 	});
 
 	conn_cfg_wgt.setOneTimeEditMode(one_time_edit, conn_alias, dbname, host, port, username, password);
+	
+	/* Workaround to hide the border of the bg_frame when running
+	 * ConnectionsConfigWidget in standalone mode */
+	conn_cfg_wgt.bg_frame->setStyleSheet("QFrame { border: none; }");
+
 	parent_form.setWindowTitle(tr("Edit database connections"));
 	parent_form.setWindowFlags(Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
 	parent_form.setMainWidget(&conn_cfg_wgt);

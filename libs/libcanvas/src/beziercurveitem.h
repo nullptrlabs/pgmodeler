@@ -66,10 +66,10 @@ class __libcanvas BezierCurveItem: public QGraphicsPathItem {
 		bool isStraightLine();
 
 		//! \brief Returns if the specified point is contained by the curve (specifically, by the stroke)
-		virtual bool contains(const QPointF &pnt) const;
+		bool contains(const QPointF &pnt) const override;
 
 		//! \brief Returns if the specified path collides with the curve (specifically, by the stroke)
-		virtual bool collidesWithPath(const QPainterPath &path, Qt::ItemSelectionMode) const;
+		bool collidesWithPath(const QPainterPath &path, Qt::ItemSelectionMode) const override;
 };
 
 #endif

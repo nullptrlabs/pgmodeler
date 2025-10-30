@@ -42,8 +42,8 @@ class __libgui SearchReplaceWidget: public QWidget, public Ui::SearchReplaceWidg
 		
 		//! \brief Find the text using the specified flags. The regexp param is ignored on Qt versions below 5.3
 		bool searchText(const QString &text, bool regexp, QTextDocument::FindFlags flags);
-		
-		void showEvent(QShowEvent *);
+
+		void showEvent(QShowEvent *) override;
 
 		QLabel *search_info_lbl;
 
@@ -52,7 +52,7 @@ class __libgui SearchReplaceWidget: public QWidget, public Ui::SearchReplaceWidg
 		void showSearchInfo(const QString &msg);
 
 	protected:
-		bool eventFilter(QObject *object, QEvent *event);
+		bool eventFilter(QObject *object, QEvent *event) override;
 
 	public:
 		SearchReplaceWidget(QPlainTextEdit *txt_edit, QWidget * parent = nullptr);

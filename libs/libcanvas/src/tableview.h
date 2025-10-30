@@ -41,7 +41,7 @@ class __libcanvas TableView: public BaseTableView {
 		QPointF getConnectionPoints(TableObject *tab_obj, ConnectionPoint conn_pnt);
 
 	private slots:
-		void configureObject();
+		void configureObject() override;
 };
 
 #endif

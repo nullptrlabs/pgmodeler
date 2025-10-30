@@ -16,6 +16,10 @@
 
 {name} $sp {type}
 
+%if {collation} %then
+	[ COLLATE ]  {collation}
+%end
+
 %if {not-null} %then
 	[ NOT NULL]
 %end

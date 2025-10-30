@@ -70,7 +70,7 @@
         <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -81,7 +81,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QToolButton" name="select_tb">
+         <widget class="QPushButton" name="select_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -115,16 +115,10 @@
             <height>25</height>
            </size>
           </property>
-          <property name="popupMode">
-           <enum>QToolButton::InstantPopup</enum>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="insert_tb">
+         <widget class="QPushButton" name="insert_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -158,16 +152,10 @@
             <height>25</height>
            </size>
           </property>
-          <property name="popupMode">
-           <enum>QToolButton::InstantPopup</enum>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="update_tb">
+         <widget class="QPushButton" name="update_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -201,16 +189,10 @@
             <height>25</height>
            </size>
           </property>
-          <property name="popupMode">
-           <enum>QToolButton::InstantPopup</enum>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="delete_tb">
+         <widget class="QPushButton" name="delete_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -244,16 +226,10 @@
             <height>25</height>
            </size>
           </property>
-          <property name="popupMode">
-           <enum>QToolButton::InstantPopup</enum>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="clear_tb">
+         <widget class="QPushButton" name="clear_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -281,15 +257,12 @@
             <height>25</height>
            </size>
           </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
          </widget>
         </item>
         <item>
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -395,10 +368,10 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
          </size>
         </property>
         <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
+         <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+         <enum>QFrame::Shadow::Raised</enum>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
          <property name="leftMargin">
@@ -428,7 +401,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
             <string/>
            </property>
            <property name="textFormat">
-            <enum>Qt::AutoText</enum>
+            <enum>Qt::TextFormat::AutoText</enum>
            </property>
            <property name="pixmap">
             <pixmap resource="../../res/resources.qrc">:/icons/icons/alert.png</pixmap>
@@ -465,14 +438,13 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
   </layout>
  </widget>
  <tabstops>
-  <tabstop>select_tb</tabstop>
-  <tabstop>insert_tb</tabstop>
-  <tabstop>update_tb</tabstop>
-  <tabstop>delete_tb</tabstop>
-  <tabstop>clear_tb</tabstop>
+  <tabstop>select_btn</tabstop>
+  <tabstop>insert_btn</tabstop>
+  <tabstop>update_btn</tabstop>
+  <tabstop>delete_btn</tabstop>
+  <tabstop>clear_btn</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

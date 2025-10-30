@@ -51,7 +51,7 @@ class __libcanvas TableObjectView: public BaseObjectView {
 		 has a constraint */
 		void configureDescriptor(ConstraintType constr_type = ConstraintType::Null);
 
-		QVariant itemChange(GraphicsItemChange, const QVariant &value)
+		QVariant itemChange(GraphicsItemChange, const QVariant &value) override
 		{
 			return value;
 		}
@@ -83,13 +83,13 @@ class __libcanvas TableObjectView: public BaseObjectView {
 
 		TableObjectView(TableObject *object=nullptr);
 
-		virtual ~TableObjectView();
+		~TableObjectView() override;
 
 		//! \brief Configures a item from a SimpleColumn instance
 		void configureObject(const SimpleColumn &col);
 
 		//! \brief Configures the object as a table object
-		void configureObject();
+		void configureObject() override;
 
 		//! \brief Sets the horizontal position of the specified child object (index)
 		void setChildObjectXPos(ChildObjectId obj_id, double px);
@@ -107,9 +107,9 @@ class __libcanvas TableObjectView: public BaseObjectView {
 		static void setSchemaNameUserType(bool value);
 		static bool isHideSchemaNameUserType();
 
-		virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr);
+		void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
 
-		virtual QRectF boundingRect(void) const;
+		QRectF boundingRect(void) const override;
 		virtual void configureObjectSelection();
 		void configureObjectShadow(void) = delete;
 };

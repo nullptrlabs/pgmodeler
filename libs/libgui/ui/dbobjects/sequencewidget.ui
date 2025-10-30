@@ -227,7 +227,7 @@
    <item row="4" column="0">
     <widget class="QLabel" name="owner_col_lbl">
      <property name="text">
-      <string>Owner Col.:</string>
+      <string>Owner Column:</string>
      </property>
     </widget>
    </item>

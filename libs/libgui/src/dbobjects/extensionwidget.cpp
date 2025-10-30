@@ -17,8 +17,7 @@ ExtensionWidget::ExtensionWidget(QWidget * parent) : BaseObjectWidget(parent, Ob
 
 	QVBoxLayout *vbox = new QVBoxLayout(types_gb);
 	vbox->addWidget(types_tab);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin,
-													 GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
+	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 
 	configureFormLayout(extension_grid, ObjectType::Extension);
 	configureTabOrder({ cur_ver_edt, old_ver_edt, types_tab });
@@ -82,6 +81,6 @@ void ExtensionWidget::applyConfiguration()
 	catch(Exception &e)
 	{
 		cancelConfiguration();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }

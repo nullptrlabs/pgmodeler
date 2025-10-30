@@ -17,6 +17,8 @@
 */
 
 #include "baseobjectwidget.h"
+#include "customuistyle.h"
+#include "messagebox.h"
 #include "permissionwidget.h"
 #include "widgets/customsqlwidget.h"
 #include "baseform.h"
@@ -84,11 +86,6 @@ BaseObjectWidget::BaseObjectWidget(QWidget *parent, ObjectType obj_type): QWidge
 	misc_btns_lt->addWidget(disable_sql_chk);
 
 	baseobject_grid->addLayout(misc_btns_lt,9,0,1,5);
-}
-
-BaseObjectWidget::~BaseObjectWidget()
-{
-
 }
 
 bool BaseObjectWidget::eventFilter(QObject *object, QEvent *event)
@@ -275,7 +272,7 @@ void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 	this->table=nullptr;
 
 	if(!model || (uses_op_list && !op_list))
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(op_list)
 	  operation_count = op_list->getCurrentSize();
@@ -291,7 +288,7 @@ void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 		else if(parent_type==ObjectType::Relationship)
 			this->relationship=dynamic_cast<Relationship *>(parent_obj);
 		else if(parent_type!=ObjectType::Database && parent_type!=ObjectType::Schema)
-			throw Exception(ErrorCode::AsgObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 	else
 	{
@@ -418,7 +415,7 @@ void BaseObjectWidget::configureFormLayout(QGridLayout *grid, ObjectType obj_typ
 		baseobject_grid = grid;
 	}
 
-	baseobject_grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	baseobject_grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	configureFormFields(obj_type, obj_type != ObjectType::BaseObject);
 }
 
@@ -502,12 +499,14 @@ QString BaseObjectWidget::generateVersionsInterval(unsigned ver_interv_id, const
 {
 	if(ver_interv_id==UntilVersion && !ini_ver.isEmpty())
 		return (UtilsNs::EntityLt + "= " + ini_ver);
-	else if(ver_interv_id==VersionsInterval && !ini_ver.isEmpty() && !end_ver.isEmpty())
+
+	if(ver_interv_id==VersionsInterval && !ini_ver.isEmpty() && !end_ver.isEmpty())
 		return (UtilsNs::EntityGt + "= " + ini_ver + UtilsNs::EntityAmp + UtilsNs::EntityLt + "= " + end_ver);
-	else if(ver_interv_id==AfterVersion &&  !ini_ver.isEmpty())
+
+	if(ver_interv_id==AfterVersion &&  !ini_ver.isEmpty())
 		return (UtilsNs::EntityGt + "= " + ini_ver);
-	else
-		return "";
+
+	return "";
 }
 
 QFrame *BaseObjectWidget::generateInformationFrame(const QString &msg)
@@ -523,15 +522,14 @@ QFrame *BaseObjectWidget::generateInformationFrame(const QString &msg)
 	font.setBold(false);
 	info_frm->setFont(font);
 
-	//GuiUtilsNs::configureWidgetFont(info_frm, GuiUtilsNs::MediumFontFactor);
-
 	info_frm->setObjectName("info_frm");
 	info_frm->setFrameShape(QFrame::StyledPanel);
 	info_frm->setFrameShadow(QFrame::Raised);
 	info_frm->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, info_frm);
 
 	grid = new QGridLayout(info_frm);
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	grid->setObjectName("grid");
 
 	ico_lbl = new QLabel(info_frm);
@@ -553,7 +551,7 @@ QFrame *BaseObjectWidget::generateInformationFrame(const QString &msg)
 	msg_lbl->setText(msg);
 
 	grid->addWidget(msg_lbl, 0, 1, 1, 1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 
 	return info_frm;
 }
@@ -600,12 +598,11 @@ QFrame *BaseObjectWidget::generateVersionWarningFrame(std::map<QString, std::vec
 	font.setItalic(false);
 	font.setBold(false);
 
-	//GuiUtilsNs::configureWidgetFont(alert_frm, GuiUtilsNs::MediumFontFactor);
-
 	alert_frm->setObjectName("alert_frm");
 	alert_frm->setFrameShape(QFrame::StyledPanel);
 	alert_frm->setFrameShadow(QFrame::Raised);
 	alert_frm->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
 	grid = new QGridLayout(alert_frm);
 	grid->setObjectName("grid");
@@ -630,7 +627,7 @@ QFrame *BaseObjectWidget::generateVersionWarningFrame(std::map<QString, std::vec
 							Generating SQL code for versions other than those specified in the fields' tooltips may create incompatible code."));
 
 	grid->addWidget(msg_lbl, 0, 1, 1, 1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 
 	alert_frm->adjustSize();
 	return alert_frm;
@@ -727,7 +724,7 @@ void BaseObjectWidget::applyConfiguration()
 									.arg(BaseObject::getTypeName(obj_type))
 									.arg(parent_obj->getName(true))
 									.arg(parent_obj->getTypeName()),
-									ErrorCode::AsgDuplicatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+									ErrorCode::AsgDuplicatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 				}
 			}
 
@@ -771,7 +768,7 @@ void BaseObjectWidget::applyConfiguration()
 		catch(Exception &e)
 		{
 			//qApp->restoreOverrideCursor();
-			throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+			throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 		}
 	}
 }
@@ -864,14 +861,14 @@ void BaseObjectWidget::finishConfiguration()
 	}
 	catch(Exception &e)
 	{
-		//qApp->restoreOverrideCursor();
-
 		if(e.getErrorCode()==ErrorCode::AsgObjectInvalidDefinition)
+		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::RequiredFieldsNotFilled)
-							.arg(this->object->getName()).arg(this->object->getTypeName()),
-							ErrorCode::RequiredFieldsNotFilled,__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
-		else
-			throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+											.arg(this->object->getName()).arg(this->object->getTypeName()),
+											ErrorCode::RequiredFieldsNotFilled,PGM_FUNC,PGM_FILE,PGM_LINE,&e);
+		}
+
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -938,6 +935,6 @@ void BaseObjectWidget::registerNewObject()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }

@@ -48,7 +48,7 @@ class CrashHandlerForm: public BugReportForm {
 		void setAnalysisMode(bool value);
 
 		//! \brief Generates a report buffer containing the issue details, model and stacktrace
-		QByteArray generateReportBuffer();
+		QByteArray generateReportBuffer() override;
 
 	public:
 		//! \brief Analysis mode argument

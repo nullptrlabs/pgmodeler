@@ -154,7 +154,7 @@ void Catalog::setConnection(Connection &conn)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -250,7 +250,7 @@ void Catalog::setObjectFilters(QStringList filters, bool only_matching, bool mat
 			if(!TableObject::isTableObject(BaseObject::getObjectType(type_name)))
 			{
 				throw Exception(Exception::getErrorMessage(ErrorCode::InvChildObjectTypeFilter).arg(type_name),
-												ErrorCode::InvChildObjectTypeFilter,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+												ErrorCode::InvChildObjectTypeFilter,PGM_FUNC,PGM_FILE,PGM_LINE);
 			}
 		}
 
@@ -280,7 +280,7 @@ void Catalog::setObjectFilters(QStringList filters, bool only_matching, bool mat
 		if(values.size() != 3)
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::InvalidObjectFilter).arg(filter).arg(modes.join('|')),
-											ErrorCode::InvalidObjectFilter,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											ErrorCode::InvalidObjectFilter,PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
 
 		obj_type = BaseObject::getObjectType(values[0]);
@@ -291,7 +291,7 @@ void Catalog::setObjectFilters(QStringList filters, bool only_matching, bool mat
 		if(obj_type == ObjectType::BaseObject || pattern.isEmpty() || !modes.contains(mode))
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::InvalidObjectFilter).arg(filter).arg(modes.join('|')),
-											ErrorCode::InvalidObjectFilter,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											ErrorCode::InvalidObjectFilter,PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
 
 		// Converting wildcard patterns into regexp syntax
@@ -541,7 +541,7 @@ void Catalog::executeCatalogQuery(const QString &qry_type, ObjectType obj_type, 
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e,
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e,
 						QString("catalog: %1").arg(BaseObject::getSchemaName(obj_type)));
 	}
 }
@@ -590,7 +590,7 @@ unsigned Catalog::getObjectsCount(std::vector<ObjectType> obj_types, bool incl_s
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -668,7 +668,7 @@ void Catalog::getObjectsOIDs(std::map<ObjectType, std::vector<unsigned> > &obj_o
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -696,7 +696,7 @@ attribs_map Catalog::getObjectsNames(ObjectType obj_type, const QString &sch_nam
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -769,7 +769,7 @@ std::vector<attribs_map> Catalog::getObjectsNames(std::vector<ObjectType> obj_ty
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -795,7 +795,7 @@ attribs_map Catalog::getAttributes(const QString &obj_name, ObjectType obj_type,
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -828,7 +828,7 @@ std::vector<attribs_map> Catalog::getMultipleAttributes(ObjectType obj_type, att
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -862,7 +862,7 @@ std::vector<attribs_map> Catalog::getMultipleAttributes(const QString &catalog_s
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -881,7 +881,7 @@ QString Catalog::getCommentQuery(const QString &oid_field, ObjectType obj_type, 
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e,
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e,
 						QString("catalog: %1").arg(query_id));
 	}
 }
@@ -901,7 +901,7 @@ QString Catalog::getNotExtObjectQuery(const QString &oid_field)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e,
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e,
 						QString("catalog: %1").arg(query_id));
 	}
 }
@@ -936,11 +936,11 @@ QString Catalog::createOidFilter(const std::vector<unsigned> &oids)
 {
 	QString filter;
 
-	for(unsigned i=0; i < oids.size(); i++)
-		filter+=QString("%1,").arg(oids.at(i));
+	for(auto &oid : oids)
+		filter += QString("%1,").arg(oid);
 
 	if(!filter.isEmpty())
-		filter.remove(filter.size()-1,1);
+		filter.remove(filter.size() - 1, 1);
 
 	return filter;
 }
@@ -967,7 +967,7 @@ std::vector<attribs_map> Catalog::getObjectsAttributes(ObjectType obj_type, cons
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e,
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e,
 						QString("catalog: %1").arg(BaseObject::getSchemaName(obj_type)));
 	}
 }
@@ -981,7 +981,7 @@ attribs_map Catalog::getObjectAttributes(ObjectType obj_type, unsigned oid, cons
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e,
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e,
 										qApp->translate("Catalog","Object type: %1","", -1).arg(BaseObject::getSchemaName(obj_type)));
 	}
 }
@@ -1000,7 +1000,7 @@ QString Catalog::getObjectOID(const QString &name, ObjectType obj_type, const QS
 
 		if(res.getTupleCount() > 1)
 			throw Exception(qApp->translate("Catalog","The catalog query returned more than one OID!","", -1),
-											ErrorCode::Custom,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		if(res.getTupleCount() == 0)
 			return "0";
@@ -1010,7 +1010,7 @@ QString Catalog::getObjectOID(const QString &name, ObjectType obj_type, const QS
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e,
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e,
 										qApp->translate("Catalog","Object type: %1","", -1).arg(BaseObject::getSchemaName(obj_type)));
 	}
 }
@@ -1049,7 +1049,7 @@ attribs_map Catalog::getServerAttributes()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e,
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e,
 										qApp->translate("Catalog","Object type: server","", -1));
 	}
 
@@ -1064,7 +1064,19 @@ bool Catalog::isServerSupported()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+	}
+}
+
+QString Catalog::getServerVersion(bool major_only)
+{
+	try
+	{
+		return connection.getPgSQLVersion(major_only);
+	}
+	catch(Exception &e)
+	{
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -1317,6 +1329,6 @@ void Catalog::operator = (const Catalog &catalog)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }

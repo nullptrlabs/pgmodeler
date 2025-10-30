@@ -47,7 +47,7 @@ class __libgui ColumnWidget: public BaseObjectWidget, public Ui::ColumnWidget {
 		void enableDefaultValueFields();
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

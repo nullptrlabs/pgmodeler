@@ -33,14 +33,14 @@ void Conversion::setEncoding(EncodingId encoding_id, EncodingType encoding_type)
 {
 	//Checks if the encoding index is valid
 	if(encoding_id > DstEncoding)
-		throw Exception(ErrorCode::RefTypeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefTypeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//If the passed enconding type is null an error is raised
 	if((~encoding_type).isEmpty())
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgNullTypeObject)
 						.arg(this->getName())
 						.arg(BaseObject::getTypeName(ObjectType::Conversion)),
-						ErrorCode::AsgNullTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgNullTypeObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Assigns the encoding to the conversion in the specified index
 	this->encodings[encoding_id]=encoding_type;
@@ -50,38 +50,49 @@ void Conversion::setConversionFunction(Function *conv_func)
 {
 	//Raises an error in case the passed conversion function is null
 	if(!conv_func)
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgNotAllocatedFunction)
 						.arg(this->getName(true))
 						.arg(BaseObject::getTypeName(ObjectType::Conversion)),
-						ErrorCode::AsgNotAllocatedFunction,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgNotAllocatedFunction, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
+
 	/* The conversion function must have 5 (or 6 in PG 14+) parameters if it's not the case
 		raises an error. */
-	else if(conv_func->getParameterCount() < 5 ||
-					conv_func->getParameterCount() > 6)
+	if(conv_func->getParameterCount() < 5 ||
+		 conv_func->getParameterCount() > 6)
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParamCount)
-						.arg(this->getName(true))
-						.arg(BaseObject::getTypeName(ObjectType::Conversion)),
-						ErrorCode::AsgFunctionInvalidParamCount,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										.arg(this->getName(true))
+										.arg(BaseObject::getTypeName(ObjectType::Conversion)),
+										ErrorCode::AsgFunctionInvalidParamCount, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
+
 	/* Raises an error if the function parameters does not following the type order:
 		interger, integer, cstring, internal, integer */
-	else if(conv_func->getParameter(0).getType()!="integer" ||
+	if(conv_func->getParameter(0).getType()!="integer" ||
 			conv_func->getParameter(1).getType()!="integer" ||
 			conv_func->getParameter(2).getType()!="cstring" ||
 			conv_func->getParameter(3).getType()!="internal" ||
 			conv_func->getParameter(4).getType()!="integer" ||
 			(conv_func->getParameterCount() == 6 &&
 			 conv_func->getParameter(5).getType() != "boolean"))
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParameters)
-						.arg(this->getName(true))
-						.arg(BaseObject::getTypeName(ObjectType::Conversion)),
-						ErrorCode::AsgFunctionInvalidParameters,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										.arg(this->getName(true))
+										.arg(BaseObject::getTypeName(ObjectType::Conversion)),
+										ErrorCode::AsgFunctionInvalidParameters, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
+
 	//Raises an error if the conversion function return type is not 'void' (or integer in PG14+)
-	else if(conv_func->getReturnType() != "void" &&
-					 conv_func->getReturnType() != "integer")
+	if(conv_func->getReturnType() != "void" &&
+		 conv_func->getReturnType() != "integer")
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidReturnType)
-						.arg(this->getName(true))
-						.arg(BaseObject::getTypeName(ObjectType::Conversion)),
-						ErrorCode::AsgFunctionInvalidReturnType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										.arg(this->getName(true))
+										.arg(BaseObject::getTypeName(ObjectType::Conversion)),
+										ErrorCode::AsgFunctionInvalidReturnType, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
 
 	setCodeInvalidated(conversion_func != conv_func);
 	this->conversion_func=conv_func;
@@ -96,7 +107,7 @@ void Conversion::setDefault(bool value)
 EncodingType Conversion::getEncoding(EncodingId encoding_id)
 {
 	if(encoding_id > DstEncoding)
-		throw Exception(ErrorCode::RefTypeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefTypeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return this->encodings[encoding_id];
 }

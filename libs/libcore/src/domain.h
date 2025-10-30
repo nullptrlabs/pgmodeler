@@ -45,8 +45,7 @@ class __libcore Domain: public BaseObject{
 
 	public:
 		Domain();
-
-		virtual ~Domain(){}
+		~Domain() override = default;
 
 		void addCheckConstraint(const QString &name, const QString &expr);
 
@@ -65,11 +64,11 @@ class __libcore Domain: public BaseObject{
 
 		/*! \brief Overloaded BaseObject name definition method.
 		 Updates the reference of the domain as a PostgreSQL data type */
-		virtual void setName(const QString &name) override;
+		void setName(const QString &name) override;
 
 		/*! \brief Overloaded BaseObject schema definition method.
 		 Updates the reference of the domain as a PostgreSQL data type */
-		virtual void setSchema(BaseObject *schema) override;
+		void setSchema(BaseObject *schema) override;
 
 		//! \brief Methods to access domain's attributes
 		QString getConstraintName();
@@ -79,13 +78,13 @@ class __libcore Domain: public BaseObject{
 		PgSqlType getType();
 
 		//! \brief Returns the SQL / XML code definition for the domain
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
-		virtual QString getAlterCode(BaseObject *object) final;
+		QString getAlterCode(BaseObject *object) final;
 
 		void operator = (Domain &domain);
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 };
 
 #endif

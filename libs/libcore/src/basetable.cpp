@@ -19,7 +19,7 @@
 #include "basetable.h"
 #include "utilsns.h"
 #include "coreutilsns.h"
-#include "column.h"
+#include "tableobject.h"
 
 BaseTable::BaseTable()
 {
@@ -75,7 +75,7 @@ QString BaseTable::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -107,7 +107,7 @@ bool BaseTable::isPaginationEnabled()
 void BaseTable::setCurrentPage(TableSection section_id, unsigned value)
 {
 	if(section_id > ExtAttribsSection)
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(curr_page[section_id] != value);
 	curr_page[section_id] = value;
@@ -116,7 +116,7 @@ void BaseTable::setCurrentPage(TableSection section_id, unsigned value)
 unsigned BaseTable::getCurrentPage(TableSection section_id)
 {
 	if(section_id > ExtAttribsSection)
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return curr_page[section_id];
 }

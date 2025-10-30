@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="focusPolicy">
-   <enum>Qt::TabFocus</enum>
+   <enum>Qt::FocusPolicy::TabFocus</enum>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -65,7 +65,7 @@
       </size>
      </property>
      <property name="focusPolicy">
-      <enum>Qt::TabFocus</enum>
+      <enum>Qt::FocusPolicy::TabFocus</enum>
      </property>
      <property name="toolTip">
       <string>Select Object</string>
@@ -103,7 +103,7 @@
       </size>
      </property>
      <property name="focusPolicy">
-      <enum>Qt::TabFocus</enum>
+      <enum>Qt::FocusPolicy::TabFocus</enum>
      </property>
      <property name="toolTip">
       <string>Clear field</string>
@@ -125,8 +125,14 @@
    </item>
    <item row="0" column="0">
     <widget class="QLineEdit" name="obj_name_edt">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
+      <enum>Qt::FocusPolicy::NoFocus</enum>
      </property>
      <property name="readOnly">
       <bool>true</bool>
@@ -141,7 +147,6 @@
   <tabstop>sel_object_tb</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

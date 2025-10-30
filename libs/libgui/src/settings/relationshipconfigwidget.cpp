@@ -20,6 +20,7 @@
 #include "attributes.h"
 #include "utils/syntaxhighlighter.h"
 #include "relationshipview.h"
+#include <QButtonGroup>
 
 std::map<QString, attribs_map> RelationshipConfigWidget::config_params;
 
@@ -66,13 +67,18 @@ RelationshipConfigWidget::RelationshipConfigWidget(QWidget * parent) : BaseConfi
 	for(auto &type : IndexingType::getTypes())
 		index_type_cmb->addItem(type, type);
 
-	settings_twg->widget(0)->setFocusProxy(crows_foot_rb);
+	conn_mode_gb->setFocusProxy(crows_foot_tb);
 	foreign_key_gb->setFocusProxy(deferrable_chk);
 
-	connect(crows_foot_rb, &QRadioButton::toggled, this, &RelationshipConfigWidget::enableConnModePreview);
-	connect(fk_to_pk_rb, &QRadioButton::toggled, this, &RelationshipConfigWidget::enableConnModePreview);
-	connect(center_pnts_rb, &QRadioButton::toggled, this, &RelationshipConfigWidget::enableConnModePreview);
-	connect(tab_edges_rb, &QRadioButton::toggled, this, &RelationshipConfigWidget::enableConnModePreview);
+	QButtonGroup *conn_mode_btns_grp = new QButtonGroup(this);
+	conn_mode_btns_grp->setExclusive(true);
+
+	for(auto &btn : conn_mode_gb->findChildren<QToolButton *>())
+		conn_mode_btns_grp->addButton(btn);
+
+	connect(conn_mode_btns_grp, &QButtonGroup::buttonToggled, this, [this](){
+			setConfigurationChanged(true);
+	});
 
 	connect(deferrable_chk, &QCheckBox::toggled, deferral_lbl, &QLabel::setEnabled);
 	connect(deferrable_chk, &QCheckBox::toggled, deferral_cmb, &QComboBox::setEnabled);
@@ -112,10 +118,10 @@ void RelationshipConfigWidget::loadConfiguration()
 		int idx = -1;
 		BaseConfigWidget::loadConfiguration(GlobalAttributes::RelationshipsConf, config_params, { Attributes::Type });
 
-		fk_to_pk_rb->setChecked(config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode]==Attributes::ConnectFkToPk);
-		center_pnts_rb->setChecked(config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode]==Attributes::ConnectCenterPnts);
-		tab_edges_rb->setChecked(config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode]==Attributes::ConnectTableEdges);
-		crows_foot_rb->setChecked(config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode]==Attributes::CrowsFoot);
+		fk_to_pk_tb->setChecked(config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode]==Attributes::ConnectFkToPk);
+		center_pnts_tb->setChecked(config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode]==Attributes::ConnectCenterPnts);
+		tab_edges_tb->setChecked(config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode]==Attributes::ConnectTableEdges);
+		crows_foot_tb->setChecked(config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode]==Attributes::CrowsFoot);
 
 		deferrable_chk->setChecked(config_params[Attributes::ForeignKeys][Attributes::Deferrable]==Attributes::True);
 		deferral_cmb->setCurrentText(config_params[Attributes::ForeignKeys][Attributes::DeferType]);
@@ -142,7 +148,7 @@ void RelationshipConfigWidget::loadConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e, e.getExtraInfo());
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e, e.getExtraInfo());
 	}
 }
 
@@ -155,11 +161,11 @@ void RelationshipConfigWidget::saveConfiguration()
 		patterns_sch = GlobalAttributes::getTmplConfigurationFilePath(GlobalAttributes::SchemasDir,
 																																	Attributes::Patterns +
 																																	GlobalAttributes::SchemaExt);
-		if(crows_foot_rb->isChecked())
+		if(crows_foot_tb->isChecked())
 			config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode] = Attributes::CrowsFoot;
-		else if(fk_to_pk_rb->isChecked())
+		else if(fk_to_pk_tb->isChecked())
 			config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode] = Attributes::ConnectFkToPk;
-		else if(tab_edges_rb->isChecked())
+		else if(tab_edges_tb->isChecked())
 			config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode] = Attributes::ConnectTableEdges;
 		else
 			config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode] = Attributes::ConnectCenterPnts;
@@ -185,23 +191,25 @@ void RelationshipConfigWidget::saveConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
 void RelationshipConfigWidget::applyConfiguration()
 {
-	RelationshipView::setCrowsFoot(crows_foot_rb->isChecked());
+	RelationshipView::setCrowsFoot(crows_foot_tb->isChecked());
 
-	if(!crows_foot_rb->isChecked())
+	if(!crows_foot_tb->isChecked())
 	{
-		if(fk_to_pk_rb->isChecked())
+		if(fk_to_pk_tb->isChecked())
 			RelationshipView::setLineConnectionMode(RelationshipView::ConnectFkToPk);
-		else if(tab_edges_rb->isChecked())
+		else if(tab_edges_tb->isChecked())
 			RelationshipView::setLineConnectionMode(RelationshipView::ConnectTableEdges);
 		else
 			RelationshipView::setLineConnectionMode(RelationshipView::ConnectCenterPoints);
 	}
+
+	setConfigurationChanged(false);
 }
 
 void RelationshipConfigWidget::restoreDefaults()
@@ -214,7 +222,7 @@ void RelationshipConfigWidget::restoreDefaults()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -281,18 +289,4 @@ void RelationshipConfigWidget::updatePattern()
 
 	setConfigurationChanged(true);
 	patterns[rel_type][inputs_map[input]] = input->toPlainText();
-}
-
-void RelationshipConfigWidget::enableConnModePreview()
-{
-	crows_foot_lbl->setEnabled(crows_foot_rb->isChecked());
-	conn_cnt_pnts_lbl->setEnabled(center_pnts_rb->isChecked());
-	conn_tab_edges_lbl->setEnabled(tab_edges_rb->isChecked());
-	conn_fk_pk_lbl->setEnabled(fk_to_pk_rb->isChecked());
-	setConfigurationChanged(true);
-}
-
-void RelationshipConfigWidget::hideEvent(QHideEvent *)
-{
-	settings_twg->setCurrentIndex(0);
 }

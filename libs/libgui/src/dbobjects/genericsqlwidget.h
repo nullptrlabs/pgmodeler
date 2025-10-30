@@ -55,7 +55,7 @@ class __libgui GenericSQLWidget: public BaseObjectWidget, public Ui::GenericSQLW
 		void setAttributes(DatabaseModel *model, OperationList *op_list, GenericSQL *genericsql=nullptr);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 
 	private slots:
 		void updateCodePreview();

@@ -39,8 +39,7 @@ class __libcore ForeignDataWrapper: public BaseObject, public ForeignObject {
 
 	public:
 		ForeignDataWrapper();
-
-		virtual ~ForeignDataWrapper(){}
+		~ForeignDataWrapper() override = default;
 
 		void setHandlerFunction(Function *func);
 		void setValidatorFunction(Function *func);
@@ -48,11 +47,11 @@ class __libcore ForeignDataWrapper: public BaseObject, public ForeignObject {
 		Function *getHandlerFunction();
 		Function *getValidatorFunction();
 
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) override;
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) override;
-		virtual QString getAlterCode(BaseObject *object) override;
+		QString getSourceCode(SchemaParser::CodeType def_type) override;
+		QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) override;
+		QString getAlterCode(BaseObject *object) override;
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 };
 
 #endif

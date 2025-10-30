@@ -154,12 +154,12 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		QPainterPath rel_shape;
 
 	protected:
-		virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
-		virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-		virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-		virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+		QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+		void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+		void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+		void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
 
-		virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
+		void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
 
 		/*! \brief (Re)connects the tables to the relationship changing the signals captured.
 		This method is called whenever the placeholder usage is toggled. If the placeholders are on
@@ -172,9 +172,9 @@ class __libcanvas RelationshipView: public BaseObjectView {
 	public:
 		RelationshipView(BaseRelationship *rel);
 
-		virtual ~RelationshipView();
+		~RelationshipView() override;
 
-		virtual QPainterPath shape() const override;
+		QPainterPath shape() const override;
 
 		//! \brief Calculates the relationship bounding rect considering all the children objects dimension
 		void configureBoundingRect();
@@ -229,7 +229,7 @@ class __libcanvas RelationshipView: public BaseObjectView {
 
 	private slots:
 		//! \brief Makes the comple relationship configuration
-		virtual void configureObject() override;
+		void configureObject() override;
 
 	signals:
 		void s_relationshipModified(BaseGraphicObject *rel);

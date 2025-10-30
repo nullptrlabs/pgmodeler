@@ -17,6 +17,7 @@
 */
 
 #include "datagridwidget.h"
+#include "customuistyle.h"
 #include "plaintextitemdelegate.h"
 #include "messagebox.h"
 #include "guiutilsns.h"
@@ -29,6 +30,11 @@
 DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name, ObjectType obj_type, const attribs_map &conn_params, QWidget * parent, Qt::WindowFlags f): QWidget(parent, f)
 {
 	setupUi(this);
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, result_info_frm);
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, warning_frm);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, tab_info_frm);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator_ln);
 
 	schema_lbl->setText(sch_name);
 
@@ -272,6 +278,10 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 		truncate_enabled = value;
 	});
 
+	connect(duplicate_tb, &QToolButton::clicked, this, [this](){
+		emit s_gridDuplicationRequested(this);
+	});
+
 	/* Installing event filters in the menus to override their
 	 * default position */
 	fks_menu.installEventFilter(this);
@@ -309,7 +319,7 @@ void DataGridWidget::sortResults(int column, Qt::SortOrder order)
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -360,7 +370,7 @@ void DataGridWidget::listColumns(const std::vector<attribs_map> &cols)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -376,7 +386,7 @@ void DataGridWidget::retrieveData()
 			Messagebox msg_box;
 
 			msg_box.show(tr("<strong>WARNING: </strong> There are some changed rows waiting the commit! Do you really want to discard them and retrieve the data now?"),
-						 Messagebox::AlertIcon, Messagebox::YesNoButtons);
+						 Messagebox::Alert, Messagebox::YesNoButtons);
 
 			if(msg_box.isRejected())
 				return;
@@ -447,7 +457,7 @@ void DataGridWidget::retrieveData()
 		emit s_editEnabled(!col_names.isEmpty());
 		emit s_exportEnabled(results_tbw->rowCount() > 0);
 
-		result_info_wgt->setVisible(results_tbw->rowCount() > 0);
+		result_info_frm->setVisible(results_tbw->rowCount() > 0);
 		result_info_lbl->setText(QString("<em>[%1]</em> ").arg(end_dt.toString("hh:mm:ss.zzz")) +
 								 tr("Row(s) returned: <strong>%1</strong> in <em><strong>%2</strong></em> ").arg(results_tbw->rowCount()).arg(exec_time_str) +
 								 tr("<em>(Limit: <strong>%1</strong> rows)</em>").arg(limit_spb->value()==0 ? tr("none") : QString::number(limit_spb->value())));
@@ -513,13 +523,13 @@ void DataGridWidget::retrieveData()
 		//qApp->restoreOverrideCursor();
 		conn_sql.close();
 		catalog.closeConnection();
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
 void DataGridWidget::resetDataGrid()
 {
-	result_info_wgt->setVisible(false);
+	result_info_frm->setVisible(false);
 	results_tbw->setRowCount(0);
 	results_tbw->setColumnCount(0);
 	warning_frm->setVisible(false);
@@ -698,7 +708,7 @@ void DataGridWidget::loadDataFromCsv(bool load_from_clipboard, bool force_csv_pa
 	catch(Exception &e)
 	{
 		//qApp->restoreOverrideCursor();
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -758,7 +768,7 @@ void DataGridWidget::retrievePKColumns(Catalog &catalog)
 		warning_frm->setVisible(pks.empty());
 
 		if(pks.empty())
-			warning_lbl->setText(tr("The table doesn't have a primary key! Updates and deletes will be performed by considering all columns as primary key. <strong>WARNING:</strong> these operations can affect more than one row."));
+			warning_lbl->setText(tr("The table does not have a primary key! Updates and deletes will be performed by considering all columns as primary key. <strong>WARNING:</strong> these operations can affect more than one row."));
 		else
 			table_oid = pks[0][Attributes::Table].toUInt();
 
@@ -783,7 +793,7 @@ void DataGridWidget::retrievePKColumns(Catalog &catalog)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -910,7 +920,7 @@ void DataGridWidget::retrieveFKColumns(Catalog &catalog)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -1289,7 +1299,7 @@ void DataGridWidget::saveChanges()
 	Messagebox msg_box;
 	msg_box.show(tr("Warning"),
 				 tr("You're running a demonstration version! The save feature of the data manipulation form is available only in the full version!"),
-				 Messagebox::AlertIcon, Messagebox::OkButton);
+				 Messagebox::Alert, Messagebox::OkButton);
 #else
 	int row = 0;
 	Connection conn_sql { conn_params };
@@ -1300,7 +1310,7 @@ void DataGridWidget::saveChanges()
 		Messagebox msg_box;
 
 		msg_box.show(tr("<strong>WARNING:</strong> Once commited its not possible to undo the changes! Proceed with saving?"),
-								 Messagebox::AlertIcon,
+								 Messagebox::Alert,
 								 Messagebox::YesNoButtons);
 
 		if(msg_box.isAccepted())
@@ -1311,9 +1321,11 @@ void DataGridWidget::saveChanges()
 			conn_sql.connect();
 			conn_sql.executeDDLCommand("START TRANSACTION");
 
-			for(unsigned idx=0; idx < changed_rows.size(); idx++)
+			for(const auto &changed_row : changed_rows)
 			{
-				row = changed_rows[idx];
+				/* We make a copy of the row id so in case of exception (see in the catch block)
+				 * we can highlight the problematic row data */
+				row = changed_row;
 				cmd = getDMLCommand(row);
 				conn_sql.executeDDLCommand(cmd);
 			}
@@ -1346,7 +1358,7 @@ void DataGridWidget::saveChanges()
 
 		Messagebox::error(Exception::getErrorMessage(ErrorCode::RowDataNotManipulated)
 											.arg(op_names[op_type]).arg(fmt_tb_name).arg(row + 1).arg(e.getErrorMessage()),
-											ErrorCode::RowDataNotManipulated, __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+											ErrorCode::RowDataNotManipulated, PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 #endif
 }
@@ -1414,7 +1426,7 @@ QString DataGridWidget::getDMLCommand(int row)
 				{
 					throw Exception(Exception::getErrorMessage(ErrorCode::MalformedUnescapedValue)
 													.arg(row + 1).arg(col_name),
-													ErrorCode::MalformedUnescapedValue, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+													ErrorCode::MalformedUnescapedValue, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 
 				col_list.push_back(QString("\"%1\"").arg(col_name));
@@ -1448,13 +1460,11 @@ QString DataGridWidget::getDMLCommand(int row)
 
 		if(col_list.isEmpty())
 			return "";
+
+		if(op_type == OpUpdate)
+			fmt_cmd = fmt_cmd.arg(fmt_tb_name).arg(val_list.join(", ")).arg(flt_list.join(" AND "));
 		else
-		{
-			if(op_type == OpUpdate)
-				fmt_cmd = fmt_cmd.arg(fmt_tb_name).arg(val_list.join(", ")).arg(flt_list.join(" AND "));
-			else
-				fmt_cmd = fmt_cmd.arg(fmt_tb_name).arg(col_list.join(", ")).arg(val_list.join(", "));
-		}
+			fmt_cmd = fmt_cmd.arg(fmt_tb_name).arg(col_list.join(", ")).arg(val_list.join(", "));
 	}
 
 	return fmt_cmd;
@@ -1501,7 +1511,7 @@ void DataGridWidget::truncateTable()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
   }
 }
 
@@ -1578,7 +1588,7 @@ void DataGridWidget::saveSelectedItems(bool csv_format)
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 

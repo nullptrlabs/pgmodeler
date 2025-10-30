@@ -242,7 +242,7 @@ class __libgui ModelWidget: public QWidget {
 		int openEditingForm(BaseObject *object, BaseObject *parent_obj, const QPointF &pos);
 
 		//! \brief Opens a editing form specific for tables and foreign tables
-		int openTableEditingForm(ObjectType tab_type, PhysicalTable *object, Schema *parent_obj, const QPointF &pos);
+		int openTableEditingForm(ObjectType tab_type, PhysicalTable *object, Schema *schema, const QPointF &pos);
 
 		//! \brief Configures the submenu related to the installed plugins actions
 		void configurePluginsActions();
@@ -360,13 +360,13 @@ class __libgui ModelWidget: public QWidget {
 
 		cut_menu;
 
-		void resizeEvent(QResizeEvent *);
-		void mousePressEvent(QMouseEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void hideEvent(QHideEvent *);
+		void resizeEvent(QResizeEvent *) override;
+		void mousePressEvent(QMouseEvent *event) override;
+		void keyPressEvent(QKeyEvent *event) override;
+		void hideEvent(QHideEvent *) override;
 
 		//! \brief Captures and handles the QWeelEvent raised on the viewport scrollbars
-		bool eventFilter(QObject *object, QEvent *event);
+		bool eventFilter(QObject *object, QEvent *event) override;
 
 		//! \brief Cancel the creation of a new object (only for graphical objects)
 		void cancelObjectAddition();
@@ -389,7 +389,7 @@ class __libgui ModelWidget: public QWidget {
 		ZoomIncrement = 0.050000;
 
 		ModelWidget(QWidget *parent = nullptr);
-		virtual ~ModelWidget();
+		~ModelWidget() override;
 
 		//! \brief Creates a BaseForm instance and insert the widget into it. A custom configuration for dialog buttons can be passed
 		template<class WidgetClass>
@@ -485,6 +485,13 @@ class __libgui ModelWidget: public QWidget {
 		void rearrangeTablesInSchemas();
 
 		void emitSceneInteracted();
+
+		//! \brief Toggles the protection over the model and display a message indicating the status
+		void setProtected(bool protect);
+
+		void setInteractive(bool interact);
+
+		bool isInteractive();
 
 	private slots:
 		//! \brief Handles the signals that indicates the object creation on the reference database model
@@ -661,6 +668,9 @@ class __libgui ModelWidget: public QWidget {
 		void s_maginifierAreaVisible(bool);
 		void s_modelResized();
 
+		//! \brief Signal emitted whenever the interaction status is changes (see setInteractive)
+		void s_interactiveChanged(bool);
+
 		//! \brief Signal emitted whenever the modified status of the model changes
 		void s_modelModified(bool);
 
@@ -700,16 +710,16 @@ class __libgui ModelWidget: public QWidget {
 		void s_objectsLayerChanged();
 
 		friend class MainWindow;
-		friend class ModelExportForm;
+		friend class ModelExportWidget;
 		friend class OperationListWidget;
 		friend class ModelObjectsWidget;
 		friend class ModelOverviewWidget;
 		friend class ModelValidationWidget;
-		friend class DatabaseImportForm;
 		friend class ObjectSearchWidget;
 		friend class NewObjectOverlayWidget;
 		friend class LayersConfigWidget;
-		friend class MetadataHandlingForm;
+		friend class MetadataHandlingWidget;
+		friend class DatabaseImportWidget;
 };
 
 #endif

@@ -94,7 +94,7 @@
         </sizepolicy>
        </property>
        <property name="toolTip">
-        <string>&lt;p&gt;The name of the reference to an object. All occurences of the reference enclosed by &lt;strong&gt;{}&lt;/strong&gt; are replaced by the referenced object's name or signature in the SQL code.&lt;/p&gt;</string>
+        <string>&lt;p&gt;The name of the reference to an object. All occurrences of the reference enclosed by &lt;strong&gt;{}&lt;/strong&gt; are replaced by the referenced object's name or signature in the SQL code.&lt;/p&gt;</string>
        </property>
        <property name="statusTip">
         <string/>
@@ -123,7 +123,7 @@
         </sizepolicy>
        </property>
        <property name="toolTip">
-        <string>&lt;p&gt;The alias of the reference to an object. All occurences of the reference enclosed by &lt;strong&gt;@{}&lt;/strong&gt; are replaced by the referenced object's alias in the SQL code.&lt;/p&gt;</string>
+        <string>&lt;p&gt;The alias of the reference to an object. All occurrences of the reference enclosed by &lt;strong&gt;@{}&lt;/strong&gt; are replaced by the referenced object's alias in the SQL code.&lt;/p&gt;</string>
        </property>
        <property name="statusTip">
         <string/>

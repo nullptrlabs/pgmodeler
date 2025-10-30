@@ -61,7 +61,7 @@ class __libgui FunctionWidget: public BaseFunctionWidget, public Ui::FunctionWid
 		void duplicateParameter(int curr_row, int new_row);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

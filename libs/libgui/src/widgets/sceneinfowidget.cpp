@@ -17,12 +17,17 @@
 */
 
 #include "sceneinfowidget.h"
+#include "customuistyle.h"
 #include "guiutilsns.h"
 #include "relationshipview.h"
 
 SceneInfoWidget::SceneInfoWidget(QWidget *parent): QWidget(parent)
 {
 	setupUi(this);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, cursor_pos_info_frm);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator_ln);
+ 	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, obj_sel_info_frm);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator_ln2);
 }
 
 void SceneInfoWidget::updateSelectedObject(BaseObjectView *object)

@@ -37,7 +37,7 @@ try \
 } \
 catch(Exception &e) \
 { \
-	Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__); \
+	Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE); \
 }
 
 /*! \brief This macro expands to a slot method call to be used with QObject::connect method.
@@ -72,7 +72,7 @@ catch(Exception &e) \
  *				receiver->ReceiverClass::someMethod();
  *			}
  *			catch(Exception &e) {
- *				Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+ *				Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
  *			}
  *		});
  */
@@ -113,7 +113,7 @@ catch(Exception &e) \
  *				receiver->ReceiverClass::someMethod(args...);
  *			}
  *			catch(Exception &e) {
- *				Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+ *				Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
  *			}
  *		});
  */

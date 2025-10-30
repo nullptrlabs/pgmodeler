@@ -17,15 +17,17 @@
 */
 
 #include "messagebox.h"
+#include "customuistyle.h"
 #include "guiutilsns.h"
 #include "utilsns.h"
+#include <qobject.h>
 
 Messagebox::Messagebox(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f)
 {
 	setupUi(this);
 
 	setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
-	show_errors_tb->setVisible(false);
+	show_errors_btn->setVisible(false);
 	custom_option_chk->setVisible(false);
 	raw_stack_txt = nullptr;
 
@@ -33,7 +35,7 @@ Messagebox::Messagebox(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f)
 	connect(no_btn, &QPushButton::clicked, this, &Messagebox::handleNoCancelClick);
 	connect(cancel_btn, &QPushButton::clicked, this, &Messagebox::handleNoCancelClick);
 
-	connect(show_errors_tb, &QToolButton::toggled, this, [this](bool checked){
+	connect(show_errors_btn, &QPushButton::toggled, this, [this](bool checked){
 		objs_group_wgt->setCurrentIndex(checked ? 1 : 0);
 		resize(baseSize().width() * (checked ? 1.25 : 1),
 					 baseSize().height() * (checked ? 3 : 1));
@@ -107,7 +109,7 @@ bool Messagebox::isCustomOptionChecked()
 	return custom_option_chk->isChecked();
 }
 
-int Messagebox::show(Exception e, const QString &msg, IconType icon_type, ButtonsId buttons, const QString &yes_lbl, const QString &no_lbl, const QString &cancel_lbl,
+int Messagebox::show(Exception e, const QString &msg, MessageType icon_type, ButtonsId buttons, const QString &yes_lbl, const QString &no_lbl, const QString &cancel_lbl,
 											const QString &yes_ico, const QString &no_ico, const QString &cancel_ico)
 {
 	QString fmt_msg, title;
@@ -119,8 +121,7 @@ int Messagebox::show(Exception e, const QString &msg, IconType icon_type, Button
 		raw_stack_txt->setLineNumbersVisible(false);
 		raw_stack_txt->setWordWrap(true);
 		GuiUtilsNs::configureTextEditFont(raw_stack_txt, font().pointSizeF());
-		stacktrace_tbw->widget(2)->layout()->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin,
-																														GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
+		stacktrace_tbw->widget(2)->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
 	}
 
 	raw_stack_txt->setPlainText(e.getExceptionsText());
@@ -139,7 +140,7 @@ int Messagebox::show(Exception e, const QString &msg, IconType icon_type, Button
 	return show(title, fmt_msg, icon_type, buttons, yes_lbl, no_lbl, cancel_lbl, yes_ico, no_ico, cancel_ico);
 }
 
-int Messagebox::show(const QString &msg, IconType icon_type, ButtonsId buttons)
+int Messagebox::show(const QString &msg, MessageType icon_type, ButtonsId buttons)
 {
 	return show("", msg,  icon_type, buttons);
 }
@@ -147,7 +148,7 @@ int Messagebox::show(const QString &msg, IconType icon_type, ButtonsId buttons)
 void Messagebox::error(const QString &msg)
 {
 	Messagebox msgbox;
-	msgbox.show(msg, ErrorIcon);
+	msgbox.show(msg, Error);
 }
 
 void Messagebox::error(const QString &msg, ErrorCode error_code, const QString &method, const QString &file, int line, Exception *e)
@@ -177,15 +178,21 @@ void Messagebox::alert(const QString &msg, Exception *ex)
 	Messagebox msgbox;
 
 	if(ex)
-		msgbox.show(*ex, msg, AlertIcon);
+		msgbox.show(*ex, msg, Alert);
 	else
-		msgbox.show(msg, AlertIcon);
+		msgbox.show(msg, Alert);
 }
 
 void Messagebox::info(const QString &msg)
 {
 	Messagebox msgbox;
-	msgbox.show(msg, InfoIcon);
+	msgbox.show(msg, Info);
+}
+
+void Messagebox::success(const QString &msg)
+{
+	Messagebox msgbox;
+	msgbox.show(msg, Success);
 }
 
 int Messagebox::confirm(const QString &msg, ButtonsId btns_id,
@@ -193,17 +200,26 @@ int Messagebox::confirm(const QString &msg, ButtonsId btns_id,
 												const QString &yes_ico, const QString &no_ico, const QString &cancel_ico)
 {
 	Messagebox msgbox;
-	return msgbox.show("", msg, ConfirmIcon, btns_id,
+	return msgbox.show("", msg, Confirm, btns_id,
 										 yes_lbl, no_lbl, cancel_lbl,
 										 yes_ico, no_ico, cancel_ico);
 }
 
-int Messagebox::show(const QString &title, const QString &msg, IconType icon_type, ButtonsId buttons,
+int Messagebox::confirm(const QString &title, const QString &msg, ButtonsId btns_id, const QString &yes_lbl, const QString &no_lbl, const QString &cancel_lbl, const QString &yes_ico, const QString &no_ico, const QString &cancel_ico)
+{
+	Messagebox msgbox;
+	return msgbox.show(title, msg, Confirm, btns_id,
+										 yes_lbl, no_lbl, cancel_lbl,
+										 yes_ico, no_ico, cancel_ico);
+}
+
+int Messagebox::show(const QString &title, const QString &msg, MessageType icon_type, ButtonsId buttons,
 										 const QString &yes_lbl, const QString &no_lbl, const QString &cancel_lbl,
 										 const QString &yes_ico, const QString &no_ico, const QString &cancel_ico)
 {
-	QString icon_name, aux_title=title;
-	QWidgetList btns = { yes_ok_btn, no_btn, cancel_btn, show_errors_tb };
+	QString icon_name, aux_title;
+	QWidgetList btns = { yes_ok_btn, no_btn, cancel_btn, show_errors_btn };
+	CustomUiStyle::StyleHint style_hint;
 
 	if(!yes_lbl.isEmpty())
 		yes_ok_btn->setText(yes_lbl);
@@ -241,51 +257,41 @@ int Messagebox::show(const QString &title, const QString &msg, IconType icon_typ
 		btn->setMinimumSize(btn->size());
 	}
 
-	if(title.isEmpty())
-	{
-		switch(icon_type)
-		{
-		case ErrorIcon:
-			aux_title=tr("Error");
-			break;
-
-		case AlertIcon:
-			aux_title=tr("Alert");
-			break;
-
-		case InfoIcon:
-			aux_title=tr("Information");
-			break;
-
-		case ConfirmIcon:
-			aux_title=tr("Confirmation");
-			break;
-
-		default:
-			break;
-		}
-	}
-
 	switch(icon_type)
 	{
-	case ErrorIcon:
-		icon_name="error";
+		case Error:
+			icon_name = "error";
+			aux_title = title.isEmpty() ? tr("Error") : title;
+			style_hint = CustomUiStyle::ErrorFrmHint;
 		break;
 
-	case InfoIcon:
-		icon_name="info";
+		case Info:
+			icon_name = "info";
+			aux_title = title.isEmpty() ? tr("Information") : title;
+			style_hint = CustomUiStyle::InfoFrmHint;
 		break;
 
-	case AlertIcon:
-		icon_name="alert";
+		case Alert:
+			icon_name = "alert";
+			aux_title = title.isEmpty() ? tr("Alert") : title;
+			style_hint = CustomUiStyle::AlertFrmHint;
 		break;
 
-	case ConfirmIcon:
-		icon_name="question";
+		case Confirm:
+			icon_name = "question";
+			aux_title = title.isEmpty() ? tr("Confirmation") : title;
+			style_hint = CustomUiStyle::ConfirmFrmHint;
 		break;
 
-	default:
-		icon_name="";
+		case Success:
+			icon_name = "success";
+			aux_title = title.isEmpty() ? tr("Success") : title;
+			style_hint = CustomUiStyle::SuccessFrmHint;
+		break;
+
+		default:
+			icon_name = "";
+			aux_title = title;
 		break;
 	}
 
@@ -298,8 +304,8 @@ int Messagebox::show(const QString &title, const QString &msg, IconType icon_typ
 
 	setWindowTitle(aux_title);
 	objs_group_wgt->setCurrentIndex(0);
-	show_errors_tb->setChecked(false);
-	show_errors_tb->setVisible(exceptions_trw->topLevelItemCount() > 0);
+	show_errors_btn->setChecked(false);
+	show_errors_btn->setVisible(exceptions_trw->topLevelItemCount() > 0);
 
 	double w_factor = 0.25, h_factor = 0.15;
 	QSize sz = screen()->size();
@@ -319,6 +325,7 @@ int Messagebox::show(const QString &title, const QString &msg, IconType icon_typ
 		resize(minimumSize());
 
 	setBaseSize(size());
+	CustomUiStyle::setStyleHint(style_hint, frame);
 
 	return exec();
 }

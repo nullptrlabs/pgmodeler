@@ -147,7 +147,7 @@
       </size>
      </property>
      <property name="sizeAdjustPolicy">
-      <enum>QComboBox::AdjustToContents</enum>
+      <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
      </property>
      <property name="iconSize">
       <size>
@@ -198,7 +198,6 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

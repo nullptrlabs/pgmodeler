@@ -64,8 +64,8 @@ class __libgui CustomSQLWidget: public BaseObjectWidget, public Ui::CustomSQLWid
 		void setAttributes(DatabaseModel *model, BaseObject *object);
 		
 	public slots:
-		void applyConfiguration();
-		
+		void applyConfiguration() override;
+
 	private slots:
 		void addCommand();
 		void clearCode();

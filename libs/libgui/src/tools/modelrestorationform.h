@@ -44,7 +44,7 @@ class __libgui ModelRestorationForm: public QDialog, public Ui::ModelRestoration
 		QStringList getSelectedModels();
 
 	public slots:
-		int exec();
+		int exec() override;
 
 		//! \brief List of files to be ignored by the restoration form
 		void setIgnoredFiles(const QStringList &list);

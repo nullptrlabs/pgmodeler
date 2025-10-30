@@ -51,7 +51,7 @@ void Role::setOption(RoleOpts op_type, bool value)
 {
 	if(op_type > OpBypassRls)
 		//Raises an error if the option type is invalid
-		throw Exception(ErrorCode::AsgValueInvalidRoleOptionType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgValueInvalidRoleOptionType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(options[op_type] != value);
 	options[op_type]=value;
@@ -61,14 +61,14 @@ void Role::addRole(RoleType role_type, Role *role)
 {
 	//Raises an error if the role to be added is not allocated
 	if(!role)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Raises an error if the role to be added is the 'this' role
 	if(role && this==role)
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgRoleMemberItself)
 						.arg(role->getName()),
-						ErrorCode::AsgRoleMemberItself,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgRoleMemberItself,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	bool role_mem = false, role_adm = false,
@@ -90,7 +90,7 @@ void Role::addRole(RoleType role_type, Role *role)
 		throw Exception(Exception::getErrorMessage(ErrorCode::InsDuplicatedRole)
 						.arg(role->getName())
 						.arg(this->getName()),
-						ErrorCode::InsDuplicatedRole,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::InsDuplicatedRole,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	// Checking for redundant reference between roles.
@@ -98,7 +98,7 @@ void Role::addRole(RoleType role_type, Role *role)
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgRoleReferenceRedundancy)
 						.arg(role->getName(), this->getName(), this->getName(), role->getName()),
-						ErrorCode::AsgRoleReferenceRedundancy,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgRoleReferenceRedundancy,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	getRoleList(role_type)->push_back(role);
@@ -148,7 +148,7 @@ std::vector<Role *> *Role::getRoleList(unsigned role_type)
 	if(role_type == AdminRole)
 		return &admin_roles;
 
-	throw Exception(ErrorCode::RefInvalidRoleType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+	throw Exception(ErrorCode::RefInvalidRoleType,PGM_FUNC,PGM_FILE,PGM_LINE);
 }
 
 void Role::removeRole(RoleType role_type, unsigned role_idx)
@@ -157,7 +157,7 @@ void Role::removeRole(RoleType role_type, unsigned role_idx)
 	std::vector<Role *>::iterator itr;
 
 	if(role_idx >= list->size())
-		throw Exception(ErrorCode::RefObjectInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefObjectInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	itr = list->begin() + role_idx;
 	list->erase(itr);
@@ -204,7 +204,7 @@ bool Role::isRoleExists(RoleType role_type, const QString &rl_name)
 bool Role::getOption(RoleOpts op_type)
 {
 	if(op_type > OpBypassRls)
-		throw Exception(ErrorCode::AsgValueInvalidRoleOptionType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgValueInvalidRoleOptionType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return options[op_type];
 }
@@ -215,7 +215,7 @@ Role *Role::getRole(RoleType role_type, unsigned role_idx)
 
 	//Raises an error if the role index is invalid (out of bound)
 	if(role_idx > list->size())
-		throw Exception(ErrorCode::RefRoleInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefRoleInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return list->at(role_idx);
 }
@@ -293,7 +293,7 @@ QString Role::getAlterMembershipCommands(Role *imp_role, Role *ref_role, bool re
 	QString cmds;
 
 	if(!imp_role || !ref_role)
-		throw Exception(ErrorCode::OprNotAllocatedObject, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	for(auto &rl_type : role_types)
 	{
@@ -318,7 +318,7 @@ QString Role::getAlterMembershipCommands(Role *imp_role, Role *ref_role, bool re
 			}
 			catch(Exception &e)
 			{
-				throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+				throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 			}
 
 			member_attrs.clear();
@@ -334,7 +334,7 @@ QString Role::getAlterCode(BaseObject *object)
 	Role *role=dynamic_cast<Role *>(object);
 
 	if(!role)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
@@ -370,7 +370,7 @@ QString Role::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 

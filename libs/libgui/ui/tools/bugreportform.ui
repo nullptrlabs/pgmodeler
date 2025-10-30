@@ -3,7 +3,7 @@
  <class>BugReportForm</class>
  <widget class="QDialog" name="BugReportForm">
   <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
+   <enum>Qt::WindowModality::ApplicationModal</enum>
   </property>
   <property name="geometry">
    <rect>
@@ -64,14 +64,14 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>64</width>
-       <height>64</height>
+       <width>96</width>
+       <height>96</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>64</width>
-       <height>64</height>
+       <width>96</width>
+       <height>96</height>
       </size>
      </property>
      <property name="text">
@@ -84,7 +84,7 @@
       <bool>true</bool>
      </property>
      <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+      <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
      </property>
     </widget>
    </item>
@@ -131,7 +131,7 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>169</width>
+         <width>180</width>
          <height>35</height>
         </size>
        </property>
@@ -149,7 +149,7 @@
      <item>
       <spacer>
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -243,13 +243,13 @@
       </size>
      </property>
      <property name="text">
-      <string>Use the form below to generate a complete bug report. Please, try to be as clear as possible when describing the actions that can reproduce the bug. Additionally, it's important to attach a sample database model so that the bug can be quickly discovered and fixed!</string>
+      <string>Use the form below to generate a complete bug report. Please, try to be as clear as possible when describing the actions that can reproduce the bug. Additionally, it is important to attach a sample database model so that the bug can be quickly discovered and fixed!</string>
      </property>
      <property name="textFormat">
-      <enum>Qt::PlainText</enum>
+      <enum>Qt::TextFormat::PlainText</enum>
      </property>
      <property name="alignment">
-      <set>Qt::AlignJustify|Qt::AlignTop</set>
+      <set>Qt::AlignmentFlag::AlignJustify|Qt::AlignmentFlag::AlignTop</set>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -261,7 +261,7 @@
       <bool>true</bool>
      </property>
      <property name="textInteractionFlags">
-      <set>Qt::TextSelectableByMouse</set>
+      <set>Qt::TextInteractionFlag::TextSelectableByMouse</set>
      </property>
     </widget>
    </item>
@@ -382,10 +382,10 @@
           </size>
          </property>
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::Shape::StyledPanel</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+          <enum>QFrame::Shadow::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
           <property name="leftMargin">
@@ -421,7 +421,7 @@
              <string/>
             </property>
             <property name="textFormat">
-             <enum>Qt::AutoText</enum>
+             <enum>Qt::TextFormat::AutoText</enum>
             </property>
             <property name="pixmap">
              <pixmap resource="../../res/resources.qrc">:/icons/icons/info.png</pixmap>
@@ -434,10 +434,10 @@
           <item row="0" column="1">
            <widget class="QLabel" name="hint_lbl">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If you prefer it's possible to report this issue anytime on pgModeler's project repository at &lt;a href=&quot;http://github.com/pgmodeler/pgmodeler/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;GitHub&lt;/span&gt;&lt;/a&gt;. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If you prefer it is possible to report this issue anytime on pgModeler's project repository at &lt;a href=&quot;http://github.com/pgmodeler/pgmodeler/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;GitHub&lt;/span&gt;&lt;/a&gt;. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="textFormat">
-             <enum>Qt::AutoText</enum>
+             <enum>Qt::TextFormat::AutoText</enum>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
@@ -529,7 +529,7 @@
              </size>
             </property>
             <property name="toolButtonStyle">
-             <enum>Qt::ToolButtonIconOnly</enum>
+             <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
             </property>
            </widget>
           </item>
@@ -570,7 +570,6 @@
   <tabstop>close_btn</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

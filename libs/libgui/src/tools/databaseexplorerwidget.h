@@ -93,9 +93,9 @@ class __libgui DatabaseExplorerWidget: public QWidget, public Ui::DatabaseExplor
 		
 		//! \brief Marks the item as editable so that the user can change its name
 		void startObjectRename(QTreeWidgetItem *item);
-		
-		bool eventFilter(QObject *object, QEvent *event);
-		
+
+		bool eventFilter(QObject *object, QEvent *event) override;
+
 		/*! \brief Returns a properly formatted object name by querying using its OID and different object types.
 		 * Optional schema and table names can be specified to filter the results */
 		QString getObjectName(const std::vector<ObjectType> &types, const QString &oid, const QString &sch_name="", const QString tab_name="");

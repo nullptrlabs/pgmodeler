@@ -32,14 +32,13 @@ class __libcore Parameter: public Column {
 		is in, out or both (IN, OUT, INOUT, VARIADIC) */
 		bool is_in, is_out, is_variadic;
 
-		virtual void updateDependencies() override {}
+		void updateDependencies() override {}
 
 	public:
 		Parameter();
 		Parameter(const Parameter &param);
 		Parameter(const QString &name, PgSqlType type, bool in = false, bool out = false, bool variadic = false);
-
-		virtual ~Parameter(){}
+		~Parameter() override = default;
 
 		void setType(PgSqlType type);
 		void setIn(bool value);
@@ -53,8 +52,8 @@ class __libcore Parameter: public Column {
 		QString getModeString();
 
 		//! \brief Returns the SQL / XML code definition for the parameter
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
 
 		void operator = (const Parameter &param);
 };

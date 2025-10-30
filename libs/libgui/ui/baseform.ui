@@ -3,7 +3,7 @@
  <class>BaseForm</class>
  <widget class="QDialog" name="BaseForm">
   <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
+   <enum>Qt::WindowModality::ApplicationModal</enum>
   </property>
   <property name="geometry">
    <rect>
@@ -23,7 +23,7 @@
    <string>Dialog</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../res/resources.qrc">
+   <iconset resource="../../../priv-plugins/res/logoicons.qrc">
     <normaloff>:/icons/icons/pgmodeler_logo.png</normaloff>:/icons/icons/pgmodeler_logo.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
@@ -96,7 +96,7 @@
           </property>
           <property name="maximumSize">
            <size>
-            <width>169</width>
+            <width>180</width>
             <height>35</height>
            </size>
           </property>
@@ -107,7 +107,7 @@
            <string/>
           </property>
           <property name="textFormat">
-           <enum>Qt::PlainText</enum>
+           <enum>Qt::TextFormat::PlainText</enum>
           </property>
           <property name="pixmap">
            <pixmap resource="../res/resources.qrc">:/images/images/pgmodeler_name.png</pixmap>
@@ -202,7 +202,7 @@
         <item row="0" column="1">
          <spacer name="horizontalSpacer">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -226,10 +226,10 @@
       </sizepolicy>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
+      <enum>QFrame::Shadow::Sunken</enum>
      </property>
     </widget>
    </item>
@@ -237,7 +237,7 @@
  </widget>
  <resources>
   <include location="../res/resources.qrc"/>
-  <include location="../res/resources.qrc"/>
+  <include location="../../../priv-plugins/res/logoicons.qrc"/>
  </resources>
  <connections/>
 </ui>

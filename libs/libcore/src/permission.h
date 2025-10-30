@@ -101,8 +101,7 @@ class __libcore Permission: public BaseObject {
 		 the permissions this can not be changed after the object instance of
 		 the class is created. */
 		Permission(BaseObject *obj);
-
-		virtual ~Permission(){}
+		~Permission() override = default;
 
 		//! \brief Adds a role that will have privileges over the object
 		void addRole(Role *role);
@@ -159,13 +158,13 @@ class __libcore Permission: public BaseObject {
 		static bool acceptsPermission(ObjectType obj_type, int privilege=-1);
 
 		//! \brief Returns the SQL / XML definition for the permission
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
-		virtual QString getSignature(bool = false) final;
+		QString getSignature(bool = false) final;
 
-		virtual QString getDropCode(bool cascade) final;
+		QString getDropCode(bool cascade) final;
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 };
 
 #endif

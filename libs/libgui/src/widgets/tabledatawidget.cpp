@@ -17,6 +17,8 @@
 */
 
 #include "tabledatawidget.h"
+#include "customuistyle.h"
+#include "messagebox.h"
 #include "tools/sqlexecutionwidget.h"
 #include "guiutilsns.h"
 #include "csvparser.h"
@@ -29,6 +31,8 @@ TableDataWidget::TableDataWidget(QWidget *parent): BaseObjectWidget(parent, Obje
 {
 	Ui_TableDataWidget::setupUi(this);
 	configureFormLayout(tabledata_grid, ObjectType::BaseObject);
+ 	
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
 	obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(ObjectType::Table)));
 
@@ -191,7 +195,7 @@ void TableDataWidget::deleteRows()
 
 void TableDataWidget::deleteColumns()
 {
-	int res = Messagebox::confirm(tr("Delete columns is an irreversible action! Do you really want to proceed?"));
+	int res = Messagebox::confirm(tr("Deleting columns is an irreversible action! Are you sure you want to proceed?"));
 
 	if(Messagebox::isAccepted(res))
 	{
@@ -225,7 +229,7 @@ void TableDataWidget::clearRows(bool confirm)
 	int res = Messagebox::Rejected;
 
 	if(confirm)
-		res = Messagebox::confirm(tr("Remove all rows is an irreversible action! Do you really want to proceed?"));
+		res = Messagebox::confirm(tr("Removing all rows is an irreversible action! Are you sure you want to proceed?"));
 
 	if(!confirm || Messagebox::isAccepted(res))
 	{
@@ -237,7 +241,7 @@ void TableDataWidget::clearRows(bool confirm)
 
 void TableDataWidget::clearColumns()
 {
-	int res = Messagebox::confirm(tr("Remove all columns is an irreversible action! Do you really want to proceed?"));
+	int res = Messagebox::confirm(tr("Removing all columns is an irreversible action! Are you sure you want to proceed?"));
 
 	if(Messagebox::isAccepted(res))
 	{
@@ -369,7 +373,7 @@ void TableDataWidget::populateDataGrid(const CsvDocument &csv_doc)
 			Messagebox msgbox;
 			msgbox.show(e,
 									tr("Failed to parse the table's initial data, check the stack trace for more detail. Do you want to dump the data into an external file in order to fix and import them back into the table?"),
-									Messagebox::AlertIcon,
+									Messagebox::Alert,
 									Messagebox::YesNoButtons);
 
 			if(msgbox.isAccepted())
@@ -383,7 +387,7 @@ void TableDataWidget::populateDataGrid(const CsvDocument &csv_doc)
 				catch(Exception &e)
 				{
 					//msgbox.show(e);
-					Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+					Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 			}
 		}
@@ -626,7 +630,7 @@ void TableDataWidget::applyConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

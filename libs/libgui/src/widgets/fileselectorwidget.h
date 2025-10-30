@@ -109,12 +109,14 @@ class __libgui FileSelectorWidget: public QWidget, public Ui::FileSelectorWidget
 		void setCustomWarning(const QString &warn_msg);
 
 		//! \brief Clears the custom warning message
-		void clearCustomWarning(void);
+		void clearCustomWarning();
 
 		/*! \brief Configures the selector as readonly. This will cause
 		 * the clear input button to be hidden, the input field to be set as readonly and
 		 * the action of the file browse button will be to open the file/directory externally */
 		void setReadOnly(bool value);
+
+		bool isReadOnly();
 
 		void setToolTip(const QString &tooltip);
 

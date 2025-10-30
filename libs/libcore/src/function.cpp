@@ -18,7 +18,7 @@
 
 #include "function.h"
 
-Function::Function() : BaseFunction()
+Function::Function()
 {
 	return_type = PgSqlType("void");
 	returns_setof=false;
@@ -46,7 +46,7 @@ void Function::addReturnedTableColumn(const QString &name, PgSqlType type)
 {
 	//Raises an error if the column name is empty
 	if(name.isEmpty())
-		throw Exception(ErrorCode::AsgEmptyNameTableReturnType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgEmptyNameTableReturnType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	std::vector<Parameter>::iterator itr,itr_end;
 	bool found=false;
@@ -69,7 +69,7 @@ void Function::addReturnedTableColumn(const QString &name, PgSqlType type)
 		throw Exception(Exception::getErrorMessage(ErrorCode::InsDuplicatedTableReturnType)
 						.arg(name)
 						.arg(this->signature),
-						ErrorCode::InsDuplicatedTableReturnType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::InsDuplicatedTableReturnType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	Parameter p;
 	p.setName(name);
@@ -203,7 +203,7 @@ Parameter Function::getReturnedTableColumn(unsigned column_idx)
 {
 	//Raises an error if the column index is out of bound
 	if(column_idx>=ret_table_columns.size())
-		throw Exception(ErrorCode::RefObjectInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefObjectInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return ret_table_columns[column_idx];
 }
@@ -227,7 +227,7 @@ void Function::removeReturnedTableColumns()
 void Function::removeReturnedTableColumn(unsigned column_idx)
 {
 	if(column_idx >= ret_table_columns.size())
-		throw Exception(ErrorCode::RefObjectInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefObjectInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	auto itr = ret_table_columns.begin() + column_idx;
 	ret_table_columns.erase(itr);
@@ -271,7 +271,7 @@ QString Function::getAlterCode(BaseObject *object)
 	Function *func=dynamic_cast<Function *>(object);
 
 	if(!func)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
@@ -305,7 +305,7 @@ QString Function::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 

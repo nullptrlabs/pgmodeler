@@ -29,7 +29,7 @@ CopyOptions::CopyOptions()
 CopyOptions::CopyOptions(CopyMode copy_mode, CopyOpts copy_opts)
 {
 	if(copy_mode > Excluding || copy_opts > All)
-		throw Exception(ErrorCode::RefInvalidLikeOptionType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefInvalidLikeOptionType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	this->copy_mode = copy_mode;
 	this->copy_opts = copy_opts;
@@ -43,7 +43,7 @@ CopyOptions::CopyMode CopyOptions::getCopyMode()
 bool CopyOptions::isOptionSet(CopyOpts op)
 {
 	if(op > All)
-		throw Exception(ErrorCode::RefInvalidLikeOptionType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefInvalidLikeOptionType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return ((copy_opts & op) == op);
 }

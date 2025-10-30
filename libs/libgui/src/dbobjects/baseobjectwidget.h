@@ -107,9 +107,9 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 			
 		//! \brief Apply the basic configurations to the object (name, schema, comment, owner, tablespace)
 		virtual void applyConfiguration();
-		
-		void showEvent(QShowEvent *);
-		
+
+		void showEvent(QShowEvent *) override;
+
 		void setAttributes(DatabaseModel *model, OperationList *op_list,
 						   BaseObject *object, BaseObject *parent_obj=nullptr,
 						   double obj_px=DNaN, double obj_py=DNaN, bool uses_op_list=true);
@@ -133,9 +133,8 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		AfterVersion=2;
 		
 		BaseObjectWidget(QWidget * parent = nullptr, ObjectType obj_type=ObjectType::BaseObject);
-		
-		virtual ~BaseObjectWidget();
-		
+		~BaseObjectWidget() override = default;
+
 		//! \brief Generates a string containing the specified version interval
 		static QString generateVersionsInterval(unsigned ver_interv_id, const QString &ini_ver, const QString &end_ver="");
 		
@@ -154,7 +153,7 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		static void setRequiredField(QWidget *widget);
 		
 		//! \brief Filters the ENTER/RETURN key press forcing the button "Apply" to be clicked
-		bool eventFilter(QObject *obj, QEvent *event);
+		bool eventFilter(QObject *obj, QEvent *event) override;
 
 		//! \brief Returns the kind of database object handled
 		ObjectType getHandledObjectType();
@@ -213,7 +212,7 @@ void BaseObjectWidget::startConfiguration(void)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

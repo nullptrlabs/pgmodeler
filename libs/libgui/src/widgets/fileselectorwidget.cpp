@@ -71,14 +71,7 @@ bool FileSelectorWidget::eventFilter(QObject *obj, QEvent *evnt)
 void FileSelectorWidget::resizeEvent(QResizeEvent *)
 {
 	warn_ico_lbl->move(filename_edt->width() - warn_ico_lbl->width() - 5,
-
-	#if QT_VERSION >= QT_VERSION_CHECK(6, 3, 0)
-		filename_edt->style()->pixelMetric(QStyle::PM_LineEditIconMargin) + 1
-	#else
-		(filename_edt->height() - warn_ico_lbl->height()) / 2
-	#endif
-
-	);
+										 (filename_edt->height() - warn_ico_lbl->height()) / 2);
 }
 
 void FileSelectorWidget::showEvent(QShowEvent *)
@@ -215,6 +208,14 @@ void FileSelectorWidget::setReadOnly(bool value)
 		connect(sel_file_tb, &QToolButton::clicked, this, &FileSelectorWidget::openFileDialog);
 		disconnect(sel_file_tb, &QToolButton::clicked, this, &FileSelectorWidget::openFileExternally);
 	}
+
+	filename_edt->adjustSize();
+	adjustSize();
+}
+
+bool FileSelectorWidget::isReadOnly()
+{
+	return read_only;
 }
 
 void FileSelectorWidget::setToolTip(const QString &tooltip)

@@ -28,7 +28,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent): QWidget(parent)
 
 	for(auto &btn : btns)
 	{
-		GuiUtilsNs::createDropShadow(btn, 1, 1, 10);
+		//GuiUtilsNs::createDropShadow(btn, 1, 1, 10);
 		fnt = btn->font();
 		fnt.setWeight(QFont::Normal);
 		btn->setFont(fnt);

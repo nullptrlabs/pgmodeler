@@ -287,13 +287,16 @@ class __libconnector Catalog {
 		 * of the currently open connection of the catalog object. */
 		bool isServerSupported();
 
+		//! \brief Returns the version of the server in which the catalog object is connected to
+		QString getServerVersion(bool major_only = false);
+
 		//! \brief Parse a PostgreSQL array value and return the elements in a string list
 		static QStringList parseArrayValues(const QString &array_val);
 
 		/*! \brief Parse a function's default value and return the elements in a string list.
 		It can be specified the string delimiter as well the value separator if the input default value
 		contains several values */
-		static QStringList parseDefaultValues(const QString &def_vals, const QString &str_delim="'", const QString &val_sep=", ");
+		static QStringList parseDefaultValues(const QString &def_values, const QString &str_delim="'", const QString &val_sep=", ");
 
 		//! \brief Parse the raw commands of a rule retrieved by the catalog and returns only the relevant parts
 		static QStringList parseRuleCommands(const QString &cmd);

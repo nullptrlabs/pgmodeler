@@ -44,8 +44,7 @@ class __libgui PlainTextItemDelegate : public QStyledItemDelegate {
 
 	public:
 		explicit PlainTextItemDelegate(QObject * parent, bool read_only);
-
-		virtual ~PlainTextItemDelegate();
+		~PlainTextItemDelegate() override = default;
 
 		static void setMaxDisplayLength(int value);
 
@@ -57,13 +56,13 @@ class __libgui PlainTextItemDelegate : public QStyledItemDelegate {
 
 	protected:
 		//! \brief Overrides the default implementation and set the editor as read only/disable to prevent change the item data
-		virtual void setEditorData(QWidget *editor, const QModelIndex &index) const;
+		void setEditorData(QWidget *editor, const QModelIndex &index) const override;
 
-		virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &index) const;
+		QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &index) const override;
 
-		virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+		void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
-		virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+		QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 };
 
 #endif

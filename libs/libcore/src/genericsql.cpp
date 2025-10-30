@@ -60,7 +60,7 @@ void GenericSQL::validateReferences(bool ignore_duplic)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 }
 
@@ -107,15 +107,15 @@ bool GenericSQL::isReferRelationshipAddedObject()
 void GenericSQL::validateReference(const Reference &ref, bool ignore_duplic)
 {
 	if(!ref.getObject())
-		throw Exception(ErrorCode::AsgNotAllocatedObjectReference,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocatedObjectReference,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(!BaseObject::isValidName(ref.getRefName()) ||
 		 !BaseObject::isValidName(ref.getRefName()))
-		throw Exception(ErrorCode::AsgInvalidNameObjReference,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidNameObjReference,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(!ignore_duplic && getObjectRefNameIndex(ref.getRefName()) >= 0)
 		throw Exception(Exception::getErrorMessage(ErrorCode::InsDuplicatedObjectReference).arg(ref.getRefName()),
-										ErrorCode::InsDuplicatedObjectReference,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										ErrorCode::InsDuplicatedObjectReference,PGM_FUNC,PGM_FILE,PGM_LINE);
 }
 
 void GenericSQL::addReference(const Reference &ref)
@@ -128,7 +128,7 @@ void GenericSQL::addReference(const Reference &ref)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -143,7 +143,7 @@ void GenericSQL::addReferences(const std::vector<Reference> &refs)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 

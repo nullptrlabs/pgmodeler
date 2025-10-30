@@ -21,6 +21,7 @@
 #include <QScrollBar>
 #include <QFileDialog>
 #include <QTemporaryFile>
+#include "customuistyle.h"
 #include "guiutilsns.h"
 #include <QMenu>
 #include <QHBoxLayout>
@@ -60,22 +61,21 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 
 	if(act_btns_enabled)
 	{
-		QPalette pal = this->palette();
+		//QPalette pal = this->palette();
 		QFont font = this->font();
 
 		show_act_btns = true;
 		font.setPointSizeF(font.pointSizeF() * 0.90);
 
 		QVBoxLayout *top_wgt_lt = new QVBoxLayout;
-		top_wgt_lt->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin,
-																	 GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
+		top_wgt_lt->setContentsMargins(GuiUtilsNs::LtMargins);
 		top_widget = new QWidget(this);
 		top_widget->setObjectName("top_widget");
 		top_widget->setAutoFillBackground(true);
 		top_widget->setLayout(top_wgt_lt);
 
-		pal.setColor(QPalette::Window, LineNumbersWidget::getBackgroundColor());
-		top_widget->setPalette(pal);
+		//pal.setColor(QPalette::Window, LineNumbersWidget::getBackgroundColor());
+		//top_widget->setPalette(pal);
 		top_widget->setVisible(act_btns_enabled);
 		top_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
@@ -83,8 +83,7 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		search_wgt->setObjectName("search_wgt");
 		search_wgt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		search_wgt->setVisible(false);
-		search_wgt->layout()->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin,
-																						 GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
+		search_wgt->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
 
 		QHBoxLayout *buttons_lt = new QHBoxLayout;
 		buttons_lt->setContentsMargins(0, 0, 0, 0);
@@ -467,18 +466,18 @@ void NumberedTextEditor::identSelection(bool ident_right)
 		cursor.setPosition(end, QTextCursor::KeepAnchor);
 		lines = cursor.selectedText().split(QChar(QChar::ParagraphSeparator));
 
-		for(int i=0; i < lines.size(); i++)
+		for(auto &line : lines)
 		{
-			if(!lines[i].isEmpty())
+			if(!line.isEmpty())
 			{
 				if(ident_right)
 				{
-					lines[i].prepend(QChar('\t'));
+					line.prepend(QChar('\t'));
 					count++;
 				}
-				else if(lines[i].at(0)==QChar('\t'))
+				else if(line.at(0) == QChar('\t'))
 				{
-					lines[i].remove(0,1);
+					line.remove(0,1);
 					count++;
 				}
 			}
@@ -508,7 +507,7 @@ void NumberedTextEditor::loadFile()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	if(loaded)
@@ -529,7 +528,7 @@ void NumberedTextEditor::saveFile()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -553,7 +552,7 @@ void NumberedTextEditor::editSource()
 	if(!input.open(QFile::WriteOnly | QFile::Truncate))
 		throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotAccessed)
 										.arg(tmp_src_file),
-										ErrorCode::FileDirectoryNotAccessed ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										ErrorCode::FileDirectoryNotAccessed ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	buffer.append(this->toPlainText().toUtf8());
 	input.write(buffer);
@@ -596,7 +595,7 @@ void NumberedTextEditor::updateSource(int exit_code, QProcess::ExitStatus)
 		if(!input.open(QFile::ReadOnly))
 			throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotAccessed)
 											.arg(tmp_src_file),
-											ErrorCode::FileDirectoryNotAccessed ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											ErrorCode::FileDirectoryNotAccessed ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		this->setPlainText(input.readAll());
 		input.close();
@@ -772,14 +771,14 @@ void NumberedTextEditor::resizeWidgets()
 
 	if(top_widget && show_act_btns)
 	{
-		top_widget->setStyleSheet(QString("QWidget#%1 { background-color: palette(window); }")
-															.arg(top_widget->objectName()));
-
+		top_widget->setStyleSheet(QString("QWidget#%1 { background-color: %2; }")
+															.arg(top_widget->objectName(), line_numbers_wgt->getBackgroundColor().name()));
+		
 		top_widget->setGeometry(lt_margin, rect.top(),
 														width, top_widget->height());
 	}
 
-	QString border_pal = AppearanceConfigWidget::isDarkUiTheme() ? "midlight" : "mid",
+	QString border_pal = CustomUiStyle::isDarkPalette() ? "dark" : "mid",
 
 			vp_style = QString("QWidget#%1 { \
 														background-color: palette(base); \
@@ -794,7 +793,7 @@ void NumberedTextEditor::resizeWidgets()
 	viewport()->setStyleSheet(vp_style);
 
 	setStyleSheet(QString("NumberedTextEditor { background-color: palette(window); border: 1px solid palette(%1); }")
-								.arg(AppearanceConfigWidget::isDarkUiTheme() ? "midlight" : "mid"));
+								.arg(CustomUiStyle::isDarkPalette() ? "dark" : "mid"));
 }
 
 int NumberedTextEditor::getLineNumbersWidth()
@@ -812,7 +811,7 @@ int NumberedTextEditor::getLineNumbersWidth()
 	}
 
 	chr_width = this->fontMetrics().horizontalAdvance(QChar('9'));
-	return (15 + chr_width * digits);
+	return (15 + (chr_width * digits));
 }
 
 void NumberedTextEditor::setWordWrapMode(QTextOption::WrapMode policy)

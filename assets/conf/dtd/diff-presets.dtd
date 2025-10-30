@@ -6,7 +6,7 @@
 
 <!ELEMENT preset (#PCDATA)>
 <!ATTLIST preset name CDATA #REQUIRED>
-<!ATTLIST preset current-model CDATA #IMPLIED>
+<!ATTLIST preset diff-mode CDATA #REQUIRED>
 <!ATTLIST preset input-db CDATA #IMPLIED>
 <!ATTLIST preset compare-to-db CDATA #IMPLIED>
 <!ATTLIST preset version CDATA #IMPLIED>
@@ -27,6 +27,7 @@
 <!ATTLIST preset ignore-duplic-errors (false|true) "false">
 <!ATTLIST preset ignore-error-codes CDATA #IMPLIED>
 <!ATTLIST preset run-in-transaction (false|true) "false">
+<!ATTLIST preset debug-mode (false|true) "true">
 <!ATTLIST preset match-by-signature (false|true) "true">
 <!ATTLIST preset only-matching (false|true) "true">
 <!ATTLIST preset forced-filtering CDATA #IMPLIED>

@@ -175,7 +175,7 @@
     </size>
    </property>
    <property name="focusPolicy">
-    <enum>Qt::StrongFocus</enum>
+    <enum>Qt::FocusPolicy::StrongFocus</enum>
    </property>
    <property name="toolTip">
     <string>Edit object's permissions</string>
@@ -210,10 +210,10 @@
     </sizepolicy>
    </property>
    <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
+    <enum>QFrame::Shape::StyledPanel</enum>
    </property>
    <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
+    <enum>QFrame::Shadow::Raised</enum>
    </property>
    <layout class="QGridLayout" name="gridLayout">
     <property name="leftMargin">
@@ -243,7 +243,7 @@
        <string/>
       </property>
       <property name="textFormat">
-       <enum>Qt::AutoText</enum>
+       <enum>Qt::TextFormat::AutoText</enum>
       </property>
       <property name="pixmap">
        <pixmap resource="../../res/resources.qrc">:/icons/icons/alert.png</pixmap>
@@ -289,7 +289,7 @@
     </sizepolicy>
    </property>
    <property name="focusPolicy">
-    <enum>Qt::StrongFocus</enum>
+    <enum>Qt::FocusPolicy::StrongFocus</enum>
    </property>
    <property name="toolTip">
     <string>Disables the generated SQL code using comment tokens (--).
@@ -340,7 +340,7 @@ This will disable the code of all child and referrer objects.</string>
     </size>
    </property>
    <property name="focusPolicy">
-    <enum>Qt::StrongFocus</enum>
+    <enum>Qt::FocusPolicy::StrongFocus</enum>
    </property>
    <property name="toolTip">
     <string>Append or prepend a set of SQL commands to the object's definition.</string>
@@ -439,10 +439,10 @@ This will disable the code of all child and referrer objects.</string>
        </size>
       </property>
       <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
+       <enum>QFrame::Shape::NoFrame</enum>
       </property>
       <property name="frameShadow">
-       <enum>QFrame::Plain</enum>
+       <enum>QFrame::Shadow::Plain</enum>
       </property>
       <property name="text">
        <string>icone</string>
@@ -451,7 +451,7 @@ This will disable the code of all child and referrer objects.</string>
        <bool>true</bool>
       </property>
       <property name="alignment">
-       <set>Qt::AlignCenter</set>
+       <set>Qt::AlignmentFlag::AlignCenter</set>
       </property>
      </widget>
     </item>
@@ -557,7 +557,6 @@ This will disable the code of all child and referrer objects.</string>
   <tabstop>disable_sql_chk</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

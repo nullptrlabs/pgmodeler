@@ -51,10 +51,9 @@ class __libcore Policy : public TableObject {
 
 	public:
 		Policy();
+		~Policy() override = default;
 
-		virtual ~Policy(){}
-
-		virtual void setParentTable(BaseTable *table) final;
+		void setParentTable(BaseTable *table) final;
 
 		//! \brief Defines if the the policy is permissive or restrictive
 		void setPermissive(bool value);
@@ -90,15 +89,15 @@ class __libcore Policy : public TableObject {
 		std::vector<Role *> getRoles();
 
 		//! \brief Returns the SQL / XML definition for the policy
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
-		virtual QString getAlterCode(BaseObject *object) final;
+		QString getAlterCode(BaseObject *object) final;
 
 		bool isRoleExists(Role *role);
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 
-		virtual void generateHashCode() override;
+		void generateHashCode() override;
 };
 
 #endif

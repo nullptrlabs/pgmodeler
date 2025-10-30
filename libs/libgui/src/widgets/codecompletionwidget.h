@@ -140,8 +140,8 @@ class __libgui CodeCompletionWidget: public QWidget {
 		void insertObjectName(BaseObject *obj);
 		
 		//! \brief Filters the necessary events to trigger the completion as well to control/select items
-		bool eventFilter(QObject *object, QEvent *event);
-		
+		bool eventFilter(QObject *object, QEvent *event) override;
+
 		/*! \brief Insert the objects of the vector into the name listing. The filter parameter is used to
 		insert only the object which names matches the filter */
 		void populateNameList(std::vector<BaseObject *> &objects, QString filter="");

@@ -124,16 +124,15 @@ class __libcore Type: public BaseObject {
 
 	public:
 		Type();
-
-		virtual ~Type(){}
+		~Type() override = default;
 
 		//! \brief Sets the type name
-		virtual void setName(const QString &name) override;
+		void setName(const QString &name) override;
 
 		//! \brief Sets the type schema
-		virtual void setSchema(BaseObject *schema) override;
+		void setSchema(BaseObject *schema) override;
 
-		virtual void setCodeInvalidated(bool value) override;
+		void setCodeInvalidated(bool value) override;
 
 		/*! \brief Defines the type configuration (BASE | ENUMARATION | COMPOSITE | RANGE).
 		Calling this method causes all attribute to be reset, so it may be executed before
@@ -223,17 +222,17 @@ class __libcore Type: public BaseObject {
 		/*! \brief Returns the SQL / XML definition for the type. If the boolean
 		 parameter is set the code definition is generated in a
 		 reduced form (XML only) */
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
+		QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
 
 		//! \brief Returns the SQL / XML definition for the type
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
-		virtual QString getAlterCode(BaseObject *object) final;
+		QString getAlterCode(BaseObject *object) final;
 
 		//! \brief Makes a copy between two type
-		void operator = (Type &tipo);
+		void operator = (Type &type);
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 
 		friend class DatabaseModel;
 		friend class ModelsDiffHelper;

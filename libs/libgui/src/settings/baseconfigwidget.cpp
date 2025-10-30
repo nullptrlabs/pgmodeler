@@ -52,7 +52,8 @@ void BaseConfigWidget::showEvent(QShowEvent *)
 
 void BaseConfigWidget::setConfigurationChanged(bool changed)
 {
-	config_changed=changed;
+	config_changed = changed;
+	emit s_configurationChanged(changed);
 }
 
 bool BaseConfigWidget::isConfigurationChanged()
@@ -85,7 +86,7 @@ void BaseConfigWidget::saveConfiguration(const QString &conf_id, std::map<QStrin
 	catch(Exception &e)
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::FileNotWrittenInvalidDefinition).arg(cfg_filename),
-										ErrorCode::FileNotWrittenInvalidDefinition,__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+										ErrorCode::FileNotWrittenInvalidDefinition,PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -102,30 +103,30 @@ void BaseConfigWidget::restoreDefaults(const QString &conf_id, bool silent)
 																															GlobalAttributes::ConfigurationExt);
 	//Raises an error if the default file doesn't exists
 	if(!QFile::exists(default_file))
-		throw Exception(Exception::getErrorMessage(ErrorCode::DefaultConfigNotRestored).arg(default_file),
-										ErrorCode::DefaultConfigNotRestored,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else
 	{
-		bool bkp_saved = false;
-		QFileInfo fi(current_file);
-		QDir dir;
-		QString bkp_dir = fi.absolutePath() + GlobalAttributes::DirSeparator + GlobalAttributes::ConfsBackupsDir,
-				bkp_filename = bkp_dir + GlobalAttributes::DirSeparator +
-											 QString("%1.bkp_%2").arg(fi.fileName()).arg(QDateTime::currentDateTime().toString("yyyyMMd_hhmmss"));
-
-		dir.mkpath(bkp_dir);
-		bkp_saved = QFile::rename(current_file, bkp_filename);
-		QFile::copy(default_file, current_file);
-
-		// Set write permissions when copying file with read-only permissions
-		QFile file(current_file);
-
-		if(!file.permissions().testFlag(QFile::WriteOwner))
-			file.setPermissions(file.permissions() | QFileDevice::WriteOwner);
-
-		if(bkp_saved && !silent)
-			Messagebox::info(tr("A backup of the previous settings was saved into <strong>%1</strong>!").arg(bkp_filename));
+		throw Exception(Exception::getErrorMessage(ErrorCode::DefaultConfigNotRestored).arg(default_file),
+										ErrorCode::DefaultConfigNotRestored,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
+
+	bool bkp_saved = false;
+	QFileInfo fi(current_file);
+	QDir dir;
+	QString bkp_dir = fi.absolutePath() + GlobalAttributes::DirSeparator + GlobalAttributes::ConfsBackupsDir,
+			bkp_filename = bkp_dir + GlobalAttributes::DirSeparator +
+										 QString("%1.bkp_%2").arg(fi.fileName()).arg(QDateTime::currentDateTime().toString("yyyyMMd_hhmmss"));
+
+	dir.mkpath(bkp_dir);
+	bkp_saved = QFile::rename(current_file, bkp_filename);
+	QFile::copy(default_file, current_file);
+
+	// Set write permissions when copying file with read-only permissions
+	QFile file(current_file);
+
+	if(!file.permissions().testFlag(QFile::WriteOwner))
+		file.setPermissions(file.permissions() | QFileDevice::WriteOwner);
+
+	if(bkp_saved && !silent)
+		Messagebox::info(tr("A backup of the previous settings was saved into <strong>%1</strong>!").arg(bkp_filename));
 }
 
 void BaseConfigWidget::loadConfiguration(const QString &filename, const QString &dtd, std::map<QString, attribs_map> &config_params,
@@ -135,9 +136,9 @@ void BaseConfigWidget::loadConfiguration(const QString &filename, const QString 
 	{
 		config_params.clear();
 		xmlparser.restartParser();
+
 		xmlparser.setDTDFile(GlobalAttributes::getTmplConfigurationFilePath(GlobalAttributes::ObjectDTDDir,
 																																				dtd + GlobalAttributes::ObjectDTDExt), dtd);
-
 		xmlparser.loadXMLFile(filename);
 
 		// Get the attributes of the root element
@@ -176,7 +177,7 @@ void BaseConfigWidget::loadConfiguration(const QString &filename, const QString 
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e, filename);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e, filename);
 	}
 }
 
@@ -189,7 +190,7 @@ void BaseConfigWidget::loadConfiguration(const QString &conf_id, std::map<QStrin
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e, e.getExtraInfo());
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e, e.getExtraInfo());
 	}
 }
 

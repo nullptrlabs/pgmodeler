@@ -34,7 +34,7 @@ class __libgui CustomSortProxyModel: public QSortFilterProxyModel {
 	public:
 		CustomSortProxyModel(QObject *parent = nullptr);
 
-		virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+		QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 };
 
 #endif

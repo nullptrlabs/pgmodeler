@@ -34,7 +34,7 @@ DonateWidget::DonateWidget(QWidget *parent) : QWidget(parent)
 		emit s_hideRequested();
 	});
 
-	connect(donate_tb, &QToolButton::clicked, this, [this](){
+	connect(donate_btn, &QPushButton::clicked, this, [this](){
 		QDesktopServices::openUrl(QUrl(GlobalAttributes::PgModelerDonateURL));
 		hide();
 		emit s_hideRequested();

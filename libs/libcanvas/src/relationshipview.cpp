@@ -30,7 +30,7 @@ RelationshipView::LineConnectionMode RelationshipView::line_conn_mode { Relation
 RelationshipView::RelationshipView(BaseRelationship *rel) : BaseObjectView(rel)
 {
 	if(!rel)
-		throw Exception(ErrorCode::AsgNotAllocattedObject, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	for(unsigned i=BaseRelationship::SrcCardLabel; i <= BaseRelationship::RelNameLabel; i++)
 	{
@@ -93,18 +93,18 @@ RelationshipView::~RelationshipView()
 		delete item;
 	}
 
-	for(int i=0; i < 2; i++)
+	for(auto & line_circle : line_circles)
 	{
-		this->removeFromGroup(line_circles[i]);
-		delete line_circles[i];
+		this->removeFromGroup(line_circle);
+		delete line_circle;
 	}
 
-	for(int i=0; i < 3; i++)
+	for(auto & label : labels)
 	{
-		if(labels[i])
+		if(label)
 		{
-			this->removeFromGroup(labels[i]);
-			delete labels[i];
+			this->removeFromGroup(label);
+			delete label;
 		}
 	}
 
@@ -130,20 +130,20 @@ RelationshipView::~RelationshipView()
 	this->removeFromGroup(descriptor);
 	delete descriptor;
 
-	for(int i =0; i < 2; i++)
+	for(auto & cf_descriptor : cf_descriptors)
 	{
-		if(cf_descriptors[i])
+		if(!cf_descriptor)
+			continue;
+		
+		for(auto &item : cf_descriptor->childItems())
 		{
-			for(auto &item : cf_descriptors[i]->childItems())
-			{
-				cf_descriptors[i]->removeFromGroup(item);
-				this->removeFromGroup(item);
-				delete item;
-			}
-
-			this->removeFromGroup(cf_descriptors[i]);
-			delete cf_descriptors[i];
+			cf_descriptor->removeFromGroup(item);
+			this->removeFromGroup(item);
+			delete item;
 		}
+
+		this->removeFromGroup(cf_descriptor);
+		delete cf_descriptor;
 	}
 }
 
@@ -201,7 +201,7 @@ unsigned RelationshipView::getLineConnectinMode()
 QPointF RelationshipView::getConnectionPoint(BaseRelationship::TableId table_idx)
 {
 	if(table_idx > 2)
-		throw Exception(ErrorCode::RefElementInvalidIndex ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return conn_points[table_idx];
 }
@@ -222,7 +222,7 @@ TextboxView *RelationshipView::getLabel(BaseRelationship::LabelId lab_idx)
 bool RelationshipView::isTableVisible(BaseRelationship::TableId table_idx)
 {
 	if(table_idx > 2)
-		throw Exception(ErrorCode::RefElementInvalidIndex ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return tables[table_idx]->isVisible();
 }
@@ -308,7 +308,7 @@ QVariant RelationshipView::itemChange(GraphicsItemChange change, const QVariant 
 			for(auto &line : lines)
 				line->setPen(pen);
 
-			for(int idx = 0; idx < 2; idx++)
+			for(auto &round_cf_descriptor : round_cf_descriptors)
 			{
 				/* If we have a circle that describes optional cardinality we should
 				 * merge its color with the object selection color in order to simulate the
@@ -325,15 +325,15 @@ QVariant RelationshipView::itemChange(GraphicsItemChange change, const QVariant 
 						grad.setColorAt(color_id++, color);
 					}
 
-					round_cf_descriptors[idx]->setBrush(grad);
+					round_cf_descriptor->setBrush(grad);
 				}
 				else
-					round_cf_descriptors[idx]->setBrush(descriptor->brush());
+					round_cf_descriptor->setBrush(descriptor->brush());
 
 				if(this->getUnderlyingObject()->getRelationshipType() == BaseRelationship::RelationshipFk)
 					pen.setStyle(Qt::DashLine);
 
-				round_cf_descriptors[idx]->setPen(pen);
+				round_cf_descriptor->setPen(pen);
 			}
 		}
 
@@ -537,29 +537,29 @@ void RelationshipView::disconnectTables()
 		if(!rel_base->isSelfRelationship())
 			tables[1]->removeConnectedRelationship(rel_base);
 
-		for(unsigned i=0; i < 2; i++)
+		for(auto & table : tables)
 		{
-			tables[i]->disconnect(this);
-			tables[i]=nullptr;
+			table->disconnect(this);
+			table = nullptr;
 		}
 	}
 }
 
 void RelationshipView::connectTables()
 {
-	if(tables[0] && tables[1])
+	if(!tables[0] || !tables[1])
+		return;
+
+	for(auto & table : tables)
 	{
-		for(unsigned i=0; i < 2; i++)
-		{
-			tables[i]->disconnect(this);
+		table->disconnect(this);
 
-			if(BaseObjectView::isPlaceholderEnabled())
-				connect(tables[i], &BaseTableView::s_relUpdateRequest, this, &RelationshipView::configureLine);
-			else
-				connect(tables[i], &BaseTableView::s_objectMoved, this, &RelationshipView::configureLine);
+		if(BaseObjectView::isPlaceholderEnabled())
+			connect(table, &BaseTableView::s_relUpdateRequest, this, &RelationshipView::configureLine);
+		else
+			connect(table, &BaseTableView::s_objectMoved, this, &RelationshipView::configureLine);
 
-			connect(tables[i], &BaseTableView::s_objectDimensionChanged, this, &RelationshipView::configureLine);
-		}
+		connect(table, &BaseTableView::s_objectDimensionChanged, this, &RelationshipView::configureLine);
 	}
 }
 
@@ -592,7 +592,7 @@ void RelationshipView::configurePositionInfo()
 	{
 		BaseObjectView::configurePositionInfo(descriptor->pos());
 		pos_info_item->setPos(descriptor->pos().x(),
-													descriptor->pos().y() - pos_info_item->boundingRect().height() * 1.5);
+													descriptor->pos().y() - (pos_info_item->boundingRect().height() * 1.5));
 	}
 }
 
@@ -974,19 +974,19 @@ void RelationshipView::configureLine()
 						if(edge.dx() == 0)
 						{
 							signal = edge.dy()/fabs(edge.dy()) * (tab_idx == 0 ? 1 : -1);
-							pi.setY(pi.y() - (conn_rels_factors[tab_idx] * max_dim) * signal);
+							pi.setY(pi.y() - ((conn_rels_factors[tab_idx] * max_dim) * signal));
 
 							// Adjusting the position of the interesection point to make is as close to the center of the edge as possible
-							pi.setY(pi.y() + (max_dim * 0.05) * signal);
+							pi.setY(pi.y() + ((max_dim * 0.05) * signal));
 						}
 
 						if(edge.dy() == 0)
 						{
 							signal = edge.dx()/fabs(edge.dx()) * (tab_idx == 0 ? 1 : -1);
-							pi.setX(pi.x() - (conn_rels_factors[tab_idx] * max_dim) * signal);
+							pi.setX(pi.x() - ((conn_rels_factors[tab_idx] * max_dim) * signal));
 
 							// Adjusting the position of the interesection point to make is as close to the center of the edge as possible
-							pi.setX(pi.x() + (max_dim * 0.05) * signal);
+							pi.setX(pi.x() + ((max_dim * 0.05) * signal));
 						}
 					}
 
@@ -1017,18 +1017,18 @@ void RelationshipView::configureLine()
 					if(edge.dx() == 0)
 					{
 						if(pi.x() < center.x())
-							pi.setX(pi.x() - ConnLineLength * size_factor);
+							pi.setX(pi.x() - (ConnLineLength * size_factor));
 						else
-							pi.setX(pi.x() + ConnLineLength * size_factor);
+							pi.setX(pi.x() + (ConnLineLength * size_factor));
 
 						conn_vert_sides[tab_idx] = true;
 					}
 					else
 					{
 						if(pi.y() < center.y())
-							pi.setY(pi.y() - ConnLineLength * size_factor);
+							pi.setY(pi.y() - (ConnLineLength * size_factor));
 						else
-							pi.setY(pi.y() + ConnLineLength * size_factor);
+							pi.setY(pi.y() + (ConnLineLength * size_factor));
 
 						conn_horiz_sides[tab_idx] = true;
 					}
@@ -1036,10 +1036,8 @@ void RelationshipView::configureLine()
 					p_aux[tab_idx] = pi;
 					break;
 				}
-				else
-				{
-					p_aux[tab_idx] = p_central[tab_idx];
-				}
+				
+				p_aux[tab_idx] = p_central[tab_idx];
 			}
 		}
 
@@ -1101,10 +1099,10 @@ void RelationshipView::configureLine()
 			}
 
 			//Destroy the unused pk or fk lines
-			i=ref_lin->size()-1;
-			while(i > static_cast<int>(count-1))
+			i = ref_lin->size()-1;
+			while(i > count - 1)
 			{
-				item=ref_lin->back();
+				item = ref_lin->back();
 				ref_lin->pop_back();
 				this->removeFromGroup(item);
 				delete item;
@@ -1274,10 +1272,10 @@ void RelationshipView::configureToolTip()
 
 	this->setToolTip(tool_tip);
 
-	for(int i = 0; i < 3; i++)
+	for(auto & label : labels)
 	{
-		if(labels[i])
-			labels[i]->setToolTip(tool_tip);
+		if(label)
+			label->setToolTip(tool_tip);
 	}
 
 	if(descriptor)
@@ -1458,7 +1456,7 @@ void RelationshipView::configureDescriptor()
 
 void RelationshipView::configureCrowsFootDescriptors()
 {
-	BaseRelationship * base_rel = dynamic_cast<BaseRelationship *>(this->getUnderlyingObject());
+	BaseRelationship * base_rel = this->getUnderlyingObject();
 	Relationship *rel=dynamic_cast<Relationship *>(base_rel);
 
 	//Hiding all descriptors related to crow's foot when the notation is not being used
@@ -1696,23 +1694,21 @@ void RelationshipView::configureCrowsFootDescriptors()
 					cf_descriptors[tab_id]->setPos(pi);
 					break;
 				}
-				else
-				{
-					/* There some cases in which the intersection point can't be determined in BoundedIntersection mode
-					 * so as a fallback we check if one of the coordinates of the identified intersection point
-					 * is between  one of the coordinates of the relationship line used in the operation.
-					 *
-					 * If it matches we'll use the use one of the extremes of the relationship line in the matching coordinate */
-					min_x = qMin<double>(rel_lines[tab_id].p1().x(), rel_lines[tab_id].p2().x());
-					max_x = qMax<double>(rel_lines[tab_id].p1().x(), rel_lines[tab_id].p2().x());
-					min_y = qMin<double>(rel_lines[tab_id].p1().y(), rel_lines[tab_id].p2().y());
-					max_y = qMax<double>(rel_lines[tab_id].p1().y(), rel_lines[tab_id].p2().y());
 
-					if(pi.x() >= min_x && pi.x() <= max_x)
-						cf_descriptors[tab_id]->setPos(QPointF(pi.x(), (rel_lines[tab_id].dy() >= 0 ? max_y : min_y)));
-					else if(pi.y() >= min_y && pi.y() <= max_y)
-						cf_descriptors[tab_id]->setPos(QPointF((rel_lines[tab_id].dx() >= 0 ? max_x : min_x), pi.y()));
-				}
+				/* There some cases in which the intersection point can't be determined in BoundedIntersection mode
+					* so as a fallback we check if one of the coordinates of the identified intersection point
+					* is between  one of the coordinates of the relationship line used in the operation.
+					*
+					* If it matches we'll use the use one of the extremes of the relationship line in the matching coordinate */
+				min_x = qMin<double>(rel_lines[tab_id].p1().x(), rel_lines[tab_id].p2().x());
+				max_x = qMax<double>(rel_lines[tab_id].p1().x(), rel_lines[tab_id].p2().x());
+				min_y = qMin<double>(rel_lines[tab_id].p1().y(), rel_lines[tab_id].p2().y());
+				max_y = qMax<double>(rel_lines[tab_id].p1().y(), rel_lines[tab_id].p2().y());
+
+				if(pi.x() >= min_x && pi.x() <= max_x)
+					cf_descriptors[tab_id]->setPos(QPointF(pi.x(), (rel_lines[tab_id].dy() >= 0 ? max_y : min_y)));
+				else if(pi.y() >= min_y && pi.y() <= max_y)
+					cf_descriptors[tab_id]->setPos(QPointF((rel_lines[tab_id].dx() >= 0 ? max_x : min_x), pi.y()));				
 			}
 		}
 	}
@@ -1813,8 +1809,8 @@ void RelationshipView::configureAttributes()
 
 		pol.clear();
 		pol.append(QPointF(-HorizSpacing, 0));
-		pol.append(QPointF(desc->boundingRect().width() + text->boundingRect().width() + 2 * HorizSpacing, 0));
-		pol.append(QPointF(desc->boundingRect().width() + text->boundingRect().width() + 2 * HorizSpacing, text->boundingRect().height()));
+		pol.append(QPointF(desc->boundingRect().width() + text->boundingRect().width() + (2 * HorizSpacing), 0));
+		pol.append(QPointF(desc->boundingRect().width() + text->boundingRect().width() + (2 * HorizSpacing), text->boundingRect().height()));
 		pol.append(QPointF(-HorizSpacing, text->boundingRect().height()));
 		sel_attrib->setPolygon(pol);
 
@@ -2011,7 +2007,7 @@ void RelationshipView::configureLabels()
 void RelationshipView::configureLabelPosition(BaseRelationship::LabelId label_id, double x, double y)
 {
 	if(label_id > BaseRelationship::RelNameLabel)
-		throw Exception(ErrorCode::RefObjectInvalidIndex ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefObjectInvalidIndex ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(labels[label_id])
 	{
@@ -2052,13 +2048,11 @@ double RelationshipView::getDefaultPenWidth()
 
 		return  ObjectBorderWidth * BaseObjectView::getScreenDpiFactor() * 1.25;
 	}
-	else
-	{
-		if(rel && rel->isIdentifier())
-			return ObjectBorderWidth * 2.25;
 
-		return ObjectBorderWidth * 1.50;
-	}
+	if(rel && rel->isIdentifier())
+		return ObjectBorderWidth * 2.25;
+
+	return ObjectBorderWidth * 1.50;
 }
 
 void RelationshipView::configureBoundingRect()
@@ -2067,15 +2061,12 @@ void RelationshipView::configureBoundingRect()
 	setFlag(QGraphicsItem::ItemClipsToShape);
 	prepareGeometryChange();
 
-	//if(descriptor && descriptor->isVisible())
-	//	rel_shape.addPolygon(descriptor->polygon());
-
-	for(int i = 0; i < 3; i++)
+	for(auto & label : labels)
 	{
-		if(!labels[i] || !labels[i]->isVisible())
+		if(!label || !label->isVisible())
 			continue;
 
-		rel_shape.addRect(labels[i]->mapRectToScene(labels[i]->boundingRect()));
+		rel_shape.addRect(label->mapRectToScene(label->boundingRect()));
 	}
 
 	QPainterPathStroker ps;

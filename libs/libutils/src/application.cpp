@@ -18,6 +18,7 @@
 #include "application.h"
 #include "exception.h"
 #include <QTranslator>
+#include "customuistyle.h"
 
 void logMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -43,9 +44,10 @@ QtMessageHandler Application::message_handler = qInstallMessageHandler(logMessag
 Application::Application(int &argc, char **argv) : QApplication(argc,argv)
 {
 	/* Checking if the user specified another widget style using the -style param
-	 * If no custom style is specified we force the usage of Fusion (the default for Qt and pgModeler) */
+	 * If no custom style is specified we force the usage of Fusion (the default for Qt and pgModeler)
+	 * via CustomUiStyle so additional UI effects can be applied */
 	if(!arguments().contains(GlobalAttributes::UiStyleOption))
-		setStyle(GlobalAttributes::DefaultQtStyle);
+		setStyle(new CustomUiStyle(GlobalAttributes::DefaultQtStyle));
 }
 
 void Application::loadTranslation(const QString &lang_id, const QString &directory)
@@ -117,7 +119,10 @@ void Application::createUserConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(ErrorCode::InitialUserConfigNotCreated).arg(GlobalAttributes::getConfigurationsPath(), GlobalAttributes::getTmplConfigurationPath()), ErrorCode::InitialUserConfigNotCreated,__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(ErrorCode::InitialUserConfigNotCreated)
+										.arg(GlobalAttributes::getConfigurationsPath(),
+												 GlobalAttributes::getTmplConfigurationPath()),
+										ErrorCode::InitialUserConfigNotCreated, PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -128,7 +133,7 @@ void Application::copyFilesRecursively(const QString &src_path, const QString &d
 	if(!src_file.exists())
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotAccessed).arg(src_path),
-										__PRETTY_FUNCTION__, __FILE__, __LINE__);
+										PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	if(src_file.isDir())
@@ -138,7 +143,7 @@ void Application::copyFilesRecursively(const QString &src_path, const QString &d
 		if(!dst_dir.exists() && !dst_dir.mkpath(dst_path))
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotWritten).arg(dst_path),
-											 __PRETTY_FUNCTION__, __FILE__, __LINE__);
+											 PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
 
 		QString new_src_path, new_dst_path;
@@ -163,9 +168,9 @@ void Application::copyFilesRecursively(const QString &src_path, const QString &d
 			new_dst_path = dst_path + dst_dir.separator() + filename;
 			fi.setFile(new_src_path);
 
-			// Ignoring the files icons-*.conf, ui-*.conf
+			// Ignoring the files icons-*.conf, ui-*.conf, *-highlight.conf, appearance.conf
 			if((filename.startsWith("icons-") ||
-					filename.startsWith("ui-")) ||
+					filename.startsWith(GlobalAttributes::UiStyleConf)) ||
 
 					/* Ignore the file if it exists in the destination and we are creating
 					 * the missing files */
@@ -188,7 +193,10 @@ void Application::copyFilesRecursively(const QString &src_path, const QString &d
 
 		/* Forcing the removal of files that are not backward compatible
 		 * if they already exists in the destination folder */
-		if(dst_path.contains("-highlight"))
+		if(dst_path.contains(GlobalAttributes::HighlightFileSuffix) ||
+			 dst_path.contains(GlobalAttributes::DiffPresetsConf) ||
+			 dst_path.contains(GlobalAttributes::HighlightFileSuffix) ||
+			 dst_path.contains(GlobalAttributes::AppearanceConf))
 			QFile::remove(dst_path);
 
 		file_copied = QFile::copy(src_path, dst_path);
@@ -196,9 +204,10 @@ void Application::copyFilesRecursively(const QString &src_path, const QString &d
 		if(!file_exists && !file_copied)
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotWritten).arg(dst_path),
-											__PRETTY_FUNCTION__, __FILE__, __LINE__);
+											PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
-		else if(file_exists || file_copied)
+
+		if(file_exists || file_copied)
 		{
 			// Set write permissions when copying file with read-only permissions
 			QFile file(dst_path);

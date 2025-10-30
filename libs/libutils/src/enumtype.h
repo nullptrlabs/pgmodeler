@@ -18,7 +18,8 @@
 
 /**
 \ingroup libutils
-\brief Definition of a constexpr function that returns the underlying type of a enum class
+\brief Definition of a constexpr function that returns the underlying type of a enum class.
+It also defines bitwise operators for enum classes to allow their use as flag containers.
 */
 
 #ifndef ENUM_TYPE_H

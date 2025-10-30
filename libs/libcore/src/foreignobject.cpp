@@ -24,15 +24,12 @@
 const QString ForeignObject::OptionsSeparator {","};
 const QString ForeignObject::OptionValueSeparator {"="};
 
-ForeignObject::ForeignObject()
-{
-
-}
+ForeignObject::ForeignObject() = default;
 
 void ForeignObject::setOption(const QString &opt, const QString &value)
 {
 	if(opt.isEmpty())
-		throw Exception(ErrorCode::AsgOptionInvalidName,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgOptionInvalidName,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	options[opt] = value;
 }
@@ -42,7 +39,7 @@ void ForeignObject::setOptions(const attribs_map &options)
 	for(auto &itr : options)
 	{
 		if(itr.first.isEmpty())
-			throw Exception(ErrorCode::AsgOptionInvalidName,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgOptionInvalidName,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	this->options = options;
@@ -63,14 +60,13 @@ attribs_map ForeignObject::getOptions()
 	return options;
 }
 
-void ForeignObject::getAlteredAttributes(ForeignObject *object, attribs_map &fo_attribs)
+void ForeignObject::getAlteredAttributes(ForeignObject *fobj, attribs_map &fo_attribs)
 {
-	attribs_map attribs;
-	ForeignObject *fobj = dynamic_cast<ForeignObject *>(object);
-	QStringList opts;
-
 	if(!fobj)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	attribs_map attribs;
+	QStringList opts;
 
 	// Comparing options (to be modified or added)
 	for(auto &opt : fobj->options)

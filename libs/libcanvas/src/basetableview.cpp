@@ -27,7 +27,7 @@ unsigned BaseTableView::attribs_per_page[2] { 10, 5};
 BaseTableView::BaseTableView(BaseTable *base_tab) : BaseObjectView(base_tab)
 {
 	if(!base_tab)
-		throw Exception(ErrorCode::AsgNotAllocattedObject, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	pending_geom_update = false;
 	body=new RoundedRectItem;
@@ -213,7 +213,7 @@ void BaseTableView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 void BaseTableView::setAttributesPerPage(BaseTable::TableSection section_id, unsigned value)
 {
 	if(section_id > BaseTable::ExtAttribsSection)
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(value > 0)
 		attribs_per_page[section_id] = value;
@@ -222,7 +222,7 @@ void BaseTableView::setAttributesPerPage(BaseTable::TableSection section_id, uns
 unsigned BaseTableView::getAttributesPerPage(BaseTable::TableSection section_id)
 {
 	if(section_id > BaseTable::ExtAttribsSection)
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return attribs_per_page[section_id];
 }
@@ -289,7 +289,7 @@ void BaseTableView::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 			//Sets the selection position as same as item's position
 			rect1=this->mapRectToItem(item, item->boundingRect());
 			obj_selection->setVisible(true);
-			obj_selection->setPos(QPointF(title->pos().x() + HorizSpacing, -rect1.top() + VertSpacing/2));
+			obj_selection->setPos(QPointF(title->pos().x() + HorizSpacing, -rect1.top() + (VertSpacing/2)));
 
 			//Stores the selected child object
 			sel_child_obj_view = item;
@@ -464,7 +464,7 @@ void BaseTableView::__configureObject(double width)
 						"`" + tab->getName(true) +
 						"' (" + tab->getTypeName() + ")" +
 						QString("\n%1 Id: %2").arg(UtilsNs::DataSeparator, QString::number(tab->getObjectId())) +
-						tr("\n%1 Connected rels: %2").arg(UtilsNs::DataSeparator, QString::number(this->getConnectRelsCount()));
+						tr("\n%1 Connected relationships: %2").arg(UtilsNs::DataSeparator, QString::number(this->getConnectRelsCount()));
 
 	if(!tab->getAlias().isEmpty())
 		table_tooltip += QString("\n%1 Alias: %2").arg(UtilsNs::DataSeparator, tab->getAlias());
@@ -596,11 +596,9 @@ bool BaseTableView::configurePaginationParams(BaseTable::TableSection section_id
 		attribs_toggler->setPaginationValues(section_id, curr_page, max_pages);
 		return true;
 	}
-	else
-	{
-		attribs_toggler->setPaginationValues(section_id, 0, 0);
-		return false;
-	}
+
+	attribs_toggler->setPaginationValues(section_id, 0, 0);
+	return false;
 }
 
 void BaseTableView::configureCollapsedSections(BaseTable::CollapseMode coll_mode)

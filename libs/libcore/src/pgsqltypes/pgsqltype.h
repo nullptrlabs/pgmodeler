@@ -269,7 +269,7 @@ class __libcore PgSqlType: public TemplateType<PgSqlType>{
 
 		QString getSourceCode(SchemaParser::CodeType def_type, QString ref_type="");
 
-		virtual QString operator ~ () override;
+		QString operator ~ () override;
 
 		//! \brief Returns the complet SQL definition for the type (same as calling getSQLTypeName(true))
 		QString operator * ();

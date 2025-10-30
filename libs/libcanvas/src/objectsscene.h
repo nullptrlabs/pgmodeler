@@ -180,14 +180,14 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		void clearTablesChildrenSelection();
 
 	protected:
-		void drawBackground(QPainter *painter, const QRectF &rect);
+		void drawBackground(QPainter *painter, const QRectF &rect) override;
 
-		void mousePressEvent(QGraphicsSceneMouseEvent *event);
-		void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-		void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-		void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void keyReleaseEvent(QKeyEvent *event);
+		void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+		void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+		void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+		void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+		void keyPressEvent(QKeyEvent *event) override;
+		void keyReleaseEvent(QKeyEvent *event) override;
 
 		//! \brief Draws a line from the point 'p_start' to the cursor position and simulates the relationship creation
 		void showRelationshipLine(bool value, const QPointF &p_start=QPointF(DNaN,DNaN));
@@ -234,7 +234,7 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		ObjectsScene();
 
-		virtual ~ObjectsScene();
+		~ObjectsScene() override;
 
 		/*! \brief Add a new layer to the scene. In case of duplicated name this method
 		 * automatically does the desambiguation. The name of the new layer is returned. */
@@ -254,7 +254,7 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		void setActiveLayers(QStringList act_layers);
 
 		//! \brief Set the layers with the provided indexes as active. Activating a layer causes objects attached to it to be visible
-		void setActiveLayers(QList<unsigned> ids);
+		void setActiveLayers(QList<unsigned> layer_ids);
 
 		//! \brief Returns true when the named layer is currenctly activated
 		bool isLayerActive(const QString &name);
@@ -468,7 +468,7 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		friend class ModelWidget;
 		friend class PgModelerCliApp;
-		friend class DatabaseImportForm;
+		friend class DatabaseImportWidget;
 };
 
 #endif

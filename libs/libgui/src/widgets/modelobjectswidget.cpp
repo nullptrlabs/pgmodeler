@@ -17,7 +17,7 @@
 */
 
 #include "modelobjectswidget.h"
-#include "tools/databaseimportform.h"
+#include "tools/databaseimportwidget.h"
 #include "guiutilsns.h"
 #include "settings/generalconfigwidget.h"
 #include "customtablewidget.h"
@@ -31,9 +31,13 @@ ModelObjectsWidget::ModelObjectsWidget(bool simplified_view, QWidget *parent) : 
 	db_model=nullptr;
 	setModel(db_model);
 
+	QFont fnt = title_lbl->font();
+	fnt.setPointSizeF(fnt.pointSizeF() * 0.85);
+	title_lbl->setFont(fnt);
+
 	title_wgt->setVisible(!simplified_view);
-	this->simplified_view=simplified_view;
-	this->save_tree_state=!simplified_view;
+	this->simplified_view = simplified_view;
+	this->save_tree_state = !simplified_view;
 	enable_obj_creation=simplified_view;
 
 	select_tb->setVisible(simplified_view);
@@ -42,9 +46,11 @@ ModelObjectsWidget::ModelObjectsWidget(bool simplified_view, QWidget *parent) : 
 	visibleobjects_grp->setVisible(false);
 	filter_wgt->setVisible(simplified_view);
 
+	if(simplified_view)
+		model_objs_grid->setContentsMargins(GuiUtilsNs::LtMargins);
+
 	connect(objectstree_tw, &QTreeWidget::itemPressed, this, &ModelObjectsWidget::selectObject);
 	connect(objectstree_tw, &QTreeWidget::itemPressed, this, &ModelObjectsWidget::showObjectMenu);
-	//connect(objectstree_tw, &QTreeWidget::itemSelectionChanged, this, &ModelObjectsWidget::selectObject);
 
 	connect(objectstree_tw, &QTreeWidget::itemCollapsed, this, [this](){
 		objectstree_tw->resizeColumnToContents(0);
@@ -93,8 +99,6 @@ ModelObjectsWidget::ModelObjectsWidget(bool simplified_view, QWidget *parent) : 
 	}
 	else
 	{
-		model_objs_grid->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin,
-																				GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
 		setMinimumSize(250, 300);
 		setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint | Qt::WindowTitleHint);
 		setWindowModality(Qt::ApplicationModal);
@@ -109,11 +113,11 @@ ModelObjectsWidget::ModelObjectsWidget(bool simplified_view, QWidget *parent) : 
 
 bool ModelObjectsWidget::eventFilter(QObject *object, QEvent *event)
 {
-	if(event->type() == QEvent::FocusOut && object==objectstree_tw)
+	if(event->type() == QEvent::FocusOut && object == objectstree_tw)
 	{
-		QFocusEvent *evnt=dynamic_cast<QFocusEvent *>(event);
+		QFocusEvent *evnt = dynamic_cast<QFocusEvent *>(event);
 
-		if(evnt->reason()==Qt::MouseFocusReason)
+		if(evnt->reason() == Qt::MouseFocusReason)
 		{
 			clearSelectedObject();
 
@@ -191,6 +195,12 @@ void ModelObjectsWidget::selectObject()
 
 	selected_objs.clear();
 	QTreeWidgetItem *tree_item = objectstree_tw->currentItem();
+
+	/* Avoiding selecting the object if the model has
+	 * interaction disabled */
+	if(!model_wgt ||
+		 (model_wgt && !model_wgt->isInteractive()))
+		return;
 
 	if(tree_item)
 	{
@@ -284,7 +294,7 @@ QTreeWidgetItem *ModelObjectsWidget::createItemForObject(BaseObject *object, QTr
 	QString obj_name;
 
 	if(!object)
-		throw Exception(ErrorCode::OprNotAllocatedObject ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	obj_type=object->getObjectType();
 	tab_obj=dynamic_cast<TableObject *>(object);
@@ -409,7 +419,7 @@ void ModelObjectsWidget::collapseAll()
 
 void ModelObjectsWidget::filterObjects()
 {
-	DatabaseImportForm::filterObjects(objectstree_tw, filter_edt->text(), (by_id_chk->isChecked() ? 1 : 0), simplified_view);
+	DatabaseImportWidget::filterObjects(objectstree_tw, filter_edt->text(), (by_id_chk->isChecked() ? 1 : 0), simplified_view);
 }
 
 void ModelObjectsWidget::updateObjectsView()
@@ -494,7 +504,7 @@ void ModelObjectsWidget::updateSchemaTree(QTreeWidgetItem *root)
 		}
 		catch(Exception &e)
 		{
-			throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+			throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 		}
 	}
 }
@@ -553,7 +563,7 @@ void ModelObjectsWidget::updateTableTree(QTreeWidgetItem *root, BaseObject *sche
 		}
 		catch(Exception &e)
 		{
-			throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+			throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 		}
 	}
 }
@@ -612,7 +622,7 @@ void ModelObjectsWidget::updateViewTree(QTreeWidgetItem *root, BaseObject *schem
 		}
 		catch(Exception &e)
 		{
-			throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+			throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 		}
 	}
 }
@@ -643,7 +653,7 @@ void ModelObjectsWidget::updatePermissionTree(QTreeWidgetItem *root, BaseObject 
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -728,7 +738,7 @@ void ModelObjectsWidget::updateDatabaseTree()
 		catch(Exception &e)
 		{
 			objectstree_tw->setUpdatesEnabled(true);
-			Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+			Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
 
 		objectstree_tw->sortByColumn(0, Qt::AscendingOrder);
@@ -786,7 +796,7 @@ void ModelObjectsWidget::setModel(DatabaseModel *db_model)
 	bool enable = (db_model!=nullptr);
 
 	this->db_model=db_model;
-	content_wgt->setEnabled(enable);
+	content_frm->setEnabled(enable);
 	updateObjectsView();	
 	expand_all_tb->setEnabled(enable);
 	collapse_all_tb->setEnabled(enable);

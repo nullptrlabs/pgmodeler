@@ -85,7 +85,7 @@ TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget
 	options_tab->setHeaderLabel(tr("Value"), 1);
 
 	vbox = new QVBoxLayout;
-	vbox->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(options_tab);
 	attributes_tbw->widget(9)->setLayout(vbox);
 
@@ -96,7 +96,7 @@ TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget
 
 	grid=new QGridLayout;
 	grid->addWidget(parent_tables, 0,0,1,1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	attributes_tbw->widget(8)->setLayout(grid);
 
 	//Configuring the table objects that stores the columns, triggers, constraints, rules and indexes
@@ -109,7 +109,7 @@ TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget
 
 		grid=new QGridLayout;
 		grid->addWidget(tab, 0,0,1,1);
-		grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+		grid->setContentsMargins(GuiUtilsNs::LtMargins);
 		attributes_tbw->widget(i + 1)->setLayout(grid);
 
 		connect(tab, &CustomTableWidget::s_rowsRemoved, this, __slot(this, TableWidget::removeObjects));
@@ -417,7 +417,7 @@ void TableWidget::__setAttributes(DatabaseModel *model, OperationList *op_list, 
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -490,7 +490,7 @@ void TableWidget::listObjects(ObjectType obj_type)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -532,7 +532,7 @@ void TableWidget::handleObject()
 	catch(Exception &e)
 	{
 		listObjects(obj_type);
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -770,7 +770,7 @@ void TableWidget::removeObjects()
 				throw Exception(Exception::getErrorMessage(ErrorCode::RemProtectedObject)
 								.arg(object->getName())
 								.arg(object->getTypeName()),
-								ErrorCode::RemProtectedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+								ErrorCode::RemProtectedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
 
 		if(obj_type == ObjectType::Constraint)
@@ -794,7 +794,7 @@ void TableWidget::removeObjects()
 			op_list->ignoreOperationChain(false);
 		}
 
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -822,7 +822,7 @@ void TableWidget::removeObject(int row)
 			throw Exception(Exception::getErrorMessage(ErrorCode::RemProtectedObject)
 							.arg(object->getName())
 							.arg(object->getTypeName()),
-							ErrorCode::RemProtectedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+							ErrorCode::RemProtectedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		if(obj_type == ObjectType::Constraint)
 			updatePkColumnsCheckState(dynamic_cast<Constraint *>(object)->getConstraintType() == ConstraintType::PrimaryKey);
@@ -838,7 +838,7 @@ void TableWidget::removeObject(int row)
 		}
 
 		listObjects(obj_type);
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -909,7 +909,7 @@ void TableWidget::duplicateObject(int sel_row, int new_row)
 		}
 
 		listObjects(obj_type);
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -942,7 +942,7 @@ void TableWidget::swapObjects(int idx1, int idx2)
 	catch(Exception &e)
 	{
 		listObjects(obj_type);
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -1067,6 +1067,8 @@ void TableWidget::applyConfiguration()
 				 * Duplicated columns are discarded by the method Constraint::addColumn */
 				for(Column *col : pk_cols)
 					pk->addColumn(col, Constraint::SourceCols);
+
+				pk->updateDependencies();
 			}
 		}
 		else if(pk_cols.empty() && pk && !pk->isAddedByRelationship())
@@ -1091,9 +1093,9 @@ void TableWidget::applyConfiguration()
 		catch(Exception &e)
 		{
 			if(e.getErrorCode()==ErrorCode::RemInvalidatedObjects)
-				Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+				Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 			else
-				throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+				throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 		}
 
 		op_list->finishOperationChain();
@@ -1115,7 +1117,7 @@ void TableWidget::applyConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

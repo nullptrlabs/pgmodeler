@@ -144,5 +144,5 @@ Operation::OperationInfo Operation::getOperationInfo() const
 		oper_type = this->op_type;
 	}
 
-	return OperationInfo(obj_name, obj_type, oper_type);
+	return { obj_name, obj_type, oper_type };
 }

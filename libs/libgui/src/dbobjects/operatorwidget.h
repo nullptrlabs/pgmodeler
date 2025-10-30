@@ -44,7 +44,7 @@ class __libgui OperatorWidget: public BaseObjectWidget, public Ui::OperatorWidge
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, Operator *oper);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

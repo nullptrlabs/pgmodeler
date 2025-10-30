@@ -77,7 +77,7 @@ FunctionWidget::FunctionWidget(QWidget *parent): BaseFunctionWidget(parent, Obje
 
 	vbox = new QVBoxLayout;
 	vbox->addWidget(return_tab);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	ret_table_gb->setLayout(vbox);
 	ret_table_gb->setVisible(false);
 
@@ -319,7 +319,7 @@ void FunctionWidget::validateConfiguredFunction()
 										.arg(object->getName(true))
 										.arg(object->getTypeName()),
 										ErrorCode::InvFuncConfigInvalidatesObject,
-										__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+										PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -367,7 +367,7 @@ void FunctionWidget::applyConfiguration()
 	catch(Exception &e)
 	{
 		cancelConfiguration();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

@@ -28,7 +28,7 @@ class __libgui ColumnDataWidget: public QWidget {
 	private:
 		NumberedTextEditor *value_txt;
 
-		void showEvent(QShowEvent *);
+		void showEvent(QShowEvent *) override;
 
 	public:
 		ColumnDataWidget(bool use_syntax_hl = false, const QString &hl_conf = "", QWidget *parent = nullptr);

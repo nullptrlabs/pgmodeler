@@ -39,16 +39,15 @@ class __libcanvas TableTitleView: public BaseObjectView {
 		QGraphicsSimpleTextItem *obj_name,
 		*schema_name;
 
-		void configureObject(void){}
+		void configureObject(void) override {}
 
 	public:
 		TableTitleView();
-		virtual ~TableTitleView();
+		~TableTitleView() override;
 
 		void configureObject(BaseGraphicObject *object);
 		void resizeTitle(double width, double height);
-
-		virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr);
+		void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
 };
 
 #endif

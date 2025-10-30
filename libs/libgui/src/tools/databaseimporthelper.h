@@ -241,8 +241,8 @@ class __libgui DatabaseImportHelper: public QObject {
 		/*! \brief Returns the xml definition for the specified oid. If the boolean param 'use_signature' is true then the method will
 		return the xml definition with signature attribute instead of name. If the param 'recursive_dep_res' is true the method will
 		create a dependency if it's attributes exists but it doesn't exists on the model yet (note: this is different from auto_resolve_deps attribute) */
-		QString getDependencyObject(const QString &oid, ObjectType dep_type, bool use_signature=false,
-									bool recursive_dep_res=true, bool generate_xml=true, attribs_map extra_attribs=attribs_map());
+		QString getDependencyObject(const QString &oid, ObjectType obj_type, bool use_signature=false,
+																bool recursive_dep_res=true, bool generate_xml=true, attribs_map extra_attribs=attribs_map());
 		
 		//! \brief Returns the xml defintion for the object's comment
 		QString getComment(attribs_map &attribs);
@@ -280,7 +280,7 @@ class __libgui DatabaseImportHelper: public QObject {
 		
 		//! \brief Configures the import parameters
 		void setImportOptions(bool import_sys_objs, bool import_ext_objs, bool auto_resolve_deps, bool ignore_errors, bool debug_mode,
-													bool rand_rel_colors, bool update_fk_rels, bool comments_as_aliases, bool is_working_model = false);
+													bool rand_rel_colors, bool update_rels, bool comments_as_aliases, bool is_working_model = false);
 		
 		//! \brief Returns the last system OID value for the current database
 		unsigned getLastSystemOID();
@@ -345,8 +345,9 @@ class __libgui DatabaseImportHelper: public QObject {
 		void importDatabase();
 		void setObjectFilters(QStringList filter, bool only_matching, bool match_signature, QStringList force_tab_obj_types = {});
 		
-		friend class DatabaseImportForm;
 		friend class ModelDatabaseDiffForm;
+		friend class DatabaseImportWidget;
+		friend class DiffToolWidget;
 };
 
 #endif

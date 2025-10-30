@@ -58,11 +58,11 @@ class __libgui ObjectSearchWidget : public QWidget, public Ui::ObjectSearchWidge
 		QLabel *_search_attrs_lbl;
 
 		//! \brief Captures the ENTER press to execute search
-		bool eventFilter(QObject *object, QEvent *event);
+		bool eventFilter(QObject *object, QEvent *event) override;
 
-		void showEvent(QShowEvent *);
+		void showEvent(QShowEvent *) override;
 
-		void resizeEvent(QResizeEvent *event);
+		void resizeEvent(QResizeEvent *event) override;
 
 	public:
 		ObjectSearchWidget(QWidget *parent = nullptr);

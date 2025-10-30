@@ -133,10 +133,10 @@ void ObjectSelectorWidget::showObjectView()
 {
 	obj_name_edt->clearFocus();
 
-	for(unsigned i=0; i < sel_obj_types.size(); i++)
-		obj_view_wgt->setObjectVisible(sel_obj_types[i], true);
+	for(auto &obj_tp : sel_obj_types)
+		obj_view_wgt->setObjectVisible(obj_tp, true);
 
-	if(sel_obj_types.size()==1)
+	if(sel_obj_types.size() == 1)
 		obj_view_wgt->setWindowTitle(tr("Select %1").arg(BaseObject::getTypeName(sel_obj_types[0]).toLower()));
 
 	obj_view_wgt->setModel(this->model);

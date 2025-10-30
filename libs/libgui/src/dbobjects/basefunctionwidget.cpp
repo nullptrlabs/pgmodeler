@@ -45,7 +45,7 @@ BaseFunctionWidget::BaseFunctionWidget(QWidget *parent, ObjectType obj_type) : B
 
 	grid = new QGridLayout;
 	grid->addWidget(parameters_tab, 0, 0, 1, 1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	func_config_twg->widget(1)->setLayout(grid);
 	security_cmb->addItems(SecurityType::getTypes());
 
@@ -62,7 +62,7 @@ BaseFunctionWidget::BaseFunctionWidget(QWidget *parent, ObjectType obj_type) : B
 	grid = new QGridLayout;
 	grid->addWidget(transform_type_wgt, 0, 0, 1, 1);
 	grid->addWidget(transform_types_tab, 1, 0, 1, 1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	func_config_twg->widget(2)->setLayout(grid);
 
 
@@ -77,7 +77,7 @@ BaseFunctionWidget::BaseFunctionWidget(QWidget *parent, ObjectType obj_type) : B
 	grid = new QGridLayout;
 	grid->addWidget(config_params_tab, 0, 0, 1, 1);
 	grid->addWidget(hint_frm, 1, 0, 1, 1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	func_config_twg->widget(4)->setLayout(grid);
 
 	connect(language_cmb, &QComboBox::currentIndexChanged, this, __slot(this, BaseFunctionWidget::selectLanguage));
@@ -157,7 +157,7 @@ void BaseFunctionWidget::showParameterForm(CustomTableWidget *params_tab, bool e
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -184,7 +184,7 @@ Parameter BaseFunctionWidget::getParameter(CustomTableWidget *params_tab, unsign
 		}
 		catch(Exception &e)
 		{
-			throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+			throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 		}
 	}
 
@@ -351,6 +351,6 @@ void BaseFunctionWidget::applyBasicConfiguration(BaseFunction *func)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }

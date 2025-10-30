@@ -40,7 +40,7 @@ void Language::setName(const QString &name)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgReservedName)
 						.arg(this->getName())
 						.arg(BaseObject::getTypeName(ObjectType::Language)),
-						ErrorCode::AsgReservedName,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgReservedName,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	BaseObject::setName(name);
 }
@@ -85,16 +85,16 @@ void Language::setFunction(Function *func, FunctionId func_id)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidReturnType)
 						.arg(this->getName(true))
 						.arg(BaseObject::getTypeName(ObjectType::Language)),
-						ErrorCode::AsgFunctionInvalidReturnType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgFunctionInvalidReturnType,PGM_FUNC,PGM_FILE,PGM_LINE);
 	else
 		//Raises an error in case the function has invalid parameters (count and types)
-		throw Exception(ErrorCode::AsgFunctionInvalidParameters,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgFunctionInvalidParameters,PGM_FUNC,PGM_FILE,PGM_LINE);
 }
 
 Function * Language::getFunction(FunctionId func_id)
 {
 	if(func_id > InlineFunc)
-		throw Exception(ErrorCode::RefObjectInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefObjectInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return functions[func_id];
 }

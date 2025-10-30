@@ -86,12 +86,12 @@ RelationshipWidget::RelationshipWidget(QWidget *parent): BaseObjectWidget(parent
 
 	grid=new QGridLayout;
 	grid->addWidget(attributes_tab, 0,0,1,1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	rel_attribs_tbw->widget(AttributesTab)->setLayout(grid);
 
 	grid=new QGridLayout;
 	grid->addWidget(constraints_tab, 0,0,1,1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	rel_attribs_tbw->widget(ConstraintsTab)->setLayout(grid);
 
 	grid=dynamic_cast<QGridLayout *>(rel_attribs_tbw->widget(SpecialPkTab)->layout());
@@ -101,7 +101,7 @@ RelationshipWidget::RelationshipWidget(QWidget *parent): BaseObjectWidget(parent
 	frame->setParent(rel_attribs_tbw->widget(SpecialPkTab));
 
 	grid=new QGridLayout;
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 
 	grid->addWidget(advanced_objs_tab, 0, 0, 1, 1);
 
@@ -191,7 +191,7 @@ RelationshipWidget::RelationshipWidget(QWidget *parent): BaseObjectWidget(parent
 
 	connect(fk_gconf_chk, &QCheckBox::toggled, this, &RelationshipWidget::useFKGlobalSettings);
 	connect(patterns_gconf_chk, &QCheckBox::toggled, this, &RelationshipWidget::usePatternGlobalSettings);
-	connect(gen_bound_expr_tb, &QToolButton::clicked, this, &RelationshipWidget::generateBoundingExpr);
+	connect(gen_bound_expr_btn, &QPushButton::clicked, this, &RelationshipWidget::generateBoundingExpr);
 	connect(default_part_chk, &QCheckBox::toggled, part_bound_expr_txt, &NumberedTextEditor::setDisabled);
 
 	setMinimumSize(600, 380);
@@ -216,14 +216,14 @@ void RelationshipWidget::setAttributes(DatabaseModel *model, OperationList *op_l
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
 void RelationshipWidget::setAttributes(DatabaseModel *model, OperationList *op_list, BaseRelationship *base_rel)
 {
 	if(!base_rel)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	BaseRelationship::RelType rel_type;
 	Relationship *aux_rel=nullptr;
@@ -457,11 +457,12 @@ QSize RelationshipWidget::getIdealSize()
 	if(rel_type == BaseRelationship::RelationshipFk ||
 		 (rel_type == BaseRelationship::RelationshipDep &&
 			this->object && this->object->getObjectType()==ObjectType::BaseRelationship))
-		return QSize(640, 320);
-	else if(rel_type == BaseRelationship::RelationshipGen)
-		return QSize(640, 520);
-	else
-		return QSize(640, 680);
+		return { 640, 320 };
+
+	if(rel_type == BaseRelationship::RelationshipGen)
+		return { 640, 520 };
+
+	return { 640, 680 };
 }
 
 void RelationshipWidget::useFKGlobalSettings(bool value)
@@ -589,7 +590,7 @@ void RelationshipWidget::listObjects(ObjectType obj_type)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -680,7 +681,7 @@ void RelationshipWidget::listAdvancedObjects()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -692,10 +693,10 @@ void RelationshipWidget::showAdvancedObject(int row)
 		ObjectType obj_type=object->getObjectType();
 		bool is_protected = false;
 
-		if(obj_type==ObjectType::Column)
+		if(obj_type == ObjectType::Column)
 		{
 			Column *col = dynamic_cast<Column *>(object);
-			is_protected = col->isProtected();
+			//is_protected = col->isProtected();
 			openEditingForm<Column,ColumnWidget>(col, col->getParentTable());
 		}
 		else if(obj_type == ObjectType::Constraint)
@@ -750,7 +751,7 @@ void RelationshipWidget::showAdvancedObject(int row)
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -812,7 +813,7 @@ void RelationshipWidget::addObject()
 	catch(Exception &e)
 	{
 		listObjects(obj_type);
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -866,7 +867,7 @@ void RelationshipWidget::duplicateObject(int curr_row, int new_row)
 		}
 
 		listObjects(obj_type);
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -899,7 +900,7 @@ void RelationshipWidget::editObject(int row)
 	{
 		listObjects(obj_type);
 		op_list->ignoreOperationChain(false);
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -973,7 +974,7 @@ void RelationshipWidget::removeObjects()
 		}
 
 		listObjects(obj_type);
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -1011,7 +1012,7 @@ void RelationshipWidget::removeObject(int row)
 		}
 
 		listObjects(obj_type);
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -1212,9 +1213,9 @@ void RelationshipWidget::applyConfiguration()
 			catch(Exception &e)
 			{
 				if(e.getErrorCode()==ErrorCode::RemInvalidatedObjects)
-					Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+					Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 				else
-					throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+					throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 			}
 		}
 
@@ -1225,7 +1226,7 @@ void RelationshipWidget::applyConfiguration()
 	{
 		model->validateRelationships();
 		//qApp->restoreOverrideCursor();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

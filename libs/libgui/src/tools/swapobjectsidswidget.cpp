@@ -1,4 +1,5 @@
 #include "swapobjectsidswidget.h"
+#include "customuistyle.h"
 #include "guiutilsns.h"
 
 const QString SwapObjectsIdsWidget::IdLabel {"ID: <strong>%1</strong>"};
@@ -10,6 +11,8 @@ SwapObjectsIdsWidget::SwapObjectsIdsWidget(QWidget *parent, Qt::WindowFlags f) :
 																																	 ObjectType::Column,
 																																	 ObjectType::Constraint });
 	setupUi(this);
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
 	sort_column = 0;
 	sort_order = Qt::AscendingOrder;
@@ -35,7 +38,7 @@ SwapObjectsIdsWidget::SwapObjectsIdsWidget(QWidget *parent, Qt::WindowFlags f) :
 	setModel(nullptr);
 	filter_wgt->setVisible(false);
 
-	connect(filter_btn, &QToolButton::toggled, filter_wgt, &QWidget::setVisible);
+	connect(filter_btn, &QPushButton::toggled, filter_wgt, &QWidget::setVisible);
 
 	connect(src_object_sel, &ObjectSelectorWidget::s_objectSelected, this, &SwapObjectsIdsWidget::showObjectId);
 	connect(dst_object_sel, &ObjectSelectorWidget::s_objectSelected, this, &SwapObjectsIdsWidget::showObjectId);
@@ -232,7 +235,7 @@ void SwapObjectsIdsWidget::swapObjectsIds()
 		 (src_obj->getObjectType() != dst_obj->getObjectType()))
 	{
 		Messagebox::error(Exception::getErrorMessage(ErrorCode::InvRelationshipIdSwap),
-											ErrorCode::InvRelationshipIdSwap, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+											ErrorCode::InvRelationshipIdSwap, PGM_FUNC, PGM_FILE, PGM_LINE);
 		return;
 	}
 
@@ -276,7 +279,7 @@ void SwapObjectsIdsWidget::swapObjectsIds()
 	catch(Exception &e)
 	{
 		//qApp->restoreOverrideCursor();
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 

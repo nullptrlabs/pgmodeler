@@ -58,7 +58,7 @@ class __libgui ConstraintWidget: public BaseObjectWidget, public Ui::ConstraintW
 		void selectReferencedTable();
 		
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

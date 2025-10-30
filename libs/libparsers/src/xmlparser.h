@@ -66,10 +66,12 @@ class __libparsers XmlParser {
 
 		//! \brief Stores the document DTD declaration
 		QString	dtd_decl,
+
 		//! \brief Stores XML document to be analyzed
 		xml_buffer,
+
 		/*! \brief Stores the declaration <?xml?>. If this isn't exists it will be
-										 a default declaration. */
+		 * a default declaration. */
 		xml_decl;
 
 		/*! \brief Remove the original DTD from the document. This is done to evit that

@@ -36,7 +36,7 @@ class PgModelerApp: public Application {
 
 	public:
 		PgModelerApp(int & argc, char ** argv);
-		bool notify(QObject * receiver, QEvent * event);
+		bool notify(QObject *receiver, QEvent *event) override;
 };
 
 #endif

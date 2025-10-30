@@ -44,33 +44,32 @@ class __libcore Tag: public BaseObject {
 
 	public:
 		Tag();
-
-	 virtual ~Tag(){}
+		~Tag() override = default;
 
 		/*! \brief Set the tag name. Different from regular database model object there is no rule
-	when setting the name. The only exception is that the name cannot be greater than
-	BaseObject::OBJECT_NAME_MAX_LENGTH */
-		virtual void setName(const QString &name) final;
+		 * when setting the name. The only exception is that the name cannot be greater than
+		 * BaseObject::OBJECT_NAME_MAX_LENGTH */
+		void setName(const QString &name) final;
 
-		virtual QString getName(bool=false, bool=false) final;
+		QString getName(bool = false, bool = false) final;
 
 		//! \brief Set the specified element id color
 		void setElementColor(const QString &elem_id, const QColor &color, ColorId color_id);
 
 		/*! \brief Set the specified element colors using a string that contains a color set
-	on the format: [#RRGGBB],[#RRGGBB],[#RRGGBB]. Color on the string beyond position 3
-	will be ignored */
+		 * on the format: [#RRGGBB],[#RRGGBB],[#RRGGBB]. Color on the string beyond position 3
+		 * will be ignored */
 		void setElementColors(const QString &elem_id, const QString &colors);
 
 		//! \brief Returns a sigle color (at specified index) of the element.
 		QColor getElementColor(const QString &elem_id, ColorId color_id);
 
 		/*! \brief Returns a gradient configured for the current element id. This method will return
-	an error if the current element does not have at least 2 colors configured */
+		 * an error if the current element does not have at least 2 colors configured */
 		QLinearGradient getFillStyle(const QString &elem_id);
 
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) override;
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) override;
+		QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
 
 		static QStringList getColorAttributes(void);
 

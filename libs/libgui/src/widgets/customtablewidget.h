@@ -316,7 +316,7 @@ class __libgui CustomTableWidget: public QWidget, public Ui::CustomTableWidget {
 		void s_contextMenuRequested(const QPoint &, bool);
 
 	protected:
-		void resizeEvent(QResizeEvent *);
+		void resizeEvent(QResizeEvent *) override;
 };
 
 #endif

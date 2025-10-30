@@ -94,8 +94,8 @@ class __libgui TableWidget: public BaseObjectWidget, public Ui::TableWidget {
 		void editData();
 
 	public slots:
-		void applyConfiguration();
-		void cancelConfiguration();
+		void applyConfiguration() override;
+		void cancelConfiguration() override;
 };
 
 #endif

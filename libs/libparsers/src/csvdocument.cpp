@@ -51,7 +51,7 @@ void CsvDocument::addRow(const QStringList &row)
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::MalformedCsvInvalidCols)
 										.arg(getColumnCount()).arg(rows.size() + 1).arg(row.size()),
-										ErrorCode::MalformedCsvInvalidCols, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::MalformedCsvInvalidCols, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	rows.append(row);
@@ -60,7 +60,7 @@ void CsvDocument::addRow(const QStringList &row)
 void CsvDocument::setSpecialChars(const QChar &sep, const QChar &txt_delim, const QChar &ln_break)
 {
 	if(sep == txt_delim || sep == ln_break || ln_break == txt_delim)
-		throw Exception(ErrorCode::InvCsvParserOptions, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(ErrorCode::InvCsvParserOptions, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	separator = sep;
 	text_delim = txt_delim;
@@ -72,7 +72,7 @@ QString CsvDocument::getValue(int row, int col) const
 	if(row >= rows.size() || col >= getColumnCount())
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::RefInvCsvDocumentValue).arg(row).arg(col),
-										ErrorCode::RefInvCsvDocumentValue, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::RefInvCsvDocumentValue, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	return rows.at(row).at(col);
@@ -113,6 +113,6 @@ void CsvDocument::saveToFile(const QString &filename) const
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }

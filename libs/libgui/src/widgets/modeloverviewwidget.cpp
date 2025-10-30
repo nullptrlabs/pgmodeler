@@ -128,7 +128,7 @@ void ModelOverviewWidget::updateOverview(bool force_update)
 		if(!p.isActive())
 		{
 			scene_bg_lbl->setPixmap(QPixmap());
-			scene_bg_lbl->setText(tr("Failed to generate the overview image.\nThe requested size %1 x %2 was too big and there was not enough memory to allocate!")
+			scene_bg_lbl->setText(tr("Failed to generate the overview image.\nThe requested size %1 x %2 was too large and there was not enough memory to allocate!")
 										 .arg(pixmap_size.width()).arg(pixmap_size.height()));
 			frame->setEnabled(false);
 		}

@@ -29,7 +29,7 @@ QFont SyntaxHighlighter::default_font {"Source Code Pro", 12};
 SyntaxHighlighter::SyntaxHighlighter(QPlainTextEdit *parent, bool single_line_mode, bool use_custom_tab_width, qreal custom_fnt_size) : QSyntaxHighlighter(parent)
 {
 	if(!parent)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	code_field_txt = parent;
 
@@ -47,7 +47,8 @@ SyntaxHighlighter::SyntaxHighlighter(QPlainTextEdit *parent, bool single_line_mo
 	{
 		QFont fnt(default_font.family(), getCurrentFontSize());
 		QFontMetrics fm = QFontMetrics(fnt);
-		int height=fm.height() + fm.lineSpacing()/2;
+		int height = fm.height() + (fm.lineSpacing() / 2);
+
 		parent->setMinimumHeight(height);
 		parent->setMaximumHeight(height);
 		parent->setSizePolicy(parent->sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
@@ -596,8 +597,8 @@ void SyntaxHighlighter::loadConfiguration(const QString &filename)
 						EnclosingCharsCfg cfg;
 						cfg.open_char = attribs[Attributes::OpenChar].front();
 						cfg.close_char = attribs[Attributes::CloseChar].front();
-						cfg.fg_color = QColor::fromString(attribs[Attributes::ForegroundColor]);
-						cfg.bg_color = QColor::fromString(attribs[Attributes::BackgroundColor]);
+						cfg.fg_color = QColor::fromString(attribs[Attributes::FgColor]);
+						cfg.bg_color = QColor::fromString(attribs[Attributes::BgColor]);
 
 						enclosing_chrs.push_back(cfg);
 					}
@@ -611,13 +612,14 @@ void SyntaxHighlighter::loadConfiguration(const QString &filename)
 						if(group_confs.contains(group))
 						{
 							throw Exception(Exception::getErrorMessage(ErrorCode::DefDuplicatedGroup).arg(group),
-															 ErrorCode::DefDuplicatedGroup, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+															 ErrorCode::DefDuplicatedGroup, PGM_FUNC, PGM_FILE, PGM_LINE);
 						}
+
 						//Raises an error if the group does not have children element
-						else if(!xmlparser.hasElement(XmlParser::ChildElement))
+						if(!xmlparser.hasElement(XmlParser::ChildElement))
 						{
 							throw Exception(Exception::getErrorMessage(ErrorCode::DefEmptyGroup).arg(group),
-															ErrorCode::DefEmptyGroup, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+															ErrorCode::DefEmptyGroup, PGM_FUNC, PGM_FILE, PGM_LINE);
 						}
 
 						case_sensitive = attribs[Attributes::CaseSensitive] == Attributes::True;
@@ -628,16 +630,16 @@ void SyntaxHighlighter::loadConfiguration(const QString &filename)
 
 						/* If the attribute isn't defined the fg color will be the same as the
 						 * parent's default text color */
-						if(attribs[Attributes::ForegroundColor].isEmpty())
+						if(attribs[Attributes::FgColor].isEmpty())
 							fg_color = code_field_txt->palette().color(QPalette::WindowText);
 						else
-							fg_color = QColor::fromString(attribs[Attributes::ForegroundColor]);
+							fg_color = QColor::fromString(attribs[Attributes::FgColor]);
 
 						// If the attribute isn't defined the default the bg color will be transparent
-						if(attribs[Attributes::BackgroundColor].isEmpty())
+						if(attribs[Attributes::BgColor].isEmpty())
 							bg_color = Qt::transparent;
 						else
-							bg_color = QColor::fromString(attribs[Attributes::BackgroundColor]);
+							bg_color = QColor::fromString(attribs[Attributes::BgColor]);
 
 						format.setFontFamilies({ default_font.family() });
 						format.setFontPointSize(default_font.pointSizeF());
@@ -705,19 +707,21 @@ void SyntaxHighlighter::loadConfiguration(const QString &filename)
 								if(!regexp.isValid())
 								{
 									throw Exception(Exception::getErrorMessage(ErrorCode::InvGroupRegExpPattern).arg(group, filename, regexp.errorString()),
-																	ErrorCode::InvGroupRegExpPattern, __PRETTY_FUNCTION__, __FILE__, __LINE__, nullptr,
+																	ErrorCode::InvGroupRegExpPattern, PGM_FUNC, PGM_FILE, PGM_LINE, nullptr,
 																	tr("Pattern: %1").arg(regexp.pattern()));
 								}
-								else if(group_cfg.persistent && (initial_expr || final_expr))
+
+								if(group_cfg.persistent && (initial_expr || final_expr))
 								{
 									throw Exception(Exception::getErrorMessage(ErrorCode::InvExprPersistentGroup).arg(group, filename),
-																	 ErrorCode::InvExprPersistentGroup, __PRETTY_FUNCTION__, __FILE__, __LINE__, nullptr,
+																	 ErrorCode::InvExprPersistentGroup, PGM_FUNC, PGM_FILE, PGM_LINE, nullptr,
 																	 tr("Pattern: %1").arg(regexp.pattern()));
 								}
-								else if(initial_expr && final_expr)
+
+								if(initial_expr && final_expr)
 								{
 									throw Exception(Exception::getErrorMessage(ErrorCode::InvExprMultilineGroup).arg(group, filename),
-																	 ErrorCode::InvExprMultilineGroup, __PRETTY_FUNCTION__, __FILE__, __LINE__, nullptr,
+																	 ErrorCode::InvExprMultilineGroup, PGM_FUNC, PGM_FILE, PGM_LINE, nullptr,
 																	 tr("Pattern: %1").arg(regexp.pattern()));
 								}
 
@@ -747,7 +751,7 @@ void SyntaxHighlighter::loadConfiguration(const QString &filename)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e, filename);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e, filename);
 	}
 }
 

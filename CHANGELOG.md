@@ -1,9 +1,150 @@
 Changelog
 ---------
 
+v2.0.0-alpha
+------
+*Release date: October 30, 2025*
+
+* [New] Added initial support for PostgreSQL 18.
+* [New] Added the message box type Success and the static method Messagebox::success.
+* [New] Added the enum StyleHint and the method setStyleHint in CustomUiStyle that renders frames background and border in a contextual way.
+* [New] Added support for hiding empty object groups in database object trees in DatabaseExplorerWidget and DatabaseImportWidget. The hidden status is persisted in general.conf file.
+* [New] Added a button in ModelFixWidget to generate output filename based on the input filename.
+* [New] Added support for grid duplication in DataGridWidget.
+* [New] Added a button to browse the selected table in DataHandlingForm.
+* [New] Moved the entire build system from qmake to CMake on all platforms.
+* [New] Added support for diffing two models in CLI and GUI.
+* [New] Added the method ModelDbSelectorWidget::clearSelection.
+* [New] Added the method Catalog::getServerVersion.
+* [New] Created the method updateConnections in ModelValidationWidget, DatabaseImportWidget, DiffToolWidget and SQLToolWidget.
+* [New] Added the class ModelDbSelectorWidget that encapsulates features to select models or databases to be used where models or databases need to be selected.
+* [New] Created the function GuiUtilsNs::createWidgetInParent.
+* [New] Added the method ModelWidget::setInteractive that toggles the interaction over the model.
+* [New] Created aliases PGM_FILE, PGM_LINE and PGM_FUNC that refer respectively to macros __FILE__, __LINE__ and __PRETTY_FUNCTION__.
+* [New] Added a dedicated icon for the Welcome view.
+* [New] Added the widget FixToolsWidget, integrated into main window, that runs both the model fix and metadata handling operations.
+* [Change] Adjusted the build to use clang-tidy to identify where code can be modernized.
+* [Change] Applied a full refactor to the code based on clang-tidy checks.
+* [Change] Refactored the class ResultSet to avoid copying the PGresult; instead, it will reuse it during initialization.
+* [Change] Renamed the files palette.conf to theme.conf.
+* [Change] Removed the method AppearanceConfigWidget::isDarkUiTheme and replaced its usage with CustomUiStyle::isDarkPalette.
+* [Change] Moved the usage of CustomUiStyle to Application class.
+* [Change] Renamed the enum IconType in Messagebox to MessageType.
+* [Change] Removed the method Messagebox::setMessageFrameColor.
+* [Change] Allowed tool/config widgets to be resized via splitter.
+* [Change] Changed the attributes foreground-color and background-color to fg-color and bg-color in *-highlight.conf files.
+* [Change] Replaced the filter options checkboxes in SQLExecutionWidget with tool buttons.
+* [Change] Adjusted the column filter routine when filtering using regular expressions.
+* [Change] Improved English grammar in internationalization strings across multiple files.
+* [Change] Adjusted the rendering of QTableWidget/QTableView grids via polish.
+* [Change] Rearranged the UI of AboutWidget and UpdateNotifierWidget.
+* [Change] Adjusted the position and size of tab bar scroll buttons.
+* [Change] Adjusted the minimum size of MainWindow.
+* [Change] Adjusted the rendering of arrows in scroll buttons of tab bars.
+* [Change] Fixed the position of scroll buttons of the SQL execution tab widget.
+* [Change] Added missing SQL keywords to sql-highlight.conf.
+* [Change] Added the style hint SuccessFrmHint in CustomUiStyle.
+* [Change] Adjusted the rendering of frames with hint DefaultFrmHint.
+* [Change] Adjusted the themes stylesheets.
+* [Change] Adjusted CustomUiStyle and AppearanceConfigWidget for better theme detection.
+* [Change] Added custom rendering routines for multiple Qt widgets in CustomUiStyle including QToolTips, QScrollBars, QTabBar, QProgressBar, QHeaderView, and others.
+* [Change] Refactored various rendering methods in CustomUiStyle to improve code reusability and maintainability.
+* [Change] Added support for smart theme detection in AppearanceConfigWidget.
+* [Change] Added support for loading color palette from theme folder, file theme.conf.
+* [Change] Adjusted the rendering of disabled checkboxes and radio buttons.
+* [Change] Fixed the rendering of editable comboboxes.
+* [Change] Adjusted the dark palette colors and rendering of various UI components.
+* [Change] Implemented enhanced CustomUiStyle with bitwise corner flags for flexible corner control.
+* [Change] Added custom disabled icon styling with dynamic theme color blending in CustomUiStyle.
+* [Change] Adjusted the UI of GeneralConfigWidget.
+* [Change] Adjusted the initial sizes of splitters in tools/config widgets.
+* [Change] Refactored the ui-style.conf to remove duplicate styles.
+* [Change] Forcing the Qt version to >= 6.4.3 in find_packages().
+* [Change] Refactored parts of the UI in ModelExportWidget to include a ModelDbSelectorWidget instance.
+* [Change] Renamed MetadataHandlingForm to MetadataHandlingWidget.
+* [Change] MetadataHandlingWidget is now part of FixToolsWidget.
+* [Change] Renamed the method PgModelerCliApp::diffModelDatabase to diffModels.
+* [Change] Minor adjustment in GeneralConfigWidget::resetAlertChoices to reset the Attributes::AlertApplyMetadata parameter.
+* [Change] Minor UI adjustment in RelationshipConfigWidget.
+* [Change] Minor UI adjustment in SchemaEditorForm.
+* [Change] Minor UI adjustment in SchemaEditorForm.
+* [Change] Minor UI adjustment in MetadataHandlingWidget.
+* [Change] Minor UI adjustment in ConfigurationWidget.
+* [Change] Minor UI adjustment in PluginsConfigWidget.
+* [Change] Minor UI adjustment in SnippetsConfigWidget.
+* [Change] Minor UI adjustment in AppearanceConfigWidget.
+* [Change] Minor UI adjustment in GeneralConfigWidget.
+* [Change] Minor UI adjustment in MainWindow.
+* [Change] Renamed the class ModelFixForm to ModelFixWidget since it now runs integrated into FixToolsWidget.
+* [Change] Adjusted the display of the Fix view in MainWindow.
+* [Change] Minor size adjustment in ConfigurationWidget.
+* [Change] Minor adjustment in DatabaseImportWidget::s_importFinished to send a bool flag indicating whether the signal was sent during import error.
+* [Change] Minor adjustment in DiffToolWidget to disable the import options group when the user selects model -> model diff.
+* [Change] Adjusted the method Application::copyFilesRecursively to ignore the diff-presets.conf from previous versions of pgModeler.
+* [Change] Minor improvement in DiffToolWidget presets saving and loading.
+* [Change] Adjusted the invalidated model alert display in ModelExportWidget.
+* [Change] Removed the tab "Partial diff" and moved all controls related to it to the main tab in DiffToolWidget.
+* [Change] Reorganized the diff widget UI.
+* [Change] Removed unused components in DiffToolWidget.
+* [Change] Minor adjustment in DatabaseImportWidget and ModelExportWidget to block changes in the model while the operations are running.
+* [Change] Adjustments to MainWindow to start/stop timers when a diff, import or export operation starts/stops.
+* [Change] The diff tool is now integrated into the main window via "Diff view".
+* [Change] The import tool is now integrated into the main window via "Import view".
+* [Change] The export tool is now integrated into the main window via "Export view".
+* [Change] Adjusted some icon sizes in icons-*.conf files.
+* [Change] Converted ModelExportWidget export mode radio buttons into tool buttons.
+* [Change] Renamed the method exec() to setModel() in ModelExportWidget.
+* [Change] Adjusted MainWindow::updateConnections to update the diff, import and export widgets connections.
+* [Change] Adjusted the UI of ModelObjectsWidget and OperationListWidget.
+* [Change] Changed some QToolButtons to QPushButton for better semantics.
+* [Change] Adjustments in the light themes.
+* [Change] Finished the UI adjustments in DataHandlingForm.
+* [Change] Started the adjustments to DataHandlingForm.
+* [Change] Adjusted the ui-style.conf.
+* [Change] Adjusted the behavior of MainWindow::closeEvent to discard any unchanged models.
+* [Change] Adjusted some class destructor declarations.
+* [Change] Removed the class ConfigurationForm.
+* [Change] Minor adjustment in ConnectionsConfigWidget::openConnectionsConfiguration.
+* [Change] Removed the use of the deprecated method ConfigurationWidget::getConfigurationWidget(int).
+* [Change] Minor improvement to BaseConfigWidget.
+* [Change] In MainWindow, if the user changes the settings without applying them, a confirmation message will be displayed so the changes can be applied or reverted before switching the current view.
+* [Change] Adjusted the tab close button icon.
+* [Change] Adjusted the border radius of table objects.
+* [Change] Modified the default color of canvas objects in dark theme.
+* [Change] Adjusted the layout classes used to arrange the view widgets in MainWindow's stack widget.
+* [Change] Adjusted the default colors of the dark palette.
+* [Change] Updated the window icons of all app subprojects.
+* [Change] Minor adjustment in logo images.
+* [Change] Adjusted the splash screen display.
+* [Change] Adjusted the logo design/color to match the icon set colors.
+* [Change] Minor adjustment in resource files.
+* [Change] Updated the icon colors for a flatter and more vivid style.
+* [Change] Adjusted the Windows version build.
+* [Change] Changed the deprecated define Q_OS_MAC to Q_OS_MACOS.
+* [Fix] Fixed a bug in the connection class that was creating an invalid connection string when other params were manually specified.
+* [Fix] Fixed a bug that was causing collations assigned to columns not to be reflected in SQL and XML codes.
+* [Fix] Fixed a bug that was causing collations to be saved always as deterministic even when the user unchecked the option in the editing form.
+* [Fix] Fixed the function PgSqlVersions::parseString to return the default version as a fallback when a major server version is not yet recognized by the tool.
+* [Fix] Fixed a bug in XMLParser that was not configuring the DTD file path correctly.
+* [Fix] Fixed a bug in ObjectsScene that was causing value overflow when aligning points to grid in some cases.
+* [Fix] Fixed a bug in ModelWidget::protectObject.
+* [Fix] Fixed the rendering of QTableView/QTableWidget item borders.
+* [Fix] Minor fix in the crash handler to load the appearance settings and keep the UI uniform.
+* [Fix] Fixed the method CustomUiStyle::setStyleHint to accept only QFrames.
+* [Fix] Minor fix in DiffToolWidget.
+* [Fix] Minor fix in relationshipconfigwidget.ui.
+* [Fix] Minor fix in databaseimportwidget.ui.
+* [Fix] Fixed the warning icon display in FileSelectorWidget.
+* [Fix] Fixed a bug that was causing columns that were part of PKs not to be removed by the user.
+* [Fix] Minor fix in difftoolwidget.ui.
+* [Fix] Fixed a bug in DatabaseImportWidget that was allocating threads every time the showEvent was triggered.
+* [Fix] Minor fix in the build process.
+* [Fix] Fixed the catalog query for constraints for PostgreSQL 17.
+* [Fix] Minor fix in libcli/CMakeLists.txt.
+
 v1.2.0
 ------
-<em>Release date: May 9, 2025</em><br/>
+*Release date: May 9, 2025*
 
 * [New] Setup a wait cursor when loading a diff code in the SQL tool.
 * [New] Added the static methods isAccepted, isRejected, and isCanceled to Messagebox.
@@ -46,7 +187,7 @@ v1.2.0
 
 v1.2.0-beta1
 ------
-<em>Release date: March 31, 2025</em><br/>
+*Release date: March 31, 2025*
 
 * [New] Added the method AppearanceConfigWidget::isDarkUiTheme.
 * [New] Added per-instance control of line numbers and action buttons visibility in NumberedTextEditor (previously global-only).
@@ -93,7 +234,7 @@ v1.2.0-beta1
 
 v1.2.0-beta
 ------
-<em>Release date: February 10, 2025</em><br/>
+*Release date: February 10, 2025*
 
 * [New] Added the enum PgModelerGuiPlugin::MenuSectionId that controls where the plugin actions are placed in the context menu in the model widget.
 * [New] Added a call to qApp::alert() when the export, import, and diff processes finish so the taskbar blinks when the window is not visible.
@@ -129,7 +270,7 @@ v1.2.0-beta
 
 v1.1.6
 ------
-<em>Release date: December 21, 2024</em><br/>
+*Release date: December 21, 2024*
 
 * [Fix] Fixed a bug in the FK relationships update routine that was causing more relationships to be deleted than what really needed to be.
 * [Fix] Fixed a crash when creating a many-to-many relationship where one or more columns of the involved primary keys use generated default values (GENERATED AS).
@@ -137,7 +278,7 @@ v1.1.6
 
 v1.1.5
 ------
-<em>Release date: October 28, 2024</em><br/>
+*Release date: October 28, 2024*
 
 * [New] Added support for PostgreSQL 17.
 * [Fix] Fixed the catalog queries of collation and domain objects for PostgreSQL 17.
@@ -145,7 +286,7 @@ v1.1.5
 
 v1.2.0-alpha1
 ------
-<em>Release date: October 25, 2024</em><br/>
+*Release date: October 25, 2024*
 
 * [New] Added support for PostgreSQL 17.
 * [New] Added support for tabbed table data handling.
@@ -212,7 +353,7 @@ v1.2.0-alpha1
 
 v1.1.4
 ------
-<em>Release date: August 21, 2024</em><br/>
+*Release date: August 21, 2024*
 
 * [Fix] Fixed a bug in the function object that was not resetting the SETOF flag when changing the return type to TABLE.
 * [Fix] Fixed a crash in the database import process when destroying detached inherited columns.
@@ -221,7 +362,7 @@ v1.1.4
 
 v1.2.0-alpha
 ------
-<em>Release date: June 24, 2024</em><br/>
+*Release date: June 24, 2024*
 
 * [New] Added support for @include statements in schema micro language.
 * [New] Added the support for Markdown data dictionaries in ModelExportForm.
@@ -294,7 +435,7 @@ v1.2.0-alpha
 
 v1.1.3
 ------
-<em>Release date: May 13, 2024</em><br/>
+*Release date: May 13, 2024*
 
 * [New] Added an option to toggle the display of the mouse position, zoom, and object selection information.
 * [Change] Minor adjustment in UI stylesheets of the scene info widget.
@@ -306,7 +447,7 @@ v1.1.3
 
 v1.1.2
 ------
-<em>Release date: April 08, 2024</em><br/>
+*Release date: April 08, 2024*
 
 * [New] Added a sample model of the famous northwind database ported to PostgreSQL.
 * [Change] Updated the sample model pagila.dbm. Now it uses the table partition feature.
@@ -324,7 +465,7 @@ v1.1.2
 
 v1.1.1
 ------
-<em>Release date: March 14, 2024</em><br/>
+*Release date: March 14, 2024*
 
 * [New] Added an XML code searching widget in SourceCodeWidget.
 * [New] Added an option to place in random positions objects that are imported to a working model.
@@ -366,7 +507,7 @@ v1.1.1
 
 v1.1.0
 ------
-<em>Release date: February 23, 2024</em><br/>
+*Release date: February 23, 2024*
 
 * [New] Created the method Application::loadTranslations.
 * [New] FindReplaceWidget now accepts ENTER/RETURN to search texts.
@@ -440,7 +581,7 @@ v1.1.0
 
 v1.1.0-beta1
 ------
-<em>Release date: December 30, 2023</em><br/>
+*Release date: December 30, 2023*
 
 * [New] Added the method Operation::getOperationInfo that returns some info (in the form of a struct) of an operation in read-only format.
 * [New] Created static methods error, info, and alert in Messagebox.
@@ -475,7 +616,7 @@ v1.1.0-beta1
 
 v1.1.0-beta
 ------
-<em>Release date: November 17, 2023</em><br/>
+*Release date: November 17, 2023*
 
 * [New] Added a compatibility code in pgmodeler-cli to enable the conversion of views in the legacy structure to the newer one.
 * [New] Added support for handling object references in ViewWidget.
@@ -555,7 +696,7 @@ v1.1.0-beta
 
 v1.0.6
 ------
-<em>Release date: October 17, 2023</em><br/>
+*Release date: October 17, 2023*
 
 * [New] Added version descriptor for PostgreSQL 16.
 * [Fix] Fixed a crash when trying to load an invalid model from recents models menu.
@@ -565,7 +706,7 @@ v1.0.6
 
 v1.1.0-alpha1
 ------
-<em>Release date: September 29, 2023</em><br/>
+*Release date: September 29, 2023*
 
 * [New] Added version descriptor for PostgreSQL 16.
 * [New] Added support for highlighting table child objects in ObjectFinderWidget.
@@ -671,7 +812,7 @@ v1.1.0-alpha1
 
 v1.0.5
 ------
-<em>Release date: July 26, 2023</em><br/>
+*Release date: July 26, 2023*
 
 * [New] Added shortcuts to Z-stack operations in ModelWidget.
 * [New] Added missing PostgreSQL multirange types
@@ -684,7 +825,7 @@ v1.0.5
 
 v1.1.0-alpha
 ------
-<em>Release date: June 09, 2023</em><br/>
+*Release date: June 09, 2023*
 
 * [New] Added support for drag & drop files in the main window to load models.
 * [New] Added NOBYPASSRLS keyword to sql-highlight.conf.
@@ -731,7 +872,7 @@ v1.1.0-alpha
 * [Change] Minor adjustment in ObjectFinderWidget.
 * [Change] Minor adjustment in schemaeditorform.ui.
 * [Change] Minor refactor in TableObjectView, Connection, SchemaParser.
-* [Change] Moved the copy actions in SQL results grid context menu to an action named the "Selection" in the same menu. 
+* [Change] Moved the copy actions in SQL results grid context menu to an action named the "Selection" in the same menu.
 * [Change] Now the ColumnDataEditWidget instances have their geometry saved/restored.
 * [Change] Replace the QPlainTextEdit by NumberedTextEditor in ColumnDataWidget.
 * [Change] Refactored DatabaseImportHelper::createObject in such a way to use a map of bind methods to perform operations instead of using a long list of switch/case to determine which method must be called to create the object during reverse engineering.
@@ -765,7 +906,7 @@ v1.1.0-alpha
 
 v1.0.4
 ------
-<em>Release date: May 19, 2023</em><br/>
+*Release date: May 19, 2023*
 
 * [New] Now pgModeler selects the UI element colors based upon the system's default colors set (light/dark).
 * [New] pgModeler now restores the default settings in case of some configuration file is corrupted/incompatible and causes the initialization to fail.
@@ -786,7 +927,7 @@ v1.0.4
 
 v1.0.3
 ------
-<em>Release date: April 24, 2023</em><br/>
+*Release date: April 24, 2023*
 
 * [New] pgmodeler-cli now logs objects that fail to be recreated in fix process into a log file stored in pgModeler's temp directory.
 * [New] Added a progress bar to model fix form and a cancel button which allows aborting the fix operation without close that form.
@@ -802,7 +943,7 @@ v1.0.3
 
 v1.0.2
 ------
-<em>Release date: March 14, 2023</em><br/>
+*Release date: March 14, 2023*
 
 * [Fix] Fixed a bug related to importing referenced tables of FKs in partial import mode.
 * [Fix] Fixed the attributes toggler item border style in partition tables.
@@ -817,7 +958,7 @@ v1.0.2
 
 v1.0.1
 ------
-<em>Release date: February 17, 2023</em><br/>
+*Release date: February 17, 2023*
 
 * [New] AppearanceConfigWidget now adjusts the drop shadows on tool buttons according to the current theme.
 * [Change] pgModeler will now ask for PK columns uncheck when removing a primary key in the Constraints tab at TableWidget
@@ -830,7 +971,7 @@ v1.0.1
 
 v1.0.0
 ------
-<em>Release date: February 1, 2023</em><br/>
+*Release date: February 1, 2023*
 
 * [New] Added an option in GeneralConfigWidget to allow pgModeler to connect to older PostgreSQL server versions, below 10 using a minimum (not reliable) compatibility mode.
 * [New] Added an option to change ObjectsScene grid pattern. Available options are square and dot.
@@ -862,7 +1003,7 @@ v1.0.0
 * [Change] Replaced the object type filter in ModelObjectsWidget with an instance of ObjectTypesListWidget.
 * [Change] Moved the method ObjectFinderWidget::updateObjectTable to GuiUtilsNs.
 * [Change] Minor refactor by replacing hardcoded references to .dbm extension by GlobalAttributes::DbModelExt.
-* [Change] Changed the location where the MainWindow::s_modelSaved signal is emitted. 
+* [Change] Changed the location where the MainWindow::s_modelSaved signal is emitted.
 * [Change] Minor adjustment in the plugin's info dialog.
 * [Change] Minor adjust in icons CSS.
 * [Change] Changed the position of the recent model actions.
@@ -898,7 +1039,7 @@ v1.0.0
 
 v1.0.0-beta1
 ------
-<em>Release date: November 25, 2022</em><br/>
+*Release date: November 25, 2022*
 
 * [New] Added the file themes/light/extra-ui-style.conf that holds extra style for the light theme.
 * [New] Added dllexport symbol __lib* to functions and static attributes declarations in all namespaces.
@@ -1113,7 +1254,7 @@ v1.0.0-beta1
 
 v1.0.0-beta
 ------
-<em>Release date: September 10, 2022</em><br/>
+*Release date: September 10, 2022*
 
 * [New] Added data dictionary entry for indexes, triggers, and sequences.
 * [New] Columns, indexes, triggers, and constraints now have their own method to generate their data dictionaries.
@@ -1148,7 +1289,7 @@ v1.0.0-beta
 
 v1.0.0-alpha1
 ------
-<em>Release date: June 21, 2022</em><br/>
+*Release date: June 21, 2022*
 
 * [New] Added PostgreSQL 15 as the default version for code generation.
 * [New] Added a workaround in MainWindow constructor to force the application of UI themes on Windows and Mac.
@@ -1211,7 +1352,7 @@ v1.0.0-alpha1
 
 v1.0.0-alpha
 ------
-<em>Release date: April 11, 2022</em><br/>
+*Release date: April 11, 2022*
 
 * [New] pgModeler 1.0 will now copy compatible config files from 0.9.x if the older configuration dir is found on the first execution.
 * [New] Added extra constants to ObjectsTableWidget to control the coloring of items in DataManipulationForm according to the theme in use.
@@ -1307,7 +1448,7 @@ v1.0.0-alpha
 
 v0.9.4
 ------
-<em>Release date: December 17, 2021</em><br/>
+*Release date: December 17, 2021*
 
 * [New] Added a fix step in CLI to reconstruct enum types XML code in new format.
 * [Change] Changed the way XML code for enum types is generated and loaded.
@@ -1318,11 +1459,11 @@ v0.9.4
 * [Fix] Minor fix in deployment script to support new libicui versions.
 * [Fix] Minor fix in order to set read/write permissions when copying configuration files with read-only permissions.
 * [Fix] Minor fix in CLI to avoid the usage of '-platform offscreen' when calling the application.
-* [Fix] Fixed a bug in file selectors on ModelExportForm that was not allowing to select output folders on Windows and macOs. 
+* [Fix] Fixed a bug in file selectors on ModelExportForm that was not allowing to select output folders on Windows and macOs.
 
 v0.9.4-beta1
 ------
-<em>Release date: November 08, 2021</em><br/>
+*Release date: November 08, 2021*
 
 * [New] Added extra PostGiS data types to PgSQLType.
 * [New] Created the method PgSqlType::isPostGiSType() which returns true if the current type is a PostGiS one.
@@ -1352,12 +1493,12 @@ v0.9.4-beta1
 
 v0.9.4-beta
 ------
-<em>Release date: September 20, 2021</em><br/>
+*Release date: September 20, 2021*
 
 * [New] Added the shortcut Alt+C to trigger the cancel action in DatabaseImportForm ModelDatabaseDiffForm and ModelExportForm.
 * [New] Added support for the generation of GRANT/REVOKE commands to control roles memberships via the diff process.
 * [New] Added a fix step to reconfigure roles membership considering the deprecation of Role:RefRole attribute.
-* [New] Added support for included columns on indexes. 
+* [New] Added support for included columns on indexes.
 * [New] Added the ability to reference view columns on indexes.
 * [New] Added support to use view's SimpleColumn in ColumnPickerWidget as well as Index.
 * [New] Added .dtd extension to SchemaEditorForm::showFileDialog.
@@ -1407,7 +1548,7 @@ v0.9.4-beta
 
 v0.9.4-alpha1
 ------
-<em>Release date: July 19, 2021</em><br/>
+*Release date: July 19, 2021*
 
 * [New] The bulk editing form now can be confirmed by the Ctrl+Return shortcut.
 * [New] The CLI now is capable of fixing models created before 0.9.4-alpha1 that have columns, functions, and other objects that reference extension types with simple names instead of schema-qualified names.
@@ -1488,7 +1629,7 @@ v0.9.4-alpha1
 
 v0.9.4-alpha
 ------
-<em>Release date: May 12, 2021</em><br/>
+*Release date: May 12, 2021*
 
 * [New] Added compatibility code that allows loading models created in versions before 0.9.4-alpha without losing layers and active layers information.
 * [New] Added an option to the metadata handling operation that serves to indicate if duplicated objects (textboxes, tags, generic sql) must be merged or not.
@@ -1561,7 +1702,7 @@ v0.9.4-alpha
 
 v0.9.3
 ------
-<em>Release date: December 30, 2020</em><br/>
+*Release date: December 30, 2020*
 
 * [New] Added support for deterministic and provider attributes in collations.
 * [New] Added missing check constraints in the data dictionary.
@@ -1584,7 +1725,7 @@ v0.9.3
 
 v0.9.3-beta1
 ------
-<em>Release date: October 5, 2020</em><br/>
+*Release date: October 5, 2020*
 
 * [New] Added the version descriptor for PostgreSQL 13.
 * [New] Added support for procedures in design, import and diff processes.
@@ -1640,7 +1781,7 @@ v0.9.3-beta1
 
 v0.9.3-beta
 ------
-<em>Release date: July 10, 2020</em><br/>
+*Release date: July 10, 2020*
 
 * [New] Added GitHub actions scripts in order to test the building on each platform. On Linux and macOs the build will occur on all Qt versions from 5.15 to 5.9, on Windows the build happens only on Qt 5.15 (due to the usage of msys2 that uses the most recent version of the framework).
 * [New] Added default constructors in the form "Class(const &)" for Connection, Parameter and TypeAttribute in order to avoid deprecated-copy warnings on GCC9.
@@ -1698,7 +1839,7 @@ v0.9.3-beta
 
 v0.9.3-alpha1
 ------
-<em>Release date: May 20, 2020</em><br/>
+*Release date: May 20, 2020*
 
 * [New] Added support for creating initial configuration files from CLI.
 * [New] The CLI is now capable of using the objects filtering in reverse engineering.
@@ -1748,7 +1889,7 @@ v0.9.3-alpha1
 
 v0.9.3-alpha
 ------
-<em>Release date: March 26, 2020</em><br/>
+*Release date: March 26, 2020*
 
 * [New] Added support for multiselection in ModelObjectsWidget.
 * [New] Added an optional parameter in PgModelerNs::generateUniqueName to avoid comparing the input object.
@@ -1830,7 +1971,7 @@ v0.9.3-alpha
 
 v0.9.2
 ------
-<em>Release date: December 26, 2019</em><br/>
+*Release date: December 26, 2019*
 
 * [New] Add support for data dictionaries generation in HTML format in ModelExportForm.
 * [New] Added options to control data dictionary generation in CLI.
@@ -1852,7 +1993,7 @@ v0.9.2
 
 v0.9.2-beta2
 ------
-<em>Release date: November 1st, 2019</em><br/>
+*Release date: November 1st, 2019*
 
 * [New] Added support for foreign tables.
 * [New] Added the method DatabaseModel::getObject(QString,vector<ObjectType>) to return the first ocurrency in the lists related to the provided types.
@@ -1942,7 +2083,7 @@ v0.9.2-beta2
 
 v0.9.2-beta1
 ------
-<em>Release date: September 2, 2019</em><br/>
+*Release date: September 2, 2019*
 
 * [New] Added a routine to write a backup file during the saving of model files in order to avoid data loss in some rare cases.
 * [New] Added a new action on DataManipulationForm to clear the selected items by pressing Ctrl+R.
@@ -1987,7 +2128,7 @@ v0.9.2-beta1
 
 v0.9.2-beta
 ------
-<em>Release date: May 31, 2019</em><br/>
+*Release date: May 31, 2019*
 
 * [New] Added support for user mapping.
 * [New] Added support for foreign server.
@@ -2059,10 +2200,10 @@ v0.9.2-beta
 
 v0.9.2-alpha1
 ------
-<em>Release date: December 17, 2018</em><br/>
+*Release date: December 17, 2018*
 
 * [New] Added support for scene layers.
-* [New] Added support for view's columns importing in DatabaseImportHelper. 
+* [New] Added support for view's columns importing in DatabaseImportHelper.
 * [New] Added the ability to load view columns from database model file in DatabaseModel::createView.
 * [New] Added a tab "Columns" in ReferenceWidget where the user will be able to insert columns to be used as view columns.
 * [New] Added support for pagination of tables and views columns pagination.
@@ -2174,7 +2315,7 @@ v0.9.2-alpha1
 
 v0.9.2-alpha
 ------
-<em>Release date: August 20, 2018</em><br/>
+*Release date: August 20, 2018*
 
 * [New] Added the support for cancelling SQL execution in SQLExecutionWidget.
 * [New] Added support for save/restore the dialogs sizes and positions.
@@ -2226,7 +2367,7 @@ v0.9.2-alpha
 
 v0.9.1
 ------
-<em>Release date: May 14, 2018</em><br/>
+*Release date: May 14, 2018*
 
 * [New] Added support for line selection by clicking and moving the mouse over the line numbers widget in any source code field.
 * [New] The validator now checks if the model has columns referencing spatial data types and creates the postgis extension automatically when fixing the model.
@@ -2275,7 +2416,7 @@ v0.9.1
 
 v0.9.1-beta1
 ------
-<em>Release date: April 6, 2018</em><br/>
+*Release date: April 6, 2018*
 
 * [New] Added the ability to create multiples one-to-many and many-to-many relatationships between the same pair of tables.
 * [New] Added the ability to use more special ascii chars in the middle of object names.
@@ -2327,7 +2468,7 @@ v0.9.1-beta1
 
 v0.9.1-beta
 ------
-<em>Release date: January 26, 2018</em><br/>
+*Release date: January 26, 2018*
 
 * [New] Added support for GROUP BY/HAVING clauses in Views by adding a new kind of reference. Proper changes done in ViewWidget to allow configuring those clauses.
 * [New] Added the method Catalog::isSystemObject(oid) which indicates if the provided OID is related to a system object.
@@ -2344,7 +2485,7 @@ v0.9.1-beta
 
 v0.9.1-alpha1
 ------
-<em>Release date: November 30, 2017</em><br/>
+*Release date: November 30, 2017*
 
 * [New] Added the ability to compare two databases, and not only a model and a database, in diff tool.
 * [New] Added the relationship creation buttons on the object overlay when a single table is selected.
@@ -2363,7 +2504,7 @@ v0.9.1-alpha1
 
 v0.9.1-alpha
 ------
-<em>Release date: October 20, 2017</em><br/>
+*Release date: October 20, 2017*
 
 * [New] Added support for crow's foot notation.
 * [New] Added the crow's foot notation switch in RelationshipConfigWidget.
@@ -2405,7 +2546,7 @@ v0.9.1-alpha
 
 v0.9.0
 ------
-<em>Release date: September 1st, 2017</em><br/>
+*Release date: September 1st, 2017*
 
 * [New] Added the ability to paste text from clipboard to data grid in DataManipulationForm.
 * [New] Created the method CsvLoadWidget::loadCsvFromBuffer to make the code that extract csv document from string buffer reusable by other classes.
@@ -2441,7 +2582,7 @@ v0.9.0
 
 v0.9.0-beta2
 ------
-<em>Release date: July 1st, 2017</em><br/>
+*Release date: July 1st, 2017*
 
 * [New] Added an action to reset labels distance in BaseRelationship and ModelWidget.
 * [New] Added a widget that shows some info about the canvas and the selected objects at the bottom of main window in design view.
@@ -2475,7 +2616,7 @@ v0.9.0-beta2
 
 v0.9.0-beta1
 ------
-<em>Release date: May 13, 2017</em><br/>
+*Release date: May 13, 2017*
 
 * [New] Added the ability to standalone dialogs like import, diff, export and others to be resized according to the screen dpi and resolution.
 * [New] Added an experimental routine that will resize windows according to the current screen resolution and font dpi.
@@ -2498,7 +2639,7 @@ v0.9.0-beta1
 
 v0.9.0-beta
 ------
-<em>Release date: April 4, 2017</em><br/>
+*Release date: April 4, 2017*
 
 * [New] Added support for indexes in Views.
 * [New] Added the support for edit/load the source code in NumberedTextEditor in external application.
@@ -2513,7 +2654,7 @@ v0.9.0-beta
 * [New] Enabled the usage of NewObjectOverlayWidget for views.
 * [Change] Changed the default characters used to escape values in DataManipulationForm and TableDataWidget from {} to // due to problems with json data.
 * [Change] Improved the file manipulation in SQLExecutionWidget. Added option to save the commands to the current file or in another file (save as).
-* [Change] Minor improvements done in Linux deployment script to support multiarch systems. 
+* [Change] Minor improvements done in Linux deployment script to support multiarch systems.
 * [Change] View's children (indexes, rules, triggers) are now listed under their respective parent view in DatabaseExplorerWidget.
 * [Change] Minor improvement in ElementsWidget to disable/hide columns combo when creating index elements for a index associated to a view.
 * [Change] Improved the diff between the complete database and a partial model representing it.
@@ -2534,7 +2675,7 @@ v0.9.0-beta
 
 v0.9.0-alpha1
 ------
-<em>Release date: February 07, 2017</em><br/>
+*Release date: February 07, 2017*
 
 * [New] Added support for object moving via arrow keys in canvas area.
 * [New] Added support for easily create primary keys just by checking the desired columns in table's editing form.
@@ -2584,7 +2725,7 @@ v0.9.0-alpha1
 
 v0.9.0-alpha
 ------
-<em>Release date: October 18, 2016</em><br/>
+*Release date: October 18, 2016*
 
 * [New] Enabling pgModeler to connect to PostgreSQL 9.6 servers.
 * [New] Added the option to ignore error codes during the export process in CLI.
@@ -2611,8 +2752,8 @@ v0.9.0-alpha
 
 v0.8.2
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: June 3, 2016</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: June 3, 2016*
 
 * [New] Created the PlainTextItemDelegate replacing the ReadOnlyItemDelegate where needed.
 * [New] Added the ability to the table to create insert commands from the initial data buffer.
@@ -2668,8 +2809,8 @@ v0.8.2
 
 v0.8.2-beta1
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: March 31, 2016</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: March 31, 2016*
 
 * [New] Added missing PostGiS types.
 * [New] Adding the ability to save/load more metadata from objects like model's last zoom and position, protection status, sql disabled status, tags, textboxes and others.
@@ -2795,8 +2936,8 @@ v0.8.2-beta1
 
 v0.8.2-beta
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: January 12, 2016</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: January 12, 2016*
 
 * [New] Added version descriptor for PostgreSQL 9.5 enabling pgModeler to connect to it.
 * [New] Added access method BRIN for indexes, operator classes and operator families as an initial support for PostgreSQL 9.5.
@@ -2816,8 +2957,8 @@ v0.8.2-beta
 
 v0.8.2-alpha1
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: November 13, 2015</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: November 13, 2015*
 
 * [New] Added an additional step in import process to validate inheritance relationships to avoid incomplete tables.
 * [New] Added an additional relationship validation in model loading process when there are inheritances. This will avoid incomplete columns and validation errors related to "permanent invalidation state".
@@ -2837,8 +2978,8 @@ v0.8.2-alpha1
 
 v0.8.2-alpha
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: October 05, 2015</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: October 05, 2015*
 
 * [New] Added a toggle button in SQL Execution to show/hide the output pane.
 * [New] Added the method Permission::isSimilarTo that returns true when a provided permission has the same semantics as the caller permission.
@@ -2914,8 +3055,8 @@ v0.8.2-alpha
 
 v0.8.1
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: July 30, 2015</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: July 30, 2015*
 
 * [New] Added the ability to create objects from within the object selectors to shorten up the time spent to create a new objects in the model. The only exception of for selectors in SwapObjectsIdsWidget and table/column selectors in ViewWidget.
 * [New] Added a new method OperationList::isObjectRegistered to check if an object is registered in the list.
@@ -2950,8 +3091,8 @@ v0.8.1
 
 v0.8.1-beta1
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: June 30, 2015</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: June 30, 2015*
 
 * [New] Objects can be now renamed in database explorer except for databases and casts.
 * [New] Added an initial Spanish (es_ES) UI translation (review needed).
@@ -2964,8 +3105,8 @@ v0.8.1-beta1
 
 v0.8.1-beta
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: June 04, 2015</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: June 04, 2015*
 
 * [New] Added the ability to handle databases in different connections at once without the need to disconnect from a server and connect to another.
 * [New] Added an option to preserve database name (do not rename) in diff process.
@@ -3029,8 +3170,8 @@ v0.8.1-beta
 
 v0.8.1-alpha1
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: April 20, 2015</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: April 20, 2015*
 
 * [New] Added the ability to import objects from an existent database to a currently working model.
 * [New] Improvements on DatabaseImportHelper to dump the objects attributes in debug mode or to the log file when "ignore errors" is checked.
@@ -3070,8 +3211,8 @@ v0.8.1-alpha1
 
 v0.8.1-alpha
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: April 02, 2015</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: April 02, 2015*
 
 * [New] Added a "Contributors" section in "About pgModeler" dialog.
 * [New] Introduced the NO_UPDATE_CHECK variable in qmake to turn off update verification code specifically for package maintainers usage.
@@ -3114,8 +3255,8 @@ v0.8.1-alpha
 
 v0.8.0
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: February 28, 2015</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: February 28, 2015*
 
 * [New] Added support for multiple SQL execution widget instances for the same browsed database in SQL tool.
 * [New] Added truncate table actions on DatabaseExplorerWidget.
@@ -3149,8 +3290,8 @@ v0.8.0
 
 v0.8.0-beta2
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: February 07, 2015</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: February 07, 2015*
 
 * [New] Added the method Connection::getServerInfo that returns some informations about the connected server.
 * [New] Added an attribute to DatabaseExplorerWidget to show the estimated rows amount for selected table.
@@ -3190,7 +3331,7 @@ v0.8.0-beta2
 * [Fix] Fix on GeneralConfigWidget that was not saving code completion enabling status.
 * [Fix] Fixed some bugs on libobjrenderer classes that was causing crashes in some models arrangements. Now graphical objects are effectively deallocated only when the whole scene is destroyed.
 * [Fix] Minor improvement on OperationList::removeOperations to avoid crashes if a pool object is destroyed outside the operation history (e.g. relationship invalidation).
-* [Fix] Several fixes on OperationList to minimize the crashes when undoing/redoing operations. 
+* [Fix] Several fixes on OperationList to minimize the crashes when undoing/redoing operations.
 * [Fix] Minor fix on validation process that was failing sometimes to use temporary names feature.
 * [Fix] Minor fix on ModelsDiffHelper to correctly recreate foreign keys that references recreated primary keys.
 * [Fix] Minor fix on Table::removeObject to change not-null state of columns only when the removed object is a primary key.
@@ -3213,8 +3354,8 @@ v0.8.0-beta2
 
 v0.8.0-beta1
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: January 10, 2015</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: January 10, 2015*
 
 * [New] Created the widget SnippetConfigWidget in order to handle SQL snippets on SQLTool and DatabaseExplorerWidget.
 * [New] Introduced a new expression %unset on SchemaParser to clear the named attributes.
@@ -3280,8 +3421,8 @@ v0.8.0-beta1
 
 v0.8.0-beta
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: November 29, 2014</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: November 29, 2014*
 
 * [New] Introduced the first version of model database diff feature.
 * [New] Created the method Constraint::isCodeDiffersFrom in order to correctly generate the xml code and compare it with another object's code.
@@ -3377,8 +3518,8 @@ v0.8.0-beta
 
 v0.8.0-alpha2
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: September 30, 2014</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: September 30, 2014*
 
 * [New] Added an option on general settings to disable ask to validate model before save, export and diff.
 * [New] If the user try to save, export or diff a model and it is invalidated, pgModeler will first validate and then proceed with the pending operation.
@@ -3422,8 +3563,8 @@ v0.8.0-alpha2
 
 v0.8.0-alpha1
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: August 15, 2014</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: August 15, 2014*
 
 * [New] pgModeler now is capable to handle table's data through the new data manipulation form.
 * [New] The SQL tool received a basic find/replace widget.
@@ -3477,8 +3618,8 @@ v0.8.0-alpha1
 
 v0.8.0-alpha
 ------
-<em>Codename: <strong>Faithful Elephant</strong></em><br/>
-<em>Release date: July 21, 2014</em><br/>
+*Codename: <strong>Faithful Elephant</strong>*
+*Release date: July 21, 2014*
 
 * [New] Added support for using global settings for relationships on the editing form of those objects.
 * [New] A new section was created on settings dialog to manage global configurations for relationships.
@@ -3508,8 +3649,8 @@ v0.8.0-alpha
 
 v0.7.2
 ------
-<em>Codename: <strong>Brave Mastodon</strong></em><br/>
-<em>Release date: June 27, 2014</em><br/>
+*Codename: <strong>Brave Mastodon</strong>*
+*Release date: June 27, 2014*
 
 * [New] Added the missing attribute BUFFERING for Gist indexes.
 * [New] Added an experimental installer for Linux based upon the Qt Installer Framework.
@@ -3523,8 +3664,8 @@ v0.7.2
 
 v0.7.2-beta1
 ------
-<em>Codename: <strong>Brave Mastodon</strong></em><br/>
-<em>Release date: June 21, 2014</em><br/>
+*Codename: <strong>Brave Mastodon</strong>*
+*Release date: June 21, 2014*
 
 * [New] Added support for event trigger objects. The export and import processes were adjusted to handle this kind of object.
 * [New] Added support for UNLOGGED tables.
@@ -3539,8 +3680,8 @@ v0.7.2-beta1
 
 v0.7.2-beta
 ------
-<em>Codename: <strong>Brave Mastodon</strong></em><br/>
-<em>Release date: June 06, 2014</em><br/>
+*Codename: <strong>Brave Mastodon</strong>*
+*Release date: June 06, 2014*
 
 * [New] Added an option to convert integer type to serial ones on columns which default value is a nextval(seq::regclass) call.
 * [Change] Changed the MacOS X deployment script to use Qt 5.3.
@@ -3563,8 +3704,8 @@ v0.7.2-beta
 
 v0.7.2-alpha1
 ------
-<em>Codename: <strong>Brave Mastodon</strong></em><br/>
-<em>Release date: May 30, 2014</em><br/>
+*Codename: <strong>Brave Mastodon</strong>*
+*Release date: May 30, 2014*
 
 * [New] Introduced a "new object" overlay widget which gives user a quick access to actions that create objects.
 * [New] Added a step to fix indexes with old <condition> tag on command line interface.
@@ -3593,8 +3734,8 @@ v0.7.2-alpha1
 
 v0.7.2-alpha
 ------
-<em>Codename: <strong>Brave Mastodon</strong></em><br/>
-<em>Release date: May 06, 2014</em><br/>
+*Codename: <strong>Brave Mastodon</strong>*
+*Release date: May 06, 2014*
 
 * [New] Added a basic routine to check if there is some new version available on pgModeler site.
 * [Change] Custom  indexes for columns and constraints added by relationships are now stored on tables. In previous version the relationship was the responsible for that but this approach was provoking the bug related on issue 449.
@@ -3611,8 +3752,8 @@ v0.7.2-alpha
 
 v0.7.1
 ------
-<em>Codename: <strong>Brave Mastodon</strong></em><br/>
-<em>Release date: April 15, 2014</em><br/>
+*Codename: <strong>Brave Mastodon</strong>*
+*Release date: April 15, 2014*
 
 * [New] Added option to invert panning mode and range selection triggers.
 * [New] Added support for use relationship attributes as special primary keys.
@@ -3624,8 +3765,8 @@ v0.7.1
 
 v0.7.1-beta1
 ------
-<em>Codename: <strong>Brave Mastodon</strong></em><br/>
-<em>Release date: April 8, 2014</em><br/>
+*Codename: <strong>Brave Mastodon</strong>*
+*Release date: April 8, 2014*
 
 * [Change] Minor change on project's description text on about dialog.
 * [Fix] Workaround for the slow editing of function's definition. Disabled the automatic syntax highlighting.
@@ -3636,8 +3777,8 @@ v0.7.1-beta1
 
 v0.7.1-beta
 ------
-<em>Codename: <strong>Brave Mastodon</strong></em><br/>
-<em>Release date: April 6, 2014</em><br/>
+*Codename: <strong>Brave Mastodon</strong>*
+*Release date: April 6, 2014*
 
 * [New] Created a small interface to pgmodeler-cli that enables the user to fix a broken model inside pgModeler GUI.
 * [New] Added support for assign a sequence as default value of a column. The sequence will be converted to "nextval('seqname'::regclass) and the validation process will check if the sequence is correctly referenced by the table that owns the column.
@@ -3652,8 +3793,8 @@ v0.7.1-beta
 
 v0.7.1-alpha1
 ------
-<em>Codename: <strong>Brave Mastodon</strong></em><br/>
-<em>Release date: March 29, 2014</em><br/>
+*Codename: <strong>Brave Mastodon</strong>*
+*Release date: March 29, 2014*
 
 * [Change] Major model validation improvement. Now special objects are correctly validated.
 * [Fix] Fixed a crash when closing a model that contains a view that references columns added by relationships.
@@ -3663,8 +3804,8 @@ v0.7.1-alpha1
 
 v0.7.1-alpha
 ------
-<em>Codename: <strong>Brave Mastodon</strong></em><br/>
-<em>Release date: March 21, 2014</em><br/>
+*Codename: <strong>Brave Mastodon</strong>*
+*Release date: March 21, 2014*
 
 * [Fix] Fixed connection config. Empty passwords are now accepted.
 * [Fix] Fixed schema object code generation.
@@ -3674,8 +3815,8 @@ v0.7.1-alpha
 
 v0.7.0
 ------
-<em>Codename: <strong>Brave Mastodon</strong></em><br/>
-<em>Release date: February 25, 2014</em><br/>
+*Codename: <strong>Brave Mastodon</strong>*
+*Release date: February 25, 2014*
 
 * [New] Addded a  catalog attribute "hide-postgres-db" in order to avoid listing "postgres" maintainance DB on import operations.
 * [New] Added options to hide system/extension objects on SQL tool improving the object listing performance.
@@ -3750,8 +3891,8 @@ v0.7.0
 
 v0.6.2
 ------
-<em>Codename: <strong>Daring Mammoth</strong></em><br/>
-<em>Release date: December 20, 2013</em>
+*Codename: <strong>Daring Mammoth</strong>*
+*Release date: December 20, 2013*
 
 * [Change] Update Qt version to 5.2.0 on build scripts (Windows only).
 * [Change] Linux binaries are now bundled with all needed Qt libs.
@@ -3769,8 +3910,8 @@ v0.6.2
 
 v0.6.2-beta
 ------
-<em>Codename: <strong>Daring Mammoth</strong></em><br/>
-<em>Release date: November 29, 2013</em>
+*Codename: <strong>Daring Mammoth</strong>*
+*Release date: November 29, 2013*
 
 * [New] Added an option to drop database before a export process.
 * [New] Disabling SQL code now disables the code of all referrer and child objects (experimental!).
@@ -3789,8 +3930,8 @@ v0.6.2-beta
 
 v0.6.1
 ------
-<em>Codename: <strong>Daring Mammoth</strong></em><br/>
-<em>Release date: November 3, 2013</em>
+*Codename: <strong>Daring Mammoth</strong>*
+*Release date: November 3, 2013*
 
 * [New] PostgreSQL version 9.3 activated on code base. Now import and export operations works with this new version.
 * [Change] Changed the way inheritance is created. Now the INHERIT command is appended in the table's definition.
@@ -3811,8 +3952,8 @@ v0.6.1
 
 v0.6.0
 ------
-<em>Codename: <strong>Daring Mammoth</strong></em><br/>
-<em>Release date: September 30, 2013</em>
+*Codename: <strong>Daring Mammoth</strong>*
+*Release date: September 30, 2013*
 
 * [New] Added a validation when removing protected FK relationships.
 * [New] Added a progress info (at bottom widgets bar) for temporary model saving.
@@ -3837,8 +3978,8 @@ v0.6.0
 
 v0.6.0-beta
 ------
-<em>Codename: <strong>Daring Mammoth</strong></em><br/>
-<em>Release date: September 16, 2013</em>
+*Codename: <strong>Daring Mammoth</strong>*
+*Release date: September 16, 2013*
 
 * [New] Added experimental reverse engineering support.
 * [New] Added an experimental option --fix-model to pgmodeler-cli to permit the user to fix the structure of an older model (generated in pgModeler < 0.6.0) or a corrupted file.
@@ -3870,8 +4011,8 @@ v0.6.0-beta
 
 v0.6.0-alpha1
 ------
-<em>Codename: <strong>Daring Mammoth</strong></em><br/>
-<em>Release date: August 05, 2013</em>
+*Codename: <strong>Daring Mammoth</strong>*
+*Release date: August 05, 2013*
 
 * [New] Added catalog query for triggers.
 * [New] Added catalog query for rules.
@@ -3904,8 +4045,8 @@ v0.6.0-alpha1
 
 v0.6.0-alpha
 ------
-<em>Codename: <strong>Daring Mammoth</strong></em><br/>
-<em>Release date: July 19, 2013</em>
+*Codename: <strong>Daring Mammoth</strong>*
+*Release date: July 19, 2013*
 
 * [New] Added the widget to swap objects IDs on model validation form.
 * [New] Added indexing type "spgist" to IndexingType class.
@@ -3939,8 +4080,8 @@ v0.6.0-alpha
 
 v0.5.2
 ------
-<em>Codename: <strong>Lovely Duda</strong></em><br/>
-<em>Release date: June 27, 2013</em>
+*Codename: <strong>Lovely Duda</strong>*
+*Release date: June 27, 2013*
 
 * [New] User now can append free SQL commands to database objects via "Append SQL" command.
 * [New] Introduced an experimental code completion on fields that permits code input.
@@ -3952,8 +4093,8 @@ v0.5.2
 
 v0.5.1_r1
 ---------
-<em>Codename: <strong>Lovely Duda</strong></em><br/>
-<em>Release date: June 13, 2013</em>
+*Codename: <strong>Lovely Duda</strong>*
+*Release date: June 13, 2013*
 
 * [New] Added deployment scripts on all platforms to compile and pack pgModeler. Note: On Windows the script must run on GNU environment port like Cygwin or MingW.
 * [New] Added an special field to columns to easily identify which relationship generated it. (only for columns added by relationship)
@@ -3973,8 +4114,8 @@ v0.5.1_r1
 
 v0.5.1
 ------
-<em>Codename: <strong>Lovely Duda</strong></em><br/>
-<em>Release date: June 1, 2013</em>
+*Codename: <strong>Lovely Duda</strong>*
+*Release date: June 1, 2013*
 
 * [New] Code base ported to C++11 and Qt5.
 * [New] MacOSX compilation now generates an application bundle: pgmodeler.app
@@ -4001,7 +4142,7 @@ v0.5.1
 v0.5.0
 ------
 
-<em>Release date: May 17, 2013</em>
+*Release date: May 17, 2013*
 
 * [New] Complete main window restyling.
 * [New] Added a model validation tool to prevent reference break and name conflicts.
@@ -4070,7 +4211,7 @@ v0.5.0
 v0.4.1_r1
 ---------
 
-<em>Release date: March 19, 2013</em>
+*Release date: March 19, 2013*
 
 * [Change] user can now prepend a CTE (commom table expression, a.k.a "with queries") on view's definition.
 * [Change] user can now create a single reference containing a expression that defines the entire view.
@@ -4081,7 +4222,7 @@ v0.4.1_r1
 v0.4.1
 ------
 
-<em>Release date: March 16, 2013 </em>
+*Release date: March 16, 2013 *
 
 * [New] introduced the  "Disable SQL code" option for roles/tablespaces.
 * [New] user now can add objects by right-clicking group items on "Model Objects" dockwidget tree.
@@ -4112,7 +4253,7 @@ v0.4.1
 v0.4.0_r1
 ---------
 
-<em>Release date: March 04, 2013 </em>
+*Release date: March 04, 2013 *
 
 * [New] introducing the "pgModeler Wiki" as the main project's support resource.
 * [Fix] when main windows is closed the overview widget is closed too.
@@ -4121,7 +4262,7 @@ v0.4.0_r1
 v0.4.0
 ------
 
-<em>Release date: February 27, 2013 </em>
+*Release date: February 27, 2013 *
 
 * [New] introduce a "New object" submenu when activating the schema context menu (right-click)
 * [New] tables and view are now graphically separated by colored rectangles representing its schemas.
@@ -4185,7 +4326,7 @@ v0.4.0
 v0.3.4
 ------
 
-<em>Release date: October 17, 2012</em>
+*Release date: October 17, 2012*
 
 * [New] added chinese UI translation (provided by [gjunming](https://github.com/gjunming)).
 * [New] added basic support for PostGiS 2.0 only data types: box2d, box3d, geometry and geography (suggested by [george-silva](https://github.com/george-silva) on [issue#28](https://github.com/pgmodeler/pgmodeler/issues/28))(EXPERIMENTAL). Note: when using these data types make sure that PostGiS extension is installed on database cluster since pgModeler WILL NOT install it automatically or generate the command to do it!
@@ -4207,7 +4348,7 @@ v0.3.4
 v0.3.3
 ------
 
-<em>Release date: October 09, 2012</em>
+*Release date: October 09, 2012*
 
 * [Change] pgModeler license were update to GPLv3.
 * [Change] Error massages and entire UI were translated to en_US. Now people can contribute more easily with translation files. [(issue#8)](https://github.com/pgmodeler/pgmodeler/issues/8)
@@ -4220,7 +4361,7 @@ v0.3.3
 v0.3.2
 ------
 
-<em>Release date: September 27, 2012</em>
+*Release date: September 27, 2012*
 
 * [Change] The default extension for the models now stands for ".dbm" [(issue#9)](https://github.com/pgmodeler/pgmodeler/issues/9)
 * [Change] Tables and sequences now can be used as function return type as well parameter type. This is valid for other objects that make use of base types (except for table columns).
@@ -4235,7 +4376,7 @@ v0.3.2
 v0.3.1
 ------
 
-<em>Release date: September 18, 2012</em>
+*Release date: September 18, 2012*
 
 * [New] Relationships generates column suffixes automaticaly. This behavior can be changed on the relationship editing form.
 * [New] Added two samples to pgModeler.
@@ -4247,7 +4388,7 @@ v0.3.1
 v0.3.0
 ------
 
-<em>Release date: September 12, 2012</em>
+*Release date: September 12, 2012*
 
 * [New] Added a model overview widget.
 * [New] Added export feature that generates PNG image of the models.
@@ -4257,7 +4398,7 @@ v0.3.0
 v0.2.0
 ------
 
-<em>Release date: August 31, 2012</em>
+*Release date: August 31, 2012*
 
 * [New] Added an interface to implement third party plugins. Check [PLUGINS.md] (https://github.com/pgmodeler/pgmodeler/blob/master/PLUGINS.md) for details.
 * [New] Added a short cut to easily control the zoom on the model. Use Crtl + Mouse wheel up (zoom up) or Crtl + Mouse wheel down (zoom down).
@@ -4268,7 +4409,7 @@ v0.2.0
 v0.1.2
 ------
 
-<em>Release date: August 24, 2012</em>
+*Release date: August 24, 2012*
 
 * [New] Added a functionality to save modified models before closing the software.
 * [Change] Updated the en_US dictionary with the texts of the above functionality.
@@ -4284,7 +4425,7 @@ v0.1.2
 v0.1.1
 ------
 
-<em>Release date: August 14, 2012</em>
+*Release date: August 14, 2012*
 
 * [Fix] Correction of the actions for inserting graphic objects (table, text box, vision and relationship) in Windows environment.
 * [Fix] Correction on the display of the maximize button in the window decoration in Windows environment.
@@ -4295,6 +4436,6 @@ v0.1.1
 v0.1.0
 ------
 
-<em>Release date: August 9, 2012</em>
+*Release date: August 9, 2012*
 
 * First pgModeler release.

@@ -39,7 +39,7 @@ void Schema::setName(const QString &name)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgReservedName)
 						.arg(this->getName())
 						.arg(BaseObject::getTypeName(ObjectType::Schema)),
-						ErrorCode::AsgReservedName,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgReservedName,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	BaseObject::setName(name);
 }

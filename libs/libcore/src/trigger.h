@@ -76,7 +76,7 @@ class __libcore Trigger: public TableObject{
 		void setBasicAttributes(SchemaParser::CodeType def_type);
 
 		//! \brief Format the function arguments to be used by the SchemaParser
-		void setArgumentAttribute(unsigned tipo_def);
+		void setArgumentAttribute(unsigned def_type);
 
 	public:
 		enum TransitionTableId: unsigned {
@@ -85,8 +85,7 @@ class __libcore Trigger: public TableObject{
 		};
 
 		Trigger();
-
-		virtual ~Trigger(){}
+		~Trigger() override = default;
 
 		/*! \brief Adds a column as a firing condition (only when the event UPDATE is used).
 		 The columns added by this method must belongs to the trigger owner table. */
@@ -200,7 +199,7 @@ class __libcore Trigger: public TableObject{
 		std::vector<Column *> getRelationshipAddedColumns();
 
 		//! \brief Returns the SQL / XML definition for the trigger
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
 		/*! \brief Validates the trigger attributes according to the docs.
 		 * This method is executed whenever the trigger is added to a table or view.
@@ -211,8 +210,8 @@ class __libcore Trigger: public TableObject{
 
 		QString getDataDictionary(bool md_format, const attribs_map &extra_attribs);
 
-		virtual void updateDependencies() override;
-		virtual void generateHashCode() override;
+		void updateDependencies() override;
+		void generateHashCode() override;
 };
 
 #endif

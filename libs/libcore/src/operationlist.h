@@ -96,7 +96,7 @@ class __libcore OperationList: public QObject {
 	public:
 		OperationList(DatabaseModel *model);
 
-		virtual ~OperationList();
+		~OperationList() override;
 
 		/*! \brief Starts chaining operations.
 		 This means that all operations added after calling this

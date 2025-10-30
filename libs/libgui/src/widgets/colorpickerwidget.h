@@ -49,8 +49,8 @@ class __libgui ColorPickerWidget: public QWidget, public Ui::ColorPickerWidget {
 		QColor disable_color;
 		
 	protected:
-		bool eventFilter(QObject *object, QEvent *event);
-		
+		bool eventFilter(QObject *object, QEvent *event) override;
+
 	public:
 		static constexpr int MaxColorButtons=20;
 		

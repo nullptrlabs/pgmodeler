@@ -140,7 +140,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Waiting task to start...</string>
+           <string>Waiting for task to start...</string>
           </property>
          </widget>
         </item>

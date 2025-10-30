@@ -70,7 +70,7 @@ QModelIndex ObjectsListModel::index(int row, int column, const QModelIndex &pare
 
 QModelIndex ObjectsListModel::parent(const QModelIndex &) const
 {
-	return QModelIndex();
+	return {};
 }
 
 std::tuple<int,int,int> ObjectsListModel::getIndexMargins()
@@ -152,9 +152,9 @@ QVariant ObjectsListModel::getItemData(const ItemData &item_dt, int role) const
 		return item_dt.sz_hint;
 
 	if(role == Qt::TextAlignmentRole)
-		return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
+		return { Qt::AlignLeft | Qt::AlignVCenter };
 
-	return QVariant();
+	return {};
 }
 
 void ObjectsListModel::fillModel(const std::vector<BaseObject*>& obj_list, const QString& search_attr)
@@ -353,9 +353,9 @@ void ObjectsListModel::fillModel(const std::vector<attribs_map> &attr_list)
 QVariant ObjectsListModel::data(const QModelIndex &index, int role) const
 {
 	if(index.row() < row_count && index.column() < col_count)
-		return getItemData(item_data.at(index.row() * col_count + index.column()), role);
+		return getItemData(item_data.at((index.row() * col_count) + index.column()), role);
 
-	return QVariant();
+	return {};
 }
 
 QVariant ObjectsListModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -363,7 +363,7 @@ QVariant ObjectsListModel::headerData(int section, Qt::Orientation orientation, 
 	if(orientation == Qt::Horizontal)
 	{
 		if(section >= col_count)
-			return QVariant();
+			return {};
 
 		return getItemData(header_data.at(section), role);
 	}

@@ -97,11 +97,11 @@ class __libgui ModelObjectsWidget: public QWidget, public Ui::ModelObjectsWidget
 
 		QTreeWidgetItem *createItemForObject(BaseObject *object, QTreeWidgetItem *root=nullptr, bool update_perms=true);
 
-		void mouseMoveEvent(QMouseEvent *);
-		void resizeEvent(QResizeEvent *);
-		void closeEvent(QCloseEvent *);
-		void showEvent(QShowEvent *);
-		bool eventFilter(QObject *object, QEvent *event);
+		void mouseMoveEvent(QMouseEvent *) override;
+		void resizeEvent(QResizeEvent *) override;
+		void closeEvent(QCloseEvent *) override;
+		void showEvent(QShowEvent *) override;
+		bool eventFilter(QObject *object, QEvent *event) override;
 
 	public:
 		ModelObjectsWidget(bool simplified_view=false, QWidget * parent = nullptr);

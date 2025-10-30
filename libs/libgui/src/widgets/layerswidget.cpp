@@ -37,10 +37,10 @@ LayersWidget::LayersWidget(QWidget *parent) : QDialog(parent)
 	connect(layers_lst, &QListWidget::itemChanged, this, &LayersWidget::updateObjectsLayers);
 
 	connect(layer_name_edt, &QLineEdit::textChanged, this, [this](const QString &txt){
-		add_tb->setEnabled(!txt.isEmpty());
+		add_btn->setEnabled(!txt.isEmpty());
 	});
 
-	connect(add_tb, &QToolButton::clicked, this, [this](){
+	connect(add_btn, &QPushButton::clicked, this, [this](){
 		emit s_newLayerRequested(layer_name_edt->text());
 		layer_name_edt->clear();
 
@@ -49,8 +49,8 @@ LayersWidget::LayersWidget(QWidget *parent) : QDialog(parent)
 		item->setCheckState(Qt::Checked);
 	});
 
-	connect(apply_tb, &QToolButton::clicked, this, &LayersWidget::accept);
-	connect(cancel_tb, &QToolButton::clicked, this, &LayersWidget::reject);
+	connect(apply_btn, &QPushButton::clicked, this, &LayersWidget::accept);
+	connect(cancel_btn, &QPushButton::clicked, this, &LayersWidget::reject);
 }
 
 bool LayersWidget::eventFilter(QObject *object, QEvent *event)
@@ -78,7 +78,7 @@ bool LayersWidget::eventFilter(QObject *object, QEvent *event)
 
 		if(k_event->key() == Qt::Key_Enter || k_event->key() == Qt::Key_Return)
 		{
-			apply_tb->click();
+			apply_btn->click();
 			return true;
 		}
 	}

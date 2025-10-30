@@ -297,6 +297,7 @@ class __libcore BaseObject {
 		/*! \brief This version, called inside updateDependencies(), just run through the provided
 		 *  dep_objs list and sets the dependency link between the "this" object and the items
 		 *  in the list. Additionally, a list of dependencies that must be undone can be provided.
+		 *  This method clears the old dependencies by default if old_deps is empty.
 		 *
 		 *  The dependency link breaking operation made using old_deps runs first before creating the
 		 *  dependency link using the objects in dep_objs.
@@ -683,9 +684,15 @@ class __libcore BaseObject {
 		bool isDependingOn(BaseObject *dep_obj);
 
 		/*! \brief Updates the dependencies list based upon the current relationship between
-		 *  the "this" object and its dependencies. NOTE: this method must be called only in specific
-		 *  points of the code (currently only in the operator = due to the need in OperationList class )
-		 *  because it can be expensive in terms of processing if lots of objects calls it */
+		 *  the "this" object and its dependencies. This method clears the old dependencies
+		 *  relationships and creates other ones.
+		 *
+		 *  NOTE: this version of the method only produces a dependency relationship between the
+		 *  schema, tablespace, owner and collation. Derived classes must reimplement thi one and include
+		 *  other dependency objects, e.g., data types, functions, and etc.
+		 *
+		 *  NOTE: this method must be called only in specific points of the code because it can be expensive
+		 *  in terms of processing if lots of objects calls it. */
 		virtual void updateDependencies();
 
 		friend class DatabaseModel;

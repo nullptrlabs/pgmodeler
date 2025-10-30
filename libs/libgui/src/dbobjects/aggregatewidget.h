@@ -61,7 +61,7 @@ class __libgui AggregateWidget: public BaseObjectWidget, public Ui::AggregateWid
 		void handleDataType(int row);
 		
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

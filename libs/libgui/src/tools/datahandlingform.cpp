@@ -32,15 +32,15 @@ DataHandlingForm::DataHandlingForm(QWidget * parent, Qt::WindowFlags f): QDialog
 	QToolButton *btn = nullptr;
 	QFont fnt;
 
-	for(auto &obj : bnts_parent_wgt->children())
+	for(auto &obj : btns_parent_wgt->children())
 	{
 		btn = dynamic_cast<QToolButton *>(obj);
 		if(!btn) continue;
 
 		fnt = btn->font();
-		fnt.setWeight(QFont::Normal);
+		fnt.setWeight(QFont::Medium);
 		btn->setFont(fnt);
-		GuiUtilsNs::updateDropShadow(btn);
+		GuiUtilsNs::configureWidgetFont(btn, GuiUtilsNs::MediumFontFactor);
 	}
 
 	refresh_tb->setToolTip(refresh_tb->toolTip() + QString(" (%1)").arg(refresh_tb->shortcut().toString()));
@@ -63,10 +63,13 @@ DataHandlingForm::DataHandlingForm(QWidget * parent, Qt::WindowFlags f): QDialog
 	connect(schema_cmb, &QComboBox::currentIndexChanged, this, &DataHandlingForm::enableRefreshButton);
 	connect(table_cmb, &QComboBox::currentIndexChanged, this, &DataHandlingForm::enableRefreshButton);
 
-	connect(table_cmb, &QComboBox::activated, this, [this](){
+	auto add_data_grid_lmb = [this](){
 		addDataGrid(schema_cmb->currentText(), table_cmb->currentText(), "",
 								static_cast<ObjectType>(table_cmb->currentData().toUInt()));
-	});
+	};
+
+	connect(table_cmb, &QComboBox::activated, this, add_data_grid_lmb);
+	connect(browse_data_tb, &QToolButton::clicked, this, add_data_grid_lmb);
 
 	connect(new_window_tb, &QToolButton::clicked, this, [this](){
 			openNewWindow(tmpl_conn_params);
@@ -87,7 +90,7 @@ void DataHandlingForm::setAttributes(const attribs_map &conn_params, const QStri
 {
 	if(!BaseTable::isBaseTable(obj_type))
 	{
-		Messagebox::error(ErrorCode::OprObjectInvalidType, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(ErrorCode::OprObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
 		return;
 	}
 
@@ -115,7 +118,7 @@ void DataHandlingForm::setAttributes(const attribs_map &conn_params, const QStri
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -207,6 +210,7 @@ void DataHandlingForm::setCurrentDataGrid(int tab_idx)
 		connect(data_grid_wgt, &DataGridWidget::s_pasteEnabled, paste_tb, &QToolButton::setEnabled);
 
 		connect(data_grid_wgt, &DataGridWidget::s_dataModified, this, &DataHandlingForm::setDataGridModified);
+		connect(data_grid_wgt, &DataGridWidget::s_gridDuplicationRequested, this, &DataHandlingForm::duplicateDataGrid);
 
 		connect(data_grid_wgt, &DataGridWidget::s_browseTableRequested, this,
 						qOverload<const QString &, const QString &, const QString &, ObjectType>(&DataHandlingForm::addDataGrid));
@@ -277,10 +281,15 @@ void DataHandlingForm::closeDataGrid(int idx, bool confirm_close)
 	}
 }
 
-void DataHandlingForm::addDataGrid(const QString &schema, const QString &table, const QString &filter, ObjectType obj_type)
+DataGridWidget *DataHandlingForm::addDataGrid(const QString &schema, const QString &table, const QString &filter, ObjectType obj_type)
+{
+	return addDataGrid(schema, table, filter, obj_type, true);
+}
+
+DataGridWidget *DataHandlingForm::addDataGrid(const QString &schema, const QString &table, const QString &filter, ObjectType obj_type, bool retrieve_data)
 {
 	if(table_cmb->currentIndex() <= 0)
-		return;
+		return nullptr;
 
 	DataGridWidget *data_grid_wgt = new DataGridWidget(schema, table, obj_type, tmpl_conn_params);
 	QString data_grid_name = schema + "." + table;
@@ -295,11 +304,66 @@ void DataHandlingForm::addDataGrid(const QString &schema, const QString &table, 
 	try
 	{	
 		data_grid_wgt->filter_txt->setPlainText(filter);
-		data_grid_wgt->retrieveData();
+
+		if(retrieve_data)
+			data_grid_wgt->retrieveData();
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
+
+	return data_grid_wgt;
+}
+
+void DataHandlingForm::duplicateDataGrid(DataGridWidget *grid)
+{
+	bool toggle_filter = grid->isFilterToggled();
+	DataGridWidget *data_grid_wgt =
+			addDataGrid(grid->sch_name, grid->tab_name,
+									grid->filter_txt->toPlainText(),
+									grid->obj_type, false);
+
+	if(data_grid_wgt)
+	{
+		// Setting the filter tab visibility
+		filter_tb->setChecked(toggle_filter);
+		data_grid_wgt->limit_spb->setValue(grid->limit_spb->value());
+
+		// Setting the same order by columns
+		for(int row = 0; row < grid->ord_columns_lst->count(); row++)
+			data_grid_wgt->ord_columns_lst->addItem(grid->ord_columns_lst->item(row)->text());
+
+		data_grid_wgt->asc_rb->setChecked(grid->asc_rb->isChecked());
+		data_grid_wgt->desc_rb->setChecked(grid->desc_rb->isChecked());
+
+		try
+		{
+			QListWidgetItem *orig_item = nullptr, *new_item = nullptr;
+			data_grid_wgt->retrieveData();
+
+			/* After retrieving the data of the duplicate data grid we
+			 * need to replicate the selected/visible columns */
+			for(int row = 0; row < grid->columns_lst->count(); row++)
+			{
+				orig_item = grid->columns_lst->item(row);
+				new_item = data_grid_wgt->columns_lst->item(row);
+
+				/* Ignoring null items or items that has different texts
+				 * This may happen if the table structure is changed before
+				 * the grid is duplicated */
+				if((!orig_item || !new_item) ||
+					 (orig_item->text() != new_item->text()))
+					continue;
+
+				new_item->setCheckState(orig_item->checkState());
+				data_grid_wgt->toggleColumnDisplay(new_item);
+			}
+		}
+		catch(Exception &e)
+		{
+			Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
+		}
 	}
 }
 
@@ -323,14 +387,17 @@ void DataHandlingForm::listTables()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
 void DataHandlingForm::enableRefreshButton()
 {
-	refresh_tb->setEnabled(schema_cmb->currentIndex() > 0 &&
-												 table_cmb->currentIndex() > 0);
+	bool enable = schema_cmb->currentIndex() > 0 &&
+								table_cmb->currentIndex() > 0;
+
+	refresh_tb->setEnabled(enable);
+	browse_data_tb->setEnabled(enable);
 }
 
 void DataHandlingForm::listObjects(QComboBox *combo, std::vector<ObjectType> obj_types, const QString &schema)
@@ -387,7 +454,7 @@ void DataHandlingForm::listObjects(QComboBox *combo, std::vector<ObjectType> obj
 	catch(Exception &e)
 	{
 		catalog.closeConnection();
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -403,7 +470,7 @@ void DataHandlingForm::resizeEvent(QResizeEvent *event)
 
 	if(refresh_tb->toolButtonStyle() != style)
 	{
-		for(auto obj : bnts_parent_wgt->children())
+		for(auto obj : btns_parent_wgt->children())
 		{
 			btn = qobject_cast<QToolButton *>(obj);
 
@@ -424,7 +491,7 @@ std::pair<bool, int> DataHandlingForm::confirmDataGridClose(int idx)
 		data_grids_tbw->setCurrentIndex(idx);
 
 		msgbox.show(tr("<strong>WARNING: </strong> The table <strong>%1</strong> is modified but the changes are not yet saved! Do you really want to close and discard the pending operations?").arg(data_grid_wgt->objectName()),
-								Messagebox::AlertIcon, Messagebox::YesNoButtons);
+								Messagebox::Alert, Messagebox::YesNoButtons);
 
 		return { true, msgbox.result() };
 	}
@@ -481,7 +548,7 @@ bool DataHandlingForm::eventFilter(QObject *object, QEvent *event)
 		 object->metaObject()->className() == QString("QMenu"))
 	{
 		QMenu *menu = dynamic_cast<QMenu *>(object);
-		QWidget *btn = bnts_parent_wgt->childAt(bnts_parent_wgt->mapFromGlobal(QCursor::pos()));
+		QWidget *btn = btns_parent_wgt->childAt(btns_parent_wgt->mapFromGlobal(QCursor::pos()));
 
 		/* Sometime the button can be null indicating that the menu was called by right clicking
 		 * in the data grid items. In that case, we just ignore skip the menu position adjustment */
@@ -506,7 +573,7 @@ void DataHandlingForm::openNewWindow(const attribs_map &conn_params, const QStri
 {
 	if(!BaseTable::isBaseTable(obj_type))
 	{
-		Messagebox::error(ErrorCode::OprObjectInvalidType, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(ErrorCode::OprObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
 		return;
 	}
 
@@ -519,12 +586,12 @@ void DataHandlingForm::openNewWindow(const attribs_map &conn_params, const QStri
 		data_hand->hide_views_chk->setChecked(obj_type != ObjectType::View);
 		data_hand->setAttributes(conn_params, schema, table, obj_type);
 
-		GuiUtilsNs::resizeDialog(data_hand);
+		GuiUtilsNs::resizeWidget(data_hand);
 		GeneralConfigWidget::restoreWidgetGeometry(data_hand);
 		data_hand->show();
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }

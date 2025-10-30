@@ -364,7 +364,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Creates a database model and assign the model widget which will manage this instance
 		explicit DatabaseModel(ModelWidget *model_wgt);
 
-		virtual ~DatabaseModel();
+		~DatabaseModel() override;
 
 		//! \brief Returns the model widget that is managing the current database instance
 		ModelWidget *getModelWidget();
@@ -433,7 +433,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		void setAuthor(const QString &author);
 
 		//! \brief Sets the protection for all objects on the model
-		void setProtected(bool value);
+		void setProtected(bool value) override;
 
 		//! \brief Sets the sql appending at end of entire model definition
 		void setAppendAtEOD(bool value);
@@ -504,10 +504,10 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		/*! \brief Returns the complete SQL/XML defintion for the entire model (including all the other objects).
 		 The parameter 'export_file' is used to format the generated code in a way that can be saved
 		 in na SQL file and executed later on the DBMS server. This parameter is only used for SQL definition. */
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool export_file) final;
+		QString getSourceCode(SchemaParser::CodeType def_type, bool export_file) final;
 
 		//! \brief Returns the complete SQL/XML definition for the entire model (including all the other objects).
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
 		//! \brief Returns the code definition only for the database (excluding the definition of the other objects)
 		QString __getSourceCode(SchemaParser::CodeType def_type);
@@ -627,13 +627,13 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		OperatorClass *getOperatorClass(unsigned obj_idx);
 		OperatorClass *getOperatorClass(const QString &name);
 
-		void addOperatorFamily(OperatorFamily *familia_op, int obj_idx=-1);
+		void addOperatorFamily(OperatorFamily *op_family, int obj_idx=-1);
 		void removeOperatorFamily(OperatorFamily *op_family, int obj_idx=-1);
 		OperatorFamily *getOperatorFamily(unsigned obj_idx);
 		OperatorFamily *getOperatorFamily(const QString &name);
 
 		void addDomain(Domain *domain, int obj_idx=-1);
-		void removeDomain(Domain *dominio, int obj_idx=-1);
+		void removeDomain(Domain *domain, int obj_idx=-1);
 		Domain *getDomain(unsigned obj_idx);
 		Domain *getDomain(const QString &name);
 
@@ -833,7 +833,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		XmlParser *getXMLParser();
 
 		//! \brief Returns the ALTER definition between the current model and the provided one
-		virtual QString getAlterCode(BaseObject *object) final;
+		QString getAlterCode(BaseObject *object) final;
 
 		//! \brief Returns the data dictionary of all tables in a single HTML code
 		void getDataDictionary(attribs_map &datadict, bool browsable, bool split, bool md_format);

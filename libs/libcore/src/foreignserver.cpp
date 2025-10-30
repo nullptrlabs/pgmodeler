@@ -18,7 +18,7 @@
 
 #include "foreignserver.h"
 
-ForeignServer::ForeignServer() : BaseObject()
+ForeignServer::ForeignServer()
 {
 	obj_type = ObjectType::ForeignServer;
 	fdata_wrapper = nullptr;
@@ -104,7 +104,7 @@ QString ForeignServer::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 

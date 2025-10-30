@@ -29,7 +29,7 @@ ResultSetModel::ResultSetModel(ResultSet &res, Catalog &catalog, QObject *parent
 		std::vector<unsigned>::iterator end;
 		std::vector<attribs_map> types;
 		std::map<int, QString> type_names;
-		int col = 0;
+		//int col = 0;
 
 		header_icons.clear();
 		col_count = res.getColumnCount();
@@ -38,7 +38,7 @@ ResultSetModel::ResultSetModel(ResultSet &res, Catalog &catalog, QObject *parent
 		insertColumns(0, col_count);
 		insertRows(0, row_count);
 
-		for(col=0; col < col_count; col++)
+		for(int col = 0; col < col_count; col++)
 		{
 			header_data.push_back(" " + res.getColumnName(col));
 			type_ids.push_back(res.getColumnTypeId(col));
@@ -49,7 +49,7 @@ ResultSetModel::ResultSetModel(ResultSet &res, Catalog &catalog, QObject *parent
 			do
 			{
 				//Fills the current row with the values of current tuple
-				for(int col=0; col < col_count; col++)
+				for(int col = 0; col < col_count; col++)
 				{
 					item_data.push_back(res.getColumnValue(col));
 				}
@@ -63,13 +63,14 @@ ResultSetModel::ResultSetModel(ResultSet &res, Catalog &catalog, QObject *parent
 		type_ids.erase(end, type_ids.end());
 
 		types = aux_cat.getObjectsAttributes(ObjectType::Type, "", "", type_ids);
-		col = 0;
+		//col = 0;
 
 		for(auto &tp : types)
 			type_names[tp[Attributes::Oid].toInt()] = tp[Attributes::Name];
 
 		int tp_id = 0;
-		for(col=0; col < col_count; col++)
+
+		for(int col = 0; col < col_count; col++)
 		{
 			tp_id = res.getColumnTypeId(col);
 			header_icons.append(QIcon(GuiUtilsNs::getIconPath(getPgTypeIconName(type_names[tp_id]))));
@@ -78,7 +79,7 @@ ResultSetModel::ResultSetModel(ResultSet &res, Catalog &catalog, QObject *parent
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -99,7 +100,7 @@ QModelIndex ResultSetModel::index(int row, int column, const QModelIndex &parent
 
 QModelIndex ResultSetModel::parent(const QModelIndex &) const
 {
-	return QModelIndex();
+	return {};
 }
 
 QVariant ResultSetModel::data(const QModelIndex &index, int role) const
@@ -107,13 +108,13 @@ QVariant ResultSetModel::data(const QModelIndex &index, int role) const
 	if(index.row() < row_count && index.column() < col_count)
 	{
 		if(role == Qt::DisplayRole)
-			return (item_data.at(index.row() * col_count + index.column()));
+			return (item_data.at((index.row() * col_count) + index.column()));
 
 		if(role == Qt::TextAlignmentRole)
-			return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
+			return { Qt::AlignLeft | Qt::AlignVCenter };
 	}
 
-	return QVariant();
+	return {};
 }
 
 QVariant ResultSetModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -121,7 +122,7 @@ QVariant ResultSetModel::headerData(int section, Qt::Orientation orientation, in
 	if(orientation == Qt::Horizontal)
 	{
 		if(section >= col_count)
-			return QVariant();
+			return {};
 
 		if(role == Qt::DisplayRole)
 			return header_data.at(section);
@@ -133,7 +134,7 @@ QVariant ResultSetModel::headerData(int section, Qt::Orientation orientation, in
 			return tooltip_data.at(section);
 
 		if(role == Qt::TextAlignmentRole)
-			return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
+			return { Qt::AlignLeft | Qt::AlignVCenter };
 	}
 
 	return QAbstractTableModel::headerData(section, orientation, role);
@@ -168,7 +169,7 @@ void ResultSetModel::append(ResultSet &res)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

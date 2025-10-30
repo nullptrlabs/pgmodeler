@@ -109,11 +109,11 @@ QString SpatialType::operator * ()
 
 		if(srid > 0)
 			return (QString("(%1%2, %3)").arg(type_names[type_idx]).arg(var_str)).arg(srid);
-		else
-			return (QString("(%1%2)").arg(type_names[type_idx]).arg(var_str));
+
+		return (QString("(%1%2)").arg(type_names[type_idx]).arg(var_str));
 	}
-	else
-		return "";
+
+	return "";
 }
 
 QStringList SpatialType::getTypes()

@@ -46,7 +46,7 @@ Parameter::Parameter(const QString &name, PgSqlType type, bool in, bool out, boo
 void Parameter::setType(PgSqlType type)
 {
 	if(!type.isArrayType() && !type.isPolymorphicType() && is_variadic)
-		throw Exception(ErrorCode::InvUsageVariadicParamMode ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::InvUsageVariadicParamMode ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	type.reset();
 	setCodeInvalidated(this->type != type);
@@ -70,7 +70,7 @@ void Parameter::setOut(bool value)
 void Parameter::setVariadic(bool value)
 {
 	if(value && !type.isArrayType() && !type.isPolymorphicType())
-		throw Exception(ErrorCode::InvUsageVariadicParamMode ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::InvUsageVariadicParamMode ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(is_variadic != value);
 	is_variadic=value;

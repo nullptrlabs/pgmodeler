@@ -17,6 +17,7 @@
 */
 
 #include "viewwidget.h"
+#include "customuistyle.h"
 #include "rulewidget.h"
 #include "triggerwidget.h"
 #include "indexwidget.h"
@@ -33,6 +34,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 
 	Ui_ViewWidget::setupUi(this);
 	alert_frm->setVisible(false);
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
 	check_option_cmb->addItem(tr("No check"));
 	check_option_cmb->addItems(CheckOptionType::getTypes());
@@ -43,7 +45,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 	sql_definition_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
 	vbox = new QVBoxLayout(sql_definition_tab);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(alert_frm);
 	vbox->addWidget(sql_definition_txt);
 
@@ -53,7 +55,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 																				ObjectType::Procedure } , true, this);
 
 	vbox = new QVBoxLayout(view_refs_tab);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(obj_refs_wgt);
 	vbox->addWidget(obj_refs_wgt);
 
@@ -63,7 +65,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 	sql_preview_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
 	vbox = new QVBoxLayout(sql_preview_tab);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(sql_preview_txt);
 
 	tag_sel=new ObjectSelectorWidget(ObjectType::Tag, this);
@@ -71,7 +73,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 
 	custom_cols_wgt = new SimpleColumnsWidget(this);
 	vbox = new QVBoxLayout(columns_tab);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(custom_cols_wgt);
 
 	//Configuring the table objects that stores the triggers and rules
@@ -86,7 +88,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 
 		grid=new QGridLayout;
 		grid->addWidget(tab, 0, 0, 1, 1);
-		grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+		grid->setContentsMargins(GuiUtilsNs::LtMargins);
 		attributes_tbw->widget(tab_id)->setLayout(grid);
 		tab_id++;
 
@@ -201,7 +203,7 @@ void ViewWidget::handleObject()
 	catch(Exception &e)
 	{
 		listObjects(obj_type);
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -244,7 +246,7 @@ void ViewWidget::duplicateObject(int curr_row, int new_row)
 		}
 
 		listObjects(obj_type);
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -284,7 +286,7 @@ void ViewWidget::removeObjects()
 		}
 
 		listObjects(obj_type);
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -304,7 +306,7 @@ void ViewWidget::removeObject(int row)
 	catch(Exception &e)
 	{
 		listObjects(obj_type);
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -399,31 +401,31 @@ void ViewWidget::showObjectData(TableObject *object, int row)
 
 void ViewWidget::listObjects(ObjectType obj_type)
 {
-	CustomTableWidget *tab=nullptr;
-	unsigned count, i;
-	View *view=nullptr;
+	CustomTableWidget *tab = nullptr;
+	unsigned count = 0, i = 0;
+	View *view = nullptr;
 
 	try
 	{
 		//Gets the object table related to the object type
-		tab=objects_tab_map[obj_type];
-		view=dynamic_cast<View *>(this->object);
+		tab = objects_tab_map[obj_type];
+		view = dynamic_cast<View *>(this->object);
 
 		tab->blockSignals(true);
 		tab->removeRows();
 
-		count=view->getObjectCount(obj_type);
-		for(i=0; i < count; i++)
+		count = view->getObjectCount(obj_type);
+		for(i = 0; i < count; i++)
 		{
 			tab->addRow();
-			showObjectData(dynamic_cast<TableObject*>(view->getObject(i, obj_type)), i);
+			showObjectData(view->getObject(i, obj_type), i);
 		}
 		tab->clearSelection();
 		tab->blockSignals(false);
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -538,7 +540,7 @@ void ViewWidget::applyConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

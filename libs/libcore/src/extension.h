@@ -98,7 +98,7 @@ class __libcore Extension: public BaseObject {
 
 		Extension();
 
-		virtual void setSchema(BaseObject *schema) override;
+		void setSchema(BaseObject *schema) override;
 
 		void addObject(const ExtObject &ext_obj);
 
@@ -115,18 +115,18 @@ class __libcore Extension: public BaseObject {
 		bool containsObject(const ExtObject &ext_obj);
 
 		//! \brief Returns the SQL / XML code definition for the extension
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
-		virtual QString getAlterCode(BaseObject *object) final;
+		QString getAlterCode(BaseObject *object) final;
 
-		virtual QString getDropCode(bool cascade) final;
+		QString getDropCode(bool cascade) final;
 
-		virtual QString getSignature(bool format = true) final;
+		QString getSignature(bool format = true) final;
 
 		/*! \brief Returns the extension name. This method was overriden from BaseObject::getName() to make the prepend_schema
 		 * to be false by default (instead of true in BaseObject::getName) so the SQL code definition of the
 		 * extension can be created correctly since the CREATE EXTENSION does not allow the schema name appended to the object's name */
-		virtual QString getName(bool format = false, bool prepend_schema = false) final;
+		QString getName(bool format = false, bool prepend_schema = false) final;
 };
 
 #endif

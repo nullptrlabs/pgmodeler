@@ -40,7 +40,7 @@ class __libcanvas TextPolygonItem : public QGraphicsPolygonItem {
 
 	public:
 		TextPolygonItem(QGraphicsItem *parent = nullptr);
-		virtual ~TextPolygonItem();
+		~TextPolygonItem() override;
 
 		//! \brief Defines the text displayed by the item
 		void setText(const QString &text);
@@ -64,7 +64,7 @@ class __libcanvas TextPolygonItem : public QGraphicsPolygonItem {
 
 		QFont getFont();
 
-		virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr);
+		void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
 };
 
 #endif

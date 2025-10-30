@@ -163,7 +163,7 @@ class __libgui ModelsDiffHelper: public QObject {
 
 		ModelsDiffHelper();
 
-		virtual ~ModelsDiffHelper();
+		~ModelsDiffHelper() override;
 
 		/*! \brief Configures the models to be compared. It is assumed that src_model is the reference model
 		from which all changes must be collected and applied to the database. The imp_model is the

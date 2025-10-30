@@ -29,34 +29,41 @@ namespace PgSqlVersions {
 	PgSqlVersion150("15.0"),
 	PgSqlVersion160("16.0"),
 	PgSqlVersion170("17.0"),
-	DefaulVersion = PgSqlVersion170,
+	PgSqlVersion180("18.0"),
+	DefaulVersion = PgSqlVersion180,
 	MinimumVersion = PgSqlVersion100;
 
 	const QStringList
 	AllVersions = {
-		PgSqlVersion170, PgSqlVersion160,
-		PgSqlVersion150, PgSqlVersion140,
-		PgSqlVersion130, PgSqlVersion120,
-		PgSqlVersion110, PgSqlVersion100
+		PgSqlVersion180, PgSqlVersion170, PgSqlVersion160,
+		PgSqlVersion150, PgSqlVersion140, PgSqlVersion130,
+		PgSqlVersion120, PgSqlVersion110, PgSqlVersion100
 	};
 
 	QString parseString(const QString &pgsql_ver, bool ignore_legacy_ver)
 	{
 		unsigned curr_ver = QString(pgsql_ver).remove('.').toUInt(),
-				minor_ver = QString(MinimumVersion).remove('.').toUInt(),
+				min_ver = QString(MinimumVersion).remove('.').toUInt(),
 				default_ver = QString(DefaulVersion).remove('.').toUInt();
 
-		if(!ignore_legacy_ver && curr_ver != 0 && (curr_ver < minor_ver))
+		if(!ignore_legacy_ver && curr_ver != 0 && (curr_ver < min_ver))
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::InvPostgreSQLVersion)
-							.arg(pgsql_ver)
-							.arg(PgSqlVersions::MinimumVersion)
-							.arg(PgSqlVersions::DefaulVersion),
-							ErrorCode::InvPostgreSQLVersion,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											.arg(pgsql_ver, PgSqlVersions::MinimumVersion, PgSqlVersions::DefaulVersion),
+											ErrorCode::InvPostgreSQLVersion, PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
 
-		if(curr_ver > 0 && curr_ver <= default_ver)
-			return pgsql_ver;
+		if(curr_ver > 0)
+		{
+			// If valid version just returns the version
+			if(curr_ver <= default_ver)
+				return pgsql_ver;
+
+			/* If it's a new version greater than the default
+			 * we fallback to the default one */
+			if(curr_ver > default_ver)
+				return DefaulVersion;
+		}
 
 		return PgSqlVersions::MinimumVersion;
 	}

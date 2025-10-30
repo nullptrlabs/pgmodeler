@@ -249,7 +249,7 @@ QColor BaseObjectView::getElementColor(const QString &id, ColorId color_id)
 	if(color_config.count(id) > 0 && color_id <= ColorId::BorderColor)
 		return color_config[id][enum_t(color_id)];
 
-	return QColor(0,0,0);
+	return { 0, 0, 0 };
 }
 
 void BaseObjectView::getFillStyle(const QString &id, QColor &color1, QColor &color2)
@@ -315,8 +315,8 @@ QTextCharFormat BaseObjectView::getFontStyle(const QString &id)
 {
 	if(font_config.count(id))
 		return font_config[id];
-	else
-		return QTextCharFormat();
+	
+	return { };
 }
 
 void BaseObjectView::setPlaceholderEnabled(bool value)
@@ -419,7 +419,7 @@ void BaseObjectView::configureObjectSelection()
 	{
 		rect_item->setRect(this->boundingRect());
 		rect_item->setPos(0, 0);
-		rect_item->setBorderRadius(12);
+		rect_item->setBorderRadius(RoundedRectItem::DefaultRadius);
 		rect_item->setBrush(this->getFillStyle(Attributes::ObjSelection));
 		rect_item->setPen(this->getBorderStyle(Attributes::ObjSelection));
 	}
@@ -555,8 +555,8 @@ unsigned BaseObjectView::getSelectionOrder()
 
 QPointF BaseObjectView::getCenter()
 {
-	return QPointF(this->pos().x() + this->boundingRect().width()/2.0,
-								 this->pos().y() + this->boundingRect().height()/2.0);
+	return { this->pos().x() + (this->boundingRect().width() / 2.0),
+			 		 this->pos().y() + (this->boundingRect().height() / 2.0) };
 }
 
 void BaseObjectView::togglePlaceholder(bool visible)

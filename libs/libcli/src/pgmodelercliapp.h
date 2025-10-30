@@ -33,7 +33,6 @@
 #include "settings/generalconfigwidget.h"
 #include "settings/connectionsconfigwidget.h"
 #include "settings/relationshipconfigwidget.h"
-#include "settings/generalconfigwidget.h"
 #include "tools/databaseimporthelper.h"
 #include "tools/modelsdiffhelper.h"
 #include "pgmodelercliplugin.h"
@@ -69,8 +68,8 @@ class __libcli PgModelerCliApp: public Application {
 		//! \brief Diff helper object
 		ModelsDiffHelper *diff_hlp;
 
-		//! \brief Reference database model
-		DatabaseModel *model;
+		//! \brief Input database model
+		DatabaseModel *input_model;
 
 		//! \brief Graphical scene used to export the model to png
 		ObjectsScene *scene;
@@ -254,7 +253,8 @@ class __libcli PgModelerCliApp: public Application {
 		Force,
 		StartDate,
 		EndDate,
-		CompareTo,
+		CompareDb,
+		CompareFile,
 		SaveDiff,
 		ApplyDiff,
 		NoDiffPreview,
@@ -283,8 +283,7 @@ class __libcli PgModelerCliApp: public Application {
 		MsgNoFileAssociation;
 
 		PgModelerCliApp(int argc, char **argv);
-
-		virtual ~PgModelerCliApp();
+		~PgModelerCliApp() override;
 
 		//! \brief Shows the options menu
 		void showMenu();
@@ -311,7 +310,7 @@ class __libcli PgModelerCliApp: public Application {
 		void fixModel();
 		void exportModel();
 		void importDatabase();
-		void diffModelDatabase();
+		void diffModels();
 		void updateMimeType();
 		void createConfigurations();
 		void listConnections();

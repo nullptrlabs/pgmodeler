@@ -47,7 +47,7 @@ class __libgui RoleWidget: public BaseObjectWidget, public Ui::RoleWidget {
 
 	public:
 		RoleWidget(QWidget * parent = nullptr);
-		virtual ~RoleWidget();
+		~RoleWidget() override;
 
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Role *role);
 
@@ -59,7 +59,7 @@ class __libgui RoleWidget: public BaseObjectWidget, public Ui::RoleWidget {
 		void configureRoleSelection();
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

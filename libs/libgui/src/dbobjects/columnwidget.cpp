@@ -90,7 +90,7 @@ void ColumnWidget::setAttributes(DatabaseModel *model, OperationList *op_list, B
 	PgSqlType type;
 
 	if(!parent_obj)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	BaseObjectWidget::setAttributes(model, op_list, column, parent_obj);
 	sequence_sel->setModel(model);
@@ -191,7 +191,7 @@ void ColumnWidget::applyConfiguration()
 				throw Exception(Exception::getErrorMessage(ErrorCode::NullPrimaryKeyColumn)
 												.arg(column->getName())
 												.arg(pk->getParentTable()->getSignature(true)),
-												ErrorCode::NullPrimaryKeyColumn,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+												ErrorCode::NullPrimaryKeyColumn,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 			// Separating fks in which the column is part so the fk relationships can be properly updated
 			for(unsigned idx = 0; idx < parent_tab->getConstraintCount(); idx++)
@@ -225,7 +225,7 @@ void ColumnWidget::applyConfiguration()
 	catch(Exception &e)
 	{
 		cancelConfiguration();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

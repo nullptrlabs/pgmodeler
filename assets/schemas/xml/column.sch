@@ -47,6 +47,8 @@ $tb [<column name=] "&{name}"
 
 $tb {type}
 
+%if {collation} %then $tb {collation} %end
+
 %if {comment} %then $tb {comment} %end
 
 $tb </column> $br

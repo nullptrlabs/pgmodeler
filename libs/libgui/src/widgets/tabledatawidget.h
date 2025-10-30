@@ -54,9 +54,9 @@ class __libgui TableDataWidget: public BaseObjectWidget, public Ui::TableDataWid
 		//! brief Generated the CSV-like buffer to be used as initial data in the table object
 		QString generateDataBuffer();
 
-		void showEvent(QShowEvent *);
+		void showEvent(QShowEvent *) override;
 
-		void enterEvent(QEnterEvent *);
+		void enterEvent(QEnterEvent *) override;
 
 	public:
 		static const QString PlaceholderColumn;
@@ -66,7 +66,7 @@ class __libgui TableDataWidget: public BaseObjectWidget, public Ui::TableDataWid
 		void setAttributes(DatabaseModel *model, PhysicalTable *table);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 
 	private slots:
 		void insertRowOnTabPress(int curr_row, int curr_col, int prev_row, int prev_col);

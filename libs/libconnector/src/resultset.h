@@ -31,26 +31,21 @@ It the resultset contains data the user must call ResultSet::accessTuple() to ac
 #include "attribsmap.h"
 #include <libpq-fe.h>
 #include <cstdlib>
-#include <iostream>
 
 //This constant is defined on PostgreSQL source code src/catalog/pg_type.h
 #define BYTEAOID 17
 
 class __libconnector ResultSet {
 	private:
-		/*! \brief Indicates whether the result was copied, this flag is used
-	 to avoid segmentation faults when calling the destructor.
-	 As the pointer 'sql_result' is copied
-	 to other elements if it is destroyed can cause
-	 reference fails. Thus, such a pointer is only deleted
-	 when this flag is marked as false */
-		bool is_res_copied;
-
 		void validateColumnIndex(int column_idx);
 
 		int validateColumnName(const QString &column_name);
 
-	protected:
+        void initResultSet(PGresult *sql_res);
+
+        void clearResultSet();
+
+    protected:
 		//! \brief Stores the current tuple index, just for navigation
 		int current_tuple;
 
@@ -61,8 +56,12 @@ class __libconnector ResultSet {
 		//! \brief Stores the result object of a SQL command
 		PGresult *sql_result;
 
-		/*! \brief This class may be constructed from a
-	 result of SQL command generated in DBConnection class */
+        /*! \brief This class may be constructed from a
+         * result of SQL command generated in Connection class.
+         * The ResultSet takes the ownership of the provided sql_result,
+         * so there's no need to call PQclear() over it after instantiate
+         * an object of this class. When destroyed, the instance will
+         * free the PGresult. (see clearResultSet) */
 		ResultSet(PGresult *sql_result);
 
 	public:
@@ -75,6 +74,9 @@ class __libconnector ResultSet {
 		};
 
 		ResultSet();
+
+         /*! \brief Destroys the result set using clearResultSet.
+          * The internal PostgreSQL result set (sql_result) is automatically freed */
 		~ResultSet();
 
 		//! \brief Returns the value of a column (searching by name or index)
@@ -88,9 +90,9 @@ class __libconnector ResultSet {
 		//! \brief Returns all the column names / values for the current tuple.
 		attribs_map getTupleValues();
 
-		/*! \brief Returns the number of rows affected by the command that generated
-	 the result if it is an INSERT, DELETE, UPDATE or the number of
-	 tuples returned if the command was a SELECT */
+        /*! \brief Returns the number of rows affected by the command that generated
+         * the result if it is an INSERT, DELETE, UPDATE or the number of
+         * tuples returned if the command was a SELECT */
 		int getTupleCount();
 
 		//! \brief Returns the column count present in one tuple
@@ -128,10 +130,8 @@ class __libconnector ResultSet {
 		//! \brief Returns if the result set is valid (created from a valid result set)
 		bool isValid();
 
-		void clearResultSet();
-
-		//! \brief Make a copy between two resultsets
-		void operator = (ResultSet &res);
+		ResultSet &operator = (const PGresult *) = delete;
+		ResultSet &operator = (const ResultSet &) = delete;
 
 		friend class Connection;
 };

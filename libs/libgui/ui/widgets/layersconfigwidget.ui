@@ -56,10 +56,10 @@
       <bool>true</bool>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="spacing">
@@ -80,7 +80,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QToolButton" name="add_tb">
+         <widget class="QPushButton" name="add_btn">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -115,16 +115,10 @@
           <property name="shortcut">
            <string>Ins</string>
           </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
-          <property name="autoRaise">
-           <bool>false</bool>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="remove_tb">
+         <widget class="QPushButton" name="remove_btn">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -159,16 +153,10 @@
           <property name="shortcut">
            <string>Del</string>
           </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
-          <property name="autoRaise">
-           <bool>false</bool>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="remove_all_tb">
+         <widget class="QPushButton" name="remove_all_btn">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -203,16 +191,10 @@
           <property name="shortcut">
            <string>Shift+Del</string>
           </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
-          <property name="autoRaise">
-           <bool>false</bool>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="visibility_tb">
+         <widget class="QPushButton" name="visibility_btn">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -250,24 +232,15 @@
           <property name="checked">
            <bool>false</bool>
           </property>
-          <property name="popupMode">
-           <enum>QToolButton::InstantPopup</enum>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
-          <property name="autoRaise">
-           <bool>false</bool>
-          </property>
          </widget>
         </item>
         <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeType">
-           <enum>QSizePolicy::Expanding</enum>
+           <enum>QSizePolicy::Policy::Expanding</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -287,7 +260,7 @@
           </property>
           <property name="icon">
            <iconset resource="../../res/resources.qrc">
-            <normaloff>:/icons/icons/close1.png</normaloff>:/icons/icons/close1.png</iconset>
+            <normaloff>:/icons/icons/closetab.png</normaloff>:/icons/icons/closetab.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -366,16 +339,16 @@
          </sizepolicy>
         </property>
         <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
+         <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
         </property>
         <property name="alternatingRowColors">
          <bool>true</bool>
         </property>
         <property name="selectionMode">
-         <enum>QAbstractItemView::SingleSelection</enum>
+         <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
         </property>
         <property name="selectionBehavior">
-         <enum>QAbstractItemView::SelectRows</enum>
+         <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
         </property>
         <property name="iconSize">
          <size>
@@ -427,16 +400,15 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>add_tb</tabstop>
-  <tabstop>remove_tb</tabstop>
-  <tabstop>remove_all_tb</tabstop>
-  <tabstop>visibility_tb</tabstop>
+  <tabstop>add_btn</tabstop>
+  <tabstop>remove_btn</tabstop>
+  <tabstop>remove_all_btn</tabstop>
+  <tabstop>visibility_btn</tabstop>
   <tabstop>toggle_layers_rects_chk</tabstop>
   <tabstop>toggle_layers_names_chk</tabstop>
   <tabstop>layers_tab</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

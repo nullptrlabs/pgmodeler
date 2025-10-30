@@ -42,14 +42,14 @@ void Cast::setDataType(DataTypeId type_idx, PgSqlType type)
 	type.reset();
 
 	if(type_idx > DstType)
-		throw Exception(ErrorCode::RefTypeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefTypeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Raises an error if the passed data type is null
 	if((*type).isEmpty())
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgNullTypeObject)
 						.arg(this->getName())
 						.arg(BaseObject::getTypeName(ObjectType::Cast)),
-						ErrorCode::AsgNullTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgNullTypeObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(this->types[type_idx] != type);
 	this->types[type_idx]=type;
@@ -61,7 +61,7 @@ void Cast::setCastType(CastType cast_type)
 {
 	//Raises an error if the user tries to assign an invalid cast type
 	if(cast_type > Implicit)
-		throw Exception(ErrorCode::AsgInvalidTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidTypeObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(this->cast_type != cast_type);
 	this->cast_type = cast_type;
@@ -83,51 +83,55 @@ void Cast::setCastFunction(Function *cast_func)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgNotAllocatedFunction)
 						.arg(this->getName())
 						.arg(BaseObject::getTypeName(ObjectType::Cast)),
-						ErrorCode::AsgNotAllocatedFunction,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgNotAllocatedFunction,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Retrieve the cast function parameter count for specific validations
 	param_count=cast_func->getParameterCount();
 
 	//Raises an error if the function don't have at least 1 parameter or a maximum of 3
-	if(param_count==0 || param_count > 3)
-		throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParamCount)
-						.arg(this->getName())
-						.arg(BaseObject::getTypeName(ObjectType::Cast)),
-						ErrorCode::AsgFunctionInvalidParamCount,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else
+	if(param_count == 0 || param_count > 3)
 	{
-		/* Error condition 1: Check if the first function parameter data type differs
-		 from cast source data type */
-		error=(cast_func->getParameter(0).getType()!=this->types[SrcType] &&
-					!cast_func->getParameter(0).getType().canCastTo(this->types[SrcType]));
-
-		/* Error condition 2: Check if the second function parameter data type
-		 is different from 'integer' */
-		if(!error && param_count>=2)
-			error=(cast_func->getParameter(1).getType()!="integer");
-
-		/* Error condition 3: Check if the third function parameter data type is
-		 different from 'boolean' */
-		if(!error && param_count==3)
-			error=(cast_func->getParameter(2).getType()!="boolean");
-
-		//In case some error condition is reached raises an error
-		if(error)
-			throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParameters)
-							.arg(this->getName())
-							.arg(BaseObject::getTypeName(ObjectType::Cast)),
-							ErrorCode::AsgFunctionInvalidParameters,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParamCount)
+										.arg(this->getName())
+										.arg(BaseObject::getTypeName(ObjectType::Cast)),
+										ErrorCode::AsgFunctionInvalidParamCount, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
+	/* Error condition 1: Check if the first function parameter data type differs
+		 from cast source data type */
+	error=(cast_func->getParameter(0).getType()!=this->types[SrcType] &&
+				!cast_func->getParameter(0).getType().canCastTo(this->types[SrcType]));
+
+	/* Error condition 2: Check if the second function parameter data type
+		 is different from 'integer' */
+	if(!error && param_count>=2)
+		error=(cast_func->getParameter(1).getType()!="integer");
+
+	/* Error condition 3: Check if the third function parameter data type is
+		 different from 'boolean' */
+	if(!error && param_count==3)
+		error=(cast_func->getParameter(2).getType()!="boolean");
+
+	//In case some error condition is reached raises an error
+	if(error)
+	{
+		throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParameters)
+										.arg(this->getName())
+										.arg(BaseObject::getTypeName(ObjectType::Cast)),
+										ErrorCode::AsgFunctionInvalidParameters, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
+	
 	/* Raises an error if the return type of the function differs from the destination data type.
-			If the types can be casted between them no error is returned */
+	   If the types can be casted between them no error is returned */
 	ret_type=cast_func->getReturnType();
 
-	if(ret_type!=this->types[DstType] && !ret_type.canCastTo(this->types[DstType]))
+	if(ret_type != this->types[DstType] && !ret_type.canCastTo(this->types[DstType]))
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidReturnType)
-						.arg(this->getName())
-						.arg(BaseObject::getTypeName(ObjectType::Cast)),
-						ErrorCode::AsgFunctionInvalidReturnType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										.arg(this->getName())
+										.arg(BaseObject::getTypeName(ObjectType::Cast)),
+										ErrorCode::AsgFunctionInvalidReturnType, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
 
 	setCodeInvalidated(cast_function != cast_func);
 	this->cast_function=cast_func;
@@ -136,7 +140,7 @@ void Cast::setCastFunction(Function *cast_func)
 PgSqlType Cast::getDataType(DataTypeId type_idx)
 {
 	if(type_idx > DstType)
-		throw Exception(ErrorCode::RefTypeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefTypeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return this->types[type_idx];
 }

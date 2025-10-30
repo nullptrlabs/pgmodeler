@@ -63,7 +63,7 @@ class __libgui ElementsTableWidget: public QWidget {
 
 	public:
 		ElementsTableWidget(QWidget *parent = nullptr);
-		virtual ~ElementsTableWidget();
+		~ElementsTableWidget() override;
 
 		//! \brief Configures the grid based upon the template Class in use
 		template<class Class>

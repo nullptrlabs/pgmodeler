@@ -17,6 +17,7 @@
 */
 
 #include "objectsfilterwidget.h"
+#include "customuistyle.h"
 #include "guiutilsns.h"
 #include "catalog.h"
 #include "utilsns.h"
@@ -27,21 +28,22 @@ ObjectsFilterWidget::ObjectsFilterWidget(QWidget *parent) : QWidget(parent)
 
 	setupUi(this);
 
-	hint_lbl->setText(tr("Using a pattern in <strong>%1</strong> mode in which no wildcard character <strong>%2</strong> \
-is present has the same effect as performing an exact match searching on the names or signatures.")
+	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, hint_frm);
+
+	hint_lbl->setText(tr("Using a pattern in <strong>%1</strong> mode where no wildcard character <strong>%2</strong> is present has the same effect as performing an exact match search on the names or signatures.")
 											 .arg(UtilsNs::FilterWildcard)
 											 .arg(UtilsNs::WildcardChar));
 
-	add_tb->setToolTip(add_tb->toolTip() + QString(" (%1)").arg(add_tb->shortcut().toString()));
-	clear_all_tb->setToolTip(clear_all_tb->toolTip() + QString(" (%1)").arg(clear_all_tb->shortcut().toString()));
-	apply_tb->setToolTip(apply_tb->toolTip() + QString(" (%1)").arg(apply_tb->shortcut().toString()));
+	add_btn->setToolTip(add_btn->toolTip() + QString(" (%1)").arg(add_btn->shortcut().toString()));
+	clear_all_btn->setToolTip(clear_all_btn->toolTip() + QString(" (%1)").arg(clear_all_btn->shortcut().toString()));
+	apply_btn->setToolTip(apply_btn->toolTip() + QString(" (%1)").arg(apply_btn->shortcut().toString()));
 
 	frame = new QFrame(this);
 	tab_objs_lst = new QListWidget(this);
 
 	QVBoxLayout *vbox = new QVBoxLayout;
 	vbox->addWidget(tab_objs_lst);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	frame->setLayout(vbox);
 
 	wgt_act_forced_filter = new QWidgetAction(this);
@@ -61,7 +63,7 @@ is present has the same effect as performing an exact match searching on the nam
 		tab_objs_lst->addItem(item);
 	}
 
-	action_only_matching = new QAction(tr("Only macthing"), this);
+	action_only_matching = new QAction(tr("Only matching"), this);
 	action_only_matching->setCheckable(true);
 	action_only_matching->setChecked(true);
 
@@ -76,13 +78,13 @@ is present has the same effect as performing an exact match searching on the nam
 	action_forced_filter->setText(tr("Forced filtering"));
 	options_menu.addAction(action_forced_filter);
 
-	options_tb->setMenu(&options_menu);
+	options_btn->setMenu(&options_menu);
 
-	connect(add_tb, &QToolButton::clicked, this, &ObjectsFilterWidget::addFilter);
-	connect(clear_all_tb, &QToolButton::clicked, this, &ObjectsFilterWidget::clearFilters);
+	connect(add_btn, &QPushButton::clicked, this, &ObjectsFilterWidget::addFilter);
+	connect(clear_all_btn, &QPushButton::clicked, this, &ObjectsFilterWidget::clearFilters);
 	connect(action_only_matching, &QAction::toggled, action_forced_filter,  &QAction::setEnabled);
 
-	connect(apply_tb, &QToolButton::clicked, this, [this](){
+	connect(apply_btn, &QPushButton::clicked, this, [this](){
 		emit s_filterApplyingRequested();
 	});
 
@@ -283,8 +285,8 @@ void ObjectsFilterWidget::addFilter()
 	connect(rem_tb, &QToolButton::clicked, this, &ObjectsFilterWidget::removeFilter);
 	filters_tbw->setCellWidget(row, 3, rem_tb);
 
-	clear_all_tb->setEnabled(true);
-	apply_tb->setEnabled(filters_tbw->rowCount() != 0);
+	clear_all_btn->setEnabled(true);
+	apply_btn->setEnabled(filters_tbw->rowCount() != 0);
 }
 
 void ObjectsFilterWidget::removeFilter()
@@ -309,8 +311,8 @@ void ObjectsFilterWidget::removeFilter()
 
 	filters_tbw->removeRow(curr_row);
 	filters_tbw->clearSelection();
-	clear_all_tb->setEnabled(filters_tbw->rowCount() != 0);
-	apply_tb->setEnabled(filters_tbw->rowCount() != 0);
+	clear_all_btn->setEnabled(filters_tbw->rowCount() != 0);
+	apply_btn->setEnabled(filters_tbw->rowCount() != 0);
 
 	if(filters_tbw->rowCount() == 0)
 		emit s_filtersRemoved();
@@ -324,5 +326,5 @@ void ObjectsFilterWidget::clearFilters()
 		removeFilter();
 	}
 
-	clear_all_tb->setEnabled(false);
+	clear_all_btn->setEnabled(false);
 }

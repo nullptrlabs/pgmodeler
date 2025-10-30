@@ -66,7 +66,7 @@ class __libgui UpdateNotifierWidget: public QWidget, public Ui::UpdateNotifierWi
 		bool show_no_upd_msg;
 
 		//! \brief This event filter is used to resize the widget when the mouse is over the notifier
-		bool eventFilter(QObject *obj, QEvent *event);
+		bool eventFilter(QObject *obj, QEvent *event) override;
 
 		void activateLink(const QString &link);
 

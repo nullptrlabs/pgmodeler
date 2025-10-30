@@ -36,7 +36,7 @@ class __libgui TablespaceWidget: public BaseObjectWidget, public Ui::TablespaceW
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Tablespace *tablespc);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

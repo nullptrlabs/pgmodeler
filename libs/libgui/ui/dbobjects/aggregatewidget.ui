@@ -82,7 +82,7 @@
         <normaloff>:/icons/icons/parameter.png</normaloff>:/icons/icons/parameter.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>Funtion &amp;Inputs</string>
+       <string>Function &amp;Inputs</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="tab_2">

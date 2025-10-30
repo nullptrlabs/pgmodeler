@@ -45,7 +45,7 @@ AggregateWidget::AggregateWidget(QWidget *parent): BaseObjectWidget(parent, Obje
 	funcaoagregacao_grid->addWidget(sort_op_sel,2,1,1,1);
 
 	grid=new QGridLayout;
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	grid->addWidget(input_type,0,0);
 	grid->addWidget(input_types_tab,1,0);
 	state_input_types_twg->widget(0)->setLayout(grid);
@@ -53,7 +53,7 @@ AggregateWidget::AggregateWidget(QWidget *parent): BaseObjectWidget(parent, Obje
 	grid=new QGridLayout;
 	spacer=new QSpacerItem(20, 1, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-	grid->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
+	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	grid->addWidget(state_type,0,0);
 	grid->addItem(spacer,1,0);
 	state_input_types_twg->widget(1)->setLayout(grid);
@@ -128,7 +128,7 @@ void AggregateWidget::handleDataType(int row)
 		if(input_types_tab->getCellText(row, 0).isEmpty())
 			input_types_tab->removeRow(row);
 
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -161,7 +161,7 @@ void AggregateWidget::applyConfiguration()
 	catch(Exception &e)
 	{
 		cancelConfiguration();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

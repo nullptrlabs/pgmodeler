@@ -36,8 +36,8 @@ class __libgui CollationWidget: public BaseObjectWidget, public Ui::CollationWid
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, Collation *collation);
 		
 	public slots:
-		void applyConfiguration();
-		
+		void applyConfiguration() override;
+
 	private slots:
 		void resetFields();
 };

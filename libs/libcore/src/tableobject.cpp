@@ -143,7 +143,7 @@ QString TableObject::getAlterCode(BaseObject *object)
 	TableObject *tab_obj = dynamic_cast<TableObject *>(object);
 
 	if(!tab_obj)
-		throw Exception(ErrorCode::OprNotAllocatedObject, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	try
 	{
@@ -156,7 +156,7 @@ QString TableObject::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 
 }
@@ -172,7 +172,7 @@ QString TableObject::getSignature(bool format)
 void TableObject::setParentRelationship(BaseObject *parent_rel)
 {
 	if(parent_rel && parent_rel->getObjectType()!=ObjectType::Relationship)
-		throw Exception(ErrorCode::AsgObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	this->parent_rel = parent_rel;
 }

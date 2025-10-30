@@ -55,12 +55,12 @@ class __libgui PermissionWidget: public BaseObjectWidget, public Ui::PermissionW
 
 	public:
 		PermissionWidget(QWidget * parent = nullptr);
-		virtual ~PermissionWidget();
+		~PermissionWidget() override;
 
-		void setAttributes(DatabaseModel *model, BaseObject *objeto_pai, BaseObject *object);
+		void setAttributes(DatabaseModel *model, BaseObject *parent_obj, BaseObject *object);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 
 	private slots:
 		//! \brief Shows the object selection window

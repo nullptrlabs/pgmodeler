@@ -68,7 +68,7 @@ void SourceCodeWidget::saveSQLCode()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -156,7 +156,7 @@ void SourceCodeWidget::generateSourceCode(int def_type)
 		task_prog_wgt.close();
 		disconnect(this->model, nullptr, &task_prog_wgt, nullptr);
 
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -208,7 +208,7 @@ void SourceCodeWidget::setAttributes(DatabaseModel *model, const std::vector<Bas
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
