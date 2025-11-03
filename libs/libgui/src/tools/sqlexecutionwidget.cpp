@@ -17,6 +17,7 @@
 */
 
 #include "sqlexecutionwidget.h"
+#include "customuistyle.h"
 #include "settings/snippetsconfigwidget.h"
 #include "guiutilsns.h"
 #include "utils/plaintextitemdelegate.h"
@@ -39,6 +40,9 @@ SQLExecutionWidget::SQLExecutionWidget(QWidget * parent) : QWidget(parent)
 	output_wgt->setVisible(false);
 	plugins_wgts_stw->setVisible(false);
 	sql_cmd_splitter->setSizes({800, 200});
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, db_info_frm);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator_ln);
 
 	sql_cmd_txt=GuiUtilsNs::createNumberedTextEditor(sql_cmd_wgt);
 	sql_cmd_txt->setObjectName("sql_cmd_txt");
@@ -328,6 +332,7 @@ void SQLExecutionWidget::setConnection(Connection conn)
 	sql_exec_hlp.setConnection(conn);
 	sql_cmd_conn = conn;
 	db_name_lbl->setText(conn.getConnectionId(true, true, true));
+	username_lbl->setText(conn.getConnectionParam(Connection::ParamUser));
 	code_compl_wgt->setConnection(conn);
 }
 

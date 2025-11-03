@@ -21,11 +21,14 @@
 #include "settings/generalconfigwidget.h"
 #include "messagebox.h"
 #include "datagridwidget.h"
+#include "customuistyle.h"
 
 DataHandlingForm::DataHandlingForm(QWidget * parent, Qt::WindowFlags f): QDialog(parent, f)
 {
 	setupUi(this);
 	setWindowFlags(Qt::Dialog | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator_ln_2);
 
 	curr_grid_wgt = nullptr;
 
@@ -101,6 +104,7 @@ void DataHandlingForm::setAttributes(const attribs_map &conn_params, const QStri
 		connection_id = conn.getConnectionId(true, true, false);
 		tmpl_conn_params = conn_params;
 		db_name_lbl->setText(conn.getConnectionId(true, true, true));
+		username_lbl->setText(conn.getConnectionParam(Connection::ParamUser));
 
 		schema_cmb->clear();
 		listObjects(schema_cmb, { ObjectType::Schema });
