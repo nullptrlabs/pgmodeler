@@ -20,33 +20,29 @@
 
 DatabaseWidget::DatabaseWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Database)
 {
-	QStringList loc_list, encodings;
-	QFrame *frame=nullptr;
-	QGridLayout *grid=nullptr;
-
 	Ui_DatabaseWidget::setupUi(this);
-	configureFormLayout(database_grid, ObjectType::Database);
 
-	def_schema_sel=new ObjectSelectorWidget(ObjectType::Schema, this);
-	def_collation_sel=new ObjectSelectorWidget(ObjectType::Collation, this);
-	def_owner_sel=new ObjectSelectorWidget(ObjectType::Role, this);
-	def_tablespace_sel=new ObjectSelectorWidget(ObjectType::Tablespace, this);
+	def_schema_sel = new ObjectSelectorWidget(ObjectType::Schema, this);
+	def_collation_sel = new ObjectSelectorWidget(ObjectType::Collation, this);
+	def_owner_sel = new ObjectSelectorWidget(ObjectType::Role, this);
+	def_tablespace_sel = new ObjectSelectorWidget(ObjectType::Tablespace, this);
 
-	frame=generateInformationFrame(tr("The fields <strong>LC_COLLATE</strong> and <strong>LC_CTYPE</strong> have pre-configured values based upon the running system. You can freely modify those values if you intend to export the model to another host."));
-	grid=dynamic_cast<QGridLayout *>(attributes_twg->widget(0)->layout());
-	grid->addItem(new QSpacerItem(10,1,QSizePolicy::Fixed,QSizePolicy::Expanding), grid->count()+1, 0);
-	grid->addWidget(frame, grid->count()+1, 0, 1, 0);
+	QFrame *frame = generateInformationFrame(tr("The fields <strong>LC_COLLATE</strong> and <strong>LC_CTYPE</strong> have pre-configured values based upon the running system. You can freely modify those values if you intend to export the model to another host."));
+	frame->setParent(db_settings_tbw->widget(1));
+	settings_grid->addWidget(frame, settings_grid->count() + 1, 0, 1, 0);
 
-	frame=generateInformationFrame(tr("Use the above fields to specify the default attributes assigned to new objects created on the database model. Leaving a field empty will cause PostgreSQL to use the default values when exporting the model."));
-	grid=dynamic_cast<QGridLayout *>(attributes_twg->widget(1)->layout());
+	frame = generateInformationFrame(tr("Use the above fields to specify the default attributes assigned to new objects created on the database model. Leaving a field empty will cause PostgreSQL to use the default values when exporting the model."));
+	frame->setParent(db_settings_tbw->widget(2));
 
-	grid->addWidget(def_collation_sel, 0, 1);
-	grid->addWidget(def_schema_sel, 1, 1);
-	grid->addWidget(def_owner_sel, 2, 1);
-	grid->addWidget(def_tablespace_sel, 3, 1);
-	grid->addItem(new QSpacerItem(10,1,QSizePolicy::Fixed,QSizePolicy::Expanding), grid->count()+1, 0);
-	grid->addWidget(frame, grid->count()+1, 0, 1, 0);
-	frame->setParent(attributes_twg->widget(1));
+	def_collation_lt->addWidget(def_collation_sel);
+	def_schema_lt->addWidget(def_schema_sel);
+	def_owner_lt->addWidget(def_owner_sel);
+	def_tablespace_lt->addWidget(def_tablespace_sel);
+	def_objects_grid->addWidget(frame, def_objects_grid->count() + 1, 0, 1, 0);
+
+	configureTabbedLayout(db_settings_tbw);
+
+	QStringList loc_list, encodings;
 
 	//Configures the encoding combobox
 	encodings = EncodingType::getTypes();
@@ -54,10 +50,10 @@ DatabaseWidget::DatabaseWidget(QWidget *parent): BaseObjectWidget(parent, Object
 	encoding_cmb->addItems(encodings);
 
 	//Configures the localizations combobox
-	for(int i=QLocale::C; i <= QLocale::Chewa; i++)
+	for(int i = QLocale::C; i <= QLocale::Zulu; i++)
 	{
-		for(int i1=QLocale::Afghanistan; i1 <= QLocale::Zimbabwe; i1++)
-			loc_list.append(QLocale(static_cast<QLocale::Language>(i),static_cast<QLocale::Country>(i1)).name());
+		for(int i1 = QLocale::Afghanistan; i1 <= QLocale::Zimbabwe; i1++)
+			loc_list.append(QLocale(static_cast<QLocale::Language>(i), static_cast<QLocale::Country>(i1)).name());
 	}
 
 	loc_list.removeDuplicates();
@@ -151,4 +147,12 @@ void DatabaseWidget::applyConfiguration()
 	{
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
+}
+
+QString DatabaseWidget::getSQLCodePreview()
+{
+	/* TODO: before generate the code we need to apply the current settings to the object
+	 * or create a new instance so we can apply the values in the form in it and then
+	 * generate the code */
+	return dynamic_cast<DatabaseModel *>(object)->__getSourceCode(SchemaParser::SqlCode);
 }

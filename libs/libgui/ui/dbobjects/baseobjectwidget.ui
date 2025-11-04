@@ -45,11 +45,11 @@
    </property>
    <property name="font">
     <font>
-     <bold>true</bold>
+     <bold>false</bold>
     </font>
    </property>
    <property name="text">
-    <string>Name:</string>
+    <string>Name</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="name_edt">
@@ -118,11 +118,11 @@
    </property>
    <property name="font">
     <font>
-     <bold>true</bold>
+     <bold>false</bold>
     </font>
    </property>
    <property name="text">
-    <string>Comment:</string>
+    <string>Comment</string>
    </property>
   </widget>
   <widget class="QLabel" name="tablespace_lbl">
@@ -142,11 +142,11 @@
    </property>
    <property name="font">
     <font>
-     <bold>true</bold>
+     <bold>false</bold>
     </font>
    </property>
    <property name="text">
-    <string>Tablespace:</string>
+    <string>Tablespace</string>
    </property>
   </widget>
   <widget class="QLabel" name="schema_lbl">
@@ -166,11 +166,11 @@
    </property>
    <property name="font">
     <font>
-     <bold>true</bold>
+     <bold>false</bold>
     </font>
    </property>
    <property name="text">
-    <string>Schema:</string>
+    <string>Schema</string>
    </property>
   </widget>
   <widget class="QPushButton" name="edt_perms_tb">
@@ -336,11 +336,11 @@ This will disable the code of all child and referrer objects.</string>
    </property>
    <property name="font">
     <font>
-     <bold>true</bold>
+     <bold>false</bold>
     </font>
    </property>
    <property name="text">
-    <string>Collation:</string>
+    <string>Collation</string>
    </property>
   </widget>
   <widget class="QPushButton" name="append_sql_tb">
@@ -401,59 +401,47 @@ This will disable the code of all child and referrer objects.</string>
    </property>
    <property name="font">
     <font>
-     <bold>true</bold>
+     <bold>false</bold>
     </font>
    </property>
    <property name="text">
-    <string>Owner:</string>
+    <string>Owner</string>
    </property>
   </widget>
-  <widget class="QWidget" name="id_ico_wgt" native="true">
+  <widget class="QFrame" name="id_icon_frm">
    <property name="geometry">
     <rect>
      <x>200</x>
      <y>80</y>
-     <width>161</width>
+     <width>91</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Shape::StyledPanel</enum>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <property name="spacing">
      <number>5</number>
     </property>
     <property name="leftMargin">
-     <number>0</number>
+     <number>5</number>
     </property>
     <property name="topMargin">
-     <number>0</number>
+     <number>5</number>
     </property>
     <property name="rightMargin">
-     <number>0</number>
+     <number>5</number>
     </property>
     <property name="bottomMargin">
-     <number>0</number>
+     <number>5</number>
     </property>
-    <item>
-     <widget class="QLabel" name="obj_id_lbl">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="toolTip">
-       <string/>
-      </property>
-      <property name="text">
-       <string>ID:</string>
-      </property>
-     </widget>
-    </item>
     <item>
      <widget class="QLabel" name="obj_icon_lbl">
       <property name="sizePolicy">
@@ -485,6 +473,27 @@ This will disable the code of all child and referrer objects.</string>
       </property>
      </widget>
     </item>
+    <item>
+     <widget class="QLabel" name="obj_id_lbl">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string/>
+      </property>
+      <property name="text">
+       <string>ID:</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QPlainTextEdit" name="comment_edt">
@@ -496,6 +505,12 @@ This will disable the code of all child and referrer objects.</string>
      <height>70</height>
     </rect>
    </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="minimumSize">
     <size>
      <width>0</width>
@@ -505,7 +520,7 @@ This will disable the code of all child and referrer objects.</string>
    <property name="maximumSize">
     <size>
      <width>16777215</width>
-     <height>80</height>
+     <height>16777215</height>
     </size>
    </property>
    <property name="tabChangesFocus">
@@ -575,11 +590,11 @@ This will disable the code of all child and referrer objects.</string>
    </property>
    <property name="font">
     <font>
-     <bold>true</bold>
+     <bold>false</bold>
     </font>
    </property>
    <property name="text">
-    <string>Alias:</string>
+    <string>Alias</string>
    </property>
   </widget>
  </widget>

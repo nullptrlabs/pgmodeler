@@ -34,16 +34,25 @@
 class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 	Q_OBJECT
 
-	protected:
+	private:
 		struct FieldLayoutCfg {
-			QLabel *label;
-			QWidget *widget;
-			int row, col, row_span, col_span;
+			QLabel *label = nullptr;
+			QWidget *widget = nullptr, *append_widget = nullptr;
+			int row = 0, col = 0, row_span = 1, col_span = 1;
 
-			FieldLayoutCfg(QLabel *label, QWidget *widget, int row, int col, int row_span = 1, int col_span = 1)
-				: label(label), widget(widget), row(row), col(col), row_span(row_span), col_span(col_span) {}
+			FieldLayoutCfg(QLabel *label, QWidget *widget, QWidget *append_widget, 
+										 int row, int col, int row_span = 1, int col_span = 1) :
+				label(label), widget(widget), append_widget(append_widget), 
+				row(row), col(col), row_span(row_span), col_span(col_span) {}
+
+			FieldLayoutCfg(QLabel *label, QWidget *widget, int row, int col, 
+										 int row_span = 1, int col_span = 1) :
+				FieldLayoutCfg(label, widget, nullptr, row, col, row_span, col_span) {}
 		};
 
+		void configureBaseLayout();
+
+	protected:
 		static constexpr int MaxObjectSize=16777215;
 
 		bool object_protected;
@@ -97,9 +106,11 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		*collation_sel;
 		
 		/*! \brief Merges the specified grid layout with the 'baseobject_grid' creating a single form.
-			The obj_type parameter must be specified to show the object type icon */
-		void configureFormLayout(QGridLayout *grid=nullptr, ObjectType obj_type=ObjectType::BaseObject);
-		
+		 * The obj_type parameter must be specified to show the object type icon */
+		void configureFormLayout(QGridLayout *grid = nullptr, ObjectType obj_type = ObjectType::BaseObject);
+
+		void configureTabbedLayout(QTabWidget *tab_widget);
+
 		/*! \brief Configures the state of commom fields related to database objects enabling/disabling/hidding
 		 * according to the object type. The parameter inst_ev_filter indicates if the special event filter
 		 * must be installed on input fields. The event filter calls applyConfiguration() when ENTER/RETURN is pressed */
@@ -134,6 +145,13 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		void configureTabOrder(std::vector<QWidget *> widgets={});
 
 		BaseObject *getHandledObject();
+
+		/*! \brief This method must be reimplemented in each derived class
+		 *  and must return the SQL code preview of the object being handled
+		 *  so it can be displayed in the SQL preview tab */
+		virtual QString getSQLCodePreview();
+
+		virtual void fillObjectAttributes(BaseObject *object);
 			
 	public:
 		//! \brief Constants used to generate version intervals for version alert frame

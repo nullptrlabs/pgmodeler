@@ -207,7 +207,7 @@ namespace GuiUtilsNs {
 		}
 	}
 
-	void configureWidgetFont(QWidget *widget, FontFactorId factor_id)
+	void configureWidgetFont(QWidget *widget, FontFactorId factor_id, bool bold, bool italic)
 	{
 		double factor = 1;
 
@@ -228,23 +228,25 @@ namespace GuiUtilsNs {
 			break;
 		}
 
-		__configureWidgetFont(widget, factor);
+		__configureWidgetFont(widget, factor, bold, italic);
 	}
 
-	void __configureWidgetFont(QWidget *widget, double factor)
+	void __configureWidgetFont(QWidget *widget, double factor, bool bold, bool italic)
 	{
 		if(!widget)
 			return;
 
 		QFont font=widget->font();
 		font.setPointSizeF(font.pointSizeF() * factor);
+		font.setBold(bold);
+		font.setItalic(italic);
 		widget->setFont(font);
 	}
 
-	void configureWidgetsFont(const QWidgetList widgets, FontFactorId factor_id)
+	void configureWidgetsFont(const QWidgetList widgets, FontFactorId factor_id, bool bold, bool italic)
 	{
 		for(auto &wgt : widgets)
-			configureWidgetFont(wgt, factor_id);
+			configureWidgetFont(wgt, factor_id, bold, italic);
 	}
 
 	void createExceptionsTree(QTreeWidget *exceptions_trw, Exception &e, QTreeWidgetItem *root)
@@ -930,7 +932,16 @@ namespace GuiUtilsNs {
 								 event->globalPosition().y() - (widget->height() - (event_wgt->height() / 2)));
 	}
 
-	QVBoxLayout *createLabeledWidgetLayout(QLabel *label, QWidget *widget, QMargins margins, int spacing)
+	void configureWidgetBuddyLabel(QLabel *label, QWidget *widget)
+	{
+		if(!label || !widget)
+			return;
+
+		label->setBuddy(widget);
+		configureWidgetFont(label, SmallFontFactor, true);
+	}
+
+	QLayout *createLabeledWidgetLayout(QLabel *label, QWidget *widget, QWidget *append_widget, QMargins margins, int spacing)
 	{
 		if(!widget || !label)
 			throw Exception(ErrorCode::OprNotAllocatedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
@@ -942,9 +953,17 @@ namespace GuiUtilsNs {
 		layout->addWidget(label);
 		layout->addWidget(widget);
 
-		label->setBuddy(widget);
-		configureWidgetFont(label, SmallFontFactor);
+		configureWidgetBuddyLabel(label, widget);
 
-		return layout;
+		if(!append_widget)
+			return layout;
+		
+		QHBoxLayout *h_layout = new QHBoxLayout;
+		h_layout->setContentsMargins(margins);
+		h_layout->setSpacing(LtSpacing);
+		h_layout->addLayout(layout);
+		h_layout->addWidget(append_widget);
+
+		return h_layout;
 	}
 }

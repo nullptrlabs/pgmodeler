@@ -37,6 +37,7 @@
 #include <QMargins>
 #include <qboxlayout.h>
 #include <qmargins.h>
+#include <qwidget.h>
 
 namespace GuiUtilsNs {
 	/*! \brief WidgetCornerId used by resizeFloatingWidget() to determine
@@ -66,9 +67,9 @@ namespace GuiUtilsNs {
 		HugeFontFactor
 	};
 
-	extern __libgui void configureWidgetFont(QWidget *widget, FontFactorId factor_id);
-	extern __libgui void __configureWidgetFont(QWidget *widget, double factor);
-	extern __libgui void configureWidgetsFont(const QWidgetList widgets, FontFactorId factor_id);
+	extern __libgui void configureWidgetFont(QWidget *widget, FontFactorId factor_id, bool bold = false, bool italic = false);
+	extern __libgui void __configureWidgetFont(QWidget *widget, double factor, bool bold = false, bool italic = false);
+	extern __libgui void configureWidgetsFont(const QWidgetList widgets, FontFactorId factor_id, bool bold = false, bool italic = false);
 
 	/*! \brief Creates an item in the specified QTreeWidget instance.
 		The new item is automatically inserted on the QTreeWidget object.
@@ -255,7 +256,10 @@ namespace GuiUtilsNs {
 	 * user must take care of the destruction of the object */
 	extern __libgui NumberedTextEditor *createNumberedTextEditor(QWidget *parent, bool act_btns_enabled = false, qreal custom_fnt_size = 0);
 
-	extern __libgui QVBoxLayout *createLabeledWidgetLayout(QLabel *label, QWidget *widget, QMargins margins = {}, int spacing = 0);
+	extern __libgui void configureWidgetBuddyLabel(QLabel *label, QWidget *widget);
+
+	extern __libgui QLayout *createLabeledWidgetLayout(QLabel *label, QWidget *widget, QWidget *append_widget = nullptr, 
+																										 QMargins margins = {}, int spacing = 0);
 }
 
 #endif

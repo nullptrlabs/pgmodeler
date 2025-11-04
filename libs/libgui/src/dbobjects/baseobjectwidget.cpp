@@ -30,12 +30,13 @@
 
 BaseObjectWidget::BaseObjectWidget(QWidget *parent, ObjectType obj_type): QWidget(parent)
 {
-	//QSpacerItem *spacer=nullptr;
+
 
 	setWindowTitle("");
 	setupUi(this);
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, protected_obj_frm);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, id_icon_frm);
 
 	handled_obj_type=obj_type;
 	operation_count=0;
@@ -61,52 +62,7 @@ BaseObjectWidget::BaseObjectWidget(QWidget *parent, ObjectType obj_type): QWidge
 	tablespace_sel = new ObjectSelectorWidget(ObjectType::Tablespace, this);
 	owner_sel = new ObjectSelectorWidget(ObjectType::Role, this);
 
-	baseobject_grid = new QGridLayout;
-	baseobject_grid->setObjectName("objetobase_grid");
-
-	misc_btns_lt = new QHBoxLayout;
-	misc_btns_lt->setObjectName("misc_btns_lt");
-
-	//baseobject_grid->addWidget(protected_obj_frm, 0, 0, 1, 0);
-	
-	//baseobject_grid->addWidget(name_lbl, 1, 0, 1, 1);
-	//baseobject_grid->addWidget(name_edt, 1, 1, 1, 1);
-	//baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(name_lbl, name_edt), 1, 0);
-
-	//baseobject_grid->addWidget(alias_lbl, 2, 0, 1, 1);
-	//baseobject_grid->addWidget(alias_edt, 2, 1, 1, 1);
-	//baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(alias_lbl, alias_edt), 1, 1);
-
-	//baseobject_grid->addWidget(schema_lbl, 4, 0, 1, 1);
-	//baseobject_grid->addWidget(schema_sel, 4, 1, 1, 4);
-	//baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(schema_lbl, schema_sel), 2, 0);
-
-	//baseobject_grid->addWidget(collation_lbl, 5, 0, 1, 1);
-	//baseobject_grid->addWidget(collation_sel, 5, 1, 1, 4);
-	//baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(collation_lbl, collation_sel), 2, 1);
-
-	//baseobject_grid->addWidget(tablespace_lbl, 6, 0, 1, 1);
-	//baseobject_grid->addWidget(tablespace_sel, 6, 1, 1, 4);
-	//baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(tablespace_lbl, tablespace_sel), 3, 0);
-
-	//baseobject_grid->addWidget(owner_lbl, 7, 0, 1, 1);
-	//baseobject_grid->addWidget(owner_sel, 7, 1, 1, 4);
-	//baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(owner_lbl, owner_sel), 3, 1);
-
-	//baseobject_grid->addWidget(comment_lbl, 8, 0, 1, 1);
-	//baseobject_grid->addWidget(comment_edt, 8, 1, 1, 4);
-	//baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(comment_lbl, comment_edt), 4, 0, 1, 2);
-
-	//baseobject_grid->addWidget(id_ico_wgt, 10, 0);
-
-	//misc_btns_lt = new QHBoxLayout;
-	//spacer = new QSpacerItem(20, 1, QSizePolicy::Expanding);
-
-	//misc_btns_lt->addItem(spacer);
-	//misc_btns_lt->addWidget(append_sql_tb);
-	//misc_btns_lt->addWidget(edt_perms_tb);
-	//misc_btns_lt->addWidget(disable_sql_chk);
-	//baseobject_grid->addLayout(misc_btns_lt, 5, 0, 1, 2);
+	configureBaseLayout();
 }
 
 bool BaseObjectWidget::eventFilter(QObject *object, QEvent *event)
@@ -258,6 +214,16 @@ BaseObject *BaseObjectWidget::getHandledObject()
 	return object;
 }
 
+QString BaseObjectWidget::getSQLCodePreview()
+{
+	return "-- TODO: implement BaseObjectWidget::getSQLCodePreview() for derived class!";
+}
+
+void BaseObjectWidget::fillObjectAttributes(BaseObject *object)
+{
+
+}
+
 void BaseObjectWidget::cancelChainedOperation()
 {
 	bool op_list_changed=false;
@@ -359,7 +325,7 @@ void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 	if(object)
 	{
 		obj_id_lbl->setVisible(true);
-		obj_id_lbl->setText(QString("ID: %1").arg(object->getObjectId()));
+		obj_id_lbl->setText(QString("#%1").arg(object->getObjectId()));
 
 		if(handled_obj_type != ObjectType::BaseObject)
 			name_edt->setText(object->getName());
@@ -403,127 +369,184 @@ void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 	}
 }
 
-void BaseObjectWidget::configureFormLayout(QGridLayout *grid, ObjectType obj_type)
+void BaseObjectWidget::configureBaseLayout()
 {
-	/* Performing the layout configuration of the basic fields
-	 * before merging the passed layout fields into the baseobject_grid */
-	if(baseobject_grid->count() == 0)
+	const std::map<QList<ObjectType>, QList<FieldLayoutCfg>> field_confs {
+		{ 
+			// Objects that has only the name field visible
+			{ ObjectType::Cast, ObjectType::Role, ObjectType::Transform, 
+				ObjectType::GenericSql, ObjectType::Tag, ObjectType::Textbox }, 
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0 } }
+		},
+
+		{	// Objects that has the name and owner fields visible
+			{ ObjectType::Language, ObjectType::Tablespace, ObjectType::EventTrigger,
+				ObjectType::ForeignDataWrapper, ObjectType::ForeignServer, ObjectType::UserMapping },
+			{ { name_lbl, name_edt, 0, 0 },
+				{ owner_lbl, owner_sel, id_icon_frm, 0, 1 } },
+		},
+
+		{	// Objects that has the name and alias fields visible
+			{ ObjectType::Relationship, ObjectType::BaseRelationship },
+			{ { name_lbl, name_edt, 0, 0 },
+				{ alias_lbl, alias_edt, id_icon_frm, 0, 1 } },
+		},
+
+		{	// Objects that has the name and schema fields visible
+			{ ObjectType::Extension },
+			{ { name_lbl, name_edt, 0, 0 },
+				{ schema_lbl, schema_sel, id_icon_frm, 0, 1 } },
+		},
+
+		{	// Objects that has the name, tablespace and owner fields visible
+			{ ObjectType::Database },
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
+				{ tablespace_lbl, tablespace_sel, 1, 0 },
+				{ owner_lbl, owner_sel, 1, 1 } },
+		},
+
+		{	// Objects that has the name, schema and owner fields visible
+			{ ObjectType::Aggregate, ObjectType::Conversion, ObjectType::Function,
+				ObjectType::OpClass, ObjectType::Operator, ObjectType::OpFamily, 
+				ObjectType::Procedure, ObjectType::Sequence },
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
+				{ schema_lbl, schema_sel, 1, 0 },
+				{ owner_lbl, owner_sel, 1, 1 } },
+		},
+
+		{	// Objects that has the name, alias and owner fields visible
+			{ ObjectType::Schema },
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
+				{ alias_lbl, alias_edt, 1, 0 },
+				{ owner_lbl, owner_sel, 1, 1 } },
+		},
+
+		{	// Objects that has the name, alias, schema and owner fields visible
+			{ ObjectType::ForeignTable },
+			{ { name_lbl, name_edt, 0, 0 },
+				{ alias_lbl, alias_edt, id_icon_frm, 0, 1 },
+				{ schema_lbl, schema_sel, 1, 0 },
+				{ owner_lbl, owner_sel, 1, 1 } },
+		},
+
+		{	// Objects that has the name, schema, collation and owner fields visible
+			{ ObjectType::Collation, ObjectType::Domain, ObjectType::Type },
+			{ { name_lbl, name_edt, 0, 0 },
+				{ schema_lbl, schema_sel, id_icon_frm, 0, 1 },
+				{ collation_lbl, collation_sel, 1, 0 },
+				{ owner_lbl, owner_sel, 1, 1 } },
+		},
+
+		{	// Objects that has the name, alias, schema, tablespace and owner fields visible
+			{ ObjectType::Table, ObjectType::View },
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
+				{ schema_lbl, schema_sel, 1, 0 },				
+				{ alias_lbl, alias_edt, 1, 1 },
+				{ tablespace_lbl, tablespace_sel, 2, 0 },
+				{ owner_lbl, owner_sel, 2, 1 } },
+		},
+	};
+
+	baseobject_grid = new QGridLayout;
+	baseobject_grid->setObjectName("objetobase_grid");
+	baseobject_grid->setContentsMargins(GuiUtilsNs::LtMargins);
+	baseobject_grid->setSpacing(GuiUtilsNs::LtSpacing);
+
+	misc_btns_lt = new QHBoxLayout;
+	misc_btns_lt->setObjectName("misc_btns_lt");
+
+	baseobject_grid->addWidget(protected_obj_frm, 0, 0, 1, 0);
+
+	for(auto &[obj_types, fields] : field_confs)
 	{
-		const std::map<QList<ObjectType>, QList<FieldLayoutCfg>> field_confs {
-			{ 
-				// Objects that has only the name field visible
-				{ ObjectType::Cast, ObjectType::Role, ObjectType::Transform, 
-					ObjectType::GenericSql, ObjectType::Tag, ObjectType::Textbox }, 
-				{ { name_lbl, name_edt, 0, 0 } }
-			},
-
-			{	// Objects that has the name and owner fields visible
-				{ ObjectType::Language, ObjectType::Tablespace, ObjectType::EventTrigger,
-					ObjectType::ForeignDataWrapper, ObjectType::ForeignServer, ObjectType::UserMapping },
-				{ { name_lbl, name_edt, 0, 0 },
-					{ owner_lbl, owner_sel, 0, 1 } },
-		 	},
-
-			{	// Objects that has the name and alias fields visible
-				{ ObjectType::Relationship, ObjectType::BaseRelationship },
-				{ { name_lbl, name_edt, 0, 0 },
-					{ alias_lbl, alias_edt, 0, 1 } },
-		 	},
-
-			{	// Objects that has the name and schema fields visible
-				{ ObjectType::Extension },
-				{ { name_lbl, name_edt, 0, 0 },
-					{ schema_lbl, schema_sel, 0, 1 } },
-		 	},
-
-			{	// Objects that has the name, tablespace and owner fields visible
-				{ ObjectType::Database },
-				{ { name_lbl, name_edt, 0, 0, 1, 2 },
-					{ tablespace_lbl, tablespace_sel, 1, 0 },
-					{ owner_lbl, owner_sel, 1, 1 } },
-		 	},
-
-			{	// Objects that has the name, schema and owner fields visible
-				{ ObjectType::Aggregate, ObjectType::Conversion, ObjectType::Function,
-					ObjectType::OpClass, ObjectType::Operator, ObjectType::OpFamily, 
-					ObjectType::Procedure, ObjectType::Sequence },
-				{ { name_lbl, name_edt, 0, 0, 1, 2 },
-					{ schema_lbl, schema_sel, 1, 0 },
-					{ owner_lbl, owner_sel, 1, 1 } },
-		 	},
-
-			{	// Objects that has the name, alias and owner fields visible
-				{ ObjectType::Schema },
-				{ { name_lbl, name_edt, 0, 0, 1, 2 },
-					{ alias_lbl, alias_edt, 1, 0 },
-					{ owner_lbl, owner_sel, 1, 1 } },
-		 	},
-
-			{	// Objects that has the name, alias, schema and owner fields visible
-				{ ObjectType::ForeignTable },
-				{ { name_lbl, name_edt, 0, 0 },
-					{ alias_lbl, alias_edt, 0, 1 },
-					{ schema_lbl, schema_sel, 1, 0 },
-					{ owner_lbl, owner_sel, 1, 1 } },
-		 	},
-
-			{	// Objects that has the name, schema, collation and owner fields visible
-				{ ObjectType::Collation, ObjectType::Domain, ObjectType::Type },
-				{ { name_lbl, name_edt, 0, 0 },
-					{ schema_lbl, schema_sel, 0, 1 },
-					{ collation_lbl, collation_sel, 1, 0 },
-					{ owner_lbl, owner_sel, 1, 1 } },
-		 	},
-
-			{	// Objects that has the name, alias, schema, tablespace and owner fields visible
-				{ ObjectType::Table, ObjectType::View },
-				{ { name_lbl, name_edt, 0, 0, 1, 2 },
-					{ alias_lbl, alias_edt, 1, 0 },
-					{ schema_lbl, schema_sel, 1, 1 },
-					{ tablespace_lbl, tablespace_sel, 2, 0 },
-					{ owner_lbl, owner_sel, 2, 1 } },
-		 	},
-		};
-
-		baseobject_grid->addWidget(protected_obj_frm, 0, 0, 1, 0);
+		if(!obj_types.contains(handled_obj_type))
+			continue;
 		
-		/* baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(name_lbl, name_edt), 1, 0);
-		baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(alias_lbl, alias_edt), 1, 1);
-		baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(schema_lbl, schema_sel), 2, 0);
-		baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(collation_lbl, collation_sel), 2, 1);
-		baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(tablespace_lbl, tablespace_sel), 3, 0);
-		baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(owner_lbl, owner_sel), 3, 1); */
-		
-		for(auto &[obj_types, fields] : field_confs)
+		for(auto &field : fields)
 		{
-			if(obj_types.contains(obj_type))
-			{
-				for(auto &field : fields)
-				{
-					/* Adding the pair (label/widget) to the grid layout. We shift the row by one
-					 * in order to leave the first row for the protected object frame */
-					baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(field.label, field.widget),
-																		 field.row + 1, field.col,
-																		 field.row_span, field.col_span);
-				}
-
-				break;
-			}
+			/* Adding the pair (label/widget) to the grid layout. We shift the row by one
+				* in order to leave the first row for the protected object frame */
+			baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(field.label, field.widget, field.append_widget),
+																	field.row + 1, field.col,
+																	field.row_span, field.col_span);
 		}
 
-		baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(comment_lbl, comment_edt),
-															 baseobject_grid->count() - 1, 0, 1, 2);
-
-		misc_btns_lt->addItem(new QSpacerItem(20, 1, QSizePolicy::Expanding));
-		misc_btns_lt->addWidget(append_sql_tb);
-		misc_btns_lt->addWidget(edt_perms_tb);
-		misc_btns_lt->addWidget(disable_sql_chk);
-
-		baseobject_grid->addLayout(misc_btns_lt,  baseobject_grid->count() - 1, 0, 1, 2);
-
-		baseobject_grid->addWidget(id_ico_wgt, 10, 0);
+		break;
 	}
 
+	baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(comment_lbl, comment_edt),
+															baseobject_grid->count() - 1, 0, 1, 2);
+
+	misc_btns_lt->addItem(new QSpacerItem(20, 1, QSizePolicy::Expanding));
+	misc_btns_lt->addWidget(append_sql_tb);
+	misc_btns_lt->addWidget(edt_perms_tb);
+	misc_btns_lt->addWidget(disable_sql_chk);
+
+	baseobject_grid->addLayout(misc_btns_lt,  baseobject_grid->count() - 1, 0, 1, 2);
+}
+
+void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget)
+{
+	if(!tab_widget)
+		return;
+
+	// General/basics fields page
+	QWidget *page =  new QWidget(tab_widget);
+	page->setObjectName("baseobject_tab");
+	page->setLayout(baseobject_grid);
+
+	tab_widget->insertTab(0, page,
+												QIcon(GuiUtilsNs::getIconPath("attribute")), tr("General"));
+	tab_widget->setCurrentIndex(0);
+
+	// Source code preview page
+	page =  new QWidget(tab_widget);
+	tab_widget->addTab(page, QIcon(GuiUtilsNs::getIconPath("sqlcode")), tr("SQL preview"));
+
+	NumberedTextEditor *source_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin, page, true);
+	source_txt->setReadOnly(true);
+
+	try
+	{
+		SyntaxHighlighter *source_hl = new SyntaxHighlighter(source_txt);
+		source_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
+	}
+	catch(Exception &e)
+	{
+		source_txt->setPlainText(tr("** Failed to load the syntax highlight configuration! ** \n\n %1").arg(e.getExceptionsText()));
+	}
+
+	configureFormFields(handled_obj_type);
+
+	// Configuring the label styles in the tabs
+	QList<QVBoxLayout *> v_layouts = tab_widget->findChildren<QVBoxLayout *>();
+	QLabel *label = nullptr;
+
+	for(auto &layout : v_layouts)
+	{
+		/* We ignore the layout if:
+		 * 1) It contains a invalid count (we need a layout with 2 widgets)
+		 * 2) It contains two widgets but the first one isn't a QLabel.
+		 * 3) It contains two widget (a QLabel and another QWidget) but the
+		 *    label already has a buddy widget configured. */
+		label = layout->count() == 2 ?
+						qobject_cast<QLabel *>(layout->itemAt(0)->widget()) : nullptr;
+
+		if(layout->count() != 2 || !label || label->buddy())
+			continue;
+
+		GuiUtilsNs::configureWidgetBuddyLabel(label, layout->itemAt(1)->widget());
+	}
+
+	// Connecting the signal to handle source code preview
+	connect(tab_widget, &QTabWidget::currentChanged, this, [this, source_txt, tab_widget](int tab_idx){
+		if(tab_idx == tab_widget->count() - 1)
+			source_txt->setPlainText(getSQLCodePreview());
+	});
+}
+
+void BaseObjectWidget::configureFormLayout(QGridLayout *grid, ObjectType obj_type)
+{	
 	if(!grid)
 		setLayout(baseobject_grid);
 	else
@@ -589,7 +612,7 @@ void BaseObjectWidget::configureFormFields(ObjectType obj_type, bool inst_ev_fil
 	comment_lbl->setVisible(BaseObject::acceptsComment(obj_type));
 	comment_edt->setVisible(BaseObject::acceptsComment(obj_type));
 
-	if(obj_type!=ObjectType::BaseObject)
+	if(obj_type != ObjectType::BaseObject)
 	{
 		obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(obj_type)));
 		obj_icon_lbl->setToolTip(BaseObject::getTypeName(obj_type));
@@ -602,7 +625,7 @@ void BaseObjectWidget::configureFormFields(ObjectType obj_type, bool inst_ev_fil
 		}
 		else
 		{
-			QFont font=name_edt->font();
+			QFont font = name_edt->font();
 			name_edt->setReadOnly(true);
 			font.setItalic(true);
 			name_edt->setFont(font);
