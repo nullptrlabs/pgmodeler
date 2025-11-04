@@ -34,6 +34,8 @@ BaseObjectWidget::BaseObjectWidget(QWidget *parent, ObjectType obj_type): QWidge
 	setWindowTitle("");
 	setupUi(this);
 
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, protected_obj_frm);
+
 	handled_obj_type=obj_type;
 	operation_count=0;
 	new_object=false;
