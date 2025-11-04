@@ -28,6 +28,7 @@ DataHandlingForm::DataHandlingForm(QWidget * parent, Qt::WindowFlags f): QDialog
 	setupUi(this);
 	setWindowFlags(Qt::Dialog | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
 
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, db_info_frm);
 	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator_ln_2);
 
 	curr_grid_wgt = nullptr;
