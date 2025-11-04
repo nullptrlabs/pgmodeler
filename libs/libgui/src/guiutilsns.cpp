@@ -929,4 +929,22 @@ namespace GuiUtilsNs {
 		widget->move(event->globalPosition().x() - widget->width() + (event_wgt->width() / 2),
 								 event->globalPosition().y() - (widget->height() - (event_wgt->height() / 2)));
 	}
+
+	QVBoxLayout *createLabeledWidgetLayout(QLabel *label, QWidget *widget, QMargins margins, int spacing)
+	{
+		if(!widget || !label)
+			throw Exception(ErrorCode::OprNotAllocatedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
+
+		QVBoxLayout *layout = new QVBoxLayout;
+
+		layout->setContentsMargins(margins);
+		layout->setSpacing(spacing);
+		layout->addWidget(label);
+		layout->addWidget(widget);
+
+		label->setBuddy(widget);
+		configureWidgetFont(label, SmallFontFactor);
+
+		return layout;
+	}
 }

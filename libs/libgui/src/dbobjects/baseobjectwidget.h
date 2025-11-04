@@ -35,6 +35,15 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 	Q_OBJECT
 
 	protected:
+		struct FieldLayoutCfg {
+			QLabel *label;
+			QWidget *widget;
+			int row, col, row_span, col_span;
+
+			FieldLayoutCfg(QLabel *label, QWidget *widget, int row, int col, int row_span = 1, int col_span = 1)
+				: label(label), widget(widget), row(row), col(col), row_span(row_span), col_span(col_span) {}
+		};
+
 		static constexpr int MaxObjectSize=16777215;
 
 		bool object_protected;

@@ -43,6 +43,11 @@
      <height>16777215</height>
     </size>
    </property>
+   <property name="font">
+    <font>
+     <bold>true</bold>
+    </font>
+   </property>
    <property name="text">
     <string>Name:</string>
    </property>
@@ -111,6 +116,11 @@
      <height>16777215</height>
     </size>
    </property>
+   <property name="font">
+    <font>
+     <bold>true</bold>
+    </font>
+   </property>
    <property name="text">
     <string>Comment:</string>
    </property>
@@ -130,6 +140,11 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="font">
+    <font>
+     <bold>true</bold>
+    </font>
+   </property>
    <property name="text">
     <string>Tablespace:</string>
    </property>
@@ -148,6 +163,11 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <bold>true</bold>
+    </font>
    </property>
    <property name="text">
     <string>Schema:</string>
@@ -314,6 +334,11 @@ This will disable the code of all child and referrer objects.</string>
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="font">
+    <font>
+     <bold>true</bold>
+    </font>
+   </property>
    <property name="text">
     <string>Collation:</string>
    </property>
@@ -373,6 +398,11 @@ This will disable the code of all child and referrer objects.</string>
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <bold>true</bold>
+    </font>
    </property>
    <property name="text">
     <string>Owner:</string>
@@ -522,7 +552,7 @@ This will disable the code of all child and referrer objects.</string>
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="logical_name_lbl">
+  <widget class="QLabel" name="alias_lbl">
    <property name="geometry">
     <rect>
      <x>8</x>
@@ -542,6 +572,11 @@ This will disable the code of all child and referrer objects.</string>
      <width>16777215</width>
      <height>16777215</height>
     </size>
+   </property>
+   <property name="font">
+    <font>
+     <bold>true</bold>
+    </font>
    </property>
    <property name="text">
     <string>Alias:</string>

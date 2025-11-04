@@ -35,6 +35,8 @@
 #include "csvdocument.h"
 #include "settings/appearanceconfigwidget.h"
 #include <QMargins>
+#include <qboxlayout.h>
+#include <qmargins.h>
 
 namespace GuiUtilsNs {
 	/*! \brief WidgetCornerId used by resizeFloatingWidget() to determine
@@ -252,6 +254,8 @@ namespace GuiUtilsNs {
 	 * the function will do nothing. If parent is null creates an orphan object which means the
 	 * user must take care of the destruction of the object */
 	extern __libgui NumberedTextEditor *createNumberedTextEditor(QWidget *parent, bool act_btns_enabled = false, qreal custom_fnt_size = 0);
+
+	extern __libgui QVBoxLayout *createLabeledWidgetLayout(QLabel *label, QWidget *widget, QMargins margins = {}, int spacing = 0);
 }
 
 #endif
