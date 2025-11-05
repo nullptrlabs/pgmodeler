@@ -18,30 +18,32 @@
 
 /**
 \ingroup libgui
-\class ObjectDepsRefsWidget
+\class ObjectAssociationsWidget
 \brief Implements the form to show the object's dependeces and references
 */
 
-#ifndef OBJECT_DEPS_REFS_WIDGET_H
-#define OBJECT_DEPS_REFS_WIDGET_H
+#ifndef OBJECT_ASSOCIATIONS_WIDGET_H
+#define OBJECT_ASSOCIATIONS_WIDGET_H
 
-#include "ui_objectdepsrefswidget.h"
-#include "dbobjects/baseobjectwidget.h"
+#include <QWidget>
+#include "ui_objectassociationswidget.h"
+#include "guiglobal.h"
+#include "modelwidget.h"
 
-class __libgui ObjectDepsRefsWidget: public BaseObjectWidget, public Ui::ObjectDepsRefsWidget {
+class __libgui ObjectAssociationsWidget: public QWidget, public Ui::ObjectAssociationsWidget {
 	Q_OBJECT
 
 	private:
+		BaseObject *object;
+
 		ModelWidget *model_wgt;
 
-		void setAttributes(DatabaseModel *model, BaseObject *object, BaseObject *parent_obj);
-
 	public:
-		ObjectDepsRefsWidget(QWidget * parent = nullptr);
-		void setAttributes(ModelWidget *model_wgt, BaseObject *object, BaseObject *parent_obj=nullptr);
+		explicit ObjectAssociationsWidget(QWidget * parent = nullptr);
 
-	public slots:
-		void applyConfiguration() override;
+		void setAttributes(ModelWidget *model_wgt, BaseObject *object, bool show_obj_name);
+
+		void setAttributes(BaseObject *object, bool show_obj_name);
 
 	private slots:
 		void updateObjectTables();

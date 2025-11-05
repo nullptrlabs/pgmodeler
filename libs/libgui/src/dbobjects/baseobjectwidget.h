@@ -30,6 +30,7 @@
 #include "widgets/objectselectorwidget.h"
 #include "ui_baseobjectwidget.h"
 #include "qtconnectmacros.h"
+#include "widgets/objectassociationswidget.h"
 
 class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 	Q_OBJECT
@@ -104,6 +105,9 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		*owner_sel,
 		*tablespace_sel,
 		*collation_sel;
+
+		//! \brief Object selectors for schema, owner, tablespace and collation
+		ObjectAssociationsWidget *obj_assoc_wgt;
 		
 		/*! \brief Merges the specified grid layout with the 'baseobject_grid' creating a single form.
 		 * The obj_type parameter must be specified to show the object type icon */

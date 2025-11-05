@@ -45,7 +45,6 @@
 #include "dbobjects/relationshipwidget.h"
 #include "dbobjects/tablewidget.h"
 #include "taskprogresswidget.h"
-#include "objectdepsrefswidget.h"
 #include "objectrenamewidget.h"
 #include "dbobjects/permissionwidget.h"
 #include "dbobjects/collationwidget.h"
@@ -302,7 +301,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 		__trycatch( cutObjects(true); )
 	});
 
-	action_deps_refs=new QAction(QIcon(GuiUtilsNs::getIconPath("depsrefs")), tr("Deps && Referrers"), this);
+	action_associations=new QAction(QIcon(GuiUtilsNs::getIconPath("associations")), tr("Associations"), this);
 
 	action_new_object = new_object_menu.menuAction();
 	action_new_object->setIcon(QIcon(GuiUtilsNs::getIconPath("newobject")));
@@ -602,7 +601,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	connect(action_select_all, &QAction::triggered, this, &ModelWidget::selectAllObjects);
 	connect(action_convert_relnn, &QAction::triggered, this, &ModelWidget::convertRelationshipNN);
 	connect(action_convert_rel1n, &QAction::triggered, this, &ModelWidget::convertRelationship1N);
-	connect(action_deps_refs, &QAction::triggered, this, &ModelWidget::showDependenciesReferences);
+	connect(action_associations, &QAction::triggered, this, &ModelWidget::showObjectAssociations);
 
 	connect(action_paste, &QAction::triggered, this, __slot(this, ModelWidget::pasteObjects));
 	connect(action_duplicate, &QAction::triggered, this, &ModelWidget::duplicateObject);
@@ -2169,7 +2168,7 @@ int ModelWidget::openEditingForm(WidgetClass *widget, Messagebox::ButtonsId butt
 	/* If the widget specified can be converted to BaseObjectWidget
 	 * means that we are handling a database object widget so
 	 * we use the BaseObjectWidget version of BaseForm::setMainWidget */
-	if(qobject_cast<BaseObjectWidget *>(widget))
+	if constexpr (std::is_base_of_v<BaseObjectWidget, WidgetClass>)
 	{
 		BaseRelationship *rel = dynamic_cast<BaseRelationship *>(widget->getHandledObject());
 		editing_form.setMainWidget(widget);
@@ -2178,7 +2177,7 @@ int ModelWidget::openEditingForm(WidgetClass *widget, Messagebox::ButtonsId butt
 			class_name.prepend(rel->getRelationshipTypeName().replace(QRegularExpression("( )+|(\\-)+"), ""));
 	}
 	else
-		// Use the QWidget version of BaseForm::setMainWidget
+		// Otherwise we use the QWidget version of BaseForm::setMainWidget
 		editing_form.setMainWidget(widget);
 
 	editing_form.setButtonConfiguration(button_conf);
@@ -2474,7 +2473,7 @@ void ModelWidget::showObjectForm(ObjectType obj_type, BaseObject *object, BaseOb
 	}
 }
 
-void ModelWidget::showDependenciesReferences()
+void ModelWidget::showObjectAssociations()
 {
 	QAction *obj_sender=dynamic_cast<QAction *>(sender());
 
@@ -2484,9 +2483,9 @@ void ModelWidget::showDependenciesReferences()
 
 		if(object)
 		{
-			ObjectDepsRefsWidget *deps_refs_wgt=new ObjectDepsRefsWidget;
-			deps_refs_wgt->setAttributes(this, object);
-			openEditingForm(deps_refs_wgt, Messagebox::CloseButton);
+			ObjectAssociationsWidget *obj_assoc_wgt = new ObjectAssociationsWidget;
+			obj_assoc_wgt->setAttributes(this, object, true);
+			openEditingForm(obj_assoc_wgt, Messagebox::CloseButton);
 		}
 	}
 }
@@ -3889,7 +3888,7 @@ void ModelWidget::enableModelActions(bool value)
 	action_select_all->setEnabled(value);
 	action_convert_relnn->setEnabled(value);
 	action_convert_rel1n->setEnabled(value);
-	action_deps_refs->setEnabled(value);
+	action_associations->setEnabled(value);
 	action_new_object->setEnabled(value);
 	action_copy->setEnabled(value);
 	action_duplicate->setEnabled(value);
@@ -4644,7 +4643,7 @@ void ModelWidget::configureBasicActions(BaseObject *obj)
 	}
 
 	action_edit->setData(QVariant::fromValue<void *>(obj));
-	action_deps_refs->setData(QVariant::fromValue<void *>(obj));
+	action_associations->setData(QVariant::fromValue<void *>(obj));
 
 	TableObject *tab_obj = dynamic_cast<TableObject *>(obj);
 
@@ -4676,7 +4675,7 @@ void ModelWidget::configureBasicActions(BaseObject *obj)
 	popup_menu.addAction(action_source_code);
 
 	if(!tab_obj || (tab_obj && !tab_obj->isAddedByRelationship()))
-		popup_menu.addAction(action_deps_refs);
+		popup_menu.addAction(action_associations);
 }
 
 void ModelWidget::configureDatabaseActions()

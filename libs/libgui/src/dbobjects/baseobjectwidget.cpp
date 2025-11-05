@@ -30,8 +30,6 @@
 
 BaseObjectWidget::BaseObjectWidget(QWidget *parent, ObjectType obj_type): QWidget(parent)
 {
-
-
 	setWindowTitle("");
 	setupUi(this);
 
@@ -52,6 +50,7 @@ BaseObjectWidget::BaseObjectWidget(QWidget *parent, ObjectType obj_type): QWidge
 	schema_sel=nullptr;
 	owner_sel=nullptr;
 	tablespace_sel=nullptr;
+	obj_assoc_wgt = nullptr;
 	object_protected = false;
 
 	connect(edt_perms_tb, &QPushButton::clicked, this, &BaseObjectWidget::editPermissions);
@@ -248,15 +247,15 @@ void BaseObjectWidget::cancelChainedOperation()
 
 void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_list, BaseObject *object, BaseObject *parent_obj, double obj_px, double obj_py, bool uses_op_list)
 {
-	ObjectType obj_type, parent_type=ObjectType::BaseObject;
+	ObjectType obj_type, parent_type = ObjectType::BaseObject;
 
 	/* Reseting the objects attributes in order to force them to be redefined
 	every time this method is called */
-	this->object=nullptr;
-	this->model=nullptr;
-	this->op_list=nullptr;
-	this->relationship=nullptr;
-	this->table=nullptr;
+	this->object = nullptr;
+	this->model = nullptr;
+	this->op_list = nullptr;
+	this->relationship = nullptr;
+	this->table = nullptr;
 
 	if(!model || (uses_op_list && !op_list))
 		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
@@ -264,51 +263,55 @@ void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 	if(op_list)
 	  operation_count = op_list->getCurrentSize();
 
-	this->model=model;
+	this->model = model;
 
 	if(parent_obj)
 	{
-		parent_type=parent_obj->getObjectType();
+		parent_type = parent_obj->getObjectType();
 
 		if(BaseTable::isBaseTable(parent_type))
-			this->table=dynamic_cast<BaseTable *>(parent_obj);
-		else if(parent_type==ObjectType::Relationship)
-			this->relationship=dynamic_cast<Relationship *>(parent_obj);
-		else if(parent_type!=ObjectType::Database && parent_type!=ObjectType::Schema)
-			throw Exception(ErrorCode::AsgObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
+			this->table = dynamic_cast<BaseTable *>(parent_obj);
+		else if(parent_type == ObjectType::Relationship)
+			this->relationship = dynamic_cast<Relationship *>(parent_obj);
+		else if(parent_type != ObjectType::Database && parent_type != ObjectType::Schema)
+			throw Exception(ErrorCode::AsgObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 	else
 	{
-		TableObject *tab_obj=dynamic_cast<TableObject *>(object);
+		TableObject *tab_obj = dynamic_cast<TableObject *>(object);
 
 		if(object && object->getSchema())
-			parent_obj=object->getSchema();
+			parent_obj = object->getSchema();
 		else if(tab_obj && tab_obj->getParentTable())
-			parent_obj=tab_obj->getParentTable();
+			parent_obj = tab_obj->getParentTable();
 		else
-			parent_obj=model;
+			parent_obj = model;
 	}
 
 	if(dynamic_cast<BaseGraphicObject *>(object))
 		dynamic_cast<BaseGraphicObject *>(object)->setModified(false);
 
-	this->op_list=op_list;
-	this->object=object;
+	this->op_list = op_list;
+	this->object = object;
+
+	// Updating the object's dependencies and references widget
+	if(obj_assoc_wgt)
+		obj_assoc_wgt->setAttributes(object, false);
 
 	if(this->table)
 	{
-		this->object_px=this->table->getPosition().x();
-		this->object_py=this->table->getPosition().y();
+		this->object_px = this->table->getPosition().x();
+		this->object_py = this->table->getPosition().y();
 	}
 	else
 	{
-		this->object_px=obj_px;
-		this->object_py=obj_py;
+		this->object_px = obj_px;
+		this->object_py = obj_py;
 	}
 
 	name_edt->setFocus();
-	edt_perms_tb->setEnabled(object!=nullptr && !new_object);
-	append_sql_tb->setEnabled(object!=nullptr && !new_object);
+	edt_perms_tb->setEnabled(object != nullptr && !new_object);
+	append_sql_tb->setEnabled(object != nullptr && !new_object);
 
 	owner_sel->setModel(model);
 	owner_sel->setSelectedObject(model->getDefaultObject(ObjectType::Role));
@@ -350,11 +353,11 @@ void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 		else if(new_object && object->getSchema())
 			schema_sel->setSelectedObject(object->getSchema());
 
-		obj_type=object->getObjectType();
-		object_protected=(parent_type!=ObjectType::Relationship &&
-																	 (object->isProtected() ||
-																		(TableObject::isTableObject(obj_type) &&
-																		 dynamic_cast<TableObject *>(object)->isAddedByRelationship())));
+		obj_type = object->getObjectType();
+		object_protected = (parent_type != ObjectType::Relationship &&
+												(object->isProtected() ||
+												 (TableObject::isTableObject(obj_type) &&
+													dynamic_cast<TableObject *>(object)->isAddedByRelationship())));
 		protected_obj_frm->setVisible(object_protected);
 		disable_sql_chk->setChecked(object->isSQLDisabled());
 	}
@@ -364,7 +367,7 @@ void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 		obj_id_lbl->setVisible(false);
 		protected_obj_frm->setVisible(false);
 
-		if(parent_obj && parent_obj->getObjectType()==ObjectType::Schema)
+		if(parent_obj && parent_obj->getObjectType() == ObjectType::Schema)
 			schema_sel->setSelectedObject(parent_obj);
 	}
 }
@@ -495,14 +498,19 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget)
 	page->setObjectName("baseobject_tab");
 	page->setLayout(baseobject_grid);
 
-	tab_widget->insertTab(0, page,
-												QIcon(GuiUtilsNs::getIconPath("attribute")), tr("General"));
+	tab_widget->insertTab(0, page, GuiUtilsNs::getIcon("attribute"), tr("General"));
 	tab_widget->setCurrentIndex(0);
+
+	// Dependencies and references page
+	obj_assoc_wgt = new ObjectAssociationsWidget(tab_widget);
+	obj_assoc_wgt->setObjectName("obj_assoc_tab");
+	obj_assoc_wgt->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
+	tab_widget->addTab(obj_assoc_wgt, GuiUtilsNs::getIcon("associations"), tr("Associations"));
 
 	// Source code preview page
 	page =  new QWidget(tab_widget);
-	tab_widget->addTab(page, QIcon(GuiUtilsNs::getIconPath("sqlcode")), tr("SQL preview"));
-
+	page->setObjectName("sql_preview_tab");
+	tab_widget->addTab(page, GuiUtilsNs::getIcon("sqlcode"), tr("SQL preview"));
 	NumberedTextEditor *source_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin, page, true);
 	source_txt->setReadOnly(true);
 
@@ -614,7 +622,7 @@ void BaseObjectWidget::configureFormFields(ObjectType obj_type, bool inst_ev_fil
 
 	if(obj_type != ObjectType::BaseObject)
 	{
-		obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(obj_type)));
+		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(obj_type));
 		obj_icon_lbl->setToolTip(BaseObject::getTypeName(obj_type));
 
 		if(obj_type != ObjectType::Permission && obj_type != ObjectType::Cast &&
@@ -700,7 +708,7 @@ QFrame *BaseObjectWidget::generateInformationFrame(const QString &msg)
 	ico_lbl->setMinimumSize(QSize(25, 25));
 	ico_lbl->setMaximumSize(QSize(25, 25));
 	ico_lbl->setScaledContents(true);
-	ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("info")));
+	ico_lbl->setPixmap(GuiUtilsNs::getPixmap("info"));
 	ico_lbl->setAlignment(Qt::AlignLeft|Qt::AlignTop);
 
 	grid->addWidget(ico_lbl, 0, 0, 1, 1);
@@ -775,7 +783,7 @@ QFrame *BaseObjectWidget::generateVersionWarningFrame(std::map<QString, std::vec
 	ico_lbl->setMinimumSize(QSize(25, 25));
 	ico_lbl->setMaximumSize(QSize(25, 25));
 	ico_lbl->setScaledContents(true);
-	ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("alert")));
+	ico_lbl->setPixmap(GuiUtilsNs::getPixmap("alert"));
 	ico_lbl->setAlignment(Qt::AlignLeft|Qt::AlignTop);
 
 	grid->addWidget(ico_lbl, 0, 0, 1, 1);
