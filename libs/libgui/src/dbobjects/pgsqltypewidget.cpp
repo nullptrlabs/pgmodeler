@@ -17,6 +17,7 @@
 */
 
 #include "pgsqltypewidget.h"
+#include "guiutilsns.h"
 #include <QCompleter>
 
 const QString PgSQLTypeWidget::InvalidType {"invalid_type"};
@@ -26,16 +27,14 @@ PgSQLTypeWidget::PgSQLTypeWidget(QWidget *parent, const QString &label) : QWidge
 	QStringList interval_lst, spatial_lst;
 
 	setupUi(this);
-
 	allow_qualifiers = true;
 
 	if(!label.isEmpty())
-		groupBox->setTitle(label);
+		data_type_gb->setTitle(label);
 
-	this->setWindowTitle(groupBox->title());
+	this->setWindowTitle(data_type_gb->title());
 
-	format_hl=nullptr;
-	format_hl=new SyntaxHighlighter(format_txt, true, false, font().pointSizeF());
+	format_hl = new SyntaxHighlighter(format_txt, true, false, font().pointSizeF());
 	format_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 	this->adjustSize();
 
@@ -91,7 +90,6 @@ void PgSQLTypeWidget::updateTypeFormat()
 
 		length_sb->setEnabled(allow_qualifiers && type.hasVariableLength());
 		timezone_chk->setVisible(type.acceptsTimezone());
-		timezone_lbl->setVisible(type.acceptsTimezone());
 		precision_sb->setEnabled(allow_qualifiers && type.acceptsPrecision());
 		dimension_sb->setEnabled(type != "void");
 

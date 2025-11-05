@@ -66,6 +66,9 @@ void ObjectAssociationsWidget::setAttributes(BaseObject *object, bool show_obj_n
 
 void ObjectAssociationsWidget::updateObjectTables()
 {
+	if(!object)
+		return;
+
 	GuiUtilsNs::populateObjectsTable(dependencies_view,
 																	 object->getDependencies(inc_indirect_links_chk->isChecked(),
 																													 {}, unique_results_chk->isChecked()));

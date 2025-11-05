@@ -17,28 +17,26 @@
 */
 
 #include "castwidget.h"
+#include "guiutilsns.h"
 
 CastWidget::CastWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Cast)
 {
-	QFrame *frame=nullptr;
-	QSpacerItem *spacer=new QSpacerItem(10,1,QSizePolicy::Fixed,QSizePolicy::Expanding);
-
 	Ui_CastWidget::setupUi(this);
 
-	src_datatype=new PgSQLTypeWidget(this, tr("Source data type"));
-	trg_datatype=new PgSQLTypeWidget(this, tr("Target data type"));
-	conv_func_sel=new ObjectSelectorWidget(ObjectType::Function, this);
+	src_datatype = new PgSQLTypeWidget(this, tr("Source data type"));
+	trg_datatype = new PgSQLTypeWidget(this, tr("Target data type"));
+	conv_func_sel = GuiUtilsNs::createWidgetInParent<ObjectSelectorWidget>(GuiUtilsNs::LtMargin,
+																																				 ObjectType::Function, conv_func_gb);
+	cast_attribs_lt->addWidget(src_datatype);
+	cast_attribs_lt->addWidget(trg_datatype);
 
-	cast_grid->addWidget(conv_func_sel,1,1,1,4);
-	cast_grid->addWidget(src_datatype,2,0,1,5);
-	cast_grid->addWidget(trg_datatype,3,0,1,5);
+	configureTabbedLayout(cast_attribs_tbw);
 
-	configureFormLayout(cast_grid, ObjectType::Cast);
-
-	frame=generateInformationFrame(tr("The function to be assigned to a cast from <em><strong>typeA</strong></em> to <em><strong>typeB</strong></em> must have the following signature: <em><strong>typeB</strong> function(<strong>typeA</strong>, integer, boolean)</em>."));
-	cast_grid->addItem(spacer, cast_grid->count()+1, 0, 1, 0);
-	cast_grid->addWidget(frame, cast_grid->count()+1, 0, 1, 0);
+	QFrame *frame = generateInformationFrame(tr("The function to be assigned to a cast from <em><strong>typeA</strong></em> to <em><strong>typeB</strong></em> must have the following signature: <em><strong>typeB</strong> function(<strong>typeA</strong>, integer, boolean)</em>."));
 	frame->setParent(this);
+
+	cast_attribs_lt->addItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::Expanding));
+	cast_attribs_lt->addWidget(frame);
 
 	setRequiredField(src_datatype);
 	setRequiredField(trg_datatype);

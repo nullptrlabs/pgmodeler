@@ -956,7 +956,7 @@ namespace GuiUtilsNs {
 
 	void configureWidgetBuddyLabel(QLabel *label, QWidget *widget)
 	{
-		if(!label || !widget)
+		if(!label /* || !widget */)
 			return;
 
 		label->setBuddy(widget);
@@ -977,13 +977,13 @@ namespace GuiUtilsNs {
 			* 2) It contains two widgets but the first one isn't a QLabel.
 			* 3) It contains two widget (a QLabel and another QWidget) but the
 			*    label already has a buddy widget configured. */
-			label = layout->count() == 2 ?
+			label = layout->count() >= 2 ?
 							qobject_cast<QLabel *>(layout->itemAt(0)->widget()) : nullptr;
 
-			if(layout->count() != 2 || !label || label->buddy())
+			if(layout->count() < 2 || !label || label->buddy())
 				continue;
 
-			configureWidgetBuddyLabel(label, layout->itemAt(1)->widget());
+			configureWidgetBuddyLabel(label, layout->findChild<QWidget*>());
 		}
 	}
 

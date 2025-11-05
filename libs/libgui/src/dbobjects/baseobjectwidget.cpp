@@ -116,10 +116,11 @@ void BaseObjectWidget::setRequiredField(QWidget *widget)
 			if(lbl)
 				lbl->setText(str_aux + lbl->text());
 
-			if(pgtype || grp)
-				widget->setStyleSheet("QGroupBox {	font-weight: bold; }");
-			else if(lbl)
-				widget->setStyleSheet("QWidget {	font-weight: bold; }");
+			if(pgtype && !grp)
+				grp = pgtype->findChild<QGroupBox *>();
+
+			if(grp)
+				grp->setTitle("* " + grp->title());
 		}
 		else if(edt || txt || sel)
 		{
@@ -373,10 +374,10 @@ void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 void BaseObjectWidget::configureBaseLayout()
 {
 	const std::map<QList<ObjectType>, QList<FieldLayoutCfg>> field_confs {
-		{ 
+		{
 			// Objects that has only the name field visible
-			{ ObjectType::Cast, ObjectType::Role, ObjectType::Transform, 
-				ObjectType::GenericSql, ObjectType::Tag, ObjectType::Textbox }, 
+			{ ObjectType::Cast, ObjectType::Role, ObjectType::Transform,
+				ObjectType::GenericSql, ObjectType::Tag, ObjectType::Textbox },
 			{ { name_lbl, name_edt, id_icon_frm, 0, 0 } }
 		},
 
@@ -408,7 +409,7 @@ void BaseObjectWidget::configureBaseLayout()
 
 		{	// Objects that has the name, schema and owner fields visible
 			{ ObjectType::Aggregate, ObjectType::Conversion, ObjectType::Function,
-				ObjectType::OpClass, ObjectType::Operator, ObjectType::OpFamily, 
+				ObjectType::OpClass, ObjectType::Operator, ObjectType::OpFamily,
 				ObjectType::Procedure, ObjectType::Sequence },
 			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
 				{ schema_lbl, schema_sel, 1, 0 },
@@ -441,7 +442,7 @@ void BaseObjectWidget::configureBaseLayout()
 		{	// Objects that has the name, alias, schema, tablespace and owner fields visible
 			{ ObjectType::Table, ObjectType::View },
 			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
-				{ schema_lbl, schema_sel, 1, 0 },				
+				{ schema_lbl, schema_sel, 1, 0 },
 				{ alias_lbl, alias_edt, 1, 1 },
 				{ tablespace_lbl, tablespace_sel, 2, 0 },
 				{ owner_lbl, owner_sel, 2, 1 } },
@@ -468,22 +469,22 @@ void BaseObjectWidget::configureBaseLayout()
 			/* Adding the pair (label/widget) to the grid layout. We shift the row by one
 				* in order to leave the first row for the protected object frame */
 			baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(field.label, field.widget, field.append_widget),
-																	field.row + 1, field.col,
-																	field.row_span, field.col_span);
+																 field.row + 1, field.col,
+																 field.row_span, field.col_span);
 		}
 
 		break;
 	}
 
 	baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(comment_lbl, comment_edt),
-															baseobject_grid->count() - 1, 0, 1, 2);
+															baseobject_grid->count(), 0, 1, 0);
 
 	misc_btns_lt->addItem(new QSpacerItem(20, 1, QSizePolicy::Expanding));
 	misc_btns_lt->addWidget(append_sql_tb);
 	misc_btns_lt->addWidget(edt_perms_tb);
 	misc_btns_lt->addWidget(disable_sql_chk);
 
-	baseobject_grid->addLayout(misc_btns_lt,  baseobject_grid->count() - 1, 0, 1, 2);
+	baseobject_grid->addLayout(misc_btns_lt, baseobject_grid->count(), 0, 1, 0);
 }
 
 void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget)
@@ -523,7 +524,6 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget)
 	}
 
 	configureFormFields(handled_obj_type);
-
 	GuiUtilsNs::configureWidgetsBuddyLabels(tab_widget);
 
 	// Connecting the signal to handle source code preview
