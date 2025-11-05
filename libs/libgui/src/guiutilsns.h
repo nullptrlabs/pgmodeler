@@ -274,8 +274,15 @@ namespace GuiUtilsNs {
 	 * user must take care of the destruction of the object */
 	extern __libgui NumberedTextEditor *createNumberedTextEditor(QWidget *parent, bool act_btns_enabled = false, qreal custom_fnt_size = 0);
 
+	/*! \brief Assigns a label as buddy of a widget. Additionally, this function
+	 * configures the label font to be small and bold giving a clear idea that it is
+	 * associated with the provided widget */
 	extern __libgui void configureWidgetBuddyLabel(QLabel *label, QWidget *widget);
 
+	//! \brief Configures all buddy labels in the provided widget
+	extern __libgui void configureWidgetsBuddyLabels(QWidget *widget);
+
+	//! \brief Creates a layout that contains a label and a widget arranged vertically
 	extern __libgui QLayout *createLabeledWidgetLayout(QLabel *label, QWidget *widget, QWidget *append_widget = nullptr, 
 																										 QMargins margins = {}, int spacing = 0);
 }

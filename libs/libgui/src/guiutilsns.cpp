@@ -963,6 +963,30 @@ namespace GuiUtilsNs {
 		configureWidgetFont(label, SmallFontFactor, true);
 	}
 
+	void configureWidgetsBuddyLabels(QWidget *widget)
+	{
+		if(!widget)
+			return;
+
+		QLabel *label = nullptr;
+
+		for(auto &layout : widget->findChildren<QVBoxLayout *>())
+		{
+		 /* We ignore the layout if:
+			* 1) It contains a invalid count (we need a layout with 2 widgets)
+			* 2) It contains two widgets but the first one isn't a QLabel.
+			* 3) It contains two widget (a QLabel and another QWidget) but the
+			*    label already has a buddy widget configured. */
+			label = layout->count() == 2 ?
+							qobject_cast<QLabel *>(layout->itemAt(0)->widget()) : nullptr;
+
+			if(layout->count() != 2 || !label || label->buddy())
+				continue;
+
+			configureWidgetBuddyLabel(label, layout->itemAt(1)->widget());
+		}
+	}
+
 	QLayout *createLabeledWidgetLayout(QLabel *label, QWidget *widget, QWidget *append_widget, QMargins margins, int spacing)
 	{
 		if(!widget || !label)

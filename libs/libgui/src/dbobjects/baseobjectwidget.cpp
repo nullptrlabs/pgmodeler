@@ -524,25 +524,7 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget)
 
 	configureFormFields(handled_obj_type);
 
-	// Configuring the label styles in the tabs
-	QList<QVBoxLayout *> v_layouts = tab_widget->findChildren<QVBoxLayout *>();
-	QLabel *label = nullptr;
-
-	for(auto &layout : v_layouts)
-	{
-		/* We ignore the layout if:
-		 * 1) It contains a invalid count (we need a layout with 2 widgets)
-		 * 2) It contains two widgets but the first one isn't a QLabel.
-		 * 3) It contains two widget (a QLabel and another QWidget) but the
-		 *    label already has a buddy widget configured. */
-		label = layout->count() == 2 ?
-						qobject_cast<QLabel *>(layout->itemAt(0)->widget()) : nullptr;
-
-		if(layout->count() != 2 || !label || label->buddy())
-			continue;
-
-		GuiUtilsNs::configureWidgetBuddyLabel(label, layout->itemAt(1)->widget());
-	}
+	GuiUtilsNs::configureWidgetsBuddyLabels(tab_widget);
 
 	// Connecting the signal to handle source code preview
 	connect(tab_widget, &QTabWidget::currentChanged, this, [this, source_txt, tab_widget](int tab_idx){
