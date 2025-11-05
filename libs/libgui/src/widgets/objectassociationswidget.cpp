@@ -29,6 +29,7 @@ ObjectAssociationsWidget::ObjectAssociationsWidget(QWidget *parent): QWidget(par
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, obj_name_frm);
 	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator_ln);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator2_ln);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 	alert_frm->setVisible(false);
 
@@ -56,9 +57,8 @@ void ObjectAssociationsWidget::setAttributes(BaseObject *object, bool show_obj_n
 
 	if(object)
 	{
-		obj_name_lbl->setText(QString("%1 [%2]")
-													.arg(object->getSignature().remove('"'))
-													.arg(object->getObjectId()));
+		obj_name_lbl->setText(object->getSignature().remove('"'));
+		obj_id_lbl->setText(QString::number(object->getObjectId()));
 		type_name_lbl->setText(object->getTypeName());
 		type_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(object->getObjectType()));
 	}

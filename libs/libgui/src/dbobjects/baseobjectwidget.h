@@ -150,12 +150,11 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 
 		BaseObject *getHandledObject();
 
-		/*! \brief This method must be reimplemented in each derived class
-		 *  and must return the SQL code preview of the object being handled
-		 *  so it can be displayed in the SQL preview tab */
+		/*! \brief This method can be reimplemented in each derived class
+		 * to return the a custom SQL code preview of the object being
+		 * handled so it can be displayed in the SQL preview tab.
+		 * The default implementation returns the current SQL code of the object. */
 		virtual QString getSQLCodePreview();
-
-		virtual void fillObjectAttributes(BaseObject *object);
 			
 	public:
 		//! \brief Constants used to generate version intervals for version alert frame

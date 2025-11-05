@@ -4691,11 +4691,13 @@ void ModelWidget::configureDatabaseActions()
 	configureQuickMenu(db_model);
 
 	action_edit->setData(QVariant::fromValue<void *>(dynamic_cast<BaseObject *>(db_model)));
+	action_associations->setData(QVariant::fromValue<void *>(dynamic_cast<BaseObject *>(db_model)));
 
 	popup_menu.addAction(action_edit);
 
 	popup_menu.addSeparator();
 	popup_menu.addAction(action_source_code);
+	popup_menu.addAction(action_associations);
 
 	if(db_model->isProtected())
 		popup_menu.addAction(action_unprotect);

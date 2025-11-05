@@ -215,12 +215,10 @@ BaseObject *BaseObjectWidget::getHandledObject()
 
 QString BaseObjectWidget::getSQLCodePreview()
 {
-	return "-- TODO: implement BaseObjectWidget::getSQLCodePreview() for derived class!";
-}
+	if(!object)
+		return "";
 
-void BaseObjectWidget::fillObjectAttributes(BaseObject *object)
-{
-
+	return object->getSourceCode(SchemaParser::SqlCode);
 }
 
 void BaseObjectWidget::cancelChainedOperation()
