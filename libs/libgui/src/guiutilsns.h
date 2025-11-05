@@ -100,6 +100,24 @@ namespace GuiUtilsNs {
 	 *  constraints the class ConstraintType */
 	extern __libgui QString getIconPath(ObjectType obj_type, int sub_type = -1);
 
+	//! \brief Returns an instance of QIcon of the provided icon name, in the icons resource (.qrc)
+	extern __libgui QIcon getIcon(const QString &icon_name);
+
+	/*! \brief Returns a QIcon instance containing the the icon of the provided object type
+	 *  The parameter sub_type is used to retrive the sub type icon. Currently only relationships
+	 *  and constraints have sub types being for relationships the Relationship::RelType enum and
+	 *  constraints the class ConstraintType */
+	extern __libgui QIcon getIcon(ObjectType obj_type, int sub_type = -1);
+
+	//! \brief Returns an instance of QPixmap of the provided icon name, in the icons resource (.qrc)
+	extern __libgui QPixmap getPixmap(const QString &icon_name);
+
+	/*! \brief Returns a QPixmap instance containing the the icon of the provided object type
+	 *  The parameter sub_type is used to retrive the sub type icon. Currently only relationships
+	 *  and constraints have sub types being for relationships the Relationship::RelType enum and
+	 *  constraints the class ConstraintType */
+	extern __libgui QPixmap getPixmap(ObjectType obj_type, int sub_type = -1);
+
 	//! \brief Resizes the provided widget considering font dpi changes as well screen size
 	extern __libgui void resizeWidget(QWidget *widget);
 

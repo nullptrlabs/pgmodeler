@@ -298,11 +298,13 @@ namespace GuiUtilsNs {
 		}
 	}
 
+	[[deprecated("Use getIcon(const QString &) instead.")]]
 	QString getIconPath(const QString &icon)
 	{
 		return QString(":/icons/icons/%1.png").arg(icon);
 	}
 
+	[[deprecated("Use getIcon(ObjectType, int) instead.")]]
 	QString getIconPath(ObjectType obj_type, int sub_type)
 	{
 		QString suffix;
@@ -347,6 +349,26 @@ namespace GuiUtilsNs {
 		}
 
 		return getIconPath(BaseObject::getSchemaName(obj_type) + suffix);
+	}
+
+	QIcon getIcon(const QString &icon_name)
+	{
+		return { QIcon(getIconPath(icon_name)) };
+	}
+
+	QIcon getIcon(ObjectType obj_type, int sub_type)
+	{
+		return { QIcon(getIconPath(obj_type, sub_type)) };
+	}
+
+	QPixmap getPixmap(const QString &icon_name)
+	{
+		return { QPixmap(getIconPath(icon_name)) };
+	}
+
+	QPixmap getPixmap(ObjectType obj_type, int sub_type)
+	{
+		return { QPixmap(getIconPath(obj_type, sub_type)) };
 	}
 
 	void resizeWidget(QWidget *widget)

@@ -30,6 +30,7 @@
 #include "widgets/objectselectorwidget.h"
 #include "ui_baseobjectwidget.h"
 #include "qtconnectmacros.h"
+#include "widgets/objectassociationswidget.h"
 
 class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 	Q_OBJECT
@@ -104,6 +105,9 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		*owner_sel,
 		*tablespace_sel,
 		*collation_sel;
+
+		//! \brief Object selectors for schema, owner, tablespace and collation
+		ObjectAssociationsWidget *obj_assoc_wgt;
 		
 		/*! \brief Merges the specified grid layout with the 'baseobject_grid' creating a single form.
 		 * The obj_type parameter must be specified to show the object type icon */
@@ -146,12 +150,11 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 
 		BaseObject *getHandledObject();
 
-		/*! \brief This method must be reimplemented in each derived class
-		 *  and must return the SQL code preview of the object being handled
-		 *  so it can be displayed in the SQL preview tab */
+		/*! \brief This method can be reimplemented in each derived class
+		 * to return the a custom SQL code preview of the object being
+		 * handled so it can be displayed in the SQL preview tab.
+		 * The default implementation returns the current SQL code of the object. */
 		virtual QString getSQLCodePreview();
-
-		virtual void fillObjectAttributes(BaseObject *object);
 			
 	public:
 		//! \brief Constants used to generate version intervals for version alert frame
