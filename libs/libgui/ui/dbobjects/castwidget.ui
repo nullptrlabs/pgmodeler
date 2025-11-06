@@ -40,10 +40,10 @@
      <widget class="QWidget" name="cast_attribs_tab">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
-        <normaloff>:/icons/icons/cast.png</normaloff>:/icons/icons/cast.png</iconset>
+        <normaloff>:/icons/icons/attribute.png</normaloff>:/icons/icons/attribute.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>Cast attributes</string>
+       <string>Attributes</string>
       </attribute>
       <layout class="QVBoxLayout" name="cast_attribs_lt">
        <property name="spacing">

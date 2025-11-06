@@ -33,7 +33,7 @@
     <number>5</number>
    </property>
    <item row="0" column="0">
-    <widget class="QTabWidget" name="db_settings_tbw">
+    <widget class="QTabWidget" name="db_attributes_tbw">
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -43,13 +43,13 @@
        <height>22</height>
       </size>
      </property>
-     <widget class="QWidget" name="settings_tab">
+     <widget class="QWidget" name="attributes_tab">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
-        <normaloff>:/icons/icons/extension.png</normaloff>:/icons/icons/extension.png</iconset>
+        <normaloff>:/icons/icons/attribute.png</normaloff>:/icons/icons/attribute.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>Settings</string>
+       <string>Attributes</string>
       </attribute>
       <layout class="QGridLayout" name="settings_grid">
        <property name="leftMargin">
@@ -426,7 +426,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="def_object_tab">
+     <widget class="QWidget" name="def_objects_tab">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/objects.png</normaloff>:/icons/icons/objects.png</iconset>

@@ -22,56 +22,55 @@
 
 RoleWidget::RoleWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Role)
 {
-	CustomTableWidget *obj_tab=nullptr;
-	QGridLayout *grid=nullptr;
-	QFrame *frame=nullptr;
+	CustomTableWidget *obj_tab = nullptr;
+	QGridLayout *grid = nullptr;
+	QFrame *frame = nullptr;
 	std::map<QString, std::vector<QWidget *> > fields_map;
 	unsigned i;
 
 	Ui_RoleWidget::setupUi(this);
-	configureFormLayout(role_grid, ObjectType::Role);
 
-	object_selection_wgt=new ModelObjectsWidget(true);
+	object_selection_wgt = new ModelObjectsWidget(true);
 
-	frame=generateInformationFrame(tr("Assigning <strong><em>-1</em></strong> to <strong><em>Connections</em></strong> creates a role without connection limit.<br/>\
-										  Unchecking <strong><em>Validity</em></strong> creates an role that never expires."));
+	frame = generateInformationFrame(tr("Assigning <strong><em>-1</em></strong> to <strong><em>Connections</em></strong> creates a role without connection limit.<br/>\
+											Unchecking <strong><em>Validity</em></strong> creates an role that never expires."));
 
-	role_grid->addWidget(frame, role_grid->count()+1, 0, 1, 4);
-	frame->setParent(this);
+	attributes_lt->addWidget(frame);
+	frame->setParent(attributes_tab);
 
 	connect(validity_chk, &QCheckBox::toggled, validity_dte, &QDateTimeEdit::setEnabled);
 	connect(members_twg, &QTabWidget::currentChanged, this, &RoleWidget::configureRoleSelection);
 
 	//Alocation of the member role tables
-	for(i=0; i < 3; i++)
+	for(i = 0; i < 3; i++)
 	{
-		obj_tab=new CustomTableWidget(CustomTableWidget::AllButtons ^
-																	(CustomTableWidget::UpdateButton | CustomTableWidget::DuplicateButton), true, this);
-		members_tab[i]=obj_tab;
+		obj_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(
+								GuiUtilsNs::LtMargin,
+								CustomTableWidget::AllButtons ^
+								(CustomTableWidget::UpdateButton | CustomTableWidget::DuplicateButton),
+								true, members_twg->widget(i + 1));
 
+		members_tab[i] = obj_tab;
 		obj_tab->setColumnCount(4);
 
-		obj_tab->setHeaderLabel(tr("Role"),0);
-		obj_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("role")),0);
+		obj_tab->setHeaderLabel(tr("Role"), 0);
+		obj_tab->setHeaderIcon(GuiUtilsNs::getIcon("role"), 0);
 
-		obj_tab->setHeaderLabel(tr("Validity"),1);
-		obj_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("validity")),1);
+		obj_tab->setHeaderLabel(tr("Validity"), 1);
+		obj_tab->setHeaderIcon(GuiUtilsNs::getIcon("validity"), 1);
 
-		obj_tab->setHeaderLabel(tr("Members"),2);
-		obj_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("role")),2);
+		obj_tab->setHeaderLabel(tr("Members"), 2);
+		obj_tab->setHeaderIcon(GuiUtilsNs::getIcon("role"), 2);
 
-		obj_tab->setHeaderLabel(tr("Admin option"),3);
-		obj_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("role")),3);
-
-		grid=new QGridLayout;
-		grid->addWidget(obj_tab,0,0,1,1);
-		grid->setContentsMargins(GuiUtilsNs::LtMargins);
-		members_twg->widget(i)->setLayout(grid);
+		obj_tab->setHeaderLabel(tr("Admin option"), 3);
+		obj_tab->setHeaderIcon(GuiUtilsNs::getIcon("role"), 3);
 	}
+
+	configureTabbedLayout(members_twg);
 
 	connect(object_selection_wgt, qOverload<BaseObject *, bool>(&ModelObjectsWidget::s_visibilityChanged), this, &RoleWidget::showSelectedRoleData);
 
-	setMinimumSize(580, 550);
+	setMinimumSize(600, 320);
 }
 
 RoleWidget::~RoleWidget()
@@ -102,7 +101,7 @@ void RoleWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Rol
 	if(role)
 	{
 		conn_limit_sb->setValue(role->getConnectionLimit());
-		passwd_edt->setText(role->getPassword());
+		password_edt->setText(role->getPassword());
 
 		validity_chk->setChecked(!role->getValidity().isEmpty());
 		validity_dte->setDateTime(QDateTime::fromString(role->getValidity(), "yyyy-MM-dd hh:mm:ss"));
@@ -225,7 +224,7 @@ void RoleWidget::applyConfiguration()
 
 		role=dynamic_cast<Role *>(this->object);
 		role->setConnectionLimit(conn_limit_sb->value());
-		role->setPassword(passwd_edt->text());
+		role->setPassword(password_edt->text());
 
 		if(validity_chk->isChecked())
 			role->setValidity(validity_dte->dateTime().toString("yyyy-MM-dd hh:mm"));

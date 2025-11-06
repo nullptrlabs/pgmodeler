@@ -497,7 +497,7 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget)
 	page->setObjectName("baseobject_tab");
 	page->setLayout(baseobject_grid);
 
-	tab_widget->insertTab(0, page, GuiUtilsNs::getIcon("attribute"), tr("General"));
+	tab_widget->insertTab(0, page, GuiUtilsNs::getIcon("objects"), tr("General"));
 	tab_widget->setCurrentIndex(0);
 
 	// Dependencies and references page

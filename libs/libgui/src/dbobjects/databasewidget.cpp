@@ -28,11 +28,11 @@ DatabaseWidget::DatabaseWidget(QWidget *parent): BaseObjectWidget(parent, Object
 	def_tablespace_sel = new ObjectSelectorWidget(ObjectType::Tablespace, this);
 
 	QFrame *frame = generateInformationFrame(tr("The fields <strong>LC_COLLATE</strong> and <strong>LC_CTYPE</strong> have pre-configured values based upon the running system. You can freely modify those values if you intend to export the model to another host."));
-	frame->setParent(db_settings_tbw->widget(1));
+	frame->setParent(attributes_tab);
 	settings_grid->addWidget(frame, settings_grid->count() + 1, 0, 1, 0);
 
-	frame = generateInformationFrame(tr("Use the above fields to specify the default attributes assigned to new objects created on the database model. Leaving a field empty will cause PostgreSQL to use the default values when exporting the model."));
-	frame->setParent(db_settings_tbw->widget(2));
+	frame = generateInformationFrame(tr("Use the above fields to specify the default denpendency objects assigned to new objects created on the database model. Leaving any field empty will cause PostgreSQL to use the default values when exporting the model."));
+	frame->setParent(def_objects_tab);
 
 	def_collation_lt->addWidget(def_collation_sel);
 	def_schema_lt->addWidget(def_schema_sel);
@@ -40,7 +40,7 @@ DatabaseWidget::DatabaseWidget(QWidget *parent): BaseObjectWidget(parent, Object
 	def_tablespace_lt->addWidget(def_tablespace_sel);
 	def_objects_grid->addWidget(frame, def_objects_grid->count() + 1, 0, 1, 0);
 
-	configureTabbedLayout(db_settings_tbw);
+	configureTabbedLayout(db_attributes_tbw);
 
 	QStringList loc_list, encodings;
 
