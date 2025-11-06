@@ -35,7 +35,7 @@ CastWidget::CastWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Ca
 	QFrame *frame = generateInformationFrame(tr("The function to be assigned to a cast from <em><strong>typeA</strong></em> to <em><strong>typeB</strong></em> must have the following signature: <em><strong>typeB</strong> function(<strong>typeA</strong>, integer, boolean)</em>."));
 	frame->setParent(this);
 
-	cast_attribs_lt->addItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::Expanding));
+	cast_attribs_lt->addItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::MinimumExpanding));
 	cast_attribs_lt->addWidget(frame);
 
 	cast_type_cmb->addItem(tr("Implict"), Cast::Implicit);
@@ -48,7 +48,7 @@ CastWidget::CastWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Ca
 	configureTabOrder({ cast_type_cmb, input_output_chk,
 											 conv_func_sel, src_datatype, trg_datatype });
 
-	setMinimumSize(520, 460);
+	setMinimumSize(600, 600);
 }
 
 void CastWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Cast *cast)

@@ -63,7 +63,7 @@ DatabaseWidget::DatabaseWidget(QWidget *parent): BaseObjectWidget(parent, Object
 	lccollate_cmb->addItems(loc_list);
 	lcctype_cmb->addItems(loc_list);
 
-	setMinimumSize(560, 380);
+	setMinimumSize(700, 500);
 }
 
 void DatabaseWidget::setAttributes(DatabaseModel *model)
