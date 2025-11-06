@@ -786,12 +786,12 @@ QFrame *BaseObjectWidget::generateVersionWarningFrame(std::map<QString, std::vec
 
 void BaseObjectWidget::editPermissions()
 {
-	BaseObject *parent_obj=nullptr;
+	BaseObject *parent_obj = nullptr;
 	BaseForm parent_form(this);
 	PermissionWidget *permission_wgt=new PermissionWidget;
 
 	if(this->relationship)
-		parent_obj=this->relationship;
+		parent_obj = this->relationship;
 
 	permission_wgt->setAttributes(this->model, parent_obj, this->object);
 	parent_form.setMainWidget(permission_wgt);
@@ -805,7 +805,7 @@ void BaseObjectWidget::editPermissions()
 void BaseObjectWidget::editCustomSQL()
 {
 	BaseForm parent_form(this);
-	CustomSQLWidget *customsql_wgt=new CustomSQLWidget;
+	CustomSQLWidget *customsql_wgt = new CustomSQLWidget;
 
 	customsql_wgt->setAttributes(this->model, this->object);
 	parent_form.setMainWidget(customsql_wgt);

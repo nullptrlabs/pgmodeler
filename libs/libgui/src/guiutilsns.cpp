@@ -983,6 +983,7 @@ namespace GuiUtilsNs {
 			if(layout->count() < 2 || !label || label->buddy())
 				continue;
 
+			layout->setSpacing(GuiUtilsNs::LtSpacing / 2);
 			configureWidgetBuddyLabel(label, layout->findChild<QWidget*>());
 		}
 	}

@@ -38,10 +38,14 @@ CastWidget::CastWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Ca
 	cast_attribs_lt->addItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::Expanding));
 	cast_attribs_lt->addWidget(frame);
 
+	cast_type_cmb->addItem(tr("Implict"), Cast::Implicit);
+	cast_type_cmb->addItem(tr("Explict"), Cast::Explicit);
+	cast_type_cmb->addItem(tr("Assignment"), Cast::Assignment);
+
 	setRequiredField(src_datatype);
 	setRequiredField(trg_datatype);
 
-	configureTabOrder({ explicit_rb, implicit_rb, assignment_rb, input_output_chk,
+	configureTabOrder({ cast_type_cmb, input_output_chk,
 											 conv_func_sel, src_datatype, trg_datatype });
 
 	setMinimumSize(520, 460);
@@ -56,14 +60,12 @@ void CastWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Cas
 
 	if(cast)
 	{
-		src_type=cast->getDataType(Cast::SrcType);
-		trg_type=cast->getDataType(Cast::DstType);
+		src_type = cast->getDataType(Cast::SrcType);
+		trg_type = cast->getDataType(Cast::DstType);
 
 		conv_func_sel->setSelectedObject(cast->getCastFunction());
 		input_output_chk->setChecked(cast->isInOut());
-		explicit_rb->setChecked(cast->getCastType()==Cast::Explicit);
-		implicit_rb->setChecked(cast->getCastType()==Cast::Implicit);
-		assignment_rb->setChecked(cast->getCastType()==Cast::Assignment);
+		cast_type_cmb->setCurrentIndex(cast_type_cmb->findData(cast->getCastType()));
 	}
 
 	src_datatype->setAttributes(src_type, model, false);
@@ -74,22 +76,16 @@ void CastWidget::applyConfiguration()
 {
 	try
 	{
-		Cast *cast=nullptr;
+		Cast *cast = nullptr;
 
 		startConfiguration<Cast>();
 
-		cast=dynamic_cast<Cast *>(this->object);
+		cast = dynamic_cast<Cast *>(this->object);
 		cast->setDataType(Cast::SrcType, src_datatype->getPgSQLType());
 		cast->setDataType(Cast::DstType, trg_datatype->getPgSQLType());
 		cast->setInOut(input_output_chk->isChecked());
 
-		if(implicit_rb->isChecked())
-			cast->setCastType(Cast::Implicit);
-		else if(assignment_rb->isChecked())
-			cast->setCastType(Cast::Assignment);
-		else
-			cast->setCastType(Cast::Explicit);
-
+		cast->setCastType(static_cast<Cast::CastType>(cast_type_cmb->currentData().toInt()));
 		cast->setCastFunction(dynamic_cast<Function*>(conv_func_sel->getSelectedObject()));
 
 		BaseObjectWidget::applyConfiguration();
