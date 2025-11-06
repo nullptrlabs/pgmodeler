@@ -37,13 +37,15 @@ class __libgui RoleWidget: public BaseObjectWidget, public Ui::RoleWidget {
 		ModelObjectsWidget *object_selection_wgt;
 
 		//! \brief Store the table widgets used to reference the member roles
-		CustomTableWidget *members_tab[3];
+		std::map<QWidget *, CustomTableWidget *> member_roles_tabs;
 
 		//! \brief Fills the tables with to member roles of the editing role
 		void fillMembersTable();
 
-		//! \brief Show the specified role data on the specified table index at the specified row
-		void showRoleData(Role *role, unsigned table_id, unsigned row);
+		//! \brief Show the specified role data on the specified table at the specified row
+		void showRoleData(Role *role, CustomTableWidget *role_tab, unsigned row);
+
+		CustomTableWidget *getRolesTable(Role::RoleType rl_type);
 
 	public:
 		RoleWidget(QWidget * parent = nullptr);

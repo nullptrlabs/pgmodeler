@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>463</width>
-    <height>245</height>
+    <height>271</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -312,7 +312,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="member_of_tab">
+     <widget class="QWidget" name="members_tab">
       <attribute name="title">
        <string>Members</string>
       </attribute>
@@ -322,7 +322,7 @@
        <string>Admin option</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="members_tab">
+     <widget class="QWidget" name="members_of_tab">
       <attribute name="title">
        <string>Member of</string>
       </attribute>
