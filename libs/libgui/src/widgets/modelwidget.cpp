@@ -20,6 +20,7 @@
 #include "modelwidget.h"
 #include "customuistyle.h"
 #include "sourcecodewidget.h"
+#include "codepreviewwidget.h"
 #include "dbobjects/databasewidget.h"
 #include "dbobjects/schemawidget.h"
 #include "dbobjects/rolewidget.h"
@@ -2492,9 +2493,13 @@ void ModelWidget::showObjectAssociations()
 
 void ModelWidget::showSourceCode()
 {
-	SourceCodeWidget *sourcecode_wgt = new SourceCodeWidget;
+	/* SourceCodeWidget *sourcecode_wgt = new SourceCodeWidget;
 	sourcecode_wgt->setAttributes(db_model, selected_objects);
-	openEditingForm(sourcecode_wgt, Messagebox::CloseButton);
+	openEditingForm(sourcecode_wgt, Messagebox::CloseButton); */
+
+	CodePreviewWidget *code_preview_wgt = new CodePreviewWidget;
+	code_preview_wgt->setAttributes(db_model, selected_objects);
+	openEditingForm(code_preview_wgt, Messagebox::CloseButton);
 }
 
 void ModelWidget::cancelObjectAddition()
