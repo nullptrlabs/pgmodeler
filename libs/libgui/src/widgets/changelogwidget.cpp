@@ -29,8 +29,8 @@ ChangelogWidget::ChangelogWidget(QWidget *parent) : QWidget(parent)
 	model = nullptr;
 	setModel(nullptr);
 
-	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, summary_frm);
-	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator_ln);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint,
+															{ summary_frm, separator_ln });
 
 	GuiUtilsNs::createDropShadow(this, 5, 5, 30);
 

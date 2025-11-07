@@ -36,8 +36,8 @@ DiffToolWidget::DiffToolWidget(QWidget *parent) : BaseConfigWidget (parent)
 
 	inv_model_alert_frm->setVisible(false);
 
-	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, inv_model_alert_frm);
-	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, diff_wgt_alert_frm);
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint,
+															{ inv_model_alert_frm, diff_wgt_alert_frm });
 
 	GuiUtilsNs::configureWidgetsFont({ generate_btn, cancel_btn }, GuiUtilsNs::BigFontFactor);
 

@@ -26,15 +26,19 @@
 #define CODE_PREVIEW_WIDGET_H
 
 #include "ui_codepreviewwidget.h"
-#include "dbobjects/baseobjectwidget.h"
 #include "numberedtexteditor.h"
 #include "utils/syntaxhighlighter.h"
+#include "databasemodel.h"
 
-class __libgui CodePreviewWidget: public BaseObjectWidget, public Ui::CodePreviewWidget {
+class __libgui CodePreviewWidget: public QWidget, public Ui::CodePreviewWidget {
 	Q_OBJECT
 
 	private:
 		std::vector<BaseObject *> objects;
+
+		DatabaseModel *dbmodel;
+
+		BaseObject *object;
 
 		NumberedTextEditor *sqlcode_txt, *xmlcode_txt;
 
@@ -51,20 +55,8 @@ class __libgui CodePreviewWidget: public BaseObjectWidget, public Ui::CodePrevie
 
 		void setAttributes(DatabaseModel *model, const std::vector<BaseObject *> &objs);
 
-		/* Forcing the widget to indicate that the handled object is not protected
-		 * even if it IS protected. This will avoid the ok button of the parent dialog
-		 * to be disabled */
-		bool isHandledObjectProtected() override
-		{
-			return false;
-		}
-
-	public slots:
-		void applyConfiguration() override;
-
 	private slots:
 		void generateSourceCode(int def_type);
-		void saveSQLCode();
 };
 
 #endif

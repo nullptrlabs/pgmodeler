@@ -20,17 +20,16 @@
 #include "taskprogresswidget.h"
 #include "guiutilsns.h"
 #include "pgsqlversions.h"
+#include "messagebox.h"
+#include "customuistyle.h"
 
-CodePreviewWidget::CodePreviewWidget(QWidget *parent): BaseObjectWidget(parent)
+CodePreviewWidget::CodePreviewWidget(QWidget *parent): QWidget(parent)
 {
 	Ui_CodePreviewWidget::setupUi(this);
-	configureFormLayout(codigofonte_grid, ObjectType::BaseObject);
-	comment_lbl->setVisible(false);
-	comment_edt->setVisible(false);
 
 	prev_pg_ver = prev_code_opt = -1;
-	hl_sqlcode = nullptr;
-	hl_xmlcode = nullptr;
+	dbmodel = nullptr;
+	object = nullptr;
 
 	sqlcode_txt = GuiUtilsNs::createNumberedTextEditor(sqlcode_wgt, true);
 	sqlcode_txt->setReadOnly(true);
@@ -38,7 +37,9 @@ CodePreviewWidget::CodePreviewWidget(QWidget *parent): BaseObjectWidget(parent)
 	xmlcode_txt = GuiUtilsNs::createNumberedTextEditor(xmlcode_wgt, true);
 	xmlcode_txt->setReadOnly(true);
 
-	name_edt->setReadOnly(true);
+	hl_sqlcode = new SyntaxHighlighter(sqlcode_txt);
+	hl_xmlcode = new SyntaxHighlighter(xmlcode_txt);
+
 	version_cmb->addItems(PgSqlVersions::AllVersions);
 
 	connect(sourcecode_twg, &QTabWidget::currentChanged, this, &CodePreviewWidget::generateSourceCode);
@@ -50,15 +51,18 @@ CodePreviewWidget::CodePreviewWidget(QWidget *parent): BaseObjectWidget(parent)
 		generateSourceCode(SchemaParser::SqlCode);
 	});
 
-	hl_sqlcode=new SyntaxHighlighter(sqlcode_txt);
-	hl_xmlcode=new SyntaxHighlighter(xmlcode_txt);
+	GuiUtilsNs::configureWidgetsBuddyLabels(this);
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint,
+															{ obj_name_frm, separator_ln,
+																separator2_ln, code_opts_frm });
 
 	setMinimumSize(800, 600);
 }
 
 void CodePreviewWidget::saveSQLCode()
 {
-	try
+	/* try
 	{
 		GuiUtilsNs::selectAndSaveFile(sqlcode_txt->toPlainText().toUtf8(),
 																	 tr("Save SQL code as..."),
@@ -69,7 +73,7 @@ void CodePreviewWidget::saveSQLCode()
 	catch(Exception &e)
 	{
 		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
-	}
+	} */
 }
 
 void CodePreviewWidget::generateSQLCode()
@@ -83,7 +87,7 @@ void CodePreviewWidget::generateSQLCode()
 	if(object && object->getObjectType() == ObjectType::Database)
 		sqlcode_txt->setPlainText(object->getSourceCode(SchemaParser::SqlCode));
 	else
-		sqlcode_txt->setPlainText(model->getSQLDefinition(objects, static_cast<DatabaseModel::CodeGenMode>(code_options_cmb->currentIndex())));
+		sqlcode_txt->setPlainText(dbmodel->getSQLDefinition(objects, static_cast<DatabaseModel::CodeGenMode>(code_options_cmb->currentIndex())));
 
 #ifdef DEMO_VERSION
 	if(!sqlcode_txt->toPlainText().isEmpty())
@@ -98,7 +102,7 @@ void CodePreviewWidget::generateSQLCode()
 #endif
 
 	if(sqlcode_txt->toPlainText().isEmpty())
-		sqlcode_txt->setPlainText(tr("-- SQL code unavailable for this type of object --"));		
+		sqlcode_txt->setPlainText(tr("-- SQL code unavailable for this type of object --"));
 }
 
 void CodePreviewWidget::generateXMLCode()
@@ -136,7 +140,8 @@ void CodePreviewWidget::generateSourceCode(int def_type)
 		{
 			task_prog_wgt.setWindowTitle(tr("Generating source code..."));
 			task_prog_wgt.show();
-			connect(this->model, &DatabaseModel::s_objectLoaded, &task_prog_wgt, qOverload<int, QString, unsigned>(&TaskProgressWidget::updateProgress));
+			connect(dbmodel, &DatabaseModel::s_objectLoaded, &task_prog_wgt,
+							qOverload<int, QString, unsigned>(&TaskProgressWidget::updateProgress));
 		}
 
 		if(def_type == SchemaParser::SqlCode)
@@ -145,17 +150,13 @@ void CodePreviewWidget::generateSourceCode(int def_type)
 			generateXMLCode();
 
 		task_prog_wgt.close();
-		disconnect(this->model, nullptr, &task_prog_wgt, nullptr);
-
+		disconnect(dbmodel, nullptr, &task_prog_wgt, nullptr);
 		qApp->restoreOverrideCursor();
 	}
 	catch(Exception &e)
 	{
-		//qApp->restoreOverrideCursor();
-
 		task_prog_wgt.close();
-		disconnect(this->model, nullptr, &task_prog_wgt, nullptr);
-
+		disconnect(dbmodel, nullptr, &task_prog_wgt, nullptr);
 		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
@@ -165,26 +166,15 @@ void CodePreviewWidget::setAttributes(DatabaseModel *model, const std::vector<Ba
 	try
 	{
 		objects = objs;
+		dbmodel = model;
 
 		if(objs.size() <= 1)
 		{
 			if(objects.empty())
 				objects.push_back(model);
 
-			BaseObjectWidget::setAttributes(model, objects[0], nullptr);
-			name_edt->setText(QString("%1 (%2)").arg(object->getSignature(), object->getTypeName()));
-			obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(object->getObjectType())));
+			object = objects[0];
 		}
-		else
-		{
-			BaseObjectWidget::setAttributes(model, static_cast<BaseObject *>(nullptr), nullptr);
-			name_edt->setVisible(false);
-			name_lbl->setVisible(false);
-			obj_icon_lbl->setVisible(false);
-		}
-
-		protected_obj_frm->setVisible(false);
-		obj_id_lbl->setVisible(false);
 
 		code_options_cmb->setEnabled(std::any_of(objs.begin(), objs.end(), [](auto &obj){
 			return obj->getObjectType() != ObjectType::Database &&
@@ -210,9 +200,4 @@ void CodePreviewWidget::setAttributes(DatabaseModel *model, const std::vector<Ba
 	{
 		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
-}
-
-void CodePreviewWidget::applyConfiguration()
-{
-	emit s_closeRequested();
 }
