@@ -2493,10 +2493,6 @@ void ModelWidget::showObjectAssociations()
 
 void ModelWidget::showSourceCode()
 {
-	/* SourceCodeWidget *sourcecode_wgt = new SourceCodeWidget;
-	sourcecode_wgt->setAttributes(db_model, selected_objects);
-	openEditingForm(sourcecode_wgt, Messagebox::CloseButton); */
-
 	CodePreviewWidget *code_preview_wgt = new CodePreviewWidget;
 	code_preview_wgt->setAttributes(db_model, selected_objects);
 	openEditingForm(code_preview_wgt, Messagebox::CloseButton);

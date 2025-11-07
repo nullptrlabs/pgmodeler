@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Source code visualization</string>
+   <string>Source code preview</string>
   </property>
   <layout class="QVBoxLayout" name="code_preview_lt">
    <property name="leftMargin">
@@ -296,7 +296,7 @@
          <number>5</number>
         </property>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <widget class="QLabel" name="pgsql_lbl">
             <property name="sizePolicy">
@@ -361,7 +361,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
            <widget class="QLabel" name="label">
             <property name="sizePolicy">
@@ -381,7 +381,7 @@
           <item>
            <widget class="QComboBox" name="code_options_cmb">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>

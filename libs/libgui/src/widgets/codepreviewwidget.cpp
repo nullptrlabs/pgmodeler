@@ -60,22 +60,6 @@ CodePreviewWidget::CodePreviewWidget(QWidget *parent): QWidget(parent)
 	setMinimumSize(800, 600);
 }
 
-void CodePreviewWidget::saveSQLCode()
-{
-	/* try
-	{
-		GuiUtilsNs::selectAndSaveFile(sqlcode_txt->toPlainText().toUtf8(),
-																	 tr("Save SQL code as..."),
-																	 QFileDialog::AnyFile,
-																	 { tr("SQL code (*.sql)"), tr("All files (*.*)") }, {}, "sql",
-																	 QString("%1-%2.sql").arg(object->getSchemaName(), object->getName()));
-	}
-	catch(Exception &e)
-	{
-		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
-	} */
-}
-
 void CodePreviewWidget::generateSQLCode()
 {
 	sqlcode_txt->clear();
@@ -174,6 +158,25 @@ void CodePreviewWidget::setAttributes(DatabaseModel *model, const std::vector<Ba
 				objects.push_back(model);
 
 			object = objects[0];
+		}
+
+		type_name_lbl->setVisible(object != nullptr);
+		obj_id_lbl->setVisible(object != nullptr);
+		type_icon_lbl->setVisible(object != nullptr);
+		oid_icon_lbl->setVisible(object != nullptr);
+		separator_ln->setVisible(object != nullptr);
+		separator2_ln->setVisible(object != nullptr);
+
+		if(object)
+		{
+			obj_name_lbl->setText(object->getSignature().remove('"'));
+			type_name_lbl->setText(object->getTypeName());
+			obj_id_lbl->setText(QString::number(object->getObjectId()));
+			type_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(object->getObjectType()));
+		}
+		else
+		{
+			obj_name_lbl->setText(tr("Previewing the code of <strong>%1</strong> objects").arg(objects.size()));
 		}
 
 		code_options_cmb->setEnabled(std::any_of(objs.begin(), objs.end(), [](auto &obj){
