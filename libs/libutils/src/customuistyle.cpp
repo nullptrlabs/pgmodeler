@@ -2119,6 +2119,12 @@ void CustomUiStyle::drawPEHeaderArrow(const QStyleOption *option, QPainter *pain
 	drawControlArrow(&arrow_opt, painter, widget, arrow_type);
 }
 
+void CustomUiStyle::setStyleHint(StyleHint hint, const QList<QFrame *> &frames)
+{
+	for(auto &frm : frames)
+		setStyleHint(hint, frm);
+}
+
 void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
 {
 	if(!frame || hint == NoHint)

@@ -509,8 +509,8 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget)
 	// Source code preview page
 	page =  new QWidget(tab_widget);
 	page->setObjectName("sql_preview_tab");
-	tab_widget->addTab(page, GuiUtilsNs::getIcon("sqlcode"), tr("SQL preview"));
-	NumberedTextEditor *source_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin, page, true);
+	tab_widget->addTab(page, GuiUtilsNs::getIcon("sqlpreview"), tr("SQL preview"));
+	NumberedTextEditor *source_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin, page, false);
 	source_txt->setReadOnly(true);
 
 	try

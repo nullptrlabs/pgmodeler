@@ -27,9 +27,9 @@ ObjectAssociationsWidget::ObjectAssociationsWidget(QWidget *parent): QWidget(par
 	object = nullptr;
 	model_wgt = nullptr;
 
-	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, obj_name_frm);
-	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator_ln);
-	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator2_ln);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint,
+															{ obj_name_frm, separator_ln, separator2_ln });
+
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 	alert_frm->setVisible(false);
 

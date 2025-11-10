@@ -41,8 +41,8 @@ SQLExecutionWidget::SQLExecutionWidget(QWidget * parent) : QWidget(parent)
 	plugins_wgts_stw->setVisible(false);
 	sql_cmd_splitter->setSizes({800, 200});
 
-	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, db_info_frm);
-	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator_ln);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint,
+															{ db_info_frm, separator_ln });
 
 	sql_cmd_txt=GuiUtilsNs::createNumberedTextEditor(sql_cmd_wgt);
 	sql_cmd_txt->setObjectName("sql_cmd_txt");

@@ -970,7 +970,7 @@ namespace GuiUtilsNs {
 
 		QLabel *label = nullptr;
 
-		for(auto &layout : widget->findChildren<QVBoxLayout *>())
+		for(auto &layout : widget->findChildren<QLayout *>())
 		{
 		 /* We ignore the layout if:
 			* 1) It contains a invalid count (we need a layout with 2 widgets)
@@ -980,7 +980,10 @@ namespace GuiUtilsNs {
 			label = layout->count() >= 2 ?
 							qobject_cast<QLabel *>(layout->itemAt(0)->widget()) : nullptr;
 
-			if(layout->count() < 2 || !label || label->buddy())
+			if((!qobject_cast<QHBoxLayout *>(layout) &&
+					!qobject_cast<QVBoxLayout *>(layout)) ||
+				 layout->count() < 2 || !label ||
+				 label->buddy() || label->text().isEmpty())
 				continue;
 
 			layout->setSpacing(GuiUtilsNs::LtSpacing / 2);

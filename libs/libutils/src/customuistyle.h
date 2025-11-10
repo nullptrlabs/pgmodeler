@@ -70,40 +70,40 @@ class __libutils CustomUiStyle : public QProxyStyle {
 
 		struct WidgetState {
 			const bool is_enabled,
-								 is_active,
-								 is_hovered,
-								 is_checked,
-								 is_selected,
-								 is_pressed,
-								 is_focused,
-								 is_default,
-								 has_custom_color;
+			is_active,
+			is_hovered,
+			is_checked,
+			is_selected,
+			is_pressed,
+			is_focused,
+			is_default,
+			has_custom_color;
 
 			WidgetState(const QStyleOption *option, const QWidget *widget) :
-					is_enabled(option->state & State_Enabled),
-					is_active(option->state & State_Active),
-					is_hovered(option->state & State_MouseOver),
-					is_checked(option->state & State_On),
-					is_selected(option->state & State_Selected),
-					is_pressed(option->state & State_Sunken),
-					is_focused(option->state & State_HasFocus),
-					is_default(is_enabled && widget &&
-										 qobject_cast<const QPushButton *>(widget) &&
-										 qobject_cast<const QPushButton *>(widget)->isDefault()),
+				is_enabled(option->state & State_Enabled),
+				is_active(option->state & State_Active),
+				is_hovered(option->state & State_MouseOver),
+				is_checked(option->state & State_On),
+				is_selected(option->state & State_Selected),
+				is_pressed(option->state & State_Sunken),
+				is_focused(option->state & State_HasFocus),
+				is_default(is_enabled && widget &&
+									 qobject_cast<const QPushButton *>(widget) &&
+									 qobject_cast<const QPushButton *>(widget)->isDefault()),
 
-					has_custom_color(widget &&
-													 widget->styleSheet().contains("background-color"))
-					{};
-		};									 
+				has_custom_color(widget &&
+												 widget->styleSheet().contains("background-color"))
+			{};
+		};
 
 		static QMap<PixelMetric, int> pixel_metrics;
 
 		static constexpr qreal BlendFactor = 0.7,
-							   					 PenWidth = 1.2;
+		PenWidth = 1.2;
 
 		static constexpr int ArrowWidth = 9, // Complex control up arrow width
-							 					 ArrowHeight = 5,  // Complex control up arrow height
-												 SplitterSize = 20;
+		ArrowHeight = 5,  // Complex control up arrow height
+		SplitterSize = 20;
 
 		// Helper method to add edge with optional rounded corner to QPainterPath
 		void addEdgeWithCorner(QPainterPath &path, const QRectF &rect, OpenEdge side, int radius) const;
@@ -126,7 +126,7 @@ class __libutils CustomUiStyle : public QProxyStyle {
 											 QPainter *painter, const QWidget *widget) const;
 
 		// Draws control elements (CE) of tab bars
-		void drawCETabBar(ControlElement element, const QStyleOption *option,	
+		void drawCETabBar(ControlElement element, const QStyleOption *option,
 											QPainter *painter, const QWidget *widget) const;
 
 		void drawControlArrow(const QStyleOption *option, QPainter *painter, const QWidget *,
@@ -136,7 +136,7 @@ class __libutils CustomUiStyle : public QProxyStyle {
 		void drawButtonMenuArrow(const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
 
 		// Draws a scrollbar button (AddLine or SubLine) intelligently handling both types
-		void drawScrollBarButton(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, 
+		void drawScrollBarButton(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget,
 														 QStyle::SubControl button_type, const QColor &bg_color, const QColor &border_color) const;
 
 		// Draws editable ComboBox with custom background and border
@@ -148,16 +148,16 @@ class __libutils CustomUiStyle : public QProxyStyle {
 
 		// Draws primitive elements (PE) of checkboxes and radio buttons
 		void drawPECheckBoxRadioBtn(PrimitiveElement element, const QStyleOption *option,
-															 QPainter *painter, const QWidget *widget) const;
+																QPainter *painter, const QWidget *widget) const;
 
 		// Draws primitive elements (PE) of frame background (when StyleHint is set)
 		void drawPEHintFramePanel(PrimitiveElement element, const QStyleOption *option,
 															QPainter *painter, const QWidget *widget) const;
 
-		void drawPEGenericElemFrame(PrimitiveElement element, const QStyleOption *option,	
-															 QPainter *painter, const QWidget *widget, int border_radius) const;
+		void drawPEGenericElemFrame(PrimitiveElement element, const QStyleOption *option,
+																QPainter *painter, const QWidget *widget, int border_radius) const;
 
-		void drawPEGroupBoxFrame(PrimitiveElement element, const QStyleOption *option,	
+		void drawPEGroupBoxFrame(PrimitiveElement element, const QStyleOption *option,
 														 QPainter *painter, const QWidget *widget) const;
 
 		// Draws primitive elements (PE) of line edits
@@ -185,17 +185,17 @@ class __libutils CustomUiStyle : public QProxyStyle {
 		// Draws primitive elements (PE) of header sort arrows
 		void drawPEHeaderArrow(const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
 
-	// Draws control elements (CE) of header sections (table/tree headers)
-	void drawCEHeaderSection(ControlElement element, const QStyleOption *option,
-													 QPainter *painter, const QWidget *widget) const;
+		// Draws control elements (CE) of header sections (table/tree headers)
+		void drawCEHeaderSection(ControlElement element, const QStyleOption *option,
+														 QPainter *painter, const QWidget *widget) const;
 
-	// Draws control elements (CE) of splitters with custom styling
-	void drawCESplitter(ControlElement element, const QStyleOption *option,
-											QPainter *painter, const QWidget *widget) const;
+		// Draws control elements (CE) of splitters with custom styling
+		void drawCESplitter(ControlElement element, const QStyleOption *option,
+												QPainter *painter, const QWidget *widget) const;
 
-	// Draws primitive elements (PE) of tabs, group boxes and other framed elements
-	void drawPETabWidgetFrame(PrimitiveElement element, const QStyleOption *option,
-														QPainter *painter, const QWidget *widget) const;
+		// Draws primitive elements (PE) of tabs, group boxes and other framed elements
+		void drawPETabWidgetFrame(PrimitiveElement element, const QStyleOption *option,
+															QPainter *painter, const QWidget *widget) const;
 		void drawCCScrollBar(const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
 
 		// Draws control elements (CE) of scroll bars
@@ -217,25 +217,25 @@ class __libutils CustomUiStyle : public QProxyStyle {
 		static QColor getStateColor(QPalette::ColorRole role, const QStyleOption *option);
 
 		static constexpr char StyleHintProp[] = "style-hint",
-													StyleHintColor[] = "style-hint-color";
+		StyleHintColor[] = "style-hint-color";
 
 	public:
 		static constexpr int NoRadius = 0,
-							 ButtonRadius = 4,
-							 InputRadius = 5,
-							 FrameRadius = 4,
-							 HintFrameRadius = 6,
-							 TabWgtRadius = 2,
-							 TabBarRadius = 5,
-							 ScrollBarRadius = 2;
+		ButtonRadius = 4,
+		InputRadius = 5,
+		FrameRadius = 4,
+		HintFrameRadius = 6,
+		TabWgtRadius = 2,
+		TabBarRadius = 5,
+		ScrollBarRadius = 2;
 
 		static constexpr int NoFactor = 0,
-												 XMinFactor = 105,
-												 MinFactor = 120,
-							 					 MidFactor = 135,
-							 					 MaxFactor = 150;
+		XMinFactor = 105,
+		MinFactor = 120,
+		MidFactor = 135,
+		MaxFactor = 150;
 
-		//! \brief Enum for setting style hints on widgets via setProperty method			
+		//! \brief Enum for setting style hints on widgets via setProperty method
 		enum StyleHint {
 			NoHint,
 			DefaultFrmHint, // Default frame
@@ -264,27 +264,28 @@ class __libutils CustomUiStyle : public QProxyStyle {
 
 		void drawItemPixmap(QPainter *painter, const QRect &rect, int alignment, const QPixmap &pixmap) const override;
 
-	void drawPrimitive(PrimitiveElement element, const QStyleOption *option,
-										 QPainter *painter, const QWidget *widget) const override;
+		void drawPrimitive(PrimitiveElement element, const QStyleOption *option,
+											 QPainter *painter, const QWidget *widget) const override;
 
-	void polish(QWidget *widget) override;
+		void polish(QWidget *widget) override;
 
-	QPixmap generatedIconPixmap(QIcon::Mode icon_mode, const QPixmap &pixmap, const QStyleOption *option) const override;	int pixelMetric(PixelMetric metric, const QStyleOption * option = nullptr, const QWidget * widget = nullptr) const override;
+		QPixmap generatedIconPixmap(QIcon::Mode icon_mode, const QPixmap &pixmap, const QStyleOption *option) const override;	int pixelMetric(PixelMetric metric, const QStyleOption * option = nullptr, const QWidget * widget = nullptr) const override;
 
-	/*! \brief Sets a style hint on a QFrame to customize its border color and radius
-	 * So it can be rendered as a inlined alert/info/error frame. 
-	 * This method forces the frame shape to StyledPanel. */
-	static void setStyleHint(StyleHint hint, QFrame *frame);
+		/*! \brief Sets a style hint on a QFrame to customize its border color and radius
+		 * So it can be rendered as a inlined alert/info/error frames.
+		 * This method forces the frames shape to StyledPanel. */
+		static void setStyleHint(StyleHint hint, QFrame *frames);
+		static void setStyleHint(StyleHint hint, const QList<QFrame *> &frames);
 
-	//! \brief Checks if the current application palette is dark (dark theme)
-	static bool isDarkPalette();
+		//! \brief Checks if the current application palette is dark (dark theme)
+		static bool isDarkPalette();
 
-	//! \brief Checks if the current palette is dark (dark theme)
-	static bool isDarkPalette(const QPalette& pal);
+		//! \brief Checks if the current palette is dark (dark theme)
+		static bool isDarkPalette(const QPalette& pal);
 
-	/*! \brief Defines a custom pixel metric attribute value globally.
-	* Which means, all instances of this class will share the same pixel metrics values */
-	static void setPixelMetricValue(PixelMetric metric, int value);
+		/*! \brief Defines a custom pixel metric attribute value globally.
+		* Which means, all instances of this class will share the same pixel metrics values */
+		static void setPixelMetricValue(PixelMetric metric, int value);
 };
 
 #endif
