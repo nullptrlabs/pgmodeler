@@ -176,7 +176,7 @@ void PgModelerGuiPlugin::configurePluginInfo(const QString &title, const QString
 	version_lbl->setText(QString(QT_TRANSLATE_NOOP("PgModelerPlugin", "<strong>Version:</strong> %1")).arg(version));
 	author_lbl->setText(QString(QT_TRANSLATE_NOOP("PgModelerPlugin","<strong>Author:</strong> %1")).arg(author));
 	description_lbl->setText(description);
-	icon_lbl->setPixmap(QPixmap(getPluginIcon(getPluginName())));
+	icon_lbl->setPixmap(getPluginPixmap(getPluginName()));
 }
 
 void PgModelerGuiPlugin::showPluginInfo()
@@ -184,10 +184,19 @@ void PgModelerGuiPlugin::showPluginInfo()
 	plugin_info_frm->show();
 }
 
-[[deprecated]]
-QString PgModelerGuiPlugin::getPluginIcon(const QString &icon_name)
+QString PgModelerGuiPlugin::getPluginIconPath(const QString &icon_name)
 {
 	return QString(":/%1/%2.png").arg(getPluginName(), icon_name);
+}
+
+QIcon PgModelerGuiPlugin::getPluginIcon(const QString &icon_name)
+{
+	return { QIcon(getPluginIconPath(icon_name)) };
+}
+
+QPixmap PgModelerGuiPlugin::getPluginPixmap(const QString &icon_name)
+{
+	return { QPixmap(getPluginIconPath(icon_name)) };
 }
 
 PgModelerGuiPlugin::PluginWidgets PgModelerGuiPlugin::createWidgets(QWidget *)
