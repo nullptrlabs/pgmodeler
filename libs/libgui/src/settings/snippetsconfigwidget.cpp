@@ -520,7 +520,7 @@ void SnippetsConfigWidget::configureSnippetsMenu(QMenu *snip_menu, std::vector<O
 				type_name=tr("General");
 			}
 			else
-				ico=QPixmap(GuiUtilsNs::getIconPath(object));
+				ico=GuiUtilsNs::getPixmap(object);
 
 			menu=new QMenu(type_name, snip_menu);
 			menu->setIcon(ico);
@@ -534,7 +534,7 @@ void SnippetsConfigWidget::configureSnippetsMenu(QMenu *snip_menu, std::vector<O
 		}
 
 		//Creating the action for the current snippet
-		act=new QAction(QPixmap(GuiUtilsNs::getIconPath("codesnippet")), snip_id, submenus[object]);
+		act=new QAction(GuiUtilsNs::getPixmap("codesnippet"), snip_id, submenus[object]);
 		act->setToolTip(snip[Attributes::Label]);
 		submenus[object]->addAction(act);
 	}

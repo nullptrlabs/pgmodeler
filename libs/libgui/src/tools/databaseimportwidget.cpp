@@ -274,9 +274,9 @@ void DatabaseImportWidget::updateProgress(int progress, QString msg, ObjectType 
 	progress_pb->setValue(progress);
 
 	if(obj_type!=ObjectType::BaseObject)
-		ico=QPixmap(GuiUtilsNs::getIconPath(obj_type));
+		ico=GuiUtilsNs::getPixmap(obj_type);
 	else
-		ico=QPixmap(GuiUtilsNs::getIconPath("info"));
+		ico=GuiUtilsNs::getPixmap("info");
 
 	ico_lbl->setPixmap(ico);
 
@@ -378,7 +378,7 @@ void DatabaseImportWidget::importDatabase()
 
 		if(low_verbosity)
 			GuiUtilsNs::createOutputTreeItem(output_trw, tr("<strong>Low verbosity is set:</strong> only key informations and errors will be displayed."),
-																					QPixmap(GuiUtilsNs::getIconPath("alert")), nullptr, false);
+																					GuiUtilsNs::getPixmap("alert"), nullptr, false);
 
 		getObjectToImport(obj_oids, col_oids);
 		obj_oids[ObjectType::Database].push_back(database_cmb->itemData(database_cmb->currentIndex()).value<unsigned>());
@@ -682,7 +682,7 @@ void DatabaseImportWidget::captureThreadError(Exception e)
 	destroyModel();
 	finishImport(tr("Importing process aborted!"), true);
 
-	ico = QPixmap(GuiUtilsNs::getIconPath("error"));
+	ico = GuiUtilsNs::getPixmap("error");
 	ico_lbl->setPixmap(ico);
 
 	item = GuiUtilsNs::createOutputTreeItem(output_trw, UtilsNs::formatMessage(e.getErrorMessage()), ico, nullptr, false, true);
@@ -790,7 +790,7 @@ void DatabaseImportWidget::destroyModel()
 
 void DatabaseImportWidget::handleImportCanceled()
 {
-	QPixmap ico=QPixmap(GuiUtilsNs::getIconPath("alert"));
+	QPixmap ico=GuiUtilsNs::getPixmap("alert");
 	QString msg=tr("Importing process canceled by user!");
 
 	destroyModel();
@@ -811,7 +811,7 @@ void DatabaseImportWidget::handleImportFinished(Exception e)
 
 	model_wgt->getDatabaseModel()->setInvalidated(false);
 
-	ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("info")));
+	ico_lbl->setPixmap(GuiUtilsNs::getPixmap("info"));
 	finishImport(tr("Importing process sucessfuly ended!"), false);
 
 	import_helper->closeConnection();
@@ -941,7 +941,7 @@ void DatabaseImportWidget::listDatabases(DatabaseImportHelper &import_helper, QC
 
 			for(int i=0; i < list.count(); i++)
 			{
-				dbcombo->setItemIcon(i, QPixmap(GuiUtilsNs::getIconPath(ObjectType::Database)));
+				dbcombo->setItemIcon(i, GuiUtilsNs::getPixmap(ObjectType::Database));
 				dbcombo->setItemData(i, oids[list[i]]);
 			}
 
@@ -988,7 +988,7 @@ void DatabaseImportWidget::listObjects(DatabaseImportHelper &import_helper, QTre
 				//Creating database item
 				db_item=new QTreeWidgetItem;
 				db_item->setText(0, import_helper.getCurrentDatabase());
-				db_item->setIcon(0, QIcon(GuiUtilsNs::getIconPath(ObjectType::Database)));
+				db_item->setIcon(0, GuiUtilsNs::getIcon(ObjectType::Database));
 				attribs = catalog.getObjectsAttributes(ObjectType::Database, "", "", {}, {{Attributes::Name, import_helper.getCurrentDatabase()}});
 
 				db_item->setData(ObjectId, Qt::UserRole, attribs[0].at(Attributes::Oid).toUInt());
@@ -1121,7 +1121,7 @@ std::vector<QTreeWidgetItem *> DatabaseImportWidget::updateObjectsTree(DatabaseI
 		{
 			//Create a group item for the current type
 			group = new QTreeWidgetItem(root);
-			group->setIcon(0, QIcon(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(grp_type))));
+			group->setIcon(0, GuiUtilsNs::getIcon(BaseObject::getSchemaName(grp_type)));
 			group->setFont(0, grp_fnt);
 			group->setText(0, BaseObject::getTypeName(grp_type) + " (0)");
 
@@ -1164,9 +1164,9 @@ std::vector<QTreeWidgetItem *> DatabaseImportWidget::updateObjectsTree(DatabaseI
 			item = new QTreeWidgetItem(group);
 
 			if(obj_type == ObjectType::Constraint)
-				item->setIcon(0, QIcon(GuiUtilsNs::getIconPath(constr_icons[attribs[Attributes::ExtraInfo]])));
+				item->setIcon(0, GuiUtilsNs::getIcon(constr_icons[attribs[Attributes::ExtraInfo]]));
 			else
-				item->setIcon(0, QIcon(GuiUtilsNs::getIconPath(obj_type)));
+				item->setIcon(0, GuiUtilsNs::getIcon(obj_type));
 
 			item->setText(0, label);
 			item->setText(ObjectId, attribs[Attributes::Oid].rightJustified(10, '0'));

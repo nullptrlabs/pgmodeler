@@ -282,7 +282,7 @@ void CodeCompletionWidget::configureCompletion(DatabaseModel *db_model, SyntaxHi
 			clearCustomItems();
 			insertCustomItems(SnippetsConfigWidget::getAllSnippetsAttribute(Attributes::Id),
 												SnippetsConfigWidget::getAllSnippetsAttribute(Attributes::Label),
-												QPixmap(GuiUtilsNs::getIconPath("codesnippet")));
+												GuiUtilsNs::getPixmap("codesnippet"));
 		}
 	}
 	else
@@ -313,7 +313,7 @@ void CodeCompletionWidget::insertCustomItems(const QStringList &names, const QSt
 void CodeCompletionWidget::insertCustomItems(const QStringList &names, const QString &tooltip, ObjectType obj_type)
 {
 	for(auto &name : names)
-		insertCustomItem(name, tooltip, QPixmap(GuiUtilsNs::getIconPath(obj_type)));
+		insertCustomItem(name, tooltip, GuiUtilsNs::getPixmap(obj_type));
 }
 
 void CodeCompletionWidget::clearCustomItems()
@@ -358,7 +358,7 @@ void CodeCompletionWidget::populateNameList(std::vector<BaseObject *> &objects, 
 		//The object will be inserted if its name matches the filter or there is no filter set
 		if(filter.isEmpty() || regexp.match(obj_name).hasMatch())
 		{
-			item= new QListWidgetItem(QPixmap(GuiUtilsNs::getIconPath(obj->getSchemaName())), obj_name);
+			item= new QListWidgetItem(GuiUtilsNs::getPixmap(obj->getSchemaName()), obj_name);
 			item->setToolTip(QString("%1 (%2)").arg(obj->getName(true)).arg(obj->getTypeName()));
 			item->setData(Qt::UserRole, QVariant::fromValue<void *>(obj));
 			item->setToolTip(BaseObject::getTypeName(obj_type));
@@ -629,7 +629,7 @@ bool CodeCompletionWidget::retrieveColumnNames()
 
 			for(auto &alias : aliases)
 			{
-				item = new QListWidgetItem(QIcon(GuiUtilsNs::getIconPath(ObjectType::Column)),
+				item = new QListWidgetItem(GuiUtilsNs::getIcon(ObjectType::Column),
 																	 alias.isEmpty() || !allow_tab_alias ?
 																	 attr.second : QString("<strong><em>%1</em>.</strong>%2").arg(alias, attr.second));
 
@@ -811,7 +811,7 @@ bool CodeCompletionWidget::retrieveObjectNames()
 
 			name_list->addItem(disp_name);
 			item = name_list->item(name_list->count() - 1);
-			item->setIcon(QIcon(GuiUtilsNs::getIconPath(obj_type)));
+			item->setIcon(GuiUtilsNs::getIcon(obj_type));
 			item->setData(Qt::UserRole, fmt_name);
 
 			if(obj_type != ObjectType::Schema)
@@ -1337,7 +1337,7 @@ void CodeCompletionWidget::updateList()
 
 		for(auto &kw : keywords.filter(regexp))
 		{
-			item=new QListWidgetItem(QPixmap(GuiUtilsNs::getIconPath("keyword")), kw);
+			item=new QListWidgetItem(GuiUtilsNs::getPixmap("keyword"), kw);
 			item->setToolTip(tr("SQL Keyword"));
 			name_list->addItem(item);
 		}

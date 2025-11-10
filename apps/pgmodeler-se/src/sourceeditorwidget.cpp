@@ -43,7 +43,7 @@ SourceEditorWidget::SourceEditorWidget(QWidget *parent) : QWidget(parent)
 	vbox->addWidget(source_file_sel);
 
 	for(auto &itr : snippets)
-		code_compl_wgt->insertCustomItem(itr.first, itr.second, QPixmap(GuiUtilsNs::getIconPath("codesnippet")));
+		code_compl_wgt->insertCustomItem(itr.first, itr.second, GuiUtilsNs::getPixmap("codesnippet"));
 
 	vbox = new QVBoxLayout(search_parent);
 	vbox->setContentsMargins(0, 0, 0, GuiUtilsNs::LtMargin);

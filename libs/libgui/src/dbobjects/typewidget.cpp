@@ -54,11 +54,11 @@ TypeWidget::TypeWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Ty
 	attributes_tab=new CustomTableWidget(CustomTableWidget::AllButtons ^ CustomTableWidget::DuplicateButton, true, this);
 	attributes_tab->setColumnCount(3);
 	attributes_tab->setHeaderLabel(tr("Name"),0);
-	attributes_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")),0);
+	attributes_tab->setHeaderIcon(GuiUtilsNs::getPixmap("uid"),0);
 	attributes_tab->setHeaderLabel(tr("Type"),1);
-	attributes_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("usertype")),1);
+	attributes_tab->setHeaderIcon(GuiUtilsNs::getPixmap("usertype"),1);
 	attributes_tab->setHeaderLabel(tr("Collation"),2);
-	attributes_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("collation")),2);
+	attributes_tab->setHeaderIcon(GuiUtilsNs::getPixmap("collation"),2);
 
 	grid=dynamic_cast<QGridLayout *>(attributes_gb->layout());
 

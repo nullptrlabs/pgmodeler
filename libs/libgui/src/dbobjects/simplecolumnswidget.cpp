@@ -31,9 +31,9 @@ SimpleColumnsWidget::SimpleColumnsWidget(QWidget *parent) : QWidget(parent)
 	columns_tab = new CustomTableWidget(CustomTableWidget::AllButtons, true, this);
 	columns_tab->setColumnCount(3);
 	columns_tab->setHeaderLabel(tr("Name"), 0);
-	columns_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")),0);
+	columns_tab->setHeaderIcon(GuiUtilsNs::getPixmap("uid"),0);
 	columns_tab->setHeaderLabel(tr("Type"), 1);
-	columns_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("usertype")),1);
+	columns_tab->setHeaderIcon(GuiUtilsNs::getPixmap("usertype"),1);
 	columns_tab->setHeaderLabel(tr("Alias"), 2);
 
 	QFrame *info_frm=BaseObjectWidget::generateInformationFrame(tr("This tab can be used to inform additional columns that the view owns and were not generated from the object references. This is just a convenience to make the visualization of this kind of object more intuitive."));

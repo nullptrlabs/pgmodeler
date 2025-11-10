@@ -31,7 +31,7 @@ TaskProgressWidget::TaskProgressWidget(QWidget *parent, Qt::WindowFlags f) : QDi
 	setAttribute(Qt::WA_TranslucentBackground, true);
 
 	for(auto &obj_tp : obj_types)
-		addIcon(enum_t(obj_tp), QIcon(GuiUtilsNs::getIconPath(obj_tp)));
+		addIcon(enum_t(obj_tp), GuiUtilsNs::getIcon(obj_tp));
 }
 
 void TaskProgressWidget::addIcon(unsigned id, const QIcon &ico)

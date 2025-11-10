@@ -45,7 +45,7 @@ TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget
 	Ui_TableWidget::setupUi(this);
 
 	edt_data_tb=new QPushButton(this);
-	QPixmap icon=QPixmap(GuiUtilsNs::getIconPath("editrows"));
+	QPixmap icon=GuiUtilsNs::getPixmap("editrows");
 	edt_data_tb->setMinimumSize(edt_perms_tb->minimumSize());
 	edt_data_tb->setText(tr("Edit data"));
 	edt_data_tb->setToolTip(tr("Define initial data for the table"));
@@ -63,11 +63,11 @@ TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget
 	parent_tables = new CustomTableWidget(CustomTableWidget::NoButtons, true, this);
 	parent_tables->setColumnCount(3);
 	parent_tables->setHeaderLabel(tr("Name"), 0);
-	parent_tables->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")),0);
+	parent_tables->setHeaderIcon(GuiUtilsNs::getPixmap("uid"),0);
 	parent_tables->setHeaderLabel(tr("Schema"), 1);
-	parent_tables->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("schema")),1);
+	parent_tables->setHeaderIcon(GuiUtilsNs::getPixmap("schema"),1);
 	parent_tables->setHeaderLabel(tr("Type"), 2);
-	parent_tables->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("usertype")),2);
+	parent_tables->setHeaderIcon(GuiUtilsNs::getPixmap("usertype"),2);
 
 	server_sel=nullptr;
 	server_sel=new ObjectSelectorWidget(ObjectType::ForeignServer, this);
@@ -123,9 +123,9 @@ TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget
 	objects_tab_map[ObjectType::Column]->setColumnCount(7);
 	objects_tab_map[ObjectType::Column]->setHeaderLabel(tr("PK"), 0);
 	objects_tab_map[ObjectType::Column]->setHeaderLabel(tr("Name"), 1);
-	objects_tab_map[ObjectType::Column]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")),1);
+	objects_tab_map[ObjectType::Column]->setHeaderIcon(GuiUtilsNs::getPixmap("uid"),1);
 	objects_tab_map[ObjectType::Column]->setHeaderLabel(tr("Type"), 2);
-	objects_tab_map[ObjectType::Column]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("usertype")),2);
+	objects_tab_map[ObjectType::Column]->setHeaderIcon(GuiUtilsNs::getPixmap("usertype"),2);
 	objects_tab_map[ObjectType::Column]->setHeaderLabel(tr("Default Value"), 3);
 	objects_tab_map[ObjectType::Column]->setHeaderLabel(tr("Attribute(s)"), 4);
 	objects_tab_map[ObjectType::Column]->setHeaderLabel(tr("Alias"), 5);
@@ -147,9 +147,9 @@ TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget
 
 	objects_tab_map[ObjectType::Constraint]->setColumnCount(6);
 	objects_tab_map[ObjectType::Constraint]->setHeaderLabel(tr("Name"), 0);
-	objects_tab_map[ObjectType::Constraint]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")),0);
+	objects_tab_map[ObjectType::Constraint]->setHeaderIcon(GuiUtilsNs::getPixmap("uid"),0);
 	objects_tab_map[ObjectType::Constraint]->setHeaderLabel(tr("Type"), 1);
-	objects_tab_map[ObjectType::Constraint]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("usertype")),1);
+	objects_tab_map[ObjectType::Constraint]->setHeaderIcon(GuiUtilsNs::getPixmap("usertype"),1);
 	objects_tab_map[ObjectType::Constraint]->setHeaderLabel(tr("ON DELETE"), 2);
 	objects_tab_map[ObjectType::Constraint]->setHeaderLabel(tr("ON UPDATE"), 3);
 	objects_tab_map[ObjectType::Constraint]->setHeaderLabel(tr("Alias"), 4);
@@ -157,18 +157,18 @@ TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget
 
 	objects_tab_map[ObjectType::Trigger]->setColumnCount(6);
 	objects_tab_map[ObjectType::Trigger]->setHeaderLabel(tr("Name"), 0);
-	objects_tab_map[ObjectType::Trigger]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")),0);
+	objects_tab_map[ObjectType::Trigger]->setHeaderIcon(GuiUtilsNs::getPixmap("uid"),0);
 	objects_tab_map[ObjectType::Trigger]->setHeaderLabel(tr("Refer. Table"), 1);
-	objects_tab_map[ObjectType::Trigger]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("table")),1);
+	objects_tab_map[ObjectType::Trigger]->setHeaderIcon(GuiUtilsNs::getPixmap("table"),1);
 	objects_tab_map[ObjectType::Trigger]->setHeaderLabel(tr("Firing"), 2);
-	objects_tab_map[ObjectType::Trigger]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("trigger")),2);
+	objects_tab_map[ObjectType::Trigger]->setHeaderIcon(GuiUtilsNs::getPixmap("trigger"),2);
 	objects_tab_map[ObjectType::Trigger]->setHeaderLabel(tr("Events"), 3);
 	objects_tab_map[ObjectType::Trigger]->setHeaderLabel(tr("Alias"), 4);
 	objects_tab_map[ObjectType::Trigger]->setHeaderLabel(tr("Comment"), 5);
 
 	objects_tab_map[ObjectType::Rule]->setColumnCount(5);
 	objects_tab_map[ObjectType::Rule]->setHeaderLabel(tr("Name"), 0);
-	objects_tab_map[ObjectType::Rule]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")),0);
+	objects_tab_map[ObjectType::Rule]->setHeaderIcon(GuiUtilsNs::getPixmap("uid"),0);
 	objects_tab_map[ObjectType::Rule]->setHeaderLabel(tr("Execution"), 1);
 	objects_tab_map[ObjectType::Rule]->setHeaderLabel(tr("Event"), 2);
 	objects_tab_map[ObjectType::Rule]->setHeaderLabel(tr("Alias"), 3);
@@ -176,21 +176,21 @@ TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget
 
 	objects_tab_map[ObjectType::Index]->setColumnCount(4);
 	objects_tab_map[ObjectType::Index]->setHeaderLabel(tr("Name"), 0);
-	objects_tab_map[ObjectType::Index]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")),0);
+	objects_tab_map[ObjectType::Index]->setHeaderIcon(GuiUtilsNs::getPixmap("uid"),0);
 	objects_tab_map[ObjectType::Index]->setHeaderLabel(tr("Indexing"), 1);
 	objects_tab_map[ObjectType::Index]->setHeaderLabel(tr("Alias"), 2);
 	objects_tab_map[ObjectType::Index]->setHeaderLabel(tr("Comment"), 3);
 
 	objects_tab_map[ObjectType::Policy]->setColumnCount(8);
 	objects_tab_map[ObjectType::Policy]->setHeaderLabel(tr("Name"), 0);
-	objects_tab_map[ObjectType::Policy]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")),0);
+	objects_tab_map[ObjectType::Policy]->setHeaderIcon(GuiUtilsNs::getPixmap("uid"),0);
 	objects_tab_map[ObjectType::Policy]->setHeaderLabel(tr("Command"), 1);
-	objects_tab_map[ObjectType::Policy]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("keyword")),1);
+	objects_tab_map[ObjectType::Policy]->setHeaderIcon(GuiUtilsNs::getPixmap("keyword"),1);
 	objects_tab_map[ObjectType::Policy]->setHeaderLabel(tr("Permissive"), 2);
 	objects_tab_map[ObjectType::Policy]->setHeaderLabel(tr("USING expression"), 3);
 	objects_tab_map[ObjectType::Policy]->setHeaderLabel(tr("CHECK expression"), 4);
 	objects_tab_map[ObjectType::Policy]->setHeaderLabel(tr("Roles"), 5);
-	objects_tab_map[ObjectType::Policy]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("role")),5);
+	objects_tab_map[ObjectType::Policy]->setHeaderIcon(GuiUtilsNs::getPixmap("role"),5);
 	objects_tab_map[ObjectType::Policy]->setHeaderLabel(tr("Alias"), 6);
 	objects_tab_map[ObjectType::Policy]->setHeaderLabel(tr("Comment"), 7);
 

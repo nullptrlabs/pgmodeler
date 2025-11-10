@@ -82,7 +82,7 @@ void ObjectRenameWidget::updateLabelsButtons()
 	if(objects.size() == 1)
 	{
 		BaseObject *obj = objects.front();
-		obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(obj->getSchemaName())));
+		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(obj->getSchemaName()));
 		obj_icon_lbl->setToolTip(obj->getTypeName());
 		new_name_edt->setText(obj->getName());
 		rename_lbl->setText(tr("Rename %1 <strong>%2</strong> to:").arg(obj->getTypeName().toLower(), obj->getName()));
@@ -90,7 +90,7 @@ void ObjectRenameWidget::updateLabelsButtons()
 	else
 	{
 		new_name_edt->setText("");
-		obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("objects")));
+		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap("objects"));
 		obj_icon_lbl->setToolTip("");
 		rename_lbl->setText(tr("Rename <strong>%1</strong> object(s) to:").arg(objects.size()));
 	}
@@ -101,7 +101,7 @@ void ObjectRenameWidget::updateLabelsButtons()
 	if(!paste_mode)
 	{
 		cancel_btn->setText(tr("Cancel"));
-		cancel_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("close1")));
+		cancel_btn->setIcon(GuiUtilsNs::getIcon("close1"));
 
 		disconnect(apply_btn, nullptr, this, nullptr);
 		connect(apply_btn, &QPushButton::clicked, this, &ObjectRenameWidget::applyRenaming, Qt::UniqueConnection);
@@ -109,7 +109,7 @@ void ObjectRenameWidget::updateLabelsButtons()
 	else
 	{
 		cancel_btn->setText(tr("Ignore"));
-		cancel_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("cancel")));
+		cancel_btn->setIcon(GuiUtilsNs::getIcon("cancel"));
 
 		disconnect(apply_btn, nullptr, this, nullptr);
 		connect(apply_btn, &QPushButton::clicked, this, &ObjectRenameWidget::validateName, Qt::UniqueConnection);

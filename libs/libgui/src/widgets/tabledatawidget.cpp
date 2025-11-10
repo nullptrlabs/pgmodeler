@@ -34,7 +34,7 @@ TableDataWidget::TableDataWidget(QWidget *parent): BaseObjectWidget(parent, Obje
  	
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
-	obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(ObjectType::Table)));
+	obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(ObjectType::Table));
 
 	comment_lbl->setVisible(false);
 	comment_edt->setVisible(false);

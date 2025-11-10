@@ -25,7 +25,7 @@ DeletableItemDelegate::DeletableItemDelegate(QComboBox *parent, const QString &t
 	combo = parent;
 	del_btn = new QToolButton(combo->view());
 	del_btn->setVisible(false);
-	del_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("delete")));
+	del_btn->setIcon(GuiUtilsNs::getIcon("delete"));
 	del_btn->setIconSize(QSize(parent->iconSize().width() * 0.80, parent->iconSize().height() * 0.80));
 	del_btn->setAutoRaise(true);
 	del_btn->setShortcut(shortcut);

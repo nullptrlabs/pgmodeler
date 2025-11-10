@@ -41,15 +41,15 @@ ReferencesWidget::ReferencesWidget(const std::vector<ObjectType> &types, bool co
 	references_tab->setColumnCount(conf_view_refs ? 7 : 6);
 
 	references_tab->setHeaderLabel(tr("Ref. name"), 0);
-	references_tab->setHeaderIcon(QIcon(GuiUtilsNs::getIconPath("uid")), 0);
+	references_tab->setHeaderIcon(GuiUtilsNs::getIcon("uid"), 0);
 
 	references_tab->setHeaderLabel(tr("Ref. alias"), 1);
 
 	references_tab->setHeaderLabel(tr("Object"), 2);
-	references_tab->setHeaderIcon(QIcon(GuiUtilsNs::getIconPath("objects")), 2);
+	references_tab->setHeaderIcon(GuiUtilsNs::getIcon("objects"), 2);
 
 	references_tab->setHeaderLabel(tr("Type"), 3);
-	references_tab->setHeaderIcon(QIcon(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(ObjectType::Type))), 3);
+	references_tab->setHeaderIcon(GuiUtilsNs::getIcon(BaseObject::getSchemaName(ObjectType::Type)), 3);
 
 	references_tab->setHeaderLabel(tr("Use signature"), 4);
 	references_tab->setHeaderLabel(tr("Format name"), 5);

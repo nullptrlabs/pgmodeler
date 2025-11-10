@@ -301,7 +301,7 @@ DataGridWidget *DataHandlingForm::addDataGrid(const QString &schema, const QStri
 
 	data_grid_wgt->setObjectName(data_grid_name);
 	int tab_idx = data_grids_tbw->addTab(data_grid_wgt,
-																			 QIcon(GuiUtilsNs::getIconPath(obj_type)),
+																			 GuiUtilsNs::getIcon(obj_type),
 																			 table);
 
 	data_grids_tbw->setCurrentIndex(tab_idx);
@@ -438,7 +438,7 @@ void DataHandlingForm::listObjects(QComboBox *combo, std::vector<ObjectType> obj
 
 			for(; idx < count; idx++)
 			{
-				combo->setItemIcon(idx, QPixmap(GuiUtilsNs::getIconPath(obj_type)));
+				combo->setItemIcon(idx, GuiUtilsNs::getPixmap(obj_type));
 				combo->setItemData(idx, enum_t(obj_type));
 			}
 

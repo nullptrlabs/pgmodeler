@@ -36,9 +36,9 @@ ColumnPickerWidget::ColumnPickerWidget(QWidget *parent) :	QWidget(parent)
 
 	columns_tab->setColumnCount(2);
 	columns_tab->setHeaderLabel(tr("Column"), 0);
-	columns_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("column")),0);
+	columns_tab->setHeaderIcon(GuiUtilsNs::getPixmap("column"),0);
 	columns_tab->setHeaderLabel(tr("Type"), 1);
-	columns_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("usertype")),1);
+	columns_tab->setHeaderIcon(GuiUtilsNs::getPixmap("usertype"),1);
 
 	col_picker_grid->addWidget(columns_tab, 1, 0, 1, 3);
 

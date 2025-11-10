@@ -173,7 +173,7 @@ void SourceCodeWidget::setAttributes(DatabaseModel *model, const std::vector<Bas
 
 			BaseObjectWidget::setAttributes(model, objects[0], nullptr);
 			name_edt->setText(QString("%1 (%2)").arg(object->getSignature(), object->getTypeName()));
-			obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(object->getObjectType())));
+			obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(object->getObjectType()));
 		}
 		else
 		{

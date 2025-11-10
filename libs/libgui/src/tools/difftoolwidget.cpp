@@ -536,7 +536,7 @@ void DiffToolWidget::startDiff()
 
 	if(low_verbosity)
 		GuiUtilsNs::createOutputTreeItem(output_trw, tr("<strong>Low verbosity is set:</strong> only key informations and errors will be displayed."),
-																				QPixmap(GuiUtilsNs::getIconPath("alert")), nullptr, false);
+																				GuiUtilsNs::getPixmap("alert"), nullptr, false);
 
 	if(input_model_wgt)
 		input_model_wgt->setInteractive(false);
@@ -600,7 +600,7 @@ void DiffToolWidget::importDatabase(ThreadId thread_id)
 		unsigned db_oid = model_db_sel->getSelectedDatabaseOid();
 
 		hlp_conn = cat_conn;
-		step_ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("import")));
+		step_ico_lbl->setPixmap(GuiUtilsNs::getPixmap("import"));
 
 		cat_conn.switchToDatabase(db_name);
 
@@ -680,7 +680,7 @@ void DiffToolWidget::diffModels()
 						.arg(total_steps)
 						.arg(input_model->getName(), compared_model->getName()));
 
-	step_ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("diff")));
+	step_ico_lbl->setPixmap(GuiUtilsNs::getPixmap("diff"));
 
 	if(input_imp_item)
 		output_trw->collapseItem(input_imp_item);
@@ -744,7 +744,7 @@ void DiffToolWidget::exportDiff(bool confirm)
 											.arg(total_steps)
 											.arg(compared_model->getName())
 											.arg(export_conn->getConnectionId(true)));
-		step_ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("export")));
+		step_ico_lbl->setPixmap(GuiUtilsNs::getPixmap("export"));
 
 		output_trw->collapseItem(diff_item);
 		diff_progress = step_pb->value();
@@ -770,7 +770,7 @@ void DiffToolWidget::exportDiff(bool confirm)
 		output_trw->collapseItem(diff_item);
 		GuiUtilsNs::createOutputTreeItem(output_trw,
 											tr("Diff process paused. Waiting user action..."),
-											QPixmap(GuiUtilsNs::getIconPath("alert")), nullptr);
+											GuiUtilsNs::getPixmap("alert"), nullptr);
 	}
 }
 
@@ -837,7 +837,7 @@ void DiffToolWidget::saveDiffToFile()
 	if(!sqlcode_txt->toPlainText().isEmpty())
 	{
 		step_lbl->setText(tr("Saving diff to file <strong>%1</strong>").arg(file_sel->getSelectedFile()));
-		step_ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("save")));
+		step_ico_lbl->setPixmap(GuiUtilsNs::getPixmap("save"));
 		compared_imp_item=GuiUtilsNs::createOutputTreeItem(output_trw, step_lbl->text(), step_ico_lbl->pixmap(Qt::ReturnByValue), nullptr);
 		step_pb->setValue(90);
 		progress_pb->setValue(100);
@@ -855,8 +855,8 @@ void DiffToolWidget::finishDiff()
 	step_lbl->setText(tr("Diff process sucessfully ended!"));
 	progress_lbl->setText(tr("No operations left."));
 
-	step_ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("info")));
-	progress_ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("info")));
+	step_ico_lbl->setPixmap(GuiUtilsNs::getPixmap("info"));
+	progress_ico_lbl->setPixmap(GuiUtilsNs::getPixmap("info"));
 
 	compared_imp_item=GuiUtilsNs::createOutputTreeItem(output_trw, step_lbl->text(), step_ico_lbl->pixmap(Qt::ReturnByValue), nullptr);
 	step_pb->setValue(100);
@@ -872,8 +872,8 @@ void DiffToolWidget::cancelOperation(bool cancel_by_user)
 		step_lbl->setText(tr("Operation cancelled by the user."));
 		progress_lbl->setText(tr("No operations left."));
 
-		step_ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("alert")));
-		progress_ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("alert")));
+		step_ico_lbl->setPixmap(GuiUtilsNs::getPixmap("alert"));
+		progress_ico_lbl->setPixmap(GuiUtilsNs::getPixmap("alert"));
 
 		GuiUtilsNs::createOutputTreeItem(output_trw, step_lbl->text(), step_ico_lbl->pixmap(Qt::ReturnByValue), nullptr);
 	}
@@ -922,7 +922,7 @@ void DiffToolWidget::captureThreadError(Exception e)
 
 	cancelOperation(false);
 	progress_lbl->setText(tr("Process aborted due to errors!"));
-	progress_ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("error")));
+	progress_ico_lbl->setPixmap(GuiUtilsNs::getPixmap("error"));
 
 	item=GuiUtilsNs::createOutputTreeItem(output_trw, UtilsNs::formatMessage(e.getErrorMessage()), progress_ico_lbl->pixmap(Qt::ReturnByValue), nullptr, false, true);
 	GuiUtilsNs::createExceptionsTree(output_trw, e, item);
@@ -1003,11 +1003,11 @@ void DiffToolWidget::handleErrorIgnored(QString err_code, QString err_msg, QStri
 	QTreeWidgetItem *item=nullptr;
 
 	item=GuiUtilsNs::createOutputTreeItem(output_trw, tr("Error code <strong>%1</strong> found and ignored. Proceeding with export.").arg(err_code),
-											 QPixmap(GuiUtilsNs::getIconPath("alert")),
+											 GuiUtilsNs::getPixmap("alert"),
 											 export_item, false);
 
 	GuiUtilsNs::createOutputTreeItem(output_trw, UtilsNs::formatMessage(err_msg),
-										QPixmap(GuiUtilsNs::getIconPath("alert")),
+										GuiUtilsNs::getPixmap("alert"),
 										item, false, true);
 
 	GuiUtilsNs::createOutputTreeItem(output_trw, cmd,
@@ -1028,7 +1028,7 @@ void DiffToolWidget::updateProgress(int progress, QString msg, ObjectType obj_ty
 		if(!low_verbosity)
 		{
 			GuiUtilsNs::createOutputTreeItem(output_trw, msg,
-												QPixmap(GuiUtilsNs::getIconPath(obj_type)),
+												GuiUtilsNs::getPixmap(obj_type),
 												input_imp_item);
 		}
 	}
@@ -1042,7 +1042,7 @@ void DiffToolWidget::updateProgress(int progress, QString msg, ObjectType obj_ty
 		if(!low_verbosity)
 		{
 			GuiUtilsNs::createOutputTreeItem(output_trw, msg,
-												QPixmap(GuiUtilsNs::getIconPath(obj_type)),
+												GuiUtilsNs::getPixmap(obj_type),
 												compared_imp_item);
 		}
 	}
@@ -1051,7 +1051,7 @@ void DiffToolWidget::updateProgress(int progress, QString msg, ObjectType obj_ty
 		if((progress == 0 || progress == 100) && obj_type==ObjectType::BaseObject)
 		{
 			GuiUtilsNs::createOutputTreeItem(output_trw, msg,
-												QPixmap(GuiUtilsNs::getIconPath("info")),
+												GuiUtilsNs::getPixmap("info"),
 												diff_item);
 		}
 
@@ -1069,12 +1069,12 @@ void DiffToolWidget::updateProgress(int progress, QString msg, ObjectType obj_ty
 			if(obj_type == ObjectType::BaseObject)
 			{
 				if(!cmd.isEmpty())
-					ico = QPixmap(GuiUtilsNs::getIconPath("sqlcode"));
+					ico = GuiUtilsNs::getPixmap("sqlcode");
 				else
-					ico = QPixmap(GuiUtilsNs::getIconPath("info"));
+					ico = GuiUtilsNs::getPixmap("info");
 			}
 			else
-				ico=QPixmap(GuiUtilsNs::getIconPath(obj_type));
+				ico=GuiUtilsNs::getPixmap(obj_type);
 
 			item=GuiUtilsNs::createOutputTreeItem(output_trw, msg, ico, export_item, false);
 
@@ -1090,9 +1090,9 @@ void DiffToolWidget::updateProgress(int progress, QString msg, ObjectType obj_ty
 	progress_pb->setValue(progress);
 
 	if(obj_type!=ObjectType::BaseObject)
-		progress_ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(obj_type)));
+		progress_ico_lbl->setPixmap(GuiUtilsNs::getPixmap(obj_type));
 	else
-		progress_ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("info")));
+		progress_ico_lbl->setPixmap(GuiUtilsNs::getPixmap("info"));
 }
 
 void DiffToolWidget::updateDiffInfo(ObjectsDiffInfo diff_info)
@@ -1110,7 +1110,7 @@ void DiffToolWidget::updateDiffInfo(ObjectsDiffInfo diff_info)
 	{
 		item = GuiUtilsNs::createOutputTreeItem(output_trw,
 																						UtilsNs::formatMessage(diff_info.getInfoMessage()),
-																						QPixmap(GuiUtilsNs::getIconPath(diff_info.getObject()->getSchemaName())), diff_item);
+																						GuiUtilsNs::getPixmap(diff_info.getObject()->getSchemaName()), diff_item);
 
 		item->setData(0, Qt::UserRole, diff_info.getDiffType());
 

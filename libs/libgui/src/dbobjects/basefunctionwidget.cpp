@@ -37,9 +37,9 @@ BaseFunctionWidget::BaseFunctionWidget(QWidget *parent, ObjectType obj_type) : B
 																					CustomTableWidget::UpdateButton, true, this);
 	parameters_tab->setColumnCount(4);
 	parameters_tab->setHeaderLabel(tr("Name"), 0);
-	parameters_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("parameter")), 0);
+	parameters_tab->setHeaderIcon(GuiUtilsNs::getPixmap("parameter"), 0);
 	parameters_tab->setHeaderLabel(tr("Type"), 1);
-	parameters_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("usertype")), 1);
+	parameters_tab->setHeaderIcon(GuiUtilsNs::getPixmap("usertype"), 1);
 	parameters_tab->setHeaderLabel(tr("Mode"), 2);
 	parameters_tab->setHeaderLabel(tr("Default Value"), 3);
 
@@ -57,7 +57,7 @@ BaseFunctionWidget::BaseFunctionWidget(QWidget *parent, ObjectType obj_type) : B
 																								CustomTableWidget::ResizeColsButton), true, this);
 	transform_types_tab->setColumnCount(1);
 	transform_types_tab->setHeaderLabel(tr("Type"), 0);
-	transform_types_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("usertype")), 0);
+	transform_types_tab->setHeaderIcon(GuiUtilsNs::getPixmap("usertype"), 0);
 
 	grid = new QGridLayout;
 	grid->addWidget(transform_type_wgt, 0, 0, 1, 1);

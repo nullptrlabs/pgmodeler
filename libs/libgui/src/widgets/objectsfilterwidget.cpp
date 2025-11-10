@@ -56,7 +56,7 @@ ObjectsFilterWidget::ObjectsFilterWidget(QWidget *parent) : QWidget(parent)
 	for(auto &type : types)
 	{
 		item = new QListWidgetItem(BaseObject::getTypeName(type));
-		item->setIcon(QIcon(GuiUtilsNs::getIconPath(type)));
+		item->setIcon(GuiUtilsNs::getIcon(type));
 		item->setData(Qt::UserRole, BaseObject::getSchemaName(type));
 		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
 		item->setCheckState(Qt::Checked);
@@ -151,7 +151,7 @@ QComboBox *ObjectsFilterWidget::createObjectsCombo()
 
 	for(auto &obj_type : obj_types)
 	{
-		combo->addItem(QIcon(GuiUtilsNs::getIconPath(obj_type)),
+		combo->addItem(GuiUtilsNs::getIcon(obj_type),
 												 BaseObject::getTypeName(obj_type),
 												 obj_type);
 	}
@@ -160,13 +160,13 @@ QComboBox *ObjectsFilterWidget::createObjectsCombo()
 	{
 		if(combo->findText(BaseObject::getTypeName(obj_type)) < 0)
 		{
-			combo->addItem(QIcon(GuiUtilsNs::getIconPath(obj_type)),
+			combo->addItem(GuiUtilsNs::getIcon(obj_type),
 													 BaseObject::getTypeName(obj_type),
 													 BaseObject::getSchemaName(obj_type));
 		}
 	}
 
-	combo->insertItem(0, QIcon(GuiUtilsNs::getIconPath("typepolymorphic")),
+	combo->insertItem(0, GuiUtilsNs::getIcon("typepolymorphic"),
 										tr("Any object"), Attributes::Any);
 	combo->setCurrentIndex(0);
 	combo->setStyleSheet("border: 0px");
@@ -279,7 +279,7 @@ void ObjectsFilterWidget::addFilter()
 	filters_tbw->setCellWidget(row, 2, combo);
 
 	rem_tb = new QToolButton;
-	rem_tb->setIcon(QIcon(GuiUtilsNs::getIconPath("delete")));
+	rem_tb->setIcon(GuiUtilsNs::getIcon("delete"));
 	rem_tb->setToolTip(tr("Remove filter"));
 	rem_tb->setAutoRaise(true);
 	connect(rem_tb, &QToolButton::clicked, this, &ObjectsFilterWidget::removeFilter);
