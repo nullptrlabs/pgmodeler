@@ -27,9 +27,13 @@
 
 #include "baseobjectwidget.h"
 #include "ui_tablespacewidget.h"
+#include "fileselectorwidget.h"
 
 class __libgui TablespaceWidget: public BaseObjectWidget, public Ui::TablespaceWidget {
 	Q_OBJECT
+
+	private:
+		FileSelectorWidget *directory_sel;
 
 	public:
 		TablespaceWidget(QWidget * parent = nullptr);

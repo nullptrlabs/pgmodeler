@@ -26,7 +26,6 @@
 #include "settings/generalconfigwidget.h"
 #include "utilsns.h"
 #include "dbobjects/pgsqltypewidget.h"
-#include "guiutilsns.h"
 
 BaseObjectWidget::BaseObjectWidget(QWidget *parent, ObjectType obj_type): QWidget(parent)
 {
@@ -36,20 +35,20 @@ BaseObjectWidget::BaseObjectWidget(QWidget *parent, ObjectType obj_type): QWidge
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, protected_obj_frm);
 	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, id_icon_frm);
 
-	handled_obj_type=obj_type;
-	operation_count=0;
-	new_object=false;
-	model=nullptr;
-	table=nullptr;
-	relationship=nullptr;
-	prev_schema=nullptr;
-	op_list=nullptr;
-	object=nullptr;
-	object_px=DNaN;
-	object_py=DNaN;
-	schema_sel=nullptr;
-	owner_sel=nullptr;
-	tablespace_sel=nullptr;
+	handled_obj_type = obj_type;
+	operation_count = 0;
+	new_object = false;
+	model = nullptr;
+	table = nullptr;
+	relationship = nullptr;
+	prev_schema = nullptr;
+	op_list = nullptr;
+	object = nullptr;
+	object_px = DNaN;
+	object_py = DNaN;
+	schema_sel = nullptr;
+	owner_sel = nullptr;
+	tablespace_sel = nullptr;
 	obj_assoc_wgt = nullptr;
 	object_protected = false;
 
@@ -102,12 +101,13 @@ void BaseObjectWidget::setRequiredField(QWidget *widget)
 {
 	if(widget)
 	{
-		QLabel *lbl=qobject_cast<QLabel *>(widget);
-		QLineEdit *edt=qobject_cast<QLineEdit *>(widget);
-		QTextEdit *txt=qobject_cast<QTextEdit *>(widget);
-		QGroupBox *grp=qobject_cast<QGroupBox *>(widget);
-		ObjectSelectorWidget *sel=dynamic_cast<ObjectSelectorWidget *>(widget);
-		PgSQLTypeWidget *pgtype=dynamic_cast<PgSQLTypeWidget *>(widget);
+		QLabel *lbl = qobject_cast<QLabel *>(widget);
+		QLineEdit *edt = qobject_cast<QLineEdit *>(widget);
+		QTextEdit *txt = qobject_cast<QTextEdit *>(widget);
+		QGroupBox *grp = qobject_cast<QGroupBox *>(widget);
+		ObjectSelectorWidget *sel = dynamic_cast<ObjectSelectorWidget *>(widget);
+		FileSelectorWidget *file_sel = dynamic_cast<FileSelectorWidget *>(widget);
+		PgSQLTypeWidget *pgtype = dynamic_cast<PgSQLTypeWidget *>(widget);
 		QString str_aux = " <span style='color: #ff0000;'>*</span> ";
 		QColor border_color = CustomTableWidget::getTableItemColor(CustomTableWidget::RemovedItemBgColor);
 
@@ -122,18 +122,19 @@ void BaseObjectWidget::setRequiredField(QWidget *widget)
 			if(grp)
 				grp->setTitle("* " + grp->title());
 		}
-		else if(edt || txt || sel)
+		else if(edt || txt || sel || file_sel)
 		{
-			if(sel)
+			if(sel || file_sel)
 			{
-				widget = sel->obj_name_edt;
-				widget->setStyleSheet(QString("ObjectSelectorWidget > QLineEdit { border: 2px solid %2; padding-top: 2px; padding-bottom: 2px; border-radius: 4px; }").arg(border_color.name()));
+				widget->setStyleSheet(QString("%1 > QLineEdit { border: 2px solid %2; padding-top: 2px; padding-bottom: 2px; border-radius: 4px; }")
+															.arg(widget->metaObject()->className(), border_color.name()));
 			}
 			else
-				widget->setStyleSheet(QString("%1 { border: 2px solid %2; padding-top: 2px; padding-bottom: 2px; border-radius: 4px; }").arg(widget->metaObject()->className()).arg(border_color.name()));
+				widget->setStyleSheet(QString("%1 { border: 2px solid %2; padding-top: 2px; padding-bottom: 2px; border-radius: 4px; }")
+															.arg(widget->metaObject()->className()).arg(border_color.name()));
 		}
 
-		str_aux=(!widget->toolTip().isEmpty() ? "\n" : "");
+		str_aux = (!widget->toolTip().isEmpty() ? "\n" : "");
 		widget->setToolTip(widget->toolTip() + str_aux + tr("Required field. Leaving this empty will raise errors!"));
 	}
 }
@@ -456,6 +457,7 @@ void BaseObjectWidget::configureBaseLayout()
 
 	misc_btns_lt = new QHBoxLayout;
 	misc_btns_lt->setObjectName("misc_btns_lt");
+	misc_btns_lt->setSpacing(GuiUtilsNs::LtSpacing);
 
 	baseobject_grid->addWidget(protected_obj_frm, 0, 0, 1, 0);
 
@@ -533,48 +535,8 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget)
 	});
 }
 
-void BaseObjectWidget::configureFormLayout(QGridLayout *grid, ObjectType obj_type)
-{	
-	if(!grid)
-		setLayout(baseobject_grid);
-	else
-	{
-		QLayoutItem *item = nullptr;
-		int lin = 0, col = 0, col_span = 0,
-				row_span = 0, item_id = 0, item_count = 0;
-
-		/* Move all the widgets of the passed grid layout one row down,
-		 permiting the insertion of the 'baseobject_grid' at the top
-		 of the items */
-		item_count = grid->count();
-		for(item_id = item_count-1; item_id >= 0; item_id--)
-		{
-			item = grid->itemAt(item_id);
-			grid->getItemPosition(item_id, &lin, &col, &row_span, &col_span);
-			grid->removeItem(item);
-			grid->addItem(item, lin+1, col, row_span, col_span);
-
-			/* Configuring QTextEdit to accept tabs as focus changes. This code
-			only applies to widgets directly linked to the layout. If there is some
-			QTextEdit nested in some child widget this is not applied */
-			if(dynamic_cast<QTextEdit *>(item->widget()))
-				dynamic_cast<QTextEdit *>(item->widget())->setTabChangesFocus(true);
-		}
-
-		//Adding the base layout on the top
-		grid->addLayout(baseobject_grid, 0,0,1,0);
-		baseobject_grid = grid;
-	}
-
-	baseobject_grid->setContentsMargins(GuiUtilsNs::LtMargins);
-	configureFormFields(obj_type, obj_type != ObjectType::BaseObject);
-}
-
 void BaseObjectWidget::configureFormFields(ObjectType obj_type, bool inst_ev_filter)
 {
-	QObjectList chld_list;
-	QWidget *wgt = nullptr;
-
 	disable_sql_chk->setVisible(obj_type!=ObjectType::BaseObject && obj_type!=ObjectType::Permission &&
 															obj_type!=ObjectType::Textbox && obj_type!=ObjectType::Tag &&
 															obj_type!=ObjectType::Parameter);
@@ -629,19 +591,13 @@ void BaseObjectWidget::configureFormFields(ObjectType obj_type, bool inst_ev_fil
 	if(inst_ev_filter)
 	{
 		//Install the event filter into all children object in order to capture key press
-		chld_list = this->children();
-
-		while(!chld_list.isEmpty())
+		for(auto &wgt : this->findChildren<QWidget *>())
 		{
-			wgt=dynamic_cast<QWidget *>(chld_list.front());
-
 			//Avoids install event filters in objects that are inteneded to edit multiple lines
 			if(wgt &&
-					wgt->metaObject()->className()!=QString("QPlainTextEdit") &&
-					wgt->metaObject()->className()!=QString("NumberedTextEditor"))
+					wgt->metaObject()->className() != QString("QPlainTextEdit") &&
+					wgt->metaObject()->className() != QString("NumberedTextEditor"))
 				wgt->installEventFilter(this);
-
-			chld_list.pop_front();
 		}
 	}
 }

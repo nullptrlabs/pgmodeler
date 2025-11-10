@@ -31,6 +31,7 @@
 #include "ui_baseobjectwidget.h"
 #include "qtconnectmacros.h"
 #include "widgets/objectassociationswidget.h"
+#include "guiutilsns.h"
 
 class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 	Q_OBJECT
@@ -109,9 +110,53 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		//! \brief Object selectors for schema, owner, tablespace and collation
 		ObjectAssociationsWidget *obj_assoc_wgt;
 		
-		/*! \brief Merges the specified grid layout with the 'baseobject_grid' creating a single form.
+		/*! \brief Merges the specified layout with the 'baseobject_grid' creating a single form.
 		 * The obj_type parameter must be specified to show the object type icon */
-		void configureFormLayout(QGridLayout *grid = nullptr, ObjectType obj_type = ObjectType::BaseObject);
+		template<class LayoutClass, std::enable_if_t<std::is_base_of_v<QLayout, LayoutClass>, bool> = true>
+		void configureFormLayout(LayoutClass *layout, ObjectType obj_type)
+		{
+			if(!layout)
+			{
+				setLayout(baseobject_grid);
+				return;
+			}
+
+			if constexpr(std::is_same_v<QGridLayout, LayoutClass>)
+			{
+				QLayoutItem *item = nullptr;
+				int lin = 0, col = 0, col_span = 0,
+						row_span = 0, item_id = 0, item_count = 0;
+
+				/* Move all the widgets of the passed grid layout one row down,
+				 * permiting the insertion of the 'baseobject_grid' at the top
+				 * of the items */
+				item_count = layout->count();
+
+				for(item_id = item_count - 1; item_id >= 0; item_id--)
+				{
+					item = layout->itemAt(item_id);
+					layout->getItemPosition(item_id, &lin, &col, &row_span, &col_span);
+					layout->removeItem(item);
+					layout->addItem(item, lin + 1, col, row_span, col_span);
+				}
+
+				//Adding the base layout on the top
+				layout->addLayout(baseobject_grid, 0, 0, 1, 0);
+				baseobject_grid = layout;
+			}
+			else
+			{
+				layout->insertLayout(0, baseobject_grid);
+			}
+
+			// Configuring QTextEdit to accept tabs as focus changes.
+			for(auto &txt_wgt : baseobject_grid->findChildren<QTextEdit *>())
+				txt_wgt->setTabChangesFocus(true);
+
+			baseobject_grid->setContentsMargins(QMargins(0, 0, 0, 0));
+			baseobject_grid->setSpacing(layout->spacing());
+			configureFormFields(obj_type, obj_type != ObjectType::BaseObject);
+		}
 
 		void configureTabbedLayout(QTabWidget *tab_widget);
 
@@ -189,7 +234,7 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		ObjectType getHandledObjectType();
 
 		virtual bool isHandledObjectProtected();
-		
+
 	protected slots:
 		void editPermissions();
 		void editCustomSQL();

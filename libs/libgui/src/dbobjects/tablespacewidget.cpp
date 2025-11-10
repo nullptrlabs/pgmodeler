@@ -21,16 +21,29 @@
 TablespaceWidget::TablespaceWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Tablespace)
 {
 	Ui_TablespaceWidget::setupUi(this);
-	configureFormLayout(tablespace_grid, ObjectType::Tablespace);
 
-	tablespace_grid->addItem(new QSpacerItem(10,0,QSizePolicy::Minimum,QSizePolicy::Expanding), tablespace_grid->count(), 0);
+	QVBoxLayout *directory_lt = new QVBoxLayout,
+			*tablespace_lt = new QVBoxLayout(this);
+
+	directory_sel = new FileSelectorWidget(this);
+	directory_sel->setDirectoryMode(true);
+	directory_sel->setAcceptMode(QFileDialog::AcceptOpen);
+	directory_lt->addWidget(directory_lbl);
+	directory_lt->addWidget(directory_sel);
+
+	baseobject_grid->addLayout(directory_lt, baseobject_grid->count(), 0, 1, 0);
+	configureTabbedLayout(tab_attribs_tbw);
+
+	tablespace_lt->addWidget(tab_attribs_tbw);
+	tablespace_lt->setContentsMargins(GuiUtilsNs::LtMargins);
+	tablespace_lt->setSpacing(GuiUtilsNs::LtSpacing);
 
 	setRequiredField(directory_lbl);
-	setRequiredField(directory_edt);
+	setRequiredField(directory_sel);
 
 	configureTabOrder();
 
-	setMinimumSize(480, 140);
+	setMinimumSize(550, 300);
 }
 
 void TablespaceWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Tablespace *tablespc)
@@ -38,19 +51,19 @@ void TablespaceWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 	BaseObjectWidget::setAttributes(model, op_list, tablespc);
 
 	if(tablespc)
-		directory_edt->setText(tablespc->getDirectory());
+		directory_sel->setSelectedFile(tablespc->getDirectory());
 }
 
 void TablespaceWidget::applyConfiguration()
 {
 	try
 	{
-		Tablespace *tablespc=nullptr;
+		Tablespace *tablespc = nullptr;
 
 		startConfiguration<Tablespace>();
+		tablespc = dynamic_cast<Tablespace *>(this->object);
+		tablespc->setDirectory(directory_sel->getSelectedFile());
 
-		tablespc=dynamic_cast<Tablespace *>(this->object);
-		tablespc->setDirectory(directory_edt->text());
 		BaseObjectWidget::applyConfiguration();
 
 		finishConfiguration();
