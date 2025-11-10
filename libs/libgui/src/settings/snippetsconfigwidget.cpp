@@ -534,7 +534,7 @@ void SnippetsConfigWidget::configureSnippetsMenu(QMenu *snip_menu, std::vector<O
 		}
 
 		//Creating the action for the current snippet
-		act=new QAction(GuiUtilsNs::getPixmap("codesnippet"), snip_id, submenus[object]);
+		act=new QAction(GuiUtilsNs::getIcon("codesnippet"), snip_id, submenus[object]);
 		act->setToolTip(snip[Attributes::Label]);
 		submenus[object]->addAction(act);
 	}

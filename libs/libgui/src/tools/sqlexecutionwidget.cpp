@@ -1191,14 +1191,14 @@ void SQLExecutionWidget::enableSQLExecution(bool enable)
 void SQLExecutionWidget::showHistoryContextMenu()
 {
 	QMenu *ctx_menu=cmd_history_txt->createStandardContextMenu();
-	QAction *action_clear = new QAction(GuiUtilsNs::getPixmap("cleartext"), tr("Clear history"), ctx_menu),
-			*action_save = new QAction(GuiUtilsNs::getPixmap("save"), tr("Save history"), ctx_menu),
-			*action_reload = new QAction(GuiUtilsNs::getPixmap("refresh"), tr("Reload history"), ctx_menu),
+	QAction *action_clear = new QAction(GuiUtilsNs::getIcon("cleartext"), tr("Clear history"), ctx_menu),
+			*action_save = new QAction(GuiUtilsNs::getIcon("save"), tr("Save history"), ctx_menu),
+			*action_reload = new QAction(GuiUtilsNs::getIcon("refresh"), tr("Reload history"), ctx_menu),
 			*action_toggle_find = nullptr,
 			*exec_act = nullptr;
 
 	if(!search_history_parent->isVisible())
-		action_toggle_find = new QAction(GuiUtilsNs::getPixmap("findtext"), tr("Search in history"), ctx_menu);
+		action_toggle_find = new QAction(GuiUtilsNs::getIcon("findtext"), tr("Search in history"), ctx_menu);
 	else
 		action_toggle_find = new QAction(tr("Hide search tool"), ctx_menu);
 

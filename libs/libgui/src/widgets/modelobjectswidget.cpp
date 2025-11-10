@@ -441,7 +441,7 @@ void ModelObjectsWidget::updateSchemaTree(QTreeWidgetItem *root)
 		QTreeWidgetItem *item = nullptr, *item1=nullptr, *item2=nullptr;
 		std::vector<ObjectType> types = BaseObject::getChildObjectTypes(ObjectType::Schema);
 		int count = 0;
-		QPixmap group_icon=GuiUtilsNs::getPixmap(QString(BaseObject::getSchemaName(ObjectType::Schema)));
+		QIcon group_icon=GuiUtilsNs::getIcon(QString(BaseObject::getSchemaName(ObjectType::Schema)));
 
 		//Removing the ObjectType::Table and ObjectType::View types since they are handled separetedly
 		types.erase(std::find(types.begin(), types.end(), ObjectType::Table));
@@ -518,7 +518,7 @@ void ModelObjectsWidget::updateTableTree(QTreeWidgetItem *root, BaseObject *sche
 		QTreeWidgetItem *item = nullptr, *item1 = nullptr, *item2 = nullptr;
 		QFont font;
 		std::vector<ObjectType> types = BaseObject::getChildObjectTypes(table_type);
-		QPixmap group_icon = GuiUtilsNs::getPixmap(BaseObject::getSchemaName(table_type));
+		QIcon group_icon = GuiUtilsNs::getIcon(BaseObject::getSchemaName(table_type));
 
 		try
 		{
@@ -577,7 +577,7 @@ void ModelObjectsWidget::updateViewTree(QTreeWidgetItem *root, BaseObject *schem
 		QTreeWidgetItem *item = nullptr, *item1 = nullptr, *item2 = nullptr;
 		QFont font;
 		std::vector<ObjectType> types = BaseObject::getChildObjectTypes(ObjectType::View);
-		QPixmap group_icon = GuiUtilsNs::getPixmap(QString(BaseObject::getSchemaName(ObjectType::View)));
+		QIcon group_icon = GuiUtilsNs::getIcon(QString(BaseObject::getSchemaName(ObjectType::View)));
 
 		try
 		{
