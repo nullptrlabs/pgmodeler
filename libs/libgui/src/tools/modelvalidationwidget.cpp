@@ -352,7 +352,7 @@ void ModelValidationWidget::updateValidation(ValidationInfo val_info)
 			val_info.getValidationType() == ValidationInfo::ValidationAborted)
 	{
 		QStringList errors=val_info.getErrors();
-		item->setIcon(0, GuiUtilsNs::getPixmap("alert"));
+		item->setIcon(0, GuiUtilsNs::getIcon("alert"));
 		validation_prog_pb->setValue(validation_prog_pb->maximum());
 		reenableValidation();
 
@@ -373,7 +373,7 @@ void ModelValidationWidget::updateValidation(ValidationInfo val_info)
 	}
 	else
 	{
-		item->setIcon(0, GuiUtilsNs::getPixmap(
+		item->setIcon(0, GuiUtilsNs::getIcon(
 											val_info.getValidationType() == ValidationInfo::UniqueSameAsPk ? "alert" : "error"));
 
 		if(val_info.getValidationType() == ValidationInfo::BrokenRelConfig)
@@ -404,7 +404,7 @@ void ModelValidationWidget::updateValidation(ValidationInfo val_info)
 				label1->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
 				label1->installEventFilter(this);
-				item1->setIcon(0, GuiUtilsNs::getPixmap(ref_obj->getSchemaName()));
+				item1->setIcon(0, GuiUtilsNs::getIcon(ref_obj->getSchemaName()));
 
 				/* Store the reference of the referrer object in order to allow opening the editing form when the user clicks the item on the output
 				 * So the needed fixes can be done manually */

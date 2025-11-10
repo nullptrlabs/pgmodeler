@@ -66,21 +66,21 @@ RelationshipWidget::RelationshipWidget(QWidget *parent): BaseObjectWidget(parent
 
 	attributes_tab->setColumnCount(2);
 	attributes_tab->setHeaderLabel(tr("Attribute"), 0);
-	attributes_tab->setHeaderIcon(GuiUtilsNs::getPixmap("column"),0);
+	attributes_tab->setHeaderIcon(GuiUtilsNs::getIcon("column"),0);
 	attributes_tab->setHeaderLabel(tr("Type"), 1);
-	attributes_tab->setHeaderIcon(GuiUtilsNs::getPixmap("usertype"),1);
+	attributes_tab->setHeaderIcon(GuiUtilsNs::getIcon("usertype"),1);
 
 	constraints_tab->setColumnCount(2);
 	constraints_tab->setHeaderLabel(tr("Constraint"), 0);
-	constraints_tab->setHeaderIcon(GuiUtilsNs::getPixmap("constraint"),0);
+	constraints_tab->setHeaderIcon(GuiUtilsNs::getIcon("constraint"),0);
 	constraints_tab->setHeaderLabel(tr("Type"), 1);
-	constraints_tab->setHeaderIcon(GuiUtilsNs::getPixmap("usertype"),1);
+	constraints_tab->setHeaderIcon(GuiUtilsNs::getIcon("usertype"),1);
 
 	advanced_objs_tab->setColumnCount(2);
 	advanced_objs_tab->setHeaderLabel(tr("Name"), 0);
-	advanced_objs_tab->setHeaderIcon(GuiUtilsNs::getPixmap("column"),0);
+	advanced_objs_tab->setHeaderIcon(GuiUtilsNs::getIcon("column"),0);
 	advanced_objs_tab->setHeaderLabel(tr("Type"), 1);
-	advanced_objs_tab->setHeaderIcon(GuiUtilsNs::getPixmap("usertype"),1);
+	advanced_objs_tab->setHeaderIcon(GuiUtilsNs::getIcon("usertype"),1);
 
 	connect(advanced_objs_tab, &CustomTableWidget::s_rowEdited, this, &RelationshipWidget::showAdvancedObject);
 

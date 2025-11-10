@@ -941,7 +941,7 @@ void DatabaseImportWidget::listDatabases(DatabaseImportHelper &import_helper, QC
 
 			for(int i=0; i < list.count(); i++)
 			{
-				dbcombo->setItemIcon(i, GuiUtilsNs::getPixmap(ObjectType::Database));
+				dbcombo->setItemIcon(i, GuiUtilsNs::getIcon(ObjectType::Database));
 				dbcombo->setItemData(i, oids[list[i]]);
 			}
 

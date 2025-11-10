@@ -38,10 +38,10 @@ DomainWidget::DomainWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 	constr_tab->setColumnCount(2);
 
 	constr_tab->setHeaderLabel(tr("Name"), 0);
-	constr_tab->setHeaderIcon(GuiUtilsNs::getPixmap("constraint_ck"), 0);
+	constr_tab->setHeaderIcon(GuiUtilsNs::getIcon("constraint_ck"), 0);
 
 	constr_tab->setHeaderLabel(tr("Expression"), 1);
-	constr_tab->setHeaderIcon(GuiUtilsNs::getPixmap("sourcecode"), 1);
+	constr_tab->setHeaderIcon(GuiUtilsNs::getIcon("sourcecode"), 1);
 
 	grid = dynamic_cast<QGridLayout *>(dom_attribs_tbw->widget(1)->layout());
 	grid->addWidget(constr_tab, 2, 0, 1, 2);

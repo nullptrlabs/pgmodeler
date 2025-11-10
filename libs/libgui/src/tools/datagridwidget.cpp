@@ -845,7 +845,7 @@ void DataGridWidget::retrieveFKColumns(Catalog &catalog)
 				//Store the referenced schema and table names
 				fk_infos[fk_name][Attributes::RefTable] = aux_table[Attributes::Name];
 				fk_infos[fk_name][Attributes::Schema] = aux_schema[Attributes::Name];
-				action = submenu->addAction(GuiUtilsNs::getPixmap("table"),
+				action = submenu->addAction(GuiUtilsNs::getIcon("table"),
 																		QString("%1.%2 (%3)").arg(aux_schema[Attributes::Name])
 																													.arg(aux_table[Attributes::Name])
 																													.arg(fk[Attributes::Name]), this, &DataGridWidget::browseReferencedTable);
@@ -905,7 +905,7 @@ void DataGridWidget::retrieveFKColumns(Catalog &catalog)
 				for(auto &col : catalog.getObjectsAttributes(ObjectType::Column, aux_schema[Attributes::Name], aux_table[Attributes::Name], col_ids))
 					name_list.push_back(BaseObject::formatName(col[Attributes::Name]));
 
-				action = submenu->addAction(GuiUtilsNs::getPixmap("table"),
+				action = submenu->addAction(GuiUtilsNs::getIcon("table"),
 																		QString("%1.%2 (%3)").arg(aux_schema[Attributes::Name])
 																													.arg(aux_table[Attributes::Name])
 																													.arg(fk[Attributes::Name]), this, &DataGridWidget::browseReferrerTable);

@@ -38,15 +38,15 @@ ElementsTableWidget::ElementsTableWidget(QWidget *parent) : QWidget(parent)
 
 		elements_tab->setColumnCount(7);
 		elements_tab->setHeaderLabel(tr("Element"), 0);
-		elements_tab->setHeaderIcon(GuiUtilsNs::getPixmap("column"),0);
+		elements_tab->setHeaderIcon(GuiUtilsNs::getIcon("column"),0);
 		elements_tab->setHeaderLabel(tr("Type"), 1);
-		elements_tab->setHeaderIcon(GuiUtilsNs::getPixmap("usertype"),1);
+		elements_tab->setHeaderIcon(GuiUtilsNs::getIcon("usertype"),1);
 		elements_tab->setHeaderLabel(tr("Operator"), 2);
-		elements_tab->setHeaderIcon(GuiUtilsNs::getPixmap("operator"),2);
+		elements_tab->setHeaderIcon(GuiUtilsNs::getIcon("operator"),2);
 		elements_tab->setHeaderLabel(tr("Operator Class"), 3);
-		elements_tab->setHeaderIcon(GuiUtilsNs::getPixmap("opclass"),3);
+		elements_tab->setHeaderIcon(GuiUtilsNs::getIcon("opclass"),3);
 		elements_tab->setHeaderLabel(tr("Collation"), 4);
-		elements_tab->setHeaderIcon(GuiUtilsNs::getPixmap("collation"),4);
+		elements_tab->setHeaderIcon(GuiUtilsNs::getIcon("collation"),4);
 		elements_tab->setHeaderLabel(tr("Sorting"), 5);
 		elements_tab->setHeaderLabel(tr("Nulls First"), 6);
 

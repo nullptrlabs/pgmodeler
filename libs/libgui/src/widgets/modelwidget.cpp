@@ -1879,7 +1879,7 @@ void ModelWidget::loadModel(const QString &filename)
 		#endif
 
 		connect(db_model, &DatabaseModel::s_objectLoaded, &task_prog_wgt, qOverload<int, QString, unsigned>(&TaskProgressWidget::updateProgress));
-		task_prog_wgt.addIcon(enum_t(ObjectType::BaseObject), GuiUtilsNs::getPixmap("design"));
+		task_prog_wgt.addIcon(enum_t(ObjectType::BaseObject), GuiUtilsNs::getIcon("design"));
 		task_prog_wgt.setWindowTitle(tr("Loading database model"));
 		task_prog_wgt.show();
 

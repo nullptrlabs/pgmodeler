@@ -1131,7 +1131,7 @@ void DatabaseExplorerWidget::listObjects()
 		curr_root = objects_trw->topLevelItem(0);
 		objects_trw->takeTopLevelItem(0);
 		root->setText(0, connection.getConnectionId(true));
-		root->setIcon(0, GuiUtilsNs::getPixmap("server"));
+		root->setIcon(0, GuiUtilsNs::getIcon("server"));
 		root->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, -1);
 		root->setData(DatabaseImportWidget::ObjectTypeId, Qt::UserRole, enum_t(ObjectType::BaseObject));
 		root->setData(DatabaseImportWidget::ObjectSource, Qt::UserRole, tr("-- Source code unavailable for this kind of object --"));
@@ -1906,7 +1906,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 
 						src_item=new QTreeWidgetItem(item);
 						src_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
-						src_item->setIcon(0, GuiUtilsNs::getPixmap("column"));
+						src_item->setIcon(0, GuiUtilsNs::getIcon("column"));
 						src_item->setText(0, QString("%1(%2)")
 															.arg(cached_attribs[Attributes::Table])
 															.arg(cached_attribs[Attributes::SrcColumns]));
@@ -1917,7 +1917,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 
 						fk_item=new QTreeWidgetItem(item);
 						fk_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
-						fk_item->setIcon(0, GuiUtilsNs::getPixmap("referenced"));
+						fk_item->setIcon(0, GuiUtilsNs::getIcon("referenced"));
 						fk_item->setText(0, QString("%1(%2)")
 														.arg(cached_attribs[Attributes::RefTable])
 														.arg(cached_attribs[Attributes::DstColumns]));
@@ -1935,7 +1935,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 						{
 							src_item=new QTreeWidgetItem(item);
 							src_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
-							src_item->setIcon(0, GuiUtilsNs::getPixmap("column"));
+							src_item->setIcon(0, GuiUtilsNs::getIcon("column"));
 							src_item->setText(0, col);
 							src_item->setFlags(Qt::ItemIsEnabled);
 						}
@@ -1954,7 +1954,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 
 					refs_item->setFont(0, font);
 					refs_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
-					refs_item->setIcon(0, GuiUtilsNs::getPixmap("referrer"));
+					refs_item->setIcon(0, GuiUtilsNs::getIcon("referrer"));
 					refs_item->setText(0, QString("%1 (%2)")
 															.arg(attribs_i18n.at(Attributes::Referrers))
 															.arg(ref_tab_names.length()));
@@ -1963,7 +1963,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 					{
 						tab_item=new QTreeWidgetItem(refs_item);
 						tab_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
-						tab_item->setIcon(0, GuiUtilsNs::getPixmap("table"));
+						tab_item->setIcon(0, GuiUtilsNs::getIcon("table"));
 						tab_item->setText(0, tab_name);
 						tab_item->setFlags(Qt::ItemIsEnabled);
 					}

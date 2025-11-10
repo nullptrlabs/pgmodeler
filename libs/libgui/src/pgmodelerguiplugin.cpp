@@ -184,6 +184,7 @@ void PgModelerGuiPlugin::showPluginInfo()
 	plugin_info_frm->show();
 }
 
+[[deprecated]]
 QString PgModelerGuiPlugin::getPluginIcon(const QString &icon_name)
 {
 	return QString(":/%1/%2.png").arg(getPluginName(), icon_name);

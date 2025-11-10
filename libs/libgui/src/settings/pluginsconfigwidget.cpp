@@ -38,7 +38,7 @@ PluginsConfigWidget::PluginsConfigWidget(QWidget *parent) : BaseConfigWidget(par
 																			CustomTableWidget::ResizeColsButton, false, this);
 	plugins_tab->setColumnCount(3);
 	plugins_tab->setHeaderLabel(tr("Plugin"),0);
-	plugins_tab->setHeaderIcon(GuiUtilsNs::getPixmap("plugins"),0);
+	plugins_tab->setHeaderIcon(GuiUtilsNs::getIcon("plugins"),0);
 	plugins_tab->setHeaderLabel(tr("Version"),1);
 	plugins_tab->setHeaderLabel(tr("Library"), 2);
 	plugins_tab->setSortingEnabled(true);

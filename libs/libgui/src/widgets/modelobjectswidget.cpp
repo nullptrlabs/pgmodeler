@@ -700,7 +700,7 @@ void ModelObjectsWidget::updateDatabaseTree()
 						item1 = new QTreeWidgetItem(root);
 						str_aux = QString(BaseObject::getSchemaName(type));
 
-						item1->setIcon(0, GuiUtilsNs::getPixmap(str_aux));
+						item1->setIcon(0, GuiUtilsNs::getIcon(str_aux));
 						item1->setData(1, Qt::UserRole, QVariant(enum_t(type)));
 
 						obj_list=(*db_model->getObjectList(type));
