@@ -230,7 +230,7 @@ void ModelExportWidget::handleErrorIgnored(QString err_code, QString err_msg, QS
 	GuiUtilsNs::createOutputTreeItem(output_trw, UtilsNs::formatMessage(err_msg),
 																			GuiUtilsNs::getPixmap("alert"),	item, false, true);
 
-	GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QPixmap(), item, false, true);
+	GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QIcon(), item, false, true);
 }
 
 void ModelExportWidget::updateProgress(int progress, QString msg, ObjectType obj_type, QString cmd, bool is_code_gen)
@@ -257,7 +257,7 @@ void ModelExportWidget::updateProgress(int progress, QString msg, ObjectType obj
 		item=GuiUtilsNs::createOutputTreeItem(output_trw, text, ico, nullptr, false);
 
 		if(!cmd.isEmpty())
-			GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QPixmap(), item, false);
+			GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QIcon(), item, false);
 	}
 }
 

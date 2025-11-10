@@ -292,7 +292,7 @@ void CodeCompletionWidget::configureCompletion(DatabaseModel *db_model, SyntaxHi
 	}
 }
 
-void CodeCompletionWidget::insertCustomItem(const QString &name, const QString &tooltip, const QPixmap &icon)
+void CodeCompletionWidget::insertCustomItem(const QString &name, const QString &tooltip, const QIcon &icon)
 {
 	if(!name.isEmpty())
 	{
@@ -302,7 +302,7 @@ void CodeCompletionWidget::insertCustomItem(const QString &name, const QString &
 	}
 }
 
-void CodeCompletionWidget::insertCustomItems(const QStringList &names, const QStringList &tooltips, const QPixmap &icon)
+void CodeCompletionWidget::insertCustomItems(const QStringList &names, const QStringList &tooltips, const QIcon &icon)
 {
 	for(int i=0; i < names.size(); i++)
 	{
@@ -313,7 +313,7 @@ void CodeCompletionWidget::insertCustomItems(const QStringList &names, const QSt
 void CodeCompletionWidget::insertCustomItems(const QStringList &names, const QString &tooltip, ObjectType obj_type)
 {
 	for(auto &name : names)
-		insertCustomItem(name, tooltip, GuiUtilsNs::getPixmap(obj_type));
+		insertCustomItem(name, tooltip, GuiUtilsNs::getIcon(obj_type));
 }
 
 void CodeCompletionWidget::clearCustomItems()

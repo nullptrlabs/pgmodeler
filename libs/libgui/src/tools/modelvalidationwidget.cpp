@@ -579,7 +579,7 @@ void ModelValidationWidget::updateProgress(int prog, QString msg, ObjectType obj
 			item=GuiUtilsNs::createOutputTreeItem(output_trw, msg, ico, nullptr, false);
 
 			if(!cmd.isEmpty())
-				GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QPixmap(), item, false);
+				GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QIcon(), item, false);
 		}
 	}
 }
@@ -693,7 +693,7 @@ void ModelValidationWidget::handleFixFailed(Exception e)
 {
 	QTreeWidgetItem *root = nullptr, *child = nullptr;
 
-	root = GuiUtilsNs::createOutputTreeItem(output_trw, tr("Failed to apply one or more fixes. Operation aborted!"), GuiUtilsNs::getIconPath("error"));
+	root = GuiUtilsNs::createOutputTreeItem(output_trw, tr("Failed to apply one or more fixes. Operation aborted!"), GuiUtilsNs::getIcon("error"));
 	child = new QTreeWidgetItem(root);
 
 	QLabel *label = new QLabel;

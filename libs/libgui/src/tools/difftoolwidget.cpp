@@ -1079,7 +1079,7 @@ void DiffToolWidget::updateProgress(int progress, QString msg, ObjectType obj_ty
 			item=GuiUtilsNs::createOutputTreeItem(output_trw, msg, ico, export_item, false);
 
 			if(!cmd.isEmpty())
-				GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QPixmap(), item, false);
+				GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QIcon(), item, false);
 		}
 	}
 

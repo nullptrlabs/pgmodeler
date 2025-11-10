@@ -2413,10 +2413,10 @@ void MainWindow::executePendingOperation(bool valid_error)
 		return;
 
 	static const QString op_names[] { "", QT_TR_NOOP("save"), QT_TR_NOOP("save"),
-																		QT_TR_NOOP("export"), QT_TR_NOOP("diff") },
+																		QT_TR_NOOP("export"), QT_TR_NOOP("diff") };
 
-	op_icons[] { "", GuiUtilsNs::getIconPath("save"), GuiUtilsNs::getIconPath("saveas"),
-									 GuiUtilsNs::getIconPath("export"), GuiUtilsNs::getIconPath("diff") };
+	static const QIcon op_icons[] { QIcon(), GuiUtilsNs::getIcon("save"), GuiUtilsNs::getIcon("saveas"),
+									 GuiUtilsNs::getIcon("export"), GuiUtilsNs::getIcon("diff") };
 
 	GuiUtilsNs::createOutputTreeItem(model_valid_wgt->output_trw,
 																	 tr("Executing pending <strong>%1</strong> operation...").arg(op_names[pending_op]),
