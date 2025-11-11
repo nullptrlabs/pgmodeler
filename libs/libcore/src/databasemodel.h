@@ -518,8 +518,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		 *  DependenciesSql: generates the original code plus all dependencies needed to properly create the object.
 		 *  ChildrenSql: generates the original code plus all object's children SQL code. This option is used only by schemas, tables and views.
 		 */
-		//QString getSQLDefinition(BaseObject *object, CodeGenMode code_gen_mode = OriginalSql);
-		QString getSQLDefinition(const std::vector<BaseObject *> objects, CodeGenMode code_gen_mode);
+		QString getSQLDefinition(const std::vector<BaseObject *> objects, CodeGenMode code_gen_mode, bool is_preview = false);
 
 		/*! \brief Returns the creation order of objects in each definition type (SQL or XML).
 

@@ -71,7 +71,11 @@ void CodePreviewWidget::generateSQLCode()
 	if(object && object->getObjectType() == ObjectType::Database)
 		sqlcode_txt->setPlainText(object->getSourceCode(SchemaParser::SqlCode));
 	else
-		sqlcode_txt->setPlainText(dbmodel->getSQLDefinition(objects, static_cast<DatabaseModel::CodeGenMode>(code_options_cmb->currentIndex())));
+	{
+		sqlcode_txt->setPlainText(dbmodel->getSQLDefinition(objects,
+																												static_cast<DatabaseModel::CodeGenMode>(code_options_cmb->currentIndex()),
+																												true));
+	}
 
 #ifdef DEMO_VERSION
 	if(!sqlcode_txt->toPlainText().isEmpty())

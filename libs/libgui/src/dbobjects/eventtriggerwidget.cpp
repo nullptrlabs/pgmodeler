@@ -62,7 +62,7 @@ void EventTriggerWidget::setAttributes(DatabaseModel *model, OperationList *op_l
 		QStringList filter=event_trig->getFilter(Attributes::Tag.toUpper());
 
 		if(filter.isEmpty())
-			filter=event_trig->getFilter(Attributes::Tag);
+			filter = event_trig->getFilter(Attributes::Tag);
 
 		filter_tab->blockSignals(true);
 

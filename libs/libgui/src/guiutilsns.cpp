@@ -298,13 +298,11 @@ namespace GuiUtilsNs {
 		}
 	}
 
-	[[deprecated("Use getIcon(const QString &) instead.")]]
 	QString getIconPath(const QString &icon)
 	{
 		return QString(":/icons/icons/%1.png").arg(icon);
 	}
 
-	[[deprecated("Use getIcon(ObjectType, int) instead.")]]
 	QString getIconPath(ObjectType obj_type, int sub_type)
 	{
 		QString suffix;

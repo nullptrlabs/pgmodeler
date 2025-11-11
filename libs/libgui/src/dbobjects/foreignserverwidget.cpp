@@ -25,30 +25,21 @@ ForeignServerWidget::ForeignServerWidget(QWidget *parent): BaseObjectWidget(pare
 
 	Ui_ForeignServerWidget::setupUi(this);
 
-	fdw_sel=nullptr;
-	fdw_sel=new ObjectSelectorWidget(ObjectType::ForeignDataWrapper, this);
+	fdw_sel = new ObjectSelectorWidget(ObjectType::ForeignDataWrapper, this);
+	fdw_lt->addWidget(fdw_sel);
 
-	hbox = new QHBoxLayout;
-	hbox->setContentsMargins(0,0,0,0);
-	hbox->addWidget(fdw_sel);
-	fdw_wgt->setLayout(hbox);
-
-	options_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
-																			 (CustomTableWidget::EditButton | CustomTableWidget::UpdateButton), true, this);
+	options_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																																		CustomTableWidget::AllButtons ^
+																																		(CustomTableWidget::EditButton | CustomTableWidget::UpdateButton),
+																																		true, options_gb);
 	options_tab->setCellsEditable(true);
 	options_tab->setColumnCount(2);
 	options_tab->setHeaderLabel(tr("Option"), 0);
 	options_tab->setHeaderLabel(tr("Value"), 1);
 
-	hbox = new QHBoxLayout;
-	hbox->setContentsMargins(GuiUtilsNs::LtMargins);
-	hbox->addWidget(options_tab);
-	options_gb->setLayout(hbox);
-
-	configureFormLayout(server_grid, ObjectType::ForeignServer);
-
 	setRequiredField(fdw_sel);
 	setRequiredField(fdw_lbl);
+	configureTabbedLayout(attributes_tbw);
 	configureTabOrder({ type_edt, version_edt, fdw_sel, options_tab });
 
 	setMinimumSize(600, 420);

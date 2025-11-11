@@ -69,12 +69,15 @@ void EventTrigger::setFunction(Function *func)
 
 void EventTrigger::setFilter(const QString &variable, const QStringList &values)
 {
-	if(variable.toLower()!=Attributes::Tag)
+	if(variable.toLower() != Attributes::Tag)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgInvalidEventTriggerVariable).arg(variable),PGM_FUNC,PGM_FILE,PGM_LINE);
 
-	if(!values.isEmpty())
+	QStringList valid_vals { values };
+	valid_vals.removeAll("");
+
+	if(!valid_vals.isEmpty())
 	{
-		filter[variable].append(values);
+		filter[variable].append(valid_vals);
 		setCodeInvalidated(true);
 	}
 }
