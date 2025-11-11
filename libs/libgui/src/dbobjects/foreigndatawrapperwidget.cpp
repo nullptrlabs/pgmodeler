@@ -25,35 +25,25 @@ ForeignDataWrapperWidget::ForeignDataWrapperWidget(QWidget *parent): BaseObjectW
 
 	Ui_ForeignDataWrapperWidget::setupUi(this);
 
-	func_handler_sel=new ObjectSelectorWidget(ObjectType::Function, this);
-	func_validator_sel=new ObjectSelectorWidget(ObjectType::Function, this);
-
+	func_handler_sel = new ObjectSelectorWidget(ObjectType::Function, this);
 	func_handler_sel->setToolTip(tr("The handler function must have the following signature:  <strong>fdw_handler</strong> <em>function_name</em>()"));
+	func_handler_lt->addWidget(func_handler_sel);
+
+	func_validator_sel = new ObjectSelectorWidget(ObjectType::Function, this);
 	func_validator_sel->setToolTip(tr("The validator function must have the following signature: <em>function_name</em>(<strong>text[]</strong>,<strong>oid</strong>). The return type of ths function is ignored."));
+	func_validator_lt->addWidget(func_validator_sel);
 
-	hbox = new QHBoxLayout;
-	hbox->setContentsMargins(0,0,0,0);
-	hbox->addWidget(func_handler_sel);
-	func_handler_wgt->setLayout(hbox);
 
-	hbox = new QHBoxLayout;
-	hbox->setContentsMargins(0,0,0,0);
-	hbox->addWidget(func_validator_sel);
-	func_validator_wgt->setLayout(hbox);
-
-	options_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
-																			 (CustomTableWidget::EditButton | CustomTableWidget::UpdateButton), true, this);
+	options_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																																		CustomTableWidget::AllButtons ^
+																																		(CustomTableWidget::EditButton | CustomTableWidget::UpdateButton),
+																																		true, options_gb);
 	options_tab->setCellsEditable(true);
 	options_tab->setColumnCount(2);
 	options_tab->setHeaderLabel(tr("Option"), 0);
 	options_tab->setHeaderLabel(tr("Value"), 1);
 
-	hbox = new QHBoxLayout;
-	hbox->setContentsMargins(GuiUtilsNs::LtMargins);
-	hbox->addWidget(options_tab);
-	options_gb->setLayout(hbox);
-
-	configureFormLayout(fdw_grid, ObjectType::ForeignDataWrapper);
+	configureTabbedLayout(attributes_tbw);
 	configureTabOrder({ func_handler_sel, func_validator_sel, options_tab });
 
 	setMinimumSize(600, 420);
@@ -93,7 +83,7 @@ void ForeignDataWrapperWidget::applyConfiguration()
 
 		startConfiguration<ForeignDataWrapper>();
 
-		fdw=dynamic_cast<ForeignDataWrapper *>(this->object);
+		fdw = dynamic_cast<ForeignDataWrapper *>(this->object);
 		fdw->setHandlerFunction(dynamic_cast<Function *>(func_handler_sel->getSelectedObject()));
 		fdw->setValidatorFunction(dynamic_cast<Function *>(func_validator_sel->getSelectedObject()));
 
@@ -107,6 +97,6 @@ void ForeignDataWrapperWidget::applyConfiguration()
 	catch(Exception &e)
 	{
 		cancelConfiguration();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
