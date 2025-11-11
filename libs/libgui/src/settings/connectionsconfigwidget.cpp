@@ -85,7 +85,7 @@ void ConnectionsConfigWidget::updateConnectionsCombo()
 	connections_cmb->clear();
 
 	for(auto &conn : connections)
-		connections_cmb->addItem(QIcon(GuiUtilsNs::getIconPath("server")), conn->getConnectionId());
+		connections_cmb->addItem(GuiUtilsNs::getIcon("server"), conn->getConnectionId());
 }
 
 void ConnectionsConfigWidget::destroyConnections()
@@ -260,7 +260,7 @@ void ConnectionsConfigWidget::duplicateConnection()
 		connections.push_back(new_conn);
 
 		new_conn->setConnectionParam(Connection::ParamAlias, QString("cp_%1").arg(conn->getConnectionParam(Connection::ParamAlias)));
-		connections_cmb->addItem(QIcon(GuiUtilsNs::getIconPath("server")), new_conn->getConnectionId());
+		connections_cmb->addItem(GuiUtilsNs::getIcon("server"), new_conn->getConnectionId());
 		connections_cmb->setCurrentIndex(connections_cmb->count()-1);
 		setConfigurationChanged(true);
 	}
@@ -281,7 +281,7 @@ void ConnectionsConfigWidget::handleConnection()
 		{
 			conn=new Connection;
 			this->configureConnection(conn, false);
-			connections_cmb->addItem(QIcon(GuiUtilsNs::getIconPath("server")), conn->getConnectionId());
+			connections_cmb->addItem(GuiUtilsNs::getIcon("server"), conn->getConnectionId());
 			connections.push_back(conn);
 		}
 		else
@@ -612,14 +612,14 @@ void ConnectionsConfigWidget::fillConnectionsComboBox(QComboBox *combo, bool inc
 
 	for(auto &itr : connections)
 	{
-		combo->addItem(QIcon(GuiUtilsNs::getIconPath("server")), itr.first, QVariant::fromValue<void *>(itr.second));
+		combo->addItem(GuiUtilsNs::getIcon("server"), itr.first, QVariant::fromValue<void *>(itr.second));
 
 		if(!def_conn && itr.second->isDefaultForOperation(check_def_for))
 			def_conn=itr.second;
 	}
 
 	if(incl_placeholder)
-		combo->addItem(QIcon(GuiUtilsNs::getIconPath("connection")), tr("Edit connections"));
+		combo->addItem(GuiUtilsNs::getIcon("connection"), tr("Edit connections"));
 
 	if(def_conn)
 		combo->setCurrentText(def_conn->getConnectionId());

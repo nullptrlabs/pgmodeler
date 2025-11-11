@@ -145,7 +145,7 @@ void CustomSQLWidget::setAttributes(DatabaseModel *model, BaseObject *object)
 		begin_of_model_chk->setVisible(object->getObjectType()==ObjectType::Database);
 
 		obj_id_lbl->setVisible(false);
-		obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(object->getObjectType())));
+		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(object->getObjectType()));
 
 		configureMenus();
 	}

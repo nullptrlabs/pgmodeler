@@ -37,7 +37,7 @@ namespace GuiUtilsNs {
 		return createWidgetInParent<NumberedTextEditor>(parent, act_btns_enabled, custom_fnt_size);
 	}
 
-	QTreeWidgetItem *createOutputTreeItem(QTreeWidget *output_trw, const QString &text, const QPixmap &ico, QTreeWidgetItem *parent, bool expand_item, bool word_wrap)
+	QTreeWidgetItem *createOutputTreeItem(QTreeWidget *output_trw, const QString &text, const QIcon &ico, QTreeWidgetItem *parent, bool expand_item, bool word_wrap)
 	{
 		if(!output_trw)
 			throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
@@ -76,7 +76,7 @@ namespace GuiUtilsNs {
 		return item;
 	}
 
-	void createOutputListItem(QListWidget *output_lst, const QString &text, const QPixmap &ico, bool is_formated)
+	void createOutputListItem(QListWidget *output_lst, const QString &text, const QIcon &ico, bool is_formated)
 	{
 		if(!output_lst)
 			throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
@@ -267,20 +267,20 @@ namespace GuiUtilsNs {
 		while(itr != itr_end)
 		{
 			text=QString("[%1] - %2").arg(idx).arg(itr->getMethod());
-			item=createOutputTreeItem(exceptions_trw, text, QPixmap(getIconPath("function1")), root, false, true);
+			item=createOutputTreeItem(exceptions_trw, text, getIcon("function1"), root, false, true);
 
 			text=QString("%1 (%2)").arg(itr->getFile()).arg(itr->getLine());
-			createOutputTreeItem(exceptions_trw, text, QPixmap(getIconPath("sourcecode")), item, false, true);
+			createOutputTreeItem(exceptions_trw, text, getIcon("sourcecode"), item, false, true);
 
 			text=QString("%1 (%2)").arg(Exception::getErrorCode(itr->getErrorCode())).arg(enum_t(itr->getErrorCode()));
-			createOutputTreeItem(exceptions_trw, text, QPixmap(getIconPath("alert")), item, false, true);
+			createOutputTreeItem(exceptions_trw, text, getIcon("alert"), item, false, true);
 
-			child_item=createOutputTreeItem(exceptions_trw, itr->getErrorMessage(), QPixmap(getIconPath("error")), item, false, true);
+			child_item=createOutputTreeItem(exceptions_trw, itr->getErrorMessage(), getIcon("error"), item, false, true);
 			exceptions_trw->itemWidget(child_item, 0)->setStyleSheet("color: #ff0000;");
 
 			if(!itr->getExtraInfo().isEmpty())
 			{
-				child_item=createOutputTreeItem(exceptions_trw, itr->getExtraInfo(), QPixmap(getIconPath("info")), item, false, true);
+				child_item=createOutputTreeItem(exceptions_trw, itr->getExtraInfo(), getIcon("info"), item, false, true);
 				exceptions_trw->itemWidget(child_item, 0)->setStyleSheet("font-style: italic;");
 			}
 
@@ -292,7 +292,7 @@ namespace GuiUtilsNs {
 			{
 				text = QT_TR_NOOP("An additional of %1 error(s) were suppressed due to the stack trace size limit.");
 				text = text.arg(list.size() - idx);
-				createOutputTreeItem(exceptions_trw, text, QPixmap(getIconPath("alert")), item, false, false);
+				createOutputTreeItem(exceptions_trw, text, getIcon("alert"), item, false, false);
 				break;
 			}
 		}

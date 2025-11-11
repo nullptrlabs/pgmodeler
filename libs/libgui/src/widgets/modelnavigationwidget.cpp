@@ -111,7 +111,7 @@ void ModelNavigationWidget::setCurrentModelModified(bool modified)
 		return;
 
 	models_cmb->setItemIcon(models_cmb->currentIndex(),
-													modified ? QIcon(GuiUtilsNs::getIconPath("save")) : QIcon());
+													modified ? GuiUtilsNs::getIcon("save") : QIcon());
 }
 
 void ModelNavigationWidget::removeModel(int idx)

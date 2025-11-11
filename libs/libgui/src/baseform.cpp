@@ -37,12 +37,12 @@ void BaseForm::setButtonConfiguration(Messagebox::ButtonsId button_conf)
 		if(button_conf==Messagebox::CloseButton)
 		{
 			apply_ok_btn->setText(tr("&Close"));
-			apply_ok_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("close1")));
+			apply_ok_btn->setIcon(GuiUtilsNs::getIcon("close1"));
 		}
 		else
 		{
 			apply_ok_btn->setText(tr("&Ok"));
-			apply_ok_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("confirm")));
+			apply_ok_btn->setIcon(GuiUtilsNs::getIcon("confirm"));
 		}
 
 		cancel_btn->setVisible(false);
@@ -153,7 +153,7 @@ void BaseForm::setMainWidget(QWidget *widget)
 	if(!widget->windowIcon().isNull())
 		setWindowIcon(widget->windowIcon());
 	else
-		setWindowIcon(QIcon(GuiUtilsNs::getIconPath("pgmodeler_logo")));
+		setWindowIcon(GuiUtilsNs::getIcon("pgmodeler_logo"));
 
 	resizeForm(widget);
 	setButtonConfiguration(Messagebox::OkButton);

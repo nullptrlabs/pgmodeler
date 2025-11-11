@@ -71,14 +71,14 @@ namespace GuiUtilsNs {
 	extern __libgui void __configureWidgetFont(QWidget *widget, double factor, bool bold = false, bool italic = false);
 	extern __libgui void configureWidgetsFont(const QWidgetList widgets, FontFactorId factor_id, bool bold = false, bool italic = false);
 
-	/*! \brief Creates an item in the specified QTreeWidget instance.
+	/*! \brief Creates an item in the specified QTreeWidget instance with the specified text and ico.
 		The new item is automatically inserted on the QTreeWidget object.
 		Setting word_wrap will create a QLabel instance into item's and assign the text to it. */
-	extern __libgui QTreeWidgetItem *createOutputTreeItem(QTreeWidget *output_trw, const QString &text, const QPixmap &ico=QPixmap(),
+	extern __libgui QTreeWidgetItem *createOutputTreeItem(QTreeWidget *output_trw, const QString &text, const QIcon &ico=QIcon(),
 																													QTreeWidgetItem *parent=nullptr, bool expand_item=true, bool word_wrap=false);
 
 	//! \brief Creates an item in the specified QListWidget instance with the specified text and ico
-	extern __libgui void createOutputListItem(QListWidget *output_lst, const QString &text, const QPixmap &ico=QPixmap(), bool is_formated=true);
+	extern __libgui void createOutputListItem(QListWidget *output_lst, const QString &text, const QIcon &ico=QIcon(), bool is_formated=true);
 
 	/*! \brief Toggles the SQL code for the object. This function also toggles the SQL of the references
 		related to the input object */

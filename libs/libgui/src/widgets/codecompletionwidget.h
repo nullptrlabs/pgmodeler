@@ -129,14 +129,12 @@ class __libgui CodeCompletionWidget: public QWidget {
 
 		enable_snippets;
 		
-		//! \brief Store the objects selected for each qualifying level
-		std::vector<BaseObject *> sel_objects;
-		
-		std::map<QString, QPixmap> custom_items;
-		
-		attribs_map custom_items_tips;
-
-		//! \brief Puts the selected object name on the current cursor position.
+	//! \brief Store the objects selected for each qualifying level
+	std::vector<BaseObject *> sel_objects;
+	
+	std::map<QString, QIcon> custom_items;
+	
+	attribs_map custom_items_tips;		//! \brief Puts the selected object name on the current cursor position.
 		void insertObjectName(BaseObject *obj);
 		
 		//! \brief Filters the necessary events to trigger the completion as well to control/select items
@@ -194,13 +192,11 @@ class __libgui CodeCompletionWidget: public QWidget {
 		highlighter uses an different configuration */
 		void configureCompletion(DatabaseModel *db_model, SyntaxHighlighter *syntax_hl=nullptr, const QString &keywords_grp="keywords");
 		
-		//! \brief Inserts a custom named item on the list with a custom icon. Custom item will always appear at the beggining of the list
-		void insertCustomItem(const QString &name, const QString &tooltip, const QPixmap &icon);
-		
-		//! \brief Inserts several custom named item on the list with a custom icon. Custom item will always appear at the beggining of the list
-		void insertCustomItems(const QStringList &names, const QStringList &tooltips, const QPixmap &icon);
-
-		//! \brief Inserts several custom named items on the list with an icon related to the obj_type. Custom item will always appear at the beggining of the list
+	//! \brief Inserts a custom named item on the list with a custom icon. Custom item will always appear at the beggining of the list
+	void insertCustomItem(const QString &name, const QString &tooltip, const QIcon &icon);
+	
+	//! \brief Inserts several custom named item on the list with a custom icon. Custom item will always appear at the beggining of the list
+	void insertCustomItems(const QStringList &names, const QStringList &tooltips, const QIcon &icon);		//! \brief Inserts several custom named items on the list with an icon related to the obj_type. Custom item will always appear at the beggining of the list
 		void insertCustomItems(const QStringList &names, const QString &tooltip, ObjectType obj_type);
 		
 		//! \brief Clear the custom added items

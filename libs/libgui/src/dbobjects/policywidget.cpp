@@ -42,7 +42,7 @@ PolicyWidget::PolicyWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 																			CustomTableWidget::EditButton), true, this);
 	roles_tab->setColumnCount(1);
 	roles_tab->setHeaderLabel(tr("Name"), 0);
-	roles_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")), 0);
+	roles_tab->setHeaderIcon(GuiUtilsNs::getIcon("uid"), 0);
 
 	QVBoxLayout *vbox = new QVBoxLayout;
 	vbox->addWidget(roles_tab);

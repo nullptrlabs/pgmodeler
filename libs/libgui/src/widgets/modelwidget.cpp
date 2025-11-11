@@ -139,7 +139,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	label->setMinimumSize(QSize(20, 20));
 	label->setMaximumSize(QSize(20, 20));
 	label->setScaledContents(true);
-	label->setPixmap(QPixmap(GuiUtilsNs::getIconPath("alert")));
+	label->setPixmap(GuiUtilsNs::getPixmap("alert"));
 	label->setObjectName("icon_lbl");
 
 	grid = new QGridLayout;
@@ -230,40 +230,40 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	zoom_info_lbl->setVisible(false);
 	zoom_info_timer.setInterval(3000);
 
-	action_edit_data=new QAction(QIcon(GuiUtilsNs::getIconPath("editrows")), tr("Edit data"), this);
+	action_edit_data=new QAction(GuiUtilsNs::getIcon("editrows"), tr("Edit data"), this);
 
-	action_source_code=new QAction(QIcon(GuiUtilsNs::getIconPath("sourcecode")), tr("Source"), this);
+	action_source_code=new QAction(GuiUtilsNs::getIcon("sourcecode"), tr("Source"), this);
 	action_source_code->setShortcut(QKeySequence(tr("Alt+S")));
 	action_source_code->setToolTip(tr("Show object source code"));
 
-	action_edit=new QAction(QIcon(GuiUtilsNs::getIconPath("edit")), tr("Properties"), this);
+	action_edit=new QAction(GuiUtilsNs::getIcon("edit"), tr("Properties"), this);
 	action_edit->setShortcut(QKeySequence(tr("Space")));
 	action_edit->setToolTip(tr("Edit the object properties"));
 
-	action_protect=new QAction(QIcon(GuiUtilsNs::getIconPath("protect")), tr("Protect"), this);
-	action_unprotect=new QAction(QIcon(GuiUtilsNs::getIconPath("unprotect")), tr("Unprotect"), this);
+	action_protect=new QAction(GuiUtilsNs::getIcon("protect"), tr("Protect"), this);
+	action_unprotect=new QAction(GuiUtilsNs::getIcon("unprotect"), tr("Unprotect"), this);
 	action_protect->setToolTip(tr("Protects object(s) from modifications"));
 
-	action_remove=new QAction(QIcon(GuiUtilsNs::getIconPath("delete")), tr("Delete"), this);
+	action_remove=new QAction(GuiUtilsNs::getIcon("delete"), tr("Delete"), this);
 	action_remove->setShortcut(QKeySequence(tr("Del")));
 	action_remove->setMenuRole(QAction::NoRole);
 
-	action_cascade_del=new QAction(QIcon(GuiUtilsNs::getIconPath("delcascade")), tr("Del. cascade"), this);
+	action_cascade_del=new QAction(GuiUtilsNs::getIcon("delcascade"), tr("Del. cascade"), this);
 	action_cascade_del->setShortcut(QKeySequence(tr("Shift+Del")));
 	action_cascade_del->setMenuRole(QAction::NoRole);
 
 	action_select_all = select_all_menu.menuAction();
-	action_select_all->setIcon(QIcon(GuiUtilsNs::getIconPath("selectmove")));
+	action_select_all->setIcon(GuiUtilsNs::getIcon("selectmove"));
 	action_select_all->setText(tr("Select all"));
 	action_select_all->setToolTip(tr("Selects all the graphical objects in the model"));
 
-	action_convert_relnn=new QAction(QIcon(GuiUtilsNs::getIconPath("convrelnn")), tr("Convert"), this);
-	action_convert_rel1n=new QAction(QIcon(GuiUtilsNs::getIconPath("convrel1n")), tr("Convert"), this);
+	action_convert_relnn=new QAction(GuiUtilsNs::getIcon("convrelnn"), tr("Convert"), this);
+	action_convert_rel1n=new QAction(GuiUtilsNs::getIcon("convrel1n"), tr("Convert"), this);
 
 	action_copy = copy_menu.menuAction();
 	action_copy->setText(tr("Copy"));
 	action_copy->setMenuRole(QAction::NoRole);
-	action_copy->setIcon(QIcon(GuiUtilsNs::getIconPath("copy")));
+	action_copy->setIcon(GuiUtilsNs::getIcon("copy"));
 
 	action = copy_menu.addAction(tr("Selected only"));
 	action->setShortcut(QKeySequence(tr("Ctrl+C")));
@@ -279,14 +279,14 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 		__trycatch( copyObjects(false, true); )
 	});
 
-	action_paste=new QAction(QIcon(GuiUtilsNs::getIconPath("paste")), tr("Paste"), this);
+	action_paste=new QAction(GuiUtilsNs::getIcon("paste"), tr("Paste"), this);
 	action_paste->setShortcut(QKeySequence(tr("Ctrl+V")));
 	action_paste->setMenuRole(QAction::NoRole);
 
 	action_cut = cut_menu.menuAction();
 	action_cut->setText(tr("Cut"));
 	action_cut->setMenuRole(QAction::NoRole);
-	action_cut->setIcon(QIcon(GuiUtilsNs::getIconPath("cut")));
+	action_cut->setIcon(GuiUtilsNs::getIcon("cut"));
 
 	action = cut_menu.addAction(tr("Selected only"));
 	action->setShortcut(QKeySequence(tr("Ctrl+X")));
@@ -302,65 +302,65 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 		__trycatch( cutObjects(true); )
 	});
 
-	action_associations=new QAction(QIcon(GuiUtilsNs::getIconPath("associations")), tr("Associations"), this);
+	action_associations=new QAction(GuiUtilsNs::getIcon("associations"), tr("Associations"), this);
 
 	action_new_object = new_object_menu.menuAction();
-	action_new_object->setIcon(QIcon(GuiUtilsNs::getIconPath("newobject")));
+	action_new_object->setIcon(GuiUtilsNs::getIcon("newobject"));
 	action_new_object->setText(tr("New"));
 	action_new_object->setToolTip(tr("Add a new object in the model"));
 
 	action_quick_actions = quick_actions_menu.menuAction();
-	action_quick_actions->setIcon(QIcon(GuiUtilsNs::getIconPath("quickactions")));
+	action_quick_actions->setIcon(GuiUtilsNs::getIcon("quickactions"));
 	action_quick_actions->setText(tr("Quick"));
 	action_quick_actions->setToolTip(tr("Quick action for the selected object"));
 
-	action_rename=new QAction(QIcon(GuiUtilsNs::getIconPath("rename")), tr("Rename"), this);
+	action_rename=new QAction(GuiUtilsNs::getIcon("rename"), tr("Rename"), this);
 	action_rename->setShortcut(QKeySequence(tr("F2")));
 	action_rename->setToolTip(tr("Quick rename the object"));
 
 	action_moveto_schema = schemas_menu.menuAction();
-	action_moveto_schema->setIcon(QIcon(GuiUtilsNs::getIconPath("movetoschema")));
+	action_moveto_schema->setIcon(GuiUtilsNs::getIcon("movetoschema"));
 	action_moveto_schema->setText(tr("Move to schema"));
 
-	action_set_layer = new QAction(QIcon(GuiUtilsNs::getIconPath("layers")), tr("Set layers"), this);
+	action_set_layer = new QAction(GuiUtilsNs::getIcon("layers"), tr("Set layers"), this);
 	action_set_layer->setShortcut(QKeySequence("F3"));
 	layers_wgt = new LayersWidget(this);
 
 	action_set_tag = tags_menu.menuAction();
-	action_set_tag->setIcon(QIcon(GuiUtilsNs::getIconPath("tag")));
+	action_set_tag->setIcon(GuiUtilsNs::getIcon("tag"));
 	action_set_tag->setText(tr("Set tag"));
 
-	action_edit_perms=new QAction(QIcon(GuiUtilsNs::getIconPath("permission")), tr("Edit permissions"), this);
+	action_edit_perms=new QAction(GuiUtilsNs::getIcon("permission"), tr("Edit permissions"), this);
 	action_edit_perms->setShortcut(QKeySequence(tr("Ctrl+E")));
 
 	action_change_owner = owners_menu.menuAction();
-	action_change_owner->setIcon(QIcon(GuiUtilsNs::getIconPath("changeowner")));
+	action_change_owner->setIcon(GuiUtilsNs::getIcon("changeowner"));
 	action_change_owner->setText(tr("Change owner"));
 
-	action_sel_sch_children=new QAction(QIcon(GuiUtilsNs::getIconPath("selectmove")), tr("Select children"), this);
-	action_sel_tagged_tabs=new QAction(QIcon(GuiUtilsNs::getIconPath("selectmove")), tr("Select tagged"), this);
-	action_sel_table_rels=new QAction(QIcon(GuiUtilsNs::getIconPath("selectmove")), tr("Select relationships"), this);
+	action_sel_sch_children=new QAction(GuiUtilsNs::getIcon("selectmove"), tr("Select children"), this);
+	action_sel_tagged_tabs=new QAction(GuiUtilsNs::getIcon("selectmove"), tr("Select tagged"), this);
+	action_sel_table_rels=new QAction(GuiUtilsNs::getIcon("selectmove"), tr("Select relationships"), this);
 
-	action_select_object=new QAction(QIcon(GuiUtilsNs::getIconPath("moved")), tr("Select"), this);
-	action_parent_rel=new QAction(QIcon(GuiUtilsNs::getIconPath("relationship")), tr("Open relationship"), this);
+	action_select_object=new QAction(GuiUtilsNs::getIcon("moved"), tr("Select"), this);
+	action_parent_rel=new QAction(GuiUtilsNs::getIcon("relationship"), tr("Open relationship"), this);
 
-	action_append_sql=new QAction(QIcon(GuiUtilsNs::getIconPath("sqlappend")), tr("Custom SQL"), this);
+	action_append_sql=new QAction(GuiUtilsNs::getIcon("sqlappend"), tr("Custom SQL"), this);
 	action_append_sql->setShortcut(QKeySequence(tr("Alt+Q")));
 
-	action_create_seq_col=new QAction(QIcon(GuiUtilsNs::getIconPath("sequence")), tr("Convert to sequence"), this);
-	action_conv_int_serial=new QAction(QIcon(GuiUtilsNs::getIconPath("sequence")), tr("Convert to serial"), this);
+	action_create_seq_col=new QAction(GuiUtilsNs::getIcon("sequence"), tr("Convert to sequence"), this);
+	action_conv_int_serial=new QAction(GuiUtilsNs::getIcon("sequence"), tr("Convert to serial"), this);
 
-	action_remove_rel_points=new QAction(QIcon(GuiUtilsNs::getIconPath("removepoints")), tr("Remove points"), this);
+	action_remove_rel_points=new QAction(GuiUtilsNs::getIcon("removepoints"), tr("Remove points"), this);
 
-	action_enable_sql=new QAction(QIcon(GuiUtilsNs::getIconPath("enablesql")), tr("Enable SQL"), this);
-	action_disable_sql=new QAction(QIcon(GuiUtilsNs::getIconPath("disablesql")), tr("Disable SQL"), this);
+	action_enable_sql=new QAction(GuiUtilsNs::getIcon("enablesql"), tr("Enable SQL"), this);
+	action_disable_sql=new QAction(GuiUtilsNs::getIcon("disablesql"), tr("Disable SQL"), this);
 
-	action_duplicate=new QAction(QIcon(GuiUtilsNs::getIconPath("duplicate")), tr("Duplicate"), this);
+	action_duplicate=new QAction(GuiUtilsNs::getIcon("duplicate"), tr("Duplicate"), this);
 	action_duplicate->setShortcut(QKeySequence(tr("Ctrl+D")));
 	action_duplicate->setMenuRole(QAction::NoRole);
 
 	action_pagination = pagination_menu.menuAction();
-	action_pagination->setIcon(QIcon(GuiUtilsNs::getIconPath("pagination")));
+	action_pagination->setIcon(GuiUtilsNs::getIcon("pagination"));
 	action_pagination->setText(tr("Pagination"));
 
 	action = pagination_menu.addAction(tr("Enable"));
@@ -372,11 +372,11 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	connect(action, &QAction::triggered, this, &ModelWidget::togglePagination);
 
 	action_jump_to_table = jump_to_tab_menu.menuAction();
-	action_jump_to_table->setIcon(QIcon(GuiUtilsNs::getIconPath("jumptotable")));
+	action_jump_to_table->setIcon(GuiUtilsNs::getIcon("jumptotable"));
 	action_jump_to_table->setText(tr("Jump to table"));
 
 	action_collapse_mode = toggle_attrs_menu.menuAction();
-	action_collapse_mode->setIcon(QIcon(GuiUtilsNs::getIconPath("collapse")));
+	action_collapse_mode->setIcon(GuiUtilsNs::getIcon("collapse"));
 	action_collapse_mode->setText(tr("Collapse"));
 
 	action_no_collapse_attribs=new QAction(tr("Not collapsed"), this);
@@ -391,7 +391,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	toggle_attrs_menu.addAction(action_collpase_all_attribs);
 
 	action_schemas_rects = toggle_sch_rects_menu.menuAction();
-	action_schemas_rects->setIcon(QIcon(GuiUtilsNs::getIconPath("schemarect")));
+	action_schemas_rects->setIcon(GuiUtilsNs::getIcon("schemarect"));
 	action_schemas_rects->setText(tr("Schemas rectangles"));
 	action_show_schemas_rects=new QAction(tr("Show"), this);
 	action_hide_schemas_rects=new QAction(tr("Hide"), this);
@@ -399,28 +399,28 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	toggle_sch_rects_menu.addAction(action_hide_schemas_rects);
 
 	action_fade = fade_menu.menuAction();
-	action_fade->setIcon(QIcon(GuiUtilsNs::getIconPath("fade")));
+	action_fade->setIcon(GuiUtilsNs::getIcon("fade"));
 	action_fade->setText(tr("Fade in/out"));
 
-	action_fade_in = new QAction(QIcon(GuiUtilsNs::getIconPath("fadein")), tr("Fade in"), this);
-	action_fade_out = new QAction(QIcon(GuiUtilsNs::getIconPath("fadeout")), tr("Fade out"), this);
+	action_fade_in = new QAction(GuiUtilsNs::getIcon("fadein"), tr("Fade in"), this);
+	action_fade_out = new QAction(GuiUtilsNs::getIcon("fadeout"), tr("Fade out"), this);
 
 	action_fade_rels = fade_rels_menu.menuAction();
-	action_fade_rels->setIcon(QIcon(GuiUtilsNs::getIconPath("relationship")));
+	action_fade_rels->setIcon(GuiUtilsNs::getIcon("relationship"));
 	action_fade_rels->setText(tr("Relationships"));
-	action_fade_rels_in=new QAction(QIcon(GuiUtilsNs::getIconPath("fadein")), tr("Fade in"), this);
-	action_fade_rels_out=new QAction(QIcon(GuiUtilsNs::getIconPath("fadeout")), tr("Fade out"), this);
+	action_fade_rels_in=new QAction(GuiUtilsNs::getIcon("fadein"), tr("Fade in"), this);
+	action_fade_rels_out=new QAction(GuiUtilsNs::getIcon("fadeout"), tr("Fade out"), this);
 
 	action_fade_peer_tables = fade_peer_tables_menu.menuAction();
-	action_fade_peer_tables->setIcon(QIcon(GuiUtilsNs::getIconPath("table")));
+	action_fade_peer_tables->setIcon(GuiUtilsNs::getIcon("table"));
 	action_fade_peer_tables->setText(tr("Peer tables"));
-	action_fade_peer_tables_in = new QAction(QIcon(GuiUtilsNs::getIconPath("fadein")), tr("Fade in"), this);
-	action_fade_peer_tables_out = new QAction(QIcon(GuiUtilsNs::getIconPath("fadeout")), tr("Fade out"), this);
+	action_fade_peer_tables_in = new QAction(GuiUtilsNs::getIcon("fadein"), tr("Fade in"), this);
+	action_fade_peer_tables_out = new QAction(GuiUtilsNs::getIcon("fadeout"), tr("Fade out"), this);
 
 	action_fade_tabs_rels = fade_both_objs_menu.menuAction();
 	action_fade_tabs_rels->setText(tr("Tables && Relationships"));
-	action_fade_tabs_rels_in = new QAction(QIcon(GuiUtilsNs::getIconPath("fadein")), tr("Fade in"), this);
-	action_fade_tabs_rels_out = new QAction(QIcon(GuiUtilsNs::getIconPath("fadeout")), tr("Fade out"), this);
+	action_fade_tabs_rels_in = new QAction(GuiUtilsNs::getIcon("fadein"), tr("Fade in"), this);
+	action_fade_tabs_rels_out = new QAction(GuiUtilsNs::getIcon("fadeout"), tr("Fade out"), this);
 
 	fade_rels_menu.addAction(action_fade_rels_in);
 	fade_rels_menu.addAction(action_fade_rels_out);
@@ -431,30 +431,30 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	fade_both_objs_menu.addAction(action_fade_tabs_rels_in);
 	fade_both_objs_menu.addAction(action_fade_tabs_rels_out);
 
-	action_edit_creation_order=new QAction(QIcon(GuiUtilsNs::getIconPath("swapobjs")), tr("Swap ids"), this);
+	action_edit_creation_order=new QAction(GuiUtilsNs::getIcon("swapobjs"), tr("Swap ids"), this);
 	action_edit_creation_order->setToolTip(tr("Edit the objects creation order by swapping their ids"));
 	connect(action_edit_creation_order, &QAction::triggered, this, &ModelWidget::swapObjectsIds);
 
 	action_break_rel_line = break_rel_menu.menuAction();
-	action_break_rel_line->setIcon(QIcon(GuiUtilsNs::getIconPath("breakrelline")));
+	action_break_rel_line->setIcon(GuiUtilsNs::getIcon("breakrelline"));
 	action_break_rel_line->setText(tr("Break line"));
 
-	action=new QAction(QIcon(GuiUtilsNs::getIconPath("breakline_90dv")), tr("90° (vertical)"), this);
+	action=new QAction(GuiUtilsNs::getIcon("breakline_90dv"), tr("90° (vertical)"), this);
 	connect(action, &QAction::triggered, this, qOverload<>(&ModelWidget::breakRelationshipLine));
 	action->setData(BreakVertNinetyDegrees);
 	break_rel_menu.addAction(action);
 
-	action=new QAction(QIcon(GuiUtilsNs::getIconPath("breakline_90dh")), tr("90° (horizontal)"), this);
+	action=new QAction(GuiUtilsNs::getIcon("breakline_90dh"), tr("90° (horizontal)"), this);
 	connect(action, &QAction::triggered, this, qOverload<>(&ModelWidget::breakRelationshipLine));
 	action->setData(BreakHorizNinetyDegrees);
 	break_rel_menu.addAction(action);
 
-	action=new QAction(QIcon(GuiUtilsNs::getIconPath("breakline_290dv")), tr("90° + 90° (vertical)"), this);
+	action=new QAction(GuiUtilsNs::getIcon("breakline_290dv"), tr("90° + 90° (vertical)"), this);
 	connect(action, &QAction::triggered, this, qOverload<>(&ModelWidget::breakRelationshipLine));
 	action->setData(BreakVert2NinetyDegrees);
 	break_rel_menu.addAction(action);
 
-	action=new QAction(QIcon(GuiUtilsNs::getIconPath("breakline_290dh")), tr("90° + 90° (horizontal)"), this);
+	action=new QAction(GuiUtilsNs::getIcon("breakline_290dh"), tr("90° + 90° (horizontal)"), this);
 	connect(action, &QAction::triggered, this, qOverload<>(&ModelWidget::breakRelationshipLine));
 	action->setData(BreakHoriz2NinetyDegrees);
 	break_rel_menu.addAction(action);
@@ -462,14 +462,14 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	//Alocatting the object creation actions
 	for(auto &type : types_vect)
 	{
-		actions_new_objects[type]=new QAction(QIcon(GuiUtilsNs::getIconPath(type)), BaseObject::getTypeName(type), this);
+		actions_new_objects[type]=new QAction(GuiUtilsNs::getIcon(type), BaseObject::getTypeName(type), this);
 		actions_new_objects[type]->setData(QVariant(enum_t(type)));
 		connect(actions_new_objects[type], &QAction::triggered, this, &ModelWidget::addNewObject);
 	}
 
 	// Configuring the submenu of database level objects
 	action_database_category = database_category_menu.menuAction();
-	action_database_category->setIcon(QIcon(GuiUtilsNs::getIconPath(ObjectType::Database)));
+	action_database_category->setIcon(GuiUtilsNs::getIcon(ObjectType::Database));
 	action_database_category->setText(tr("Database object"));
 	types_vect = BaseObject::getChildObjectTypes(ObjectType::Database);
 
@@ -478,7 +478,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 
 	// Configuring the submenu of schema level objects
 	action_schema_category = schema_category_menu.menuAction();
-	action_schema_category->setIcon(QIcon(GuiUtilsNs::getIconPath(ObjectType::Schema)));
+	action_schema_category->setIcon(GuiUtilsNs::getIcon(ObjectType::Schema));
 	action_schema_category->setText(tr("Schema object"));
 	types_vect = BaseObject::getChildObjectTypes(ObjectType::Schema);
 
@@ -488,7 +488,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	//Creating the relationship submenu
 	rels_menu=new QMenu(this);
 	actions_new_objects[ObjectType::Relationship] = rels_menu->menuAction();
-	actions_new_objects[ObjectType::Relationship]->setIcon(QIcon(GuiUtilsNs::getIconPath(ObjectType::Relationship)));
+	actions_new_objects[ObjectType::Relationship]->setIcon(GuiUtilsNs::getIcon(ObjectType::Relationship));
 	actions_new_objects[ObjectType::Relationship]->setText(BaseObject::getTypeName(ObjectType::Relationship));
 	actions_new_objects[ObjectType::Relationship]->setData(QVariant(enum_t(ObjectType::Relationship)));
 
@@ -496,7 +496,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	{
 		str_ico=BaseObject::getSchemaName(ObjectType::Relationship) + rel_types_cod[i];
 
-		action=new QAction(QIcon(GuiUtilsNs::getIconPath(str_ico)),
+		action=new QAction(GuiUtilsNs::getIcon(str_ico),
 							 BaseRelationship::getRelationshipTypeName(rel_types_id[i], false), this);
 
 		//Storing a unique identifier for the relationship type
@@ -528,7 +528,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 		}
 		else
 		{
-			action=new QAction(QIcon(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(obj_type))), labels[i++], this);
+			action=new QAction(GuiUtilsNs::getIcon(BaseObject::getSchemaName(obj_type)), labels[i++], this);
 			select_all_menu.addAction(action);
 		}
 
@@ -537,13 +537,13 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	}
 
 	action_stacking = stacking_menu.menuAction();
-	action_stacking->setIcon(QIcon(GuiUtilsNs::getIconPath("stacking")));
+	action_stacking->setIcon(GuiUtilsNs::getIcon("stacking"));
 	action_stacking->setText(tr("Stacking"));
 
-	action_send_to_back=new QAction(QIcon(GuiUtilsNs::getIconPath("sendtoback")), tr("Send to back"), this);
+	action_send_to_back=new QAction(GuiUtilsNs::getIcon("sendtoback"), tr("Send to back"), this);
 	action_send_to_back->setShortcut(QKeySequence("Shift+Down"));
 
-	action_bring_to_front=new QAction(QIcon(GuiUtilsNs::getIconPath("bringtofront")), tr("Bring to front"), this);
+	action_bring_to_front=new QAction(GuiUtilsNs::getIcon("bringtofront"), tr("Bring to front"), this);
 	action_bring_to_front->setShortcut(QKeySequence("Shift+Up"));
 
 	stacking_menu.addAction(action_send_to_back);
@@ -566,11 +566,11 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 
 	for(auto &act_type : act_types)
 	{
-		act = fade_in_all_menu.addAction(QIcon(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(act_type))),	act_labels[id]);
+		act = fade_in_all_menu.addAction(GuiUtilsNs::getIcon(BaseObject::getSchemaName(act_type)),	act_labels[id]);
 		act->setData(enum_t(act_type));
 		connect(act, &QAction::triggered, this, &ModelWidget::fadeObjectsIn);
 
-		act = fade_out_all_menu.addAction(QIcon(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(act_type))),	act_labels[id]);
+		act = fade_out_all_menu.addAction(GuiUtilsNs::getIcon(BaseObject::getSchemaName(act_type)),	act_labels[id]);
 		act->setData(enum_t(act_type));
 		connect(act, &QAction::triggered, this, &ModelWidget::fadeObjectsOut);
 
@@ -582,14 +582,14 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	fade_in_all_menu.insertSeparator(act);
 	connect(act, &QAction::triggered, this, &ModelWidget::fadeObjectsIn);
 	fade_in_all_menu.menuAction()->setText("Fade in");
-	fade_in_all_menu.menuAction()->setIcon(QIcon(GuiUtilsNs::getIconPath("fadein")));
+	fade_in_all_menu.menuAction()->setIcon(GuiUtilsNs::getIcon("fadein"));
 
 	act = fade_out_all_menu.addAction(tr("All objects"));
 	act->setData(enum_t(ObjectType::BaseObject));
 	fade_out_all_menu.insertSeparator(act);
 	connect(act, &QAction::triggered, this, &ModelWidget::fadeObjectsOut);
 	fade_out_all_menu.menuAction()->setText("Fade out");
-	fade_out_all_menu.menuAction()->setIcon(QIcon(GuiUtilsNs::getIconPath("fadeout")));
+	fade_out_all_menu.menuAction()->setIcon(GuiUtilsNs::getIcon("fadeout"));
 
 	connect(action_send_to_back, &QAction::triggered, this, &ModelWidget::sendToBack);
 	connect(action_bring_to_front, &QAction::triggered, this, &ModelWidget::bringToFront);
@@ -1124,7 +1124,7 @@ void ModelWidget::addNewObject()
 				{
 					//For the graphical object, changes the cursor icon until the user click on the model to show the editing form
 					QPixmap act_ico = action->icon().pixmap(QSize(32, 32)),
-							cursor_ico = QPixmap(GuiUtilsNs::getIconPath("cursortmpl")).scaled(48, 48, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+							cursor_ico = GuiUtilsNs::getPixmap("cursortmpl").scaled(48, 48, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 					QPainter painter;
 
 					painter.begin(&cursor_ico);
@@ -1879,7 +1879,7 @@ void ModelWidget::loadModel(const QString &filename)
 		#endif
 
 		connect(db_model, &DatabaseModel::s_objectLoaded, &task_prog_wgt, qOverload<int, QString, unsigned>(&TaskProgressWidget::updateProgress));
-		task_prog_wgt.addIcon(enum_t(ObjectType::BaseObject), QPixmap(GuiUtilsNs::getIconPath("design")));
+		task_prog_wgt.addIcon(enum_t(ObjectType::BaseObject), GuiUtilsNs::getIcon("design"));
 		task_prog_wgt.setWindowTitle(tr("Loading database model"));
 		task_prog_wgt.show();
 
@@ -3976,7 +3976,7 @@ void ModelWidget::configureQuickMenu(BaseObject *object)
 						{
 							//act = new QAction(obj_list.back()->getName(), menus[i]);
 							act = new QAction(obj->getName(), menus[i]);
-							act->setIcon(QIcon(GuiUtilsNs::getIconPath(types[i])));
+							act->setIcon(GuiUtilsNs::getIcon(types[i]));
 
 							/* Check the current action only if there is only one selected object and the object representing
 								 the action is assigned to the selected object */
@@ -4464,18 +4464,18 @@ void ModelWidget::configureConstraintsMenu(TableObject *tab_obj)
 
 				//For each constaint is created a menu with the edit, source code, protect/unprotect and delete actions
 				submenu=new QMenu(&popup_menu);
-				submenu->setIcon(QIcon(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(ObjectType::Constraint) + str_aux)));
+				submenu->setIcon(GuiUtilsNs::getIcon(BaseObject::getSchemaName(ObjectType::Constraint) + str_aux));
 				submenu->setTitle(constr->getName());
 
 				action=new QAction(dynamic_cast<QObject *>(submenu));
-				action->setIcon(QIcon(GuiUtilsNs::getIconPath("edit")));
+				action->setIcon(GuiUtilsNs::getIcon("edit"));
 				action->setText(tr("Properties"));
 				action->setData(QVariant::fromValue<void *>(dynamic_cast<BaseObject *>(constr)));
 				connect(action, &QAction::triggered, this, &ModelWidget::editObject);
 				submenu->addAction(action);
 
 				action=new QAction(dynamic_cast<QObject *>(submenu));
-				action->setIcon(QIcon(GuiUtilsNs::getIconPath("sourcecode")));
+				action->setIcon(GuiUtilsNs::getIcon("sourcecode"));
 				action->setText(tr("Source code"));
 				action->setData(QVariant::fromValue<void *>(dynamic_cast<BaseObject *>(constr)));
 				connect(action, &QAction::triggered, this, &ModelWidget::showSourceCode);
@@ -4492,18 +4492,18 @@ void ModelWidget::configureConstraintsMenu(TableObject *tab_obj)
 
 						if(constr->isProtected())
 						{
-							action->setIcon(QIcon(GuiUtilsNs::getIconPath("unprotect")));
+							action->setIcon(GuiUtilsNs::getIcon("unprotect"));
 							action->setText(tr("Unprotect"));
 						}
 						else
 						{
-							action->setIcon(QIcon(GuiUtilsNs::getIconPath("protect")));
+							action->setIcon(GuiUtilsNs::getIcon("protect"));
 							action->setText(tr("Protect"));
 						}
 					}
 
 					action=new QAction(dynamic_cast<QObject *>(submenu));
-					action->setIcon(QIcon(GuiUtilsNs::getIconPath("delete")));
+					action->setIcon(GuiUtilsNs::getIcon("delete"));
 					action->setData(QVariant::fromValue<void *>(dynamic_cast<BaseObject *>(constr)));
 					action->setText(tr("Delete"));
 					submenu->addAction(action);
@@ -4513,7 +4513,7 @@ void ModelWidget::configureConstraintsMenu(TableObject *tab_obj)
 					});
 
 					action=new QAction(dynamic_cast<QObject *>(submenu));
-					action->setIcon(QIcon(GuiUtilsNs::getIconPath("delcascade")));
+					action->setIcon(GuiUtilsNs::getIcon("delcascade"));
 					action->setData(QVariant::fromValue<void *>(dynamic_cast<BaseObject *>(constr)));
 					action->setText(tr("Del. cascade"));
 					submenu->addAction(action);
@@ -4531,7 +4531,7 @@ void ModelWidget::configureConstraintsMenu(TableObject *tab_obj)
 		{
 			submenu=new QMenu(&popup_menu);
 			submenu->setTitle(tr("Constraints"));
-			submenu->setIcon(QIcon(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(ObjectType::Constraint))));
+			submenu->setIcon(GuiUtilsNs::getIcon(BaseObject::getSchemaName(ObjectType::Constraint)));
 
 			for(auto &menu : submenus)
 				submenu->addMenu(menu);
@@ -4609,11 +4609,11 @@ void ModelWidget::configureBasicActions(BaseObject *obj)
 				popup_menu.addAction(action_jump_to_table);
 				jump_to_tab_menu.clear();
 
-				action = jump_to_tab_menu.addAction(QIcon(GuiUtilsNs::getIconPath(rel->getTable(BaseRelationship::SrcTable)->getObjectType())),
+				action = jump_to_tab_menu.addAction(GuiUtilsNs::getIcon(rel->getTable(BaseRelationship::SrcTable)->getObjectType()),
 																						rel->getTable(BaseRelationship::SrcTable)->getSignature(), this, &ModelWidget::jumpToTable);
 				action->setData(QVariant::fromValue<void *>(reinterpret_cast<void *>(rel->getTable(BaseRelationship::SrcTable))));
 
-				action = jump_to_tab_menu.addAction(QIcon(GuiUtilsNs::getIconPath(rel->getTable(BaseRelationship::DstTable)->getObjectType())),
+				action = jump_to_tab_menu.addAction(GuiUtilsNs::getIcon(rel->getTable(BaseRelationship::DstTable)->getObjectType()),
 																						rel->getTable(BaseRelationship::DstTable)->getSignature(), this, &ModelWidget::jumpToTable);
 				action->setData(QVariant::fromValue<void *>(reinterpret_cast<void *>(rel->getTable(BaseRelationship::DstTable))));
 			}
@@ -5330,10 +5330,10 @@ void ModelWidget::swapObjectsIds()
 	parent_form.setButtonConfiguration(Messagebox::OkCancelButtons);
 
 	parent_form.apply_ok_btn->setEnabled(false);
-	parent_form.apply_ok_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("swapobjs")));
+	parent_form.apply_ok_btn->setIcon(GuiUtilsNs::getIcon("swapobjs"));
 	parent_form.apply_ok_btn->setText(tr("&Swap ids"));
 
-	parent_form.cancel_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("close1")));
+	parent_form.cancel_btn->setIcon(GuiUtilsNs::getIcon("close1"));
 	parent_form.cancel_btn->setText(tr("&Close"));
 
 	connect(swap_ids_wgt, &SwapObjectsIdsWidget::s_objectsIdsSwapped, this, [this](){

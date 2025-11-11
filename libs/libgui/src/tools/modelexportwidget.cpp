@@ -225,12 +225,12 @@ void ModelExportWidget::handleErrorIgnored(QString err_code, QString err_msg, QS
 	QTreeWidgetItem *item=nullptr;
 
 	item=GuiUtilsNs::createOutputTreeItem(output_trw, tr("Error code <strong>%1</strong> found and ignored. Proceeding with export.").arg(err_code),
-																					 QPixmap(GuiUtilsNs::getIconPath("alert")), nullptr, false);
+																					 GuiUtilsNs::getPixmap("alert"), nullptr, false);
 
 	GuiUtilsNs::createOutputTreeItem(output_trw, UtilsNs::formatMessage(err_msg),
-																			QPixmap(GuiUtilsNs::getIconPath("alert")),	item, false, true);
+																			GuiUtilsNs::getPixmap("alert"),	item, false, true);
 
-	GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QPixmap(), item, false, true);
+	GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QIcon(), item, false, true);
 }
 
 void ModelExportWidget::updateProgress(int progress, QString msg, ObjectType obj_type, QString cmd, bool is_code_gen)
@@ -243,11 +243,11 @@ void ModelExportWidget::updateProgress(int progress, QString msg, ObjectType obj
 	progress_pb->setValue(progress);
 
 	if(obj_type != ObjectType::BaseObject)
-		ico = QPixmap(GuiUtilsNs::getIconPath(obj_type));
+		ico = GuiUtilsNs::getPixmap(obj_type);
 	else if(!cmd.isEmpty())
-		ico = QPixmap(GuiUtilsNs::getIconPath("sqlcode"));
+		ico = GuiUtilsNs::getPixmap("sqlcode");
 	else
-		ico = QPixmap(GuiUtilsNs::getIconPath("info"));
+		ico = GuiUtilsNs::getPixmap("info");
 
 	ico_lbl->setPixmap(ico);
 
@@ -257,7 +257,7 @@ void ModelExportWidget::updateProgress(int progress, QString msg, ObjectType obj
 		item=GuiUtilsNs::createOutputTreeItem(output_trw, text, ico, nullptr, false);
 
 		if(!cmd.isEmpty())
-			GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QPixmap(), item, false);
+			GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QIcon(), item, false);
 	}
 }
 
@@ -310,7 +310,7 @@ void ModelExportWidget::exportModel()
 
 			if(low_verbosity)
 				GuiUtilsNs::createOutputTreeItem(output_trw, tr("<strong>Low verbosity is set:</strong> only key informations and errors will be displayed."),
-																						QPixmap(GuiUtilsNs::getIconPath("alert")), nullptr, false);
+																						GuiUtilsNs::getPixmap("alert"), nullptr, false);
 
 			//Exporting to sql file
 			if(export_to_file_tb->isChecked())
@@ -374,11 +374,11 @@ void ModelExportWidget::selectExportMode()
 void ModelExportWidget::captureThreadError(Exception e)
 {
 	QTreeWidgetItem *item=GuiUtilsNs::createOutputTreeItem(output_trw, UtilsNs::formatMessage(e.getErrorMessage()),
-																														QPixmap(GuiUtilsNs::getIconPath("error")), nullptr, false, true);
+																														GuiUtilsNs::getPixmap("error"), nullptr, false, true);
 
 	GuiUtilsNs::createExceptionsTree(output_trw, e, item);
 
-	ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("error")));
+	ico_lbl->setPixmap(GuiUtilsNs::getPixmap("error"));
 	finishExport(tr("Exporting process aborted!"));
 
 	Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
@@ -392,7 +392,7 @@ void ModelExportWidget::cancelExport()
 
 void ModelExportWidget::handleExportCanceled()
 {
-	QPixmap ico=QPixmap(GuiUtilsNs::getIconPath("alert"));
+	QPixmap ico=GuiUtilsNs::getPixmap("alert");
 	QString msg=tr("Exporting process canceled by user!");
 
 	finishExport(msg);
@@ -402,7 +402,7 @@ void ModelExportWidget::handleExportCanceled()
 
 void ModelExportWidget::handleExportFinished()
 {
-	QPixmap ico=QPixmap(GuiUtilsNs::getIconPath("info"));
+	QPixmap ico=GuiUtilsNs::getPixmap("info");
 	QString msg=tr("Exporting process sucessfully ended!");
 
 	finishExport(msg);

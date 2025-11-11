@@ -66,7 +66,7 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 
 	act = copy_menu.addAction(tr("Copy as text"));
 	act->setShortcut(QKeySequence("Ctrl+C"));
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("txtfile")));
+	act->setIcon(GuiUtilsNs::getIcon("txtfile"));
 
 	connect(act, &QAction::triggered,	this, [this](){
 		SQLExecutionWidget::copySelection(results_tbw, false, false);
@@ -75,7 +75,7 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 
 	act = copy_menu.addAction(tr("Copy as CSV"));
 	act->setShortcut(QKeySequence("Ctrl+Shift+C"));
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("csvfile")));
+	act->setIcon(GuiUtilsNs::getIcon("csvfile"));
 
 	connect(act, &QAction::triggered, this, [this](){
 		SQLExecutionWidget::copySelection(results_tbw, false, true);
@@ -84,11 +84,11 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 
 	act = save_menu.menuAction();
 	act->setText(tr("Save as..."));
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("saveas")));
+	act->setIcon(GuiUtilsNs::getIcon("saveas"));
 	copy_menu.addAction(act);
 
 	act = save_menu.addAction(tr("Text file"));
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("txtfile")));
+	act->setIcon(GuiUtilsNs::getIcon("txtfile"));
 	act->setShortcut(QKeySequence("Ctrl+Shift+T"));
 
 	connect(act, &QAction::triggered, this, [this](){
@@ -96,7 +96,7 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 	});
 
 	act = save_menu.addAction(tr("CSV file"));
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("csvfile")));
+	act->setIcon(GuiUtilsNs::getIcon("csvfile"));
 	act->setShortcut(QKeySequence("Ctrl+Shift+S"));
 
 	connect(act, &QAction::triggered, this, [this](){
@@ -105,7 +105,7 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 
 	act = paste_menu.addAction(tr("Paste as text"));
 	act->setShortcut(QKeySequence("Ctrl+V"));
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("txtfile")));
+	act->setIcon(GuiUtilsNs::getIcon("txtfile"));
 
 	connect(act, &QAction::triggered,	this, [this](){
 		loadDataFromCsv(true, false);
@@ -114,14 +114,14 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 
 	act = paste_menu.addAction(tr("Paste as CSV"));
 	act->setShortcut(QKeySequence("Ctrl+Shift+V"));
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("csvfile")));
+	act->setIcon(GuiUtilsNs::getIcon("csvfile"));
 
 	connect(act, &QAction::triggered,	this, [this](){
 		loadDataFromCsv(true, true);
 		emit s_pasteEnabled(false);
 	});
 
-	action_add = edit_menu.addAction(QIcon(GuiUtilsNs::getIconPath("addrow")),
+	action_add = edit_menu.addAction(GuiUtilsNs::getIcon("addrow"),
 																	 tr("Add row(s)"), QKeySequence("Ins"));
 	action_add->setToolTip(tr("Add empty rows"));
 
@@ -130,12 +130,12 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 		updateRowOperationsInfo();
 	});
 
-	action_delete = edit_menu.addAction(QIcon(GuiUtilsNs::getIconPath("delrow")),
+	action_delete = edit_menu.addAction(GuiUtilsNs::getIcon("delrow"),
 																			tr("Delete row(s)"), QKeySequence("Del"),
 																			this, &DataGridWidget::markDeleteOnRows);
 	action_delete->setToolTip(tr("Mark the selected rows to be deleted"));
 
-	action_bulk_edit = edit_menu.addAction(QIcon(GuiUtilsNs::getIconPath("bulkedit")), tr("Edit cells"));
+	action_bulk_edit = edit_menu.addAction(GuiUtilsNs::getIcon("bulkedit"), tr("Edit cells"));
 	action_bulk_edit->setShortcut(QKeySequence("Ctrl+E"));
 	action_bulk_edit->setToolTip(tr("Change the values of all selected cells at once"));
 
@@ -143,19 +143,19 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 		GuiUtilsNs::openColumnDataForm(results_tbw);
 	});
 
-	action_duplicate = edit_menu.addAction(QIcon(GuiUtilsNs::getIconPath("duprow")), tr("Duplicate row(s)"), QKeySequence("Ctrl+D"),
+	action_duplicate = edit_menu.addAction(GuiUtilsNs::getIcon("duprow"), tr("Duplicate row(s)"), QKeySequence("Ctrl+D"),
 																				 this, &DataGridWidget::duplicateRows);
 	action_duplicate->setToolTip(tr("Duplicate the selected rows"));
 
-	action_clear = edit_menu.addAction(QIcon(GuiUtilsNs::getIconPath("cleartext")), tr("Clear cell(s)"), QKeySequence("Ctrl+R"),
+	action_clear = edit_menu.addAction(GuiUtilsNs::getIcon("cleartext"), tr("Clear cell(s)"), QKeySequence("Ctrl+R"),
 																		 this, &DataGridWidget::clearItemsText);
 	action_clear->setToolTip(tr("Clears the items selected on the grid"));
 
-	truncate_menu.addAction(QIcon(GuiUtilsNs::getIconPath("truncate")),
+	truncate_menu.addAction(GuiUtilsNs::getIcon("truncate"),
 													tr("Truncate"), QKeySequence("Ctrl+Del"),
 													this, &DataGridWidget::truncateTable)->setData(QVariant::fromValue<bool>(false));
 
-	truncate_menu.addAction(QIcon(GuiUtilsNs::getIconPath("trunccascade")),
+	truncate_menu.addAction(GuiUtilsNs::getIcon("trunccascade"),
 													tr("Truncate cascade"), QKeySequence("Ctrl+Shift+Del"),
 													this, &DataGridWidget::truncateTable)->setData(QVariant::fromValue<bool>(true));
 
@@ -176,14 +176,14 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 	columns_lst->installEventFilter(this);
 
 	act = export_menu.addAction(tr("Text file"));
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("txtfile")));
+	act->setIcon(GuiUtilsNs::getIcon("txtfile"));
 
 	connect(act, &QAction::triggered, this, [this](){
 		SQLExecutionWidget::exportResults(results_tbw, false);
 	});
 
 	act = export_menu.addAction(tr("CSV file"));
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("csvfile")));
+	act->setIcon(GuiUtilsNs::getIcon("csvfile"));
 
 	connect(act, &QAction::triggered, this, [this](){
 		SQLExecutionWidget::exportResults(results_tbw, true);
@@ -356,7 +356,7 @@ void DataGridWidget::listColumns(const std::vector<attribs_map> &cols)
 		{
 			col_names.push_back(col.at(Attributes::Name));
 			code_compl_wgt->insertCustomItem(col.at(Attributes::Name), {},
-																			 QPixmap(GuiUtilsNs::getIconPath("column")));
+																			 GuiUtilsNs::getPixmap("column"));
 
 			if(!sel_ord_cols.contains(col.at(Attributes::Name)))
 				ord_column_cmb->addItem(col.at(Attributes::Name));
@@ -826,7 +826,7 @@ void DataGridWidget::retrieveFKColumns(Catalog &catalog)
 			submenu = new QMenu(this);
 
 			QAction *act = submenu->menuAction();
-			act->setIcon(QIcon(GuiUtilsNs::getIconPath("referenced")));
+			act->setIcon(GuiUtilsNs::getIcon("referenced"));
 			act->setText(tr("Referenced tables"));
 			fks_menu.addAction(act);
 
@@ -845,7 +845,7 @@ void DataGridWidget::retrieveFKColumns(Catalog &catalog)
 				//Store the referenced schema and table names
 				fk_infos[fk_name][Attributes::RefTable] = aux_table[Attributes::Name];
 				fk_infos[fk_name][Attributes::Schema] = aux_schema[Attributes::Name];
-				action = submenu->addAction(QPixmap(GuiUtilsNs::getIconPath("table")),
+				action = submenu->addAction(GuiUtilsNs::getIcon("table"),
 																		QString("%1.%2 (%3)").arg(aux_schema[Attributes::Name])
 																													.arg(aux_table[Attributes::Name])
 																													.arg(fk[Attributes::Name]), this, &DataGridWidget::browseReferencedTable);
@@ -879,7 +879,7 @@ void DataGridWidget::retrieveFKColumns(Catalog &catalog)
 			submenu = new QMenu(this);
 
 			act = submenu->menuAction();
-			act->setIcon(QIcon(GuiUtilsNs::getIconPath("referrer")));
+			act->setIcon(GuiUtilsNs::getIcon("referrer"));
 			act->setText(tr("Referrer tables"));
 			fks_menu.addAction(act);
 
@@ -905,7 +905,7 @@ void DataGridWidget::retrieveFKColumns(Catalog &catalog)
 				for(auto &col : catalog.getObjectsAttributes(ObjectType::Column, aux_schema[Attributes::Name], aux_table[Attributes::Name], col_ids))
 					name_list.push_back(BaseObject::formatName(col[Attributes::Name]));
 
-				action = submenu->addAction(QPixmap(GuiUtilsNs::getIconPath("table")),
+				action = submenu->addAction(GuiUtilsNs::getIcon("table"),
 																		QString("%1.%2 (%3)").arg(aux_schema[Attributes::Name])
 																													.arg(aux_table[Attributes::Name])
 																													.arg(fk[Attributes::Name]), this, &DataGridWidget::browseReferrerTable);
@@ -1538,17 +1538,17 @@ void DataGridWidget::showPopupMenu(const QPoint &pnt)
 	items_menu.clear();
 
 	act = copy_menu.menuAction();
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("selection")));
+	act->setIcon(GuiUtilsNs::getIcon("selection"));
 	act->setText(tr("Selected items"));
 	items_menu.addAction(act);
 
 	act = paste_menu.menuAction();
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("paste")));
+	act->setIcon(GuiUtilsNs::getIcon("paste"));
 	act->setText(tr("Paste items"));
 	act->setEnabled(isPasteEnabled());
 	items_menu.addAction(act);
 
-	act = items_menu.addAction(QIcon(GuiUtilsNs::getIconPath("cleartext")), tr("Clear items"),
+	act = items_menu.addAction(GuiUtilsNs::getIcon("cleartext"), tr("Clear items"),
 														 this, &DataGridWidget::clearItemsText);
 
 	act->setEnabled(!results_tbw->selectedRanges().isEmpty());
@@ -1557,7 +1557,7 @@ void DataGridWidget::showPopupMenu(const QPoint &pnt)
 	{
 		items_menu.addSeparator();
 		act = fks_menu.menuAction();
-		act->setIcon(QIcon(GuiUtilsNs::getIconPath("browsetable")));
+		act->setIcon(GuiUtilsNs::getIcon("browsetable"));
 		act->setText(tr("Browse tables"));
 		act->setEnabled(browse_enabled);
 		items_menu.addAction(act);

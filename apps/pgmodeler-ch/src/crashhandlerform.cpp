@@ -46,7 +46,7 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 	wgt->setLayout(layout);
 
 	logo_lbl->setPixmap(QPixmap(":/images/images/crashhandler.png"));
-	report_twg->addTab(wgt, QIcon(GuiUtilsNs::getIconPath("alert")), tr("Stack trace"));
+	report_twg->addTab(wgt, GuiUtilsNs::getIcon("alert"), tr("Stack trace"));
 
 	//Open for reading the stack trace file generated on the last crash
 	input.setFileName(GlobalAttributes::getTemporaryFilePath(GlobalAttributes::StacktraceFile));
@@ -85,7 +85,7 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 	layout->addWidget(input_sel);
 
 	save_tb=new QToolButton(input_wgt);
-	save_tb->setIcon(QIcon(GuiUtilsNs::getIconPath("save")));
+	save_tb->setIcon(GuiUtilsNs::getIcon("save"));
 	save_tb->setSizePolicy(attach_tb->sizePolicy());
 	save_tb->setToolButtonStyle(attach_tb->toolButtonStyle());
 	save_tb->setIconSize(attach_tb->iconSize());

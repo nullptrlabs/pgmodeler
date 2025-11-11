@@ -101,25 +101,25 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 
 	objects_tab_map[ObjectType::Trigger]->setColumnCount(6);
 	objects_tab_map[ObjectType::Trigger]->setHeaderLabel(tr("Name"), 0);
-	objects_tab_map[ObjectType::Trigger]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")),0);
+	objects_tab_map[ObjectType::Trigger]->setHeaderIcon(GuiUtilsNs::getIcon("uid"),0);
 	objects_tab_map[ObjectType::Trigger]->setHeaderLabel(tr("Refer. Table"), 1);
-	objects_tab_map[ObjectType::Trigger]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("table")),1);
+	objects_tab_map[ObjectType::Trigger]->setHeaderIcon(GuiUtilsNs::getIcon("table"),1);
 	objects_tab_map[ObjectType::Trigger]->setHeaderLabel(tr("Firing"), 2);
-	objects_tab_map[ObjectType::Trigger]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("trigger")),2);
+	objects_tab_map[ObjectType::Trigger]->setHeaderIcon(GuiUtilsNs::getIcon("trigger"),2);
 	objects_tab_map[ObjectType::Trigger]->setHeaderLabel(tr("Events"), 3);
 	objects_tab_map[ObjectType::Trigger]->setHeaderLabel(tr("Alias"), 4);
 	objects_tab_map[ObjectType::Trigger]->setHeaderLabel(tr("Comment"), 5);
 
 	objects_tab_map[ObjectType::Index]->setColumnCount(4);
 	objects_tab_map[ObjectType::Index]->setHeaderLabel(tr("Name"), 0);
-	objects_tab_map[ObjectType::Index]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")),0);
+	objects_tab_map[ObjectType::Index]->setHeaderIcon(GuiUtilsNs::getIcon("uid"),0);
 	objects_tab_map[ObjectType::Index]->setHeaderLabel(tr("Indexing"), 1);
 	objects_tab_map[ObjectType::Index]->setHeaderLabel(tr("Alias"), 2);
 	objects_tab_map[ObjectType::Index]->setHeaderLabel(tr("Comment"), 3);
 
 	objects_tab_map[ObjectType::Rule]->setColumnCount(5);
 	objects_tab_map[ObjectType::Rule]->setHeaderLabel(tr("Name"), 0);
-	objects_tab_map[ObjectType::Rule]->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")),0);
+	objects_tab_map[ObjectType::Rule]->setHeaderIcon(GuiUtilsNs::getIcon("uid"),0);
 	objects_tab_map[ObjectType::Rule]->setHeaderLabel(tr("Execution"), 1);
 	objects_tab_map[ObjectType::Rule]->setHeaderLabel(tr("Event"), 2);
 	objects_tab_map[ObjectType::Rule]->setHeaderLabel(tr("Alias"), 3);

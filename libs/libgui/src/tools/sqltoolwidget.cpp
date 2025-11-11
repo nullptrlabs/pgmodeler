@@ -40,7 +40,7 @@ SQLToolWidget::SQLToolWidget(QWidget * parent) : QWidget(parent)
 
 	sql_exec_corner_tb = new QToolButton(sql_exec_tbw);
 	sql_exec_corner_tb->setObjectName("sql_exec_corner_btn");
-	sql_exec_corner_tb->setIcon(QIcon(GuiUtilsNs::getIconPath("newtab")));
+	sql_exec_corner_tb->setIcon(GuiUtilsNs::getIcon("newtab"));
 	sql_exec_corner_tb->setToolTip(tr("Add a new execution tab for the current database (%1)").arg(QKeySequence("Ctrl+T").toString()));
 
 	corner_wgt = new QWidget(sql_exec_tbw);

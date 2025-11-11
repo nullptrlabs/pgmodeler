@@ -200,7 +200,7 @@ void SwapObjectsIdsWidget::showObjectId()
 	if(sel_obj)
 	{
 		id_lbl->setText(IdLabel.arg(sel_obj->getObjectId()));
-		ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(sel_obj->getObjectType())));
+		ico_lbl->setPixmap(GuiUtilsNs::getPixmap(sel_obj->getObjectType()));
 		ico_lbl->setToolTip(sel_obj->getTypeName());
 
 		id_lbl->setVisible(true);

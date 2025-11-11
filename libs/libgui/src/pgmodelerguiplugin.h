@@ -174,7 +174,13 @@ class __libgui PgModelerGuiPlugin: public PgModelerPlugin {
 		virtual QToolButton *getToolButton() = 0;
 
 		//! \brief Returns the path to a plugin icon in the plugin's qrc file
-		QString getPluginIcon(const QString &icon_name);
+		QString getPluginIconPath(const QString &icon_name);
+
+		//! \brief Returns an QIcon instance with the plugin icon in the plugin's qrc file
+		QIcon getPluginIcon(const QString &icon_name);
+
+		//! \brief Returns an QPixmap instance with the plugin icon in the plugin's qrc file
+		QPixmap getPluginPixmap(const QString &icon_name);
 
 		/*! \brief Returns an struct containing a toolbutton and a widget
 		 *  that are installed in the areas in SQLExecutionWidget reserved for plugin

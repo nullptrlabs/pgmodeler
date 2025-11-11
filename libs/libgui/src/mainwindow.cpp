@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 	connect(recent_models_menu, &QMenu::aboutToShow, this, &MainWindow::validateRecentModelsActions);
 
 	QAction *act = clear_recent_menu.menuAction();
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("delete")));
+	act->setIcon(GuiUtilsNs::getIcon("delete"));
 	act->setText(tr("Clear menu"));
 
 	clear_recent_menu.addAction(tr("Missing files only"), this, [this](){
@@ -224,7 +224,7 @@ void MainWindow::configureMenusActionsWidgets()
 {
 	QAction *act_more = more_actions_menu.menuAction();
 	act_more->setText(tr("More"));
-	act_more->setIcon(QIcon(GuiUtilsNs::getIconPath("moreactions")));
+	act_more->setIcon(GuiUtilsNs::getIcon("moreactions"));
 	act_more->setToolTip(tr("Additional actions over the model"));
 
 	QToolButton *tool_btn = nullptr;
@@ -232,7 +232,7 @@ void MainWindow::configureMenusActionsWidgets()
 	QAction *act_arrange_objs = canvas_menu->insertMenu(action_compact_view, &arrange_menu);
 	act_arrange_objs->setText(tr("Arrange objects"));
 	act_arrange_objs->setToolTip(tr("Rearrange objects over the canvas"));
-	act_arrange_objs->setIcon(QIcon(GuiUtilsNs::getIconPath("arrangetables")));
+	act_arrange_objs->setIcon(GuiUtilsNs::getIcon("arrangetables"));
 	act_arrange_objs->setEnabled(false);
 	model_acts_tb->insertAction(action_compact_view, act_arrange_objs);
 	tool_btn = qobject_cast<QToolButton *>(model_acts_tb->widgetForAction(act_arrange_objs));
@@ -260,7 +260,7 @@ void MainWindow::configureMenusActionsWidgets()
 	action_expand_canvas->setEnabled(false);
 	action_expand_canvas->setText(tr("Expand canvas"));
 	action_expand_canvas->setToolTip(tr("Expand the canvas geometry to a specific direction"));
-	action_expand_canvas->setIcon(QIcon(GuiUtilsNs::getIconPath("expandcanvas")));
+	action_expand_canvas->setIcon(GuiUtilsNs::getIcon("expandcanvas"));
 	model_acts_tb->insertAction(act_arrange_objs, action_expand_canvas);
 	tool_btn = qobject_cast<QToolButton *>(model_acts_tb->widgetForAction(action_expand_canvas));
 	tool_btn->setPopupMode(QToolButton::InstantPopup);
@@ -283,7 +283,7 @@ void MainWindow::configureMenusActionsWidgets()
 	model_acts_tb->addAction(plugins_config_menu.menuAction());
 	QToolButton *plugins_btn = dynamic_cast<QToolButton *>(model_acts_tb->widgetForAction(plugins_config_menu.menuAction()));
 	plugins_btn->setPopupMode(QToolButton::InstantPopup);
-	plugins_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("pluginsconfig")));
+	plugins_btn->setIcon(GuiUtilsNs::getIcon("pluginsconfig"));
 	plugins_btn->setToolButtonStyle(Qt::ToolButtonIconOnly);
 
 	if(!plugins_tb_acts.isEmpty())
@@ -353,7 +353,7 @@ void MainWindow::configureMenusActionsWidgets()
 	main_menu.addSeparator();
 	main_menu.addAction(action_show_main_menu);
 
-	main_menu.setIcon(QIcon(GuiUtilsNs::getIconPath("mainmenu")));
+	main_menu.setIcon(GuiUtilsNs::getIcon("mainmenu"));
 	main_menu.menuAction()->setText(tr("Main menu"));
 	main_menu.menuAction()->setToolTip(tr("Main menu"));
 	model_acts_tb->insertAction(action_new_model, main_menu.menuAction());
@@ -361,7 +361,7 @@ void MainWindow::configureMenusActionsWidgets()
 #endif
 
 	QAction *act = recent_models_menu->menuAction();
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("loadrecent")));
+	act->setIcon(GuiUtilsNs::getIcon("loadrecent"));
 	act->setText(tr("Recent models"));
 	act->setToolTip(tr("Load recently opened model"));
 	model_acts_tb->insertAction(action_load_model, act);
@@ -550,7 +550,7 @@ void MainWindow::loadConfigurations()
 		action_plugins_config->setText(tr("Plug-ins"));
 		action_plugins_config->setToolTip(tr("Access the loaded plug-ins settings"));
 		action_plugins_config->setEnabled(!plugins_config_menu.isEmpty());
-		action_plugins_config->setIcon(QIcon(GuiUtilsNs::getIconPath("pluginsconfig")));
+		action_plugins_config->setIcon(GuiUtilsNs::getIcon("pluginsconfig"));
 
 		//Configuring the widget visibility according to the configurations
 		for(auto &itr : GeneralConfigWidget::getConfigurationParams())
@@ -1232,7 +1232,7 @@ void MainWindow::updateRecentModelsMenu()
 		act->setData(recent_mdl);
 
 		if(fi.suffix() == dbm_ext)
-			act->setIcon(QIcon(GuiUtilsNs::getIconPath("dbmfile")));
+			act->setIcon(GuiUtilsNs::getIcon("dbmfile"));
 		else
 		{
 			if(recent_models_icons.contains(fi.suffix()))
@@ -2301,7 +2301,7 @@ void MainWindow::configureSamplesMenu()
 		path=QFileInfo(GlobalAttributes::getSamplesPath() + GlobalAttributes::DirSeparator + files.front()).absoluteFilePath();
 		act->setToolTip(path);
 		act->setData(path);
-		act->setIcon(QIcon(GuiUtilsNs::getIconPath("dbmfile")));
+		act->setIcon(GuiUtilsNs::getIcon("dbmfile"));
 		files.pop_front();
 	}
 
@@ -2413,10 +2413,10 @@ void MainWindow::executePendingOperation(bool valid_error)
 		return;
 
 	static const QString op_names[] { "", QT_TR_NOOP("save"), QT_TR_NOOP("save"),
-																		QT_TR_NOOP("export"), QT_TR_NOOP("diff") },
+																		QT_TR_NOOP("export"), QT_TR_NOOP("diff") };
 
-	op_icons[] { "", GuiUtilsNs::getIconPath("save"), GuiUtilsNs::getIconPath("saveas"),
-									 GuiUtilsNs::getIconPath("export"), GuiUtilsNs::getIconPath("diff") };
+	static const QIcon op_icons[] { QIcon(), GuiUtilsNs::getIcon("save"), GuiUtilsNs::getIcon("saveas"),
+									 GuiUtilsNs::getIcon("export"), GuiUtilsNs::getIcon("diff") };
 
 	GuiUtilsNs::createOutputTreeItem(model_valid_wgt->output_trw,
 																	 tr("Executing pending <strong>%1</strong> operation...").arg(op_names[pending_op]),

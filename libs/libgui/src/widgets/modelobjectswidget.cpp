@@ -238,7 +238,7 @@ void ModelObjectsWidget::selectObject()
 		if(simplified_view && enable_obj_creation)
 			connect(model_wgt->getDatabaseModel(), &DatabaseModel::s_objectAdded, this, &ModelObjectsWidget::selectCreatedObject, Qt::QueuedConnection);
 
-		p_act->setIcon(QIcon(GuiUtilsNs::getIconPath(obj_type)));
+		p_act->setIcon(GuiUtilsNs::getIcon(obj_type));
 		p_act->setText(tr("New") + " " + BaseObject::getTypeName(obj_type));
 		popup.addAction(p_act);
 		popup.exec(QCursor::pos());
@@ -357,7 +357,7 @@ QTreeWidgetItem *ModelObjectsWidget::createItemForObject(BaseObject *object, QTr
 	else if(obj_type == ObjectType::Constraint)
 		sub_type = dynamic_cast<Constraint *>(object)->getConstraintType().getTypeId();
 
-	item->setIcon(0, QIcon(GuiUtilsNs::getIconPath(obj_type, sub_type)));
+	item->setIcon(0, GuiUtilsNs::getIcon(obj_type, sub_type));
 	item->setData(2, Qt::UserRole, QString("%1_%2").arg(object->getObjectId()).arg(object->getSchemaName()));
 
 	return item;
@@ -441,7 +441,7 @@ void ModelObjectsWidget::updateSchemaTree(QTreeWidgetItem *root)
 		QTreeWidgetItem *item = nullptr, *item1=nullptr, *item2=nullptr;
 		std::vector<ObjectType> types = BaseObject::getChildObjectTypes(ObjectType::Schema);
 		int count = 0;
-		QPixmap group_icon=QPixmap(GuiUtilsNs::getIconPath(QString(BaseObject::getSchemaName(ObjectType::Schema))));
+		QIcon group_icon=GuiUtilsNs::getIcon(QString(BaseObject::getSchemaName(ObjectType::Schema)));
 
 		//Removing the ObjectType::Table and ObjectType::View types since they are handled separetedly
 		types.erase(std::find(types.begin(), types.end(), ObjectType::Table));
@@ -484,7 +484,7 @@ void ModelObjectsWidget::updateSchemaTree(QTreeWidgetItem *root)
 					if(visible_objs_map[type])
 					{
 						item2 = new QTreeWidgetItem(item1);
-						item2->setIcon(0,QPixmap(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(type))));
+						item2->setIcon(0,GuiUtilsNs::getPixmap(BaseObject::getSchemaName(type)));
 
 						//Get the objects that belongs to the current schema
 						obj_list = db_model->getObjects(type, schema);
@@ -518,7 +518,7 @@ void ModelObjectsWidget::updateTableTree(QTreeWidgetItem *root, BaseObject *sche
 		QTreeWidgetItem *item = nullptr, *item1 = nullptr, *item2 = nullptr;
 		QFont font;
 		std::vector<ObjectType> types = BaseObject::getChildObjectTypes(table_type);
-		QPixmap group_icon = QPixmap(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(table_type)));
+		QIcon group_icon = GuiUtilsNs::getIcon(BaseObject::getSchemaName(table_type));
 
 		try
 		{
@@ -547,7 +547,7 @@ void ModelObjectsWidget::updateTableTree(QTreeWidgetItem *root, BaseObject *sche
 					if(visible_objs_map[type])
 					{
 						item2 = new QTreeWidgetItem(item1);
-						item2->setIcon(0,QPixmap(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(type))));
+						item2->setIcon(0,GuiUtilsNs::getPixmap(BaseObject::getSchemaName(type)));
 						font = item2->font(0);
 						font.setItalic(true);
 						item2->setFont(0, font);
@@ -577,7 +577,7 @@ void ModelObjectsWidget::updateViewTree(QTreeWidgetItem *root, BaseObject *schem
 		QTreeWidgetItem *item = nullptr, *item1 = nullptr, *item2 = nullptr;
 		QFont font;
 		std::vector<ObjectType> types = BaseObject::getChildObjectTypes(ObjectType::View);
-		QPixmap group_icon = QPixmap(GuiUtilsNs::getIconPath(QString(BaseObject::getSchemaName(ObjectType::View))));
+		QIcon group_icon = GuiUtilsNs::getIcon(QString(BaseObject::getSchemaName(ObjectType::View)));
 
 		try
 		{
@@ -606,7 +606,7 @@ void ModelObjectsWidget::updateViewTree(QTreeWidgetItem *root, BaseObject *schem
 					if(visible_objs_map[type])
 					{
 						item2 = new QTreeWidgetItem(item1);
-						item2->setIcon(0,QPixmap(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(type))));
+						item2->setIcon(0,GuiUtilsNs::getPixmap(BaseObject::getSchemaName(type)));
 						font = item2->font(0);
 						font.setItalic(true);
 						item2->setFont(0, font);
@@ -639,7 +639,7 @@ void ModelObjectsWidget::updatePermissionTree(QTreeWidgetItem *root, BaseObject 
 			QFont font=item->font(0);
 
 			db_model->getPermissions(object, perms);
-			item->setIcon(0,QPixmap(GuiUtilsNs::getIconPath("permission")));
+			item->setIcon(0,GuiUtilsNs::getPixmap("permission"));
 
 			font.setItalic(true);
 			item->setFont(0, font);
@@ -700,7 +700,7 @@ void ModelObjectsWidget::updateDatabaseTree()
 						item1 = new QTreeWidgetItem(root);
 						str_aux = QString(BaseObject::getSchemaName(type));
 
-						item1->setIcon(0, QPixmap(GuiUtilsNs::getIconPath(str_aux)));
+						item1->setIcon(0, GuiUtilsNs::getIcon(str_aux));
 						item1->setData(1, Qt::UserRole, QVariant(enum_t(type)));
 
 						obj_list=(*db_model->getObjectList(type));

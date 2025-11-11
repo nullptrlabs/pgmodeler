@@ -91,35 +91,35 @@ SQLExecutionWidget::SQLExecutionWidget(QWidget * parent) : QWidget(parent)
 
 	results_tbw->setItemDelegate(new PlainTextItemDelegate(this, true));
 
-	action_load = file_menu.addAction(QIcon(GuiUtilsNs::getIconPath("open")), tr("Load"), QKeySequence("Ctrl+L"));
-	action_save = file_menu.addAction(QIcon(GuiUtilsNs::getIconPath("save")), tr("Save"), QKeySequence("Ctrl+S"));
-	action_save_as = file_menu.addAction(QIcon(GuiUtilsNs::getIconPath("saveas")), tr("Save as"), QKeySequence("Ctrl+Shift+S"));
+	action_load = file_menu.addAction(GuiUtilsNs::getIcon("open"), tr("Load"), QKeySequence("Ctrl+L"));
+	action_save = file_menu.addAction(GuiUtilsNs::getIcon("save"), tr("Save"), QKeySequence("Ctrl+S"));
+	action_save_as = file_menu.addAction(GuiUtilsNs::getIcon("saveas"), tr("Save as"), QKeySequence("Ctrl+Shift+S"));
 	file_tb->setMenu(&file_menu);
 
-	action_search = code_menu.addAction(QIcon(GuiUtilsNs::getIconPath("findtext")), tr("Search"), QKeySequence("Ctrl+F"));
+	action_search = code_menu.addAction(GuiUtilsNs::getIcon("findtext"), tr("Search"), QKeySequence("Ctrl+F"));
 	action_search->setCheckable(true);
-	action_wrap = code_menu.addAction(QIcon(GuiUtilsNs::getIconPath("wordwrap")), tr("Word wrap"), QKeySequence("Ctrl+W"));
+	action_wrap = code_menu.addAction(GuiUtilsNs::getIcon("wordwrap"), tr("Word wrap"), QKeySequence("Ctrl+W"));
 	action_wrap->setCheckable(true);
 
 	QAction *act = snippets_menu.menuAction();
 	act->setText(tr("Snippets"));
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("codesnippet")));
+	act->setIcon(GuiUtilsNs::getIcon("codesnippet"));
 	code_menu.addSeparator();
 	code_menu.addAction(act);
 	code_tb->setMenu(&code_menu);
 
-	action_filter = result_menu.addAction(QIcon(GuiUtilsNs::getIconPath("filter")), tr("Filter"), QKeySequence("Ctrl+T"));
+	action_filter = result_menu.addAction(GuiUtilsNs::getIcon("filter"), tr("Filter"), QKeySequence("Ctrl+T"));
 	action_filter->setCheckable(true);
 
 	act = export_menu.menuAction();
 	act->setText(tr("Export"));
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("exportdata")));
+	act->setIcon(GuiUtilsNs::getIcon("exportdata"));
 	result_menu.addAction(act);
 
 	results_tb->setMenu(&result_menu);
 
 	act = export_menu.addAction(tr("Text file"));
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("txtfile")));
+	act->setIcon(GuiUtilsNs::getIcon("txtfile"));
 	act->setShortcut(QKeySequence("Ctrl+Shift+T"));
 
 	connect(act, &QAction::triggered, this, [this](){
@@ -127,7 +127,7 @@ SQLExecutionWidget::SQLExecutionWidget(QWidget * parent) : QWidget(parent)
 	});
 
 	act = export_menu.addAction(tr("CSV file"));
-	act->setIcon(QIcon(GuiUtilsNs::getIconPath("csvfile")));
+	act->setIcon(GuiUtilsNs::getIcon("csvfile"));
 	act->setShortcut(QKeySequence("Ctrl+Shift+C"));
 
 	filter_wgt->setVisible(false);
@@ -433,7 +433,7 @@ void SQLExecutionWidget::fillResultsTable(Catalog &catalog, ResultSet &res, QTab
 			item->setToolTip(type_names[res.getColumnTypeId(col)]);
 			type_name = type_names[res.getColumnTypeId(col)];
 			item->setData(Qt::ToolTipRole, type_name);
-			item->setIcon(QIcon(GuiUtilsNs::getIconPath(ResultSetModel::getPgTypeIconName(type_name))));
+			item->setIcon(GuiUtilsNs::getIcon(ResultSetModel::getPgTypeIconName(type_name)));
 		}
 
 		if(res.accessTuple(ResultSet::FirstTuple))
@@ -483,14 +483,14 @@ void SQLExecutionWidget::handleExecutionAborted(Exception e)
 
 	GuiUtilsNs::createOutputListItem(msgoutput_lst,
 										UtilsNs::formatMessage(QString("%1 %2").arg(time_str, e.getErrorMessage())),
-										QPixmap(GuiUtilsNs::getIconPath("error")));
+										GuiUtilsNs::getPixmap("error"));
 
 	if(e.getErrorCode()==ErrorCode::ConnectionTimeout ||
 		 e.getErrorCode()==ErrorCode::ConnectionBroken)
 	{
 		GuiUtilsNs::createOutputListItem(msgoutput_lst,
 											QString("%1 %2").arg(time_str, tr("No results retrieved or changes done due to the error above! Run the command again.")),
-											QPixmap(GuiUtilsNs::getIconPath("alert")), false);
+											GuiUtilsNs::getPixmap("alert"), false);
 	}
 
 	output_tbw->setTabText(1, tr("Messages (%1)").arg(msgoutput_lst->count()));
@@ -563,7 +563,7 @@ void SQLExecutionWidget::finishExecution(int rows_affected)
 		{
 			GuiUtilsNs::createOutputListItem(msgoutput_lst,
 																					QString("[%1]: %2").arg(QTime::currentTime().toString("hh:mm:ss.zzz")).arg(notice.trimmed()),
-																					QPixmap(GuiUtilsNs::getIconPath("alert")), false);
+																					GuiUtilsNs::getPixmap("alert"), false);
 		}
 
 		GuiUtilsNs::createOutputListItem(msgoutput_lst,
@@ -572,7 +572,7 @@ void SQLExecutionWidget::finishExecution(int rows_affected)
 																																		 .arg(total_exec >= 1000 ? QString("%1 s").arg(total_exec/1000.0) : QString("%1 ms").arg(total_exec))
 																																		 .arg(!res_model ? tr("Rows affected") :  tr("Rows retrieved"))
 																																		 .arg(rows_affected)),
-																				QPixmap(GuiUtilsNs::getIconPath("info")));
+																				GuiUtilsNs::getPixmap("info"));
 
 		output_tbw->setTabText(1, tr("Messages (%1)").arg(msgoutput_lst->count()));
 	}
@@ -749,7 +749,7 @@ void SQLExecutionWidget::runSQLCommand(const QString &cmd)
 	GuiUtilsNs::createOutputListItem(msgoutput_lst,
 																		tr("[%1]: SQL command is running...")
 																				.arg(QTime::currentTime().toString("hh:mm:ss.zzz")),
-																		QPixmap(GuiUtilsNs::getIconPath("info")), false);
+																		GuiUtilsNs::getPixmap("info"), false);
 }
 
 void SQLExecutionWidget::saveCommands()
@@ -989,24 +989,24 @@ void SQLExecutionWidget::copySelection(QTableView *results_tbw, bool use_popup, 
 			{
 				act = copy_mode_menu.menuAction();
 				act->setText(tr("Selection"));
-				act->setIcon(QIcon(GuiUtilsNs::getIconPath("selection")));
+				act->setIcon(GuiUtilsNs::getIcon("selection"));
 
 				act_txt = copy_mode_menu.addAction(tr("Copy as text"));
-				act_txt->setIcon(QIcon(GuiUtilsNs::getIconPath("txtfile")));
+				act_txt->setIcon(GuiUtilsNs::getIcon("txtfile"));
 
 				act_csv = copy_mode_menu.addAction(tr("Copy as CSV"));
-				act_csv->setIcon(QIcon(GuiUtilsNs::getIconPath("csvfile")));
+				act_csv->setIcon(GuiUtilsNs::getIcon("csvfile"));
 
 				act_save = save_menu.menuAction();
 				act_save->setText(tr("Save as..."));
-				act_save->setIcon(QIcon(GuiUtilsNs::getIconPath("saveas")));
+				act_save->setIcon(GuiUtilsNs::getIcon("saveas"));
 				copy_mode_menu.addAction(act_save);
 
 				act_save_txt = save_menu.addAction(tr("Text file"));
-				act_save_txt->setIcon(QIcon(GuiUtilsNs::getIconPath("txtfile")));
+				act_save_txt->setIcon(GuiUtilsNs::getIcon("txtfile"));
 
 				act_save_csv = save_menu.addAction(tr("CSV file"));
-				act_save_csv->setIcon(QIcon(GuiUtilsNs::getIconPath("csvfile")));
+				act_save_csv->setIcon(GuiUtilsNs::getIcon("csvfile"));
 
 				copy_menu.addAction(act);
 				act = copy_menu.exec(QCursor::pos());
@@ -1191,14 +1191,14 @@ void SQLExecutionWidget::enableSQLExecution(bool enable)
 void SQLExecutionWidget::showHistoryContextMenu()
 {
 	QMenu *ctx_menu=cmd_history_txt->createStandardContextMenu();
-	QAction *action_clear = new QAction(QPixmap(GuiUtilsNs::getIconPath("cleartext")), tr("Clear history"), ctx_menu),
-			*action_save = new QAction(QPixmap(GuiUtilsNs::getIconPath("save")), tr("Save history"), ctx_menu),
-			*action_reload = new QAction(QPixmap(GuiUtilsNs::getIconPath("refresh")), tr("Reload history"), ctx_menu),
+	QAction *action_clear = new QAction(GuiUtilsNs::getIcon("cleartext"), tr("Clear history"), ctx_menu),
+			*action_save = new QAction(GuiUtilsNs::getIcon("save"), tr("Save history"), ctx_menu),
+			*action_reload = new QAction(GuiUtilsNs::getIcon("refresh"), tr("Reload history"), ctx_menu),
 			*action_toggle_find = nullptr,
 			*exec_act = nullptr;
 
 	if(!search_history_parent->isVisible())
-		action_toggle_find = new QAction(QPixmap(GuiUtilsNs::getIconPath("findtext")), tr("Search in history"), ctx_menu);
+		action_toggle_find = new QAction(GuiUtilsNs::getIcon("findtext"), tr("Search in history"), ctx_menu);
 	else
 		action_toggle_find = new QAction(tr("Hide search tool"), ctx_menu);
 

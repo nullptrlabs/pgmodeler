@@ -167,10 +167,10 @@ void ChangelogWidget::inspectChangelog()
 			obj_type = BaseObject::getObjectType(data_tbw->item(row, 2)->text());
 			action = data_tbw->item(row, 3)->text();
 
-			data_tbw->item(row, 1)->setIcon(QIcon(GuiUtilsNs::getIconPath(obj_type)));
+			data_tbw->item(row, 1)->setIcon(GuiUtilsNs::getIcon(obj_type));
 			data_tbw->item(row, 2)->setText(BaseObject::getTypeName(obj_type));
 			data_tbw->item(row, 3)->setText(actions_i18n[action]);
-			data_tbw->item(row, 3)->setIcon(QIcon(GuiUtilsNs::getIconPath(actions_icons[action])));
+			data_tbw->item(row, 3)->setIcon(GuiUtilsNs::getIcon(actions_icons[action]));
 
 			fnt = data_tbw->item(row, 2)->font();
 			fnt.setItalic(true);
