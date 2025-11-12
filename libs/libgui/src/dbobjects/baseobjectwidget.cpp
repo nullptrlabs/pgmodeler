@@ -459,6 +459,10 @@ void BaseObjectWidget::configureBaseLayout()
 	misc_btns_lt->setObjectName("misc_btns_lt");
 	misc_btns_lt->setSpacing(GuiUtilsNs::LtSpacing);
 
+	extra_wgts_lt = new QVBoxLayout;
+	extra_wgts_lt->setObjectName("extra_wgts_lt ");
+	extra_wgts_lt->setSpacing(GuiUtilsNs::LtSpacing);
+
 	baseobject_grid->addWidget(protected_obj_frm, 0, 0, 1, 0);
 
 	for(auto &[obj_types, fields] : field_confs)
@@ -480,11 +484,12 @@ void BaseObjectWidget::configureBaseLayout()
 
 	baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(comment_lbl, comment_edt),
 															baseobject_grid->count(), 0, 1, 0);
+	baseobject_grid->addLayout(extra_wgts_lt, baseobject_grid->count(), 0, 1, 0);
 
-	misc_btns_lt->addItem(new QSpacerItem(20, 1, QSizePolicy::Expanding));
 	misc_btns_lt->addWidget(append_sql_tb);
 	misc_btns_lt->addWidget(edt_perms_tb);
 	misc_btns_lt->addWidget(disable_sql_chk);
+	misc_btns_lt->addItem(new QSpacerItem(20, 1, QSizePolicy::Expanding));
 
 	baseobject_grid->addLayout(misc_btns_lt, baseobject_grid->count(), 0, 1, 0);
 }

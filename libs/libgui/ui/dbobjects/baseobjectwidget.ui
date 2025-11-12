@@ -296,8 +296,8 @@
   <widget class="QCheckBox" name="disable_sql_chk">
    <property name="geometry">
     <rect>
-     <x>465</x>
-     <y>314</y>
+     <x>310</x>
+     <y>380</y>
      <width>131</width>
      <height>24</height>
     </rect>

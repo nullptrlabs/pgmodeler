@@ -31,7 +31,7 @@ TablespaceWidget::TablespaceWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	directory_lt->addWidget(directory_lbl);
 	directory_lt->addWidget(directory_sel);
 
-	baseobject_grid->addLayout(directory_lt, baseobject_grid->count(), 0, 1, 0);
+	extra_wgts_lt->addLayout(directory_lt);
 	configureTabbedLayout(tab_attribs_tbw);
 
 	tablespace_lt->addWidget(tab_attribs_tbw);

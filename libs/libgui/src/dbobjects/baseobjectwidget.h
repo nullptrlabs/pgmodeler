@@ -59,7 +59,14 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 
 		bool object_protected;
 
+		/*! \brief This horizontal layout arranges the buttons "Custom" SQL and "Edit permissions"
+		 *  as well as the checkbox "Disable SQL code" */
 		QHBoxLayout *misc_btns_lt;
+
+		/*! \brief This vertical layout, initially empty, can be used by derived classes to
+		 *  insert custom widgets/layouts in the middle of the form, between the main fields
+		 *  (name, schema, comment, etc) and the layout misc_btns_lt */
+		QVBoxLayout *extra_wgts_lt;
 
 		//! \brief Store the kind of object being handled by the widget (configured in the constructor)
 		ObjectType handled_obj_type;

@@ -33,8 +33,8 @@ SchemaWidget::SchemaWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 	schema_lt->addWidget(schema_attribs_tbw);
 	schema_lt->setContentsMargins(GuiUtilsNs::LtMargins);
 	schema_lt->setSpacing(GuiUtilsNs::LtSpacing);
-	baseobject_grid->addWidget(attributes_gb, baseobject_grid->count(), 0, 1, 0);
 
+	extra_wgts_lt->addWidget(attributes_gb);
 	configureTabbedLayout(schema_attribs_tbw);
 	configureTabOrder({ fill_color_picker, name_color_picker, show_rect_chk });
 
