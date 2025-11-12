@@ -22,20 +22,13 @@ SchemaWidget::SchemaWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 {
 	Ui_SchemaWidget::setupUi(this);
 
-	QVBoxLayout *schema_lt = new QVBoxLayout(this);
-
 	fill_color_picker = new ColorPickerWidget(1, this);
 	fill_color_lt->addWidget(fill_color_picker);
 
 	name_color_picker = new ColorPickerWidget(1, this);
 	name_color_lt->addWidget(name_color_picker);
 
-	schema_lt->addWidget(schema_attribs_tbw);
-	schema_lt->setContentsMargins(GuiUtilsNs::LtMargins);
-	schema_lt->setSpacing(GuiUtilsNs::LtSpacing);
-
-	extra_wgts_lt->addWidget(attributes_gb);
-	configureTabbedLayout(schema_attribs_tbw);
+	configureTabbedLayout();
 	configureTabOrder({ fill_color_picker, name_color_picker, show_rect_chk });
 
 	setMinimumSize(550, 400);

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>462</width>
-    <height>431</height>
+    <width>294</width>
+    <height>156</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -16,54 +16,56 @@
     <height>0</height>
    </size>
   </property>
-  <widget class="QGroupBox" name="options_gb">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>70</y>
-     <width>452</width>
-     <height>97</height>
-    </rect>
+  <layout class="QVBoxLayout" name="usermapping_lt">
+   <property name="leftMargin">
+    <number>0</number>
    </property>
-   <property name="title">
-    <string>Options</string>
+   <property name="topMargin">
+    <number>0</number>
    </property>
-  </widget>
-  <widget class="QTabWidget" name="attributes_tbw">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>230</y>
-     <width>441</width>
-     <height>191</height>
-    </rect>
+   <property name="rightMargin">
+    <number>0</number>
    </property>
-  </widget>
-  <widget class="QLabel" name="server_lbl">
-   <property name="geometry">
-    <rect>
-     <x>6</x>
-     <y>6</y>
-     <width>49</width>
-     <height>22</height>
-    </rect>
+   <property name="bottomMargin">
+    <number>0</number>
    </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>0</width>
-     <height>0</height>
-    </size>
-   </property>
-   <property name="text">
-    <string>Server</string>
-   </property>
-  </widget>
+   <item>
+    <layout class="QVBoxLayout" name="server_lt">
+     <item>
+      <widget class="QLabel" name="server_lbl">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Server</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="options_gb">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Options</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

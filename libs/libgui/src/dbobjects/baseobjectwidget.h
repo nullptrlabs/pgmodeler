@@ -165,7 +165,16 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 			configureFormFields(obj_type, obj_type != ObjectType::BaseObject);
 		}
 
+		/*! \brief Configures a form layout in tabbed way.
+		 *  The tab_widget is the QTabWidget instance that will hold
+		 *  all pages. By default, this method add three new pages in
+		 *  the tab widget: General (baseobject_grid), Associations and SQL preview. */
 		void configureTabbedLayout(QTabWidget *tab_widget);
+
+		/*! \brief Configures a tabbed layout from a simple QHBoxLayout-ed
+		 *  or a QVBoxLayout-ed widget. This method creates a QTabWidget instance and
+		 *  move all widgets/sublayouts of the orignal widget's layout to the "General" page. */
+		void configureTabbedLayout();
 
 		/*! \brief Configures the state of commom fields related to database objects enabling/disabling/hidding
 		 * according to the object type. The parameter inst_ev_filter indicates if the special event filter
@@ -268,7 +277,7 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 };
 
 template<class Class>
-void BaseObjectWidget::startConfiguration(void)
+void BaseObjectWidget::startConfiguration()
 {
 	try
 	{

@@ -23,15 +23,7 @@ UserMappingWidget::UserMappingWidget(QWidget *parent): BaseObjectWidget(parent, 
 {
 	Ui_UserMappingWidget::setupUi(this);
 
-	QVBoxLayout *usermap_lt = new QVBoxLayout(this),
-			*server_lt = new QVBoxLayout;
-
-	usermap_lt->addWidget(attributes_tbw);
-	usermap_lt->setContentsMargins(GuiUtilsNs::LtMargins);
-	usermap_lt->setSpacing(GuiUtilsNs::LtSpacing);
-
 	server_sel = new ObjectSelectorWidget(ObjectType::ForeignServer, this);
-	server_lt->addWidget(server_lbl);
 	server_lt->addWidget(server_sel);
 
 	options_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
@@ -46,10 +38,7 @@ UserMappingWidget::UserMappingWidget(QWidget *parent): BaseObjectWidget(parent, 
 	setRequiredField(server_sel);
 	setRequiredField(server_lbl);
 
-	extra_wgts_lt->addLayout(server_lt);
-	extra_wgts_lt->addWidget(options_gb);
-
-	configureTabbedLayout(attributes_tbw);
+	configureTabbedLayout();
 	configureTabOrder({ server_sel, options_tab });
 
 	setMinimumSize(550, 400);

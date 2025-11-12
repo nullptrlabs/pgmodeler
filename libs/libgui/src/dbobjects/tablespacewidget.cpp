@@ -22,25 +22,15 @@ TablespaceWidget::TablespaceWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 {
 	Ui_TablespaceWidget::setupUi(this);
 
-	QVBoxLayout *directory_lt = new QVBoxLayout,
-			*tablespace_lt = new QVBoxLayout(this);
-
 	directory_sel = new FileSelectorWidget(this);
 	directory_sel->setDirectoryMode(true);
 	directory_sel->setAcceptMode(QFileDialog::AcceptOpen);
 	directory_lt->addWidget(directory_lbl);
 	directory_lt->addWidget(directory_sel);
 
-	extra_wgts_lt->addLayout(directory_lt);
-	configureTabbedLayout(tab_attribs_tbw);
-
-	tablespace_lt->addWidget(tab_attribs_tbw);
-	tablespace_lt->setContentsMargins(GuiUtilsNs::LtMargins);
-	tablespace_lt->setSpacing(GuiUtilsNs::LtSpacing);
-
+	configureTabbedLayout();
 	setRequiredField(directory_lbl);
 	setRequiredField(directory_sel);
-
 	configureTabOrder();
 
 	setMinimumSize(550, 300);

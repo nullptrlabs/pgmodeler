@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>318</height>
+    <height>34</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -16,35 +16,33 @@
     <height>0</height>
    </size>
   </property>
-  <widget class="QTabWidget" name="tab_attribs_tbw">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>120</y>
-     <width>411</width>
-     <height>181</height>
-    </rect>
+  <layout class="QVBoxLayout" name="directory_lt">
+   <property name="leftMargin">
+    <number>0</number>
    </property>
-  </widget>
-  <widget class="QLabel" name="directory_lbl">
-   <property name="geometry">
-    <rect>
-     <x>21</x>
-     <y>61</y>
-     <width>70</width>
-     <height>22</height>
-    </rect>
+   <property name="topMargin">
+    <number>0</number>
    </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
+   <property name="rightMargin">
+    <number>0</number>
    </property>
-   <property name="text">
-    <string>Directory</string>
+   <property name="bottomMargin">
+    <number>0</number>
    </property>
-  </widget>
+   <item>
+    <widget class="QLabel" name="directory_lbl">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Directory</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

@@ -954,11 +954,19 @@ namespace GuiUtilsNs {
 
 	void configureWidgetBuddyLabel(QLabel *label, QWidget *widget)
 	{
-		if(!label /* || !widget */)
+		if(!label)
 			return;
 
 		label->setBuddy(widget);
 		configureWidgetFont(label, SmallFontFactor, true);
+	}
+
+	void configureWidgetsBuddyLabels(QBoxLayout *layout)
+	{
+		if(!layout)
+			return;
+
+
 	}
 
 	void configureWidgetsBuddyLabels(QWidget *widget)
@@ -966,26 +974,47 @@ namespace GuiUtilsNs {
 		if(!widget)
 			return;
 
-		QLabel *label = nullptr;
+		QLabel *label = nullptr;		
+		QList<QBoxLayout *> layouts;
+		QLayoutItem *item = nullptr;
+		QBoxLayout *box_lt = nullptr;
+		int item_cnt = 0;
 
-		for(auto &layout : widget->findChildren<QLayout *>())
+		for(auto &layout : widget->findChildren<QBoxLayout *>())
 		{
-		 /* We ignore the layout if:
-			* 1) It contains a invalid count (we need a layout with 2 widgets)
-			* 2) It contains two widgets but the first one isn't a QLabel.
-			* 3) It contains two widget (a QLabel and another QWidget) but the
-			*    label already has a buddy widget configured. */
-			label = layout->count() >= 2 ?
-							qobject_cast<QLabel *>(layout->itemAt(0)->widget()) : nullptr;
+			item_cnt = layout->count();
+			layouts.clear();
+			layouts.append(layout);
 
-			if((!qobject_cast<QHBoxLayout *>(layout) &&
-					!qobject_cast<QVBoxLayout *>(layout)) ||
-				 layout->count() < 2 || !label ||
-				 label->buddy() || label->text().isEmpty())
-				continue;
+			/* Collecting children layouts of the current layout
+			 * so we don't miss internal layouts that fits the
+			 * conditions to configure a buddy label */
+			for(int idx = 0; idx < item_cnt; idx++)
+			{
+				item = layout->itemAt(idx);
+				box_lt = qobject_cast<QBoxLayout *>(item->layout());
 
-			layout->setSpacing(GuiUtilsNs::LtSpacing / 2);
-			configureWidgetBuddyLabel(label, layout->findChild<QWidget*>());
+				if(box_lt)
+					layouts.append(box_lt);
+			}
+
+			for(auto &lt : layouts)
+			{
+				/* We ignore the layout if:
+				 * 1) It contains a invalid count (we need a layout with 2 widgets)
+				 * 2) It contains two widgets but the first one isn't a QLabel.
+				 * 3) It contains two widgets (a QLabel and another QWidget) but the
+				 *    label already has a buddy widget configured. */
+				 label = lt->count() >= 2 ?
+								 qobject_cast<QLabel *>(lt->itemAt(0)->widget()) : nullptr;
+
+				 if(lt->count() < 2 || !label ||
+						label->buddy() || label->text().isEmpty())
+					 continue;
+
+				 lt->setSpacing(GuiUtilsNs::LtSpacing / 2);
+				 configureWidgetBuddyLabel(label, lt->itemAt(1)->widget());
+			}
 		}
 	}
 

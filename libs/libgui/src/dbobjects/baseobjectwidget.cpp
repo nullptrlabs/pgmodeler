@@ -540,6 +540,53 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget)
 	});
 }
 
+void BaseObjectWidget::configureTabbedLayout()
+{
+	QLayout *curr_layout = layout();
+	bool is_hbox = qobject_cast<QHBoxLayout *>(curr_layout) != nullptr,
+			 is_vbox = qobject_cast<QVBoxLayout *>(curr_layout) != nullptr;
+
+	if(!is_hbox && !is_vbox)
+	{
+		qDebug().noquote() << "BaseObjectWidget::configureTabbedLayout(): The widget's layout must be QHBoxLayout or QVBoxLayout.";
+		return;
+	}
+
+	QLayout *new_layout = nullptr;
+	QLayoutItem *item = nullptr;
+	QTabWidget *attribs_tbw = nullptr;
+
+	if(is_hbox)
+		new_layout = new QHBoxLayout;
+	else
+		new_layout = new QVBoxLayout;
+
+	new_layout->setContentsMargins(curr_layout->contentsMargins());
+	new_layout->setSpacing(curr_layout->spacing());
+	new_layout->setObjectName(curr_layout->objectName());
+
+	/* Moving all items from the current widget's layout
+	 * to the new layout */
+	while(!curr_layout->isEmpty())
+	{
+		item = curr_layout->takeAt(0);
+
+		if(item)
+			new_layout->addItem(item);
+	}
+
+	/* We have to delete the current layout to be able
+	 * to reconfigure the widget's layout */
+	delete curr_layout;
+
+	// Adding the new layout in the middle space in extra_wgts_lt
+	extra_wgts_lt->addLayout(new_layout);
+
+	// Create a default tab widget and configure a tabbed layout in it
+	attribs_tbw = GuiUtilsNs::createWidgetInParent<QTabWidget>(GuiUtilsNs::LtMargin, this);
+	configureTabbedLayout(attribs_tbw);
+}
+
 void BaseObjectWidget::configureFormFields(ObjectType obj_type, bool inst_ev_filter)
 {
 	disable_sql_chk->setVisible(obj_type!=ObjectType::BaseObject && obj_type!=ObjectType::Permission &&
