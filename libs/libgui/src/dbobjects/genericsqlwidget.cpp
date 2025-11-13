@@ -24,7 +24,6 @@ GenericSQLWidget::GenericSQLWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	std::vector<ObjectType> types;
 
 	Ui_GenericSQLWidget::setupUi(this);
-	configureFormLayout(genericsql_grid, ObjectType::GenericSql);
 
 	// Configuring the object types accepted by object references
 	types = BaseObject::getObjectTypes(false, { ObjectType::Database, ObjectType::GenericSql,
@@ -37,25 +36,27 @@ GenericSQLWidget::GenericSQLWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	vbox->addWidget(obj_refs_wgt);
 	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 
-	definition_txt = GuiUtilsNs::createNumberedTextEditor(attribs_tbw->widget(0), true);
+	definition_txt = GuiUtilsNs::createNumberedTextEditor(this, true);
 	definition_hl = new SyntaxHighlighter(definition_txt);
 	definition_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
-	definition_cp=new CodeCompletionWidget(definition_txt, true);
+	definition_cp = new CodeCompletionWidget(definition_txt, true);
+	extra_wgts_lt->addWidget(definition_txt);
 
 	comment_edt->setVisible(false);
 	comment_lbl->setVisible(false);
 
-	preview_txt = GuiUtilsNs::createNumberedTextEditor(attribs_tbw->widget(2), false);
+	preview_txt = GuiUtilsNs::createNumberedTextEditor(this/*attribs_tbw->widget(1)*/, false);
 	preview_txt->setReadOnly(true);
 	preview_hl = new SyntaxHighlighter(preview_txt);
 	preview_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
-	attribs_tbw->widget(0)->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
-	attribs_tbw->widget(0)->layout()->addWidget(definition_txt);
+	/* attribs_tbw->widget(0)->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
+	attribs_tbw->widget(0)->layout()->addWidget(definition_txt); */
 
-	attribs_tbw->widget(2)->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
-	attribs_tbw->widget(2)->layout()->addWidget(preview_txt);
+	//attribs_tbw->widget(1)->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
+	//attribs_tbw->widget(1)->layout()->addWidget(preview_txt);
 
+	configureTabbedLayout(attribs_tbw);
 	setMinimumSize(700, 500);
 
 	connect(attribs_tbw, &QTabWidget::currentChanged, this, [this](int idx){

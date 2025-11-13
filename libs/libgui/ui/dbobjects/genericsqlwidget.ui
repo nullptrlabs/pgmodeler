@@ -13,7 +13,10 @@
   <property name="windowTitle">
    <string/>
   </property>
-  <layout class="QGridLayout" name="genericsql_grid">
+  <layout class="QVBoxLayout" name="generic_sql_lt">
+   <property name="spacing">
+    <number>5</number>
+   </property>
    <property name="leftMargin">
     <number>5</number>
    </property>
@@ -26,10 +29,7 @@
    <property name="bottomMargin">
     <number>5</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="0" column="0">
+   <item>
     <widget class="QTabWidget" name="attribs_tbw">
      <property name="currentIndex">
       <number>0</number>
@@ -40,15 +40,6 @@
        <height>22</height>
       </size>
      </property>
-     <widget class="QWidget" name="tab">
-      <attribute name="icon">
-       <iconset resource="../../res/resources.qrc">
-        <normaloff>:/icons/icons/sqlcode.png</normaloff>:/icons/icons/sqlcode.png</iconset>
-      </attribute>
-      <attribute name="title">
-       <string>S&amp;QL code</string>
-      </attribute>
-     </widget>
      <widget class="QWidget" name="references_tab">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
@@ -58,7 +49,7 @@
        <string>&amp;References</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="tab_3">
+     <widget class="QWidget" name="preview_tab">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/sqlpreview.png</normaloff>:/icons/icons/sqlpreview.png</iconset>
@@ -72,7 +63,6 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>
