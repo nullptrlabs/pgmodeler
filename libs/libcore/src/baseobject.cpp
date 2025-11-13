@@ -124,6 +124,7 @@ BaseObject::BaseObject()
 	attributes[Attributes::Drop]="";
 	attributes[Attributes::Signature]="";
 	attributes[Attributes::EscapeComment]="";
+	attributes[Attributes::ObjectType]="";
 	this->setName(qApp->translate("BaseObject","new_object","", -1));
 }
 
@@ -824,6 +825,8 @@ void BaseObject::setBasicAttributes(bool format_name)
 
 	if(attributes[Attributes::SqlObject].isEmpty())
 		attributes[Attributes::SqlObject] = objs_sql[enum_t(this->obj_type)];
+
+	attributes[Attributes::ObjectType] = getSchemaName();
 }
 
 QString BaseObject::__getSourceCode(SchemaParser::CodeType def_type)
@@ -835,50 +838,50 @@ QString BaseObject::getSourceCode(SchemaParser::CodeType def_type, bool reduced_
 {
 	QString code_def;
 
-	if((def_type==SchemaParser::SqlCode &&
-		obj_type!=ObjectType::BaseObject && obj_type!=ObjectType::BaseRelationship &&
-		obj_type!=ObjectType::BaseTable && obj_type!=ObjectType::Textbox) ||
+	if((def_type == SchemaParser::SqlCode &&
+			obj_type != ObjectType::BaseObject && obj_type != ObjectType::BaseRelationship &&
+			obj_type != ObjectType::BaseTable && obj_type != ObjectType::Textbox) ||
 
-			(def_type==SchemaParser::XmlCode &&
-			 obj_type!=ObjectType::BaseObject && obj_type!=ObjectType::BaseTable))
+			(def_type == SchemaParser::XmlCode &&
+			 obj_type != ObjectType::BaseObject && obj_type != ObjectType::BaseTable))
 	{
-		bool format=false;
+		bool format = false;
 
 		schparser.setPgSQLVersion(BaseObject::pgsql_ver, ignore_db_version);
-		attributes[Attributes::SqlDisabled]=(sql_disabled ? Attributes::True : "");
+		attributes[Attributes::SqlDisabled] = (sql_disabled ? Attributes::True : "");
 
 		//Formats the object's name in case the SQL definition is being generated
-		format=((def_type==SchemaParser::SqlCode) ||
-				(def_type==SchemaParser::XmlCode && reduced_form &&
-				 obj_type!=ObjectType::Textbox && obj_type!=ObjectType::Relationship));
+		format=((def_type == SchemaParser::SqlCode) ||
+						(def_type == SchemaParser::XmlCode && reduced_form &&
+						 obj_type != ObjectType::Textbox && obj_type != ObjectType::Relationship));
 
 		setBasicAttributes(format);
 
 		if(schema)
 		{
-			if(def_type==SchemaParser::XmlCode)
-				attributes[Attributes::Schema]=schema->getSourceCode(def_type, true);
+			if(def_type == SchemaParser::XmlCode)
+				attributes[Attributes::Schema] = schema->getSourceCode(def_type, true);
 			else
-				attributes[Attributes::Schema]=schema->getName(format);
+				attributes[Attributes::Schema] = schema->getName(format);
 		}
 
-		if(def_type==SchemaParser::XmlCode)
-			attributes[Attributes::Protected]=(is_protected ? Attributes::True : "");
+		if(def_type == SchemaParser::XmlCode)
+			attributes[Attributes::Protected] = (is_protected ? Attributes::True : "");
 
 		if(tablespace)
 		{
-			if(def_type==SchemaParser::SqlCode)
-				attributes[Attributes::Tablespace]=tablespace->getName(format);
+			if(def_type == SchemaParser::SqlCode)
+				attributes[Attributes::Tablespace] = tablespace->getName(format);
 			else
-				attributes[Attributes::Tablespace]=tablespace->getSourceCode(def_type, true);
+				attributes[Attributes::Tablespace] = tablespace->getSourceCode(def_type, true);
 		}
 
 		if(collation && attributes[Attributes::Collation].isEmpty())
 		{
-			if(def_type==SchemaParser::SqlCode)
-				attributes[Attributes::Collation]=collation->getName(format);
+			if(def_type == SchemaParser::SqlCode)
+				attributes[Attributes::Collation] = collation->getName(format);
 			else
-				attributes[Attributes::Collation]=collation->getSourceCode(def_type, true);
+				attributes[Attributes::Collation] = collation->getSourceCode(def_type, true);
 		}
 
 		if(owner)
@@ -888,33 +891,34 @@ QString BaseObject::getSourceCode(SchemaParser::CodeType def_type, bool reduced_
 				attributes[Attributes::Owner] = owner->getName(format);
 
 				/* Only tablespaces, database and user mapping do not have an ALTER OWNER SET
-				 because the rule says that PostgreSQL tablespaces and database should be created
-				 with just a command line isolated from the others */
+				 * because the rule says that PostgreSQL tablespaces and database should be created
+				 * with just a command line isolated from the others */
 				if(obj_type != ObjectType::Tablespace && obj_type != ObjectType::Database && obj_type != ObjectType::UserMapping)
 				{
 					SchemaParser sch_parser;
-					QString filename=GlobalAttributes::getSchemaFilePath(GlobalAttributes::AlterSchemaDir, Attributes::Owner);
+					QString filename = GlobalAttributes::getSchemaFilePath(GlobalAttributes::AlterSchemaDir, Attributes::Owner);
 
 					sch_parser.ignoreUnkownAttributes(true);
-					attributes[Attributes::Owner]=sch_parser.getSourceCode(filename, attributes);
+					attributes[Attributes::Owner] = sch_parser.getSourceCode(filename, attributes);
 				}
 			}
 			else
-				attributes[Attributes::Owner]=owner->getSourceCode(def_type, true);
+				attributes[Attributes::Owner] = owner->getSourceCode(def_type, true);
 		}
 
 		if(!comment.isEmpty())
 		{
-			if(def_type==SchemaParser::SqlCode)
+			if(def_type == SchemaParser::SqlCode)
 			{
 				QString escape_comm = getEscapedComment(escape_comments);
-				attributes[Attributes::EscapeComment]=escape_comments ? Attributes::True : "";
-				attributes[Attributes::Comment]=escape_comm;
+				attributes[Attributes::EscapeComment] = escape_comments ? Attributes::True : "";
+				attributes[Attributes::Comment] = escape_comm;
 			}
 			else
-				attributes[Attributes::Comment]=comment;
+				attributes[Attributes::Comment] = comment;
 
 			schparser.ignoreUnkownAttributes(true);
+			schparser.ignoreEmptyAttributes(true);
 
 			attributes[Attributes::Comment]=
 					schparser.getSourceCode(Attributes::Comment, attributes, def_type);
@@ -922,9 +926,9 @@ QString BaseObject::getSourceCode(SchemaParser::CodeType def_type, bool reduced_
 
 		if(!appended_sql.isEmpty())
 		{
-			attributes[Attributes::AppendedSql]=appended_sql;
+			attributes[Attributes::AppendedSql] = appended_sql;
 
-			if(def_type==SchemaParser::XmlCode)
+			if(def_type == SchemaParser::XmlCode)
 			{
 				schparser.ignoreUnkownAttributes(true);
 				attributes[Attributes::AppendedSql]=
@@ -938,9 +942,9 @@ QString BaseObject::getSourceCode(SchemaParser::CodeType def_type, bool reduced_
 
 		if(!prepended_sql.isEmpty())
 		{
-			attributes[Attributes::PrependedSql]=prepended_sql;
+			attributes[Attributes::PrependedSql] = prepended_sql;
 
-			if(def_type==SchemaParser::XmlCode)
+			if(def_type == SchemaParser::XmlCode)
 			{
 				schparser.ignoreUnkownAttributes(true);
 				attributes[Attributes::PrependedSql]=
@@ -952,13 +956,13 @@ QString BaseObject::getSourceCode(SchemaParser::CodeType def_type, bool reduced_
 			}
 		}
 
-		if(def_type==SchemaParser::SqlCode && this->acceptsDropCommand())
+		if(def_type == SchemaParser::SqlCode && this->acceptsDropCommand())
 		{
-			attributes[Attributes::Drop]=getDropCode(true);
+			attributes[Attributes::Drop] = getDropCode(true);
 			attributes[Attributes::Drop].remove(Attributes::DdlEndToken + '\n');
 		}
 
-		attributes[Attributes::ReducedForm]=(reduced_form ? Attributes::True : "");
+		attributes[Attributes::ReducedForm] = (reduced_form ? Attributes::True : "");
 
 		try
 		{
@@ -1018,16 +1022,8 @@ void BaseObject::setAttribute(const QString &attrib, const QString &value)
 
 void BaseObject::clearAttributes()
 {
-	attribs_map::iterator itr, itr_end;
-
-	itr=attributes.begin();
-	itr_end=attributes.end();
-
-	while(itr!=itr_end)
-	{
-		itr->second="";
-		itr++;
-	}
+	for(auto &[attr_name, attr_val] : attributes)
+		attr_val.clear();
 }
 
 void BaseObject::swapObjectsIds(BaseObject *obj1, BaseObject *obj2, bool enable_cl_obj_swap)

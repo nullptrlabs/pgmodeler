@@ -40,22 +40,22 @@
        <height>22</height>
       </size>
      </property>
+     <widget class="QWidget" name="definition_tab">
+      <attribute name="icon">
+       <iconset resource="../../res/resources.qrc">
+        <normaloff>:/icons/icons/sourcecode.png</normaloff>:/icons/icons/sourcecode.png</iconset>
+      </attribute>
+      <attribute name="title">
+       <string>Definition</string>
+      </attribute>
+     </widget>
      <widget class="QWidget" name="references_tab">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/reference.png</normaloff>:/icons/icons/reference.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;References</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="preview_tab">
-      <attribute name="icon">
-       <iconset resource="../../res/resources.qrc">
-        <normaloff>:/icons/icons/sqlpreview.png</normaloff>:/icons/icons/sqlpreview.png</iconset>
-      </attribute>
-      <attribute name="title">
-       <string>&amp;Preview</string>
+       <string>References</string>
       </attribute>
      </widget>
     </widget>
