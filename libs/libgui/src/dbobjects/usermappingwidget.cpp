@@ -38,7 +38,7 @@ UserMappingWidget::UserMappingWidget(QWidget *parent): BaseObjectWidget(parent, 
 	setRequiredField(server_sel);
 	setRequiredField(server_lbl);
 
-	configureTabbedLayout();
+	configureTabbedLayout(false);
 	configureTabOrder({ server_sel, options_tab });
 
 	setMinimumSize(550, 400);

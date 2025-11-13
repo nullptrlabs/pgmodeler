@@ -116,6 +116,10 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 
 		//! \brief Object selectors for schema, owner, tablespace and collation
 		ObjectAssociationsWidget *obj_assoc_wgt;
+
+		/*! \brief Holds the reference to the SQL preview tab when in tabbed layout
+		 *  This attribute is nullptr for objects that don't generate SQL code */
+		QWidget *sql_preview_pg;
 		
 		/*! \brief Merges the specified layout with the 'baseobject_grid' creating a single form.
 		 * The obj_type parameter must be specified to show the object type icon */
@@ -174,7 +178,7 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		/*! \brief Configures a tabbed layout from a simple QHBoxLayout-ed
 		 *  or a QVBoxLayout-ed widget. This method creates a QTabWidget instance and
 		 *  move all widgets/sublayouts of the orignal widget's layout to the "General" page. */
-		void configureTabbedLayout();
+		void configureTabbedLayout(bool create_attr_page, const QString &attr_pg_name = "", const QString &attr_pg_icon = "");
 
 		/*! \brief Configures the state of commom fields related to database objects enabling/disabling/hidding
 		 * according to the object type. The parameter inst_ev_filter indicates if the special event filter

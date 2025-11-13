@@ -17,27 +17,25 @@
 */
 
 #include "textboxwidget.h"
-#include <QColorDialog>
 
 TextboxWidget::TextboxWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Textbox)
 {
 	Ui_TextboxWidget::setupUi(this);
-	configureFormLayout(textbox_grid, ObjectType::Textbox);
 
 	text_txt->removeEventFilter(this);
-	connect(color_select_tb, &QToolButton::clicked, this, &TextboxWidget::selectTextColor);
 
-	setMinimumSize(500, 200);
+	text_color_cp = new ColorPickerWidget(1, this);
+	text_color_lt->addWidget(text_color_cp);
+
+	configureTabbedLayout(false);
+	setMinimumSize(550, 350);
 }
 
 void TextboxWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Textbox *txtbox, double obj_px, double obj_py)
 {
 	if(txtbox)
 	{
-		QPalette palette;
-		palette.setColor(QPalette::Button, txtbox->getTextColor());
-		color_select_tb->setPalette(palette);
-
+		text_color_cp->setColor(0, txtbox->getTextColor());
 		text_txt->setPlainText(txtbox->getComment());
 		bold_chk->setChecked(txtbox->getTextAttribute(Textbox::BoldText));
 		italic_chk->setChecked(txtbox->getTextAttribute(Textbox::ItalicText));
@@ -46,22 +44,6 @@ void TextboxWidget::setAttributes(DatabaseModel *model, OperationList *op_list, 
 	}
 
 	BaseObjectWidget::setAttributes(model, op_list, txtbox, nullptr, obj_px, obj_py);
-}
-
-void TextboxWidget::selectTextColor()
-{
-	QColorDialog color_dlg;
-	QPalette palette;
-
-	color_dlg.setWindowTitle(tr("Select text color"));
-	color_dlg.setCurrentColor(color_select_tb->palette().color(QPalette::Button));
-	color_dlg.exec();
-
-	if(color_dlg.result()==QDialog::Accepted)
-	{
-		palette.setColor(QPalette::Button, color_dlg.selectedColor());
-		color_select_tb->setPalette(palette);
-	}
 }
 
 void TextboxWidget::applyConfiguration()
@@ -77,7 +59,7 @@ void TextboxWidget::applyConfiguration()
 		txtbox->setTextAttribute(Textbox::ItalicText, italic_chk->isChecked());
 		txtbox->setTextAttribute(Textbox::BoldText, bold_chk->isChecked());
 		txtbox->setTextAttribute(Textbox::UnderlineText, underline_chk->isChecked());
-		txtbox->setTextColor(color_select_tb->palette().color(QPalette::Button));
+		txtbox->setTextColor(text_color_cp->getColor(0));
 		txtbox->setFontSize(font_size_sb->value());
 
 		if(txtbox->getTextWidth() <= 0)

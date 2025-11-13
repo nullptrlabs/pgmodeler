@@ -27,17 +27,18 @@
 
 #include "ui_textboxwidget.h"
 #include "baseobjectwidget.h"
+#include "colorpickerwidget.h"
 
 class __libgui TextboxWidget: public BaseObjectWidget, public Ui::TextboxWidget {
 	Q_OBJECT
+
+	private:
+		ColorPickerWidget *text_color_cp;
 
 	public:
 		TextboxWidget(QWidget * parent = nullptr);
 
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Textbox *txtbox=nullptr, double obj_px=DNaN, double obj_py=DNaN);
-
-	private slots:
-		void selectTextColor();
 
 	public slots:
 		void applyConfiguration() override;

@@ -28,7 +28,7 @@ TablespaceWidget::TablespaceWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	directory_lt->addWidget(directory_lbl);
 	directory_lt->addWidget(directory_sel);
 
-	configureTabbedLayout();
+	configureTabbedLayout(false);
 	setRequiredField(directory_lbl);
 	setRequiredField(directory_sel);
 	configureTabOrder();

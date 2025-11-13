@@ -21,22 +21,28 @@
 TagWidget::TagWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Tag)
 {
 	Ui_TagWidget::setupUi(this);
-	configureFormLayout(tag_grid, ObjectType::Tag);
 
-	unsigned color_count=1;
-	int row=0;
+	unsigned color_count = 1;
+	int row = 0;
+
+	std::map<QString, QBoxLayout *> layouts {
+		{ Attributes::TableName, tab_name_lt }, { Attributes::TableSchemaName, sch_name_lt },
+		{ Attributes::TableTitle, title_lt }, { Attributes::TableBody, body_lt },
+		{ Attributes::TableExtBody, extbody_lt }, { Attributes::TableTogglerButtons, toggler_btns_lt },
+		{ Attributes::TableTogglerBody, toggler_body_lt }
+	};
 
 	for(auto &attr : Tag::getColorAttributes())
 	{
-		if(color_count==1 && attr!=Attributes::TableName && attr!=Attributes::TableSchemaName)
-			color_count=3;
+		if(color_count == 1 && attr != Attributes::TableName && attr != Attributes::TableSchemaName)
+			color_count = 3;
 
-		color_pickers[attr]=new ColorPickerWidget(color_count, this);
-		colors_grid->addWidget(color_pickers[attr], row, 1);
-		colors_grid->addItem(new QSpacerItem(10,10, QSizePolicy::Expanding, QSizePolicy::Fixed), row, 2);
+		color_pickers[attr] = new ColorPickerWidget(color_count, this);
+		layouts[attr]->addWidget(color_pickers[attr]);
 		row++;
 	}
 
+	configureTabbedLayout(true, tr("Colors"), "appearance");
 	setMinimumSize(450, 280);
 }
 

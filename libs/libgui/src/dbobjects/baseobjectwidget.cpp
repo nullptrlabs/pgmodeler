@@ -50,6 +50,7 @@ BaseObjectWidget::BaseObjectWidget(QWidget *parent, ObjectType obj_type): QWidge
 	owner_sel = nullptr;
 	tablespace_sel = nullptr;
 	obj_assoc_wgt = nullptr;
+	sql_preview_pg = nullptr;
 	object_protected = false;
 
 	connect(edt_perms_tb, &QPushButton::clicked, this, &BaseObjectWidget::editPermissions);
@@ -507,40 +508,47 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget)
 	tab_widget->insertTab(0, page, GuiUtilsNs::getIcon("objects"), tr("General"));
 	tab_widget->setCurrentIndex(0);
 
-	// Dependencies and references page
-	obj_assoc_wgt = new ObjectAssociationsWidget(tab_widget);
-	obj_assoc_wgt->setObjectName("obj_assoc_tab");
-	obj_assoc_wgt->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
-	tab_widget->addTab(obj_assoc_wgt, GuiUtilsNs::getIcon("associations"), tr("Associations"));
-
-	// Source code preview page
-	page =  new QWidget(tab_widget);
-	page->setObjectName("sql_preview_tab");
-	tab_widget->addTab(page, GuiUtilsNs::getIcon("sqlpreview"), tr("SQL preview"));
-	NumberedTextEditor *source_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin, page, false);
-	source_txt->setReadOnly(true);
-
-	try
+	if(handled_obj_type != ObjectType::Textbox)
 	{
-		SyntaxHighlighter *source_hl = new SyntaxHighlighter(source_txt);
-		source_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
+		// Dependencies and references page
+		obj_assoc_wgt = new ObjectAssociationsWidget(tab_widget);
+		obj_assoc_wgt->setObjectName("obj_assoc_tab");
+		obj_assoc_wgt->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
+		tab_widget->addTab(obj_assoc_wgt, GuiUtilsNs::getIcon("associations"), tr("Associations"));
 	}
-	catch(Exception &e)
+
+	if(handled_obj_type != ObjectType::Tag &&
+		 handled_obj_type != ObjectType::Textbox)
 	{
-		source_txt->setPlainText(tr("** Failed to load the syntax highlight configuration! ** \n\n %1").arg(e.getExceptionsText()));
+		// Source code preview page
+		sql_preview_pg =  new QWidget(tab_widget);
+		page->setObjectName("sql_preview_tab");
+		tab_widget->addTab(page, GuiUtilsNs::getIcon("sqlpreview"), tr("SQL preview"));
+		NumberedTextEditor *source_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin, page, false);
+		source_txt->setReadOnly(true);
+
+		try
+		{
+			SyntaxHighlighter *source_hl = new SyntaxHighlighter(source_txt);
+			source_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
+		}
+		catch(Exception &e)
+		{
+			source_txt->setPlainText(tr("** Failed to load the syntax highlight configuration! ** \n\n %1").arg(e.getExceptionsText()));
+		}
+
+		// Connecting the signal to handle source code preview
+		connect(tab_widget, &QTabWidget::currentChanged, this, [this, source_txt, tab_widget](int){
+			if(sql_preview_pg && tab_widget->currentWidget() == sql_preview_pg)
+				source_txt->setPlainText(getSQLCodePreview());
+		});
 	}
 
 	configureFormFields(handled_obj_type);
 	GuiUtilsNs::configureWidgetsBuddyLabels(tab_widget);
-
-	// Connecting the signal to handle source code preview
-	connect(tab_widget, &QTabWidget::currentChanged, this, [this, source_txt, tab_widget](int tab_idx){
-		if(tab_idx == tab_widget->count() - 1)
-			source_txt->setPlainText(getSQLCodePreview());
-	});
 }
 
-void BaseObjectWidget::configureTabbedLayout()
+void BaseObjectWidget::configureTabbedLayout(bool create_attr_page, const QString &attr_pg_name, const QString &attr_pg_icon)
 {
 	QLayout *curr_layout = layout();
 	bool is_hbox = qobject_cast<QHBoxLayout *>(curr_layout) != nullptr,
@@ -579,11 +587,23 @@ void BaseObjectWidget::configureTabbedLayout()
 	 * to reconfigure the widget's layout */
 	delete curr_layout;
 
-	// Adding the new layout in the middle space in extra_wgts_lt
-	extra_wgts_lt->addLayout(new_layout);
-
 	// Create a default tab widget and configure a tabbed layout in it
 	attribs_tbw = GuiUtilsNs::createWidgetInParent<QTabWidget>(GuiUtilsNs::LtMargin, this);
+
+	if(create_attr_page)
+	{
+		QWidget *attr_page = new QWidget(this);
+		attr_page->setLayout(new_layout);
+		attribs_tbw->addTab(attr_page,
+												attr_pg_icon.isEmpty() ? GuiUtilsNs::getIcon("attribute") : GuiUtilsNs::getIcon(attr_pg_icon),
+												attr_pg_name.isEmpty() ? tr("Attributes") : attr_pg_name);
+	}
+	else
+	{
+		// Adding the new layout in the middle space in extra_wgts_lt
+		extra_wgts_lt->addLayout(new_layout);
+	}
+
 	configureTabbedLayout(attribs_tbw);
 }
 

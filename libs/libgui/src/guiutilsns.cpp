@@ -971,6 +971,7 @@ namespace GuiUtilsNs {
 		QList<QBoxLayout *> layouts;
 		QLayoutItem *item = nullptr;
 		QBoxLayout *box_lt = nullptr;
+		QGridLayout *grid_lt = nullptr;
 		int item_cnt = 0;
 
 		for(auto &layout : widget->findChildren<QBoxLayout *>())
@@ -986,9 +987,15 @@ namespace GuiUtilsNs {
 			{
 				item = layout->itemAt(idx);
 				box_lt = qobject_cast<QBoxLayout *>(item->layout());
+				grid_lt = qobject_cast<QGridLayout *>(item->layout());
 
 				if(box_lt)
+				{
 					layouts.append(box_lt);
+					layouts.append(box_lt->findChildren<QBoxLayout *>());
+				}
+				else if(grid_lt)
+					layouts.append(grid_lt->findChildren<QBoxLayout *>());
 			}
 
 			for(auto &lt : layouts)
