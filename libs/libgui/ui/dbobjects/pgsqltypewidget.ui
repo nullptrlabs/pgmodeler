@@ -98,12 +98,6 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="minimumSize">
-             <size>
-              <width>55</width>
-              <height>0</height>
-             </size>
-            </property>
             <property name="maximumSize">
              <size>
               <width>16777215</width>
@@ -223,12 +217,6 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="minimumSize">
-               <size>
-                <width>60</width>
-                <height>0</height>
-               </size>
-              </property>
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
@@ -288,12 +276,6 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>60</width>
-                <height>0</height>
-               </size>
               </property>
               <property name="maximumSize">
                <size>
@@ -357,12 +339,6 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>40</width>
-                <height>0</height>
-               </size>
               </property>
               <property name="maximumSize">
                <size>
@@ -712,21 +688,6 @@
        </layout>
       </item>
      </layout>
-     <zorder>type_lbl</zorder>
-     <zorder>type_cmb</zorder>
-     <zorder>interval_lbl</zorder>
-     <zorder>spatial_lbl</zorder>
-     <zorder>format_lbl</zorder>
-     <zorder>format_txt</zorder>
-     <zorder>interval_cmb</zorder>
-     <zorder>dimension_sb</zorder>
-     <zorder>dimension_lbl</zorder>
-     <zorder>precision_sb</zorder>
-     <zorder>precision_lbl</zorder>
-     <zorder>length_sb</zorder>
-     <zorder>length_lbl</zorder>
-     <zorder>spatial_cmb</zorder>
-     <zorder>horizontalSpacer</zorder>
     </widget>
    </item>
   </layout>

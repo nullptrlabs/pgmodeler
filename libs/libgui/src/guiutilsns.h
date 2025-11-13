@@ -55,6 +55,8 @@ namespace GuiUtilsNs {
 		AllCorners = 31
 	};
 
+	static constexpr char FontAdjustedProp[] { "font-adjusted" };
+
 	static constexpr int LtMargin = 5,
 	LtSpacing = 5;
 

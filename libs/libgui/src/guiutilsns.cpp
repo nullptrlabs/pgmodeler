@@ -958,15 +958,8 @@ namespace GuiUtilsNs {
 			return;
 
 		label->setBuddy(widget);
+		label->setProperty(FontAdjustedProp, true);
 		configureWidgetFont(label, SmallFontFactor, true);
-	}
-
-	void configureWidgetsBuddyLabels(QBoxLayout *layout)
-	{
-		if(!layout)
-			return;
-
-
 	}
 
 	void configureWidgetsBuddyLabels(QWidget *widget)
@@ -1008,11 +1001,11 @@ namespace GuiUtilsNs {
 				 label = lt->count() >= 2 ?
 								 qobject_cast<QLabel *>(lt->itemAt(0)->widget()) : nullptr;
 
-				 if(lt->count() < 2 || !label ||
-						label->buddy() || label->text().isEmpty())
+				 if(lt->count() < 2 || !label || label->text().isEmpty() ||
+						label->property(FontAdjustedProp).toBool())
 					 continue;
 
-				 lt->setSpacing(GuiUtilsNs::LtSpacing / 2);
+				 lt->setSpacing(LtSpacing / 2);
 				 configureWidgetBuddyLabel(label, lt->itemAt(1)->widget());
 			}
 		}

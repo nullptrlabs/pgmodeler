@@ -17,7 +17,6 @@
 */
 
 #include "pgsqltypewidget.h"
-#include "guiutilsns.h"
 #include <QCompleter>
 
 const QString PgSQLTypeWidget::InvalidType {"invalid_type"};
@@ -94,8 +93,8 @@ void PgSQLTypeWidget::updateTypeFormat()
 		dimension_sb->setEnabled(type != "void");
 
 		interval_cmb->setVisible(type == "interval");
-		interval_lbl->setVisible(interval_cmb->isVisible());
-		interval_cmb->setEnabled(allow_qualifiers);
+		interval_lbl->setVisible(allow_qualifiers && interval_cmb->isVisible());
+		interval_cmb->setVisible(allow_qualifiers && interval_cmb->isVisible());
 
 		spatial_cmb->setEnabled(allow_qualifiers);
 		spatial_cmb->setVisible(type.isPostGisGeoType());
@@ -182,10 +181,7 @@ void PgSQLTypeWidget::setAttributes(PgSqlType type, DatabaseModel *model, bool a
 		QString type_name;
 
 		this->allow_qualifiers = allow_qualifiers;
-
-		//type_cmb->blockSignals(true);
 		listPgSQLTypes(type_cmb, model, usr_type_conf, oid_types, pseudo_types);
-		//type_cmb->blockSignals(false);
 
 		//Get the passed type index
 		type_name=~type;
