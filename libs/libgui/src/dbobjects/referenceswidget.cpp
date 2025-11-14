@@ -31,12 +31,12 @@ ReferencesWidget::ReferencesWidget(const std::vector<ObjectType> &types, bool co
 
 	object_sel = new ObjectSelectorWidget(types, this);
 	references_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
-																								 CustomTableWidget::DuplicateButton, true, this);
+																				 CustomTableWidget::DuplicateButton, true, this);
 
 	this->conf_view_refs = conf_view_refs;
 
-	references_grid->addWidget(object_sel, 0, 1, 1, 1);
-	references_grid->addWidget(references_tab, 3, 0, 1, 2);
+	object_lt->addWidget(object_sel);
+	references_lt->addWidget(references_tab);
 
 	references_tab->setColumnCount(conf_view_refs ? 7 : 6);
 
@@ -58,11 +58,6 @@ ReferencesWidget::ReferencesWidget(const std::vector<ObjectType> &types, bool co
 		references_tab->setHeaderLabel(tr("Use column(s)"), 6);
 
 	use_columns_chk->setVisible(conf_view_refs);
-
-	connect(object_sel, &ObjectSelectorWidget::s_selectorChanged, this, [this](bool selected){
-		sel_obj_icon_lbl->setPixmap(selected ? GuiUtilsNs::getIconPath(object_sel->getSelectedObject()->getSchemaName()) : QPixmap());
-		sel_obj_icon_lbl->setToolTip(selected ? object_sel->getSelectedObject()->getTypeName() : "");
-	});
 
 	connect(references_tab, &CustomTableWidget::s_rowAdded, this, &ReferencesWidget::handleReference);
 	connect(references_tab, &CustomTableWidget::s_rowEdited, this, &ReferencesWidget::editReference);
