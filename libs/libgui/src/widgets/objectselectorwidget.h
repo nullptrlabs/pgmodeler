@@ -72,6 +72,12 @@ class __libgui ObjectSelectorWidget: public QWidget, public Ui::ObjectSelectorWi
 		//! \brief Defines the model which the selector will search the objects
 		void setModel(DatabaseModel *model);
 
+		/*! \brief Defines the selector as readonly, hiding the clear and object browse buttons
+		 *  Also, disables the event filter over the object name input to avoid displaying the
+		 *  object selection dialog. The method setSelectedObject still defines the object to
+		 *  be displayed, only user interactions in the UI are disabled. */
+		void setReadOnly(bool ro);
+
 	private slots:
 		void showSelectedObject(BaseObject *obj_sel, bool=false);
 

@@ -172,8 +172,9 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		/*! \brief Configures a form layout in tabbed way.
 		 *  The tab_widget is the QTabWidget instance that will hold
 		 *  all pages. By default, this method add three new pages in
-		 *  the tab widget: General (baseobject_grid), Associations and SQL preview. */
-		void configureTabbedLayout(QTabWidget *tab_widget);
+		 *  the tab widget: General (baseobject_grid), Associations and SQL preview.
+		 *  If create_general_pg is false then the general page is not created. */
+		void configureTabbedLayout(QTabWidget *tab_widget, bool create_general_pg = true);
 
 		/*! \brief Configures a tabbed layout from a simple QHBoxLayout-ed
 		 *  or a QVBoxLayout-ed widget. This method creates a QTabWidget instance and

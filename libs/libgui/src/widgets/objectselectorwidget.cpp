@@ -119,6 +119,17 @@ void ObjectSelectorWidget::setModel(DatabaseModel *model)
 	this->model = model;
 }
 
+void ObjectSelectorWidget::setReadOnly(bool ro)
+{
+	if(ro)
+		obj_name_edt->removeEventFilter(this);
+	else
+		obj_name_edt->installEventFilter(this);
+
+	rem_object_tb->setVisible(!ro);
+	sel_object_tb->setVisible(!ro);
+}
+
 void ObjectSelectorWidget::showSelectedObject(BaseObject *obj_sel, bool)
 {
 	if(obj_sel)

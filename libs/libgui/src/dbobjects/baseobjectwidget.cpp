@@ -495,18 +495,21 @@ void BaseObjectWidget::configureBaseLayout()
 	baseobject_grid->addLayout(misc_btns_lt, baseobject_grid->count(), 0, 1, 0);
 }
 
-void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget)
+void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget, bool create_general_pg)
 {
 	if(!tab_widget)
 		return;
 
-	// General/basics fields page
-	QWidget *page =  new QWidget(tab_widget);
-	page->setObjectName("baseobject_tab");
-	page->setLayout(baseobject_grid);
+	if(create_general_pg)
+	{
+		// General/basics fields page
+		QWidget *page =  new QWidget(tab_widget);
+		page->setObjectName("baseobject_tab");
+		page->setLayout(baseobject_grid);
 
-	tab_widget->insertTab(0, page, GuiUtilsNs::getIcon("objects"), tr("General"));
-	tab_widget->setCurrentIndex(0);
+		tab_widget->insertTab(0, page, GuiUtilsNs::getIcon("objects"), tr("General"));
+		tab_widget->setCurrentIndex(0);
+	}
 
 	if(handled_obj_type != ObjectType::Textbox)
 	{
@@ -522,7 +525,7 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget)
 	{
 		// Source code preview page
 		sql_preview_pg = new QWidget(tab_widget);
-		page->setObjectName("sql_preview_tab");
+		sql_preview_pg->setObjectName("sql_preview_tab");
 		tab_widget->addTab(sql_preview_pg, GuiUtilsNs::getIcon("sqlpreview"), tr("SQL preview"));
 		NumberedTextEditor *source_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin, sql_preview_pg, false);
 		source_txt->setReadOnly(true);

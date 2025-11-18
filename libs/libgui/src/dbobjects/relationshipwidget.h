@@ -45,7 +45,9 @@ class __libgui RelationshipWidget: public BaseObjectWidget, public Ui::Relations
 			AdvancedTab
 		};
 
-		ColorPickerWidget *color_picker;
+		ObjectSelectorWidget *ref_table_sel, *recv_table_sel;
+
+		ColorPickerWidget *custom_color_cl;
 
 		NumberedTextEditor *part_bound_expr_txt;
 
@@ -58,9 +60,7 @@ class __libgui RelationshipWidget: public BaseObjectWidget, public Ui::Relations
 		//! \brief Stores the original labels of the tabs
 		QStringList tab_labels;
 
-		SyntaxHighlighter *table1_hl,
-		*table2_hl,
-		*patterns_hl[8],
+		SyntaxHighlighter *patterns_hl[8],
 		*part_bound_expr_hl;
 
 		//! \brief Table widgets that stores the attributes, constraint and advanced objects of relationship
