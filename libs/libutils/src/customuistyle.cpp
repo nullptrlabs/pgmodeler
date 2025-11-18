@@ -273,6 +273,7 @@ void CustomUiStyle::drawCCGroupBox(ComplexControl control, const QStyleOptionCom
 
 	// Calculate title area if there's text
 	bool has_title = !group_box_opt->text.isEmpty();
+	int padding = 2; // 2px padding above and below title
 
 	if(has_title)
 	{
@@ -283,7 +284,6 @@ void CustomUiStyle::drawCCGroupBox(ComplexControl control, const QStyleOptionCom
 
 		QFontMetrics fm(title_font);
 		int text_height = fm.height();
-		int padding = 3; // 3px padding above and below title
 		int total_title_height = text_height + (2 * padding);
 
 		// Title takes the top portion including padding
@@ -318,8 +318,8 @@ void CustomUiStyle::drawCCGroupBox(ComplexControl control, const QStyleOptionCom
 		// Use state-aware text color
 		painter->setPen(getStateColor(QPalette::WindowText, group_box_opt));
 
-		// Draw the text in the title area with 3px padding (centered vertically)
-		title_rect.adjust(0, 3, 0, -3); // Apply 3px padding top/bottom
+		// Draw the text in the title area with 2px padding (centered vertically)
+		title_rect.adjust(0, padding, 0, -padding); // Apply 2px padding top/bottom
 		painter->drawText(title_rect,
 						group_box_opt->textAlignment | Qt::AlignVCenter,
 						group_box_opt->text);
@@ -1124,6 +1124,9 @@ void CustomUiStyle::drawPEHintFramePanel(PrimitiveElement element, const QStyleO
 		// For DefaultFrmHint we use the midlight color as background
 		if(hint == DefaultFrmHint)
 			bg_color = getStateColor(isDarkPalette() ? QPalette::Midlight : QPalette::Light, option);
+		// For AltDefFrmHint we use the same background as QGroupBox
+		else if(hint == AltDefaultFrmHint)
+			bg_color = getAdjustedColor(getStateColor(QPalette::Dark, option), XMinFactor, MinFactor);
 		else
 		{
 			if(isDarkPalette())
@@ -1177,6 +1180,9 @@ void CustomUiStyle::drawPEGenericElemFrame(PrimitiveElement element, const QStyl
 			// For DefaultFrmHint we use a standard border color based on theme
 			if(hint == DefaultFrmHint)
 				border_color = getStateColor(isDarkPalette() ? QPalette::Light : QPalette::Midlight, option);
+			// For AltDefFrmHint we use the same border color as QGroupBox
+			else if(hint == AltDefaultFrmHint)
+				border_color = getAdjustedColor(getStateColor(QPalette::Mid, option), XMinFactor, -XMinFactor);
 			else
 				// For other hints, use the custom color with slight adjustments
 				border_color = getAdjustedColor(widget->property(StyleHintColor).value<QColor>(), XMinFactor, -XMinFactor);
@@ -2141,8 +2147,10 @@ void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
 	frame->setProperty(StyleHintProp, static_cast<int>(hint));
 
 	QColor hint_color;
+	bool is_def_hint = (hint == DefaultFrmHint ||
+											hint == AltDefaultFrmHint);
 
-	if(hint != DefaultFrmHint)
+	if(!is_def_hint)
 		hint_color = frm_colors.at(hint);
 
 	frame->setProperty(StyleHintColor, hint_color);
@@ -2153,7 +2161,7 @@ void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
 	// For HLine/VLine frames, apply border color via stylesheet
 	if(shape == QFrame::HLine || shape == QFrame::VLine)
 	{
-		QString color_role = hint == DefaultFrmHint ? "light" : "midlight";
+		QString color_role = is_def_hint ? "light" : "midlight";
 		frame->setStyleSheet(QString("QFrame { border: %1px solid palette(%2); }")
 												 .arg(PenWidth)
 												 .arg(color_role));

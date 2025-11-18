@@ -18,6 +18,7 @@
 
 #include "referenceswidget.h"
 #include "guiutilsns.h"
+#include "customuistyle.h"
 
 const QRegularExpression ReferencesWidget::AttrDelimRegexp {
 	QString("(\\%1)+|(\\%2)+")
@@ -29,9 +30,14 @@ ReferencesWidget::ReferencesWidget(const std::vector<ObjectType> &types, bool co
 {
 	Ui_ReferencesWidget::setupUi(this);
 
+	CustomUiStyle::setStyleHint(CustomUiStyle::AltDefaultFrmHint, options_frm);
+
 	object_sel = new ObjectSelectorWidget(types, this);
 	references_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
 																				 CustomTableWidget::DuplicateButton, true, this);
+
+	ref_alias_edt->setMaximumHeight(object_sel->height());
+	ref_name_edt->setMaximumHeight(object_sel->height());
 
 	this->conf_view_refs = conf_view_refs;
 
