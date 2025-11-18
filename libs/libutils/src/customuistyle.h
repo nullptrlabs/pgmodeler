@@ -239,6 +239,7 @@ class __libutils CustomUiStyle : public QProxyStyle {
 		enum StyleHint {
 			NoHint,
 			DefaultFrmHint, // Default frame
+			AltDefaultFrmHint, // Alternate default frame (colors similar to QGroup)
 			InfoFrmHint, // Blueish border (informational)
 			ConfirmFrmHint, // Green border (confirmation)
 			AlertFrmHint, // Yellow border (alert)

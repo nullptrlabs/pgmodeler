@@ -13,8 +13,14 @@
 
 > $br
 
-%if {references} %then {references} %end
+%if {references} %then 
+	{references} 
+%end
 
 $tb <definition> $sp <! $ob CDATA $ob {definition} $cb $cb > $sp </definition> $br
+
+%if {comment} %then
+	{comment}
+%end
 
 </genericsql> $br $br
