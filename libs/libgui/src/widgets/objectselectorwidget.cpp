@@ -17,6 +17,7 @@
 */
 
 #include "objectselectorwidget.h"
+#include "guiutilsns.h"
 
 ObjectSelectorWidget::ObjectSelectorWidget(ObjectType sel_obj_type, QWidget *parent) : QWidget(parent)
 {
@@ -35,13 +36,14 @@ void ObjectSelectorWidget::configureSelector()
 	Ui_ObjectSelectorWidget::setupUi(this);
 	obj_view_wgt = new ModelObjectsWidget(true);
 
-	model=nullptr;
-	selected_obj=nullptr;
+	model = nullptr;
+	selected_obj = nullptr;
+	obj_icon_lbl->setVisible(false);
 
 	connect(sel_object_tb, &QToolButton::clicked, this, &ObjectSelectorWidget::showObjectView);
 	connect(rem_object_tb, &QToolButton::clicked, this, &ObjectSelectorWidget::clearSelector);
 	connect(obj_view_wgt, qOverload<BaseObject*, bool>(&ModelObjectsWidget::s_visibilityChanged),
-						 this, qOverload<BaseObject*, bool>(&ObjectSelectorWidget::showSelectedObject));
+					this, qOverload<BaseObject*, bool>(&ObjectSelectorWidget::showSelectedObject));
 
 	obj_name_edt->installEventFilter(this);
 }
@@ -83,12 +85,12 @@ void ObjectSelectorWidget::setSelectedObject(BaseObject *object)
 	ObjectType obj_type = ObjectType::BaseObject;
 
 	if(object)
-		obj_type=object->getObjectType();
+		obj_type = object->getObjectType();
 
 	if(object && std::find(sel_obj_types.begin(), sel_obj_types.end(),obj_type)!=sel_obj_types.end())
 	{
 		rem_object_tb->setEnabled(object);
-		this->selected_obj=object;
+		this->selected_obj = object;
 
 		if(obj_type != ObjectType::Constraint)
 		{
@@ -99,8 +101,11 @@ void ObjectSelectorWidget::setSelectedObject(BaseObject *object)
 		}
 		else
 			obj_name_edt->setText(QString("%1.%2")
-														.arg(dynamic_cast<TableObject *>(selected_obj)->getParentTable()->getSignature())
-														.arg(selected_obj->getName(true)));
+														.arg(dynamic_cast<TableObject *>(selected_obj)->getParentTable()->getSignature(),
+																 selected_obj->getName(true)));
+
+		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(object->getObjectType()));
+		obj_icon_lbl->setVisible(true);
 
 		emit s_objectSelected();
 		emit s_selectorChanged(true);
@@ -109,9 +114,9 @@ void ObjectSelectorWidget::setSelectedObject(BaseObject *object)
 		clearSelector();
 }
 
-void ObjectSelectorWidget::setModel(DatabaseModel *modelo)
+void ObjectSelectorWidget::setModel(DatabaseModel *model)
 {
-	this->model=modelo;
+	this->model = model;
 }
 
 void ObjectSelectorWidget::showSelectedObject(BaseObject *obj_sel, bool)
@@ -122,9 +127,11 @@ void ObjectSelectorWidget::showSelectedObject(BaseObject *obj_sel, bool)
 
 void ObjectSelectorWidget::clearSelector()
 {
-	this->selected_obj=nullptr;
+	this->selected_obj = nullptr;
 	obj_name_edt->clear();
 	rem_object_tb->setEnabled(false);
+	obj_icon_lbl->setVisible(false);
+
 	emit s_selectorCleared();
 	emit s_selectorChanged(false);
 }
