@@ -39,6 +39,10 @@
 #include <QPalette>
 #include <QPen>
 #include <QPoint>
+#include <QTimer>
+#include <QElapsedTimer>
+#include <QDateTime>
+#include <cmath>
 
 QMap<QStyle::PixelMetric, int> CustomUiStyle::pixel_metrics;
 
@@ -1375,7 +1379,8 @@ void CustomUiStyle::drawCEProgressBar(ControlElement element, const QStyleOption
 	QPainterPath shape;
 	QColor bg_color, border_color, fill_color;
 	bool has_progress = (pb_opt->progress > pb_opt->minimum),
-		 is_horizontal = qobject_cast<const QProgressBar *>(widget)->orientation() == Qt::Horizontal;
+		 is_horizontal = qobject_cast<const QProgressBar *>(widget)->orientation() == Qt::Horizontal,
+		 is_busy = (pb_opt->minimum == 0 && pb_opt->maximum == 0);
 
 	// Handle different progress bar elements
 	if(element == CE_ProgressBarGroove)
@@ -1401,8 +1406,110 @@ void CustomUiStyle::drawCEProgressBar(ControlElement element, const QStyleOption
 		return;
 	}
 
-	if(element == CE_ProgressBarContents && has_progress)
+	if(element == CE_ProgressBarContents && (has_progress || is_busy))
 	{
+		// Setup busy indicator animation timer if in busy mode
+		if(is_busy)
+		{
+			// Property names as constants to avoid repetition
+			static constexpr char BusyAnimTimerProp[] = "__busy_anim_timer",
+														BusyElapsedTimerProp[] = "__busy_elapsed_timer";
+			
+			QProgressBar *pb = const_cast<QProgressBar *>(qobject_cast<const QProgressBar *>(widget));
+			
+			// Check if animation timer exists, create if not
+			QTimer *anim_timer = pb->findChild<QTimer *>(BusyAnimTimerProp, Qt::FindDirectChildrenOnly);
+
+			if(!anim_timer)
+			{
+				anim_timer = new QTimer(pb);
+				anim_timer->setObjectName(BusyAnimTimerProp);
+				anim_timer->setInterval(16); // ~60 FPS (16ms = 62.5 FPS)
+				anim_timer->setTimerType(Qt::PreciseTimer); // Use precise timer for smoother animation
+
+				QObject::connect(anim_timer, &QTimer::timeout, pb, [pb]() {
+					pb->update();
+				});
+
+				// Initialize animation elapsed timer (more precise than QDateTime)
+				QElapsedTimer *elapsed_timer = new QElapsedTimer();
+				elapsed_timer->start();
+				pb->setProperty(BusyElapsedTimerProp, QVariant::fromValue(static_cast<void*>(elapsed_timer)));
+				anim_timer->start();
+			}
+
+			// Calculate busy indicator position using precise elapsed timer
+			QElapsedTimer *elapsed_timer = static_cast<QElapsedTimer*>(pb->property(BusyElapsedTimerProp).value<void*>());
+			qint64 elapsed = elapsed_timer ? elapsed_timer->elapsed() : 0;
+
+			// Animation parameters
+			static constexpr qreal AnimDuration = 10000.0; // Duration for one full cycle in ms (slower movement)
+			static constexpr qreal BusyIndicatorSize = 0.05; // 5% of total width/height
+
+			// Calculate position (0.0 to beyond 1.0 to allow full exit/entry)
+			// Position goes from -BusyIndicatorSize (fully outside left) to 1.0 (fully outside right)
+			qreal time_normalized = static_cast<qreal>(elapsed % static_cast<qint64>(AnimDuration)) / AnimDuration;
+			
+			// Simple linear movement from left (-size) to right (1.0), then reset
+			// This allows the indicator to fully exit on the right and re-enter from the left
+			qreal position = -BusyIndicatorSize + (time_normalized * (1.0 + BusyIndicatorSize));
+
+			// Calculate indicator rectangle
+			QRect content_rect = option->rect;
+			QRectF indicator_rect; // Use QRectF for sub-pixel precision
+			static constexpr qreal MinIndicatorSize = 20.0; // Minimum size in pixels
+
+			if(is_horizontal)
+			{
+				qreal indicator_width = content_rect.width() * BusyIndicatorSize;
+				// Ensure minimum size of 20px
+				indicator_width = std::max(indicator_width, MinIndicatorSize);
+				
+				// Position can be negative (off-screen left) to > 1.0 (off-screen right)
+				qreal x_pos = content_rect.x() + (content_rect.width() * position);
+				indicator_rect = QRectF(x_pos, content_rect.y(), indicator_width, content_rect.height());
+			}
+			else
+			{
+				qreal indicator_height = content_rect.height() * BusyIndicatorSize;
+				// Ensure minimum size of 20px
+				indicator_height = std::max(indicator_height, MinIndicatorSize);
+				
+				// For vertical: move from bottom to top (reverse direction)
+				qreal y_pos = content_rect.y() + content_rect.height() - (content_rect.height() * (position + BusyIndicatorSize));
+				indicator_rect = QRectF(content_rect.x(), y_pos, content_rect.width(), indicator_height);
+			}
+
+			// Draw the busy indicator
+			fill_color = getStateColor(QPalette::Highlight, option);
+			border_color = getStateColor(QPalette::Highlight, option).lighter(MidFactor);
+			
+			// Use QRectF for sub-pixel rendering (smoother animation)
+			QPainterPath shape_f;
+			qreal radius = InputRadius;
+			shape_f.addRoundedRect(indicator_rect.adjusted(0.5, 0.5, -0.5, -0.5), radius, radius);
+
+			painter->save();
+			painter->setRenderHint(QPainter::Antialiasing, true);
+			painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
+			
+			// Clip to content rect to avoid drawing artifacts outside the progress bar
+			painter->setClipRect(content_rect);
+			
+			painter->setBrush(fill_color);
+			painter->setPen(Qt::NoPen);
+			painter->drawPath(shape_f);
+
+			// Draw border
+			painter->setPen(QPen(border_color, PenWidth));
+			painter->setBrush(Qt::NoBrush);
+			painter->drawPath(shape_f);
+			painter->restore();
+			
+
+			return;
+		}
+
 		// Calculate progress percentage and content rectangle
 		int range = pb_opt->maximum - pb_opt->minimum;
 		qreal prog_ratio = range > 0 ? static_cast<qreal>(pb_opt->progress - pb_opt->minimum) / range : 0.0;
