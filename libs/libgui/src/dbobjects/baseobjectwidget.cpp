@@ -452,7 +452,7 @@ void BaseObjectWidget::configureBaseLayout()
 	};
 
 	baseobject_grid = new QGridLayout;
-	baseobject_grid->setObjectName("objetobase_grid");
+	baseobject_grid->setObjectName("baseobject_grid");
 	baseobject_grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	baseobject_grid->setSpacing(GuiUtilsNs::LtSpacing);
 

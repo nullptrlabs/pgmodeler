@@ -27,14 +27,14 @@ BaseFunctionWidget::BaseFunctionWidget(QWidget *parent, ObjectType obj_type) : B
 	QGridLayout *grid = nullptr;
 	Ui_BaseFunctionWidget::setupUi(this);
 
-	source_code_txt = new NumberedTextEditor(this, true);
-	dynamic_cast<QGridLayout *>(source_code_frm->layout())->addWidget(source_code_txt, 1, 0, 1, 2);
-
+	source_code_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin, source_code_grp, true);
 	source_code_hl = new SyntaxHighlighter(source_code_txt);
 	source_code_cp = new CodeCompletionWidget(source_code_txt, true);
 
-	parameters_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
-																					CustomTableWidget::UpdateButton, true, this);
+	parameters_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																																			 CustomTableWidget::AllButtons ^
+																																			 CustomTableWidget::UpdateButton, true,
+																																			 func_params_tab);
 	parameters_tab->setColumnCount(4);
 	parameters_tab->setHeaderLabel(tr("Name"), 0);
 	parameters_tab->setHeaderIcon(GuiUtilsNs::getIcon("parameter"), 0);
@@ -43,42 +43,27 @@ BaseFunctionWidget::BaseFunctionWidget(QWidget *parent, ObjectType obj_type) : B
 	parameters_tab->setHeaderLabel(tr("Mode"), 2);
 	parameters_tab->setHeaderLabel(tr("Default Value"), 3);
 
-	grid = new QGridLayout;
-	grid->addWidget(parameters_tab, 0, 0, 1, 1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
-	func_config_twg->widget(1)->setLayout(grid);
 	security_cmb->addItems(SecurityType::getTypes());
 
-
-	transform_type_wgt = new PgSQLTypeWidget(this);
-	transform_types_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
-																							 (CustomTableWidget::UpdateButton |
-																								CustomTableWidget::EditButton |
-																								CustomTableWidget::ResizeColsButton), true, this);
+	transform_type_wgt = GuiUtilsNs::createWidgetInParent<PgSQLTypeWidget>(GuiUtilsNs::LtMargin, transform_type_tab);
+	transform_types_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(CustomTableWidget::AllButtons ^
+																																						(CustomTableWidget::UpdateButton |
+																																						 CustomTableWidget::EditButton |
+																																						 CustomTableWidget::ResizeColsButton), true,
+																																						 transform_type_tab);
 	transform_types_tab->setColumnCount(1);
 	transform_types_tab->setHeaderLabel(tr("Type"), 0);
 	transform_types_tab->setHeaderIcon(GuiUtilsNs::getIcon("usertype"), 0);
 
-	grid = new QGridLayout;
-	grid->addWidget(transform_type_wgt, 0, 0, 1, 1);
-	grid->addWidget(transform_types_tab, 1, 0, 1, 1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
-	func_config_twg->widget(2)->setLayout(grid);
-
-
-	config_params_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
-																							 (CustomTableWidget::UpdateButton |
-																								CustomTableWidget::EditButton), true, this);
+	config_params_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																																					CustomTableWidget::AllButtons ^
+																																					(CustomTableWidget::UpdateButton |
+																																					 CustomTableWidget::EditButton), true,
+																																					func_config_tab);
 	config_params_tab->setColumnCount(2);
 	config_params_tab->setHeaderLabel(tr("Parameter"), 0);
 	config_params_tab->setHeaderLabel(tr("Value"), 1);
 	config_params_tab->setCellsEditable(true);
-
-	grid = new QGridLayout;
-	grid->addWidget(config_params_tab, 0, 0, 1, 1);
-	grid->addWidget(hint_frm, 1, 0, 1, 1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
-	func_config_twg->widget(4)->setLayout(grid);
 
 	connect(language_cmb, &QComboBox::currentIndexChanged, this, __slot(this, BaseFunctionWidget::selectLanguage));
 
@@ -89,7 +74,7 @@ BaseFunctionWidget::BaseFunctionWidget(QWidget *parent, ObjectType obj_type) : B
 	setRequiredField(language_lbl);
 	setRequiredField(symbol_lbl);
 	setRequiredField(library_lbl);
-	setRequiredField(sourc_code_lbl);
+	setRequiredField(source_code_grp);
 }
 
 void BaseFunctionWidget::handleParameter(CustomTableWidget *params_tab, Parameter param, int result, bool handle_param_modes)
@@ -280,8 +265,8 @@ void BaseFunctionWidget::selectLanguage()
 {
 	bool c_lang = (language_cmb->currentText() == DefaultLanguages::C);
 
-	source_code_frm->setVisible(!c_lang);
-	library_frm->setVisible(c_lang);
+	source_code_grp->setVisible(!c_lang);
+	library_grp->setVisible(c_lang);
 
 	if(!c_lang)
 	{
