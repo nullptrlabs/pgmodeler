@@ -33,34 +33,25 @@
 
 TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget(parent, tab_type)
 {
-	QGridLayout *grid=nullptr;
-	QVBoxLayout *vbox=nullptr;
-	CustomTableWidget *tab=nullptr;
-	ObjectType types[]={ ObjectType::Column, ObjectType::Constraint, ObjectType::Trigger,
-											 ObjectType::Rule, ObjectType::Index, ObjectType::Policy };
-	std::map<QString, std::vector<QWidget *> > fields_map;	
-	QPushButton *edt_data_tb=nullptr;
-	QStringList part_types;
-
 	Ui_TableWidget::setupUi(this);
 
-	edt_data_tb=new QPushButton(this);
-	QIcon icon=GuiUtilsNs::getIcon("editrows");
+	QPushButton *edt_data_tb = new QPushButton(this);
 	edt_data_tb->setMinimumSize(edt_perms_tb->minimumSize());
 	edt_data_tb->setText(tr("Edit data"));
 	edt_data_tb->setToolTip(tr("Define initial data for the table"));
-	edt_data_tb->setIcon(icon);
+	edt_data_tb->setIcon(GuiUtilsNs::getIcon("editrows"));
 	edt_data_tb->setIconSize(edt_perms_tb->iconSize());
 
 	connect(edt_data_tb, &QPushButton::clicked, this, __slot(this, TableWidget::editData));
 	misc_btns_lt->insertWidget(1, edt_data_tb);
 
+	std::map<QString, std::vector<QWidget *> > fields_map;
 	fields_map[generateVersionsInterval(UntilVersion, PgSqlVersions::PgSqlVersion110)].push_back(with_oids_chk);
-	warn_frame=generateVersionWarningFrame(fields_map);
-	table_grid->addWidget(warn_frame, table_grid->count()+1, 0, 1, 2);
-	warn_frame->setParent(this);
+	highlightVersionSpecificFields(fields_map);
 
-	parent_tables = new CustomTableWidget(CustomTableWidget::NoButtons, true, this);
+	parent_tables = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																																			CustomTableWidget::NoButtons, true,
+																																			parent_tables_tab);
 	parent_tables->setColumnCount(3);
 	parent_tables->setHeaderLabel(tr("Name"), 0);
 	parent_tables->setHeaderIcon(GuiUtilsNs::getIcon("uid"),0);
@@ -69,48 +60,39 @@ TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget
 	parent_tables->setHeaderLabel(tr("Type"), 2);
 	parent_tables->setHeaderIcon(GuiUtilsNs::getIcon("usertype"),2);
 
-	server_sel=nullptr;
-	server_sel=new ObjectSelectorWidget(ObjectType::ForeignServer, this);
+	server_sel = new ObjectSelectorWidget(ObjectType::ForeignServer, this);
+	server_lt->addWidget(server_sel);
 
-	vbox = new QVBoxLayout;
-	vbox->setContentsMargins(0,0,0,0);
-	vbox->addWidget(server_sel);
-	server_wgt->setLayout(vbox);
-
-	options_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
-																			 (CustomTableWidget::EditButton | CustomTableWidget::UpdateButton), true, this);
+	options_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																																		CustomTableWidget::AllButtons ^
+																																		(CustomTableWidget::EditButton | CustomTableWidget::UpdateButton),
+																																		true, ftab_options_tab);
 	options_tab->setCellsEditable(true);
 	options_tab->setColumnCount(2);
 	options_tab->setHeaderLabel(tr("Option"), 0);
 	options_tab->setHeaderLabel(tr("Value"), 1);
 
-	vbox = new QVBoxLayout;
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
-	vbox->addWidget(options_tab);
-	attributes_tbw->widget(9)->setLayout(vbox);
-
 	tag_sel = new ObjectSelectorWidget(ObjectType::Tag, this);
-	vbox = new QVBoxLayout(tag_sel_parent);
-	vbox->addWidget(tag_sel);
-	vbox->setContentsMargins(0,0,0,0);
+	tag_lt->addWidget(tag_sel);
 
-	grid=new QGridLayout;
-	grid->addWidget(parent_tables, 0,0,1,1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
-	attributes_tbw->widget(8)->setLayout(grid);
+	/* Moving the attributes_wgt (where tags, servers and options lies)
+	 * to the extra_wgt_lt the is created in general page */
+	layout()->removeWidget(attributes_wgt);
+	extra_wgts_lt->addWidget(attributes_wgt);
+	configureTabbedLayout(attributes_tbw);
 
 	//Configuring the table objects that stores the columns, triggers, constraints, rules and indexes
-	for(unsigned i=0; i <= 5; i++)
+	CustomTableWidget *tab = nullptr;
+	unsigned tab_idx = 1;
+
+	for(auto &type : { ObjectType::Column, ObjectType::Constraint, ObjectType::Trigger,
+										 ObjectType::Rule, ObjectType::Index, ObjectType::Policy })
 	{
-		tab=new CustomTableWidget(CustomTableWidget::AllButtons ^
-								CustomTableWidget::UpdateButton, true, this);
-
-		objects_tab_map[types[i]]=tab;
-
-		grid=new QGridLayout;
-		grid->addWidget(tab, 0,0,1,1);
-		grid->setContentsMargins(GuiUtilsNs::LtMargins);
-		attributes_tbw->widget(i + 1)->setLayout(grid);
+		tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																															CustomTableWidget::AllButtons ^
+																															CustomTableWidget::UpdateButton, true,
+																															attributes_tbw->widget(tab_idx++));
+		objects_tab_map[type] = tab;
 
 		connect(tab, &CustomTableWidget::s_rowsRemoved, this, __slot(this, TableWidget::removeObjects));
 		connect(tab, &CustomTableWidget::s_rowRemoved, this, __slot_n(this, TableWidget::removeObject));
@@ -194,12 +176,11 @@ TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget
 	objects_tab_map[ObjectType::Policy]->setHeaderLabel(tr("Alias"), 6);
 	objects_tab_map[ObjectType::Policy]->setHeaderLabel(tr("Comment"), 7);
 
-	partition_keys_tab = new ElementsTableWidget;
+	partition_keys_tab = new ElementsTableWidget(this);
 	partition_keys_tab->setEnabled(false);
-	grid = dynamic_cast<QGridLayout *>(attributes_tbw->widget(7)->layout());
-	grid->addWidget(partition_keys_tab, 1, 0, 1, 2);
+	part_keys_tab->layout()->addWidget(partition_keys_tab);
 
-	part_types = PartitioningType::getTypes();
+	QStringList part_types = PartitioningType::getTypes();
 	part_types.push_front(tr("None"));
 	partitioning_type_cmb->addItems(part_types);
 
@@ -210,12 +191,8 @@ TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget
 	setRequiredField(server_lbl);
 	setRequiredField(server_sel);
 
-	configureFormFields(tab_type);
-	baseobject_grid->setContentsMargins(0, 0, 0, 0);
-	dynamic_cast<QGridLayout*>(attributes_tbw->widget(0)->layout())->addLayout(baseobject_grid, 0, 0, 1, 3);
-
 	configureTabOrder({ tag_sel });
-	setMinimumSize(700, 650);
+	setMinimumSize(700, 550);
 }
 
 template<class Class, class WidgetClass>
@@ -282,8 +259,8 @@ void TableWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Sc
 
 	__setAttributes(model, op_list, schema, table, pos_x, pos_y);
 	server_lbl->setVisible(false);
-	server_wgt->setVisible(false);
-	attributes_tbw->removeTab(9); // Removing the options tab
+	server_sel->setVisible(false);
+	attributes_tbw->removeTab(attributes_tbw->indexOf(ftab_options_tab)); // Removing the options tab
 }
 
 void TableWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, ForeignTable *ftable, double pos_x, double pos_y)
@@ -302,15 +279,14 @@ void TableWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Sc
 
 	__setAttributes(model, op_list, schema, ftable, pos_x, pos_y);
 
-	warn_frame->setVisible(false);
 	with_oids_chk->setVisible(false);
 	unlogged_chk->setVisible(false);
 	enable_rls_chk->setVisible(false);
 	force_rls_chk->setVisible(false);
-	attributes_tbw->removeTab(4); //Removing the Index tab
-	attributes_tbw->removeTab(4); //Removing the Rule tab
-	attributes_tbw->removeTab(4); //Removing the Policies tab
-	attributes_tbw->removeTab(4); //Removing the Partition keys tab
+	attributes_tbw->removeTab(attributes_tbw->indexOf(indexes_tab)); //Removing the Index tab
+	attributes_tbw->removeTab(attributes_tbw->indexOf(rules_tab)); //Removing the Rule tab
+	attributes_tbw->removeTab(attributes_tbw->indexOf(policies_tab)); //Removing the Policies tab
+	attributes_tbw->removeTab(attributes_tbw->indexOf(part_keys_tab)); //Removing the Partition keys tab
 	objects_tab_map[ObjectType::Column]->setHeaderVisible(0, false); //Hiding the "PK" checkbox on columns grid
 	server_sel->setModel(this->model);
 	server_sel->setSelectedObject(ftable->getForeignServer());

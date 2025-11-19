@@ -543,7 +543,16 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget, bool create
 		// Connecting the signal to handle source code preview
 		connect(tab_widget, &QTabWidget::currentChanged, this, [this, source_txt, tab_widget](int){
 			if(sql_preview_pg && tab_widget->currentWidget() == sql_preview_pg)
-				source_txt->setPlainText(getSQLCodePreview());
+			{
+				try
+				{
+					source_txt->setPlainText(getSQLCodePreview());
+				}
+				catch(Exception &e)
+				{
+					source_txt->setPlainText(QString("/* %1 */").arg(e.getExceptionsText()));
+				}
+			}
 		});
 	}
 
