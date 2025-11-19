@@ -212,6 +212,7 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		//! \brief Disable the object's refereces SQL code
 		void disableReferencesSQL(BaseObject *object);
 		
+		[[deprecated]]
 		void configureTabOrder(std::vector<QWidget *> widgets={});
 
 		BaseObject *getHandledObject();
@@ -238,9 +239,11 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 			PostgreSQL versions. On the first map (fields) the key is the PostgreSQL versions and
 			the values are the reference to the widget. The second map is used to specify the values
 			of widgets specific for each version. */
+		[[deprecated]]
 		static QFrame *generateVersionWarningFrame(std::map<QString, std::vector<QWidget *> > &fields, std::map<QWidget *, std::vector<QString> > *values=nullptr);
 		
 		//! \brief Generates a informative frame containing the specified message
+		[[deprecated]]
 		static QFrame *generateInformationFrame(const QString &msg);
 
 		static void highlightVersionSpecificFields(std::map<QString, std::vector<QWidget *> > &fields, std::map<QWidget *, std::vector<QString> > *values=nullptr);

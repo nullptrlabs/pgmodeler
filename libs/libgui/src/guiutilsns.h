@@ -238,9 +238,14 @@ namespace GuiUtilsNs {
 	}
 
 	/*! \brief Creates a wiget in a parent. If the parent has no layout configured then
-	 * this function also creates a layout for the parent and puts the new widget there.
-	 * The user can specify the layout margins. If no parent is provided the object is an
-	 * orphan one, meaning the user needs to take care of its destruction */
+	 * this function also creates a vertical layout for the parent and puts the new widget there.
+	 *
+	 * If the parent already has a box layout (vertical or horizontal) then the method puts the
+	 * widget at the end of the layout.
+	 *
+	 * The user can specify the layout margins if the layout need to be created.
+	 * If no parent is provided the object is an orphan one, meaning the user needs to
+	 * take care of its allocations in a layout as well as its destruction. */
 	template<class WgtClass, typename ...CtorArgs,
 					 std::enable_if_t<std::is_base_of_v<QWidget, WgtClass>, bool> = true>
 	WgtClass *createWidgetInParent(int lt_margins, CtorArgs... new_wgt_ctor_args)
@@ -248,12 +253,20 @@ namespace GuiUtilsNs {
 		WgtClass *new_wgt = new WgtClass(new_wgt_ctor_args...);
 		QWidget *parent = qobject_cast<QWidget *>(new_wgt->parent());
 
-		if(parent && !parent->layout())
+		if(parent)
 		{
-			QVBoxLayout *vbox = new QVBoxLayout(parent);
-			vbox->addWidget(new_wgt);
-			vbox->setContentsMargins(lt_margins, lt_margins, lt_margins, lt_margins);
-			vbox->setSpacing(LtSpacing);
+			QLayout *layout = parent->layout();
+
+			if(!layout)
+			{
+				QVBoxLayout *vbox = new QVBoxLayout(parent);
+				vbox->addWidget(new_wgt);
+				vbox->setContentsMargins(lt_margins, lt_margins, lt_margins, lt_margins);
+				vbox->setSpacing(LtSpacing);
+			}
+			// We add the item into widget only if the parent's layout is QBoxLayout
+			else if(qobject_cast<QBoxLayout *>(layout))
+				layout->addWidget(new_wgt);
 		}
 
 		return new_wgt;
