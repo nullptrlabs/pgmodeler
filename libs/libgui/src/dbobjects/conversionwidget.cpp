@@ -20,30 +20,22 @@
 
 ConversionWidget::ConversionWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Conversion)
 {
-	QFrame *frame=nullptr;
 	Ui_ConversionWidget::setupUi(this);
 
-	conv_func_sel=nullptr;
-	conv_func_sel=new ObjectSelectorWidget(ObjectType::Function, this);
-	convcod_grid->addWidget(conv_func_sel,1,1,1,3);
+	conv_func_sel = new ObjectSelectorWidget(ObjectType::Function, this);
+	conv_func_lt->addWidget(conv_func_sel);
 
 	setRequiredField(src_encoding_lbl);
 	setRequiredField(trg_encoding_lbl);
 	setRequiredField(conv_func_lbl);
 	setRequiredField(conv_func_sel);
 
-	configureFormLayout(convcod_grid, ObjectType::Conversion);
-	frame=generateInformationFrame(tr("The function to be assigned to an encoding conversion must have the following signature: <em>void function(integer, integer, cstring, internal, integer)</em>."));
-	convcod_grid->addItem(new QSpacerItem(10,10,QSizePolicy::Minimum,QSizePolicy::Expanding), convcod_grid->count()+1, 0, 1, 0);
-	convcod_grid->addWidget(frame, convcod_grid->count()+1, 0, 1, 0);
-	frame->setParent(this);
-
 	src_encoding_cmb->addItems(EncodingType::getTypes());
 	trg_encoding_cmb->addItems(EncodingType::getTypes());
 
+	configureTabbedLayout(false);
 	configureTabOrder({ src_encoding_cmb, trg_encoding_cmb, conv_func_sel });
-
-	setMinimumSize(500, 300);
+	setMinimumSize(600, 450);
 }
 
 void ConversionWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, Conversion *conv)

@@ -967,7 +967,7 @@ namespace GuiUtilsNs {
 		if(!widget)
 			return;
 
-		QLabel *label = nullptr;		
+		QLabel *label = nullptr;
 		QList<QBoxLayout *> layouts;
 		QLayoutItem *item = nullptr;
 		QBoxLayout *box_lt = nullptr;

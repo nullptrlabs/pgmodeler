@@ -177,8 +177,10 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		void configureTabbedLayout(QTabWidget *tab_widget, bool create_general_pg = true);
 
 		/*! \brief Configures a tabbed layout from a simple QHBoxLayout-ed
-		 *  or a QVBoxLayout-ed widget. This method creates a QTabWidget instance and
-		 *  move all widgets/sublayouts of the orignal widget's layout to the "General" page. */
+		 *  or a QVBoxLayout-ed widget. When create_attr_page is false this method creates a
+		 *  QTabWidget instance and move all widgets/sublayouts of the orignal widget's layout
+		 *  to the "General" page. If create_attr_page is true then the widget/sublayouts are moved
+		 *  to a page named "Attributes", but the "General" page is still created with basic fields. */
 		void configureTabbedLayout(bool create_attr_page, const QString &attr_pg_name = "", const QString &attr_pg_icon = "");
 
 		/*! \brief Configures the state of commom fields related to database objects enabling/disabling/hidding
