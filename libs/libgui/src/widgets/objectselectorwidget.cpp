@@ -105,6 +105,8 @@ void ObjectSelectorWidget::setSelectedObject(BaseObject *object)
 																 selected_obj->getName(true)));
 
 		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(object->getObjectType()));
+		obj_icon_lbl->setToolTip(tr("<strong>ID:</strong> %1<br/><strong>Type:</strong> %2")
+														 .arg(QString::number(object->getObjectId()), object->getTypeName()));
 		obj_icon_lbl->setVisible(true);
 
 		emit s_objectSelected();
