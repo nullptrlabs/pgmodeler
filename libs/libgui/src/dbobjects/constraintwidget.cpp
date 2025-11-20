@@ -29,6 +29,7 @@ ConstraintWidget::ConstraintWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	Ui_ConstraintWidget::setupUi(this);
 
 	excl_elems_tab=new ElementsTableWidget(this);
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	grid=new QGridLayout;
 	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	grid->addWidget(excl_elems_tab,0,0);
@@ -41,6 +42,7 @@ ConstraintWidget::ConstraintWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	col_picker_wgt = new ColumnPickerWidget(this);
 	ref_col_picker_wgt = new ColumnPickerWidget(this);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *vbox = new QVBoxLayout(columns_tbw->widget(0));
 	vbox->addWidget(col_picker_wgt);
 	vbox->setContentsMargins(GuiUtilsNs::LtMargins);

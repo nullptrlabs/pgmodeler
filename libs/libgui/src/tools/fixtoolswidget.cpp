@@ -25,8 +25,8 @@ FixToolsWidget::FixToolsWidget(QWidget *parent) : QWidget(parent)
 
 	GuiUtilsNs::configureWidgetsFont({ run_tool_btn, cancel_btn }, GuiUtilsNs::BigFontFactor);
 
-	model_fix_wgt = GuiUtilsNs::createWidgetInParent<ModelFixWidget>(fix_pg);
-	metadata_wgt = GuiUtilsNs::createWidgetInParent<MetadataHandlingWidget>(metadata_pg);
+	model_fix_wgt = GuiUtilsNs::createWidgetInParent<ModelFixWidget>(0, fix_pg);
+	metadata_wgt = GuiUtilsNs::createWidgetInParent<MetadataHandlingWidget>(0, metadata_pg);
 
 	h_splitter->setSizes({800, 700});
 

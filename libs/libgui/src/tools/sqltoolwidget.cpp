@@ -48,12 +48,14 @@ SQLToolWidget::SQLToolWidget(QWidget * parent) : QWidget(parent)
 	corner_wgt->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 	sql_exec_tbw->setCornerWidget(corner_wgt);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	corner_wgt_lt = new QVBoxLayout;
 	corner_wgt_lt->setContentsMargins(0, 0,
 																		corner_wgt->width() / 2,
 																		corner_wgt->height());
 	corner_wgt->setLayout(corner_wgt_lt);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *vbox=new QVBoxLayout;
 	sourcecode_txt=new NumberedTextEditor(sourcecode_gb);
 	sourcecode_txt->setReadOnly(true);

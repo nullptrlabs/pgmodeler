@@ -32,12 +32,14 @@ IndexWidget::IndexWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::
 
 	elements_tab = new ElementsTableWidget(this);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	grid=new QGridLayout;
 	grid->setContentsMargins(0,0,0,0);
 	grid->addWidget(elements_tab,0,0);
 	attributes_tbw->widget(1)->setLayout(grid);
 
 	incl_cols_picker_wgt = new ColumnPickerWidget(this);
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *vbox = new QVBoxLayout(attributes_tbw->widget(2));
 	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(incl_cols_picker_wgt);

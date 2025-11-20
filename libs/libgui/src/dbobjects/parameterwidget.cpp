@@ -26,6 +26,7 @@ ParameterWidget::ParameterWidget(QWidget *parent): BaseObjectWidget(parent, Obje
 	Ui_ParameterWidget::setupUi(this);
 
 	data_type=new PgSQLTypeWidget(this);
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	parameter_grid=new QGridLayout(this);
 	spacer=new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
 	parameter_grid->setContentsMargins(0, 0, 0, 0);

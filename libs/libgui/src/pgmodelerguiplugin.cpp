@@ -30,6 +30,7 @@ PgModelerGuiPlugin::PgModelerGuiPlugin()
 
 	main_window = nullptr;
 	plugin_info_frm=new BaseForm;
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	gridLayout=new QGridLayout;
 
 	widget=new QWidget;

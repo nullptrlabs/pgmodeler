@@ -18,10 +18,14 @@
 
 #include "operationlistwidget.h"
 #include "guiutilsns.h"
+#include "customuistyle.h"
 
 OperationListWidget::OperationListWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::AltDefaultFrmHint, content_frm);
+
 	setModel(nullptr);
 
 	QFont fnt = title_lbl->font();

@@ -44,6 +44,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 	sql_definition_hl = new SyntaxHighlighter(sql_definition_txt);
 	sql_definition_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	vbox = new QVBoxLayout(sql_definition_tab);
 	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(alert_frm);
@@ -54,6 +55,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 																				ObjectType::View, ObjectType::Function,
 																				ObjectType::Procedure } , true, this);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	vbox = new QVBoxLayout(view_refs_tab);
 	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(obj_refs_wgt);
@@ -64,6 +66,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 	sql_preview_hl=new SyntaxHighlighter(sql_preview_txt);
 	sql_preview_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	vbox = new QVBoxLayout(sql_preview_tab);
 	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(sql_preview_txt);
@@ -72,6 +75,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 	dynamic_cast<QGridLayout *>(basics_gb->layout())->addWidget(tag_sel, 0, 1, 1, 6);
 
 	custom_cols_wgt = new SimpleColumnsWidget(this);
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	vbox = new QVBoxLayout(columns_tab);
 	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(custom_cols_wgt);
@@ -86,6 +90,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 
 		objects_tab_map[type] = tab;
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 		grid=new QGridLayout;
 		grid->addWidget(tab, 0, 0, 1, 1);
 		grid->setContentsMargins(GuiUtilsNs::LtMargins);

@@ -166,6 +166,7 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 	csv_load_parent->setVisible(false);
 
 	csv_load_wgt = new CsvLoadWidget(this, false);
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *layout = new QVBoxLayout;
 
 	layout->addWidget(csv_load_wgt);

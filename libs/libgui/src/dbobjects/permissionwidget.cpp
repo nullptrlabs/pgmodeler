@@ -49,6 +49,7 @@ PermissionWidget::PermissionWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	roles_tab->setHeaderLabel(tr("Name"),0);
 	roles_tab->setHeaderIcon(GuiUtilsNs::getIcon("uid"),0);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	grid=new QGridLayout;
 	grid->addWidget(roles_tab,0,0,1,1);
 	grid->setContentsMargins(GuiUtilsNs::LtMargins);
@@ -65,6 +66,7 @@ PermissionWidget::PermissionWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	permissions_tab->setHeaderLabel(tr("Privileges"),2);
 	permissions_tab->setHeaderIcon(GuiUtilsNs::getIcon("grant"),2);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	grid=new QGridLayout;
 	grid->addWidget(permissions_tab,0,0,1,1);
 	grid->setContentsMargins(GuiUtilsNs::LtMargins);

@@ -57,6 +57,7 @@ TableDataWidget::TableDataWidget(QWidget *parent): BaseObjectWidget(parent, Obje
 	csv_load_parent->setVisible(false);
 
 	csv_load_wgt = new CsvLoadWidget(this, true);
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *layout = new QVBoxLayout;
 
 	layout->addWidget(csv_load_wgt);

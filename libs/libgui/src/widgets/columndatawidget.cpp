@@ -22,6 +22,7 @@
 
 ColumnDataWidget::ColumnDataWidget(bool use_syntax_hl, const QString &hl_conf, QWidget *parent) : QWidget(parent)
 {
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *vbox = new QVBoxLayout(this);
 
 	setWindowTitle(tr("Edit column data"));

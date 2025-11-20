@@ -38,6 +38,7 @@ SourceEditorWidget::SourceEditorWidget(QWidget *parent) : QWidget(parent)
 	source_file_sel->setReadOnly(true);
 	source_file_parent->setVisible(false);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *vbox = new QVBoxLayout(source_file_parent);
 	vbox->setContentsMargins(0, 0, 0, 0);
 	vbox->addWidget(source_file_sel);
@@ -45,6 +46,7 @@ SourceEditorWidget::SourceEditorWidget(QWidget *parent) : QWidget(parent)
 	for(auto &itr : snippets)
 		code_compl_wgt->insertCustomItem(itr.first, itr.second, GuiUtilsNs::getPixmap("codesnippet"));
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	vbox = new QVBoxLayout(search_parent);
 	vbox->setContentsMargins(0, 0, 0, GuiUtilsNs::LtMargin);
 	vbox->addWidget(search_wgt);

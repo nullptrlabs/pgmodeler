@@ -26,10 +26,11 @@ DomainWidget::DomainWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 	check_expr_hl = new SyntaxHighlighter(check_expr_txt, false, true, font().pointSizeF());
 	check_expr_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
-	data_type = GuiUtilsNs::createWidgetInParent<PgSQLTypeWidget>(data_type_tab);
+	data_type = GuiUtilsNs::createWidgetInParent<PgSQLTypeWidget>(0, data_type_tab);
 	data_type_tab->layout()->addItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Expanding));
 
-	constr_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(CustomTableWidget::AllButtons ^
+	constr_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(0,
+																																	 CustomTableWidget::AllButtons ^
 																																	 CustomTableWidget::DuplicateButton, true,
 																																	 check_constr_tab);
 	constr_tab->setColumnCount(2);

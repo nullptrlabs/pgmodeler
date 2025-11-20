@@ -44,6 +44,7 @@ PolicyWidget::PolicyWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 	roles_tab->setHeaderLabel(tr("Name"), 0);
 	roles_tab->setHeaderIcon(GuiUtilsNs::getIcon("uid"), 0);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *vbox = new QVBoxLayout;
 	vbox->addWidget(roles_tab);
 

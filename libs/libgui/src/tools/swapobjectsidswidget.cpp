@@ -23,12 +23,14 @@ SwapObjectsIdsWidget::SwapObjectsIdsWidget(QWidget *parent, Qt::WindowFlags f) :
 
 	filter_lt->setAlignment(filter_btn, Qt::AlignLeft);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QHBoxLayout *hbox = new QHBoxLayout(src_sel_parent);
 	hbox->setContentsMargins(0,0,0,0);
 	src_object_sel=new ObjectSelectorWidget(types, src_sel_parent);
 	src_object_sel->enableObjectCreation(false);
 	hbox->addWidget(src_object_sel);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	hbox = new QHBoxLayout(dst_sel_parent);
 	hbox->setContentsMargins(0,0,0,0);
 	dst_object_sel=new ObjectSelectorWidget(types, dst_sel_parent);

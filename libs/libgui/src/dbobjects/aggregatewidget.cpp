@@ -39,7 +39,8 @@ AggregateWidget::AggregateWidget(QWidget *parent): BaseObjectWidget(parent, Obje
 
 	input_type = GuiUtilsNs::createWidgetInParent<PgSQLTypeWidget>(GuiUtilsNs::LtMargin,
 																																 inputs_tab, tr("Input data type"));
-	input_types_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(CustomTableWidget::AllButtons ^
+	input_types_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(0,
+																																				CustomTableWidget::AllButtons ^
 																																				CustomTableWidget::EditButton, true,
 																																				inputs_tab);
 	input_types_tab->setColumnCount(1);

@@ -316,21 +316,25 @@ void MainWindow::configureMenusActionsWidgets()
 	welcome_wgt->lower();
 	v_splitter1->lower();
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *vlayout=new QVBoxLayout;
 	vlayout->setContentsMargins(0,0,0,0);
 	vlayout->addWidget(model_objs_wgt);
 	model_objs_parent->setLayout(vlayout);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	vlayout=new QVBoxLayout;
 	vlayout->setContentsMargins(0,0,0,0);
 	vlayout->addWidget(oper_list_wgt);
 	oper_list_parent->setLayout(vlayout);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QHBoxLayout * hlayout=new QHBoxLayout;
 	hlayout->setContentsMargins(0,0,0,0);
 	hlayout->addWidget(model_valid_wgt);
 	model_valid_parent->setLayout(hlayout);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	hlayout=new QHBoxLayout;
 	hlayout->setContentsMargins(0,0,0,0);
 	hlayout->addWidget(obj_finder_wgt);
@@ -462,18 +466,8 @@ WgtClass *MainWindow::createViewWidget(MWViewsId view_id, const QString &view_na
 	if(!parent_wgt)
 		throw Exception(tr("Page index %1 not created in views widget!").arg(view_id), ErrorCode::Custom, PGM_FUNC, PGM_FILE, PGM_LINE);
 
-	WgtClass *view_wgt = GuiUtilsNs::createWidgetInParent<WgtClass>(parent_wgt);
+	WgtClass *view_wgt = GuiUtilsNs::createWidgetInParent<WgtClass>(0, parent_wgt);
 	view_wgt->setObjectName(view_name);
-
-	/*WgtClass *view_wgt = new WgtClass(this);
-	view_wgt->setObjectName(view_name);
-
-
-	QVBoxLayout *vbox = new QVBoxLayout;
-	vbox->setContentsMargins(0,0,0,0);
-	vbox->setSpacing(0);
-	vbox->addWidget(view_wgt);
-	views_stw->widget(view_id)->setLayout(vbox); */
 
 	return view_wgt;
 }
@@ -490,6 +484,7 @@ void MainWindow::createMainWidgets()
 
 		scene_info_wgt = new SceneInfoWidget(this);
 		scene_info_wgt->setObjectName("scene_info_wgt");
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 		QHBoxLayout *hbox = new QHBoxLayout(scene_info_parent);
 		hbox->addWidget(scene_info_wgt);
 		hbox->setContentsMargins(0, GuiUtilsNs::LtMargin, 0, 0);

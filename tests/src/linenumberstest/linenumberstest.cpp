@@ -32,6 +32,7 @@ void LineNumbersTest::handleLineSelectionUsingMouse()
 {
   QDialog *dlg=new QDialog;
 	NumberedTextEditor *edt=new NumberedTextEditor(dlg, true);
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
   QHBoxLayout *layout=new QHBoxLayout(dlg);
 
 	LineNumbersWidget::setColors(Qt::darkGray, QColor(230,230,230));

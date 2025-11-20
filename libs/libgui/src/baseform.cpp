@@ -62,6 +62,7 @@ void BaseForm::resizeForm(QWidget *widget)
 	if(!widget)
 		return;
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *vbox = new QVBoxLayout;
 	QSize min_size = widget->minimumSize();
 	int max_h = 0, max_w = 0, curr_w =0, curr_h = 0;

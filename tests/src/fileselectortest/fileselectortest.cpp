@@ -29,6 +29,7 @@ class FileSelectorTest: public QObject {
 void FileSelectorTest::testFileSelection()
 {
   QDialog *dlg = new QDialog;
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
   QHBoxLayout *layout = new QHBoxLayout(dlg);
   FileSelectorWidget *selector = new FileSelectorWidget;
 

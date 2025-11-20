@@ -198,6 +198,7 @@ CREATE TABLE public.table_b (\n \
 
 	font_preview_hl = new SyntaxHighlighter(font_preview_txt, false, true);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *layout = new QVBoxLayout(code_preview_gb);
 	layout->setContentsMargins(GuiUtilsNs::LtMargins);
 	layout->addWidget(font_preview_txt);

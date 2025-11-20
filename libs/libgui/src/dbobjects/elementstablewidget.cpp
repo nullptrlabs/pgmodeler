@@ -31,6 +31,7 @@ ElementsTableWidget::ElementsTableWidget(QWidget *parent) : QWidget(parent)
 	element_form.setButtonConfiguration();
 	connect(&element_form, &BaseForm::accepted, element_wgt, &ElementWidget::applyConfiguration);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *vbox = new QVBoxLayout(this);
 	elements_tab=new CustomTableWidget(CustomTableWidget::AllButtons ^
 																			(CustomTableWidget::UpdateButton | CustomTableWidget::DuplicateButton), true, this);

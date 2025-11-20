@@ -46,7 +46,8 @@ BaseFunctionWidget::BaseFunctionWidget(QWidget *parent, ObjectType obj_type) : B
 	security_cmb->addItems(SecurityType::getTypes());
 
 	transform_type_wgt = GuiUtilsNs::createWidgetInParent<PgSQLTypeWidget>(GuiUtilsNs::LtMargin, transform_type_tab);
-	transform_types_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(CustomTableWidget::AllButtons ^
+	transform_types_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(0,
+																																						CustomTableWidget::AllButtons ^
 																																						(CustomTableWidget::UpdateButton |
 																																						 CustomTableWidget::EditButton |
 																																						 CustomTableWidget::ResizeColsButton), true,

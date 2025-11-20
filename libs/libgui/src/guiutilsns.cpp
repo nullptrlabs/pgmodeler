@@ -34,7 +34,7 @@
 namespace GuiUtilsNs {
 	NumberedTextEditor *createNumberedTextEditor(QWidget *parent, bool act_btns_enabled, qreal custom_fnt_size)
 	{
-		return createWidgetInParent<NumberedTextEditor>(parent, act_btns_enabled, custom_fnt_size);
+		return createWidgetInParent<NumberedTextEditor>(0, parent, act_btns_enabled, custom_fnt_size);
 	}
 
 	QTreeWidgetItem *createOutputTreeItem(QTreeWidget *output_trw, const QString &text, const QIcon &ico, QTreeWidgetItem *parent, bool expand_item, bool word_wrap)
@@ -1023,6 +1023,7 @@ namespace GuiUtilsNs {
 		if(!widget || !label)
 			throw Exception(ErrorCode::OprNotAllocatedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 		QVBoxLayout *layout = new QVBoxLayout;
 
 		layout->setContentsMargins(margins);
@@ -1035,6 +1036,7 @@ namespace GuiUtilsNs {
 		if(!append_widget)
 			return layout;
 		
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 		QHBoxLayout *h_layout = new QHBoxLayout;
 		h_layout->setContentsMargins(margins);
 		h_layout->setSpacing(LtSpacing);

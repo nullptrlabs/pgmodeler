@@ -67,6 +67,7 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		show_act_btns = true;
 		font.setPointSizeF(font.pointSizeF() * 0.90);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 		QVBoxLayout *top_wgt_lt = new QVBoxLayout;
 		top_wgt_lt->setContentsMargins(GuiUtilsNs::LtMargins);
 		top_widget = new QWidget(this);
@@ -85,6 +86,7 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		search_wgt->setVisible(false);
 		search_wgt->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 		QHBoxLayout *buttons_lt = new QHBoxLayout;
 		buttons_lt->setContentsMargins(0, 0, 0, 0);
 
@@ -100,6 +102,7 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		editor_alert_wgt = new QWidget(top_widget);
 		editor_alert_wgt->setFont(font);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 		QHBoxLayout *alert_lt = new QHBoxLayout;
 		alert_lt->setContentsMargins(0,0,0,0);
 		alert_lt->addWidget(ico);

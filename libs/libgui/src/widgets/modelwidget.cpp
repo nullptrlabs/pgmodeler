@@ -142,6 +142,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	label->setPixmap(GuiUtilsNs::getPixmap("alert"));
 	label->setObjectName("icon_lbl");
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	grid = new QGridLayout;
 	grid->addWidget(label, 0, 0, 1, 1);
 
@@ -187,6 +188,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	viewport->installEventFilter(this);
 	viewport->setAcceptDrops(true);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	grid=new QGridLayout;
 	grid->addWidget(protected_model_frm, 0,0,1,1);
 	grid->addWidget(viewport, 1,0,1,1);

@@ -237,6 +237,19 @@ namespace GuiUtilsNs {
 		}
 	}
 
+	/*! \brief Creates an empty layout manager.
+	 *  Custom margins and spacing values can be specified, as well as the
+	 *  layout class constructor arguments (generally a parent widget) */
+	template<class LtClass, typename ...CtorArgs,
+					 std::enable_if_t<std::is_base_of_v<QLayout, LtClass>, bool> = true>
+	LtClass *createLayout(int lt_margins, int lt_spacing, CtorArgs... new_lt_ctor_args)
+	{
+		LtClass *layout { new LtClass(new_lt_ctor_args...) };
+		layout->setContentsMargins(lt_margins, lt_margins, lt_margins, lt_margins);
+		layout->setSpacing(lt_spacing);
+		return layout;
+	}
+
 	/*! \brief Creates a wiget in a parent. If the parent has no layout configured then
 	 * this function also creates a vertical layout for the parent and puts the new widget there.
 	 *
@@ -259,10 +272,8 @@ namespace GuiUtilsNs {
 
 			if(!layout)
 			{
-				QVBoxLayout *vbox = new QVBoxLayout(parent);
+				QVBoxLayout *vbox = createLayout<QVBoxLayout>(lt_margins, LtSpacing, parent);
 				vbox->addWidget(new_wgt);
-				vbox->setContentsMargins(lt_margins, lt_margins, lt_margins, lt_margins);
-				vbox->setSpacing(LtSpacing);
 			}
 			// We add the item into widget only if the parent's layout is QBoxLayout
 			else if(qobject_cast<QBoxLayout *>(layout))
@@ -270,17 +281,6 @@ namespace GuiUtilsNs {
 		}
 
 		return new_wgt;
-	}
-
-	/*! \brief Creates a wiget in a parent. If the parent has no layout configured then
-	 * this function also creates a layout for the parent and puts the new widget there.
-	 * This version, creates the layout in parent with no margins. If no parent is provided
-	 * the object is an orphan one, meaning the user needs to take care of its destruction */
-	template<class WgtClass, typename ...CtorArgs,
-					 std::enable_if_t<std::is_base_of_v<QWidget, WgtClass>, bool> = true>
-	WgtClass *createWidgetInParent(CtorArgs... new_wgt_ctor_args)
-	{
-		return createWidgetInParent<WgtClass>(0, new_wgt_ctor_args...);
 	}
 
 	/*! \brief Creates a NumberedTextEditor instance automatically assigning it to 'parent'.

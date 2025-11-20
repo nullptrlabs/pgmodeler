@@ -79,6 +79,7 @@ SchemaEditorForm::SchemaEditorForm(QWidget *parent) : QWidget(parent)
 	syntax_conf_sel = new FileSelectorWidget(syntax_conf_wgt);
 	syntax_conf_sel->setReadOnly(true);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *vbox = new QVBoxLayout(syntax_conf_wgt);
 	vbox->addWidget(syntax_conf_sel);
 	vbox->setContentsMargins(0, 0, 0, 0);

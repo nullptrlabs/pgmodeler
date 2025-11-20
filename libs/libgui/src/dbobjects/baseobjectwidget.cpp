@@ -451,15 +451,18 @@ void BaseObjectWidget::configureBaseLayout()
 		},
 	};
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	baseobject_grid = new QGridLayout;
 	baseobject_grid->setObjectName("baseobject_grid");
 	baseobject_grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	baseobject_grid->setSpacing(GuiUtilsNs::LtSpacing);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	misc_btns_lt = new QHBoxLayout;
 	misc_btns_lt->setObjectName("misc_btns_lt");
 	misc_btns_lt->setSpacing(GuiUtilsNs::LtSpacing);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	extra_wgts_lt = new QVBoxLayout;
 	extra_wgts_lt->setObjectName("extra_wgts_lt ");
 	extra_wgts_lt->setSpacing(GuiUtilsNs::LtSpacing);
@@ -576,6 +579,7 @@ void BaseObjectWidget::configureTabbedLayout(bool create_attr_page, const QStrin
 	QLayoutItem *item = nullptr;
 	QTabWidget *attribs_tbw = nullptr;
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	if(is_hbox)
 		new_layout = new QHBoxLayout;
 	else
@@ -719,6 +723,7 @@ QFrame *BaseObjectWidget::generateInformationFrame(const QString &msg)
 	info_frm->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, info_frm);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	grid = new QGridLayout(info_frm);
 	grid->setContentsMargins(GuiUtilsNs::LtMargins);
 	grid->setObjectName("grid");
@@ -795,6 +800,7 @@ QFrame *BaseObjectWidget::generateVersionWarningFrame(std::map<QString, std::vec
 	alert_frm->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	grid = new QGridLayout(alert_frm);
 	grid->setObjectName("grid");
 

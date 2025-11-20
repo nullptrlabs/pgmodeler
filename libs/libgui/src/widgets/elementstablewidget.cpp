@@ -32,6 +32,7 @@ ElementsTableWidget::ElementsTableWidget(QWidget *parent) : QWidget(parent)
 		element_form.setButtonConfiguration();
 		connect(&element_form, SIGNAL(accepted()), element_wgt, SLOT(applyConfiguration()));
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 		QVBoxLayout *vbox = new QVBoxLayout(this);
 		elements_tab=new ObjectsTableWidget(ObjectsTableWidget::AllButtons ^
 																				(ObjectsTableWidget::UpdateButton | ObjectsTableWidget::DuplicateButton), true, this);

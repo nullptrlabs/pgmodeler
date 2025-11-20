@@ -18,57 +18,48 @@
 
 #include "operatorwidget.h"
 #include "guiutilsns.h"
+#include "customuistyle.h"
 
 OperatorWidget::OperatorWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Operator)
 {
 	QGridLayout *grid=nullptr;
 	unsigned i, i1;
-	QFrame *frame=nullptr;
 
 	Ui_OperatorWidget::setupUi(this);
+	CustomUiStyle::setStyleHint(CustomUiStyle::AltDefaultFrmHint, option_frm);
 
-	arg_types[0]=nullptr;
-	arg_types[0]=new PgSQLTypeWidget(this, tr("Left Argument Type"));
-	arg_types[1]=nullptr;
-	arg_types[1]=new PgSQLTypeWidget(this, tr("Right Argument Type"));
+	arg_types[0] = new PgSQLTypeWidget(arguments_tab, tr("Left argument type"));
+	arg_types[1] = new PgSQLTypeWidget(arguments_tab, tr("Right argument type"));
 
-	grid=new QGridLayout;
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
-	grid->addWidget(arg_types[0],0,0);
-	grid->addWidget(arg_types[1],1,0);
+	QVBoxLayout *vlayout = GuiUtilsNs::createLayout<QVBoxLayout>(GuiUtilsNs::LtMargin,
+																															 GuiUtilsNs::LtSpacing,
+																															 arguments_tab);
+	vlayout->addWidget(arg_types[0]);
+	vlayout->addWidget(arg_types[1]);
+	vlayout->addItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::Expanding));
 
-	grid->addItem(new QSpacerItem(10,1,QSizePolicy::Fixed,QSizePolicy::Expanding), 2, 0);
+	for(auto &func_sel : functions_sel)
+		func_sel = new ObjectSelectorWidget(ObjectType::Function, this);
 
-	frame=generateInformationFrame(tr("To create a unary operator it is necessary to specify as <strong><em>'any'</em></strong> one of its arguments. Additionally, the function that defines the operator must have only one parameter and this, in turn, must have the same data type of the the argument of unary operator."));
-	grid->addWidget(frame, 3, 0);
-	attributes_twg->widget(0)->setLayout(grid);
+	op_func_lt->addWidget(functions_sel[Operator::FuncOperator]);
+	restriction_lt->addWidget(functions_sel[Operator::FuncRestrict]);
+	join_lt->addWidget(functions_sel[Operator::FuncJoin]);
 
+	for(auto &op_sel : operators_sel)
+		op_sel = new ObjectSelectorWidget(ObjectType::Operator, this);
 
-	grid=dynamic_cast<QGridLayout *>(attributes_twg->widget(1)->layout());
-	for(i=Operator::FuncOperator; i <= Operator::FuncRestrict; i++)
-	{
-		functions_sel[i]=nullptr;
-		functions_sel[i]=new ObjectSelectorWidget(ObjectType::Function, this);
+	commutator_lt->addWidget(operators_sel[Operator::OperCommutator]);
+	negator_lt->addWidget(operators_sel[Operator::OperNegator]);
 
-		if(i!=Operator::FuncOperator)
-			grid->addWidget(functions_sel[i],i,1,1,1);
-	}
-
-	for(i=Operator::OperCommutator, i1=3; i <= Operator::OperNegator; i++,i1++)
-	{
-		operators_sel[i]=nullptr;
-		operators_sel[i]=new ObjectSelectorWidget(ObjectType::Operator, this);
-		grid->addWidget(operators_sel[i],i1,1,1,1);
-	}
-
-	operator_grid->addWidget(functions_sel[0],0,1,1,3);
-	configureFormLayout(operator_grid, ObjectType::Operator);
+	layout()->removeWidget(func_opts_wgt);
+	extra_wgts_lt->addWidget(func_opts_wgt);
+	configureTabbedLayout(attributes_twg);
 
 	setRequiredField(operator_func_lbl);
 	setRequiredField(functions_sel[0]);
 	configureTabOrder({ functions_sel[0], merges_chk, hashes_chk, arg_types[0], arg_types[1] });
 
-	setMinimumSize(600, 620);
+	setMinimumSize(600, 500);
 }
 
 void OperatorWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, Operator *oper)

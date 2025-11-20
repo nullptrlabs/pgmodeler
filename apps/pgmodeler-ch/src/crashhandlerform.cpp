@@ -29,6 +29,7 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 	QFile input;
 	QString buf;
 	QWidget *wgt=new QWidget;
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QHBoxLayout *layout=new QHBoxLayout;
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, hint_frm);
@@ -69,6 +70,7 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 	input_wgt=new QWidget(this);
 	input_wgt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	layout=new QHBoxLayout(input_wgt);
 	layout->setContentsMargins(0, 0, 0, 0);
 

@@ -75,6 +75,7 @@ DiffToolWidget::DiffToolWidget(QWidget *parent) : BaseConfigWidget (parent)
 	search_sql_wgt = new SearchReplaceWidget(sqlcode_txt, search_wgt_parent);
 	search_wgt_parent->setVisible(false);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	vbox = new QVBoxLayout(search_wgt_parent);
 	vbox->addWidget(search_sql_wgt);
 	vbox->setContentsMargins(0,0,0,0);
@@ -88,7 +89,7 @@ DiffToolWidget::DiffToolWidget(QWidget *parent) : BaseConfigWidget (parent)
 	connect(search_tb, &QToolButton::toggled, search_wgt_parent, &QWidget::setVisible);
 	connect(search_sql_wgt, &SearchReplaceWidget::s_hideRequested, search_tb, &QToolButton::toggle);
 
-	file_sel = GuiUtilsNs::createWidgetInParent<FileSelectorWidget>(store_in_file_wgt);
+	file_sel = GuiUtilsNs::createWidgetInParent<FileSelectorWidget>(0, store_in_file_wgt);
 	file_sel->setAllowFilenameInput(true);
 	file_sel->setAcceptMode(QFileDialog::AcceptSave);
 	file_sel->setFileDialogTitle(tr("Save diff as"));

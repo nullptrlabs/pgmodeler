@@ -21,11 +21,15 @@
 #include "guiutilsns.h"
 #include "settings/generalconfigwidget.h"
 #include "customtablewidget.h"
+#include "customuistyle.h"
 #include <QScrollBar>
 
 ModelObjectsWidget::ModelObjectsWidget(bool simplified_view, QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::AltDefaultFrmHint, content_frm);
+
 	obj_types_wgt = nullptr;
 	model_wgt=nullptr;
 	db_model=nullptr;

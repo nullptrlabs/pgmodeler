@@ -52,6 +52,7 @@ DatabaseImportWidget::DatabaseImportWidget(QWidget *parent) : QWidget(parent)
 	tree_filter_wgt->setVisible(false);
 
 	objs_filter_wgt = new ObjectsFilterWidget(this);
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *vbox = new QVBoxLayout(filter_gb);
 	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(objs_filter_wgt);
@@ -60,6 +61,7 @@ DatabaseImportWidget::DatabaseImportWidget(QWidget *parent) : QWidget(parent)
 	output_trw->setItemDelegateForColumn(0, htmlitem_del);
 
 	dbg_output_wgt = new DebugOutputWidget(this);
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	vbox = new QVBoxLayout(settings_tbw->widget(2));
 	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(dbg_output_wgt);

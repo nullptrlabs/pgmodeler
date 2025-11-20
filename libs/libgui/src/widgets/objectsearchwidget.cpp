@@ -43,10 +43,12 @@ ObjectSearchWidget::ObjectSearchWidget(QWidget *parent) : QWidget(parent)
 	_search_attrs_lbl->setText(tr("Search field:"));
 	_search_attrs_lbl->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QHBoxLayout *hbox = new QHBoxLayout;
 	hbox->addWidget(_search_attrs_lbl);
 	hbox->addWidget(_search_attrs_cmb);
 
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QVBoxLayout *vbox = new QVBoxLayout(filter_wgt);
 	vbox->addLayout(hbox);
 	vbox->addWidget(obj_types_lst);

@@ -6,11 +6,11 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>522</width>
-    <height>295</height>
+    <width>553</width>
+    <height>427</height>
    </rect>
   </property>
-  <layout class="QGridLayout" name="operator_grid">
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <property name="leftMargin">
     <number>5</number>
    </property>
@@ -23,10 +23,83 @@
    <property name="bottomMargin">
     <number>5</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="2" column="0" colspan="4">
+   <item>
+    <widget class="QWidget" name="func_opts_wgt" native="true">
+     <layout class="QHBoxLayout" name="func_opts_lt">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <layout class="QVBoxLayout" name="op_func_lt">
+        <item>
+         <widget class="QLabel" name="operator_func_lbl">
+          <property name="text">
+           <string>Operator function</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QFrame" name="option_frm">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Shape::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Shadow::Raised</enum>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>5</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>5</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QCheckBox" name="merges_chk">
+           <property name="text">
+            <string>MERGES</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="hashes_chk">
+           <property name="text">
+            <string>HASHES</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QTabWidget" name="attributes_twg">
      <property name="currentIndex">
       <number>0</number>
@@ -43,7 +116,7 @@
         <normaloff>:/icons/icons/usertype.png</normaloff>:/icons/icons/usertype.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Arguments</string>
+       <string>Arguments</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="funcs_opers_tab">
@@ -52,9 +125,9 @@
         <normaloff>:/icons/icons/moreactions.png</normaloff>:/icons/icons/moreactions.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>A&amp;dvanced</string>
+       <string>Advanced</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout">
+      <layout class="QVBoxLayout" name="verticalLayout">
        <property name="leftMargin">
         <number>5</number>
        </property>
@@ -67,41 +140,54 @@
        <property name="bottomMargin">
         <number>5</number>
        </property>
-       <property name="spacing">
-        <number>5</number>
-       </property>
-       <item row="1" column="0">
-        <widget class="QLabel" name="join_func_lbl">
-         <property name="text">
-          <string>Join:</string>
-         </property>
-        </widget>
+       <item>
+        <layout class="QVBoxLayout" name="join_lt">
+         <item>
+          <widget class="QLabel" name="join_func_lbl">
+           <property name="text">
+            <string>Join function</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="restrict_func_lbl">
-         <property name="text">
-          <string>Restrict:</string>
-         </property>
-        </widget>
+       <item>
+        <layout class="QVBoxLayout" name="restriction_lt">
+         <item>
+          <widget class="QLabel" name="restrict_func_lbl">
+           <property name="text">
+            <string>Restriction function</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="commutator_op_lbl">
-         <property name="text">
-          <string>Commutator:</string>
-         </property>
-        </widget>
+       <item>
+        <layout class="QVBoxLayout" name="commutator_lt">
+         <item>
+          <widget class="QLabel" name="commutator_op_lbl">
+           <property name="text">
+            <string>Commutator operator</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="negator_op_lbl">
-         <property name="text">
-          <string>Negator:</string>
-         </property>
-        </widget>
+       <item>
+        <layout class="QVBoxLayout" name="negator_lt">
+         <item>
+          <widget class="QLabel" name="negator_op_lbl">
+           <property name="text">
+            <string>Negator operator</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
-       <item row="5" column="0">
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -115,57 +201,9 @@
      </widget>
     </widget>
    </item>
-   <item row="1" column="3">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>229</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="operator_func_lbl">
-     <property name="text">
-      <string>Operator Func.:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="2">
-    <widget class="QCheckBox" name="hashes_chk">
-     <property name="text">
-      <string>HASHES</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="options_lbl">
-     <property name="minimumSize">
-      <size>
-       <width>70</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Options:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QCheckBox" name="merges_chk">
-     <property name="text">
-      <string>MERGES</string>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>
