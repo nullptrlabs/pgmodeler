@@ -132,6 +132,12 @@ void ObjectSelectorWidget::setReadOnly(bool ro)
 	sel_object_tb->setVisible(!ro);
 }
 
+void ObjectSelectorWidget::setSizePolicy(QSizePolicy::Policy horiz_pol, QSizePolicy::Policy vert_pol)
+{
+	QWidget::setSizePolicy(horiz_pol, vert_pol);
+	obj_name_edt->setSizePolicy(horiz_pol, vert_pol);
+}
+
 void ObjectSelectorWidget::showSelectedObject(BaseObject *obj_sel, bool)
 {
 	if(obj_sel)

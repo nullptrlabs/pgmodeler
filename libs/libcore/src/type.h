@@ -37,8 +37,8 @@ class __libcore Type: public BaseObject {
 	public:
 		enum TypeConfig: unsigned {
 			BaseType,
-			EnumerationType,
 			CompositeType,
+			EnumerationType,
 			RangeType
 		};
 

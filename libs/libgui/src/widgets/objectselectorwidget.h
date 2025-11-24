@@ -78,6 +78,8 @@ class __libgui ObjectSelectorWidget: public QWidget, public Ui::ObjectSelectorWi
 		 *  be displayed, only user interactions in the UI are disabled. */
 		void setReadOnly(bool ro);
 
+		void setSizePolicy(QSizePolicy::Policy horiz_pol, QSizePolicy::Policy vert_pol);
+
 	private slots:
 		void showSelectedObject(BaseObject *obj_sel, bool=false);
 

@@ -62,10 +62,7 @@ class __libgui TypeWidget: public BaseObjectWidget, public Ui::TypeWidget {
 
 	private slots:
 		//! \brief Handles the form showing the fields according to the selected type configuration (base, composite, enumaration)
-		void selectTypeConfiguration();
-
-		//! \brief Handles the type enumarations
-		void handleEnumeration(int row);
+		void selectTypeConfiguration(int type_idx);
 
 		//! \brief Create/Updated an attribute based upon values of the form
 		void handleAttribute(int row);
