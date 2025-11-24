@@ -972,6 +972,7 @@ namespace GuiUtilsNs {
 		QLayoutItem *item = nullptr;
 		QBoxLayout *box_lt = nullptr;
 		QGridLayout *grid_lt = nullptr;
+		bool is_hbox = false;
 		int item_cnt = 0;
 
 		for(auto &layout : widget->findChildren<QBoxLayout *>())
@@ -1008,11 +1009,15 @@ namespace GuiUtilsNs {
 				 label = lt->count() >= 2 ?
 								 qobject_cast<QLabel *>(lt->itemAt(0)->widget()) : nullptr;
 
-				 if(lt->count() < 2 || !label || label->text().isEmpty() ||
+					if(lt->count() < 2 || !label || label->text().isEmpty() ||
 						label->property(FontAdjustedProp).toBool())
-					 continue;
+						continue;
 
-				 lt->setSpacing(LtSpacing / 2);
+					if(qobject_cast<QHBoxLayout *>(lt))
+						lt->setSpacing(LtSpacing);
+					else
+						lt->setSpacing(LtSpacing / 2);
+
 				 configureWidgetBuddyLabel(label, lt->itemAt(1)->widget());
 			}
 		}

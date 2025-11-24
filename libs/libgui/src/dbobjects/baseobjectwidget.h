@@ -231,7 +231,9 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		VersionsInterval=1,
 		AfterVersion=2;
 		
-		BaseObjectWidget(QWidget * parent = nullptr, ObjectType obj_type=ObjectType::BaseObject);
+		BaseObjectWidget(QWidget * parent = nullptr,
+										 ObjectType obj_type = ObjectType::BaseObject);
+
 		~BaseObjectWidget() override = default;
 
 		//! \brief Generates a string containing the specified version interval

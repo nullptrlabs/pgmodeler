@@ -41,7 +41,7 @@ TransformWidget::TransformWidget(QWidget *parent): BaseObjectWidget(parent, Obje
 	setRequiredField(language_lbl);
 	configureTabbedLayout(attributes_tbw);
 
-	setMinimumSize(550, 450);
+	setMinimumSize(550, 400);
 }
 
 void TransformWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Transform *transform)

@@ -26,8 +26,9 @@ DomainWidget::DomainWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 	check_expr_hl = new SyntaxHighlighter(check_expr_txt, false, true, font().pointSizeF());
 	check_expr_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
-	data_type = GuiUtilsNs::createWidgetInParent<PgSQLTypeWidget>(0, data_type_tab);
-	data_type_tab->layout()->addItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Expanding));
+	data_type = new PgSQLTypeWidget(this);
+	data_type_lt->insertWidget(0, data_type);
+	data_type_lt->addItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Expanding));
 
 	constr_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(0,
 																																	 CustomTableWidget::AllButtons ^
@@ -43,11 +44,18 @@ DomainWidget::DomainWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 	connect(constr_tab, &CustomTableWidget::s_rowUpdated, this, &DomainWidget::handleConstraint);
 	connect(constr_tab, &CustomTableWidget::s_rowEdited, this, &DomainWidget::editConstraint);
 
+	domain_lt->removeItem(data_type_lt);
+	extra_wgts_lt->addLayout(data_type_lt);
+
+	domain_lt->removeItem(def_value_lt);
+	extra_wgts_lt->addLayout(def_value_lt);
+
 	configureTabbedLayout(dom_attribs_tbw);
+
 	setRequiredField(data_type);
 	configureTabOrder({ def_value_edt, not_null_chk,	data_type, constr_name_edt, check_expr_txt });
 
-	setMinimumSize(600, 400);
+	setMinimumSize(600, 500);
 }
 
 void DomainWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, Domain *domain)

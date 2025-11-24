@@ -27,12 +27,11 @@
 
 ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::View)
 {
-	CustomTableWidget *tab = nullptr;
-	ObjectType types[] = { ObjectType::Trigger, ObjectType::Rule, ObjectType::Index };
 	QGridLayout *grid = nullptr;
 	QVBoxLayout *vbox = nullptr;
 
 	Ui_ViewWidget::setupUi(this);
+
 	alert_frm->setVisible(false);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
@@ -40,62 +39,39 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 	check_option_cmb->addItems(CheckOptionType::getTypes());
 	check_option_cmb->setCurrentIndex(0);
 
-	sql_definition_txt = new NumberedTextEditor(this, true);
+	sql_definition_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin, sql_definition_tab, true);
 	sql_definition_hl = new SyntaxHighlighter(sql_definition_txt);
 	sql_definition_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	vbox = new QVBoxLayout(sql_definition_tab);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
-	vbox->addWidget(alert_frm);
-	vbox->addWidget(sql_definition_txt);
+	std::vector ref_types {
+		ObjectType::Schema, ObjectType::Column,
+		ObjectType::Table, ObjectType::ForeignTable,
+		ObjectType::View, ObjectType::Function,
+		ObjectType::Procedure
+	};
 
-	obj_refs_wgt = new ReferencesWidget({ ObjectType::Schema, ObjectType::Column,
-																				ObjectType::Table, ObjectType::ForeignTable,
-																				ObjectType::View, ObjectType::Function,
-																				ObjectType::Procedure } , true, this);
+	obj_refs_wgt = GuiUtilsNs::createWidgetInParent<ReferencesWidget>(GuiUtilsNs::LtMargin,
+																																		ref_types,
+																																		true, view_refs_tab);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	vbox = new QVBoxLayout(view_refs_tab);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
-	vbox->addWidget(obj_refs_wgt);
-	vbox->addWidget(obj_refs_wgt);
+	tag_sel = new ObjectSelectorWidget(ObjectType::Tag, this);
+	tag_lt->insertWidget(1, tag_sel);
 
-	sql_preview_txt=new NumberedTextEditor(this);
-	sql_preview_txt->setReadOnly(true);
-	sql_preview_hl=new SyntaxHighlighter(sql_preview_txt);
-	sql_preview_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
-
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	vbox = new QVBoxLayout(sql_preview_tab);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
-	vbox->addWidget(sql_preview_txt);
-
-	tag_sel=new ObjectSelectorWidget(ObjectType::Tag, this);
-	dynamic_cast<QGridLayout *>(basics_gb->layout())->addWidget(tag_sel, 0, 1, 1, 6);
-
-	custom_cols_wgt = new SimpleColumnsWidget(this);
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	vbox = new QVBoxLayout(columns_tab);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
-	vbox->addWidget(custom_cols_wgt);
+	custom_cols_wgt = GuiUtilsNs::createWidgetInParent< SimpleColumnsWidget>(GuiUtilsNs::LtMargin,
+																																					 columns_tab);
 
 	//Configuring the table objects that stores the triggers and rules
-	unsigned tab_id = 4;
+	QWidgetList parent_tab { triggers_tab, rules_tab, indexes_tab };
+	CustomTableWidget *tab = nullptr;
+	int p_idx = 0;
 
-	for(auto &type : types)
+	for(auto &type : { ObjectType::Trigger, ObjectType::Rule, ObjectType::Index })
 	{
-		tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
-																(CustomTableWidget::UpdateButton  | CustomTableWidget::MoveButtons), true, this);
-
+		tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																															CustomTableWidget::AllButtons ^
+																															(CustomTableWidget::UpdateButton  | CustomTableWidget::MoveButtons),
+																															true, parent_tab[p_idx++]);
 		objects_tab_map[type] = tab;
-
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-		grid=new QGridLayout;
-		grid->addWidget(tab, 0, 0, 1, 1);
-		grid->setContentsMargins(GuiUtilsNs::LtMargins);
-		attributes_tbw->widget(tab_id)->setLayout(grid);
-		tab_id++;
 
 		connect(tab, &CustomTableWidget::s_rowsRemoved, this, __slot(this, ViewWidget::removeObjects));
 		connect(tab, &CustomTableWidget::s_rowRemoved, this, __slot_n(this, ViewWidget::removeObject));
@@ -133,31 +109,22 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 	tablespace_sel->setEnabled(false);
 	tablespace_lbl->setEnabled(false);
 
-	connect(attributes_tbw, &QTabWidget::currentChanged, this, &ViewWidget::updateCodePreview);
-
-	connect(materialized_rb, &QRadioButton::toggled, with_no_data_chk, &QCheckBox::setEnabled);
-	connect(materialized_rb, &QRadioButton::toggled, tablespace_sel, &ObjectSelectorWidget::setEnabled);
-	connect(materialized_rb, &QRadioButton::toggled, tablespace_lbl, &QLabel::setEnabled);
-	connect(materialized_rb, &QRadioButton::toggled, check_option_cmb, &QComboBox::setDisabled);
-	connect(recursive_rb, &QRadioButton::toggled, check_option_cmb, &QComboBox::setDisabled);
-
-	connect(materialized_rb, &QRadioButton::toggled, this, &ViewWidget::updateCodePreview);
-	connect(recursive_rb,  &QRadioButton::toggled,  this, &ViewWidget::updateCodePreview);
-	connect(with_no_data_chk, &QCheckBox::toggled, this, &ViewWidget::updateCodePreview);
-	connect(tablespace_sel, &ObjectSelectorWidget::s_objectSelected, this, &ViewWidget::updateCodePreview);
-	connect(tablespace_sel, &ObjectSelectorWidget::s_selectorCleared, this, &ViewWidget::updateCodePreview);
-	connect(schema_sel, &ObjectSelectorWidget::s_objectSelected, this, &ViewWidget::updateCodePreview);
-	connect(schema_sel, &ObjectSelectorWidget::s_selectorCleared, this, &ViewWidget::updateCodePreview);
+	connect(view_type_cmb, &QComboBox::activated, this, [this](int idx){
+		with_no_data_chk->setEnabled(idx == Materialized);
+		tablespace_sel->setEnabled(idx == Materialized);
+		tablespace_lbl->setEnabled(idx == Materialized);
+		check_option_cmb->setEnabled(idx == Ordinary);
+	});
 
 	connect(sql_definition_txt, &NumberedTextEditor::textChanged, this, [this]() {
 		alert_frm->setVisible(sql_definition_txt->toPlainText().contains(QRegularExpression(View::ExtraSCRegExp)));
 	});
 
-	configureFormFields(ObjectType::View);
-	baseobject_grid->setContentsMargins(0, 0, 0, 0);
-	dynamic_cast<QVBoxLayout*>(attributes_tbw->widget(0)->layout())->insertLayout(0, baseobject_grid);
+	layout()->removeItem(type_sec_tag_lt);
+	extra_wgts_lt->addLayout(type_sec_tag_lt);
+	configureTabbedLayout(attributes_tbw);
 
-	configureTabOrder({ tag_sel, ordinary_rb, recursive_rb, with_no_data_chk, attributes_tbw });
+	configureTabOrder({ tag_sel, view_type_cmb, with_no_data_chk, attributes_tbw });
 	setMinimumSize(700, 650);
 }
 
@@ -434,10 +401,10 @@ void ViewWidget::listObjects(ObjectType obj_type)
 	}
 }
 
-void ViewWidget::updateCodePreview()
+QString ViewWidget::getSQLCodePreview()
 {
 	if(attributes_tbw->currentIndex() != attributes_tbw->count() - 1)
-		return;
+		return "";
 
 	try
 	{
@@ -450,18 +417,15 @@ void ViewWidget::updateCodePreview()
 		aux_view.setSqlDefinition(sql_definition_txt->toPlainText());
 		aux_view.setReferences(obj_refs_wgt->getObjectReferences());
 
-		aux_view.setMaterialized(materialized_rb->isChecked());
-		aux_view.setRecursive(recursive_rb->isChecked());
+		aux_view.setMaterialized(view_type_cmb->currentIndex() == Materialized);
+		aux_view.setRecursive(view_type_cmb->currentIndex() == Recursive);
 		aux_view.setWithNoData(with_no_data_chk->isChecked());
 
-		sql_preview_txt->setPlainText(aux_view.getSourceCode(SchemaParser::SqlCode));
+		return aux_view.getSourceCode(SchemaParser::SqlCode);
 	}
 	catch(Exception &e)
 	{
-		//In case of error no code is outputed, showing a error message in the code preview widget
-		QString str_aux=tr("/* Could not generate the SQL code. Make sure all attributes are correctly filled! ");
-		str_aux+=QString("\n\n>> Returned error(s): \n\n%1*/").arg(e.getExceptionsText());
-		sql_preview_txt->setPlainText(str_aux);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -469,7 +433,7 @@ void ViewWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Sch
 {
 	if(!view)
 	{
-		view=new View;
+		view = new View;
 
 		if(schema)
 			view->setSchema(schema);
@@ -483,8 +447,13 @@ void ViewWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Sch
 
 	sql_definition_txt->setPlainText(view->getSqlDefinition());
 	obj_refs_wgt->setAttributes(this->model, view->getObjectReferences());
-	materialized_rb->setChecked(view->isMaterialized());
-	recursive_rb->setChecked(view->isRecursive());
+
+	if(view->isMaterialized())
+		view_type_cmb->setCurrentIndex(Materialized);
+
+	if(view->isRecursive())
+		view_type_cmb->setCurrentIndex(Recursive);
+
 	with_no_data_chk->setChecked(view->isWithNoData());
 
 	op_list->startOperationChain();
@@ -522,8 +491,8 @@ void ViewWidget::applyConfiguration()
 		view->setSecurityBarrier(security_barrier_chk->isChecked());
 		view->setSecurityInvoker(security_invoker_chk->isChecked());
 		view->setCheckOption(check_option_cmb->currentIndex() > 0 ? check_option_cmb->currentText() : "");
-		view->setMaterialized(materialized_rb->isChecked());
-		view->setRecursive(recursive_rb->isChecked());
+		view->setMaterialized(view_type_cmb->currentIndex() == Materialized);
+		view->setRecursive(view_type_cmb->currentIndex() == Recursive);
 		view->setWithNoData(with_no_data_chk->isChecked());
 		view->setTag(dynamic_cast<Tag *>(tag_sel->getSelectedObject()));
 

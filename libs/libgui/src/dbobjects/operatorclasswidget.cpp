@@ -63,13 +63,15 @@ OperatorClassWidget::OperatorClassWidget(QWidget *parent): BaseObjectWidget(pare
 	selectElementType(0);
 	indexing_cmb->addItems(IndexingType::getTypes());
 
+	layout()->removeItem(attributes_lt);
+	extra_wgts_lt->addLayout(attributes_lt);
 	configureTabbedLayout(attributes_tbw);
 
 	configureTabOrder({ indexing_cmb, def_class_chk , family_sel, data_type, elem_type_cmb,
 											operator_sel, elem_family_sel, function_sel, stg_num_sb, storage_type,
 											elements_tab });
 
-	setMinimumSize(600, 400);
+	setMinimumSize(600, 500);
 }
 
 void OperatorClassWidget::selectElementType(int elem_type)

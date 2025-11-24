@@ -505,6 +505,9 @@
             <property name="editable">
              <bool>true</bool>
             </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QComboBox::SizeAdjustPolicy::AdjustToContentsOnFirstShow</enum>
+            </property>
             <property name="iconSize">
              <size>
               <width>28</width>

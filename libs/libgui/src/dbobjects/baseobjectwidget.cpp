@@ -391,7 +391,8 @@ void BaseObjectWidget::configureBaseLayout()
 		},
 
 		{	// Objects that has the name and alias fields visible
-			{ ObjectType::Relationship, ObjectType::BaseRelationship },
+			{ ObjectType::Relationship, ObjectType::BaseRelationship,
+				ObjectType::Rule, ObjectType::Policy, ObjectType::Trigger },
 			{ { name_lbl, name_edt, 0, 0 },
 				{ alias_lbl, alias_edt, id_icon_frm, 0, 1 } },
 		},
@@ -407,6 +408,21 @@ void BaseObjectWidget::configureBaseLayout()
 			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
 				{ tablespace_lbl, tablespace_sel, 1, 0 },
 				{ owner_lbl, owner_sel, 1, 1 } },
+		},
+
+		{
+			// Objects that has the name, alias and collation field visible
+			{ ObjectType::Column },
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
+				{ alias_lbl, alias_edt, 1, 0 },
+				{ collation_lbl, collation_sel, 1, 1 } },
+		},
+
+		{	// Objects that has the name, alias and tablespace fields visible
+			{ ObjectType::Constraint, ObjectType::Index },
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
+				{ alias_lbl, alias_edt, 1, 0 },
+				{ tablespace_lbl, tablespace_sel, 1, 1 } },
 		},
 
 		{	// Objects that has the name, schema and owner fields visible
@@ -502,6 +518,8 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget, bool create
 {
 	if(!tab_widget)
 		return;
+
+	tab_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	if(create_general_pg)
 	{

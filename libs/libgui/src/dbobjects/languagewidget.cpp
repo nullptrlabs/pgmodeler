@@ -30,16 +30,10 @@ LanguageWidget::LanguageWidget(QWidget *parent): BaseObjectWidget(parent, Object
 	func_validator_lt->addWidget(func_validator_sel);
 	func_inline_lt->addWidget(func_inline_sel);
 
-	QFrame *frame = generateInformationFrame(tr("The functions to be assigned to the language should have, respectively, the following signatures:<br/><br/>  <strong>Handler function:</strong> <em>language_handler function()</em><br/>  <strong>Validator function:</strong> <em>void function(oid)</em><br/>  <strong>Inline function:</strong> <em>void function(internal)</em>"));
-	frame->setParent(this);
-
-	attributes_lt->addItem(new QSpacerItem(10, 10, QSizePolicy::Minimum, QSizePolicy::Expanding));
-	attributes_lt->addWidget(frame);
-
-	configureTabbedLayout(lang_attribs_tbw);
+	configureTabbedLayout(false);
 	configureTabOrder({ trusted_chk, func_handler_sel, func_validator_sel, func_inline_sel });
 
-	setMinimumSize(600, 420);
+	setMinimumSize(600, 500);
 }
 
 void LanguageWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Language *language)

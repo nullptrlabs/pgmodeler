@@ -27,7 +27,7 @@ OperatorFamilyWidget::OperatorFamilyWidget(QWidget *parent): BaseObjectWidget(pa
 	setRequiredField(indexing_lbl);
 	configureTabbedLayout(false);
 	configureTabOrder();
-	setMinimumSize(500, 350);
+	setMinimumSize(550, 350);
 }
 
 void OperatorFamilyWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, OperatorFamily *op_family)
