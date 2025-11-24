@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
-    <height>271</height>
+    <width>553</width>
+    <height>305</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -150,16 +150,19 @@
            <number>5</number>
           </property>
           <property name="topMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
           <property name="rightMargin">
            <number>5</number>
           </property>
           <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <property name="horizontalSpacing">
            <number>5</number>
           </property>
-          <property name="spacing">
-           <number>5</number>
+          <property name="verticalSpacing">
+           <number>0</number>
           </property>
           <item row="0" column="0">
            <widget class="QCheckBox" name="superusr_chk">
@@ -254,6 +257,9 @@
           </item>
           <item row="5" column="1" colspan="2">
            <layout class="QHBoxLayout" name="horizontalLayout">
+            <property name="spacing">
+             <number>5</number>
+            </property>
             <item>
              <widget class="QCheckBox" name="validity_chk">
               <property name="sizePolicy">
@@ -273,7 +279,7 @@
                <bool>false</bool>
               </property>
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -282,7 +288,7 @@
                <string/>
               </property>
               <property name="displayFormat">
-               <string>yyyy-MMM-dd hh:mm:ss</string>
+               <string>yyyy-MM-dd hh:mm:ss</string>
               </property>
               <property name="calendarPopup">
                <bool>false</bool>
@@ -291,6 +297,19 @@
                <enum>Qt::TimeSpec::LocalTime</enum>
               </property>
              </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </item>

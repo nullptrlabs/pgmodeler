@@ -192,7 +192,7 @@ TableWidget::TableWidget(QWidget *parent, ObjectType tab_type): BaseObjectWidget
 	setRequiredField(server_sel);
 
 	configureTabOrder({ tag_sel });
-	setMinimumSize(700, 550);
+	setMinimumSize(700, 580);
 }
 
 template<class Class, class WidgetClass>
