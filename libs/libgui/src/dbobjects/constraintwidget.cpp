@@ -18,6 +18,7 @@
 
 #include "constraintwidget.h"
 #include "guiutilsns.h"
+#include "customuistyle.h"
 
 ConstraintWidget::ConstraintWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Constraint)
 {
@@ -27,6 +28,7 @@ ConstraintWidget::ConstraintWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 
 	Ui_ConstraintWidget::setupUi(this);
 
+	CustomUiStyle::setStyleHint(CustomUiStyle::AltDefaultFrmHint, options_frm);
 	GuiUtilsNs::configureWidgetFont(deferrable_chk, GuiUtilsNs::SmallFontFactor, true);
 	GuiUtilsNs::configureWidgetFont(fill_factor_chk, GuiUtilsNs::SmallFontFactor, true);
 	GuiUtilsNs::configureWidgetFont(indexing_chk, GuiUtilsNs::SmallFontFactor, true);
@@ -36,17 +38,11 @@ ConstraintWidget::ConstraintWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	expression_hl = new SyntaxHighlighter(expression_txt, false, true, font().pointSizeF());
 	expression_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
-	ref_table_sel = new ObjectSelectorWidget(ObjectType::Table, this);
-	col_picker_wgt = new ColumnPickerWidget(this);
+	ref_table_sel = new ObjectSelectorWidget(ObjectType::Table, ref_cols_pg);
+	col_picker_wgt = GuiUtilsNs::createWidgetInParent<ColumnPickerWidget>(GuiUtilsNs::LtMargin, columns_pg);
 	ref_col_picker_wgt = new ColumnPickerWidget(this);
-
-	#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QVBoxLayout *vbox = new QVBoxLayout(constr_attibs_tbw->widget(0));
-	vbox->addWidget(col_picker_wgt);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
-
-	dynamic_cast<QGridLayout *>(constr_attibs_tbw->widget(1)->layout())->addWidget(ref_table_sel, 0,1,1,2);
-	dynamic_cast<QGridLayout *>(constr_attibs_tbw->widget(1)->layout())->addWidget(ref_col_picker_wgt, 3,0,1,3);
+	ref_table_lt->addWidget(ref_table_sel);
+	ref_cols_lt->addWidget(ref_col_picker_wgt);
 
 	constr_type_cmb->addItems(ConstraintType::getTypes());
 	match_cmb->addItems(MatchType::getTypes());
@@ -66,9 +62,9 @@ ConstraintWidget::ConstraintWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 
 	selectConstraintType();
 
-	layout()->removeItem(constr_attribs_lt);
-	extra_wgts_lt->addLayout(constr_attribs_lt);
-	configureTabbedLayout(constr_attibs_tbw);
+	layout()->removeItem(constr_attribs_grid);
+	extra_wgts_lt->addLayout(constr_attribs_grid);
+	configureTabbedLayout(constr_attribs_tbw);
 
 	configureTabOrder();
 	setMinimumSize(600, 450);
@@ -88,11 +84,18 @@ void ConstraintWidget::selectConstraintType()
 			 is_ck = (constr_type == ConstraintType::Check),
 			 is_ex = (constr_type == ConstraintType::Exclude);
 
-
 	tablespace_lbl->setVisible(is_pk || is_uq);
 	tablespace_sel->setVisible(is_pk || is_uq);
 
-	if(!tablespace_sel->isVisible()) tablespace_sel->clearSelector();
+	if(!tablespace_sel->isVisible())
+		tablespace_sel->clearSelector();
+
+	options_frm->setVisible(is_uq || is_ck);
+
+	if(is_uq || is_ck)
+		v_spacer->changeSize(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored);
+	else
+		v_spacer->changeSize(5, 5, QSizePolicy::Ignored, QSizePolicy::Expanding);
 
 	no_inherit_chk->setVisible(is_ck);
 	nulls_not_distinct_chk->setVisible(is_uq);
@@ -110,21 +113,15 @@ void ConstraintWidget::selectConstraintType()
 	on_update_cmb->setVisible(is_fk);
 	on_update_lbl->setVisible(is_fk);
 
-	//columns_tbw->setVisible(!is_ck && !is_ex);
-
 	indexing_chk->setVisible(is_ex);
 	indexing_cmb->setVisible(is_ex);
 
-	/* if(!is_fk)
-	{
-		columns_tbw->setTabEnabled(1, false);
-		columns_tbw->setCurrentIndex(0);
-		ref_table_sel->clearSelector();
-	}
-	else
-		columns_tbw->setTabEnabled(1, true); */
+	constr_attribs_tbw->setTabVisible(constr_attribs_tbw->indexOf(ref_cols_pg), is_fk);
+	constr_attribs_tbw->setTabVisible(constr_attribs_tbw->indexOf(expression_pg), is_ck || is_ex);
+	constr_attribs_tbw->setTabVisible(constr_attribs_tbw->indexOf(excl_elems_pg), is_ex);
 
-	//excl_elems_grp->setVisible(constr_type == ConstraintType::Exclude);
+	if(!is_fk)
+		ref_table_sel->clearSelector();
 }
 
 void ConstraintWidget::setAttributes(DatabaseModel *model, OperationList *op_list,  BaseObject *parent_obj, Constraint *constr)

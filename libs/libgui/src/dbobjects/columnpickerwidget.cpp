@@ -40,7 +40,7 @@ ColumnPickerWidget::ColumnPickerWidget(QWidget *parent) :	QWidget(parent)
 	columns_tab->setHeaderLabel(tr("Type"), 1);
 	columns_tab->setHeaderIcon(GuiUtilsNs::getIcon("usertype"),1);
 
-	col_picker_grid->addWidget(columns_tab, 1, 0, 1, 3);
+	col_picker_lt->addWidget(columns_tab);
 
 	connect(columns_tab, &CustomTableWidget::s_rowAdded, this, [this](int idx){
 		__trycatch( addColumn(idx); )
@@ -70,7 +70,9 @@ void ColumnPickerWidget::setParentObject(BaseObject *p_obj)
 			p_obj = nullptr;
 
 		parent_obj = p_obj;
-		setEnabled(p_obj != nullptr);
+		columns_tab->setEnabled(p_obj != nullptr);
+		columns_cmb->setEnabled(p_obj != nullptr);
+		columns_lbl->setEnabled(p_obj != nullptr);
 
 		columns_tab->blockSignals(true);
 		columns_tab->removeRows();

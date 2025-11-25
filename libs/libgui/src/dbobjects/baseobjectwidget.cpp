@@ -577,6 +577,23 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget, bool create
 		});
 	}
 
+	/* Moving the frame that displays the protected object message
+	 * to outside general tab, thus, it'll be places at the very top
+	 * of the widget's layout so it can be visible above the tab widget */
+	QVBoxLayout *wgt_lt = qobject_cast<QVBoxLayout *>(layout());
+
+	if(wgt_lt)
+	{
+		baseobject_grid->removeWidget(protected_obj_frm);
+		wgt_lt->insertWidget(0, protected_obj_frm);
+	}
+	else
+	{
+		/* If the widget's layout is not a QVBoxLayout we just display a debug
+		 * message and keep the alert message in the general tab */
+		qDebug().noquote() << "BaseObjectWidget::configureTabbedLayout(QTabWidget *, bool): The widget's layout must be QHBoxLayout or QVBoxLayout.";
+	}
+
 	configureFormFields(handled_obj_type);
 	GuiUtilsNs::configureWidgetsBuddyLabels(tab_widget);
 }
@@ -589,7 +606,7 @@ void BaseObjectWidget::configureTabbedLayout(bool create_attr_page, const QStrin
 
 	if(!is_hbox && !is_vbox)
 	{
-		qDebug().noquote() << "BaseObjectWidget::configureTabbedLayout(): The widget's layout must be QHBoxLayout or QVBoxLayout.";
+		qDebug().noquote() << "BaseObjectWidget::configureTabbedLayout(bool, QString, QString): The widget's layout must be QHBoxLayout or QVBoxLayout.";
 		return;
 	}
 
