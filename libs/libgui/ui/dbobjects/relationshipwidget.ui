@@ -122,6 +122,9 @@
            </item>
            <item>
             <layout class="QHBoxLayout" name="ref_table_lt">
+             <property name="spacing">
+              <number>5</number>
+             </property>
              <item>
               <widget class="QCheckBox" name="table1_mand_chk">
                <property name="sizePolicy">
@@ -168,6 +171,9 @@
            </item>
            <item>
             <layout class="QHBoxLayout" name="recv_table_lt">
+             <property name="spacing">
+              <number>5</number>
+             </property>
              <item>
               <widget class="QCheckBox" name="table2_mand_chk">
                <property name="sizePolicy">
