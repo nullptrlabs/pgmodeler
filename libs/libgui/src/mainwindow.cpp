@@ -70,7 +70,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 	connectSignalsToSlots();
 	showRightWidgetsBar();
 	showBottomWidgetsBar();
-	updateConnections();
+	//updateConnections();
 	updateRecentModelsMenu();
 	configureSamplesMenu();
 	applyConfigurations();

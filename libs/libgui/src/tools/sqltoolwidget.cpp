@@ -227,7 +227,10 @@ void SQLToolWidget::connectToServer()
 		if(connections_cmb->currentIndex()==connections_cmb->count()-1)
 		{
 			if(ConnectionsConfigWidget::openConnectionsConfiguration(connections_cmb, true))
+			{
+				clearDatabases();
 				emit s_connectionsUpdateRequested();
+			}
 		}
 		else
 		{
