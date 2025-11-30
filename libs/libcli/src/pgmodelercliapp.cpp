@@ -2941,14 +2941,14 @@ int PgModelerCliApp::definePluginsExecOrder(const attribs_map &opts)
 	int plug_op_modes = 0;
 	PgModelerCliPlugin::OperationId op_id;
 	QString acc_op_key;
-	bool is_op_mode = false;
+	bool is_op_mode = false, stg_plugin = false;
 
-	QStringList valid_opts, export_opts = {
+	QStringList valid_opts, export_ops = {
 		ExportToFile, ExportToPng, ExportToSvg,
 		ExportToDbms, ExportToDict
 	};
 
-	std::map<PgModelerCliPlugin::OperationId, QString> cli_op = {
+	std::map<PgModelerCliPlugin::OperationId, QString> cli_ops = {
 		{ PgModelerCliPlugin::ExportToFile, ExportToFile},
 		{ PgModelerCliPlugin::ExportToPng, ExportToPng },
 		{ PgModelerCliPlugin::ExportToSvg, ExportToSvg },
@@ -2964,30 +2964,57 @@ int PgModelerCliApp::definePluginsExecOrder(const attribs_map &opts)
 	{
 		for(auto &plugin : plugins)
 		{
+			stg_plugin = false;
 			valid_opts = plugin->getValidOptions();
 			is_op_mode = plugin->isOpModeOption(opt);
+			op_id = plugin->getOperationId();
 
+			/* We discard the plugin immediately if
+			 * the current option isn't part of the
+			 * valid options set of the plugin or
+			 * the plugin is already stagged for
+			 * execution */
 			if(!valid_opts.contains(opt) ||
-				 !is_op_mode ||
 				 plug_exec_order.contains(plugin))
 				continue;
 
-			plug_exec_order.append(plugin);
-			op_id = plugin->getOperationId();
-
-			if(op_id == PgModelerCliPlugin::CustomCliOp &&
-				 is_op_mode && !accepted_opts.count(opt))
+			/* If the plugin run in any export operation we
+			 * have to include its valid options in the valid
+			 * options sets of each export option so the CLI
+			 * recognizes the plugin options in use */
+			if(op_id == PgModelerCliPlugin::Export)
 			{
-				acc_op_key = opt;
-				plug_op_modes++;
-			}
-			else if(op_id == PgModelerCliPlugin::Export && export_opts.contains(opt))
-				acc_op_key = opt;
-			else if(cli_op.count(op_id))
-				acc_op_key = cli_op[op_id];
+				for(auto &exp_op : export_ops)
+				{
+					accepted_opts[exp_op].append(valid_opts);
+					accepted_opts[exp_op].append(IgnoreFaultyPlugins);
+				}
 
-			accepted_opts[acc_op_key].append(valid_opts);
-			accepted_opts[acc_op_key].append(IgnoreFaultyPlugins);
+				stg_plugin = true;
+			}
+			/* If the plugin runs o an individual CLI operation
+			 * we copy the plugin's valid options to the set
+			 * of option to the related CLI operation */
+			else if((op_id == PgModelerCliPlugin::CustomCliOp &&
+							 is_op_mode && !accepted_opts.count(opt)) ||
+							cli_ops.count(op_id))
+			{
+				if(op_id == PgModelerCliPlugin::CustomCliOp)
+				{
+					acc_op_key = opt;
+					plug_op_modes++;
+				}
+				else
+					acc_op_key = cli_ops[op_id];
+
+				accepted_opts[acc_op_key].append(valid_opts);
+				accepted_opts[acc_op_key].append(IgnoreFaultyPlugins);
+				stg_plugin = true;
+			}
+
+			// Stagging the plugin for execution
+			if(stg_plugin)
+				plug_exec_order.append(plugin);
 		}
 	}
 
