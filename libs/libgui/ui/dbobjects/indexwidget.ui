@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>728</width>
-    <height>218</height>
+    <width>561</width>
+    <height>425</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -43,15 +43,15 @@
        <height>22</height>
       </size>
      </property>
-     <widget class="QWidget" name="tab_3">
+     <widget class="QWidget" name="attributes_pg">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/attribute.png</normaloff>:/icons/icons/attribute.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Attributes</string>
+       <string>Attributes</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <property name="leftMargin">
         <number>5</number>
        </property>
@@ -64,157 +64,250 @@
        <property name="bottomMargin">
         <number>5</number>
        </property>
-       <property name="spacing">
-        <number>5</number>
-       </property>
-       <item row="0" column="0">
-        <widget class="QLabel" name="indexing_lbl">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <italic>false</italic>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Indexing:</string>
-         </property>
-        </widget>
+       <item>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="indexing_lbl">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <italic>false</italic>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Indexing</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="indexing_cmb">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="0" column="1" rowspan="2">
+          <widget class="QGroupBox" name="groupBox">
+           <property name="title">
+            <string>Options</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout">
+            <property name="leftMargin">
+             <number>5</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <property name="verticalSpacing">
+             <number>0</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QCheckBox" name="concurrent_chk">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Concurrent</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QCheckBox" name="buffering_chk">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Buffering</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="unique_chk">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Unique</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QCheckBox" name="fast_update_chk">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Fast update</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="nulls_not_distinct_chk">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Nulls not distinct</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QCheckBox" name="fill_factor_chk">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Fill Factor</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="fill_factor_sb">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>110</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="minimum">
+              <number>10</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>90</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </item>
-       <item row="0" column="1">
-        <widget class="QComboBox" name="indexing_cmb">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>127</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>127</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>28</width>
-           <height>28</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="0" column="3">
-        <widget class="QCheckBox" name="fill_factor_chk">
-         <property name="text">
-          <string>Fill Factor:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="4">
-        <widget class="QSpinBox" name="fill_factor_sb">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>110</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="minimum">
-          <number>10</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="value">
-          <number>90</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="options_lbl">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Options:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1" colspan="4">
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
          <property name="spacing">
-          <number>5</number>
+          <number>0</number>
          </property>
          <item>
-          <widget class="QCheckBox" name="concurrent_chk">
+          <widget class="QLabel" name="predicate_lbl">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -234,14 +327,14 @@
             </size>
            </property>
            <property name="text">
-            <string>Concurrent</string>
+            <string>Predicate</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="unique_chk">
+          <widget class="QPlainTextEdit" name="predicate_txt">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -249,7 +342,7 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>0</height>
+             <height>50</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -258,144 +351,43 @@
              <height>16777215</height>
             </size>
            </property>
-           <property name="text">
-            <string>Unique</string>
+           <property name="frameShadow">
+            <enum>QFrame::Shadow::Sunken</enum>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="fast_update_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+           <property name="lineWidth">
+            <number>1</number>
            </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
+           <property name="midLineWidth">
+            <number>0</number>
            </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
            </property>
-           <property name="text">
-            <string>Fast update</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="buffering_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Buffering</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="nulls_not_distinct_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Nulls not distinct</string>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
            </property>
           </widget>
          </item>
         </layout>
        </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="predicate_lbl">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Predicate:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1" colspan="4">
-        <widget class="QPlainTextEdit" name="predicate_txt">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Sunken</enum>
-         </property>
-         <property name="lineWidth">
-          <number>1</number>
-         </property>
-         <property name="midLineWidth">
-          <number>0</number>
-         </property>
-         <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarAsNeeded</enum>
-         </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAsNeeded</enum>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_4">
+     <widget class="QWidget" name="elements_pg">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/usertype.png</normaloff>:/icons/icons/usertype.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Elements</string>
+       <string>Elements</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="include_cols_pg">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/column.png</normaloff>:/icons/icons/column.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Include columns</string>
+       <string>Include columns</string>
       </attribute>
      </widget>
     </widget>
@@ -407,13 +399,9 @@
   <tabstop>indexing_cmb</tabstop>
   <tabstop>fill_factor_chk</tabstop>
   <tabstop>fill_factor_sb</tabstop>
-  <tabstop>concurrent_chk</tabstop>
-  <tabstop>unique_chk</tabstop>
-  <tabstop>fast_update_chk</tabstop>
   <tabstop>predicate_txt</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

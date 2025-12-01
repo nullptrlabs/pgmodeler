@@ -21,39 +21,25 @@
 
 IndexWidget::IndexWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Index)
 {
-	QGridLayout *grid=nullptr;
-	std::map<QString, std::vector<QWidget *> > fields_map;
-	std::map<QWidget *, std::vector<QString> > values_map;
-
 	Ui_IndexWidget::setupUi(this);
+	GuiUtilsNs::configureWidgetFont(fill_factor_chk, GuiUtilsNs::SmallFontFactor, true);
 
-	predicate_hl=new SyntaxHighlighter(predicate_txt, false, true, font().pointSizeF());
+	predicate_hl = new SyntaxHighlighter(predicate_txt, false, true, font().pointSizeF());
 	predicate_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
-	elements_tab = new ElementsTableWidget(this);
+	elements_tab = GuiUtilsNs::createWidgetInParent<ElementsTableWidget>(GuiUtilsNs::LtMargin, elements_pg);
+	incl_cols_picker_wgt = GuiUtilsNs::createWidgetInParent<ColumnPickerWidget>(GuiUtilsNs::LtMargin, include_cols_pg);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	grid=new QGridLayout;
-	grid->setContentsMargins(0,0,0,0);
-	grid->addWidget(elements_tab,0,0);
-	attributes_tbw->widget(1)->setLayout(grid);
-
-	incl_cols_picker_wgt = new ColumnPickerWidget(this);
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QVBoxLayout *vbox = new QVBoxLayout(attributes_tbw->widget(2));
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
-	vbox->addWidget(incl_cols_picker_wgt);
-
-	configureFormLayout(index_grid, ObjectType::Index);
 	indexing_cmb->addItems(IndexingType::getTypes());
 
 	connect(indexing_cmb, &QComboBox::currentIndexChanged, this, &IndexWidget::selectIndexingType);
 	connect(fill_factor_chk, &QCheckBox::toggled, fill_factor_sb, &QSpinBox::setEnabled);
 
+	configureTabbedLayout(attributes_tbw);
 	configureTabOrder();
 	selectIndexingType();
 
-	setMinimumSize(570, 550);
+	setMinimumSize(600, 400);
 }
 
 void IndexWidget::selectIndexingType()
