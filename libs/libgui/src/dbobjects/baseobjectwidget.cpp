@@ -514,7 +514,7 @@ void BaseObjectWidget::configureBaseLayout()
 	baseobject_grid->addLayout(misc_btns_lt, baseobject_grid->count(), 0, 1, 0);
 }
 
-void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget, bool create_general_pg)
+void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget, bool create_general_pg, bool create_assoc_pg)
 {
 	if(!tab_widget)
 		return;
@@ -532,7 +532,7 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget, bool create
 		tab_widget->setCurrentIndex(0);
 	}
 
-	if(handled_obj_type != ObjectType::Textbox)
+	if(create_assoc_pg && handled_obj_type != ObjectType::Textbox)
 	{
 		// Dependencies and references page
 		obj_assoc_wgt = new ObjectAssociationsWidget(tab_widget);

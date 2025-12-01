@@ -174,7 +174,7 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		 *  all pages. By default, this method add three new pages in
 		 *  the tab widget: General (baseobject_grid), Associations and SQL preview.
 		 *  If create_general_pg is false then the general page is not created. */
-		void configureTabbedLayout(QTabWidget *tab_widget, bool create_general_pg = true);
+		void configureTabbedLayout(QTabWidget *tab_widget, bool create_general_pg = true, bool create_assoc_pg = true);
 
 		/*! \brief Configures a tabbed layout from a simple QHBoxLayout-ed
 		 *  or a QVBoxLayout-ed widget. When create_attr_page is false this method creates a
