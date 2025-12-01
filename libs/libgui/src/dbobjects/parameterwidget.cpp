@@ -20,33 +20,18 @@
 
 ParameterWidget::ParameterWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Parameter)
 {
-	QGridLayout *parameter_grid=nullptr;
-	QSpacerItem *spacer=nullptr;
-
 	Ui_ParameterWidget::setupUi(this);
 
-	data_type=new PgSQLTypeWidget(this);
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	parameter_grid=new QGridLayout(this);
-	spacer=new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
-	parameter_grid->setContentsMargins(0, 0, 0, 0);
+	data_type = new PgSQLTypeWidget(this);
+	parameter_lt->insertWidget(1, data_type);
+	configureFormLayout(parameter_lt, ObjectType::Parameter);
 
-	parameter_grid->addWidget(default_value_lbl, 0, 0, 1, 1);
-	parameter_grid->addWidget(default_value_edt, 0, 1, 1, 3);
-	parameter_grid->addWidget(mode_lbl, 1, 0, 1, 1);
-	parameter_grid->addWidget(param_in_chk, 1, 1, 1, 1);
-	parameter_grid->addWidget(param_out_chk, 1, 2, 1, 1);
-	parameter_grid->addWidget(param_variadic_chk, 1, 3, 1, 1);
-	parameter_grid->addWidget(data_type,2, 0, 1, 4);
-	parameter_grid->addItem(spacer, parameter_grid->count()+1,0);
-
-	configureFormLayout(parameter_grid, ObjectType::Parameter);
 	connect(param_variadic_chk, &QCheckBox::toggled, param_in_chk, &QCheckBox::setDisabled);
 	connect(param_variadic_chk, &QCheckBox::toggled, param_out_chk, &QCheckBox::setDisabled);
 	connect(param_in_chk, &QCheckBox::toggled, this, &ParameterWidget::enableVariadic);
 	connect(param_out_chk, &QCheckBox::toggled, this, &ParameterWidget::enableVariadic);
 
-	setMinimumSize(500, 200);
+	setMinimumSize(550, 300);
 }
 
 void ParameterWidget::enableVariadic()

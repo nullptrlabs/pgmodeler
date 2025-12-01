@@ -30,21 +30,15 @@ const QString TableDataWidget::PlaceholderColumn {"$placeholder$"};
 TableDataWidget::TableDataWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::BaseObject)
 {
 	Ui_TableDataWidget::setupUi(this);
+
 	configureFormLayout(tabledata_grid, ObjectType::BaseObject);
- 	
+
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
+	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, hint_frm);
 
 	obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(ObjectType::Table));
-
-	comment_lbl->setVisible(false);
-	comment_edt->setVisible(false);
-
 	data_tbw->setItemDelegate(new PlainTextItemDelegate(this, false));
-
-	QFont font=name_edt->font();
-	font.setItalic(true);
 	name_edt->setReadOnly(true);
-	name_edt->setFont(font);
 
 	add_row_tb->setToolTip(add_row_tb->toolTip() + QString(" (%1)").arg(add_row_tb->shortcut().toString()));
 	del_rows_tb->setToolTip(del_rows_tb->toolTip() + QString(" (%1)").arg(del_rows_tb->shortcut().toString()));
@@ -334,10 +328,9 @@ void TableDataWidget::enableButtons()
 void TableDataWidget::setAttributes(DatabaseModel *model, PhysicalTable *table)
 {
 	BaseObjectWidget::setAttributes(model, table, nullptr);
-	bool enable=(object != nullptr);
+	bool enable = (object != nullptr);
 
 	protected_obj_frm->setVisible(false);
-	obj_id_lbl->setVisible(false);
 	data_tbw->setEnabled(enable);
 	add_row_tb->setEnabled(enable);
 

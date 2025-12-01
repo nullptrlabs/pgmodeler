@@ -29,9 +29,8 @@ ConstraintWidget::ConstraintWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	Ui_ConstraintWidget::setupUi(this);
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::AltDefaultFrmHint, options_frm);
-	GuiUtilsNs::configureWidgetFont(deferrable_chk, GuiUtilsNs::SmallFontFactor, true);
-	GuiUtilsNs::configureWidgetFont(fill_factor_chk, GuiUtilsNs::SmallFontFactor, true);
-	GuiUtilsNs::configureWidgetFont(indexing_chk, GuiUtilsNs::SmallFontFactor, true);
+	GuiUtilsNs::configureWidgetsFont({ deferrable_chk, fill_factor_chk, indexing_chk },
+																	GuiUtilsNs::SmallFontFactor, true);
 
 	excl_elems_tab = GuiUtilsNs::createWidgetInParent<ElementsTableWidget>(GuiUtilsNs::LtMargin, excl_elems_pg);
 

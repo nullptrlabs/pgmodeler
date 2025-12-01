@@ -31,8 +31,7 @@ UpdateNotifierWidget::UpdateNotifierWidget(QWidget *parent) : QWidget(parent)
 	frame->installEventFilter(this);
 
 	GuiUtilsNs::createDropShadow(this, 5, 5, 30);
-	GuiUtilsNs::configureWidgetFont(ver_num_lbl, GuiUtilsNs::BigFontFactor);
-	GuiUtilsNs::configureWidgetFont(ver_date_lbl, GuiUtilsNs::BigFontFactor);
+	GuiUtilsNs::configureWidgetsFont({ ver_num_lbl, ver_date_lbl }, GuiUtilsNs::BigFontFactor);
 
 	connect(&update_chk_manager, &QNetworkAccessManager::finished, this, &UpdateNotifierWidget::handleUpdateChecked);
 

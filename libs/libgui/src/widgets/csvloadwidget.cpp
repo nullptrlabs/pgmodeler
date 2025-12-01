@@ -22,6 +22,7 @@
 #include <QTextStream>
 #include "csvparser.h"
 #include "messagebox.h"
+#include "guiutilsns.h"
 
 CsvLoadWidget::CsvLoadWidget(QWidget * parent, bool cols_in_first_row) : QWidget(parent)
 {
@@ -31,7 +32,7 @@ CsvLoadWidget::CsvLoadWidget(QWidget * parent, bool cols_in_first_row) : QWidget
 	file_sel->setFileMustExist(true);
 	file_sel->setFileDialogTitle(tr("Load CSV file"));
 	file_sel->setMimeTypeFilters({"text/csv", "application/octet-stream"});
-	load_csv_grid->addWidget(file_sel, 0, 1, 1, 8);
+	file_lt->addWidget(file_sel);
 
 	separator_edt->setVisible(false);
 
@@ -40,6 +41,9 @@ CsvLoadWidget::CsvLoadWidget(QWidget * parent, bool cols_in_first_row) : QWidget
 		col_names_chk->setVisible(false);
 		col_names_chk->setChecked(true);
 	}
+
+	GuiUtilsNs::configureWidgetFont(txt_delim_chk, GuiUtilsNs::SmallFontFactor, true);
+	GuiUtilsNs::configureWidgetsBuddyLabels(this);
 
 	connect(txt_delim_chk, &QCheckBox::toggled, txt_delim_edt, &QLineEdit::setEnabled);
 	connect(load_btn, &QPushButton::clicked, this, &CsvLoadWidget::loadCsvFile);

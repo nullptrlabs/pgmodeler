@@ -24,7 +24,6 @@
 
 BaseFunctionWidget::BaseFunctionWidget(QWidget *parent, ObjectType obj_type) : BaseObjectWidget(parent, obj_type)
 {
-	QGridLayout *grid = nullptr;
 	Ui_BaseFunctionWidget::setupUi(this);
 
 	source_code_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin, source_code_grp, true);

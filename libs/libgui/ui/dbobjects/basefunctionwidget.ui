@@ -22,7 +22,10 @@
     <height>216</height>
    </size>
   </property>
-  <layout class="QGridLayout" name="base_function_grid">
+  <layout class="QVBoxLayout" name="basefunction_lt">
+   <property name="spacing">
+    <number>5</number>
+   </property>
    <property name="leftMargin">
     <number>5</number>
    </property>
@@ -35,10 +38,7 @@
    <property name="bottomMargin">
     <number>5</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="1" column="0">
+   <item>
     <widget class="QTabWidget" name="func_config_twg">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">

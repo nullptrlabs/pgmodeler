@@ -25,9 +25,8 @@ ElementWidget::ElementWidget(QWidget *parent) : QWidget(parent)
 
 	setupUi(this);
 
-	GuiUtilsNs::configureWidgetFont(column_rb, GuiUtilsNs::SmallFontFactor, true);
-	GuiUtilsNs::configureWidgetFont(expression_rb, GuiUtilsNs::SmallFontFactor, true);
-	GuiUtilsNs::configureWidgetFont(sorting_chk, GuiUtilsNs::SmallFontFactor, true);
+	GuiUtilsNs::configureWidgetsFont({ column_rb, expression_rb, sorting_chk },
+																	 GuiUtilsNs::SmallFontFactor, true);
 
 	elem_expr_hl=new SyntaxHighlighter(elem_expr_txt, false, true, font().pointSizeF());
 	elem_expr_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());

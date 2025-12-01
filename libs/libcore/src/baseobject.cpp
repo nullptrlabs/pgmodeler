@@ -546,9 +546,9 @@ bool BaseObject::acceptsAlias(ObjectType obj_type)
 
 bool BaseObject::acceptsComment(ObjectType obj_type)
 {
-	return obj_type!=ObjectType::Relationship && obj_type!=ObjectType::Textbox &&
-				 obj_type!=ObjectType::Parameter && obj_type!=ObjectType::UserMapping &&
-				 obj_type!=ObjectType::Permission;
+	return obj_type != ObjectType::Relationship && obj_type != ObjectType::Textbox &&
+				 obj_type != ObjectType::Parameter && obj_type != ObjectType::UserMapping &&
+				 obj_type != ObjectType::Permission && obj_type != ObjectType::BaseObject;
 }
 
 bool BaseObject::acceptsCustomSQL()

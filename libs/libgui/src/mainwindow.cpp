@@ -1524,7 +1524,6 @@ void MainWindow::setCurrentModel()
 			font.setWeight(QFont::Medium);
 			btn->setFont(font);
 			GuiUtilsNs::configureWidgetFont(btn, GuiUtilsNs::MediumFontFactor);
-			//GuiUtilsNs::updateDropShadow(btn);
 		}
 
 		edit_menu->addAction(current_model->action_copy);

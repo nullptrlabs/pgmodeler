@@ -378,8 +378,9 @@ void BaseObjectWidget::configureBaseLayout()
 	const std::map<QList<ObjectType>, QList<FieldLayoutCfg>> field_confs {
 		{
 			// Objects that has only the name field visible
-			{ ObjectType::Cast, ObjectType::Role, ObjectType::Transform,
-				ObjectType::GenericSql, ObjectType::Tag, ObjectType::Textbox },
+			{ ObjectType::BaseObject, ObjectType::Cast, ObjectType::Role,
+				ObjectType::Transform, ObjectType::GenericSql, ObjectType::Tag,
+				ObjectType::Textbox, ObjectType::Parameter },
 			{ { name_lbl, name_edt, id_icon_frm, 0, 0 } }
 		},
 
@@ -516,7 +517,7 @@ void BaseObjectWidget::configureBaseLayout()
 
 void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget, bool create_general_pg, bool create_assoc_pg)
 {
-	if(!tab_widget)
+	if(!tab_widget || !tab_widget->parentWidget())
 		return;
 
 	tab_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -591,7 +592,8 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget, bool create
 	{
 		/* If the widget's layout is not a QVBoxLayout we just display a debug
 		 * message and keep the alert message in the general tab */
-		qDebug().noquote() << "BaseObjectWidget::configureTabbedLayout(QTabWidget *, bool): The widget's layout must be QHBoxLayout or QVBoxLayout.";
+		qDebug().noquote().nospace() << "BaseObjectWidget::configureTabbedLayout(QTabWidget *, bool): The widget's ("
+		<< tab_widget->parentWidget()->metaObject()->className() << ") layout must be QHBoxLayout or QVBoxLayout.";
 	}
 
 	configureFormFields(handled_obj_type);

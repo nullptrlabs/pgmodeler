@@ -132,6 +132,9 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 				return;
 			}
 
+			baseobject_grid->setContentsMargins(0, 0, 0, 0);
+			baseobject_grid->setSpacing(layout->spacing());
+
 			if constexpr(std::is_same_v<QGridLayout, LayoutClass>)
 			{
 				QLayoutItem *item = nullptr;
@@ -164,9 +167,8 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 			for(auto &txt_wgt : baseobject_grid->findChildren<QTextEdit *>())
 				txt_wgt->setTabChangesFocus(true);
 
-			baseobject_grid->setContentsMargins(QMargins(0, 0, 0, 0));
-			baseobject_grid->setSpacing(layout->spacing());
 			configureFormFields(obj_type, obj_type != ObjectType::BaseObject);
+			GuiUtilsNs::configureWidgetsBuddyLabels(this);
 		}
 
 		/*! \brief Configures a form layout in tabbed way.
