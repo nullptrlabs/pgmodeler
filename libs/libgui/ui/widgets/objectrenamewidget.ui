@@ -293,11 +293,11 @@
           </item>
           <item row="0" column="0" colspan="4">
            <widget class="QLineEdit" name="new_name_edt">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
             <property name="clearButtonEnabled">
              <bool>true</bool>
