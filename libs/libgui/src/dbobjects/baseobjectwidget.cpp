@@ -495,7 +495,7 @@ void BaseObjectWidget::configureBaseLayout()
 		{
 			/* Adding the pair (label/widget) to the grid layout. We shift the row by one
 				* in order to leave the first row for the protected object frame */
-			baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(field.label, field.widget, field.append_widget),
+			baseobject_grid->addLayout(GuiUtilsNs::createBuddyWidgetLayout(field.label, field.widget, field.append_widget),
 																 field.row + 1, field.col,
 																 field.row_span, field.col_span);
 		}
@@ -503,7 +503,7 @@ void BaseObjectWidget::configureBaseLayout()
 		break;
 	}
 
-	baseobject_grid->addLayout(GuiUtilsNs::createLabeledWidgetLayout(comment_lbl, comment_edt),
+	baseobject_grid->addLayout(GuiUtilsNs::createBuddyWidgetLayout(comment_lbl, comment_edt),
 															baseobject_grid->count(), 0, 1, 0);
 	baseobject_grid->addLayout(extra_wgts_lt, baseobject_grid->count(), 0, 1, 0);
 
@@ -597,7 +597,7 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget, bool create
 	}
 
 	configureFormFields(handled_obj_type);
-	GuiUtilsNs::configureWidgetsBuddyLabels(tab_widget);
+	GuiUtilsNs::configureBuddyWidgets(tab_widget);
 }
 
 void BaseObjectWidget::configureTabbedLayout(bool create_attr_page, const QString &attr_pg_name, const QString &attr_pg_icon)

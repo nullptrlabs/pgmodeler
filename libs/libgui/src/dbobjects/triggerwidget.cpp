@@ -17,13 +17,10 @@
 */
 
 #include "triggerwidget.h"
-#include "customuistyle.h"
 
 TriggerWidget::TriggerWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Trigger)
 {
 	Ui_TriggerWidget::setupUi(this);
-
-	GuiUtilsNs::configureWidgetFont(deferrable_chk, GuiUtilsNs::SmallFontFactor, true);
 
 	cond_expr_hl = new SyntaxHighlighter(cond_expr_txt, false, true, font().pointSizeF());
 	cond_expr_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());

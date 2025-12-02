@@ -31,8 +31,6 @@ RelationshipWidget::RelationshipWidget(QWidget *parent): BaseObjectWidget(parent
 {
 	Ui_RelationshipWidget::setupUi(this);
 
-	GuiUtilsNs::configureWidgetFont(deferrable_chk, GuiUtilsNs::SmallFontFactor, true);
-
 	ref_table_sel = new ObjectSelectorWidget({ ObjectType::Table,
 																						 ObjectType::View,
 																						 ObjectType::ForeignTable }, this);

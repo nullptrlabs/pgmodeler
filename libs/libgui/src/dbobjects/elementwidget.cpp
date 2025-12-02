@@ -25,7 +25,7 @@ ElementWidget::ElementWidget(QWidget *parent) : QWidget(parent)
 
 	setupUi(this);
 
-	GuiUtilsNs::configureWidgetsFont({ column_rb, expression_rb, sorting_chk },
+	GuiUtilsNs::configureWidgetsFont({ column_rb, expression_rb },
 																	 GuiUtilsNs::SmallFontFactor, true);
 
 	elem_expr_hl=new SyntaxHighlighter(elem_expr_txt, false, true, font().pointSizeF());
@@ -70,7 +70,7 @@ ElementWidget::ElementWidget(QWidget *parent) : QWidget(parent)
 	setTabOrder(sorting_chk, sort_mode_cmb);
 	setTabOrder(sort_mode_cmb, nulls_first_chk);
 
-	GuiUtilsNs::configureWidgetsBuddyLabels(this);
+	GuiUtilsNs::configureBuddyWidgets(this);
 }
 
 void ElementWidget::setAttributes(DatabaseModel *model, BaseObject *parent_obj, Element *elem)

@@ -22,7 +22,6 @@
 IndexWidget::IndexWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Index)
 {
 	Ui_IndexWidget::setupUi(this);
-	GuiUtilsNs::configureWidgetFont(fill_factor_chk, GuiUtilsNs::SmallFontFactor, true);
 
 	predicate_hl = new SyntaxHighlighter(predicate_txt, false, true, font().pointSizeF());
 	predicate_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
