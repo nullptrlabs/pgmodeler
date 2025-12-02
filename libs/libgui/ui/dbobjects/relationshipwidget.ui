@@ -28,7 +28,10 @@
     <height>16777215</height>
    </size>
   </property>
-  <layout class="QGridLayout" name="relationship_grid" rowstretch="0">
+  <layout class="QVBoxLayout" name="relationship_lt">
+   <property name="spacing">
+    <number>5</number>
+   </property>
    <property name="leftMargin">
     <number>5</number>
    </property>
@@ -41,10 +44,7 @@
    <property name="bottomMargin">
     <number>5</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="0" column="0">
+   <item>
     <widget class="QTabWidget" name="rel_attribs_tbw">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">

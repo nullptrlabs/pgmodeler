@@ -124,7 +124,7 @@ set(SOURCES
     src/widgets/operationlistwidget.cpp src/widgets/operationlistwidget.h
     src/widgets/sceneinfowidget.cpp src/widgets/sceneinfowidget.h
     src/widgets/searchreplacewidget.cpp src/widgets/searchreplacewidget.h
-    src/widgets/sourcecodewidget.cpp src/widgets/sourcecodewidget.h
+
     src/widgets/codepreviewwidget.cpp src/widgets/codepreviewwidget.h
     src/widgets/tabledatawidget.cpp src/widgets/tabledatawidget.h
     src/widgets/taskprogresswidget.cpp src/widgets/taskprogresswidget.h
@@ -210,7 +210,7 @@ set(FORMS
     ui/widgets/objectsearchwidget.ui
     ui/widgets/objecttypeslistwidget.ui
     ui/widgets/searchreplacewidget.ui
-    ui/widgets/sourcecodewidget.ui
+
     ui/widgets/codepreviewwidget.ui
     ui/widgets/fileselectorwidget.ui
     ui/widgets/modeloverviewwidget.ui

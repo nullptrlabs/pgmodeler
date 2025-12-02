@@ -112,7 +112,9 @@ RelationshipWidget::RelationshipWidget(QWidget *parent): BaseObjectWidget(parent
 
 	baseobject_grid->setContentsMargins(0,0,0,0);
 	base_fields_lt->addLayout(baseobject_grid);
+
 	configureTabbedLayout(rel_attribs_tbw, false);
+
 	baseobject_grid->removeWidget(disable_sql_chk);
 	rel_attribs_grid->addWidget(disable_sql_chk, rel_attribs_grid->count(), 0, 1, 0);
 	options_lt->insertWidget(options_lt->count() - 1, disable_sql_chk);

@@ -19,7 +19,6 @@
 #include "baseform.h"
 #include "modelwidget.h"
 #include "customuistyle.h"
-#include "sourcecodewidget.h"
 #include "codepreviewwidget.h"
 #include "dbobjects/databasewidget.h"
 #include "dbobjects/schemawidget.h"

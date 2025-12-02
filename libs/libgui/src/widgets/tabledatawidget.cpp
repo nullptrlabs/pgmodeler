@@ -50,13 +50,7 @@ TableDataWidget::TableDataWidget(QWidget *parent): BaseObjectWidget(parent, Obje
 	data_tbw->removeEventFilter(this);
 	csv_load_parent->setVisible(false);
 
-	csv_load_wgt = new CsvLoadWidget(this, true);
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QVBoxLayout *layout = new QVBoxLayout;
-
-	layout->addWidget(csv_load_wgt);
-	layout->setContentsMargins(0,0,0,0);
-	csv_load_parent->setLayout(layout);
+	csv_load_wgt = GuiUtilsNs::createWidgetInParent< CsvLoadWidget>(0, csv_load_parent, true);
 	csv_load_parent->setMinimumSize(csv_load_wgt->minimumSize());
 
 	setMinimumSize(640, 480);

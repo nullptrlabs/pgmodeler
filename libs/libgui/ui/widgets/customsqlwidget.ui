@@ -25,26 +25,26 @@
   <property name="windowTitle">
    <string>Add custom SQL code</string>
   </property>
-  <layout class="QGridLayout" name="sqlappend_grid">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
+  <layout class="QVBoxLayout" name="customsql_lt">
    <property name="spacing">
     <number>5</number>
    </property>
-   <item row="0" column="0">
+   <property name="leftMargin">
+    <number>5</number>
+   </property>
+   <property name="topMargin">
+    <number>5</number>
+   </property>
+   <property name="rightMargin">
+    <number>5</number>
+   </property>
+   <property name="bottomMargin">
+    <number>5</number>
+   </property>
+   <item>
     <widget class="QGroupBox" name="sqlcode_grp">
      <property name="title">
-      <string>S&amp;QL code</string>
+      <string>SQL code</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <property name="spacing">
@@ -103,7 +103,7 @@
            <string>Puts an SELECT command template at current cursor position.</string>
           </property>
           <property name="text">
-           <string>&amp;SELECT</string>
+           <string>SELECT</string>
           </property>
           <property name="icon">
            <iconset resource="../../res/resources.qrc">
@@ -140,7 +140,7 @@
            <string>Puts an INSERT command template at current cursor position.</string>
           </property>
           <property name="text">
-           <string>&amp;INSERT</string>
+           <string>INSERT</string>
           </property>
           <property name="icon">
            <iconset resource="../../res/resources.qrc">
@@ -177,7 +177,7 @@
            <string>Puts an UPDATE command template at current cursor position.</string>
           </property>
           <property name="text">
-           <string>&amp;UPDATE</string>
+           <string>UPDATE</string>
           </property>
           <property name="icon">
            <iconset resource="../../res/resources.qrc">
@@ -214,7 +214,7 @@
            <string>Puts an DELETE command template at current cursor position.</string>
           </property>
           <property name="text">
-           <string>&amp;DELETE</string>
+           <string>DELETE</string>
           </property>
           <property name="icon">
            <iconset resource="../../res/resources.qrc">
@@ -245,7 +245,7 @@
            <string/>
           </property>
           <property name="text">
-           <string>&amp;Clear</string>
+           <string>Clear</string>
           </property>
           <property name="icon">
            <iconset resource="../../res/resources.qrc">
@@ -306,7 +306,7 @@
 Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE command.</string>
             </property>
             <property name="text">
-             <string>Append at end of model definition.</string>
+             <string>Append at end of model definition</string>
             </property>
            </widget>
           </item>
@@ -342,7 +342,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
 Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE command.</string>
             </property>
             <property name="text">
-             <string>Prepend at beginning of model definition.</string>
+             <string>Prepend at beginning of model definition</string>
             </property>
            </widget>
           </item>
@@ -413,14 +413,6 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
          </item>
          <item row="0" column="1">
           <widget class="QLabel" name="message_lbl">
-           <property name="font">
-            <font>
-             <bold>false</bold>
-             <underline>false</underline>
-             <strikeout>false</strikeout>
-             <kerning>true</kerning>
-            </font>
-           </property>
            <property name="text">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use custom commands with extreme caution because you can change the semantics of the entire model when running SQL validation or export processes. Additionally, depending on the amount of commands, those processes can have their performance sensibly degradated.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
