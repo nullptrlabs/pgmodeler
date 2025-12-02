@@ -33,6 +33,9 @@ class __libgui ObjectSelectorWidget: public QWidget, public Ui::ObjectSelectorWi
 	Q_OBJECT
 
 	private:
+		//! \brief Indicates whether the object id label must be displayed
+		bool show_id_label;
+
 		//! \brief An object view widget instance used as object picker
 		ModelObjectsWidget *obj_view_wgt;
 
@@ -51,9 +54,9 @@ class __libgui ObjectSelectorWidget: public QWidget, public Ui::ObjectSelectorWi
 		bool eventFilter(QObject *obj, QEvent *evnt) override;
 
 	public:
-		ObjectSelectorWidget(ObjectType sel_obj_type, QWidget * parent = nullptr);
+		explicit ObjectSelectorWidget(ObjectType sel_obj_type, QWidget * parent, bool show_id_lbl = false);
 
-		ObjectSelectorWidget(std::vector<ObjectType> sel_obj_types, QWidget * parent = nullptr);
+		explicit ObjectSelectorWidget(std::vector<ObjectType> sel_obj_types, QWidget * parent, bool show_id_lbl = false);
 
 		~ObjectSelectorWidget() override;
 

@@ -19,15 +19,17 @@
 #include "objectselectorwidget.h"
 #include "guiutilsns.h"
 
-ObjectSelectorWidget::ObjectSelectorWidget(ObjectType sel_obj_type, QWidget *parent) : QWidget(parent)
+ObjectSelectorWidget::ObjectSelectorWidget(ObjectType sel_obj_type, QWidget *parent, bool show_id_lbl) : QWidget(parent)
 {
 	this->sel_obj_types.push_back(sel_obj_type);
+	show_id_label = show_id_lbl;
 	configureSelector();
 }
 
-ObjectSelectorWidget::ObjectSelectorWidget(std::vector<ObjectType> sel_obj_types, QWidget * parent) : QWidget(parent)
+ObjectSelectorWidget::ObjectSelectorWidget(std::vector<ObjectType> sel_obj_types, QWidget * parent, bool show_id_lbl) : QWidget(parent)
 {
-	this->sel_obj_types=sel_obj_types;
+	this->sel_obj_types = sel_obj_types;
+	show_id_label = show_id_lbl;
 	configureSelector();
 }
 
@@ -39,6 +41,7 @@ void ObjectSelectorWidget::configureSelector()
 	model = nullptr;
 	selected_obj = nullptr;
 	obj_icon_lbl->setVisible(false);
+	obj_id_lbl->setVisible(false);
 
 	connect(sel_object_tb, &QToolButton::clicked, this, &ObjectSelectorWidget::showObjectView);
 	connect(rem_object_tb, &QToolButton::clicked, this, &ObjectSelectorWidget::clearSelector);
@@ -109,6 +112,9 @@ void ObjectSelectorWidget::setSelectedObject(BaseObject *object)
 														 .arg(QString::number(object->getObjectId()), object->getTypeName()));
 		obj_icon_lbl->setVisible(true);
 
+		obj_id_lbl->setText(QString("#%1").arg(QString::number(object->getObjectId())));
+		obj_id_lbl->setVisible(show_id_label);
+
 		emit s_objectSelected();
 		emit s_selectorChanged(true);
 	}
@@ -150,6 +156,7 @@ void ObjectSelectorWidget::clearSelector()
 	obj_name_edt->clear();
 	rem_object_tb->setEnabled(false);
 	obj_icon_lbl->setVisible(false);
+	obj_id_lbl->setVisible(false);
 
 	emit s_selectorCleared();
 	emit s_selectorChanged(false);
