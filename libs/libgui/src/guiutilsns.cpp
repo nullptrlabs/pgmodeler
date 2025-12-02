@@ -19,6 +19,7 @@
 #include <QLabel>
 #include <QGraphicsDropShadowEffect>
 #include <QSettings>
+#include <QRadioButton>
 #include "guiutilsns.h"
 #include "customuistyle.h"
 #include "messagebox.h"
@@ -952,27 +953,34 @@ namespace GuiUtilsNs {
 								 event->globalPosition().y() - (widget->height() - (event_wgt->height() / 2)));
 	}
 
-	void configureWidgetBuddyLabel(QLabel *label, QWidget *widget)
+ /*	void configureWidgetBuddy(QCheckBox *buddy_chkbox, QWidget *widget)
 	{
-		if(!label)
+		if(!buddy_chkbox || !widget)
 			return;
 
-		label->setBuddy(widget);
-		label->setProperty(FontAdjustedProp, true);
-		configureWidgetFont(label, SmallFontFactor, true);
+		buddy_chkbox->setProperty(FontAdjustedProp, true);
+		configureWidgetFont(buddy_chkbox, SmallFontFactor, true);
 	}
 
-	void configureWidgetsBuddyLabels(QWidget *widget)
+	void configureWidgetBuddy(QLabel *buddy_label, QWidget *widget)
+	{
+		if(!buddy_label || !widget)
+			return;
+
+		buddy_label->setBuddy(widget);
+		buddy_label->setProperty(FontAdjustedProp, true);
+		configureWidgetFont(buddy_label, SmallFontFactor, true);
+	} */
+
+	void configureBuddyWidgets(QWidget *widget)
 	{
 		if(!widget)
 			return;
 
-		QLabel *label = nullptr;
 		QList<QBoxLayout *> layouts;
 		QLayoutItem *item = nullptr;
 		QBoxLayout *box_lt = nullptr;
 		QGridLayout *grid_lt = nullptr;
-		bool is_hbox = false;
 		int item_cnt = 0;
 
 		for(auto &layout : widget->findChildren<QBoxLayout *>())
@@ -1000,54 +1008,68 @@ namespace GuiUtilsNs {
 			}
 
 			for(auto &lt : layouts)
-			{
-				/* We ignore the layout if:
-				 * 1) It contains a invalid count (we need a layout with 2 widgets)
-				 * 2) It contains two widgets but the first one isn't a QLabel.
-				 * 3) It contains two widgets (a QLabel and another QWidget) but the
-				 *    label already has a buddy widget configured. */
-				 label = lt->count() >= 2 ?
-								 qobject_cast<QLabel *>(lt->itemAt(0)->widget()) : nullptr;
-
-					if(lt->count() < 2 || !label || label->text().isEmpty() ||
-						label->property(FontAdjustedProp).toBool())
-						continue;
-
-					if(qobject_cast<QHBoxLayout *>(lt))
-						lt->setSpacing(LtSpacing);
-					else
-						lt->setSpacing(LtSpacing / 2);
-
-				 configureWidgetBuddyLabel(label, lt->itemAt(1)->widget());
-			}
+				configureBuddyWidget(lt);
 		}
 	}
 
-	QLayout *createLabeledWidgetLayout(QLabel *label, QWidget *widget, QWidget *append_widget, QMargins margins, int spacing)
+	QLayout *createBuddyWidgetLayout(QLabel *label, QWidget *widget, QWidget *append_widget, int margin, int spacing)
 	{
 		if(!widget || !label)
 			throw Exception(ErrorCode::OprNotAllocatedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-		QVBoxLayout *layout = new QVBoxLayout;
-
-		layout->setContentsMargins(margins);
-		layout->setSpacing(spacing);
+		QVBoxLayout *layout = GuiUtilsNs::createLayout<QVBoxLayout>(margin, spacing);
 		layout->addWidget(label);
 		layout->addWidget(widget);
-
-		configureWidgetBuddyLabel(label, widget);
+		configureBuddyWidget(layout);
 
 		if(!append_widget)
 			return layout;
 		
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-		QHBoxLayout *h_layout = new QHBoxLayout;
-		h_layout->setContentsMargins(margins);
-		h_layout->setSpacing(LtSpacing);
+		QHBoxLayout *h_layout =GuiUtilsNs::createLayout<QHBoxLayout>(margin, LtSpacing);
 		h_layout->addLayout(layout);
 		h_layout->addWidget(append_widget);
 
 		return h_layout;
+	}
+
+	void configureBuddyWidget(QLayout *lt)
+	{
+		QBoxLayout *box_lt = qobject_cast<QBoxLayout *>(lt);
+
+		/* Ignoring layout if:
+		 * - It contains a invalid count (we need a layout with 2 widgets)
+		 * - It not contains at least two items. */
+		if(!box_lt ||
+				box_lt->count() < 2 ||
+			 !box_lt->itemAt(0)->widget())
+			return;
+
+		QWidget *buddy_wgt = box_lt->itemAt(0)->widget(),
+				*lt_wgt = box_lt->itemAt(1)->widget();
+		QLabel *label = qobject_cast<QLabel *>(buddy_wgt);
+		QCheckBox *chkbox = qobject_cast<QCheckBox *>(buddy_wgt);
+
+		/* We also ignore the layout if:
+		 * - It contains two widgets (a QLabel/QCheckbox and another QWidget) but the
+		 *   buddy was already configured for the widget.
+		 * - The buddy widget is not QLabel or QCheckbox */
+		if((!label && !chkbox) ||
+			 (label && (label->text().isEmpty())) ||
+			 (chkbox && (qobject_cast<QCheckBox *>(lt_wgt) || qobject_cast<QRadioButton *>(lt_wgt))) ||
+			 (buddy_wgt && buddy_wgt->property(FontAdjustedProp).toBool()))
+			return;
+
+		if(label)
+			label->setBuddy(lt_wgt);
+
+		buddy_wgt->setProperty(FontAdjustedProp, true);
+		configureWidgetFont(buddy_wgt, SmallFontFactor, true);
+
+		if(qobject_cast<QHBoxLayout *>(box_lt))
+			box_lt->setSpacing(LtSpacing);
+		else if(qobject_cast<QVBoxLayout *>(box_lt) && chkbox)
+			box_lt->setSpacing(0);
+		else if(label)
+			box_lt->setSpacing(LtSpacing / 2);
 	}
 }

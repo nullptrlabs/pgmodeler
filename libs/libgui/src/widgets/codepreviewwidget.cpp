@@ -51,7 +51,7 @@ CodePreviewWidget::CodePreviewWidget(QWidget *parent): QWidget(parent)
 		generateSourceCode(SchemaParser::SqlCode);
 	});
 
-	GuiUtilsNs::configureWidgetsBuddyLabels(this);
+	GuiUtilsNs::configureBuddyWidgets(this);
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint,
 															{ obj_name_frm, separator_ln,

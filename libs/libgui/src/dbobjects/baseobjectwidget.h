@@ -168,7 +168,7 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 				txt_wgt->setTabChangesFocus(true);
 
 			configureFormFields(obj_type, obj_type != ObjectType::BaseObject);
-			GuiUtilsNs::configureWidgetsBuddyLabels(this);
+			GuiUtilsNs::configureBuddyWidgets(this);
 		}
 
 		/*! \brief Configures a form layout in tabbed way.

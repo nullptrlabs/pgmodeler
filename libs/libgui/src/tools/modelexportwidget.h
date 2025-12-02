@@ -37,6 +37,9 @@ class __libgui ModelExportWidget: public QWidget, public Ui::ModelExportWidget {
 	Q_OBJECT
 
 	private:
+		static constexpr int StandaloneFile = 0,
+		SplitFiles = 1;
+
 		/*! \brief Indicates if the full output generated during the process should be displayed
 		 * When this attribute is true, only errors and some key info messages are displayed. */
 		static bool low_verbosity;
@@ -93,7 +96,7 @@ class __libgui ModelExportWidget: public QWidget, public Ui::ModelExportWidget {
 		void enableExport();
 		void selectImageFormat();
 		void selectDataDictMode();
-		void selectSQLExportMode();
+		void selectSQLExportMode(int);
 
 	signals:
 		/*! \brief This signal is emitted whenever the user changes the connections settings

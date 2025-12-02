@@ -289,17 +289,23 @@ namespace GuiUtilsNs {
 	 * user must take care of the destruction of the object */
 	extern __libgui NumberedTextEditor *createNumberedTextEditor(QWidget *parent, bool act_btns_enabled = false, qreal custom_fnt_size = 0);
 
-	/*! \brief Assigns a label as buddy of a widget. Additionally, this function
-	 * configures the label font to be small and bold giving a clear idea that it is
+	/*! \brief Assigns a buddy label as buddy of a widget. Additionally, this function
+	 * configures the buddy font to be small and bold giving a clear idea that it is
 	 * associated with the provided widget */
-	extern __libgui void configureWidgetBuddyLabel(QLabel *label, QWidget *widget);
+	//extern __libgui void configureWidgetBuddy(QLabel *buddy_label, QWidget *widget);
+
+	/*! \brief Assigns a buddy checkbox as buddy of a widget. Additionally, this function
+	 * configures the buddy font to be small and bold giving a clear idea that it is
+	 * associated with the provided widget */
+	//extern __libgui void configureWidgetBuddy(QCheckBox *buddy_chkbox, QWidget *widget);
+	extern __libgui void configureBuddyWidget(QLayout *lt);
 
 	//! \brief Configures all buddy labels in the provided widget
-	extern __libgui void configureWidgetsBuddyLabels(QWidget *widget);
+	extern __libgui void configureBuddyWidgets(QWidget *widget);
 
 	//! \brief Creates a layout that contains a label and a widget arranged vertically
-	extern __libgui QLayout *createLabeledWidgetLayout(QLabel *label, QWidget *widget, QWidget *append_widget = nullptr, 
-																										 QMargins margins = {}, int spacing = 0);
+	extern __libgui QLayout *createBuddyWidgetLayout(QLabel *label, QWidget *widget, QWidget *append_widget = nullptr,
+																										 int margin = 0, int spacing = 0);
 }
 
 #endif
