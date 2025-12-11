@@ -25,7 +25,10 @@
   <property name="windowTitle">
    <string>Edit permissions</string>
   </property>
-  <layout class="QGridLayout" name="permission_grid">
+  <layout class="QVBoxLayout" name="permission_lt">
+   <property name="spacing">
+    <number>5</number>
+   </property>
    <property name="leftMargin">
     <number>5</number>
    </property>
@@ -38,10 +41,7 @@
    <property name="bottomMargin">
     <number>5</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="0" column="0">
+   <item>
     <widget class="QTabWidget" name="perm_settings_tbw">
      <property name="currentIndex">
       <number>0</number>

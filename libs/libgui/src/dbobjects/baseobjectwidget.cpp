@@ -468,21 +468,14 @@ void BaseObjectWidget::configureBaseLayout()
 		},
 	};
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	baseobject_grid = new QGridLayout;
+	baseobject_grid = GuiUtilsNs::createGridLayout(GuiUtilsNs::LtMargin, GuiUtilsNs::LtSpacing);
 	baseobject_grid->setObjectName("baseobject_grid");
-	baseobject_grid->setContentsMargins(GuiUtilsNs::LtMargins);
-	baseobject_grid->setSpacing(GuiUtilsNs::LtSpacing);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	misc_btns_lt = new QHBoxLayout;
+	misc_btns_lt = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing);
 	misc_btns_lt->setObjectName("misc_btns_lt");
-	misc_btns_lt->setSpacing(GuiUtilsNs::LtSpacing);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	extra_wgts_lt = new QVBoxLayout;
+	extra_wgts_lt = GuiUtilsNs::createVBoxLayout(0, GuiUtilsNs::LtSpacing);
 	extra_wgts_lt->setObjectName("extra_wgts_lt ");
-	extra_wgts_lt->setSpacing(GuiUtilsNs::LtSpacing);
 
 	baseobject_grid->addWidget(protected_obj_frm, 0, 0, 1, 0);
 
@@ -616,7 +609,6 @@ void BaseObjectWidget::configureTabbedLayout(bool create_attr_page, const QStrin
 	QLayoutItem *item = nullptr;
 	QTabWidget *attribs_tbw = nullptr;
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	if(is_hbox)
 		new_layout = new QHBoxLayout;
 	else
@@ -743,9 +735,9 @@ QString BaseObjectWidget::generateVersionsInterval(unsigned ver_interv_id, const
 
 QFrame *BaseObjectWidget::generateInformationFrame(const QString &msg)
 {
-	QFrame *info_frm=nullptr;
-	QGridLayout *grid=nullptr;
-	QLabel *ico_lbl=nullptr, *msg_lbl=nullptr;
+	QFrame *info_frm = nullptr;
+	QHBoxLayout *hbox = nullptr;
+	QLabel *ico_lbl = nullptr, *msg_lbl = nullptr;
 	QFont font;
 
 	info_frm = new QFrame;
@@ -760,10 +752,8 @@ QFrame *BaseObjectWidget::generateInformationFrame(const QString &msg)
 	info_frm->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, info_frm);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	grid = new QGridLayout(info_frm);
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
-	grid->setObjectName("grid");
+	hbox = GuiUtilsNs::createHBoxLayout(GuiUtilsNs::LtMargin, GuiUtilsNs::LtSpacing, info_frm);
+	hbox->setObjectName("grid");
 
 	ico_lbl = new QLabel(info_frm);
 	ico_lbl->setObjectName("icon_lbl");
@@ -773,18 +763,15 @@ QFrame *BaseObjectWidget::generateInformationFrame(const QString &msg)
 	ico_lbl->setPixmap(GuiUtilsNs::getPixmap("info"));
 	ico_lbl->setAlignment(Qt::AlignLeft|Qt::AlignTop);
 
-	grid->addWidget(ico_lbl, 0, 0, 1, 1);
-
 	msg_lbl = new QLabel(info_frm);
 	msg_lbl->setFont(font);
 	msg_lbl->setObjectName("message_lbl");
 	msg_lbl->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
 	msg_lbl->setWordWrap(true);
-
 	msg_lbl->setText(msg);
 
-	grid->addWidget(msg_lbl, 0, 1, 1, 1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
+	hbox->addWidget(ico_lbl);
+	hbox->addWidget(msg_lbl);
 
 	return info_frm;
 }

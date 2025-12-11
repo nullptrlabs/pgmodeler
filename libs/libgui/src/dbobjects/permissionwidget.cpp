@@ -112,6 +112,8 @@ void PermissionWidget::setAttributes(DatabaseModel *model, BaseObject *parent_ob
 
 	if(object)
 	{
+		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(object->getObjectType()));
+		obj_icon_lbl->setToolTip(BaseObject::getTypeName(object->getObjectType()));
 		obj_signature_edt->setText(object->getSignature());
 
 		connect(object_selection_wgt, qOverload<BaseObject *, bool>(&ModelObjectsWidget::s_visibilityChanged), this, [this](){

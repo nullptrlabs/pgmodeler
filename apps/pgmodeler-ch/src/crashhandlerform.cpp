@@ -28,11 +28,10 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 {
 	QFile input;
 	QString buf;
-	QWidget *wgt=new QWidget;
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QHBoxLayout *layout=new QHBoxLayout;
+	QWidget *wgt = new QWidget;
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, hint_frm);
+	QHBoxLayout *layout = GuiUtilsNs::createHBoxLayout();
 
 	setWindowTitle(tr("pgModeler crash handler"));
 	setWindowIcon(QPixmap(":/images/images/crashhandler.png"));
@@ -43,7 +42,6 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 	stack_txt->setLineWrapMode(QPlainTextEdit::NoWrap);
 
 	layout->addWidget(stack_txt);
-	layout->setContentsMargins(GuiUtilsNs::LtMargins);
 	wgt->setLayout(layout);
 
 	logo_lbl->setPixmap(QPixmap(":/images/images/crashhandler.png"));
@@ -67,15 +65,13 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 	}
 
 	//Creating an input field in order to select the input report file
-	input_wgt=new QWidget(this);
+	input_wgt = new QWidget(this);
 	input_wgt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	layout=new QHBoxLayout(input_wgt);
-	layout->setContentsMargins(0, 0, 0, 0);
+	layout = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing, input_wgt);
 
-	input_lbl=new QLabel(input_wgt);
-	input_lbl->setText(tr("Input:"));
+	input_lbl = new QLabel(input_wgt);
+	input_lbl->setText(tr("Input"));
 	layout->addWidget(input_lbl);
 
 	input_sel = new FileSelectorWidget(this);

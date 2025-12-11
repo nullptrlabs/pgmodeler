@@ -250,6 +250,21 @@ namespace GuiUtilsNs {
 		return layout;
 	}
 
+	//! \brief Creates a QVBoxLayout with the provided margins, spacing and parent widget
+	extern __libgui QVBoxLayout *createVBoxLayout(int lt_margins = LtMargin,
+																								int lt_spacing = LtSpacing,
+																								QWidget *parent = nullptr);
+
+	//! \brief Creates a QHBoxLayout with the provided margins, spacing and parent widget
+	extern __libgui QHBoxLayout *createHBoxLayout(int lt_margins = LtMargin,
+																								int lt_spacing = LtSpacing,
+																								QWidget *parent = nullptr);
+
+	//! \brief Creates a QGridLayout with the provided margins, spacing and parent widget
+	extern __libgui QGridLayout *createGridLayout(int lt_margins = LtMargin,
+																								int lt_spacing = LtSpacing,
+																								QWidget *parent = nullptr);
+
 	/*! \brief Creates a wiget in a parent. If the parent has no layout configured then
 	 * this function also creates a vertical layout for the parent and puts the new widget there.
 	 *
@@ -289,15 +304,6 @@ namespace GuiUtilsNs {
 	 * user must take care of the destruction of the object */
 	extern __libgui NumberedTextEditor *createNumberedTextEditor(QWidget *parent, bool act_btns_enabled = false, qreal custom_fnt_size = 0);
 
-	/*! \brief Assigns a buddy label as buddy of a widget. Additionally, this function
-	 * configures the buddy font to be small and bold giving a clear idea that it is
-	 * associated with the provided widget */
-	//extern __libgui void configureWidgetBuddy(QLabel *buddy_label, QWidget *widget);
-
-	/*! \brief Assigns a buddy checkbox as buddy of a widget. Additionally, this function
-	 * configures the buddy font to be small and bold giving a clear idea that it is
-	 * associated with the provided widget */
-	//extern __libgui void configureWidgetBuddy(QCheckBox *buddy_chkbox, QWidget *widget);
 	extern __libgui void configureBuddyWidget(QLayout *lt);
 
 	//! \brief Configures all buddy labels in the provided widget

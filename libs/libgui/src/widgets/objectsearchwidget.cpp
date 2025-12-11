@@ -49,7 +49,9 @@ ObjectSearchWidget::ObjectSearchWidget(QWidget *parent) : QWidget(parent)
 	hbox->addWidget(_search_attrs_lbl);
 	hbox->addWidget(_search_attrs_cmb);
 
-	QVBoxLayout *vbox = GuiUtilsNs::createLayout<QVBoxLayout>(GuiUtilsNs::LtMargin, GuiUtilsNs::LtSpacing, filter_wgt);
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargin,
+																									 GuiUtilsNs::LtSpacing,
+																									 filter_wgt);
 	vbox->addLayout(hbox);
 	vbox->addWidget(obj_types_lst);
 	vbox->addWidget(regexp_chk);

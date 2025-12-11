@@ -31,9 +31,9 @@ OperatorWidget::OperatorWidget(QWidget *parent): BaseObjectWidget(parent, Object
 	arg_types[0] = new PgSQLTypeWidget(arguments_tab, tr("Left argument type"));
 	arg_types[1] = new PgSQLTypeWidget(arguments_tab, tr("Right argument type"));
 
-	QVBoxLayout *vlayout = GuiUtilsNs::createLayout<QVBoxLayout>(GuiUtilsNs::LtMargin,
-																															 GuiUtilsNs::LtSpacing,
-																															 arguments_tab);
+	QVBoxLayout *vlayout = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargin,
+																											GuiUtilsNs::LtSpacing,
+																											arguments_tab);
 	vlayout->addWidget(arg_types[0]);
 	vlayout->addWidget(arg_types[1]);
 	vlayout->addItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::Expanding));

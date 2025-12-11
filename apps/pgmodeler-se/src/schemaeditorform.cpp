@@ -45,12 +45,9 @@ SchemaEditorForm::SchemaEditorForm(QWidget *parent) : QWidget(parent)
 	for(auto &obj : btns_parent_wgt->children())
 	{
 		btn = dynamic_cast<QToolButton *>(obj);
-		if(!btn) continue;
 
-		fnt = btn->font();
-		fnt.setWeight(QFont::Normal);
-		btn->setFont(fnt);
-		GuiUtilsNs::createDropShadow(btn, 1, 1, 5);
+		if(!btn)
+			continue;
 
 		if(!btn->toolTip().isEmpty() && !btn->shortcut().toString().isEmpty())
 			btn->setToolTip(btn->toolTip() + QString(" (%1)").arg(btn->shortcut().toString()));
@@ -79,10 +76,8 @@ SchemaEditorForm::SchemaEditorForm(QWidget *parent) : QWidget(parent)
 	syntax_conf_sel = new FileSelectorWidget(syntax_conf_wgt);
 	syntax_conf_sel->setReadOnly(true);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QVBoxLayout *vbox = new QVBoxLayout(syntax_conf_wgt);
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(0, 0, syntax_conf_wgt);
 	vbox->addWidget(syntax_conf_sel);
-	vbox->setContentsMargins(0, 0, 0, 0);
 
 	syntax_conf_sel->setNameFilters({ tr("Syntax highlight config file (*%1)").arg(GlobalAttributes::ConfigurationExt) });
 

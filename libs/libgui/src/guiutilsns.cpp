@@ -1072,4 +1072,19 @@ namespace GuiUtilsNs {
 		else if(label)
 			box_lt->setSpacing(LtSpacing / 2);
 	}
+
+	QVBoxLayout *createVBoxLayout(int lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QVBoxLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	QHBoxLayout *createHBoxLayout(int lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QHBoxLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	QGridLayout *createGridLayout(int lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QGridLayout>(lt_margins, lt_spacing, parent);
+	}
 }

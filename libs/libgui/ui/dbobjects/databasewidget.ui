@@ -16,7 +16,10 @@
     <height>0</height>
    </size>
   </property>
-  <layout class="QGridLayout" name="database_grid">
+  <layout class="QVBoxLayout" name="database_lt">
+   <property name="spacing">
+    <number>5</number>
+   </property>
    <property name="leftMargin">
     <number>5</number>
    </property>
@@ -29,10 +32,7 @@
    <property name="bottomMargin">
     <number>5</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="0" column="0">
+   <item>
     <widget class="QTabWidget" name="db_attributes_tbw">
      <property name="currentIndex">
       <number>0</number>

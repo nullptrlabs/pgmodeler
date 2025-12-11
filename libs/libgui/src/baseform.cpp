@@ -62,8 +62,6 @@ void BaseForm::resizeForm(QWidget *widget)
 	if(!widget)
 		return;
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QVBoxLayout *vbox = new QVBoxLayout;
 	QSize min_size = widget->minimumSize();
 	int max_h = 0, max_w = 0, curr_w =0, curr_h = 0;
 	QScreen *screen = qApp->primaryScreen();
@@ -71,6 +69,8 @@ void BaseForm::resizeForm(QWidget *widget)
 
 	max_w = screen_sz.width() * 0.70;
 	max_h = screen_sz.height() * 0.70;
+
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(0, GuiUtilsNs::LtSpacing);
 	vbox->setContentsMargins(0, 0, 0, 0);
 
 	/* If the widget's minimum size is zero then we need to do
