@@ -48,25 +48,18 @@ SQLToolWidget::SQLToolWidget(QWidget * parent) : QWidget(parent)
 	corner_wgt->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 	sql_exec_tbw->setCornerWidget(corner_wgt);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	corner_wgt_lt = new QVBoxLayout;
-	corner_wgt_lt->setContentsMargins(0, 0,
-																		corner_wgt->width() / 2,
-																		corner_wgt->height());
-	corner_wgt->setLayout(corner_wgt_lt);
+	corner_wgt_lt = GuiUtilsNs::createVBoxLayout({ 0, 0,
+																								 corner_wgt->width() / 2,
+																								 corner_wgt->height() }, 0, corner_wgt);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QVBoxLayout *vbox=new QVBoxLayout;
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargin, 0, sourcecode_gb);
 	sourcecode_txt=new NumberedTextEditor(sourcecode_gb);
 	sourcecode_txt->setReadOnly(true);
 	sourcecode_txt->installEventFilter(this);
 
 	sourcecode_hl=new SyntaxHighlighter(sourcecode_txt);
 	sourcecode_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
-
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(sourcecode_txt);
-	sourcecode_gb->setLayout(vbox);
 
 	connect(connections_cmb, &QComboBox::activated, this, __slot(this, SQLToolWidget::connectToServer));
 	connect(connections_cmb, &QComboBox::currentIndexChanged, this, [this](int idx) {

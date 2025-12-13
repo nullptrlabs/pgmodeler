@@ -58,11 +58,9 @@ SQLExecutionWidget::SQLExecutionWidget(QWidget * parent) : QWidget(parent)
 	output_tbw->widget(2)->installEventFilter(this);
 
 	search_history_wgt = new SearchReplaceWidget(cmd_history_txt, search_history_parent);
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QVBoxLayout *layout = new QVBoxLayout;
-	layout->setContentsMargins(0,0,0,0);
+
+	QVBoxLayout *layout = GuiUtilsNs::createVBoxLayout(0, 0, search_history_parent);
 	layout->addWidget(search_history_wgt);
-	search_history_parent->setLayout(layout);
 	search_history_parent->setVisible(false);
 
 	sql_cmd_hl=new SyntaxHighlighter(sql_cmd_txt, false);
@@ -76,9 +74,8 @@ SQLExecutionWidget::SQLExecutionWidget(QWidget * parent) : QWidget(parent)
 	code_compl_wgt=new CodeCompletionWidget(sql_cmd_txt, true);
 
 	find_replace_wgt=new SearchReplaceWidget(sql_cmd_txt, search_wgt_parent);
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QHBoxLayout *hbox=new QHBoxLayout(search_wgt_parent);
-	hbox->setContentsMargins(0,0,0,0);
+
+	QHBoxLayout *hbox = GuiUtilsNs::createHBoxLayout(0, 0, search_wgt_parent);
 	hbox->addWidget(find_replace_wgt);
 	search_wgt_parent->setVisible(false);
 

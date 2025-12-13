@@ -94,7 +94,6 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 
 	QFont font;
 	QLabel *label=nullptr;
-	QGridLayout *grid=nullptr;
 	QAction *action=nullptr;
 	QString str_ico;
 	QStringList rel_types_cod={"11", "1n", "nn", "dep", "gen", "part" };
@@ -141,10 +140,10 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	label->setPixmap(GuiUtilsNs::getPixmap("alert"));
 	label->setObjectName("icon_lbl");
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	grid = new QGridLayout;
-	grid->addWidget(label, 0, 0, 1, 1);
-
+	QHBoxLayout *hbox = GuiUtilsNs::createHBoxLayout(GuiUtilsNs::LtMargin,
+																									 GuiUtilsNs::LtSpacing,
+																									 protected_model_frm);
+	hbox->addWidget(label);
 	label = new QLabel(protected_model_frm);
 
 	font.setBold(false);
@@ -156,10 +155,8 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	label->setFont(font);
 	label->setObjectName("message_lbl");
 	label->setWordWrap(true);
-	//label->setText(tr("<strong>ATTENTION:</strong> The database model is protected! Any modification over it is disabled!"));
 
-	grid->addWidget(label, 0, 1, 1, 1);
-	protected_model_frm->setLayout(grid);
+	hbox->addWidget(label);
 	protected_model_frm->adjustSize();
 
 	db_model = new DatabaseModel(this);
@@ -187,12 +184,9 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	viewport->installEventFilter(this);
 	viewport->setAcceptDrops(true);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	grid=new QGridLayout;
-	grid->addWidget(protected_model_frm, 0,0,1,1);
-	grid->addWidget(viewport, 1,0,1,1);
-	grid->setContentsMargins(20,20,20,20);
-	this->setLayout(grid);
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(20, GuiUtilsNs::LtSpacing, this);
+	vbox->addWidget(protected_model_frm);
+	vbox->addWidget(viewport);
 
 	int sz = (std::min<int>(qApp->primaryScreen()->size().width(),
 												 qApp->primaryScreen()->size().height()))/2;

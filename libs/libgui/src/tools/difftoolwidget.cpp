@@ -75,10 +75,8 @@ DiffToolWidget::DiffToolWidget(QWidget *parent) : BaseConfigWidget (parent)
 	search_sql_wgt = new SearchReplaceWidget(sqlcode_txt, search_wgt_parent);
 	search_wgt_parent->setVisible(false);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	vbox = new QVBoxLayout(search_wgt_parent);
+	vbox = GuiUtilsNs::createVBoxLayout(0, 0, search_wgt_parent);
 	vbox->addWidget(search_sql_wgt);
-	vbox->setContentsMargins(0,0,0,0);
 
 	dbg_output_wgt = GuiUtilsNs::createWidgetInParent<DebugOutputWidget>(GuiUtilsNs::LtMargin, settings_tbw->widget(3));
 

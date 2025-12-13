@@ -1078,12 +1078,27 @@ namespace GuiUtilsNs {
 		return createLayout<QVBoxLayout>(lt_margins, lt_spacing, parent);
 	}
 
+	QVBoxLayout *createVBoxLayout(QMargins lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QVBoxLayout>(lt_margins, lt_spacing, parent);
+	}
+
 	QHBoxLayout *createHBoxLayout(int lt_margins, int lt_spacing, QWidget *parent)
 	{
 		return createLayout<QHBoxLayout>(lt_margins, lt_spacing, parent);
 	}
 
+	QHBoxLayout *createHBoxLayout(QMargins lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QHBoxLayout>(lt_margins, lt_spacing, parent);
+	}
+
 	QGridLayout *createGridLayout(int lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QGridLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	QGridLayout *createGridLayout(QMargins lt_margins, int lt_spacing, QWidget *parent)
 	{
 		return createLayout<QGridLayout>(lt_margins, lt_spacing, parent);
 	}

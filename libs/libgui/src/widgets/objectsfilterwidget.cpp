@@ -41,11 +41,8 @@ ObjectsFilterWidget::ObjectsFilterWidget(QWidget *parent) : QWidget(parent)
 	frame = new QFrame(this);
 	tab_objs_lst = new QListWidget(this);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QVBoxLayout *vbox = new QVBoxLayout;
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargin, 0, frame);
 	vbox->addWidget(tab_objs_lst);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
-	frame->setLayout(vbox);
 
 	wgt_act_forced_filter = new QWidgetAction(this);
 	wgt_act_forced_filter->setDefaultWidget(frame);

@@ -22,8 +22,7 @@
 
 ColumnDataWidget::ColumnDataWidget(bool use_syntax_hl, const QString &hl_conf, QWidget *parent) : QWidget(parent)
 {
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QVBoxLayout *vbox = new QVBoxLayout(this);
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargin, 0, this);
 
 	setWindowTitle(tr("Edit column data"));
 
@@ -37,7 +36,6 @@ ColumnDataWidget::ColumnDataWidget(bool use_syntax_hl, const QString &hl_conf, Q
 	}
 
 	vbox->addWidget(value_txt);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 }
 
 void ColumnDataWidget::setData(const QString &data)

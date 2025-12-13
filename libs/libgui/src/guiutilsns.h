@@ -242,26 +242,49 @@ namespace GuiUtilsNs {
 	 *  layout class constructor arguments (generally a parent widget) */
 	template<class LtClass, typename ...CtorArgs,
 					 std::enable_if_t<std::is_base_of_v<QLayout, LtClass>, bool> = true>
-	LtClass *createLayout(int lt_margins, int lt_spacing, CtorArgs... new_lt_ctor_args)
+	LtClass *createLayout(QMargins lt_margins, int lt_spacing, CtorArgs... new_lt_ctor_args)
 	{
 		LtClass *layout { new LtClass(new_lt_ctor_args...) };
-		layout->setContentsMargins(lt_margins, lt_margins, lt_margins, lt_margins);
+		layout->setContentsMargins(lt_margins);
 		layout->setSpacing(lt_spacing);
 		return layout;
 	}
 
+	/*! \brief Creates an empty layout manager.
+	 *  Custom margins (the same for all edges) and spacing values can be specified,
+	 *  as well as the layout class constructor arguments (generally a parent widget) */
+	template<class LtClass, typename ...CtorArgs,
+					 std::enable_if_t<std::is_base_of_v<QLayout, LtClass>, bool> = true>
+	LtClass *createLayout(int lt_margins, int lt_spacing, CtorArgs... new_lt_ctor_args)
+	{
+		return createLayout<LtClass>({ lt_margins, lt_margins, lt_margins, lt_margins },
+																 lt_spacing, new_lt_ctor_args...);
+	}
+
 	//! \brief Creates a QVBoxLayout with the provided margins, spacing and parent widget
-	extern __libgui QVBoxLayout *createVBoxLayout(int lt_margins = LtMargin,
+	extern __libgui QVBoxLayout *createVBoxLayout(int lt_margins,
+																								int lt_spacing = LtSpacing,
+																								QWidget *parent = nullptr);
+
+	extern __libgui QVBoxLayout *createVBoxLayout(QMargins lt_margins,
 																								int lt_spacing = LtSpacing,
 																								QWidget *parent = nullptr);
 
 	//! \brief Creates a QHBoxLayout with the provided margins, spacing and parent widget
-	extern __libgui QHBoxLayout *createHBoxLayout(int lt_margins = LtMargin,
+	extern __libgui QHBoxLayout *createHBoxLayout(int lt_margins,
+																								int lt_spacing = LtSpacing,
+																								QWidget *parent = nullptr);
+
+	extern __libgui QHBoxLayout *createHBoxLayout(QMargins lt_margins,
 																								int lt_spacing = LtSpacing,
 																								QWidget *parent = nullptr);
 
 	//! \brief Creates a QGridLayout with the provided margins, spacing and parent widget
-	extern __libgui QGridLayout *createGridLayout(int lt_margins = LtMargin,
+	extern __libgui QGridLayout *createGridLayout(int lt_margins,
+																								int lt_spacing = LtSpacing,
+																								QWidget *parent = nullptr);
+
+	extern __libgui QGridLayout *createGridLayout(QMargins lt_margins,
 																								int lt_spacing = LtSpacing,
 																								QWidget *parent = nullptr);
 

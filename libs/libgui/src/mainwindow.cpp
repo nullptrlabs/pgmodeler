@@ -316,29 +316,17 @@ void MainWindow::configureMenusActionsWidgets()
 	welcome_wgt->lower();
 	v_splitter1->lower();
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QVBoxLayout *vlayout=new QVBoxLayout;
-	vlayout->setContentsMargins(0,0,0,0);
+	QVBoxLayout *vlayout = GuiUtilsNs::createVBoxLayout(0, 0, model_objs_parent);
 	vlayout->addWidget(model_objs_wgt);
-	model_objs_parent->setLayout(vlayout);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	vlayout=new QVBoxLayout;
-	vlayout->setContentsMargins(0,0,0,0);
+	vlayout = GuiUtilsNs::createVBoxLayout(0, 0, oper_list_parent);
 	vlayout->addWidget(oper_list_wgt);
-	oper_list_parent->setLayout(vlayout);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QHBoxLayout * hlayout=new QHBoxLayout;
-	hlayout->setContentsMargins(0,0,0,0);
+	QHBoxLayout *hlayout = GuiUtilsNs::createHBoxLayout(0, 0, model_valid_parent);
 	hlayout->addWidget(model_valid_wgt);
-	model_valid_parent->setLayout(hlayout);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	hlayout=new QHBoxLayout;
-	hlayout->setContentsMargins(0,0,0,0);
+	hlayout = GuiUtilsNs::createHBoxLayout(0, 0, obj_search_parent);
 	hlayout->addWidget(obj_finder_wgt);
-	obj_search_parent->setLayout(hlayout);
 
 	models_tbw_parent->resize(QSize(models_tbw_parent->maximumWidth(), models_tbw_parent->height()));
 
@@ -484,11 +472,10 @@ void MainWindow::createMainWidgets()
 
 		scene_info_wgt = new SceneInfoWidget(this);
 		scene_info_wgt->setObjectName("scene_info_wgt");
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-		QHBoxLayout *hbox = new QHBoxLayout(scene_info_parent);
+
+		QHBoxLayout *hbox = GuiUtilsNs::createHBoxLayout({ 0, GuiUtilsNs::LtMargin, 0, 0 },
+																										 0, scene_info_parent);
 		hbox->addWidget(scene_info_wgt);
-		hbox->setContentsMargins(0, GuiUtilsNs::LtMargin, 0, 0);
-		scene_info_parent->setLayout(hbox);
 
 		welcome_wgt = createViewWidget<WelcomeWidget>(WelcomeView, "welcome_wgt");
 		sql_tool_wgt = createViewWidget<SQLToolWidget>(ManageView, "sql_tool_wgt");

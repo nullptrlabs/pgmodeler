@@ -81,18 +81,15 @@ CodeCompletionWidget::CodeCompletionWidget(QPlainTextEdit *code_field_txt, bool 
 	name_list->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	name_list->setItemDelegate(new HtmlItemDelegate(name_list, true));
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QVBoxLayout *vbox=new QVBoxLayout(completion_wgt);
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargins,
+																									 GuiUtilsNs::LtSpacing,
+																									 completion_wgt);
 	vbox->addWidget(name_list);
 	vbox->addWidget(always_on_top_chk);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
-	vbox->setSpacing(GuiUtilsNs::LtSpacing);
-	completion_wgt->setLayout(vbox);
 
-	this->code_field_txt=code_field_txt;
-	auto_triggered=false;
+	this->code_field_txt = code_field_txt;
+	auto_triggered = false;
 	filter_kw_pos = ini_cur_pos = -1;
-
 	db_model=nullptr;
 	setQualifyingLevel(nullptr);
 

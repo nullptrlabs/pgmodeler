@@ -30,9 +30,7 @@ PluginsConfigWidget::PluginsConfigWidget(QWidget *parent) : BaseConfigWidget(par
 	root_dir_sel->setDirectoryMode(true);
 	root_dir_sel->setSelectedFile(GlobalAttributes::getPluginsPath());
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QVBoxLayout *vbox = new QVBoxLayout(plugins_root_gb);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargins, 0, plugins_root_gb);
 	vbox->addWidget(root_dir_sel);
 
 	plugins_tab = new CustomTableWidget(CustomTableWidget::EditButton |
@@ -46,11 +44,8 @@ PluginsConfigWidget::PluginsConfigWidget(QWidget *parent) : BaseConfigWidget(par
 
 	connect(plugins_tab, &CustomTableWidget::s_rowEdited, this, &PluginsConfigWidget::showPluginInfo);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	vbox = new QVBoxLayout(loaded_plugins_gb);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
+	vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargins, 0, loaded_plugins_gb);
 	vbox->addWidget(plugins_tab);
-	loaded_plugins_gb->setLayout(vbox);
 }
 
 PluginsConfigWidget::~PluginsConfigWidget()

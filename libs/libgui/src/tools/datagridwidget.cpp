@@ -166,12 +166,8 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 	csv_load_parent->setVisible(false);
 
 	csv_load_wgt = new CsvLoadWidget(this, false);
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	QVBoxLayout *layout = new QVBoxLayout;
-
+	QVBoxLayout *layout = GuiUtilsNs::createVBoxLayout(0, 0, csv_load_parent);
 	layout->addWidget(csv_load_wgt);
-	layout->setContentsMargins(0,0,0,0);
-	csv_load_parent->setLayout(layout);
 	csv_load_parent->setMinimumSize(csv_load_wgt->minimumSize());
 
 	columns_lst->installEventFilter(this);

@@ -67,16 +67,14 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		show_act_btns = true;
 		font.setPointSizeF(font.pointSizeF() * 0.90);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-		QVBoxLayout *top_wgt_lt = new QVBoxLayout;
-		top_wgt_lt->setContentsMargins(GuiUtilsNs::LtMargins);
 		top_widget = new QWidget(this);
 		top_widget->setObjectName("top_widget");
 		top_widget->setAutoFillBackground(true);
-		top_widget->setLayout(top_wgt_lt);
 
-		//pal.setColor(QPalette::Window, LineNumbersWidget::getBackgroundColor());
-		//top_widget->setPalette(pal);
+		QVBoxLayout *top_wgt_lt = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargins,
+																													 GuiUtilsNs::LtSpacing,
+																													 top_widget);
+
 		top_widget->setVisible(act_btns_enabled);
 		top_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
@@ -86,10 +84,7 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		search_wgt->setVisible(false);
 		search_wgt->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-		QHBoxLayout *buttons_lt = new QHBoxLayout;
-		buttons_lt->setContentsMargins(0, 0, 0, 0);
-
+		QHBoxLayout *buttons_lt = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing);
 		top_wgt_lt->addLayout(buttons_lt);
 
 		QLabel *ico = new QLabel(top_widget);
@@ -102,13 +97,10 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		editor_alert_wgt = new QWidget(top_widget);
 		editor_alert_wgt->setFont(font);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-		QHBoxLayout *alert_lt = new QHBoxLayout;
-		alert_lt->setContentsMargins(0,0,0,0);
+		QHBoxLayout *alert_lt = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing, editor_alert_wgt);
 		alert_lt->addWidget(ico);
 		alert_lt->addWidget(msg_lbl);
 		editor_alert_wgt->setVisible(false);
-		editor_alert_wgt->setLayout(alert_lt);
 
 		buttons_lt->addWidget(editor_alert_wgt);
 		buttons_lt->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Expanding));

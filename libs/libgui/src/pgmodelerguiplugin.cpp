@@ -23,29 +23,24 @@ QList<PgModelerGuiPlugin *> PgModelerGuiPlugin::reg_plugins;
 
 PgModelerGuiPlugin::PgModelerGuiPlugin()
 {
-	QGridLayout *gridLayout=nullptr;
-	QSpacerItem *verticalSpacer=nullptr;
 	QFont font;
-	QWidget *widget=nullptr;
 
 	main_window = nullptr;
-	plugin_info_frm=new BaseForm;
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	gridLayout=new QGridLayout;
+	plugin_info_frm = new BaseForm;
 
-	widget=new QWidget;
+	QWidget *widget = new QWidget;
 	widget->setWindowTitle(QT_TRANSLATE_NOOP("PgModelerGuiPlugin", "Plugin information"));
 
-	gridLayout->setHorizontalSpacing(GuiUtilsNs::LtSpacing);
-	gridLayout->setVerticalSpacing(GuiUtilsNs::LtSpacing);
-	gridLayout->setContentsMargins(GuiUtilsNs::LtMargins);
+	QGridLayout *grid = GuiUtilsNs::createGridLayout(GuiUtilsNs::LtMargins,
+																									 GuiUtilsNs::LtSpacing,
+																									 widget);
 
 	icon_lbl = new QLabel(widget);
 	icon_lbl->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	icon_lbl->setMinimumSize(QSize(64, 64));
 	icon_lbl->setMaximumSize(QSize(64, 64));
 	icon_lbl->setScaledContents(true);
-	gridLayout->addWidget(icon_lbl, 0, 0, 2, 1);
+	grid->addWidget(icon_lbl, 0, 0, 2, 1);
 
 	title_lbl = new QLabel(widget);
 	title_lbl->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -53,29 +48,28 @@ PgModelerGuiPlugin::PgModelerGuiPlugin()
 	font.setBold(true);
 	font.setItalic(true);
 	title_lbl->setFont(font);
-	gridLayout->addWidget(title_lbl, 0, 1, 1, 1);
+	grid->addWidget(title_lbl, 0, 1, 1, 1);
 
 	author_lbl = new QLabel(widget);
 	author_lbl->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 	author_lbl->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	gridLayout->addWidget(author_lbl, 1, 1, 2, 1);
+	grid->addWidget(author_lbl, 1, 1, 2, 1);
 
-	verticalSpacer = new QSpacerItem(20, 18, QSizePolicy::Minimum, QSizePolicy::Expanding);
-	gridLayout->addItem(verticalSpacer, 2, 0, 2, 1);
+	grid->addItem(new QSpacerItem(20, 18, QSizePolicy::Minimum, QSizePolicy::Expanding),
+								2, 0, 2, 1);
 
 	version_lbl = new QLabel(widget);
 	version_lbl->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 	version_lbl->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	gridLayout->addWidget(version_lbl, 3, 1, 1, 1);
+	grid->addWidget(version_lbl, 3, 1, 1, 1);
 
 	description_lbl = new QLabel(widget);
 	description_lbl->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 	description_lbl->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
 	description_lbl->setWordWrap(true);
 	description_lbl->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	gridLayout->addWidget(description_lbl, 4, 0, 1, 2);
+	grid->addWidget(description_lbl, 4, 0, 1, 2);
 
-	widget->setLayout(gridLayout);
 	widget->setMinimumSize(480, 240);
 	plugin_info_frm->setMainWidget(widget);
 }

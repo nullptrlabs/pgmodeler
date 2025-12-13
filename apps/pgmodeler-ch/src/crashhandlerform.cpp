@@ -31,7 +31,7 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 	QWidget *wgt = new QWidget;
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, hint_frm);
-	QHBoxLayout *layout = GuiUtilsNs::createHBoxLayout();
+	QHBoxLayout *layout = GuiUtilsNs::createHBoxLayout(GuiUtilsNs::LtMargin);
 
 	setWindowTitle(tr("pgModeler crash handler"));
 	setWindowIcon(QPixmap(":/images/images/crashhandler.png"));

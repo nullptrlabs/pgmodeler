@@ -807,9 +807,9 @@ void BaseObjectWidget::highlightVersionSpecificFields(std::map<QString, std::vec
 QFrame *BaseObjectWidget::generateVersionWarningFrame(std::map<QString, std::vector<QWidget *> > &fields,
 																											std::map< QWidget *, std::vector<QString> > *values)
 {
-	QFrame *alert_frm=nullptr;
-	QGridLayout *grid=nullptr;
-	QLabel *ico_lbl=nullptr, *msg_lbl=nullptr;
+	QFrame *alert_frm = nullptr;
+	QHBoxLayout *layout = nullptr;
+	QLabel *ico_lbl = nullptr, *msg_lbl = nullptr;
 	QFont font;
 
 	highlightVersionSpecificFields(fields, values);
@@ -824,9 +824,11 @@ QFrame *BaseObjectWidget::generateVersionWarningFrame(std::map<QString, std::vec
 	alert_frm->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
-	grid = new QGridLayout(alert_frm);
-	grid->setObjectName("grid");
+	layout = GuiUtilsNs::createHBoxLayout(GuiUtilsNs::LtMargin,
+																				GuiUtilsNs::LtSpacing,
+																				alert_frm);
+
+	layout->setObjectName("version_warn_lt");
 
 	ico_lbl = new QLabel(alert_frm);
 	ico_lbl->setObjectName("icon_lbl");
@@ -836,7 +838,7 @@ QFrame *BaseObjectWidget::generateVersionWarningFrame(std::map<QString, std::vec
 	ico_lbl->setPixmap(GuiUtilsNs::getPixmap("alert"));
 	ico_lbl->setAlignment(Qt::AlignLeft|Qt::AlignTop);
 
-	grid->addWidget(ico_lbl, 0, 0, 1, 1);
+	layout->addWidget(ico_lbl);
 
 	msg_lbl = new QLabel(alert_frm);
 	msg_lbl->setFont(font);
@@ -847,10 +849,9 @@ QFrame *BaseObjectWidget::generateVersionWarningFrame(std::map<QString, std::vec
 	msg_lbl->setText(tr("The <em><u><strong>highlighted</strong></u></em> fields in the form or one of their values are available only on specific PostgreSQL versions. \
 							Generating SQL code for versions other than those specified in the fields' tooltips may create incompatible code."));
 
-	grid->addWidget(msg_lbl, 0, 1, 1, 1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
-
+	layout->addWidget(msg_lbl);
 	alert_frm->adjustSize();
+
 	return alert_frm;
 }
 
