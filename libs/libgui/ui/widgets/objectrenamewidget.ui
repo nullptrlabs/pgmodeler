@@ -265,7 +265,7 @@
              <string>&lt;p&gt;Use the default name disambiguation convention the next time a name conflict is detected.&lt;/p&gt;</string>
             </property>
             <property name="text">
-             <string>Always use the default.</string>
+             <string>Always use the default</string>
             </property>
            </widget>
           </item>
@@ -375,7 +375,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Rename ... to:</string>
+             <string>Rename ... to</string>
             </property>
            </widget>
           </item>

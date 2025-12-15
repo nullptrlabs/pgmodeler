@@ -28,6 +28,7 @@ ModelObjectsWidget::ModelObjectsWidget(bool simplified_view, QWidget *parent) : 
 {
 	setupUi(this);
 
+	GuiUtilsNs::configureBuddyWidgets(filter_wgt);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AltDefaultFrmHint, content_frm);
 
 	obj_types_wgt = nullptr;

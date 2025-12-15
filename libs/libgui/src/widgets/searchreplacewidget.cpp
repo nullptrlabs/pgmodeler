@@ -20,6 +20,7 @@
 #include <QRegularExpression>
 #include <QTimer>
 #include "exception.h"
+#include "guiutilsns.h"
 
 SearchReplaceWidget::SearchReplaceWidget(QPlainTextEdit *txt_edit, QWidget *parent): QWidget(parent)
 {
@@ -28,6 +29,9 @@ SearchReplaceWidget::SearchReplaceWidget(QPlainTextEdit *txt_edit, QWidget *pare
 
 	setupUi(this);
 	text_edt = txt_edit;
+
+	GuiUtilsNs::configureWidgetsFont({ search_lbl, replace_lbl },
+																	 GuiUtilsNs::SmallFontFactor, true);
 
 	search_edt->installEventFilter(this);
 

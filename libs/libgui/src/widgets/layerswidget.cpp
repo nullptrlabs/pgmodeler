@@ -23,9 +23,10 @@
 LayersWidget::LayersWidget(QWidget *parent) : QDialog(parent)
 {
 	setupUi(this);
-
 	setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 	setAttribute(Qt::WA_TranslucentBackground, true);
+
+	GuiUtilsNs::configureBuddyWidget(layer_name_lt);
 
 	frame->installEventFilter(this);
 	handle_lbl->installEventFilter(this);

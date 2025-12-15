@@ -148,221 +148,7 @@
       <property name="spacing">
        <number>5</number>
       </property>
-      <item row="0" column="0">
-       <widget class="QTreeWidget" name="objectstree_tw">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="palette">
-         <palette>
-          <active>
-           <colorrole role="Link">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>0</red>
-              <green>170</green>
-              <blue>255</blue>
-             </color>
-            </brush>
-           </colorrole>
-          </active>
-          <inactive>
-           <colorrole role="Link">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>0</red>
-              <green>170</green>
-              <blue>255</blue>
-             </color>
-            </brush>
-           </colorrole>
-          </inactive>
-          <disabled>
-           <colorrole role="Link">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>0</red>
-              <green>170</green>
-              <blue>255</blue>
-             </color>
-            </brush>
-           </colorrole>
-          </disabled>
-         </palette>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Shadow::Sunken</enum>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="autoScroll">
-         <bool>true</bool>
-        </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
-        </property>
-        <property name="showDropIndicator" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="alternatingRowColors">
-         <bool>true</bool>
-        </property>
-        <property name="selectionMode">
-         <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
-        </property>
-        <property name="selectionBehavior">
-         <enum>QAbstractItemView::SelectionBehavior::SelectItems</enum>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>22</width>
-          <height>22</height>
-         </size>
-        </property>
-        <property name="indentation">
-         <number>20</number>
-        </property>
-        <property name="rootIsDecorated">
-         <bool>true</bool>
-        </property>
-        <property name="uniformRowHeights">
-         <bool>true</bool>
-        </property>
-        <property name="itemsExpandable">
-         <bool>true</bool>
-        </property>
-        <property name="sortingEnabled">
-         <bool>false</bool>
-        </property>
-        <property name="animated">
-         <bool>true</bool>
-        </property>
-        <property name="allColumnsShowFocus">
-         <bool>false</bool>
-        </property>
-        <property name="headerHidden">
-         <bool>true</bool>
-        </property>
-        <property name="expandsOnDoubleClick">
-         <bool>false</bool>
-        </property>
-        <property name="columnCount">
-         <number>1</number>
-        </property>
-        <attribute name="headerMinimumSectionSize">
-         <number>50</number>
-        </attribute>
-        <attribute name="headerDefaultSectionSize">
-         <number>50</number>
-        </attribute>
-        <attribute name="headerStretchLastSection">
-         <bool>true</bool>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>1</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QGroupBox" name="visibleobjects_grp">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="title">
-         <string>Visible object types</string>
-        </property>
-        <property name="flat">
-         <bool>false</bool>
-        </property>
-        <property name="checkable">
-         <bool>false</bool>
-        </property>
-        <layout class="QGridLayout" name="gridLayout">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <property name="spacing">
-          <number>5</number>
-         </property>
-        </layout>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QWidget" name="filter_wgt" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QLabel" name="filter_lbl">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Filter:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="filter_edt">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="clearButtonEnabled">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="by_id_chk">
-           <property name="text">
-            <string>By ID</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="3" column="0">
+      <item row="6" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <property name="spacing">
          <number>5</number>
@@ -578,14 +364,233 @@
         </item>
        </layout>
       </item>
+      <item row="0" column="0">
+       <widget class="QTreeWidget" name="objectstree_tw">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="palette">
+         <palette>
+          <active>
+           <colorrole role="Link">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>170</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </active>
+          <inactive>
+           <colorrole role="Link">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>170</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </inactive>
+          <disabled>
+           <colorrole role="Link">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>170</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </disabled>
+         </palette>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Shadow::Sunken</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="autoScroll">
+         <bool>true</bool>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+        </property>
+        <property name="showDropIndicator" stdset="0">
+         <bool>true</bool>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectionBehavior::SelectItems</enum>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="indentation">
+         <number>20</number>
+        </property>
+        <property name="rootIsDecorated">
+         <bool>true</bool>
+        </property>
+        <property name="uniformRowHeights">
+         <bool>true</bool>
+        </property>
+        <property name="itemsExpandable">
+         <bool>true</bool>
+        </property>
+        <property name="sortingEnabled">
+         <bool>false</bool>
+        </property>
+        <property name="animated">
+         <bool>true</bool>
+        </property>
+        <property name="allColumnsShowFocus">
+         <bool>false</bool>
+        </property>
+        <property name="headerHidden">
+         <bool>true</bool>
+        </property>
+        <property name="expandsOnDoubleClick">
+         <bool>false</bool>
+        </property>
+        <property name="columnCount">
+         <number>1</number>
+        </property>
+        <attribute name="headerMinimumSectionSize">
+         <number>50</number>
+        </attribute>
+        <attribute name="headerDefaultSectionSize">
+         <number>50</number>
+        </attribute>
+        <attribute name="headerStretchLastSection">
+         <bool>true</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>1</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QWidget" name="filter_wgt" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <property name="spacing">
+          <number>5</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <layout class="QHBoxLayout" name="filter_lt">
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="filter_lbl">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Filter</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="filter_edt">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="clearButtonEnabled">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="by_id_chk">
+             <property name="text">
+              <string>By ID</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QGroupBox" name="visibleobjects_grp">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Visible object types</string>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <property name="spacing">
+          <number>5</number>
+         </property>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>filter_edt</tabstop>
-  <tabstop>by_id_chk</tabstop>
   <tabstop>select_tb</tabstop>
   <tabstop>cancel_tb</tabstop>
   <tabstop>options_tb</tabstop>

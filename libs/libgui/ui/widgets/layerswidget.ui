@@ -119,62 +119,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="5">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Set object(s) layer(s):</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="5">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QLineEdit" name="layer_name_edt">
-          <property name="placeholderText">
-           <string>New layer name</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="add_btn">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Add a new layer</string>
-          </property>
-          <property name="text">
-           <string>Add</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../../res/resources.qrc">
-            <normaloff>:/icons/icons/addlayer.png</normaloff>:/icons/icons/addlayer.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>22</width>
-            <height>22</height>
-           </size>
-          </property>
-          <property name="shortcut">
-           <string>Ins</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
       <item row="4" column="3">
        <widget class="QPushButton" name="cancel_btn">
         <property name="sizePolicy">
@@ -232,6 +176,69 @@
          <bool>false</bool>
         </property>
        </widget>
+      </item>
+      <item row="0" column="0" colspan="5">
+       <layout class="QVBoxLayout" name="layer_name_lt">
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Set object(s) layer(s)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QLineEdit" name="layer_name_edt">
+            <property name="placeholderText">
+             <string>New layer name</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="add_btn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Add a new layer</string>
+            </property>
+            <property name="text">
+             <string>Add</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../../res/resources.qrc">
+              <normaloff>:/icons/icons/addlayer.png</normaloff>:/icons/icons/addlayer.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>22</width>
+              <height>22</height>
+             </size>
+            </property>
+            <property name="shortcut">
+             <string>Ins</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
