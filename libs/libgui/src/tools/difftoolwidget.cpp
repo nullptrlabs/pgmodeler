@@ -40,6 +40,7 @@ DiffToolWidget::DiffToolWidget(QWidget *parent) : BaseConfigWidget (parent)
 															{ inv_model_alert_frm, diff_wgt_alert_frm });
 
 	GuiUtilsNs::configureWidgetsFont({ generate_btn, cancel_btn }, GuiUtilsNs::BigFontFactor);
+	GuiUtilsNs::configureBuddyWidgets(dates_wgt);
 
 	forced_obj_types_wgt = new ObjectTypesListWidget(this, { ObjectType::Relationship, ObjectType::Permission,
 																													 ObjectType::Database, ObjectType::Tag,
