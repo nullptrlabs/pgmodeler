@@ -28,6 +28,8 @@ ModelValidationWidget::ModelValidationWidget(QWidget *parent): QWidget(parent)
 {
 	setupUi(this);
 
+	GuiUtilsNs::configureBuddyWidgets(conn_opts_wgt);
+
 	output_menu.addAction(tr("Copy as text"), QKeySequence("Ctrl+Shift+C"), this, &ModelValidationWidget::copyTextOutput);
 	output_menu.addAction(tr("Clear"), this, &ModelValidationWidget::clearOutput);
 	output_btn->setMenu(&output_menu);
@@ -47,9 +49,7 @@ ModelValidationWidget::ModelValidationWidget(QWidget *parent): QWidget(parent)
 
 	connect(hide_tb, &QToolButton::clicked, this, &ModelValidationWidget::hide);
 	connect(options_btn, &QPushButton::toggled, options_frm, &QFrame::setVisible);
-	connect(sql_validation_chk, &QCheckBox::toggled, connections_cmb, &QComboBox::setEnabled);
-	connect(sql_validation_chk, &QCheckBox::toggled, version_cmb, &QComboBox::setEnabled);
-	connect(sql_validation_chk, &QCheckBox::toggled, use_tmp_names_chk, &QCheckBox::setEnabled);
+	connect(sql_validation_chk, &QCheckBox::toggled, conn_opts_wgt, &QWidget::setEnabled);
 	connect(validate_btn, &QPushButton::clicked, this, &ModelValidationWidget::validateModel);
 	connect(fix_btn, &QPushButton::clicked, this, &ModelValidationWidget::applyFixes);
 	connect(cancel_btn, &QPushButton::clicked, this, &ModelValidationWidget::cancelValidation);

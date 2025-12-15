@@ -273,11 +273,11 @@ class __libutils CustomUiStyle : public QProxyStyle {
 
 		void polish(QWidget *widget) override;
 
-	QPixmap generatedIconPixmap(QIcon::Mode icon_mode, const QPixmap &pixmap, const QStyleOption *option) const override;
+		QPixmap generatedIconPixmap(QIcon::Mode icon_mode, const QPixmap &pixmap, const QStyleOption *option) const override;
 
-	int pixelMetric(PixelMetric metric, const QStyleOption * option = nullptr, const QWidget * widget = nullptr) const override;
+		int pixelMetric(PixelMetric metric, const QStyleOption * option = nullptr, const QWidget * widget = nullptr) const override;
 
-	QRect subControlRect(ComplexControl control, const QStyleOptionComplex *option, SubControl sub_control, const QWidget *widget) const override;
+		QRect subControlRect(ComplexControl control, const QStyleOptionComplex *option, SubControl sub_control, const QWidget *widget) const override;
 
 	/*! \brief Sets a style hint on a QFrame to customize its border color and radius
 	 * So it can be rendered as a inlined alert/info/error frames.

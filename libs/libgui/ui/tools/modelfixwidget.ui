@@ -124,14 +124,14 @@
        </layout>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="label_6">
+       <widget class="QLabel" name="fix_tries_lbl">
         <property name="text">
-         <string>Fix tries:</string>
+         <string>Fix tries</string>
         </property>
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_5">
+       <widget class="QLabel" name="output_file_lbl">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -139,7 +139,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Output file:</string>
+         <string>Output file</string>
         </property>
        </widget>
       </item>
@@ -152,7 +152,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>pgmodeler-cli:</string>
+         <string>pgmodeler-cli</string>
         </property>
        </widget>
       </item>
@@ -240,7 +240,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="input_file_lbl">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -248,7 +248,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Input file:</string>
+         <string>Input file</string>
         </property>
        </widget>
       </item>

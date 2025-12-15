@@ -64,9 +64,9 @@
        <number>5</number>
       </property>
       <item row="0" column="0">
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="operation_lbl">
         <property name="text">
-         <string>Operation:</string>
+         <string>Operation</string>
         </property>
        </widget>
       </item>
@@ -112,21 +112,21 @@
       <item row="1" column="0">
        <widget class="QLabel" name="extract_from_lbl">
         <property name="text">
-         <string>Extract from:</string>
+         <string>Extract from</string>
         </property>
        </widget>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="apply_to_lbl">
         <property name="text">
-         <string>Apply to:</string>
+         <string>Apply to</string>
         </property>
        </widget>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="backup_file_lbl">
         <property name="text">
-         <string>Backup file:</string>
+         <string>Backup file</string>
         </property>
        </widget>
       </item>

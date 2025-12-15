@@ -27,6 +27,10 @@ MetadataHandlingWidget::MetadataHandlingWidget(QWidget *parent) : QWidget(parent
 {
 	setupUi(this);
 
+	GuiUtilsNs::configureWidgetsFont({ operation_lbl, extract_from_lbl,
+																		 apply_to_lbl, backup_file_lbl },
+																	 GuiUtilsNs::SmallFontFactor, true);
+
 	progress_wgt->setVisible(false);
 	root_item = nullptr;
 	output_trw->setItemDelegateForColumn(0, new HtmlItemDelegate(this));

@@ -19,6 +19,7 @@
 #include "modelfixwidget.h"
 #include "customuistyle.h"
 #include "globalattributes.h"
+#include "guiutilsns.h"
 
 const QString ModelFixWidget::PgModelerCli {
 #ifdef Q_OS_WIN
@@ -33,6 +34,10 @@ ModelFixWidget::ModelFixWidget(QWidget *parent) : QWidget(parent)
 	setupUi(this);
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert2_frm);
+
+	GuiUtilsNs::configureWidgetsFont({ pgmodeler_cli_lbl, input_file_lbl,
+																		 output_file_lbl, fix_tries_lbl },
+																	 GuiUtilsNs::SmallFontFactor, true);
 
 	input_file_sel = new FileSelectorWidget(this);
 	input_file_sel->setObjectName("input_file_sel");
