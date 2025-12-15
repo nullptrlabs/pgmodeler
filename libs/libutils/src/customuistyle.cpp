@@ -273,30 +273,31 @@ void CustomUiStyle::drawCCGroupBox(ComplexControl control, const QStyleOptionCom
 	painter->save();
 
 	QRect group_rect = group_box_opt->rect,
-		  title_rect, frame_rect = group_rect;
+			title_rect, frame_rect = group_rect;
 
 	// Calculate title area if there's text
 	bool has_title = !group_box_opt->text.isEmpty();
-	int padding = 2; // 2px padding above and below title
 
 	if(has_title)
 	{
 		// Create bold font with 80% size to calculate text height
 		QFont title_font = painter->font();
 		title_font.setBold(true);
-		title_font.setPointSizeF(title_font.pointSizeF() * 0.80);
+		title_font.setPointSizeF(title_font.pointSizeF() * GrpBoxTitleFontSize);
 
 		QFontMetrics fm(title_font);
 		int text_height = fm.height();
-		int total_title_height = text_height + (2 * padding);
+		int total_title_height = text_height + (2 * GrpBoxTitlePadding);
 
 		// Title takes the top portion including padding
 		title_rect = QRect(group_rect.left(), group_rect.top(),
-						group_rect.width(), total_title_height);
+											 group_rect.width(), total_title_height);
 
-		// Frame starts below the title (including padding)
-		frame_rect = QRect(group_rect.left(), group_rect.top() + total_title_height,
-						group_rect.width(), group_rect.height() - total_title_height);
+		// Frame starts below the title and extends to the bottom of the group box
+		int frame_top = group_rect.top() + total_title_height;
+		int frame_height = group_rect.bottom() - frame_top + 1;
+		frame_rect = QRect(group_rect.left(), frame_top,
+											 group_rect.width(), frame_height);
 	}
 
 	// Draw the frame below the title
@@ -323,7 +324,7 @@ void CustomUiStyle::drawCCGroupBox(ComplexControl control, const QStyleOptionCom
 		painter->setPen(getStateColor(QPalette::WindowText, group_box_opt));
 
 		// Draw the text in the title area with 2px padding (centered vertically)
-		title_rect.adjust(0, padding, 0, -padding); // Apply 2px padding top/bottom
+		title_rect.adjust(0, GrpBoxTitlePadding, 0, -GrpBoxTitlePadding); // Apply 2px padding top/bottom
 		painter->drawText(title_rect,
 						group_box_opt->textAlignment | Qt::AlignVCenter,
 						group_box_opt->text);
@@ -701,6 +702,44 @@ int CustomUiStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *o
 
 	// Use the default pixel metric attribute value if there's no custom value defined
 	return QProxyStyle::pixelMetric(metric, option, widget);
+}
+
+QRect CustomUiStyle::subControlRect(ComplexControl control, const QStyleOptionComplex *option, SubControl sub_control, const QWidget *widget) const
+{
+	QRect rect = QProxyStyle::subControlRect(control, option, sub_control, widget);
+
+	// Adjust GroupBox content rectangle to account for custom title height
+	if(control == CC_GroupBox && sub_control == SC_GroupBoxContents)
+	{
+		const QStyleOptionGroupBox *group_box_opt = qstyleoption_cast<const QStyleOptionGroupBox *>(option);
+
+		if(group_box_opt && !group_box_opt->text.isEmpty())
+		{
+			// Create bold font with 80% size to calculate text height (same as in drawCCGroupBox)
+			QFont title_font = widget ? widget->font() : QApplication::font();
+			title_font.setBold(true);
+			title_font.setPointSizeF(title_font.pointSizeF() * GrpBoxTitleFontSize);
+
+			QFontMetrics fm(title_font);
+			int text_height = fm.height(),
+					total_title_height = text_height + (2 * GrpBoxTitlePadding);
+
+			// Get the default rect from the base style
+			QRect default_rect = QProxyStyle::subControlRect(control, option, sub_control, widget);
+
+			/* Adjust the top position to account for our custom title height
+			 * The frame starts at total_title_height, so content should start a bit below that */
+			int frame_margin = pixelMetric(PM_DefaultFrameWidth, option, widget) + 1;
+
+			// Adjusting the rect so the top/bottom margins are the same as left/right margins
+			rect = QRect(default_rect.left() - 1,
+									 group_box_opt->rect.top() + total_title_height + frame_margin,
+									 default_rect.width() + 2,
+									 group_box_opt->rect.height() - total_title_height - (frame_margin * 2));
+		}
+	}
+
+	return rect;
 }
 
 void CustomUiStyle::polish(QWidget *widget)
@@ -1254,7 +1293,7 @@ void CustomUiStyle::drawPEGroupBoxFrame(PrimitiveElement element, const QStyleOp
 	painter->setPen(QPen(border_color, PenWidth));
 	painter->setBrush(Qt::NoBrush);
 	painter->drawPath(createControlShape(option->rect, FrameRadius, AllCorners,
-					0.5, 0.5, -0.5, -0.5));
+																			 0.5, 0.5, -0.5, -0.5));
 
 	painter->restore();
 }

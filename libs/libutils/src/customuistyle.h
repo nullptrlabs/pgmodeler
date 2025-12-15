@@ -227,7 +227,10 @@ class __libutils CustomUiStyle : public QProxyStyle {
 		HintFrameRadius = 6,
 		TabWgtRadius = 2,
 		TabBarRadius = 5,
-		ScrollBarRadius = 2;
+		ScrollBarRadius = 2,
+		GrpBoxTitlePadding = 2;
+
+		static constexpr double GrpBoxTitleFontSize = 0.80;
 
 		static constexpr int NoFactor = 0,
 		XMinFactor = 105,
@@ -270,11 +273,15 @@ class __libutils CustomUiStyle : public QProxyStyle {
 
 		void polish(QWidget *widget) override;
 
-		QPixmap generatedIconPixmap(QIcon::Mode icon_mode, const QPixmap &pixmap, const QStyleOption *option) const override;	int pixelMetric(PixelMetric metric, const QStyleOption * option = nullptr, const QWidget * widget = nullptr) const override;
+	QPixmap generatedIconPixmap(QIcon::Mode icon_mode, const QPixmap &pixmap, const QStyleOption *option) const override;
 
-		/*! \brief Sets a style hint on a QFrame to customize its border color and radius
-		 * So it can be rendered as a inlined alert/info/error frames.
-		 * This method forces the frames shape to StyledPanel. */
+	int pixelMetric(PixelMetric metric, const QStyleOption * option = nullptr, const QWidget * widget = nullptr) const override;
+
+	QRect subControlRect(ComplexControl control, const QStyleOptionComplex *option, SubControl sub_control, const QWidget *widget) const override;
+
+	/*! \brief Sets a style hint on a QFrame to customize its border color and radius
+	 * So it can be rendered as a inlined alert/info/error frames.
+	 * This method forces the frames shape to StyledPanel. */
 		static void setStyleHint(StyleHint hint, QFrame *frames);
 		static void setStyleHint(StyleHint hint, const QList<QFrame *> &frames);
 
