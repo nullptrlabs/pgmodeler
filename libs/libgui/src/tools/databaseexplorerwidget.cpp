@@ -156,8 +156,9 @@ DatabaseExplorerWidget::DatabaseExplorerWidget(QWidget *parent): QWidget(parent)
 	for(auto &btn : PgModelerGuiPlugin::getPluginsToolButtons())
 		installPluginButton(btn);
 
-	pg_version_alert_frm->setVisible(false);
+	GuiUtilsNs::configureBuddyWidget(filter_lt);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, pg_version_alert_frm);
+	pg_version_alert_frm->setVisible(false);
 
 	curr_scroll_value = 0;
 	filter_parent->setVisible(false);

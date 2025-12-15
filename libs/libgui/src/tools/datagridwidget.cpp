@@ -34,6 +34,7 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, result_info_frm);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, warning_frm);
 	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, { tab_info_frm, separator_ln });
+	GuiUtilsNs::configureBuddyWidgets(order_by_grp);
 
 	schema_lbl->setText(sch_name);
 
@@ -278,6 +279,11 @@ DataGridWidget::DataGridWidget(const QString &sch_name, const QString &tab_name,
 		emit s_gridDuplicationRequested(this);
 	});
 
+	connect(limit_chk, &QCheckBox::toggled, this, [this](bool checked){
+		limit_spb->setEnabled(checked);
+		rows_lbl->setEnabled(checked);
+	});
+
 	/* Installing event filters in the menus to override their
 	 * default position */
 	fks_menu.installEventFilter(this);
@@ -392,7 +398,7 @@ void DataGridWidget::retrieveData()
 		QString	query = tmpl_query.arg("*", sch_name, tab_name),
 				cnt_query = tmpl_query.arg("count(*)", sch_name, tab_name);
 		ResultSet res, cnt_res;
-		unsigned limit = limit_spb->value();
+		unsigned limit = limit_chk->isChecked() ? limit_spb->value() : 0;
 		std::vector<int> curr_hidden_cols;
 		int col_cnt = results_tbw->horizontalHeader()->count(), row_cnt = -1;
 		QDateTime start_dt = QDateTime::currentDateTime(), end_dt;
@@ -456,7 +462,7 @@ void DataGridWidget::retrieveData()
 		result_info_frm->setVisible(results_tbw->rowCount() > 0);
 		result_info_lbl->setText(QString("<em>[%1]</em> ").arg(end_dt.toString("hh:mm:ss.zzz")) +
 								 tr("Row(s) returned: <strong>%1</strong> in <em><strong>%2</strong></em> ").arg(results_tbw->rowCount()).arg(exec_time_str) +
-								 tr("<em>(Limit: <strong>%1</strong> rows)</em>").arg(limit_spb->value()==0 ? tr("none") : QString::number(limit_spb->value())));
+								 tr("<em>(Limit: <strong>%1</strong> rows)</em>").arg(!limit_chk->isChecked() ? tr("none") : QString::number(limit)));
 
 		//Reset the changed rows state
 		enableRowControlButtons();

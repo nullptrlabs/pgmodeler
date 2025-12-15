@@ -334,6 +334,7 @@ void DataHandlingForm::duplicateDataGrid(DataGridWidget *grid)
 		// Setting the filter tab visibility
 		filter_tb->setChecked(toggle_filter);
 		data_grid_wgt->limit_spb->setValue(grid->limit_spb->value());
+		data_grid_wgt->limit_chk->setChecked(grid->limit_chk->isChecked());
 
 		// Setting the same order by columns
 		for(int row = 0; row < grid->ord_columns_lst->count(); row++)

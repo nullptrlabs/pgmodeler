@@ -40,8 +40,8 @@ BugReportForm::BugReportForm(QWidget *parent, Qt::WindowFlags f) : QDialog(paren
 	output_sel->setAllowFilenameInput(true);
 	output_sel->setFileMustExist(true);
 	output_sel->setSelectedFile(GlobalAttributes::getTemporaryPath());
-
 	output_lt->addWidget(output_sel);
+	GuiUtilsNs::configureBuddyWidgets(output_wgt);
 
 	connect(close_btn, &QPushButton::clicked, this, &BugReportForm::close);
 	connect(create_btn, &QPushButton::clicked, this, qOverload<>(&BugReportForm::generateReport));
