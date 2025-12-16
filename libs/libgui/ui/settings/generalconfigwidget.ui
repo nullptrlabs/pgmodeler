@@ -86,13 +86,19 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="title">
          <string>General</string>
         </property>
         <property name="flat">
          <bool>false</bool>
         </property>
-        <layout class="QGridLayout" name="general_grid">
+        <layout class="QGridLayout" name="gridLayout_8">
          <property name="leftMargin">
           <number>5</number>
          </property>
@@ -105,175 +111,86 @@
          <property name="bottomMargin">
           <number>5</number>
          </property>
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Source code editor:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QCheckBox" name="check_update_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Check for new version on server at startup</string>
-           </property>
-           <property name="text">
-            <string>Check updates:</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>Editor arguments:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QCheckBox" name="save_restore_geometry_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Save dialog sizes</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item row="2" column="0" colspan="2">
+          <layout class="QVBoxLayout" name="source_editor_lt">
            <item>
-            <widget class="QPushButton" name="reset_sizes_btn">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Source code editor</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="0" column="1">
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QCheckBox" name="check_update_chk">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Check for new version on server at startup</string>
+             </property>
+             <property name="text">
+              <string>Check updates</string>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="check_versions_cmb">
              <property name="enabled">
               <bool>false</bool>
              </property>
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="focusPolicy">
-              <enum>Qt::FocusPolicy::StrongFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Reset the dialogs sizes and positions to their default values.</string>
-             </property>
-             <property name="text">
-              <string>Reset sizes</string>
-             </property>
-             <property name="icon">
-              <iconset resource="../../res/resources.qrc">
-               <normaloff>:/icons/icons/resetsizes.png</normaloff>:/icons/icons/resetsizes.png</iconset>
-             </property>
              <property name="iconSize">
               <size>
-               <width>25</width>
-               <height>25</height>
+               <width>28</width>
+               <height>28</height>
               </size>
              </property>
+             <item>
+              <property name="text">
+               <string>All versions</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Stable and beta versions</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Stable version only</string>
+              </property>
+             </item>
             </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="reset_alerts_choices_btn">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="focusPolicy">
-              <enum>Qt::FocusPolicy::StrongFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>&lt;p&gt;Reset alert statuses/choices regarding the unsaved models, the open SQL execution tabs, and the usage of the disambiguation convention for duplicated object names.&lt;/p&gt;</string>
-             </property>
-             <property name="text">
-              <string>Reset alerts</string>
-             </property>
-             <property name="icon">
-              <iconset resource="../../res/resources.qrc">
-               <normaloff>:/icons/icons/resetalerts.png</normaloff>:/icons/icons/resetalerts.png</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>25</width>
-               <height>25</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
            </item>
           </layout>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Config. directory:</string>
-           </property>
-          </widget>
+         <item row="1" column="0" colspan="2">
+          <layout class="QVBoxLayout" name="confs_dir_lt">
+           <item>
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Configurations directory</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="ui_language_cmb">
-           <property name="toolTip">
-            <string>Overrides the default user interface language defined by the system. Requires restarting the program. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are third party collaborations thus any typo or mistake should be reported directly to their respective maintainers.</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="sizeAdjustPolicy">
-            <enum>QComboBox::SizeAdjustPolicy::AdjustToContentsOnFirstShow</enum>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>28</width>
-             <height>28</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="0" colspan="2">
+         <item row="4" column="0" colspan="2">
           <widget class="QCheckBox" name="low_verbosity_chk">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -292,59 +209,168 @@
            </property>
           </widget>
          </item>
+         <item row="3" column="0">
+          <layout class="QVBoxLayout" name="editor_args_lt">
+           <item>
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Editor arguments</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="source_editor_args_edt">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string/>
+             </property>
+             <property name="readOnly">
+              <bool>false</bool>
+             </property>
+             <property name="clearButtonEnabled">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>Interface language:</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="ui_lang_lt">
+           <item>
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Interface language</string>
+             </property>
+             <property name="buddy">
+              <cstring>custom_page_sz_grp</cstring>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="ui_language_cmb">
+             <property name="toolTip">
+              <string>Overrides the default user interface language defined by the system. Requires restarting the program. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are third party collaborations thus any typo or mistake should be reported directly to their respective maintainers.</string>
+             </property>
+             <property name="statusTip">
+              <string/>
+             </property>
+             <property name="sizeAdjustPolicy">
+              <enum>QComboBox::SizeAdjustPolicy::AdjustToContentsOnFirstShow</enum>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item row="3" column="1">
-          <widget class="QLineEdit" name="source_editor_args_edt">
-           <property name="toolTip">
-            <string/>
-           </property>
-           <property name="readOnly">
-            <bool>false</bool>
-           </property>
-           <property name="clearButtonEnabled">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QComboBox" name="check_versions_cmb">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>28</width>
-             <height>28</height>
-            </size>
-           </property>
+          <layout class="QVBoxLayout" name="verticalLayout">
            <item>
-            <property name="text">
-             <string>All versions</string>
-            </property>
+            <widget class="QCheckBox" name="save_restore_geometry_chk">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Save dialog sizes</string>
+             </property>
+            </widget>
            </item>
            <item>
-            <property name="text">
-             <string>Stable and beta versions</string>
-            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="reset_sizes_btn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::FocusPolicy::StrongFocus</enum>
+               </property>
+               <property name="toolTip">
+                <string>Reset the dialogs sizes and positions to their default values.</string>
+               </property>
+               <property name="text">
+                <string>Reset sizes</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../../res/resources.qrc">
+                 <normaloff>:/icons/icons/resetsizes.png</normaloff>:/icons/icons/resetsizes.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>25</width>
+                 <height>25</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="reset_alerts_choices_btn">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::FocusPolicy::StrongFocus</enum>
+               </property>
+               <property name="toolTip">
+                <string>&lt;p&gt;Reset alert statuses/choices regarding the unsaved models, the open SQL execution tabs, and the usage of the disambiguation convention for duplicated object names.&lt;/p&gt;</string>
+               </property>
+               <property name="text">
+                <string>Reset alerts</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../../res/resources.qrc">
+                 <normaloff>:/icons/icons/resetalerts.png</normaloff>:/icons/icons/resetalerts.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>25</width>
+                 <height>25</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
-           <item>
-            <property name="text">
-             <string>Stable version only</string>
-            </property>
-           </item>
-          </widget>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -356,6 +382,12 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
         </property>
         <property name="title">
          <string>SQL tool</string>
@@ -371,9 +403,6 @@
           <number>5</number>
          </property>
          <property name="bottomMargin">
-          <number>5</number>
-         </property>
-         <property name="spacing">
           <number>5</number>
          </property>
          <item row="0" column="1">
@@ -406,7 +435,7 @@
            <item>
             <widget class="QPushButton" name="clear_sql_history_btn">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -452,6 +481,128 @@
             </spacer>
            </item>
           </layout>
+         </item>
+         <item row="2" column="1">
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QCheckBox" name="disable_inline_editor_chk">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>&lt;p&gt;In data manipulation form, long texts that exceed the truncation threshold will be displayed in an input form instead of opening an inline editor in the data grid.&lt;/p&gt;</string>
+             </property>
+             <property name="statusTip">
+              <string/>
+             </property>
+             <property name="text">
+              <string>Disable inline editor for long texts</string>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="hide_empty_obj_grps_chk">
+             <property name="toolTip">
+              <string>&lt;p&gt;Toggles the hiding of empty object groups in the objects trees, providing a cleaner view of the database structure. This option affects both the database explorer widget and the database import widget. For this option to take effect, it is necessary to reload any populated database object tree.&lt;/p&gt;</string>
+             </property>
+             <property name="text">
+              <string>Hide empty groups in objects trees</string>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="2" column="0">
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <widget class="QCheckBox" name="code_completion_chk">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>&lt;p&gt;Toggles the code completion in all fields that accept the input of SQL commands, in both the SQL tool and design view. Requires restarting the tool to take effect.&lt;/p&gt;</string>
+             </property>
+             <property name="statusTip">
+              <string/>
+             </property>
+             <property name="text">
+              <string>Enable SQL code completion</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="old_pgsql_versions_chk">
+             <property name="toolTip">
+              <string>&lt;p&gt;pgModeler will try to connect to older server versions (below 10) in a minimum compatibility mode. &lt;strong&gt;WARNING:&lt;/strong&gt; this option may cause the diff and import processes to fail or produce unreliable results. Also, it can lead to data loss when handling table data. Enable this option at &lt;strong&gt;your own risk&lt;/strong&gt;!&lt;/p&gt;</string>
+             </property>
+             <property name="text">
+              <string>Allow unsupported server versions</string>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>22</width>
+               <height>22</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="sql_history_lbl">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>SQL commands history maximum lines</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="trunc_columns_data_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>&lt;p&gt;Toggles the automatic truncation of columns' data in the results grid when exceeding a specified threshold. This improves performance when displaying/handling columns with lots of data.&lt;/p&gt;</string>
+           </property>
+           <property name="statusTip">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Truncate columns data exceeding</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
          <item row="1" column="1">
           <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -510,120 +661,6 @@
            </item>
           </layout>
          </item>
-         <item row="6" column="0">
-          <widget class="QCheckBox" name="code_completion_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>&lt;p&gt;Toggles the code completion in all fields that accept the input of SQL commands, in both the SQL tool and design view. Requires restarting the tool to take effect.&lt;/p&gt;</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Enable SQL code completion</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="QCheckBox" name="hide_empty_obj_grps_chk">
-           <property name="toolTip">
-            <string>&lt;p&gt;Toggles the hiding of empty object groups in the objects trees, providing a cleaner view of the database structure. This option affects both the database explorer widget and the database import widget. For this option to take effect, it is necessary to reload any populated database object tree.&lt;/p&gt;</string>
-           </property>
-           <property name="text">
-            <string>Hide empty groups in objects trees</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="trunc_columns_data_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>&lt;p&gt;Toggles the automatic truncation of columns' data in the results grid when exceeding a specified threshold. This improves performance when displaying/handling columns with lots of data.&lt;/p&gt;</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Truncate columns data exceeding:</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QCheckBox" name="old_pgsql_versions_chk">
-           <property name="toolTip">
-            <string>&lt;p&gt;pgModeler will try to connect to older server versions (below 10) in a minimum compatibility mode. &lt;strong&gt;WARNING:&lt;/strong&gt; this option may cause the diff and import processes to fail or produce unreliable results. Also, it can lead to data loss when handling table data. Enable this option at &lt;strong&gt;your own risk&lt;/strong&gt;!&lt;/p&gt;</string>
-           </property>
-           <property name="text">
-            <string>Allow unsupported server versions</string>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>22</width>
-             <height>22</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QCheckBox" name="disable_inline_editor_chk">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>&lt;p&gt;In data manipulation form, long texts that exceed the truncation threshold will be displayed in an input form instead of opening an inline editor in the data grid.&lt;/p&gt;</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Disable inline editor for long texts</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="sql_history_lbl">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>SQL command history maximum lines:</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
       </item>
@@ -638,7 +675,7 @@
         <property name="title">
          <string>Design behavior</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout_6">
+        <layout class="QVBoxLayout" name="verticalLayout_11">
          <property name="leftMargin">
           <number>5</number>
          </property>
@@ -651,375 +688,119 @@
          <property name="bottomMargin">
           <number>5</number>
          </property>
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <item row="7" column="0">
-          <widget class="QCheckBox" name="use_placeholders_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>&lt;p&gt;When enabled this option creates a placeholder object at the previous table's position when starting to move it. This will cause graphical updates on relationship lines to be performed only when the drag &amp; drop action is done improving the performance. Disabling placeholders will cause those updates to be executed every time the table's position changes a single pixel (classical behavior).&lt;/p&gt;</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Use placeholders when moving tables</string>
-           </property>
-          </widget>
-         </item>
-         <item row="19" column="0">
-          <spacer name="verticalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Orientation::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="18" column="0">
-          <widget class="QCheckBox" name="disable_smooth_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>&lt;p&gt; Disable the antialiasing for lines and texts improving performance when handling huge models.&lt;/p&gt;</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Disable render smoothness</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QCheckBox" name="corner_move_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Start move the canvas when the cursor is on the canvas edges</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Enable canvas move on corners</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="0">
-          <widget class="QCheckBox" name="hide_ext_attribs_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Hide the portion of table which represents triggers, indexes and rules.</string>
-           </property>
-           <property name="text">
-            <string>Hide table extended section</string>
-           </property>
-          </widget>
-         </item>
-         <item row="14" column="0">
-          <widget class="QCheckBox" name="hide_sch_name_usr_types_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>&lt;p&gt;Hide the schema names of the user-defined types referenced by columns. This option will affect only the graphical objects, the code generation will keep displaying user-defined types names fully schema-qualified.&lt;/p&gt;</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Hide schema names of types</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QCheckBox" name="save_last_pos_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>&lt;p&gt;After loading the model the last zoom and position on canvas will be restored&lt;/p&gt;</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Save and restore position and zoom</string>
-           </property>
-          </widget>
-         </item>
-         <item row="13" column="0">
-          <widget class="QCheckBox" name="hide_rel_name_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Hide the object that represents the relationship name</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Hide relationship name</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QCheckBox" name="invert_rangesel_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>&lt;p&gt;By default the range selection is triggered with Shift + left click. By checking this option range selection will be activated only with a single click and move.&lt;/p&gt;</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Trigger range selection with a click</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="17" column="0">
-          <widget class="QCheckBox" name="hide_obj_sel_info_chk">
-           <property name="toolTip">
-            <string>&lt;p&gt;Toggles the visibility of the widget that displays the current objects' selection bounding rectangle.&lt;/p&gt;</string>
-           </property>
-           <property name="text">
-            <string>Hide objects' selection info</string>
-           </property>
-          </widget>
-         </item>
-         <item row="16" column="0">
-          <widget class="QCheckBox" name="hide_cur_pos_zoom_info_chk">
-           <property name="toolTip">
-            <string>&lt;p&gt;Toggles the visibility of the widget that displays the current mouse cursor position and current zoom factor in the canvas.&lt;/p&gt;</string>
-           </property>
-           <property name="text">
-            <string>Hide canvas info widget</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <layout class="QGridLayout" name="gridLayout_7">
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-           <property name="spacing">
-            <number>5</number>
-           </property>
-           <item row="0" column="1">
-            <widget class="QSpinBox" name="oplist_size_spb">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>60</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>&lt;p&gt;Defines the maximum amount of elements held in the operation history. Once reached the maximum number the history is automatically cleaned.&lt;/p&gt;</string>
-             </property>
-             <property name="statusTip">
-              <string/>
-             </property>
-             <property name="minimum">
-              <number>500</number>
-             </property>
-             <property name="maximum">
-              <number>1000</number>
-             </property>
-            </widget>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_10">
+             <item>
+              <widget class="QLabel" name="oplist_size_lbl">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>160</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Operations history size</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="oplist_size_spb">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>60</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;p&gt;Defines the maximum amount of elements held in the operation history. Once reached the maximum number the history is automatically cleaned.&lt;/p&gt;</string>
+               </property>
+               <property name="statusTip">
+                <string/>
+               </property>
+               <property name="suffix">
+                <string> objects</string>
+               </property>
+               <property name="minimum">
+                <number>1000</number>
+               </property>
+               <property name="maximum">
+                <number>2000</number>
+               </property>
+               <property name="singleStep">
+                <number>50</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="oplist_size_lbl">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>160</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Operation history size:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QCheckBox" name="autosave_interv_chk">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="toolTip">
-              <string>&lt;p&gt;Defines the period when the opened models will be saved automatically. The temporary models saving period will be defined as the half of the value defined here. If the autosave is disabled the temporary models saving will occur in a period of 5 minutes.&lt;/p&gt;</string>
-             </property>
-             <property name="statusTip">
-              <string/>
-             </property>
-             <property name="text">
-              <string>Autosave interval:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QSpinBox" name="autosave_interv_spb">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>60</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="suffix">
-              <string> min</string>
-             </property>
-             <property name="minimum">
-              <number>5</number>
-             </property>
-             <property name="maximum">
-              <number>30</number>
-             </property>
-             <property name="singleStep">
-              <number>5</number>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2" rowspan="2">
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_8">
+             <item>
+              <widget class="QCheckBox" name="autosave_interv_chk">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;p&gt;Defines the period when the opened models will be saved automatically. The temporary models saving period will be defined as the half of the value defined here. If the autosave is disabled the temporary models saving will occur in a period of 5 minutes.&lt;/p&gt;</string>
+               </property>
+               <property name="statusTip">
+                <string/>
+               </property>
+               <property name="text">
+                <string>Autosave interval</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="autosave_interv_spb">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>60</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="suffix">
+                <string> minutes</string>
+               </property>
+               <property name="minimum">
+                <number>5</number>
+               </property>
+               <property name="maximum">
+                <number>30</number>
+               </property>
+               <property name="singleStep">
+                <number>5</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </item>
-         <item row="3" column="0">
-          <widget class="QCheckBox" name="simple_obj_creation_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>&lt;p&gt;Graphical objects (table, views and textboxes) will be created in a single step without the need to click on canvas &lt;/p&gt;</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Simplified graphical objects creation</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="15" column="0">
-          <widget class="QCheckBox" name="hide_obj_shadows_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>&lt;p&gt;Hide the schema names of the user-defined types referenced by columns. This option will affect only the graphical objects, the code generation will keep displaying user-defined types names fully schema-qualified.&lt;/p&gt;</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Hide objects' shadows</string>
-           </property>
-          </widget>
-         </item>
-         <item row="12" column="0">
-          <widget class="QCheckBox" name="hide_table_tags_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Hide the object which represents the tag assigned to the table</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Hide table tags</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
+         <item>
           <widget class="QCheckBox" name="confirm_validation_chk">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1041,8 +822,8 @@
            </property>
           </widget>
          </item>
-         <item row="10" column="0">
-          <widget class="QCheckBox" name="escape_comments_chk">
+         <item>
+          <widget class="QCheckBox" name="simple_obj_creation_chk">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -1050,17 +831,102 @@
             </sizepolicy>
            </property>
            <property name="toolTip">
-            <string>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects' comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</string>
+            <string>&lt;p&gt;Graphical objects (table, views and textboxes) will be created in a single step without the need to click on canvas &lt;/p&gt;</string>
            </property>
            <property name="statusTip">
             <string/>
            </property>
            <property name="text">
-            <string>Escaped objects' comments</string>
+            <string>Simplified graphical objects creation</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
-         <item row="9" column="0">
+         <item>
+          <widget class="QCheckBox" name="corner_move_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Start move the canvas when the cursor is on the canvas edges</string>
+           </property>
+           <property name="statusTip">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Enable canvas move on corners</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="invert_rangesel_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>&lt;p&gt;By default the range selection is triggered with Shift + left click. By checking this option range selection will be activated only with a single click and move.&lt;/p&gt;</string>
+           </property>
+           <property name="statusTip">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Trigger range selection with a click</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="save_last_pos_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>&lt;p&gt;After loading the model the last zoom and position on canvas will be restored&lt;/p&gt;</string>
+           </property>
+           <property name="statusTip">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Save and restore position and zoom</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="use_placeholders_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>&lt;p&gt;When enabled this option creates a placeholder object at the previous table's position when starting to move it. This will cause graphical updates on relationship lines to be performed only when the drag &amp; drop action is done improving the performance. Disabling placeholders will cause those updates to be executed every time the table's position changes a single pixel (classical behavior).&lt;/p&gt;</string>
+           </property>
+           <property name="statusTip">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Use placeholders when moving tables</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QCheckBox" name="use_curved_lines_chk">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1079,6 +945,169 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QCheckBox" name="escape_comments_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects' comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</string>
+           </property>
+           <property name="statusTip">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Escaped objects' comments</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="hide_ext_attribs_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Hide the portion of table which represents triggers, indexes and rules.</string>
+           </property>
+           <property name="text">
+            <string>Hide table extended section</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="hide_table_tags_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Hide the object which represents the tag assigned to the table</string>
+           </property>
+           <property name="statusTip">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Hide table tags</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="hide_rel_name_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Hide the object that represents the relationship name</string>
+           </property>
+           <property name="statusTip">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Hide relationship name</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="hide_sch_name_usr_types_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>&lt;p&gt;Hide the schema names of the user-defined types referenced by columns. This option will affect only the graphical objects, the code generation will keep displaying user-defined types names fully schema-qualified.&lt;/p&gt;</string>
+           </property>
+           <property name="statusTip">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Hide schema names of types</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="hide_obj_shadows_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>&lt;p&gt;Hide the schema names of the user-defined types referenced by columns. This option will affect only the graphical objects, the code generation will keep displaying user-defined types names fully schema-qualified.&lt;/p&gt;</string>
+           </property>
+           <property name="statusTip">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Hide objects' shadows</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="hide_cur_pos_zoom_info_chk">
+           <property name="toolTip">
+            <string>&lt;p&gt;Toggles the visibility of the widget that displays the current mouse cursor position and current zoom factor in the canvas.&lt;/p&gt;</string>
+           </property>
+           <property name="text">
+            <string>Hide canvas info widget</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="hide_obj_sel_info_chk">
+           <property name="toolTip">
+            <string>&lt;p&gt;Toggles the visibility of the widget that displays the current objects' selection bounding rectangle.&lt;/p&gt;</string>
+           </property>
+           <property name="text">
+            <string>Hide objects' selection info</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="disable_smooth_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>&lt;p&gt; Disable the antialiasing for lines and texts improving performance when handling huge models.&lt;/p&gt;</string>
+           </property>
+           <property name="statusTip">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Disable render smoothness</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Orientation::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </widget>
       </item>
@@ -1093,7 +1122,7 @@
         <property name="title">
          <string>Printing</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout_3">
+        <layout class="QGridLayout" name="gridLayout_9">
          <property name="leftMargin">
           <number>5</number>
          </property>
@@ -1106,190 +1135,266 @@
          <property name="bottomMargin">
           <number>5</number>
          </property>
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <item row="1" column="0">
-          <widget class="QLabel" name="paper_lbl">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Paper:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="3" colspan="2">
-          <layout class="QGridLayout" name="gridLayout">
-           <property name="spacing">
-            <number>5</number>
-           </property>
-           <item row="0" column="3">
-            <widget class="QDoubleSpinBox" name="top_marg">
+         <item row="0" column="0">
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QLabel" name="paper_lbl">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="toolTip">
-              <string>Top margin</string>
-             </property>
-             <property name="maximum">
-              <double>5000.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="3">
-            <widget class="QDoubleSpinBox" name="bottom_marg">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="toolTip">
-              <string>Bottom margin</string>
-             </property>
-             <property name="maximum">
-              <double>5000.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QLabel" name="top_lbl">
              <property name="text">
-              <string>Top:</string>
+              <string>Page size</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="left_lbl">
-             <property name="minimumSize">
-              <size>
-               <width>39</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Left:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QLabel" name="bottom_lbl">
-             <property name="text">
-              <string>Bottom:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="right_lbl">
-             <property name="minimumSize">
-              <size>
-               <width>39</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Right:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QDoubleSpinBox" name="right_marg">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="toolTip">
-              <string>Right margin</string>
-             </property>
-             <property name="maximum">
-              <double>5000.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QDoubleSpinBox" name="left_marg">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="toolTip">
-              <string>Left margin</string>
-             </property>
-             <property name="maximum">
-              <double>5000.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="4" rowspan="2">
-            <spacer name="horizontalSpacer_7">
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QComboBox" name="paper_cmb">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="currentIndex">
+                <number>0</number>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>28</width>
+                 <height>28</height>
+                </size>
+               </property>
+               <item>
+                <property name="text">
+                 <string>A0 (841 x 1189 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>A1 (594 x 841 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>A2 (420 x 594 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>A3 (297 x 420 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>A4 (210 x 297 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>A5 (148 x 210 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>A6 (105 x 148 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>A7 (74 x 105 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>A8 (52 x 74 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>A9 (37 x 52 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>B0 (1030 x 1456 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>B1 (728 x 1030 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>B10 (32 x 45 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>B2 (515 x 728 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>B3 (364 x 515 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>B4 (257 x 364 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>B5 (182 x 257 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>B6 (128 x 182 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>B7 (91 x 128 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>B8 (64 x 91 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>B9 (45 x 64 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>C5E (163 x 229 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Comm10E (105 x 241 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>DLE (110 x 220 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Executive (191 x 254 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Folio (210 x 330 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Ledger (432 x 279 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Legal (216 x 356 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Letter (216 x 279 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Tabloid (279 x 432 mm)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Custom</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="label">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Unity:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="orientation_lbl">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Orientation:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="3" colspan="2">
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <property name="spacing">
-            <number>5</number>
-           </property>
+         <item row="0" column="1">
+          <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
-            <widget class="QComboBox" name="paper_cmb">
+            <widget class="QLabel" name="orientation_lbl">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>16777215</height>
-              </size>
+             <property name="text">
+              <string>Orientation</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="orientation_cmb">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <item>
+              <property name="text">
+               <string>Landscape</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Portrait</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="0" column="2">
+          <layout class="QVBoxLayout" name="verticalLayout_7">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Unity</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="unity_cmb">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
              <property name="currentIndex">
               <number>0</number>
@@ -1302,337 +1407,326 @@
              </property>
              <item>
               <property name="text">
-               <string>A0 (841 x 1189 mm)</string>
+               <string>Milimeters</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>A1 (594 x 841 mm)</string>
+               <string>Pixels</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>A2 (420 x 594 mm)</string>
+               <string>Inches</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>A3 (297 x 420 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>A4 (210 x 297 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>A5 (148 x 210 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>A6 (105 x 148 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>A7 (74 x 105 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>A8 (52 x 74 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>A9 (37 x 52 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>B0 (1030 x 1456 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>B1 (728 x 1030 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>B10 (32 x 45 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>B2 (515 x 728 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>B3 (364 x 515 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>B4 (257 x 364 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>B5 (182 x 257 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>B6 (128 x 182 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>B7 (91 x 128 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>B8 (64 x 91 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>B9 (45 x 64 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>C5E (163 x 229 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Comm10E (105 x 241 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>DLE (110 x 220 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Executive (191 x 254 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Folio (210 x 330 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Ledger (432 x 279 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Legal (216 x 356 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Letter (216 x 279 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Tabloid (279 x 432 mm)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Custom</string>
+               <string>Centimeter</string>
               </property>
              </item>
             </widget>
            </item>
+          </layout>
+         </item>
+         <item row="1" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
-            <widget class="QLabel" name="width_lbl">
+            <widget class="QGroupBox" name="custom_page_sz_grp">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="text">
-              <string>W:</string>
+             <property name="title">
+              <string>Custom page size</string>
              </property>
+             <layout class="QGridLayout" name="gridLayout_3">
+              <property name="leftMargin">
+               <number>5</number>
+              </property>
+              <property name="topMargin">
+               <number>5</number>
+              </property>
+              <property name="rightMargin">
+               <number>5</number>
+              </property>
+              <property name="bottomMargin">
+               <number>5</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="QLabel" name="width_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Width</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QDoubleSpinBox" name="width_spb">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimum">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>9999.989999999999782</double>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="height_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Height</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QDoubleSpinBox" name="height_spb">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimum">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>9999.989999999999782</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="width_spb">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+            <widget class="QGroupBox" name="page_margins_grp">
+             <property name="title">
+              <string>Page margins</string>
              </property>
-             <property name="minimum">
-              <double>1.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>9999.989999999999782</double>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="height_lbl">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>H:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QDoubleSpinBox" name="height_spb">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimum">
-              <double>1.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>9999.989999999999782</double>
-             </property>
+             <layout class="QGridLayout" name="gridLayout">
+              <property name="leftMargin">
+               <number>5</number>
+              </property>
+              <property name="topMargin">
+               <number>5</number>
+              </property>
+              <property name="rightMargin">
+               <number>5</number>
+              </property>
+              <property name="bottomMargin">
+               <number>5</number>
+              </property>
+              <property name="spacing">
+               <number>5</number>
+              </property>
+              <item row="1" column="1">
+               <widget class="QDoubleSpinBox" name="right_marg">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>Right margin</string>
+                </property>
+                <property name="maximum">
+                 <double>5000.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="right_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>39</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Right</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QLabel" name="bottom_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Bottom</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLabel" name="top_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Top</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QDoubleSpinBox" name="bottom_marg">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>Bottom margin</string>
+                </property>
+                <property name="maximum">
+                 <double>5000.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="left_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>39</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Left</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QDoubleSpinBox" name="left_marg">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>Left margin</string>
+                </property>
+                <property name="maximum">
+                 <double>5000.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QDoubleSpinBox" name="top_marg">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>Top margin</string>
+                </property>
+                <property name="maximum">
+                 <double>5000.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </item>
           </layout>
          </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="print_op_lbl">
+         <item row="1" column="1" colspan="2">
+          <widget class="QGroupBox" name="groupBox">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="text">
-            <string>Options:</string>
+           <property name="title">
+            <string>Options</string>
            </property>
-          </widget>
-         </item>
-         <item row="0" column="3" colspan="2">
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="QCheckBox" name="print_grid_chk">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Print grid</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="print_pg_num_chk">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Print page numbers</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="margins_lbl">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Page Margins:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="3">
-          <widget class="QComboBox" name="orientation_cmb">
-           <item>
-            <property name="text">
-             <string>Landscape</string>
+           <layout class="QVBoxLayout" name="verticalLayout_9">
+            <property name="leftMargin">
+             <number>5</number>
             </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Portrait</string>
+            <property name="topMargin">
+             <number>5</number>
             </property>
-           </item>
-          </widget>
-         </item>
-         <item row="5" column="3">
-          <widget class="QComboBox" name="unity_cmb">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="currentIndex">
-            <number>0</number>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>28</width>
-             <height>28</height>
-            </size>
-           </property>
-           <item>
-            <property name="text">
-             <string>Milimeters</string>
+            <property name="rightMargin">
+             <number>5</number>
             </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Pixels</string>
+            <property name="bottomMargin">
+             <number>5</number>
             </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Inches</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Centimeter</string>
-            </property>
-           </item>
+            <item>
+             <widget class="QCheckBox" name="print_grid_chk">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Print canvas grid</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="print_pg_num_chk">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Print page numbers</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>
