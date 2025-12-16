@@ -143,6 +143,7 @@ AppearanceConfigWidget::AppearanceConfigWidget(QWidget *parent) : BaseConfigWidg
 	}
 
 	elem_color_cp = new ColorPickerWidget(3, this);
+	elem_colors_lt->addWidget(elem_color_cp);
 
 	model = new DatabaseModel;
 	scene = new ObjectsScene;
@@ -169,9 +170,7 @@ AppearanceConfigWidget::AppearanceConfigWidget(QWidget *parent) : BaseConfigWidg
 	delimiters_color_cp->setButtonToolTip(0, tr("Define a custom color for the page delimiter lines"));
 	delimiters_color_lt->insertWidget(0, delimiters_color_cp);
 
-	QGridLayout *grid = dynamic_cast<QGridLayout *>(objects_gb->layout());
-	grid->addWidget(elem_color_cp, 3, 1, 1, 4);
-	grid->addWidget(viewp, 4, 0, 1, 5);
+	objects_grid->addWidget(viewp, 2, 0, 1, 0);
 
 	line_numbers_cp = new ColorPickerWidget(1, this);
 	line_numbers_cp->setButtonToolTip(0, tr("Line numbers' font color"));
@@ -217,6 +216,8 @@ CREATE TABLE public.table_b (\n \
 	ico_sz_btn_grp->addButton(icon_big_tb);
 
 	theme_cmb->installEventFilter(this);
+
+	GuiUtilsNs::configureBuddyWidgets(this);
 
 	connect(ico_sz_btn_grp, &QButtonGroup::buttonToggled, this, __slot(this, AppearanceConfigWidget::previewUiSettings));
 
@@ -871,15 +872,14 @@ void AppearanceConfigWidget::enableConfigElement()
 	elem_font_cmb->setEnabled(idx == 0);
 	font_lbl->setEnabled(idx == 0);
 	elem_font_size_spb->setEnabled(idx == 0);
-	unity_lbl->setEnabled(idx == 0);
 
 	// Widgets enabled when a font configuration element is selected
 	underline_chk->setEnabled(idx != 0 && !conf_items[idx].obj_conf);
 	bold_chk->setEnabled(idx != 0 && !conf_items[idx].obj_conf);
 	italic_chk->setEnabled(idx != 0 && !conf_items[idx].obj_conf);
 
-	colors_lbl->setVisible(idx != 0);
-	elem_color_cp->setVisible(colors_lbl->isVisible());
+	colors_lbl->setEnabled(idx != 0);
+	elem_color_cp->setEnabled(idx != 0);
 
 	// Buttons visible when a object configuration element is selected
 	elem_color_cp->setButtonVisible(1, conf_items[idx].obj_conf);
