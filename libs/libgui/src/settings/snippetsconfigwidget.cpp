@@ -34,13 +34,15 @@ SnippetsConfigWidget::SnippetsConfigWidget(QWidget * parent) : BaseConfigWidget(
 	QPixmap ico;
 	QString gen_purpose=tr("General purpose");
 	std::map<QString, ObjectType> types_map;
-	std::vector<ObjectType> types=BaseObject::getObjectTypes(true, {ObjectType::Relationship, ObjectType::Tag, ObjectType::Textbox,
+	std::vector<ObjectType> types=BaseObject::getObjectTypes(true,
+																													 { ObjectType::Relationship, ObjectType::Tag, ObjectType::Textbox,
 																														 ObjectType::Permission, ObjectType::BaseRelationship });
 
 	setupUi(this);
+	GuiUtilsNs::configureBuddyWidgets(this);
 
 	for(ObjectType type : types)
-		types_map[BaseObject::getTypeName(type)]=type;
+		types_map[BaseObject::getTypeName(type)] = type;
 
 	//Creates a combo with the accepted object type
 	for(auto &itr : types_map)
