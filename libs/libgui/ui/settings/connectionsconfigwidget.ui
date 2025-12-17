@@ -397,7 +397,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Connection alias:</string>
+            <string>Alias</string>
            </property>
           </widget>
          </item>
@@ -493,7 +493,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Timeout:</string>
+            <string>Timeout</string>
            </property>
           </widget>
          </item>
@@ -506,7 +506,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Other params:</string>
+            <string>Others</string>
            </property>
           </widget>
          </item>
@@ -571,7 +571,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>User:</string>
+            <string>Username</string>
            </property>
           </widget>
          </item>
@@ -603,7 +603,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Connection DB:</string>
+            <string>Database</string>
            </property>
           </widget>
          </item>
@@ -616,7 +616,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Password:</string>
+            <string>Password</string>
            </property>
           </widget>
          </item>
@@ -627,23 +627,26 @@
            </property>
            <item>
             <widget class="QSpinBox" name="timeout_sbp">
+             <property name="suffix">
+              <string> second(s)</string>
+             </property>
              <property name="value">
               <number>2</number>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="seconds_lbl">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
-             <property name="text">
-              <string>second(s)</string>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
              </property>
-            </widget>
+            </spacer>
            </item>
           </layout>
          </item>
@@ -666,7 +669,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Host/Port:</string>
+            <string>Host / Port</string>
            </property>
           </widget>
          </item>
@@ -679,7 +682,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Set role:</string>
+            <string>Set role</string>
            </property>
           </widget>
          </item>
@@ -700,7 +703,7 @@
           </widget>
          </item>
          <item row="8" column="0">
-          <widget class="QLabel" name="options_lbl_2">
+          <widget class="QLabel" name="default_for_lbl">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -711,7 +714,7 @@
             <string>&lt;p&gt;Indicates in which operations (diff, export, import or validation) the connection is used if none is explicitly specified by the user.&lt;/p&gt;</string>
            </property>
            <property name="text">
-            <string>Default for:</string>
+            <string>Default for</string>
            </property>
           </widget>
          </item>
@@ -778,7 +781,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>SSL mode:</string>
+            <string>SSL mode</string>
            </property>
           </widget>
          </item>
@@ -855,7 +858,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Client certificate:</string>
+            <string>Client certificate</string>
            </property>
           </widget>
          </item>
@@ -887,7 +890,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Client key:</string>
+            <string>Client key</string>
            </property>
           </widget>
          </item>
@@ -919,7 +922,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Root certificate:</string>
+            <string>Root certificate</string>
            </property>
           </widget>
          </item>
@@ -951,7 +954,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Revoked certs.:</string>
+            <string>Revoked certs</string>
            </property>
           </widget>
          </item>
@@ -983,7 +986,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Kerberos server:</string>
+            <string>Kerberos server</string>
            </property>
           </widget>
          </item>

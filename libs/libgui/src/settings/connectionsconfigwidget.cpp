@@ -28,7 +28,14 @@ std::map<QString, attribs_map> ConnectionsConfigWidget::config_params;
 ConnectionsConfigWidget::ConnectionsConfigWidget(QWidget * parent) : BaseConfigWidget(parent)
 {
 	Ui_ConnectionsConfigWidget::setupUi(this);
+
 	GuiUtilsNs::createPasswordShowAction(passwd_edt);
+	GuiUtilsNs::configureWidgetsFont({ alias_lbl, conn_db_lbl, host_lbl,
+																		user_lbl, passwd_lbl, timeout_lbl,
+																		set_role_lbl, other_params_lbl, default_for_lbl,
+																		ssl_mode_lbl, client_cert_lbl, client_key_lbl,
+																		root_cert_lbl, crl_lbl, krb_server_lbl },
+																	 GuiUtilsNs::SmallFontFactor, true);
 
 	one_time_conn_edit = false;
 	one_time_test_tb->setVisible(false);
