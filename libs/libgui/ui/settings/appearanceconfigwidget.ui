@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>854</width>
+    <width>871</width>
     <height>919</height>
    </rect>
   </property>
@@ -126,7 +126,7 @@
                <item>
                 <widget class="QLabel" name="label_4">
                  <property name="text">
-                  <string>UI theme</string>
+                  <string>Theme</string>
                  </property>
                 </widget>
                </item>
@@ -156,7 +156,7 @@
                   <string>&lt;p&gt;Defines a custom UI scale factor. This factor is applied when drawing widgets and fonts. Requires restarting pgModeler when in use.&lt;/p&gt;</string>
                  </property>
                  <property name="text">
-                  <string>UI scale </string>
+                  <string>Scale </string>
                  </property>
                 </widget>
                </item>
