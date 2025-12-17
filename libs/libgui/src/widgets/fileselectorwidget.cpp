@@ -41,7 +41,7 @@ FileSelectorWidget::FileSelectorWidget(QWidget *parent) : QWidget(parent)
 	warn_ico_lbl->setMaximumSize(warn_ico_lbl->minimumSize());
 	warn_ico_lbl->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	warn_ico_lbl->setScaledContents(true);
-	warn_ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("alert")));
+	warn_ico_lbl->setPixmap(GuiUtilsNs::getPixmap("alert"));
 	warn_ico_lbl->setToolTip(tr("No such file or directory!"));
 
 	connect(sel_file_tb, &QToolButton::clicked, this, &FileSelectorWidget::openFileDialog);
@@ -234,7 +234,7 @@ void FileSelectorWidget::openFileDialog()
 	QFileDialog file_dlg;
 
 	filename_edt->clearFocus();
-	file_dlg.setWindowIcon(QIcon(GuiUtilsNs::getIconPath("pgmodeler_logo")));
+	file_dlg.setWindowIcon(GuiUtilsNs::getIcon("pgmodeler_logo"));
 	file_dlg.selectFile(filename_edt->text());
 	file_dlg.setFileMode(file_mode);
 	file_dlg.setAcceptMode(accept_mode);

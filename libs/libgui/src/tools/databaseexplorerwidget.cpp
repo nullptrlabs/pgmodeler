@@ -156,8 +156,9 @@ DatabaseExplorerWidget::DatabaseExplorerWidget(QWidget *parent): QWidget(parent)
 	for(auto &btn : PgModelerGuiPlugin::getPluginsToolButtons())
 		installPluginButton(btn);
 
-	pg_version_alert_frm->setVisible(false);
+	GuiUtilsNs::configureBuddyWidget(filter_lt);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, pg_version_alert_frm);
+	pg_version_alert_frm->setVisible(false);
 
 	curr_scroll_value = 0;
 	filter_parent->setVisible(false);
@@ -190,28 +191,28 @@ DatabaseExplorerWidget::DatabaseExplorerWidget(QWidget *parent): QWidget(parent)
 	toggle_display_tb->setMenu(&toggle_disp_menu);
 
 	snippets_menu.setTitle(tr("Snippets"));
-	snippets_menu.setIcon(QIcon(GuiUtilsNs::getIconPath("codesnippet")));
+	snippets_menu.setIcon(GuiUtilsNs::getIcon("codesnippet"));
 
-	drop_action=new QAction(QIcon(GuiUtilsNs::getIconPath("delete")), tr("Drop object"), &handle_menu);
+	drop_action=new QAction(GuiUtilsNs::getIcon("delete"), tr("Drop object"), &handle_menu);
 	drop_action->setShortcut(QKeySequence(Qt::Key_Delete));
 
-	drop_cascade_action=new QAction(QIcon(GuiUtilsNs::getIconPath("delcascade")), tr("Drop cascade"), &handle_menu);
+	drop_cascade_action=new QAction(GuiUtilsNs::getIcon("delcascade"), tr("Drop cascade"), &handle_menu);
 	drop_cascade_action->setShortcut(QKeySequence("Shift+Del"));
 
-	truncate_action=new QAction(QIcon(GuiUtilsNs::getIconPath("truncate")), tr("Truncate"), &handle_menu);
-	trunc_cascade_action=new QAction(QIcon(GuiUtilsNs::getIconPath("trunccascade")), tr("Trunc. cascade"), &handle_menu);
+	truncate_action=new QAction(GuiUtilsNs::getIcon("truncate"), tr("Truncate"), &handle_menu);
+	trunc_cascade_action=new QAction(GuiUtilsNs::getIcon("trunccascade"), tr("Trunc. cascade"), &handle_menu);
 
-	handle_data_action=new QAction(QIcon(GuiUtilsNs::getIconPath("editrows")), tr("Handle data"), &handle_menu);
+	handle_data_action=new QAction(GuiUtilsNs::getIcon("editrows"), tr("Handle data"), &handle_menu);
 	handle_data_action->setShortcut(QKeySequence(Qt::Key_Space));
-	properties_action=new QAction(QIcon(GuiUtilsNs::getIconPath("reloadattribs")), tr("Reload properties"), &handle_menu);
+	properties_action=new QAction(GuiUtilsNs::getIcon("reloadattribs"), tr("Reload properties"), &handle_menu);
 
-	refresh_action=new QAction(QIcon(GuiUtilsNs::getIconPath("refresh")), tr("Update"), &handle_menu);
+	refresh_action=new QAction(GuiUtilsNs::getIcon("refresh"), tr("Update"), &handle_menu);
 	refresh_action->setShortcut(QKeySequence(Qt::Key_F6));
 
-	rename_action=new QAction(QIcon(GuiUtilsNs::getIconPath("rename")), tr("Rename"), &handle_menu);
+	rename_action=new QAction(GuiUtilsNs::getIcon("rename"), tr("Rename"), &handle_menu);
 	rename_action->setShortcut(QKeySequence(Qt::Key_F2));
 
-	source_action=new QAction(QIcon(GuiUtilsNs::getIconPath("sqlcode")), tr("Source code"), &handle_menu);
+	source_action=new QAction(GuiUtilsNs::getIcon("sqlcode"), tr("Source code"), &handle_menu);
 	source_action->setShortcut(QKeySequence(Qt::Key_F7));
 
 	objects_trw->installEventFilter(this);
@@ -1131,7 +1132,7 @@ void DatabaseExplorerWidget::listObjects()
 		curr_root = objects_trw->topLevelItem(0);
 		objects_trw->takeTopLevelItem(0);
 		root->setText(0, connection.getConnectionId(true));
-		root->setIcon(0, QPixmap(GuiUtilsNs::getIconPath("server")));
+		root->setIcon(0, GuiUtilsNs::getIcon("server"));
 		root->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, -1);
 		root->setData(DatabaseImportWidget::ObjectTypeId, Qt::UserRole, enum_t(ObjectType::BaseObject));
 		root->setData(DatabaseImportWidget::ObjectSource, Qt::UserRole, tr("-- Source code unavailable for this kind of object --"));
@@ -1866,7 +1867,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 					font.setItalic(true);
 					tab_item->setText(attrib.first);
 					tab_item->setFont(font);
-					tab_item->setIcon(QIcon(GuiUtilsNs::getIconPath("attribute")));
+					tab_item->setIcon(GuiUtilsNs::getIcon("attribute"));
 					properties_tbw->setItem(row, 0, tab_item);
 
 					values=attrib.second.split(UtilsNs::DataSeparator);
@@ -1906,7 +1907,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 
 						src_item=new QTreeWidgetItem(item);
 						src_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
-						src_item->setIcon(0, QPixmap(GuiUtilsNs::getIconPath("column")));
+						src_item->setIcon(0, GuiUtilsNs::getIcon("column"));
 						src_item->setText(0, QString("%1(%2)")
 															.arg(cached_attribs[Attributes::Table])
 															.arg(cached_attribs[Attributes::SrcColumns]));
@@ -1917,7 +1918,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 
 						fk_item=new QTreeWidgetItem(item);
 						fk_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
-						fk_item->setIcon(0, QPixmap(GuiUtilsNs::getIconPath("referenced")));
+						fk_item->setIcon(0, GuiUtilsNs::getIcon("referenced"));
 						fk_item->setText(0, QString("%1(%2)")
 														.arg(cached_attribs[Attributes::RefTable])
 														.arg(cached_attribs[Attributes::DstColumns]));
@@ -1935,7 +1936,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 						{
 							src_item=new QTreeWidgetItem(item);
 							src_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
-							src_item->setIcon(0, QPixmap(GuiUtilsNs::getIconPath("column")));
+							src_item->setIcon(0, GuiUtilsNs::getIcon("column"));
 							src_item->setText(0, col);
 							src_item->setFlags(Qt::ItemIsEnabled);
 						}
@@ -1954,7 +1955,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 
 					refs_item->setFont(0, font);
 					refs_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
-					refs_item->setIcon(0, QPixmap(GuiUtilsNs::getIconPath("referrer")));
+					refs_item->setIcon(0, GuiUtilsNs::getIcon("referrer"));
 					refs_item->setText(0, QString("%1 (%2)")
 															.arg(attribs_i18n.at(Attributes::Referrers))
 															.arg(ref_tab_names.length()));
@@ -1963,7 +1964,7 @@ void DatabaseExplorerWidget::showObjectProperties(bool force_reload)
 					{
 						tab_item=new QTreeWidgetItem(refs_item);
 						tab_item->setData(DatabaseImportWidget::ObjectId, Qt::UserRole, QVariant::fromValue<int>(-1));
-						tab_item->setIcon(0, QPixmap(GuiUtilsNs::getIconPath("table")));
+						tab_item->setIcon(0, GuiUtilsNs::getIcon("table"));
 						tab_item->setText(0, tab_name);
 						tab_item->setFlags(Qt::ItemIsEnabled);
 					}

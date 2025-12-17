@@ -23,38 +23,39 @@ DomainWidget::DomainWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 {
 	Ui_DomainWidget::setupUi(this);
 
-	check_expr_hl=nullptr;
-	check_expr_hl=new SyntaxHighlighter(check_expr_txt, false, true, font().pointSizeF());
+	check_expr_hl = new SyntaxHighlighter(check_expr_txt, false, true, font().pointSizeF());
 	check_expr_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
-	data_type=nullptr;
-	data_type=new PgSQLTypeWidget(this);
+	data_type = new PgSQLTypeWidget(this);
+	data_type_lt->insertWidget(0, data_type);
+	data_type_lt->addItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Expanding));
 
-	QGridLayout *grid = dynamic_cast<QGridLayout *>(dom_attribs_tbw->widget(0)->layout());
-	grid->addWidget(data_type, 1, 0, 1, 2);
-	grid->addItem(new QSpacerItem(10, 1, QSizePolicy::Fixed,QSizePolicy::Expanding), 2, 0, 1, 1);
-
-	constr_tab=new CustomTableWidget(CustomTableWidget::AllButtons ^ (CustomTableWidget::DuplicateButton), true, this);
+	constr_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(0,
+																																	 CustomTableWidget::AllButtons ^
+																																	 CustomTableWidget::DuplicateButton, true,
+																																	 check_constr_tab);
 	constr_tab->setColumnCount(2);
-
 	constr_tab->setHeaderLabel(tr("Name"), 0);
-	constr_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("constraint_ck")), 0);
-
+	constr_tab->setHeaderIcon(GuiUtilsNs::getIcon("constraint_ck"), 0);
 	constr_tab->setHeaderLabel(tr("Expression"), 1);
-	constr_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("sourcecode")), 1);
-
-	grid = dynamic_cast<QGridLayout *>(dom_attribs_tbw->widget(1)->layout());
-	grid->addWidget(constr_tab, 2, 0, 1, 2);
+	constr_tab->setHeaderIcon(GuiUtilsNs::getIcon("sourcecode"), 1);
 
 	connect(constr_tab, &CustomTableWidget::s_rowAdded, this, &DomainWidget::handleConstraint);
 	connect(constr_tab, &CustomTableWidget::s_rowUpdated, this, &DomainWidget::handleConstraint);
 	connect(constr_tab, &CustomTableWidget::s_rowEdited, this, &DomainWidget::editConstraint);
 
-	configureFormLayout(domain_grid, ObjectType::Domain);
+	domain_lt->removeItem(data_type_lt);
+	extra_wgts_lt->addLayout(data_type_lt);
+
+	domain_lt->removeItem(def_value_lt);
+	extra_wgts_lt->addLayout(def_value_lt);
+
+	configureTabbedLayout(dom_attribs_tbw);
+
 	setRequiredField(data_type);
 	configureTabOrder({ def_value_edt, not_null_chk,	data_type, constr_name_edt, check_expr_txt });
 
-	setMinimumSize(580, 580);
+	setMinimumSize(600, 500);
 }
 
 void DomainWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, Domain *domain)
@@ -71,7 +72,7 @@ void DomainWidget::setAttributes(DatabaseModel *model, OperationList *op_list, S
 
 		constr_tab->blockSignals(true);
 
-		for(auto itr : domain->getCheckConstraints())
+		for(auto &itr : domain->getCheckConstraints())
 		{
 			constr_tab->addRow();
 			constr_tab->setCellText(itr.first, constr_tab->getRowCount() - 1, 0);

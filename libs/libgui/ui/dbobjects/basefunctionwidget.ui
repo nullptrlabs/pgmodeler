@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>879</width>
-    <height>559</height>
+    <height>390</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,7 +22,10 @@
     <height>216</height>
    </size>
   </property>
-  <layout class="QGridLayout" name="base_function_grid">
+  <layout class="QVBoxLayout" name="basefunction_lt">
+   <property name="spacing">
+    <number>5</number>
+   </property>
    <property name="leftMargin">
     <number>5</number>
    </property>
@@ -35,10 +38,7 @@
    <property name="bottomMargin">
     <number>5</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="1" column="0">
+   <item>
     <widget class="QTabWidget" name="func_config_twg">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -67,12 +67,9 @@
         <normaloff>:/icons/icons/attribute.png</normaloff>:/icons/icons/attribute.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Attributes</string>
+       <string>Attributes</string>
       </attribute>
-      <layout class="QVBoxLayout" name="attributes_vbox">
-       <property name="spacing">
-        <number>5</number>
-       </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
        <property name="leftMargin">
         <number>5</number>
        </property>
@@ -86,86 +83,103 @@
         <number>5</number>
        </property>
        <item>
-        <layout class="QGridLayout" name="gridLayout">
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="language_lbl">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Language:</string>
-           </property>
-          </widget>
+        <layout class="QHBoxLayout" name="lang_security_lt">
+         <item>
+          <layout class="QVBoxLayout" name="language_lt">
+           <item>
+            <widget class="QLabel" name="language_lbl">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Language</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="language_cmb">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>25</width>
+               <height>25</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="security_lbl">
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Security:</string>
-           </property>
-           <property name="indent">
-            <number>-1</number>
-           </property>
-          </widget>
+         <item>
+          <layout class="QVBoxLayout" name="security_lt">
+           <item>
+            <widget class="QLabel" name="security_lbl">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Security</string>
+             </property>
+             <property name="indent">
+              <number>-1</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="security_cmb">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>25</width>
+               <height>25</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
-         <item row="1" column="1" colspan="2">
-          <widget class="QComboBox" name="security_cmb">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>25</width>
-             <height>25</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1" colspan="2">
-          <widget class="QComboBox" name="language_cmb">
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>25</width>
-             <height>25</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="3" rowspan="2">
+         <item>
           <spacer name="horizontalSpacer_2">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -179,22 +193,22 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="parameters_tab">
+     <widget class="QWidget" name="func_params_tab">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/parameter.png</normaloff>:/icons/icons/parameter.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Parameters</string>
+       <string>Parameters</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="transform_type_tab">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/usertype.png</normaloff>:/icons/icons/usertype.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Transform types</string>
+       <string>Transform types</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="definition_tab">
@@ -203,7 +217,7 @@
         <normaloff>:/icons/icons/sourcecode.png</normaloff>:/icons/icons/sourcecode.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Definition</string>
+       <string>Definition</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
        <property name="leftMargin">
@@ -222,292 +236,127 @@
         <number>5</number>
        </property>
        <item row="0" column="0">
-        <widget class="QFrame" name="library_frm">
+        <widget class="QGroupBox" name="library_grp">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
+         <property name="title">
+          <string>Dynamic Library</string>
          </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_3">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
           <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <property name="spacing">
            <number>5</number>
           </property>
-          <item row="0" column="0" colspan="3">
-           <widget class="QLabel" name="dy_library_lbl">
-            <property name="text">
-             <string>Dynamic Library:</string>
-            </property>
-           </widget>
+          <property name="topMargin">
+           <number>5</number>
+          </property>
+          <property name="rightMargin">
+           <number>5</number>
+          </property>
+          <property name="bottomMargin">
+           <number>5</number>
+          </property>
+          <item>
+           <layout class="QVBoxLayout" name="symbol_lt">
+            <item>
+             <widget class="QLabel" name="symbol_lbl">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Symbol</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="symbol_edt">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="clearButtonEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
-          <item row="0" column="3">
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>450</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLabel" name="symbol_lbl">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Symbol:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2" colspan="2">
-           <widget class="QLineEdit" name="symbol_edt">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="clearButtonEnabled">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLabel" name="library_lbl">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Library:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2" colspan="2">
-           <widget class="QLineEdit" name="library_edt">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="clearButtonEnabled">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2">
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
+          <item>
+           <layout class="QVBoxLayout" name="library_lt">
+            <item>
+             <widget class="QLabel" name="library_lbl">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Library</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="library_edt">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="clearButtonEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QFrame" name="source_code_frm">
+        <widget class="QGroupBox" name="source_code_grp">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
+         <property name="title">
+          <string>Source code</string>
          </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_2">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <property name="spacing">
-           <number>5</number>
-          </property>
-          <item row="0" column="0">
-           <widget class="QLabel" name="sourc_code_lbl">
-            <property name="text">
-             <string>Source code:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>485</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
         </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="func_config_tab">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/config.png</normaloff>:/icons/icons/config.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Configuration</string>
+       <string>Configuration</string>
       </attribute>
-      <widget class="QFrame" name="hint_frm">
-       <property name="geometry">
-        <rect>
-         <x>4</x>
-         <y>55</y>
-         <width>410</width>
-         <height>217</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>30</height>
-        </size>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_5">
-        <property name="leftMargin">
-         <number>5</number>
-        </property>
-        <property name="topMargin">
-         <number>5</number>
-        </property>
-        <property name="rightMargin">
-         <number>5</number>
-        </property>
-        <property name="bottomMargin">
-         <number>5</number>
-        </property>
-        <item row="0" column="0">
-         <widget class="QLabel" name="icon_lbl">
-          <property name="minimumSize">
-           <size>
-            <width>32</width>
-            <height>32</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>32</width>
-            <height>32</height>
-           </size>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="textFormat">
-           <enum>Qt::AutoText</enum>
-          </property>
-          <property name="pixmap">
-           <pixmap resource="../../res/resources.qrc">:/icons/icons/info.png</pixmap>
-          </property>
-          <property name="scaledContents">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="hint_lbl">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="font">
-           <font>
-            <bold>false</bold>
-            <underline>false</underline>
-            <strikeout>false</strikeout>
-            <kerning>true</kerning>
-           </font>
-          </property>
-          <property name="text">
-           <string>Use this tab to define custom configuration parameters for the function. The parameters specified will be attached to the function's SQL code via &lt;strong&gt;SET config_param = value&lt;/strong&gt;. Pay attention to the values formatting since pgModeler &lt;strong&gt;will not&lt;/strong&gt; perform any formatting.</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </widget>
    </item>
@@ -521,7 +370,6 @@
   <tabstop>library_edt</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

@@ -23,6 +23,7 @@
 ObjectSearchWidget::ObjectSearchWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
+	GuiUtilsNs::configureWidgetFont(pattern_lbl, GuiUtilsNs::SmallFontFactor, true);
 
 	filter_wgt = new QWidget(this);
 	obj_types_lst = new ObjectTypesListWidget(this);
@@ -40,23 +41,22 @@ ObjectSearchWidget::ObjectSearchWidget(QWidget *parent) : QWidget(parent)
 
 	_search_attrs_cmb = new QComboBox(this);
 	_search_attrs_lbl = new QLabel(this);
-	_search_attrs_lbl->setText(tr("Search field:"));
+	_search_attrs_lbl->setText(tr("Search field"));
 	_search_attrs_lbl->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	GuiUtilsNs::configureWidgetFont(_search_attrs_lbl, GuiUtilsNs::SmallFontFactor, true);
 
 	QHBoxLayout *hbox = new QHBoxLayout;
 	hbox->addWidget(_search_attrs_lbl);
 	hbox->addWidget(_search_attrs_cmb);
 
-	QVBoxLayout *vbox = new QVBoxLayout(filter_wgt);
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargin,
+																									 GuiUtilsNs::LtSpacing,
+																									 filter_wgt);
 	vbox->addLayout(hbox);
 	vbox->addWidget(obj_types_lst);
 	vbox->addWidget(regexp_chk);
 	vbox->addWidget(exact_match_chk);
 	vbox->addWidget(case_sensitive_chk);
-
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
-	vbox->setSpacing(GuiUtilsNs::LtSpacing);
-	filter_wgt->setLayout(vbox);
 
 	QWidgetAction *wgt_act_filter = new QWidgetAction(this);
 	wgt_act_filter->setDefaultWidget(filter_wgt);

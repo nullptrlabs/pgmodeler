@@ -36,6 +36,7 @@ void SyntaxHighlighterTest::handleMultiLineComment()
 {
 	QDialog *dlg=new QDialog;
 	QPlainTextEdit *edt=new QPlainTextEdit(dlg);
+#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
 	QHBoxLayout *layout=new QHBoxLayout(dlg);
 	SyntaxHighlighter *sql_hl=nullptr;
 

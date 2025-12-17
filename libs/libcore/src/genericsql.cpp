@@ -216,6 +216,7 @@ QString GenericSQL::getSourceCode(SchemaParser::CodeType def_type)
 		 fmt_definition.contains(name_attr) && getObjectRefNameIndex(Attributes::Name) < 0)
 		fmt_definition = fmt_definition.replace(name_attr, this->getName(true));
 
+	attributes[Attributes::Comment] = comment;
 	attributes[Attributes::Definition] = fmt_definition;
 
 	return this->BaseObject::__getSourceCode(def_type);

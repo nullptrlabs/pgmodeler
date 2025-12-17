@@ -22,19 +22,17 @@ SequenceWidget::SequenceWidget(QWidget *parent): BaseObjectWidget(parent, Object
 {
 	Ui_SequenceWidget::setupUi(this);
 
-	column_sel=nullptr;
-	column_sel=new ObjectSelectorWidget(ObjectType::Column, this);
-	sequence_grid->addWidget(column_sel, 4, 1, 1, 3);
+	column_sel = new ObjectSelectorWidget(ObjectType::Column, this);
+	column_lt->insertWidget(0, column_sel);
 
-	configureFormLayout(sequence_grid, ObjectType::Sequence);
-	sequence_grid->addItem(new QSpacerItem(10,0,QSizePolicy::Minimum,QSizePolicy::Expanding), sequence_grid->count(), 0);
+	configureTabbedLayout(true);
 	configureTabOrder();
 
 	def_values_cmb->addItem(tr("User defined"));
 	def_values_cmb->addItem("smallserial");
 	def_values_cmb->addItem("serial");
 	def_values_cmb->addItem("bigserial");
-	setMinimumSize(520, 350);
+	setMinimumSize(550, 350);
 
 	connect(def_values_cmb, &QComboBox::currentIndexChanged, this, &SequenceWidget::setDefaultValues);
 }

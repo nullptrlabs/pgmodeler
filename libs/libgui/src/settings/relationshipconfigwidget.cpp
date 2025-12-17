@@ -21,6 +21,7 @@
 #include "utils/syntaxhighlighter.h"
 #include "relationshipview.h"
 #include <QButtonGroup>
+#include "guiutilsns.h"
 
 std::map<QString, attribs_map> RelationshipConfigWidget::config_params;
 
@@ -36,7 +37,10 @@ RelationshipConfigWidget::RelationshipConfigWidget(QWidget * parent) : BaseConfi
 
 	Ui_RelationshipConfigWidget::setupUi(this);
 
-	SyntaxHighlighter *pattern_hl=nullptr;
+	GuiUtilsNs::configureBuddyWidgets(this);
+
+	SyntaxHighlighter *pattern_hl = nullptr;
+
 	QList<QPlainTextEdit *> pattern_fields={ src_col_pattern_txt, dst_col_pattern_txt,
 																					 src_fk_pattern_txt, dst_fk_pattern_txt,
 																					 pk_pattern_txt, uq_pattern_txt, pk_col_pattern_txt,
@@ -80,7 +84,6 @@ RelationshipConfigWidget::RelationshipConfigWidget(QWidget * parent) : BaseConfi
 			setConfigurationChanged(true);
 	});
 
-	connect(deferrable_chk, &QCheckBox::toggled, deferral_lbl, &QLabel::setEnabled);
 	connect(deferrable_chk, &QCheckBox::toggled, deferral_cmb, &QComboBox::setEnabled);
 
 	connect(deferrable_chk, &QCheckBox::toggled, this, [this]() {

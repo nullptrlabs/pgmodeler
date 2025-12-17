@@ -18,24 +18,25 @@
 
 #include "customsqlwidget.h"
 #include "guiutilsns.h"
+#include "customuistyle.h"
 
 CustomSQLWidget::CustomSQLWidget(QWidget *parent) : BaseObjectWidget(parent)
 {
-	QFont font;
-
 	Ui_CustomSQLWidget::setupUi(this);
-	configureFormLayout(sqlappend_grid, ObjectType::BaseObject);
 
-	append_sql_txt=GuiUtilsNs::createNumberedTextEditor(append_sql_wgt, true);
-	prepend_sql_txt=GuiUtilsNs::createNumberedTextEditor(prepend_sql_wgt, true);
+	configureFormLayout(customsql_lt, ObjectType::BaseObject);
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
-	append_sql_hl=new SyntaxHighlighter(append_sql_txt);
+	append_sql_txt = GuiUtilsNs::createNumberedTextEditor(append_sql_wgt, true);
+	prepend_sql_txt = GuiUtilsNs::createNumberedTextEditor(prepend_sql_wgt, true);
+
+	append_sql_hl = new SyntaxHighlighter(append_sql_txt);
 	append_sql_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
-	append_sql_cp=new CodeCompletionWidget(append_sql_txt, true);
+	append_sql_cp = new CodeCompletionWidget(append_sql_txt, true);
 
-	prepend_sql_hl=new SyntaxHighlighter(prepend_sql_txt);
+	prepend_sql_hl = new SyntaxHighlighter(prepend_sql_txt);
 	prepend_sql_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
-	prepend_sql_cp=new CodeCompletionWidget(prepend_sql_txt, true);
+	prepend_sql_cp = new CodeCompletionWidget(prepend_sql_txt, true);
 
 	name_edt->setReadOnly(true);
 	comment_edt->setVisible(false);
@@ -123,8 +124,6 @@ void CustomSQLWidget::setAttributes(DatabaseModel *model, BaseObject *object)
 	{
 		BaseObjectWidget::setAttributes(model, object, nullptr);
 
-		name_edt->setText(QString("%1 (%2)").arg(object->getSignature()).arg(object->getTypeName()));
-
 		if(object->getObjectType()==ObjectType::Database)
 		{
 			end_of_model_chk->setChecked(dynamic_cast<DatabaseModel *>(object)->isAppendAtEOD());
@@ -143,9 +142,7 @@ void CustomSQLWidget::setAttributes(DatabaseModel *model, BaseObject *object)
 
 		end_of_model_chk->setVisible(object->getObjectType()==ObjectType::Database);
 		begin_of_model_chk->setVisible(object->getObjectType()==ObjectType::Database);
-
-		obj_id_lbl->setVisible(false);
-		obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(object->getObjectType())));
+		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(object->getObjectType()));
 
 		configureMenus();
 	}

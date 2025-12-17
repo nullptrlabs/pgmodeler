@@ -21,30 +21,27 @@
 TransformWidget::TransformWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Transform)
 {
 	Ui_TransformWidget::setupUi(this);
-	QGridLayout *transform_grid = new QGridLayout(this);
 
 	type_wgt = new PgSQLTypeWidget(this);
-	transform_grid->addWidget(type_wgt, 0, 0, 1, 2);
+	attributes_lt->insertWidget(0, type_wgt);
 
 	language_sel = new ObjectSelectorWidget(ObjectType::Language, this);
-	transform_grid->addWidget(language_lbl, 1, 0);
-	transform_grid->addWidget(language_sel, 1, 1);
+	language_lt->addWidget(language_sel);
 
 	from_sql_func_sel = new ObjectSelectorWidget(ObjectType::Function, this);
-	transform_grid->addWidget(from_sql_func_lbl, 2, 0);
-	transform_grid->addWidget(from_sql_func_sel, 2, 1);
+	from_sql_func_lt->addWidget(from_sql_func_sel);
 
 	to_sql_func_sel = new ObjectSelectorWidget(ObjectType::Function, this);
-	transform_grid->addWidget(to_sql_func_lbl, 3, 0);
-	transform_grid->addWidget(to_sql_func_sel, 3, 1);
+	to_sql_func_lt->addWidget(to_sql_func_sel);
 
-	transform_grid->addItem(new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding), 4, 0);
+	attributes_lt->addItem(new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
-	configureFormLayout(transform_grid, ObjectType::Transform);
 	setRequiredField(type_wgt);
 	setRequiredField(language_sel);
 	setRequiredField(language_lbl);
-	setMinimumSize(640, 480);
+	configureTabbedLayout(attributes_tbw);
+
+	setMinimumSize(550, 400);
 }
 
 void TransformWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Transform *transform)

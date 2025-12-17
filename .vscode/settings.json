@@ -209,7 +209,7 @@
          
          // Reduce number of worker threads (default is number of cores)
          // Lower values = less memory but slower indexing
-         "-j=4",
+         "-j=10",
          
          // Disable expensive background indexing features
          "--background-index=false",

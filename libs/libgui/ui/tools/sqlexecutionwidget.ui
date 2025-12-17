@@ -1048,6 +1048,9 @@
            </property>
            <item row="0" column="0">
             <widget class="QListWidget" name="msgoutput_lst">
+             <property name="sizeAdjustPolicy">
+              <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
+             </property>
              <property name="editTriggers">
               <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
              </property>
@@ -1068,6 +1071,12 @@
                <width>22</width>
                <height>22</height>
               </size>
+             </property>
+             <property name="verticalScrollMode">
+              <enum>QAbstractItemView::ScrollMode::ScrollPerPixel</enum>
+             </property>
+             <property name="resizeMode">
+              <enum>QListView::ResizeMode::Adjust</enum>
              </property>
              <property name="spacing">
               <number>2</number>

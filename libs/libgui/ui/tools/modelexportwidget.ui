@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1353</width>
-    <height>812</height>
+    <width>1141</width>
+    <height>1013</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -244,7 +244,7 @@
            <item>
             <widget class="QGroupBox" name="export_to_dbms_gb">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -258,7 +258,10 @@
              <property name="checkable">
               <bool>false</bool>
              </property>
-             <layout class="QGridLayout" name="gridLayout_9">
+             <layout class="QHBoxLayout" name="horizontalLayout_12">
+              <property name="spacing">
+               <number>10</number>
+              </property>
               <property name="leftMargin">
                <number>5</number>
               </property>
@@ -271,339 +274,7 @@
               <property name="bottomMargin">
                <number>5</number>
               </property>
-              <property name="spacing">
-               <number>5</number>
-              </property>
-              <item row="0" column="2">
-               <widget class="QWidget" name="export_to_dbms_wgt" native="true">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <layout class="QGridLayout" name="gridLayout">
-                 <property name="leftMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>5</number>
-                 </property>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="connections_lbl">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Connection:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QComboBox" name="connections_cmb">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="insertPolicy">
-                    <enum>QComboBox::InsertPolicy::InsertAlphabetically</enum>
-                   </property>
-                   <property name="sizeAdjustPolicy">
-                    <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
-                   </property>
-                   <property name="iconSize">
-                    <size>
-                     <width>22</width>
-                     <height>22</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="1">
-                  <layout class="QHBoxLayout" name="horizontalLayout_12">
-                   <property name="spacing">
-                    <number>5</number>
-                   </property>
-                   <item>
-                    <widget class="QComboBox" name="drop_mode_cmb">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>100</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                     <item>
-                      <property name="text">
-                       <string>Objects</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string>Database</string>
-                      </property>
-                     </item>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QCheckBox" name="force_db_drop_chk">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="toolTip">
-                      <string>&lt;p&gt;If the current user has the proper permissions, this option causes the termination of all existing connections to the target database before dropping it. This option takes effect only on &lt;strong&gt;PostgreSQL 13+&lt;strong&gt;, thus it'll be ignored on older versions.&lt;/p&gt;</string>
-                     </property>
-                     <property name="text">
-                      <string>Force drop</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <spacer name="horizontalSpacer_5">
-                     <property name="orientation">
-                      <enum>Qt::Orientation::Horizontal</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>40</width>
-                       <height>20</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QCheckBox" name="pgsqlvers_chk">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="statusTip">
-                    <string>PostgreSQL version in which the SQL code should be generated. It is recommended to select this option only when the version of the DBMS, somehow, is not identifiable or if you need to generate a specific version of SQL code for test purposes.</string>
-                   </property>
-                   <property name="text">
-                    <string>PostgreSQL:</string>
-                   </property>
-                   <property name="checked">
-                    <bool>false</bool>
-                   </property>
-                   <property name="autoExclusive">
-                    <bool>false</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <layout class="QHBoxLayout" name="horizontalLayout_9">
-                   <property name="spacing">
-                    <number>5</number>
-                   </property>
-                   <item>
-                    <widget class="QComboBox" name="pgsqlvers1_cmb">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>100</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>16777215</height>
-                      </size>
-                     </property>
-                     <property name="toolTip">
-                      <string/>
-                     </property>
-                     <property name="insertPolicy">
-                      <enum>QComboBox::InsertPolicy::InsertAtBottom</enum>
-                     </property>
-                     <property name="sizeAdjustPolicy">
-                      <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
-                     </property>
-                     <property name="iconSize">
-                      <size>
-                       <width>28</width>
-                       <height>28</height>
-                      </size>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QCheckBox" name="run_in_transaction_chk">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="toolTip">
-                      <string>&lt;p&gt;Run the generated commands in a single transaction block. In case of errors, all changes are rolled back. &lt;strong&gt;NOTE:&lt;/strong&gt; This option has no effect for roles, tablespace and database DDL commands.&lt;/p&gt;</string>
-                     </property>
-                     <property name="statusTip">
-                      <string/>
-                     </property>
-                     <property name="text">
-                      <string>Run in a transaction</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <spacer name="horizontalSpacer_2">
-                     <property name="orientation">
-                      <enum>Qt::Orientation::Horizontal</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>40</width>
-                       <height>20</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QCheckBox" name="drop_chk">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="toolTip">
-                    <string>&lt;p&gt;If &lt;strong&gt;Database&lt;/strong&gt; is checked pgModeler will destroy the database if already exists on the server. When &lt;strong&gt;Objects&lt;/strong&gt; is checked pgModeler will execute the DROP command attached to SQL-enabled objects. &lt;strong&gt;WARNING:&lt;/strong&gt; this option leads to data loss so make sure to have a backup before exporting.&lt;/p&gt;</string>
-                   </property>
-                   <property name="statusTip">
-                    <string/>
-                   </property>
-                   <property name="text">
-                    <string>Drop mode:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="2">
-                  <layout class="QHBoxLayout" name="horizontalLayout_10">
-                   <property name="bottomMargin">
-                    <number>0</number>
-                   </property>
-                   <item>
-                    <widget class="QCheckBox" name="ignore_error_codes_chk">
-                     <property name="enabled">
-                      <bool>true</bool>
-                     </property>
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="toolTip">
-                      <string>This advanced option causes pgModeler to ignore extra errors by their numeric codes. These errors must be informed in the input below and separated by space. For the complete list of error codes check the PostgreSQL docs, section &lt;strong&gt; Appendix A. PostgreSQL Error Codes&lt;/strong&gt;. &lt;strong&gt;WARNING:&lt;/strong&gt; use this option with extreme care since it can interfere in final export result.</string>
-                     </property>
-                     <property name="statusTip">
-                      <string/>
-                     </property>
-                     <property name="text">
-                      <string>Ignore error codes:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QLineEdit" name="error_codes_edt">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="clearButtonEnabled">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="1" column="2">
-                  <widget class="QCheckBox" name="ignore_dup_chk">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="toolTip">
-                    <string>&lt;p&gt;pgModeler ignores errors generated by duplicated objects and creates only those that do not exist in the database. This option may be used when an object was created after a previous model export.&lt;/p&gt;</string>
-                   </property>
-                   <property name="statusTip">
-                    <string/>
-                   </property>
-                   <property name="text">
-                    <string>Ignore object's duplicity</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="0" column="0">
+              <item>
                <widget class="QToolButton" name="export_to_dbms_tb">
                 <property name="enabled">
                  <bool>true</bool>
@@ -623,8 +294,8 @@
                 </property>
                 <property name="iconSize">
                  <size>
-                  <width>37</width>
-                  <height>90</height>
+                  <width>100</width>
+                  <height>40</height>
                  </size>
                 </property>
                 <property name="checkable">
@@ -641,18 +312,374 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QWidget" name="export_to_dbms_wgt" native="true">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_16">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <layout class="QVBoxLayout" name="verticalLayout_6">
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <layout class="QVBoxLayout" name="verticalLayout_3">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="connections_lbl">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>Connection</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="connections_cmb">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="insertPolicy">
+                        <enum>QComboBox::InsertPolicy::InsertAlphabetically</enum>
+                       </property>
+                       <property name="sizeAdjustPolicy">
+                        <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>22</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_2">
+                     <property name="spacing">
+                      <number>5</number>
+                     </property>
+                     <item>
+                      <widget class="QCheckBox" name="ignore_error_codes_chk">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="toolTip">
+                        <string>This advanced option causes pgModeler to ignore extra errors by their numeric codes. These errors must be informed in the input below and separated by space. For the complete list of error codes check the PostgreSQL docs, section &lt;strong&gt; Appendix A. PostgreSQL Error Codes&lt;/strong&gt;. &lt;strong&gt;WARNING:&lt;/strong&gt; use this option with extreme care since it can interfere in final export result.</string>
+                       </property>
+                       <property name="statusTip">
+                        <string/>
+                       </property>
+                       <property name="text">
+                        <string>Ignore error codes</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="error_codes_edt">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="clearButtonEnabled">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QGridLayout" name="gridLayout">
+                   <item row="0" column="0">
+                    <layout class="QVBoxLayout" name="verticalLayout_4">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QCheckBox" name="pgsqlvers_chk">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="statusTip">
+                        <string>PostgreSQL version in which the SQL code should be generated. It is recommended to select this option only when the version of the DBMS, somehow, is not identifiable or if you need to generate a specific version of SQL code for test purposes.</string>
+                       </property>
+                       <property name="text">
+                        <string>PostgreSQL</string>
+                       </property>
+                       <property name="checked">
+                        <bool>false</bool>
+                       </property>
+                       <property name="autoExclusive">
+                        <bool>false</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="pgsqlvers1_cmb">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>16777215</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="toolTip">
+                        <string/>
+                       </property>
+                       <property name="insertPolicy">
+                        <enum>QComboBox::InsertPolicy::InsertAtBottom</enum>
+                       </property>
+                       <property name="sizeAdjustPolicy">
+                        <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>28</width>
+                         <height>28</height>
+                        </size>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item row="0" column="1">
+                    <layout class="QVBoxLayout" name="verticalLayout_5">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QCheckBox" name="drop_chk">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="toolTip">
+                        <string>&lt;p&gt;If &lt;strong&gt;Database&lt;/strong&gt; is checked pgModeler will destroy the database if already exists on the server. When &lt;strong&gt;Objects&lt;/strong&gt; is checked pgModeler will execute the DROP command attached to SQL-enabled objects. &lt;strong&gt;WARNING:&lt;/strong&gt; this option leads to data loss so make sure to have a backup before exporting.&lt;/p&gt;</string>
+                       </property>
+                       <property name="statusTip">
+                        <string/>
+                       </property>
+                       <property name="text">
+                        <string>Drop mode</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <layout class="QHBoxLayout" name="horizontalLayout_11">
+                       <property name="spacing">
+                        <number>5</number>
+                       </property>
+                       <item>
+                        <widget class="QComboBox" name="drop_mode_cmb">
+                         <property name="enabled">
+                          <bool>false</bool>
+                         </property>
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>100</width>
+                           <height>0</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>16777215</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <item>
+                          <property name="text">
+                           <string>Objects</string>
+                          </property>
+                         </item>
+                         <item>
+                          <property name="text">
+                           <string>Database</string>
+                          </property>
+                         </item>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QCheckBox" name="force_db_drop_chk">
+                         <property name="enabled">
+                          <bool>false</bool>
+                         </property>
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="toolTip">
+                          <string>&lt;p&gt;If the current user has the proper permissions, this option causes the termination of all existing connections to the target database before dropping it. This option takes effect only on &lt;strong&gt;PostgreSQL 13+&lt;strong&gt;, thus it'll be ignored on older versions.&lt;/p&gt;</string>
+                         </property>
+                         <property name="text">
+                          <string>Force drop operation</string>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </item>
+                    </layout>
+                   </item>
+                   <item row="1" column="0" colspan="2">
+                    <layout class="QHBoxLayout" name="horizontalLayout_15">
+                     <item>
+                      <widget class="QCheckBox" name="ignore_dup_chk">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="toolTip">
+                        <string>&lt;p&gt;pgModeler ignores errors generated by duplicated objects and creates only those that do not exist in the database. This option may be used when an object was created after a previous model export.&lt;/p&gt;</string>
+                       </property>
+                       <property name="statusTip">
+                        <string/>
+                       </property>
+                       <property name="text">
+                        <string>Ignore duplicity</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QCheckBox" name="run_in_transaction_chk">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="toolTip">
+                        <string>&lt;p&gt;Run the generated commands in a single transaction block. In case of errors, all changes are rolled back. &lt;strong&gt;NOTE:&lt;/strong&gt; This option has no effect for roles, tablespace and database DDL commands.&lt;/p&gt;</string>
+                       </property>
+                       <property name="statusTip">
+                        <string/>
+                       </property>
+                       <property name="text">
+                        <string>Run in a transaction</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>
            <item>
             <widget class="QGroupBox" name="export_to_file_gb">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="focusPolicy">
               <enum>Qt::FocusPolicy::StrongFocus</enum>
              </property>
              <property name="title">
               <string>SQL file</string>
              </property>
-             <layout class="QGridLayout" name="gridLayout_10">
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <property name="spacing">
+               <number>10</number>
+              </property>
               <property name="leftMargin">
                <number>5</number>
               </property>
@@ -665,10 +692,42 @@
               <property name="bottomMargin">
                <number>5</number>
               </property>
-              <property name="spacing">
-               <number>5</number>
-              </property>
-              <item row="0" column="1" rowspan="2">
+              <item>
+               <widget class="QToolButton" name="export_to_file_tb">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../../res/resources.qrc">
+                  <normaloff>:/images/images/exporttosql.png</normaloff>:/images/images/exporttosql.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>100</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+                <property name="autoExclusive">
+                 <bool>false</bool>
+                </property>
+                <property name="autoRaise">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QWidget" name="export_to_file_wgt" native="true">
                 <property name="enabled">
                  <bool>false</bool>
@@ -685,266 +744,295 @@
                   <height>0</height>
                  </size>
                 </property>
-                <layout class="QGridLayout" name="export_to_file_grid">
+                <layout class="QVBoxLayout" name="verticalLayout_12">
                  <property name="leftMargin">
-                  <number>5</number>
+                  <number>0</number>
                  </property>
                  <property name="topMargin">
-                  <number>5</number>
+                  <number>0</number>
                  </property>
                  <property name="rightMargin">
                   <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>5</number>
+                  <number>0</number>
                  </property>
-                 <property name="spacing">
-                  <number>5</number>
-                 </property>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="output_lbl">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Output:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1">
-                  <layout class="QHBoxLayout" name="horizontalLayout_5">
-                   <property name="spacing">
-                    <number>5</number>
-                   </property>
-                   <item>
-                    <widget class="QComboBox" name="pgsqlvers_cmb">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>16777215</height>
-                      </size>
-                     </property>
-                     <property name="toolTip">
-                      <string>PostgreSQL version in which the SQL code should be generated</string>
-                     </property>
-                     <property name="insertPolicy">
-                      <enum>QComboBox::InsertPolicy::InsertAtBottom</enum>
-                     </property>
-                     <property name="sizeAdjustPolicy">
-                      <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
-                     </property>
-                     <property name="iconSize">
-                      <size>
-                       <width>28</width>
-                       <height>28</height>
-                      </size>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <spacer name="horizontalSpacer">
-                     <property name="orientation">
-                      <enum>Qt::Orientation::Horizontal</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>158</width>
-                       <height>20</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="0" column="1">
+                 <item>
                   <layout class="QHBoxLayout" name="horizontalLayout">
-                   <property name="spacing">
-                    <number>5</number>
-                   </property>
                    <item>
-                    <widget class="QRadioButton" name="sql_standalone_rb">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="toolTip">
-                      <string>&lt;strong&gt;Standalone:&lt;/strong&gt; pgModeler will generate a single SQL file containing all the code that defines the whole database. </string>
-                     </property>
-                     <property name="statusTip">
-                      <string/>
-                     </property>
-                     <property name="text">
-                      <string>Standalone</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
+                    <layout class="QVBoxLayout" name="verticalLayout_9">
+                     <item>
+                      <widget class="QLabel" name="mode_lbl">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="statusTip">
+                        <string/>
+                       </property>
+                       <property name="text">
+                        <string>Format</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="sql_file_mode_cmb">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="sizeAdjustPolicy">
+                        <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
+                       </property>
+                       <item>
+                        <property name="text">
+                         <string>Standalone</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Split</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                    </layout>
                    </item>
                    <item>
-                    <widget class="QRadioButton" name="sql_split_rb">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
+                    <layout class="QVBoxLayout" name="verticalLayout_8">
+                     <property name="spacing">
+                      <number>5</number>
                      </property>
-                     <property name="toolTip">
-                      <string>&lt;strong&gt;Split:&lt;/strong&gt; the SQL definition of each object is generated in separate files inside the selected directory.</string>
-                     </property>
-                     <property name="statusTip">
-                      <string/>
-                     </property>
-                     <property name="text">
-                      <string>Split:</string>
-                     </property>
-                    </widget>
+                     <item>
+                      <widget class="QLabel" name="pgsql_lbl">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <italic>false</italic>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>PostgreSQL</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="pgsqlvers_cmb">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>16777215</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="toolTip">
+                        <string>PostgreSQL version in which the SQL code should be generated</string>
+                       </property>
+                       <property name="insertPolicy">
+                        <enum>QComboBox::InsertPolicy::InsertAtBottom</enum>
+                       </property>
+                       <property name="sizeAdjustPolicy">
+                        <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>28</width>
+                         <height>28</height>
+                        </size>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </item>
                    <item>
-                    <widget class="QComboBox" name="code_options_cmb">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="toolTip">
-                      <string>&lt;p&gt;&lt;strong&gt;Original:&lt;/strong&gt; generates only the original SQL code for each object. The files will be named in such a way to reflect the correct creation order of the objects.&lt;br/&gt;&lt;br/&gt;
+                    <layout class="QVBoxLayout" name="verticalLayout_11">
+                     <item>
+                      <widget class="QLabel" name="code_gen_mode_lbl">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="text">
+                        <string>Code generation mode</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <layout class="QHBoxLayout" name="horizontalLayout_9">
+                       <property name="spacing">
+                        <number>5</number>
+                       </property>
+                       <item>
+                        <widget class="QComboBox" name="code_options_cmb">
+                         <property name="enabled">
+                          <bool>false</bool>
+                         </property>
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="toolTip">
+                          <string>&lt;p&gt;&lt;strong&gt;Original:&lt;/strong&gt; generates only the original SQL code for each object. The files will be named in such a way to reflect the correct creation order of the objects.&lt;br/&gt;&lt;br/&gt;
 
 &lt;strong&gt;Original + dependencies' SQL:&lt;/strong&gt; generates the original code including all dependencies needed to properly create a single object.&lt;br/&gt;&lt;br/&gt;
 
 &lt;strong&gt;Original + children's SQL:&lt;/strong&gt; generates the original code including all children's SQL code of a single object. This option is used only for schemas, tables, and views&lt;br/&gt;&lt;br/&gt;
 
 &lt;strong&gt;Group by object type:&lt;/strong&gt; instead of creating a separate SQL file per object, groups the SQL code of all objects of the same type in a single file.&lt;/p&gt;</string>
-                     </property>
-                     <property name="statusTip">
-                      <string/>
-                     </property>
-                     <property name="sizeAdjustPolicy">
-                      <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
-                     </property>
-                     <item>
-                      <property name="text">
-                       <string>Original</string>
-                      </property>
+                         </property>
+                         <property name="statusTip">
+                          <string/>
+                         </property>
+                         <property name="sizeAdjustPolicy">
+                          <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
+                         </property>
+                         <item>
+                          <property name="text">
+                           <string>Original</string>
+                          </property>
+                         </item>
+                         <item>
+                          <property name="text">
+                           <string>Original + depedencies' SQL</string>
+                          </property>
+                         </item>
+                         <item>
+                          <property name="text">
+                           <string>Original + children's SQL</string>
+                          </property>
+                         </item>
+                         <item>
+                          <property name="text">
+                           <string>Group by object type</string>
+                          </property>
+                         </item>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QCheckBox" name="gen_drop_file_chk">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="toolTip">
+                          <string>&lt;p&gt;Create a separate script containing the DROP commands to destroy objects in the database.&lt;/p&gt;</string>
+                         </property>
+                         <property name="text">
+                          <string>Create a DROP script</string>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </item>
-                     <item>
-                      <property name="text">
-                       <string>Original + depedencies' SQL</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string>Original + children's SQL</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string>Group by object type</string>
-                      </property>
-                     </item>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QCheckBox" name="gen_drop_file_chk">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="toolTip">
-                      <string>&lt;p&gt;Create a separate script containing the DROP commands to destroy objects in the database.&lt;/p&gt;</string>
-                     </property>
-                     <property name="text">
-                      <string>Create a DROP script</string>
-                     </property>
-                    </widget>
+                    </layout>
                    </item>
                   </layout>
                  </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="pgsql_lbl">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <italic>false</italic>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>PostgreSQL:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="mode_lbl">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="statusTip">
-                    <string/>
-                   </property>
-                   <property name="text">
-                    <string>Mode:</string>
-                   </property>
-                  </widget>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_5">
+                   <item>
+                    <layout class="QVBoxLayout" name="sql_file_lt">
+                     <item>
+                      <widget class="QLabel" name="output_lbl">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>Output</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
                  </item>
                 </layout>
                </widget>
               </item>
-              <item row="0" column="0" rowspan="2">
-               <widget class="QToolButton" name="export_to_file_tb">
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="export_to_img_gb">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::FocusPolicy::StrongFocus</enum>
+             </property>
+             <property name="title">
+              <string>Graphics file</string>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_13">
+              <property name="spacing">
+               <number>10</number>
+              </property>
+              <property name="leftMargin">
+               <number>5</number>
+              </property>
+              <property name="topMargin">
+               <number>5</number>
+              </property>
+              <property name="rightMargin">
+               <number>5</number>
+              </property>
+              <property name="bottomMargin">
+               <number>5</number>
+              </property>
+              <item>
+               <widget class="QToolButton" name="export_to_img_tb">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -954,12 +1042,12 @@
                 </property>
                 <property name="icon">
                  <iconset resource="../../res/resources.qrc">
-                  <normaloff>:/images/images/exporttosql.png</normaloff>:/images/images/exporttosql.png</iconset>
+                  <normaloff>:/images/images/exporttoimg.png</normaloff>:/images/images/exporttoimg.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
-                  <width>37</width>
-                  <height>90</height>
+                  <width>100</width>
+                  <height>40</height>
                  </size>
                 </property>
                 <property name="checkable">
@@ -976,40 +1064,7 @@
                 </property>
                </widget>
               </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="export_to_img_gb">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="focusPolicy">
-              <enum>Qt::FocusPolicy::StrongFocus</enum>
-             </property>
-             <property name="title">
-              <string>Graphics file</string>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_11">
-              <property name="leftMargin">
-               <number>5</number>
-              </property>
-              <property name="topMargin">
-               <number>5</number>
-              </property>
-              <property name="rightMargin">
-               <number>5</number>
-              </property>
-              <property name="bottomMargin">
-               <number>5</number>
-              </property>
-              <property name="spacing">
-               <number>5</number>
-              </property>
-              <item row="0" column="2" rowspan="2">
+              <item>
                <widget class="QWidget" name="export_to_img_wgt" native="true">
                 <property name="enabled">
                  <bool>false</bool>
@@ -1026,108 +1081,209 @@
                   <height>0</height>
                  </size>
                 </property>
-                <layout class="QGridLayout" name="export_to_img_grid">
+                <layout class="QVBoxLayout" name="verticalLayout_15">
                  <property name="leftMargin">
-                  <number>5</number>
+                  <number>0</number>
                  </property>
                  <property name="topMargin">
-                  <number>5</number>
+                  <number>0</number>
                  </property>
                  <property name="rightMargin">
                   <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>5</number>
+                  <number>0</number>
                  </property>
-                 <property name="spacing">
-                  <number>5</number>
-                 </property>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="image_lbl">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>File:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="img_fmt_lbl">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Format:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1" colspan="2">
-                  <widget class="QComboBox" name="img_fmt_cmb">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="sizeAdjustPolicy">
-                    <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
-                   </property>
-                   <item>
-                    <property name="text">
-                     <string>PNG</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>SVG</string>
-                    </property>
-                   </item>
-                  </widget>
-                 </item>
-                 <item row="0" column="3">
+                 <item>
                   <layout class="QHBoxLayout" name="horizontalLayout_3">
-                   <property name="spacing">
-                    <number>5</number>
-                   </property>
-                   <property name="topMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="rightMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="bottomMargin">
-                    <number>0</number>
-                   </property>
                    <item>
-                    <widget class="QLabel" name="zoom_lbl">
-                     <property name="enabled">
-                      <bool>false</bool>
+                    <layout class="QVBoxLayout" name="verticalLayout_13">
+                     <item>
+                      <widget class="QLabel" name="img_fmt_lbl">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>Format</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="img_fmt_cmb">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="sizeAdjustPolicy">
+                        <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
+                       </property>
+                       <item>
+                        <property name="text">
+                         <string>PNG</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>SVG</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <layout class="QVBoxLayout" name="verticalLayout_14">
+                     <property name="spacing">
+                      <number>5</number>
                      </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="zoom_lbl">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <italic>false</italic>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>Zoom</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <layout class="QHBoxLayout" name="horizontalLayout_7">
+                       <property name="spacing">
+                        <number>5</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <widget class="QComboBox" name="zoom_cmb">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="sizeAdjustPolicy">
+                          <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
+                         </property>
+                         <property name="iconSize">
+                          <size>
+                           <width>28</width>
+                           <height>28</height>
+                          </size>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QCheckBox" name="show_grid_chk">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="text">
+                          <string>Show grid</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QCheckBox" name="show_delim_chk">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="text">
+                          <string>Show delimiters</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QCheckBox" name="page_by_page_chk">
+                         <property name="enabled">
+                          <bool>false</bool>
+                         </property>
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="toolTip">
+                          <string>Exporting the model page by page will generate files with a &lt;strong&gt;_p[n]&lt;/strong&gt; suffix where &lt;strong&gt;n&lt;/strong&gt; is the page id. Check if the current user has write permission on output folder.</string>
+                         </property>
+                         <property name="statusTip">
+                          <string/>
+                         </property>
+                         <property name="text">
+                          <string>Page by page</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QCheckBox" name="override_bg_color_chk">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="toolTip">
+                          <string>&lt;p&gt;By checking this option, pgModeler ignores the original canvas background color and the exported image background will be set to white so the file can be print-ready. The default behavior is to create an output image in which the background follows the canvas background color. In some cases, this behavior may not be desirable mainly if the generated image is for printing. &lt;/p&gt;</string>
+                         </property>
+                         <property name="text">
+                          <string>Override background</string>
+                         </property>
+                         <property name="checked">
+                          <bool>false</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QVBoxLayout" name="img_file_lt">
+                   <item>
+                    <widget class="QLabel" name="image_lbl">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                        <horstretch>0</horstretch>
@@ -1140,147 +1296,53 @@
                        <height>0</height>
                       </size>
                      </property>
-                     <property name="font">
-                      <font>
-                       <italic>false</italic>
-                      </font>
-                     </property>
                      <property name="text">
-                      <string>Zoom:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QComboBox" name="zoom_cmb">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="sizeAdjustPolicy">
-                      <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
-                     </property>
-                     <property name="iconSize">
-                      <size>
-                       <width>28</width>
-                       <height>28</height>
-                      </size>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <spacer name="horizontalSpacer_3">
-                     <property name="orientation">
-                      <enum>Qt::Orientation::Horizontal</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>40</width>
-                       <height>20</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="3" column="1" colspan="3">
-                  <layout class="QHBoxLayout" name="horizontalLayout_8">
-                   <property name="spacing">
-                    <number>5</number>
-                   </property>
-                   <item>
-                    <widget class="QCheckBox" name="show_grid_chk">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>Show grid</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QCheckBox" name="show_delim_chk">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>Show delimiters</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QCheckBox" name="page_by_page_chk">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="toolTip">
-                      <string>Exporting the model page by page will generate files with a &lt;strong&gt;_p[n]&lt;/strong&gt; suffix where &lt;strong&gt;n&lt;/strong&gt; is the page id. Check if the current user has write permission on output folder.</string>
-                     </property>
-                     <property name="statusTip">
-                      <string/>
-                     </property>
-                     <property name="text">
-                      <string>Page by page</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QCheckBox" name="override_bg_color_chk">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="toolTip">
-                      <string>&lt;p&gt;By checking this option, pgModeler ignores the original canvas background color and the exported image background will be set to white so the file can be print-ready. The default behavior is to create an output image in which the background follows the canvas background color. In some cases, this behavior may not be desirable mainly if the generated image is for printing. &lt;/p&gt;</string>
-                     </property>
-                     <property name="text">
-                      <string>Override background</string>
-                     </property>
-                     <property name="checked">
-                      <bool>false</bool>
+                      <string>Output</string>
                      </property>
                     </widget>
                    </item>
                   </layout>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label">
-                   <property name="text">
-                    <string>Options:</string>
-                   </property>
-                  </widget>
                  </item>
                 </layout>
                </widget>
               </item>
-              <item row="0" column="0" rowspan="2">
-               <widget class="QToolButton" name="export_to_img_tb">
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="export_to_dict_gb">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::FocusPolicy::StrongFocus</enum>
+             </property>
+             <property name="title">
+              <string>Data dictionary</string>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_14">
+              <property name="spacing">
+               <number>10</number>
+              </property>
+              <property name="leftMargin">
+               <number>5</number>
+              </property>
+              <property name="topMargin">
+               <number>5</number>
+              </property>
+              <property name="rightMargin">
+               <number>5</number>
+              </property>
+              <property name="bottomMargin">
+               <number>5</number>
+              </property>
+              <item>
+               <widget class="QToolButton" name="export_to_dict_tb">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -1290,12 +1352,12 @@
                 </property>
                 <property name="icon">
                  <iconset resource="../../res/resources.qrc">
-                  <normaloff>:/images/images/exporttoimg.png</normaloff>:/images/images/exporttoimg.png</iconset>
+                  <normaloff>:/images/images/exporttodatadict.png</normaloff>:/images/images/exporttodatadict.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
-                  <width>37</width>
-                  <height>90</height>
+                  <width>100</width>
+                  <height>40</height>
                  </size>
                 </property>
                 <property name="checkable">
@@ -1312,40 +1374,7 @@
                 </property>
                </widget>
               </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="export_to_dict_gb">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="focusPolicy">
-              <enum>Qt::FocusPolicy::StrongFocus</enum>
-             </property>
-             <property name="title">
-              <string>Data dictionary</string>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_12">
-              <property name="leftMargin">
-               <number>5</number>
-              </property>
-              <property name="topMargin">
-               <number>5</number>
-              </property>
-              <property name="rightMargin">
-               <number>5</number>
-              </property>
-              <property name="bottomMargin">
-               <number>5</number>
-              </property>
-              <property name="spacing">
-               <number>5</number>
-              </property>
-              <item row="0" column="2" rowspan="2">
+              <item>
                <widget class="QWidget" name="export_to_dict_wgt" native="true">
                 <property name="enabled">
                  <bool>false</bool>
@@ -1362,184 +1391,160 @@
                   <height>0</height>
                  </size>
                 </property>
-                <layout class="QGridLayout" name="export_to_dict_grid">
+                <layout class="QVBoxLayout" name="verticalLayout_19">
                  <property name="leftMargin">
-                  <number>5</number>
+                  <number>0</number>
                  </property>
                  <property name="topMargin">
-                  <number>5</number>
+                  <number>0</number>
                  </property>
                  <property name="rightMargin">
                   <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>5</number>
+                  <number>0</number>
                  </property>
-                 <property name="spacing">
-                  <number>5</number>
-                 </property>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="data_dict_mode_lbl_2">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="statusTip">
-                    <string/>
-                   </property>
-                   <property name="text">
-                    <string>Format:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="data_dict_ouput_lbl">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Output:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1" colspan="2">
-                  <layout class="QHBoxLayout" name="horizontalLayout_4">
-                   <property name="spacing">
-                    <number>5</number>
-                   </property>
-                   <property name="rightMargin">
-                    <number>0</number>
-                   </property>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_8">
                    <item>
-                    <widget class="QComboBox" name="dict_format_cmb">
-                     <property name="toolTip">
-                      <string>&lt;strong&gt;HTML:&lt;/strong&gt; Creates the data dictionary in Hypertext Markup Language format.
+                    <layout class="QVBoxLayout" name="verticalLayout_16">
+                     <item>
+                      <widget class="QLabel" name="data_dict_mode_lbl">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="statusTip">
+                        <string/>
+                       </property>
+                       <property name="text">
+                        <string>Format</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="dict_format_cmb">
+                       <property name="toolTip">
+                        <string>&lt;strong&gt;HTML:&lt;/strong&gt; Creates the data dictionary in Hypertext Markup Language format.
 
 &lt;strong&gt;MD:&lt;/strong&gt; Creates the data dictionary in Markdown format.</string>
-                     </property>
-                     <property name="sizeAdjustPolicy">
-                      <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
-                     </property>
-                     <item>
-                      <property name="text">
-                       <string>HTML</string>
-                      </property>
+                       </property>
+                       <property name="sizeAdjustPolicy">
+                        <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
+                       </property>
+                       <item>
+                        <property name="text">
+                         <string>HTML</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>MD</string>
+                        </property>
+                       </item>
+                      </widget>
                      </item>
-                     <item>
-                      <property name="text">
-                       <string>MD</string>
-                      </property>
-                     </item>
-                    </widget>
+                    </layout>
                    </item>
                    <item>
-                    <widget class="QComboBox" name="dict_mode_cmb">
-                     <property name="toolTip">
-                      <string>&lt;strong&gt;Standalone:&lt;/strong&gt; pgModeler will generate a single file containing the data dictionaries of all tables in the database model. 
+                    <layout class="QVBoxLayout" name="verticalLayout_17">
+                     <item>
+                      <widget class="QLabel" name="label">
+                       <property name="text">
+                        <string>Code generation mode</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <layout class="QHBoxLayout" name="horizontalLayout_4">
+                       <property name="spacing">
+                        <number>5</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <widget class="QComboBox" name="dict_mode_cmb">
+                         <property name="toolTip">
+                          <string>&lt;strong&gt;Standalone:&lt;/strong&gt; pgModeler will generate a single file containing the data dictionaries of all tables in the database model. 
 
 &lt;strong&gt;Split:&lt;/strong&gt; pgModeler will generate a data dictionary file per table of the database model.</string>
-                     </property>
-                     <property name="sizeAdjustPolicy">
-                      <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
-                     </property>
-                     <item>
-                      <property name="text">
-                       <string>Standalone</string>
-                      </property>
+                         </property>
+                         <property name="sizeAdjustPolicy">
+                          <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
+                         </property>
+                         <item>
+                          <property name="text">
+                           <string>Standalone</string>
+                          </property>
+                         </item>
+                         <item>
+                          <property name="text">
+                           <string>Split</string>
+                          </property>
+                         </item>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QCheckBox" name="incl_index_chk">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="toolTip">
+                          <string>pgModeler will generate an index to help navigate through the data dictionary. If splitted mode is set then a separated file named &lt;em&gt;index.(html|md)&lt;/em&gt; will be saved into the destination folder.</string>
+                         </property>
+                         <property name="statusTip">
+                          <string/>
+                         </property>
+                         <property name="text">
+                          <string>Include index</string>
+                         </property>
+                         <property name="checked">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </item>
-                     <item>
-                      <property name="text">
-                       <string>Split</string>
-                      </property>
-                     </item>
-                    </widget>
+                    </layout>
                    </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QVBoxLayout" name="dict_file_lt">
                    <item>
-                    <widget class="QCheckBox" name="incl_index_chk">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
+                    <widget class="QLabel" name="data_dict_ouput_lbl">
                      <property name="sizePolicy">
-                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                        <horstretch>0</horstretch>
                        <verstretch>0</verstretch>
                       </sizepolicy>
                      </property>
-                     <property name="toolTip">
-                      <string>pgModeler will generate an index to help navigate through the data dictionary. If splitted mode is set then a separated file named &lt;em&gt;index.(html|md)&lt;/em&gt; will be saved into the destination folder.</string>
-                     </property>
-                     <property name="statusTip">
-                      <string/>
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>0</height>
+                      </size>
                      </property>
                      <property name="text">
-                      <string>Include index</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
+                      <string>Output</string>
                      </property>
                     </widget>
                    </item>
                   </layout>
                  </item>
                 </layout>
-               </widget>
-              </item>
-              <item row="0" column="0" rowspan="2">
-               <widget class="QToolButton" name="export_to_dict_tb">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="../../res/resources.qrc">
-                  <normaloff>:/images/images/exporttodatadict.png</normaloff>:/images/images/exporttodatadict.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>37</width>
-                  <height>90</height>
-                 </size>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-                <property name="autoExclusive">
-                 <bool>false</bool>
-                </property>
-                <property name="autoRaise">
-                 <bool>true</bool>
-                </property>
                </widget>
               </item>
              </layout>
@@ -1833,17 +1838,8 @@
   <tabstop>settings_tbw</tabstop>
   <tabstop>export_to_dbms_tb</tabstop>
   <tabstop>connections_cmb</tabstop>
-  <tabstop>pgsqlvers_chk</tabstop>
-  <tabstop>pgsqlvers1_cmb</tabstop>
   <tabstop>export_to_file_tb</tabstop>
-  <tabstop>sql_standalone_rb</tabstop>
-  <tabstop>sql_split_rb</tabstop>
-  <tabstop>code_options_cmb</tabstop>
-  <tabstop>pgsqlvers_cmb</tabstop>
   <tabstop>export_to_img_tb</tabstop>
-  <tabstop>show_grid_chk</tabstop>
-  <tabstop>show_delim_chk</tabstop>
-  <tabstop>page_by_page_chk</tabstop>
   <tabstop>export_to_dict_tb</tabstop>
   <tabstop>output_trw</tabstop>
  </tabstops>

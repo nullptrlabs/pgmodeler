@@ -27,6 +27,10 @@ MetadataHandlingWidget::MetadataHandlingWidget(QWidget *parent) : QWidget(parent
 {
 	setupUi(this);
 
+	GuiUtilsNs::configureWidgetsFont({ operation_lbl, extract_from_lbl,
+																		 apply_to_lbl, backup_file_lbl },
+																	 GuiUtilsNs::SmallFontFactor, true);
+
 	progress_wgt->setVisible(false);
 	root_item = nullptr;
 	output_trw->setItemDelegateForColumn(0, new HtmlItemDelegate(this));
@@ -225,7 +229,7 @@ void MetadataHandlingWidget::handleObjectsMetada()
 
 			root_item = GuiUtilsNs::createOutputTreeItem(output_trw,
 																									 UtilsNs::formatMessage(tr("Extracting metadata to file `%1'").arg(metadata_file)),
-																									 QPixmap(GuiUtilsNs::getIconPath("info")), nullptr);
+																									 GuiUtilsNs::getPixmap("info"), nullptr);
 
 			extract_model->saveObjectsMetadata(metadata_file, options);
 
@@ -234,7 +238,7 @@ void MetadataHandlingWidget::handleObjectsMetada()
 				root_item->setExpanded(false);
 				root_item = GuiUtilsNs::createOutputTreeItem(output_trw,
 																										 UtilsNs::formatMessage(tr("Saving backup metadata to file `%1'").arg(backup_file_sel->getSelectedFile())),
-																										 QPixmap(GuiUtilsNs::getIconPath("info")), nullptr);
+																										 GuiUtilsNs::getPixmap("info"), nullptr);
 
 				apply_model->saveObjectsMetadata(bkp_filename);
 			}
@@ -253,7 +257,7 @@ void MetadataHandlingWidget::handleObjectsMetada()
 
 			root_item = GuiUtilsNs::createOutputTreeItem(output_trw,
 																										UtilsNs::formatMessage(tr("Applying metadata from file `%1'").arg(metadata_file)),
-																										QPixmap(GuiUtilsNs::getIconPath("info")), nullptr);
+																										GuiUtilsNs::getPixmap("info"), nullptr);
 
 
 			apply_model->loadObjectsMetadata(metadata_file, options);
@@ -266,7 +270,7 @@ void MetadataHandlingWidget::handleObjectsMetada()
 	}
 	catch(Exception &e)
 	{
-		QPixmap icon = QPixmap(GuiUtilsNs::getIconPath("error"));
+		QPixmap icon = GuiUtilsNs::getPixmap("error");
 
 		GuiUtilsNs::createOutputTreeItem(output_trw,
 																		 UtilsNs::formatMessage(e.getErrorMessage()),
@@ -312,12 +316,12 @@ void MetadataHandlingWidget::updateProgress(int progress, QString msg, unsigned 
 	if(obj_type == ObjectType::BaseObject)
 	{
 		if(progress == 100)
-			icon = QPixmap(GuiUtilsNs::getIconPath("info"));
+			icon = GuiUtilsNs::getPixmap("info");
 		else
-			icon = QPixmap(GuiUtilsNs::getIconPath("alert"));
+			icon = GuiUtilsNs::getPixmap("alert");
 	}
 	else
-		icon = QPixmap(GuiUtilsNs::getIconPath(obj_type));
+		icon = GuiUtilsNs::getPixmap(obj_type);
 
 	GuiUtilsNs::createOutputTreeItem(output_trw, fmt_msg, icon, root_item);
 	progress_lbl->setText(fmt_msg);

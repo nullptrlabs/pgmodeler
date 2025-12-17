@@ -34,13 +34,15 @@ SnippetsConfigWidget::SnippetsConfigWidget(QWidget * parent) : BaseConfigWidget(
 	QPixmap ico;
 	QString gen_purpose=tr("General purpose");
 	std::map<QString, ObjectType> types_map;
-	std::vector<ObjectType> types=BaseObject::getObjectTypes(true, {ObjectType::Relationship, ObjectType::Tag, ObjectType::Textbox,
+	std::vector<ObjectType> types=BaseObject::getObjectTypes(true,
+																													 { ObjectType::Relationship, ObjectType::Tag, ObjectType::Textbox,
 																														 ObjectType::Permission, ObjectType::BaseRelationship });
 
 	setupUi(this);
+	GuiUtilsNs::configureBuddyWidgets(this);
 
 	for(ObjectType type : types)
-		types_map[BaseObject::getTypeName(type)]=type;
+		types_map[BaseObject::getTypeName(type)] = type;
 
 	//Creates a combo with the accepted object type
 	for(auto &itr : types_map)
@@ -520,7 +522,7 @@ void SnippetsConfigWidget::configureSnippetsMenu(QMenu *snip_menu, std::vector<O
 				type_name=tr("General");
 			}
 			else
-				ico=QPixmap(GuiUtilsNs::getIconPath(object));
+				ico=GuiUtilsNs::getPixmap(object);
 
 			menu=new QMenu(type_name, snip_menu);
 			menu->setIcon(ico);
@@ -534,7 +536,7 @@ void SnippetsConfigWidget::configureSnippetsMenu(QMenu *snip_menu, std::vector<O
 		}
 
 		//Creating the action for the current snippet
-		act=new QAction(QPixmap(GuiUtilsNs::getIconPath("codesnippet")), snip_id, submenus[object]);
+		act=new QAction(GuiUtilsNs::getIcon("codesnippet"), snip_id, submenus[object]);
 		act->setToolTip(snip[Attributes::Label]);
 		submenus[object]->addAction(act);
 	}

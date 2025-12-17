@@ -23,8 +23,7 @@ AboutSEWidget::AboutSEWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
 
-	GuiUtilsNs::configureWidgetFont(title_lbl, GuiUtilsNs::HugeFontFactor);
-	GuiUtilsNs::configureWidgetFont(pgmodeler_ver_lbl, GuiUtilsNs::HugeFontFactor);
+	GuiUtilsNs::configureWidgetsFont({ title_lbl, pgmodeler_ver_lbl}, GuiUtilsNs::HugeFontFactor);
 	GuiUtilsNs::configureWidgetFont(build_num_lbl, GuiUtilsNs::BigFontFactor);
 
 	pgmodeler_ver_lbl->setText(QString("v%1 ").arg(GlobalAttributes::PgModelerVersion));

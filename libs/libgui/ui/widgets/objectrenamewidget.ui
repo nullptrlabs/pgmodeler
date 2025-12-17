@@ -265,7 +265,7 @@
              <string>&lt;p&gt;Use the default name disambiguation convention the next time a name conflict is detected.&lt;/p&gt;</string>
             </property>
             <property name="text">
-             <string>Always use the default.</string>
+             <string>Always use the default</string>
             </property>
            </widget>
           </item>
@@ -293,11 +293,11 @@
           </item>
           <item row="0" column="0" colspan="4">
            <widget class="QLineEdit" name="new_name_edt">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
             <property name="clearButtonEnabled">
              <bool>true</bool>
@@ -375,7 +375,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Rename ... to:</string>
+             <string>Rename ... to</string>
             </property>
            </widget>
           </item>

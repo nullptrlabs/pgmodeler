@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>885</width>
-    <height>737</height>
+    <width>649</width>
+    <height>420</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -16,7 +16,7 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <layout class="QGridLayout" name="funcaoagregacao_grid">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <property name="leftMargin">
     <number>5</number>
    </property>
@@ -29,43 +29,13 @@
    <property name="bottomMargin">
     <number>5</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="0" column="0">
-    <widget class="QLabel" name="final_func_lbl">
-     <property name="text">
-      <string>Final Function:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="sort_op_lbl">
-     <property name="text">
-      <string>Sort Operator:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="initial_cod_lbl">
-     <property name="text">
-      <string>Initial Condition:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="QTabWidget" name="state_input_types_twg">
+   <item>
+    <widget class="QTabWidget" name="agg_attribs_twg">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>200</height>
-      </size>
      </property>
      <property name="currentIndex">
       <number>0</number>
@@ -76,49 +46,112 @@
        <height>22</height>
       </size>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="functions_tab">
+      <attribute name="icon">
+       <iconset resource="../../res/resources.qrc">
+        <normaloff>:/icons/icons/function.png</normaloff>:/icons/icons/function.png</iconset>
+      </attribute>
+      <attribute name="title">
+       <string>Functions</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="leftMargin">
+        <number>5</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>5</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <layout class="QVBoxLayout" name="transition_func_lt">
+         <item>
+          <widget class="QLabel" name="transition_func_lbl">
+           <property name="text">
+            <string>Transition function</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="final_func_lt">
+         <item>
+          <widget class="QLabel" name="final_func_lbl">
+           <property name="text">
+            <string>Final function</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="sort_op_lt">
+         <item>
+          <widget class="QLabel" name="sort_op_lbl">
+           <property name="text">
+            <string>Sort operator</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="initial_cod_lt">
+         <item>
+          <widget class="QLabel" name="initial_cod_lbl">
+           <property name="text">
+            <string>Initial condition</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPlainTextEdit" name="initial_cond_txt">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="inputs_tab">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/parameter.png</normaloff>:/icons/icons/parameter.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>Function &amp;Inputs</string>
+       <string>Inputs</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="state_tab">
+      <attribute name="icon">
+       <iconset resource="../../res/resources.qrc">
+        <normaloff>:/icons/icons/usertype.png</normaloff>:/icons/icons/usertype.png</iconset>
+      </attribute>
       <attribute name="title">
-       <string>Function &amp;State</string>
+       <string>State</string>
       </attribute>
      </widget>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="transition_func_lbl">
-     <property name="text">
-      <string>Transition Func.:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QPlainTextEdit" name="initial_cond_txt">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
     </widget>
    </item>
   </layout>
  </widget>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

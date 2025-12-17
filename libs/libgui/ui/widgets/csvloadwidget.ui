@@ -6,14 +6,17 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1041</width>
-    <height>100</height>
+    <width>651</width>
+    <height>99</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="spacing">
+    <number>5</number>
+   </property>
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -26,27 +29,18 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="0" column="0">
+   <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>100</height>
-      </size>
-     </property>
      <property name="title">
-      <string>&amp;Load CSV</string>
+      <string>Load CSV</string>
      </property>
-     <layout class="QGridLayout" name="load_csv_grid">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
       <property name="leftMargin">
        <number>5</number>
       </property>
@@ -59,264 +53,273 @@
       <property name="bottomMargin">
        <number>5</number>
       </property>
-      <property name="spacing">
-       <number>5</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="file_lbl">
-        <property name="text">
-         <string>CSV File:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="separator_lbl">
-        <property name="text">
-         <string>Separator: </string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Policy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>5</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="5">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="spacing">
-         <number>0</number>
-        </property>
+      <item>
+       <layout class="QHBoxLayout" name="file_lt">
         <item>
-         <widget class="QCheckBox" name="col_names_chk">
-          <property name="toolTip">
-           <string>&lt;p&gt;Use the first row as column names in the CSV file. By unchecking this option the first row is used as data.&lt;/p&gt;</string>
-          </property>
-          <property name="statusTip">
-           <string/>
-          </property>
-          <property name="text">
-           <string>Columns in the first row</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="1" column="6">
-       <spacer name="horizontalSpacer_6">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>32</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="7" colspan="2">
-       <widget class="QPushButton" name="load_btn">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Load</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../../res/resources.qrc">
-          <normaloff>:/icons/icons/csvload.png</normaloff>:/icons/icons/csvload.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>25</width>
-          <height>25</height>
-         </size>
-        </property>
-        <property name="default">
-         <bool>false</bool>
-        </property>
-        <property name="flat">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <property name="spacing">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QComboBox" name="separator_cmb">
+         <widget class="QLabel" name="file_lbl">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="minimumSize">
            <size>
-            <width>110</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>28</width>
-            <height>28</height>
-           </size>
-          </property>
-          <item>
-           <property name="text">
-            <string>Semicolon (;)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Comma (,)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Space</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Tabulation</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Other</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="separator_edt">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>25</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>0</width>
+            <width>70</width>
             <height>0</height>
            </size>
           </property>
           <property name="text">
-           <string>;</string>
-          </property>
-          <property name="maxLength">
-           <number>2</number>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
+           <string>CSV File</string>
           </property>
          </widget>
         </item>
        </layout>
       </item>
-      <item row="1" column="3">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <property name="spacing">
-         <number>5</number>
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
         </property>
         <item>
-         <widget class="QCheckBox" name="txt_delim_chk">
-          <property name="text">
-           <string>Text delimiter:</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="txt_delim_edt">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
+         <widget class="QLabel" name="separator_lbl">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="maximumSize">
+          <property name="minimumSize">
            <size>
-            <width>25</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>0</width>
+            <width>70</width>
             <height>0</height>
            </size>
           </property>
           <property name="text">
-           <string>&quot;</string>
-          </property>
-          <property name="maxLength">
-           <number>2</number>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
+           <string>Separator </string>
           </property>
          </widget>
         </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <property name="spacing">
+           <number>5</number>
+          </property>
+          <item>
+           <widget class="QComboBox" name="separator_cmb">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>28</width>
+              <height>28</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Semicolon (;)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Comma (,)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Space</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Tabulation</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Other</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="separator_edt">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>25</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>;</string>
+            </property>
+            <property name="maxLength">
+             <number>2</number>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="txt_delim_chk">
+            <property name="text">
+             <string>Text delimiter</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="txt_delim_edt">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>25</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>&quot;</string>
+            </property>
+            <property name="maxLength">
+             <number>2</number>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="col_names_chk">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>&lt;p&gt;Use the first row as column names in the CSV file. By unchecking this option the first row is used as data.&lt;/p&gt;</string>
+            </property>
+            <property name="statusTip">
+             <string/>
+            </property>
+            <property name="text">
+             <string>Columns in the first row</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>32</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="load_btn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Load</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../../res/resources.qrc">
+              <normaloff>:/icons/icons/csvload.png</normaloff>:/icons/icons/csvload.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>25</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="default">
+             <bool>false</bool>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
        </layout>
-      </item>
-      <item row="1" column="2">
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Policy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>5</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>
@@ -329,10 +332,8 @@
   <tabstop>txt_delim_chk</tabstop>
   <tabstop>txt_delim_edt</tabstop>
   <tabstop>col_names_chk</tabstop>
-  <tabstop>load_btn</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

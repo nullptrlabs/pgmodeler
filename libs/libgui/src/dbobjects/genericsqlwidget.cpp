@@ -24,44 +24,27 @@ GenericSQLWidget::GenericSQLWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	std::vector<ObjectType> types;
 
 	Ui_GenericSQLWidget::setupUi(this);
-	configureFormLayout(genericsql_grid, ObjectType::GenericSql);
 
 	// Configuring the object types accepted by object references
 	types = BaseObject::getObjectTypes(false, { ObjectType::Database, ObjectType::GenericSql,
 																							 ObjectType::Permission, ObjectType::Relationship,
 																							 ObjectType::Tag, ObjectType::Textbox });
 	types.push_back(ObjectType::Column);
-	obj_refs_wgt = new ReferencesWidget(types, false, this);
+	obj_refs_wgt = GuiUtilsNs::createWidgetInParent<ReferencesWidget>(GuiUtilsNs::LtMargin, types,
+																																		false, references_tab);
 
-	QVBoxLayout *vbox = new QVBoxLayout(references_tab);
-	vbox->addWidget(obj_refs_wgt);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
+	definition_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin,
+																																				definition_tab, true);
 
-	definition_txt = GuiUtilsNs::createNumberedTextEditor(attribs_tbw->widget(0), true);
 	definition_hl = new SyntaxHighlighter(definition_txt);
 	definition_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
-	definition_cp=new CodeCompletionWidget(definition_txt, true);
+	definition_cp = new CodeCompletionWidget(definition_txt, true);
 
 	comment_edt->setVisible(false);
 	comment_lbl->setVisible(false);
 
-	preview_txt = GuiUtilsNs::createNumberedTextEditor(attribs_tbw->widget(2), false);
-	preview_txt->setReadOnly(true);
-	preview_hl = new SyntaxHighlighter(preview_txt);
-	preview_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
-
-	attribs_tbw->widget(0)->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
-	attribs_tbw->widget(0)->layout()->addWidget(definition_txt);
-
-	attribs_tbw->widget(2)->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
-	attribs_tbw->widget(2)->layout()->addWidget(preview_txt);
-
+	configureTabbedLayout(attribs_tbw);
 	setMinimumSize(700, 500);
-
-	connect(attribs_tbw, &QTabWidget::currentChanged, this, [this](int idx){
-		if(idx == attribs_tbw->count() - 1)
-			updateCodePreview();
-	});
 }
 
 void GenericSQLWidget::setAttributes(DatabaseModel *model, OperationList *op_list, GenericSQL *genericsql)
@@ -80,7 +63,7 @@ void GenericSQLWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 	definition_cp->configureCompletion(model, definition_hl);
 }
 
-void GenericSQLWidget::updateCodePreview()
+QString GenericSQLWidget::getSQLCodePreview()
 {
 	try
 	{
@@ -93,14 +76,15 @@ void GenericSQLWidget::updateCodePreview()
 			dummy_gsql.addReferences(obj_refs_wgt->getObjectReferences());
 			dummy_gsql.setDefinition(definition_txt->toPlainText());
 			dummy_gsql.setCodeInvalidated(true);
-			preview_txt->setPlainText(dummy_gsql.getSourceCode(SchemaParser::SqlCode));
+
+			return dummy_gsql.getSourceCode(SchemaParser::SqlCode);
 		}
-		else
-			preview_txt->setPlainText(QString("-- %1 --").arg(tr("No object name, SQL code or references defined! Preview unavailable.")));
+
+		return QString("-- %1 --").arg(tr("No object name, SQL code or references defined! Preview unavailable."));
 	}
 	catch(Exception &e)
 	{
-		preview_txt->setPlainText(QString("/* %1 */").arg(e.getExceptionsText()));
+		return QString("/* %1 */").arg(e.getExceptionsText());
 	}
 }
 

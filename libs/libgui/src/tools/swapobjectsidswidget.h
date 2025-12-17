@@ -32,8 +32,6 @@ class __libgui SwapObjectsIdsWidget: public QWidget, public Ui::SwapObjectsIdsWi
 	Q_OBJECT
 
 	private:
-		static const QString IdLabel;
-
 		unsigned selector_idx = 0;
 
 		//! \brief The sort mode (asc|desc) applied to a column
@@ -57,7 +55,7 @@ class __libgui SwapObjectsIdsWidget: public QWidget, public Ui::SwapObjectsIdsWi
 		void setSelectedObjects(BaseObject *src_object, BaseObject *dst_objct);
 
 	private slots:
-		void showObjectId();
+		void enableSwap();
 		void filterObjects();
 		void selectItem(const QModelIndex &index);
 		void clearSelectors();

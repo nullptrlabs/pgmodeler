@@ -18,54 +18,39 @@
 
 #include "constraintwidget.h"
 #include "guiutilsns.h"
+#include "customuistyle.h"
 
 ConstraintWidget::ConstraintWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Constraint)
 {
-	QStringList list;
 	std::map<QString, std::vector<QWidget *> > fields_map;
 	std::map<QWidget *, std::vector<QString> > values_map;
-	QGridLayout *grid=nullptr;
+	QGridLayout *grid = nullptr;
 
 	Ui_ConstraintWidget::setupUi(this);
 
-	excl_elems_tab=new ElementsTableWidget(this);
-	grid=new QGridLayout;
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
-	grid->addWidget(excl_elems_tab,0,0);
-	excl_elems_grp->setLayout(grid);
+	CustomUiStyle::setStyleHint(CustomUiStyle::AltDefaultFrmHint, options_frm);
 
-	expression_hl=new SyntaxHighlighter(expression_txt, false, true, font().pointSizeF());
+	excl_elems_tab = GuiUtilsNs::createWidgetInParent<ElementsTableWidget>(GuiUtilsNs::LtMargin, excl_elems_pg);
+
+	expression_hl = new SyntaxHighlighter(expression_txt, false, true, font().pointSizeF());
 	expression_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
-	ref_table_sel=new ObjectSelectorWidget(ObjectType::Table, this);
-	col_picker_wgt = new ColumnPickerWidget(this);
+	ref_table_sel = new ObjectSelectorWidget(ObjectType::Table, ref_cols_pg);
+	col_picker_wgt = GuiUtilsNs::createWidgetInParent<ColumnPickerWidget>(GuiUtilsNs::LtMargin, columns_pg);
 	ref_col_picker_wgt = new ColumnPickerWidget(this);
-
-	QVBoxLayout *vbox = new QVBoxLayout(columns_tbw->widget(0));
-	vbox->addWidget(col_picker_wgt);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
-
-	dynamic_cast<QGridLayout *>(columns_tbw->widget(1)->layout())->addWidget(ref_table_sel, 0,1,1,2);
-	dynamic_cast<QGridLayout *>(columns_tbw->widget(1)->layout())->addWidget(ref_col_picker_wgt, 3,0,1,3);
-
-	configureFormLayout(constraint_grid, ObjectType::Constraint);
+	ref_table_lt->addWidget(ref_table_sel);
+	ref_cols_lt->addWidget(ref_col_picker_wgt);
 
 	constr_type_cmb->addItems(ConstraintType::getTypes());
 	match_cmb->addItems(MatchType::getTypes());
 	deferral_cmb->addItems(DeferralType::getTypes());
 	indexing_cmb->addItems(IndexingType::getTypes());
 
-	list = ActionType::getTypes();
-	on_delete_cmb->addItems(list);
-	on_update_cmb->addItems(list);
-
-	info_frm=generateInformationFrame(tr("Columns which were included by relationship can not be added / removed manually from the primary key. If done such changes they can raise errors. To create primary key using columns included by relationship use the following options: identifier field, attributes & constraints tab or primary key tab on the relationship form."));
-	constraint_grid->addWidget(info_frm, constraint_grid->count()+1, 0, 1, 0);
-	info_frm->setParent(this);
+	on_delete_cmb->addItems(ActionType::getTypes());
+	on_update_cmb->addItems(ActionType::getTypes());
 
 	connect(constr_type_cmb, &QComboBox::currentIndexChanged, this, &ConstraintWidget::selectConstraintType);
 	connect(deferrable_chk, &QCheckBox::toggled, deferral_cmb, &QComboBox::setEnabled);
-	connect(deferrable_chk, &QCheckBox::toggled, deferral_lbl, &QLabel::setEnabled);
 	connect(indexing_chk, &QCheckBox::toggled, indexing_cmb, &QComboBox::setEnabled);
 	connect(fill_factor_chk, &QCheckBox::toggled, fill_factor_sb, &QSpinBox::setEnabled);
 
@@ -73,8 +58,13 @@ ConstraintWidget::ConstraintWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	connect(ref_table_sel, &ObjectSelectorWidget::s_objectSelected, this, __slot(this, ConstraintWidget::selectReferencedTable));
 
 	selectConstraintType();
+
+	layout()->removeItem(constr_attribs_grid);
+	extra_wgts_lt->addLayout(constr_attribs_grid);
+	configureTabbedLayout(constr_attribs_tbw);
+
 	configureTabOrder();
-	setMinimumSize(540, 600);
+	setMinimumSize(600, 450);
 }
 
 void ConstraintWidget::selectReferencedTable()
@@ -84,55 +74,51 @@ void ConstraintWidget::selectReferencedTable()
 
 void ConstraintWidget::selectConstraintType()
 {
-	ConstraintType constr_type=ConstraintType(constr_type_cmb->currentText());
+	ConstraintType constr_type = ConstraintType(constr_type_cmb->currentText());
+	bool is_pk = (constr_type == ConstraintType::PrimaryKey),
+			 is_fk = (constr_type == ConstraintType::ForeignKey),
+			 is_uq = (constr_type == ConstraintType::Unique),
+			 is_ck = (constr_type == ConstraintType::Check),
+			 is_ex = (constr_type == ConstraintType::Exclude);
 
-	tablespace_lbl->setVisible(constr_type==ConstraintType::PrimaryKey || constr_type==ConstraintType::Unique);
-	tablespace_sel->setVisible(constr_type==ConstraintType::PrimaryKey || constr_type==ConstraintType::Unique);
+	tablespace_lbl->setVisible(is_pk || is_uq);
+	tablespace_sel->setVisible(is_pk || is_uq);
 
-	if(!tablespace_sel->isVisible()) tablespace_sel->clearSelector();
+	if(!tablespace_sel->isVisible())
+		tablespace_sel->clearSelector();
 
-	expression_lbl->setVisible(constr_type==ConstraintType::Check || constr_type==ConstraintType::Exclude);
-	expression_txt->setVisible(constr_type==ConstraintType::Check || constr_type==ConstraintType::Exclude);
-	no_inherit_chk->setVisible(constr_type==ConstraintType::Check);
+	options_frm->setVisible(is_uq || is_ck);
 
-	nulls_not_distinct_chk->setVisible(constr_type==ConstraintType::Unique);
-
-	fill_factor_chk->setVisible(constr_type==ConstraintType::Unique ||
-								constr_type==ConstraintType::PrimaryKey ||
-								constr_type==ConstraintType::Exclude);
-	fill_factor_sb->setVisible(constr_type==ConstraintType::Unique ||
-							   constr_type==ConstraintType::PrimaryKey ||
-							   constr_type==ConstraintType::Exclude);
-
-	info_frm->setVisible(constr_type==ConstraintType::PrimaryKey);
-
-	deferrable_chk->setVisible(constr_type!=ConstraintType::Check);
-	deferral_cmb->setVisible(constr_type!=ConstraintType::Check);
-	deferral_lbl->setVisible(constr_type!=ConstraintType::Check);
-
-	match_lbl->setVisible(constr_type==ConstraintType::ForeignKey);
-	match_cmb->setVisible(constr_type==ConstraintType::ForeignKey);
-	on_delete_cmb->setVisible(constr_type==ConstraintType::ForeignKey);
-	on_delete_lbl->setVisible(constr_type==ConstraintType::ForeignKey);
-	on_update_cmb->setVisible(constr_type==ConstraintType::ForeignKey);
-	on_update_lbl->setVisible(constr_type==ConstraintType::ForeignKey);
-
-	columns_tbw->setVisible(constr_type!=ConstraintType::Check &&
-										 constr_type!=ConstraintType::Exclude);
-
-	indexing_chk->setVisible(constr_type==ConstraintType::Exclude);
-	indexing_cmb->setVisible(constr_type==ConstraintType::Exclude);
-
-	if(constr_type!=ConstraintType::ForeignKey)
-	{
-		columns_tbw->setTabEnabled(1, false);
-		columns_tbw->setCurrentIndex(0);
-		ref_table_sel->clearSelector();
-	}
+	if(is_uq || is_ck)
+		v_spacer->changeSize(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored);
 	else
-		columns_tbw->setTabEnabled(1, true);
+		v_spacer->changeSize(5, 5, QSizePolicy::Ignored, QSizePolicy::Expanding);
 
-	excl_elems_grp->setVisible(constr_type==ConstraintType::Exclude);
+	no_inherit_chk->setVisible(is_ck);
+	nulls_not_distinct_chk->setVisible(is_uq);
+
+	fill_factor_chk->setVisible(is_uq || is_pk || is_ex);
+	fill_factor_sb->setVisible(is_uq || is_pk || is_ex);
+
+	deferrable_chk->setVisible(!is_ck);
+	deferral_cmb->setVisible(!is_ck);
+
+	match_lbl->setVisible(is_fk);
+	match_cmb->setVisible(is_fk);
+	on_delete_cmb->setVisible(is_fk);
+	on_delete_lbl->setVisible(is_fk);
+	on_update_cmb->setVisible(is_fk);
+	on_update_lbl->setVisible(is_fk);
+
+	indexing_chk->setVisible(is_ex);
+	indexing_cmb->setVisible(is_ex);
+
+	constr_attribs_tbw->setTabVisible(constr_attribs_tbw->indexOf(ref_cols_pg), is_fk);
+	constr_attribs_tbw->setTabVisible(constr_attribs_tbw->indexOf(expression_pg), is_ck || is_ex);
+	constr_attribs_tbw->setTabVisible(constr_attribs_tbw->indexOf(excl_elems_pg), is_ex);
+
+	if(!is_fk)
+		ref_table_sel->clearSelector();
 }
 
 void ConstraintWidget::setAttributes(DatabaseModel *model, OperationList *op_list,  BaseObject *parent_obj, Constraint *constr)
@@ -141,16 +127,15 @@ void ConstraintWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 	std::vector<ExcludeElement> excl_elems;
 
 	if(!parent_obj)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+		throw Exception(ErrorCode::AsgNotAllocattedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	obj_type = parent_obj->getObjectType();
 
-	if(!PhysicalTable::isPhysicalTable(obj_type) && obj_type!=ObjectType::Relationship)
-		throw Exception(ErrorCode::OprObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
+	if(!PhysicalTable::isPhysicalTable(obj_type) && obj_type != ObjectType::Relationship)
+		throw Exception(ErrorCode::OprObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	BaseObjectWidget::setAttributes(model, op_list, constr, parent_obj);
 
-	info_frm->setVisible(this->table != nullptr);
 	ref_table_sel->setModel(model);
 	col_picker_wgt->setParentObject(parent_obj);
 
@@ -208,8 +193,8 @@ void ConstraintWidget::applyConfiguration()
 		constr->setMatchType(MatchType(match_cmb->currentText()));
 		constr->setDeferrable(deferrable_chk->isChecked());
 		constr->setDeferralType(DeferralType(deferral_cmb->currentText()));
-		constr->setActionType(ActionType(on_delete_cmb->currentText()),Constraint::DeleteAction);
-		constr->setActionType(ActionType(on_update_cmb->currentText()),Constraint::UpdateAction);
+		constr->setActionType(ActionType(on_delete_cmb->currentText()), Constraint::DeleteAction);
+		constr->setActionType(ActionType(on_update_cmb->currentText()), Constraint::UpdateAction);
 		constr->setNoInherit(no_inherit_chk->isChecked());
 		constr->setNullsNotDistinct(nulls_not_distinct_chk->isChecked());
 
@@ -218,7 +203,7 @@ void ConstraintWidget::applyConfiguration()
 		else
 			constr->setIndexType(IndexingType::Null);
 
-		if(constr->getConstraintType()==ConstraintType::ForeignKey)
+		if(constr->getConstraintType() == ConstraintType::ForeignKey)
 			constr->setReferencedTable(dynamic_cast<BaseTable *>(ref_table_sel->getSelectedObject()));
 
 		constr->addColumns(col_picker_wgt->getColumns(), Constraint::SourceCols);
@@ -228,27 +213,31 @@ void ConstraintWidget::applyConfiguration()
 		constr->addExcludeElements(excl_elems);
 
 		//Raises an error if the user try to create a primary key that has columns added by relationship (not supported)
-		if(constr->getConstraintType()==ConstraintType::PrimaryKey &&
+		if(constr->getConstraintType() == ConstraintType::PrimaryKey &&
 				constr->isReferRelationshipAddedColumns())
-			throw Exception(ErrorCode::UnsupportedPKColsAddedByRel,PGM_FUNC,PGM_FILE,PGM_LINE);
+		{
+			throw Exception(ErrorCode::UnsupportedPKColsAddedByRel, PGM_FUNC, PGM_FILE, PGM_LINE);
+		}
 
 		BaseObjectWidget::applyConfiguration();
 
 		/* Raises an error if the constraint type requires at least one column to be assinged and
 		there is no columns configured on the form */
-		if(((constr->getConstraintType()==ConstraintType::ForeignKey ||
-			 constr->getConstraintType()==ConstraintType::PrimaryKey) &&
-			constr->getColumnCount(Constraint::SourceCols)==0) ||
-				(constr->getConstraintType()==ConstraintType::ForeignKey &&
-				 constr->getColumnCount(Constraint::ReferencedCols)==0))
-			throw Exception(ErrorCode::InvConstratintNoColumns,PGM_FUNC,PGM_FILE,PGM_LINE);
+		if(((constr->getConstraintType() == ConstraintType::ForeignKey ||
+				 constr->getConstraintType() == ConstraintType::PrimaryKey) &&
+				constr->getColumnCount(Constraint::SourceCols) == 0) ||
+			 (constr->getConstraintType( )== ConstraintType::ForeignKey &&
+				constr->getColumnCount(Constraint::ReferencedCols) == 0))
+		{
+			throw Exception(ErrorCode::InvConstratintNoColumns, PGM_FUNC, PGM_FILE, PGM_LINE);
+		}
 
 		finishConfiguration();
 
 		//For the foreign keys and uniques, updates the fk relationships on the model
 		if(this->table &&
-			 (constr->getConstraintType()==ConstraintType::ForeignKey ||
-			 constr->getConstraintType()==ConstraintType::Unique))
+			 (constr->getConstraintType() == ConstraintType::ForeignKey ||
+			 constr->getConstraintType() == ConstraintType::Unique))
 			this->model->updateTableFKRelationships(dynamic_cast<Table *>(this->table));
 	}
 	catch(Exception &e)

@@ -26,6 +26,7 @@
 ModelRestorationForm::ModelRestorationForm(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f)
 {
 	setupUi(this);
+
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
 	connect(restore_btn, &QPushButton::clicked, this, &ModelRestorationForm::accept);

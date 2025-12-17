@@ -30,7 +30,7 @@ ObjectTypesListWidget::ObjectTypesListWidget(QWidget *parent, const std::vector<
 	for(auto &type : BaseObject::getObjectTypes(true, excluded_types))
 	{
 		item = new QListWidgetItem(BaseObject::getTypeName(type));
-		item->setIcon(QIcon(GuiUtilsNs::getIconPath(type)));
+		item->setIcon(GuiUtilsNs::getIcon(type));
 		item->setData(Qt::UserRole, QVariant::fromValue<ObjectType>(type));
 		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
 		item->setCheckState(Qt::Checked);

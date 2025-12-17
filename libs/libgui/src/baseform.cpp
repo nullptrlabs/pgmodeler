@@ -37,12 +37,12 @@ void BaseForm::setButtonConfiguration(Messagebox::ButtonsId button_conf)
 		if(button_conf==Messagebox::CloseButton)
 		{
 			apply_ok_btn->setText(tr("&Close"));
-			apply_ok_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("close1")));
+			apply_ok_btn->setIcon(GuiUtilsNs::getIcon("close1"));
 		}
 		else
 		{
 			apply_ok_btn->setText(tr("&Ok"));
-			apply_ok_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("confirm")));
+			apply_ok_btn->setIcon(GuiUtilsNs::getIcon("confirm"));
 		}
 
 		cancel_btn->setVisible(false);
@@ -62,14 +62,15 @@ void BaseForm::resizeForm(QWidget *widget)
 	if(!widget)
 		return;
 
-	QVBoxLayout *vbox=new QVBoxLayout;
-	QSize min_size=widget->minimumSize();
+	QSize min_size = widget->minimumSize();
 	int max_h = 0, max_w = 0, curr_w =0, curr_h = 0;
 	QScreen *screen = qApp->primaryScreen();
 	QSize screen_sz = screen->size();
 
 	max_w = screen_sz.width() * 0.70;
 	max_h = screen_sz.height() * 0.70;
+
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(0, GuiUtilsNs::LtSpacing);
 	vbox->setContentsMargins(0, 0, 0, 0);
 
 	/* If the widget's minimum size is zero then we need to do
@@ -79,11 +80,13 @@ void BaseForm::resizeForm(QWidget *widget)
 		widget->adjustSize();
 		min_size = widget->size();
 	}
+	else
+		min_size = widget->minimumSize();
 
 	//Insert the widget into a scroll area if it's minimum size exceeds the 70% of screen's dimensions
 	if(max_w < min_size.width() || max_h < min_size.height())
 	{
-		QScrollArea *scrollarea=nullptr;
+		QScrollArea *scrollarea = nullptr;
 		scrollarea=new QScrollArea(main_frm);
 		scrollarea->setFrameShape(QFrame::NoFrame);
 		scrollarea->setFrameShadow(QFrame::Plain);
@@ -99,34 +102,42 @@ void BaseForm::resizeForm(QWidget *widget)
 	}
 
 	main_frm->setLayout(vbox);
-	this->adjustSize();
 
-	curr_h=this->height();
-	curr_w=min_size.width();
+	/* The minimum size must include the base form margins and
+	 * the height of the name logo at bottom */
+	min_size.setWidth(min_size.width() + (GuiUtilsNs::LtMargin * 4));
+	min_size.setHeight(min_size.height() + pgmodeler_name_lbl->height() + (GuiUtilsNs::LtMargin * 4));
+	setMinimumSize(min_size);
 
-	// If the current height is greater than the widget's minimum height we will use a medium value
-	if(curr_h > min_size.height() && min_size.height() < max_h)
-		curr_h = (curr_h + min_size.height())/2.5;
-	//Using the maximum height if the widget's minimum height exceeds the maximum allowed
-	else if(min_size.height() >= max_h)
-		curr_h = max_h;
+	/* Making the widget temporarily fixed
+	 * so we can determine the optimal size
+	 * by calling adjustSize() */
+	QSize max_size = widget->maximumSize();
+	setMaximumSize(min_size);
+	adjustSize();
+	setMaximumSize(max_size);
 
-	curr_w += (vbox->contentsMargins().left() +
-						 vbox->contentsMargins().right()) * 6;
+	curr_h = height();
+	curr_w = min_size.width();
 
-	curr_h += pgmodeler_name_lbl->minimumHeight() +
-							((buttons_lt->contentsMargins().top() +
-								buttons_lt->contentsMargins().bottom()) * 6);
+	bool resize_wgt = false;
 
+	/* If the current size of the widget exceeds
+	 * the screen demension, we shrink it */
 	if(curr_w > screen_sz.width())
+	{
 		curr_w = screen_sz.width() * 0.80;
+		resize_wgt = true;
+	}
 
 	if(curr_h > screen_sz.height())
+	{
 		curr_h = screen_sz.height() * 0.80;
+		resize_wgt = true;
+	}
 
-	this->setMinimumSize(min_size);
-	this->resize(curr_w, curr_h);
-	this->adjustSize();
+	if(resize_wgt)
+		resize(curr_w, curr_h);
 }
 
 void BaseForm::closeEvent(QCloseEvent *)
@@ -143,7 +154,7 @@ void BaseForm::setMainWidget(QWidget *widget)
 	if(!widget->windowIcon().isNull())
 		setWindowIcon(widget->windowIcon());
 	else
-		setWindowIcon(QIcon(GuiUtilsNs::getIconPath("pgmodeler_logo")));
+		setWindowIcon(GuiUtilsNs::getIcon("pgmodeler_logo"));
 
 	resizeForm(widget);
 	setButtonConfiguration(Messagebox::OkButton);

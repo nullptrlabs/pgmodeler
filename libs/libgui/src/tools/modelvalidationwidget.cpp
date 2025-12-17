@@ -28,6 +28,8 @@ ModelValidationWidget::ModelValidationWidget(QWidget *parent): QWidget(parent)
 {
 	setupUi(this);
 
+	GuiUtilsNs::configureBuddyWidgets(conn_opts_wgt);
+
 	output_menu.addAction(tr("Copy as text"), QKeySequence("Ctrl+Shift+C"), this, &ModelValidationWidget::copyTextOutput);
 	output_menu.addAction(tr("Clear"), this, &ModelValidationWidget::clearOutput);
 	output_btn->setMenu(&output_menu);
@@ -47,9 +49,7 @@ ModelValidationWidget::ModelValidationWidget(QWidget *parent): QWidget(parent)
 
 	connect(hide_tb, &QToolButton::clicked, this, &ModelValidationWidget::hide);
 	connect(options_btn, &QPushButton::toggled, options_frm, &QFrame::setVisible);
-	connect(sql_validation_chk, &QCheckBox::toggled, connections_cmb, &QComboBox::setEnabled);
-	connect(sql_validation_chk, &QCheckBox::toggled, version_cmb, &QComboBox::setEnabled);
-	connect(sql_validation_chk, &QCheckBox::toggled, use_tmp_names_chk, &QCheckBox::setEnabled);
+	connect(sql_validation_chk, &QCheckBox::toggled, conn_opts_wgt, &QWidget::setEnabled);
 	connect(validate_btn, &QPushButton::clicked, this, &ModelValidationWidget::validateModel);
 	connect(fix_btn, &QPushButton::clicked, this, &ModelValidationWidget::applyFixes);
 	connect(cancel_btn, &QPushButton::clicked, this, &ModelValidationWidget::cancelValidation);
@@ -352,7 +352,7 @@ void ModelValidationWidget::updateValidation(ValidationInfo val_info)
 			val_info.getValidationType() == ValidationInfo::ValidationAborted)
 	{
 		QStringList errors=val_info.getErrors();
-		item->setIcon(0, QPixmap(GuiUtilsNs::getIconPath("alert")));
+		item->setIcon(0, GuiUtilsNs::getIcon("alert"));
 		validation_prog_pb->setValue(validation_prog_pb->maximum());
 		reenableValidation();
 
@@ -373,23 +373,23 @@ void ModelValidationWidget::updateValidation(ValidationInfo val_info)
 	}
 	else
 	{
-		item->setIcon(0, QPixmap(GuiUtilsNs::getIconPath(
-											val_info.getValidationType() == ValidationInfo::UniqueSameAsPk ? "alert" : "error")));
+		item->setIcon(0, GuiUtilsNs::getIcon(
+											val_info.getValidationType() == ValidationInfo::UniqueSameAsPk ? "alert" : "error"));
 
 		if(val_info.getValidationType() == ValidationInfo::BrokenRelConfig)
 		{
 			GuiUtilsNs::createOutputTreeItem(output_trw, tr("<strong>HINT:</strong> try to change the relationship's creation order in the objects swap dialog and run the validation again. Note that other objects may be lost in the swapping process."),
-																			 QPixmap(GuiUtilsNs::getIconPath("alert")), item);
+																			 GuiUtilsNs::getPixmap("alert"), item);
 		}
 		else if(val_info.getValidationType() == ValidationInfo::MissingExtension)
 		{
 			GuiUtilsNs::createOutputTreeItem(output_trw, tr("<strong>HINT:</strong> Create the extension in the model or let it be created by applying the needed fixes."),
-																			 QPixmap(GuiUtilsNs::getIconPath("alert")), item);
+																			 GuiUtilsNs::getPixmap("alert"), item);
 		}
 		else if(val_info.getValidationType() == ValidationInfo::UniqueSameAsPk)
 		{
 			GuiUtilsNs::createOutputTreeItem(output_trw, tr("<strong>HINT:</strong> try to change the unique key configuration or remove it from the table otherwise PostgreSQL will ignore it."),
-																			 QPixmap(GuiUtilsNs::getIconPath("alert")), item);
+																			 GuiUtilsNs::getPixmap("alert"), item);
 		}
 		else
 		{
@@ -404,7 +404,7 @@ void ModelValidationWidget::updateValidation(ValidationInfo val_info)
 				label1->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
 				label1->installEventFilter(this);
-				item1->setIcon(0, QPixmap(GuiUtilsNs::getIconPath(ref_obj->getSchemaName())));
+				item1->setIcon(0, GuiUtilsNs::getIcon(ref_obj->getSchemaName()));
 
 				/* Store the reference of the referrer object in order to allow opening the editing form when the user clicks the item on the output
 				 * So the needed fixes can be done manually */
@@ -521,7 +521,7 @@ void ModelValidationWidget::updateProgress(int prog, QString msg, ObjectType obj
 			warn_count_lbl->setText(QString::number(warn_cnt + 1));
 			GuiUtilsNs::createOutputTreeItem(output_trw,
 												tr("SQL validation not executed! No connection defined."),
-												QPixmap(GuiUtilsNs::getIconPath("alert")));
+												GuiUtilsNs::getPixmap("alert"));
 		}		
 		else
 		{
@@ -533,7 +533,7 @@ void ModelValidationWidget::updateProgress(int prog, QString msg, ObjectType obj
 		{
 			GuiUtilsNs::createOutputTreeItem(output_trw,
 																			 tr("Database model successfully validated."),
-																			 QPixmap(GuiUtilsNs::getIconPath("info")));
+																			 GuiUtilsNs::getPixmap("info"));
 		}
 		else
 		{
@@ -541,13 +541,13 @@ void ModelValidationWidget::updateProgress(int prog, QString msg, ObjectType obj
 			{
 				GuiUtilsNs::createOutputTreeItem(output_trw,
 																				 tr("Database model validation finished with error(s)."),
-																				 QPixmap(GuiUtilsNs::getIconPath("error")));
+																				 GuiUtilsNs::getPixmap("error"));
 			}
 			else
 			{
 				GuiUtilsNs::createOutputTreeItem(output_trw,
 																				 tr("Database model validation finished with warning(s)."),
-																				 QPixmap(GuiUtilsNs::getIconPath("alert")));
+																				 GuiUtilsNs::getPixmap("alert"));
 			}
 		}
 
@@ -560,11 +560,11 @@ void ModelValidationWidget::updateProgress(int prog, QString msg, ObjectType obj
 		msg=UtilsNs::formatMessage(msg);
 
 		if(obj_type!=ObjectType::BaseObject)
-			ico=QPixmap(GuiUtilsNs::getIconPath(obj_type));
+			ico=GuiUtilsNs::getPixmap(obj_type);
 		else if(!cmd.isEmpty())
-			ico=QPixmap(GuiUtilsNs::getIconPath("sqlcmd"));
+			ico=GuiUtilsNs::getPixmap("sqlcmd");
 		else
-			ico=QPixmap(GuiUtilsNs::getIconPath("info"));
+			ico=GuiUtilsNs::getPixmap("info");
 
 		if(is_code_gen)
 		{
@@ -573,13 +573,13 @@ void ModelValidationWidget::updateProgress(int prog, QString msg, ObjectType obj
 		}
 		else
 		{
-			ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("sqlcode")));
+			ico_lbl->setPixmap(GuiUtilsNs::getPixmap("sqlcode"));
 			object_lbl->setText(tr("Running SQL commands on server..."));
 
 			item=GuiUtilsNs::createOutputTreeItem(output_trw, msg, ico, nullptr, false);
 
 			if(!cmd.isEmpty())
-				GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QPixmap(), item, false);
+				GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QIcon(), item, false);
 		}
 	}
 }
@@ -587,7 +587,7 @@ void ModelValidationWidget::updateProgress(int prog, QString msg, ObjectType obj
 void ModelValidationWidget::updateObjectName(QString obj_name, ObjectType obj_type)
 {
 	object_lbl->setText(tr("Processing object: %1").arg(UtilsNs::formatMessage(obj_name)));
-	ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(obj_type)));
+	ico_lbl->setPixmap(GuiUtilsNs::getPixmap(obj_type));
 }
 
 void ModelValidationWidget::configureValidation()
@@ -693,7 +693,7 @@ void ModelValidationWidget::handleFixFailed(Exception e)
 {
 	QTreeWidgetItem *root = nullptr, *child = nullptr;
 
-	root = GuiUtilsNs::createOutputTreeItem(output_trw, tr("Failed to apply one or more fixes. Operation aborted!"), GuiUtilsNs::getIconPath("error"));
+	root = GuiUtilsNs::createOutputTreeItem(output_trw, tr("Failed to apply one or more fixes. Operation aborted!"), GuiUtilsNs::getIcon("error"));
 	child = new QTreeWidgetItem(root);
 
 	QLabel *label = new QLabel;

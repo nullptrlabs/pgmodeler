@@ -43,9 +43,6 @@ class __libgui EventTriggerWidget: public BaseObjectWidget, public Ui::EventTrig
 		
 	public slots:
 		void applyConfiguration() override;
-
-	private slots:
-		void handleTagValue(int row);
 };
 
 #endif

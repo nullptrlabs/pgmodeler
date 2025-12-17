@@ -44,7 +44,7 @@
       </size>
      </property>
      <property name="text">
-      <string>Search:</string>
+      <string>Search</string>
      </property>
     </widget>
    </item>
@@ -307,7 +307,7 @@
       </size>
      </property>
      <property name="text">
-      <string>Replace:</string>
+      <string>Replace</string>
      </property>
     </widget>
    </item>

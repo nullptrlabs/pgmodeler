@@ -19,6 +19,7 @@
 #include <QLabel>
 #include <QGraphicsDropShadowEffect>
 #include <QSettings>
+#include <QRadioButton>
 #include "guiutilsns.h"
 #include "customuistyle.h"
 #include "messagebox.h"
@@ -34,10 +35,10 @@
 namespace GuiUtilsNs {
 	NumberedTextEditor *createNumberedTextEditor(QWidget *parent, bool act_btns_enabled, qreal custom_fnt_size)
 	{
-		return createWidgetInParent<NumberedTextEditor>(parent, act_btns_enabled, custom_fnt_size);
+		return createWidgetInParent<NumberedTextEditor>(0, parent, act_btns_enabled, custom_fnt_size);
 	}
 
-	QTreeWidgetItem *createOutputTreeItem(QTreeWidget *output_trw, const QString &text, const QPixmap &ico, QTreeWidgetItem *parent, bool expand_item, bool word_wrap)
+	QTreeWidgetItem *createOutputTreeItem(QTreeWidget *output_trw, const QString &text, const QIcon &ico, QTreeWidgetItem *parent, bool expand_item, bool word_wrap)
 	{
 		if(!output_trw)
 			throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
@@ -76,7 +77,7 @@ namespace GuiUtilsNs {
 		return item;
 	}
 
-	void createOutputListItem(QListWidget *output_lst, const QString &text, const QPixmap &ico, bool is_formated)
+	void createOutputListItem(QListWidget *output_lst, const QString &text, const QIcon &ico, bool is_formated)
 	{
 		if(!output_lst)
 			throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
@@ -207,7 +208,7 @@ namespace GuiUtilsNs {
 		}
 	}
 
-	void configureWidgetFont(QWidget *widget, FontFactorId factor_id)
+	void configureWidgetFont(QWidget *widget, FontFactorId factor_id, bool bold, bool italic)
 	{
 		double factor = 1;
 
@@ -228,23 +229,25 @@ namespace GuiUtilsNs {
 			break;
 		}
 
-		__configureWidgetFont(widget, factor);
+		__configureWidgetFont(widget, factor, bold, italic);
 	}
 
-	void __configureWidgetFont(QWidget *widget, double factor)
+	void __configureWidgetFont(QWidget *widget, double factor, bool bold, bool italic)
 	{
 		if(!widget)
 			return;
 
 		QFont font=widget->font();
 		font.setPointSizeF(font.pointSizeF() * factor);
+		font.setBold(bold);
+		font.setItalic(italic);
 		widget->setFont(font);
 	}
 
-	void configureWidgetsFont(const QWidgetList widgets, FontFactorId factor_id)
+	void configureWidgetsFont(const QWidgetList widgets, FontFactorId factor_id, bool bold, bool italic)
 	{
 		for(auto &wgt : widgets)
-			configureWidgetFont(wgt, factor_id);
+			configureWidgetFont(wgt, factor_id, bold, italic);
 	}
 
 	void createExceptionsTree(QTreeWidget *exceptions_trw, Exception &e, QTreeWidgetItem *root)
@@ -265,20 +268,20 @@ namespace GuiUtilsNs {
 		while(itr != itr_end)
 		{
 			text=QString("[%1] - %2").arg(idx).arg(itr->getMethod());
-			item=createOutputTreeItem(exceptions_trw, text, QPixmap(getIconPath("function1")), root, false, true);
+			item=createOutputTreeItem(exceptions_trw, text, getIcon("function1"), root, false, true);
 
 			text=QString("%1 (%2)").arg(itr->getFile()).arg(itr->getLine());
-			createOutputTreeItem(exceptions_trw, text, QPixmap(getIconPath("sourcecode")), item, false, true);
+			createOutputTreeItem(exceptions_trw, text, getIcon("sourcecode"), item, false, true);
 
 			text=QString("%1 (%2)").arg(Exception::getErrorCode(itr->getErrorCode())).arg(enum_t(itr->getErrorCode()));
-			createOutputTreeItem(exceptions_trw, text, QPixmap(getIconPath("alert")), item, false, true);
+			createOutputTreeItem(exceptions_trw, text, getIcon("alert"), item, false, true);
 
-			child_item=createOutputTreeItem(exceptions_trw, itr->getErrorMessage(), QPixmap(getIconPath("error")), item, false, true);
+			child_item=createOutputTreeItem(exceptions_trw, itr->getErrorMessage(), getIcon("error"), item, false, true);
 			exceptions_trw->itemWidget(child_item, 0)->setStyleSheet("color: #ff0000;");
 
 			if(!itr->getExtraInfo().isEmpty())
 			{
-				child_item=createOutputTreeItem(exceptions_trw, itr->getExtraInfo(), QPixmap(getIconPath("info")), item, false, true);
+				child_item=createOutputTreeItem(exceptions_trw, itr->getExtraInfo(), getIcon("info"), item, false, true);
 				exceptions_trw->itemWidget(child_item, 0)->setStyleSheet("font-style: italic;");
 			}
 
@@ -290,7 +293,7 @@ namespace GuiUtilsNs {
 			{
 				text = QT_TR_NOOP("An additional of %1 error(s) were suppressed due to the stack trace size limit.");
 				text = text.arg(list.size() - idx);
-				createOutputTreeItem(exceptions_trw, text, QPixmap(getIconPath("alert")), item, false, false);
+				createOutputTreeItem(exceptions_trw, text, getIcon("alert"), item, false, false);
 				break;
 			}
 		}
@@ -345,6 +348,26 @@ namespace GuiUtilsNs {
 		}
 
 		return getIconPath(BaseObject::getSchemaName(obj_type) + suffix);
+	}
+
+	QIcon getIcon(const QString &icon_name)
+	{
+		return { QIcon(getIconPath(icon_name)) };
+	}
+
+	QIcon getIcon(ObjectType obj_type, int sub_type)
+	{
+		return { QIcon(getIconPath(obj_type, sub_type)) };
+	}
+
+	QPixmap getPixmap(const QString &icon_name)
+	{
+		return { QPixmap(getIconPath(icon_name)) };
+	}
+
+	QPixmap getPixmap(ObjectType obj_type, int sub_type)
+	{
+		return { QPixmap(getIconPath(obj_type, sub_type)) };
 	}
 
 	void resizeWidget(QWidget *widget)
@@ -928,5 +951,155 @@ namespace GuiUtilsNs {
 
 		widget->move(event->globalPosition().x() - widget->width() + (event_wgt->width() / 2),
 								 event->globalPosition().y() - (widget->height() - (event_wgt->height() / 2)));
+	}
+
+ /*	void configureWidgetBuddy(QCheckBox *buddy_chkbox, QWidget *widget)
+	{
+		if(!buddy_chkbox || !widget)
+			return;
+
+		buddy_chkbox->setProperty(FontAdjustedProp, true);
+		configureWidgetFont(buddy_chkbox, SmallFontFactor, true);
+	}
+
+	void configureWidgetBuddy(QLabel *buddy_label, QWidget *widget)
+	{
+		if(!buddy_label || !widget)
+			return;
+
+		buddy_label->setBuddy(widget);
+		buddy_label->setProperty(FontAdjustedProp, true);
+		configureWidgetFont(buddy_label, SmallFontFactor, true);
+	} */
+
+	void configureBuddyWidgets(QWidget *widget)
+	{
+		if(!widget)
+			return;
+
+		QList<QBoxLayout *> layouts;
+		QLayoutItem *item = nullptr;
+		QBoxLayout *box_lt = nullptr;
+		QGridLayout *grid_lt = nullptr;
+		int item_cnt = 0;
+
+		for(auto &layout : widget->findChildren<QBoxLayout *>())
+		{
+			item_cnt = layout->count();
+			layouts.clear();
+			layouts.append(layout);
+
+			/* Collecting children layouts of the current layout
+			 * so we don't miss internal layouts that fits the
+			 * conditions to configure a buddy label */
+			for(int idx = 0; idx < item_cnt; idx++)
+			{
+				item = layout->itemAt(idx);
+				box_lt = qobject_cast<QBoxLayout *>(item->layout());
+				grid_lt = qobject_cast<QGridLayout *>(item->layout());
+
+				if(box_lt)
+				{
+					layouts.append(box_lt);
+					layouts.append(box_lt->findChildren<QBoxLayout *>());
+				}
+				else if(grid_lt)
+					layouts.append(grid_lt->findChildren<QBoxLayout *>());
+			}
+
+			for(auto &lt : layouts)
+				configureBuddyWidget(lt);
+		}
+	}
+
+	QLayout *createBuddyWidgetLayout(QLabel *label, QWidget *widget, QWidget *append_widget, int margin, int spacing)
+	{
+		if(!widget || !label)
+			throw Exception(ErrorCode::OprNotAllocatedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
+
+		QVBoxLayout *layout = GuiUtilsNs::createLayout<QVBoxLayout>(margin, spacing);
+		layout->addWidget(label);
+		layout->addWidget(widget);
+		configureBuddyWidget(layout);
+
+		if(!append_widget)
+			return layout;
+		
+		QHBoxLayout *h_layout =GuiUtilsNs::createLayout<QHBoxLayout>(margin, LtSpacing);
+		h_layout->addLayout(layout);
+		h_layout->addWidget(append_widget);
+
+		return h_layout;
+	}
+
+	void configureBuddyWidget(QLayout *lt)
+	{
+		QBoxLayout *box_lt = qobject_cast<QBoxLayout *>(lt);
+
+		/* Ignoring layout if:
+		 * - It contains a invalid count (we need a layout with 2 widgets)
+		 * - It not contains at least two items. */
+		if(!box_lt ||
+				box_lt->count() < 2 ||
+			 !box_lt->itemAt(0)->widget())
+			return;
+
+		QWidget *buddy_wgt = box_lt->itemAt(0)->widget(),
+				*lt_wgt = box_lt->itemAt(1)->widget();
+		QLabel *label = qobject_cast<QLabel *>(buddy_wgt);
+		QCheckBox *chkbox = qobject_cast<QCheckBox *>(buddy_wgt);
+
+		/* We also ignore the layout if:
+		 * - It contains two widgets (a QLabel/QCheckbox and another QWidget) but the
+		 *   buddy was already configured for the widget.
+		 * - The buddy widget is not QLabel or QCheckbox */
+		if((!label && !chkbox) ||
+			 (label && (label->text().isEmpty())) ||
+			 (chkbox && (qobject_cast<QCheckBox *>(lt_wgt) || qobject_cast<QRadioButton *>(lt_wgt))) ||
+			 (buddy_wgt && buddy_wgt->property(FontAdjustedProp).toBool()))
+			return;
+
+		if(label)
+			label->setBuddy(lt_wgt);
+
+		buddy_wgt->setProperty(FontAdjustedProp, true);
+		configureWidgetFont(buddy_wgt, SmallFontFactor, true);
+
+		if(qobject_cast<QHBoxLayout *>(box_lt))
+			box_lt->setSpacing(LtSpacing);
+		else if(qobject_cast<QVBoxLayout *>(box_lt) && chkbox)
+			box_lt->setSpacing(0);
+		else if(label)
+			box_lt->setSpacing(LtSpacing / 2);
+	}
+
+	QVBoxLayout *createVBoxLayout(int lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QVBoxLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	QVBoxLayout *createVBoxLayout(QMargins lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QVBoxLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	QHBoxLayout *createHBoxLayout(int lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QHBoxLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	QHBoxLayout *createHBoxLayout(QMargins lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QHBoxLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	QGridLayout *createGridLayout(int lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QGridLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	QGridLayout *createGridLayout(QMargins lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QGridLayout>(lt_margins, lt_spacing, parent);
 	}
 }

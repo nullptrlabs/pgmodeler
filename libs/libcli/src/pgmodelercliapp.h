@@ -217,6 +217,7 @@ class __libcli PgModelerCliApp: public Application {
 		NonTransactional,
 		PgSqlVer,
 		Help,
+		Version,
 		ShowGrid,
 		ShowDelimiters,
 		PageByPage,
@@ -289,7 +290,7 @@ class __libcli PgModelerCliApp: public Application {
 		void showMenu();
 
 					 //! \brief Shows the version info
-		void showVersionInfo();
+		void showVersionInfo(bool only_ver_num);
 
 		/*! \brief Prints to the stdout the provided text appending a \n on the string
 		 * even if the silent mode is active. */

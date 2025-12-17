@@ -73,7 +73,7 @@ ResultSetModel::ResultSetModel(ResultSet &res, Catalog &catalog, QObject *parent
 		for(int col = 0; col < col_count; col++)
 		{
 			tp_id = res.getColumnTypeId(col);
-			header_icons.append(QIcon(GuiUtilsNs::getIconPath(getPgTypeIconName(type_names[tp_id]))));
+			header_icons.append(GuiUtilsNs::getIcon(getPgTypeIconName(type_names[tp_id])));
 			tooltip_data.push_back(type_names[tp_id]);
 		}
 	}

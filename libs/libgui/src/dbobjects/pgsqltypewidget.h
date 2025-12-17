@@ -46,14 +46,14 @@ class __libgui PgSQLTypeWidget: public QWidget, public Ui::PgSQLTypeWidget {
 		static const QString InvalidType;
 
 	public:
-		PgSQLTypeWidget(QWidget * parent = nullptr, const QString &label="");
+		PgSQLTypeWidget(QWidget * parent = nullptr, const QString &label = "");
 
 		/*! \brief Lists the PostgreSQL types on the specified combo. The user can configure which types
 		must be shown using the last tree parameters. The DatabaseModel parameter is used to
 		gather the user-defined types of the specified model. */
 		static void listPgSQLTypes(QComboBox *combo, DatabaseModel *model,
-									 UserTypeConfig::TypeConf user_type_conf=UserTypeConfig::AllUserTypes,
-								   bool oid_types=true, bool pseudo_types=true);
+															 UserTypeConfig::TypeConf user_type_conf = UserTypeConfig::AllUserTypes,
+															 bool oid_types = true, bool pseudo_types = true);
 
 	private slots:
 		void updateTypeFormat();

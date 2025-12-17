@@ -21,47 +21,39 @@
 
 OperatorClassWidget::OperatorClassWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::OpClass)
 {
-	QGridLayout *grid=nullptr;
 	Ui_OperatorClassWidget::setupUi(this);
 
-	family_sel=new ObjectSelectorWidget(ObjectType::OpFamily, this);
-	data_type=new PgSQLTypeWidget(this);
-	operator_sel=new ObjectSelectorWidget(ObjectType::Operator, this);
-	elem_family_sel=new ObjectSelectorWidget(ObjectType::OpFamily, this);
-	function_sel=new ObjectSelectorWidget(ObjectType::Function, this);
-	storage_type=new PgSQLTypeWidget(this, tr("Storage Type"));
-	elements_tab=new CustomTableWidget(CustomTableWidget::AllButtons ^ CustomTableWidget::DuplicateButton, true, this);
+	family_sel = new ObjectSelectorWidget(ObjectType::OpFamily, this);
+	op_family_lt->addWidget(family_sel);
+
+	data_type = new PgSQLTypeWidget(this);
+	attributes_lt->insertWidget(attributes_lt->count() - 1, data_type);
+
+	operator_sel = new ObjectSelectorWidget(ObjectType::Operator, this);
+	elem_oper_lt->addWidget(operator_sel);
+
+	elem_family_sel = new ObjectSelectorWidget(ObjectType::OpFamily, this);
+	elem_opfam_lt->addWidget(elem_family_sel);
+
+	function_sel = new ObjectSelectorWidget(ObjectType::Function, this);
+	elem_func_lt->addWidget(function_sel);
+
+	storage_type = new PgSQLTypeWidget(this, tr("Storage Type"));
+	elements_lt->addWidget(storage_type);
+
+	elements_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^ CustomTableWidget::DuplicateButton, true, this);
+	elements_lt->addWidget(elements_tab);
 
 	elements_tab->setColumnCount(4);
 	elements_tab->setHeaderLabel(tr("Object"),0);
-	elements_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("table")),0);
+	elements_tab->setHeaderIcon(GuiUtilsNs::getIcon("table"),0);
 
 	elements_tab->setHeaderLabel(tr("Type"),1);
-	elements_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("usertype")),1);
+	elements_tab->setHeaderIcon(GuiUtilsNs::getIcon("usertype"),1);
 
-	elements_tab->setHeaderLabel(tr("Support/Strategy"),2);
+	elements_tab->setHeaderLabel(tr("Support / Strategy"),2);
 	elements_tab->setHeaderLabel(tr("Operator Family"),3);
-	elements_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("opfamily")),3);
-
-	grid=new QGridLayout;
-	grid->setContentsMargins(0,0,0,0);
-	grid->addWidget(def_class_lbl,0,2,1,1);
-	grid->addWidget(def_class_chk,0,3,1,1);
-	grid->addWidget(indexing_lbl,0,0,1,1);
-	grid->addWidget(indexing_cmb,0,1,1,1);
-	grid->addWidget(family_lbl,2,0,1,1);
-	grid->addWidget(family_sel,2,1,1,4);
-	grid->addWidget(data_type,4,0,1,5);
-	grid->addWidget(elements_grp,5,0,1,5);
-	this->setLayout(grid);
-	configureFormLayout(grid, ObjectType::OpClass);
-
-	grid=dynamic_cast<QGridLayout *>(elements_grp->layout());
-	grid->addWidget(function_sel, 1,1,1,4);
-	grid->addWidget(operator_sel, 2,1,1,4);
-	grid->addWidget(elem_family_sel, 3,1,1,4);
-	grid->addWidget(storage_type, 5,0,1,5);
-	grid->addWidget(elements_tab, 6,0,1,4);
+	elements_tab->setHeaderIcon(GuiUtilsNs::getIcon("opfamily"),3);
 
 	connect(elem_type_cmb, &QComboBox::currentIndexChanged, this, &OperatorClassWidget::selectElementType);
 	connect(elements_tab, &CustomTableWidget::s_rowAdded, this, __slot_n(this, OperatorClassWidget::handleElement));
@@ -71,29 +63,39 @@ OperatorClassWidget::OperatorClassWidget(QWidget *parent): BaseObjectWidget(pare
 	selectElementType(0);
 	indexing_cmb->addItems(IndexingType::getTypes());
 
-	setRequiredField(elements_grp);
+	layout()->removeItem(attributes_lt);
+	extra_wgts_lt->addLayout(attributes_lt);
+	configureTabbedLayout(attributes_tbw);
+
 	configureTabOrder({ indexing_cmb, def_class_chk , family_sel, data_type, elem_type_cmb,
 											operator_sel, elem_family_sel, function_sel, stg_num_sb, storage_type,
 											elements_tab });
 
-	setMinimumSize(640, 730);
+	setMinimumSize(600, 500);
 }
 
 void OperatorClassWidget::selectElementType(int elem_type)
 {
 	unsigned sel_idx=static_cast<unsigned>(elem_type);
 
-	function_lbl->setVisible(sel_idx==OperatorClassElement::FunctionElem);
-	function_sel->setVisible(sel_idx==OperatorClassElement::FunctionElem);
+	function_lbl->setVisible(sel_idx == OperatorClassElement::FunctionElem);
+	function_sel->setVisible(sel_idx == OperatorClassElement::FunctionElem);
 
-	operator_lbl->setVisible(sel_idx==OperatorClassElement::OperatorElem);
-	operator_sel->setVisible(sel_idx==OperatorClassElement::OperatorElem);
-	elem_family_lbl->setVisible(sel_idx==OperatorClassElement::OperatorElem);
-	elem_family_sel->setVisible(sel_idx==OperatorClassElement::OperatorElem);
+	operator_lbl->setVisible(sel_idx == OperatorClassElement::OperatorElem);
+	operator_sel->setVisible(sel_idx == OperatorClassElement::OperatorElem);
+	elem_family_lbl->setVisible(sel_idx == OperatorClassElement::OperatorElem);
+	elem_family_sel->setVisible(sel_idx == OperatorClassElement::OperatorElem);
 
-	storage_type->setVisible(sel_idx==OperatorClassElement::StorageElem);
-	stg_num_lbl->setVisible(sel_idx!=OperatorClassElement::StorageElem);
-	stg_num_sb->setVisible(sel_idx!=OperatorClassElement::StorageElem);
+	storage_type->setVisible(sel_idx == OperatorClassElement::StorageElem);
+	stg_num_lbl->setVisible(sel_idx != OperatorClassElement::StorageElem);
+	stg_num_sb->setVisible(sel_idx != OperatorClassElement::StorageElem);
+
+	stg_num_lbl->setText(function_lbl->isVisible() ? tr("Support") : tr("Strategy"));
+
+	if(sel_idx == OperatorClassElement::OperatorElem)
+		hspacer->changeSize(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored);
+	else
+		hspacer->changeSize(10, 10, QSizePolicy::Expanding, QSizePolicy::Fixed);
 }
 
 void OperatorClassWidget::editElement(int lin_idx)

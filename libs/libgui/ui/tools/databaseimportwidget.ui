@@ -129,7 +129,7 @@
            <height>22</height>
           </size>
          </property>
-         <widget class="QWidget" name="tab_7">
+         <widget class="QWidget" name="settings_pg">
           <attribute name="icon">
            <iconset resource="../../res/resources.qrc">
             <normaloff>:/icons/icons/config.png</normaloff>:/icons/icons/config.png</iconset>
@@ -1165,7 +1165,7 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tab_8">
+         <widget class="QWidget" name="output_pg">
           <attribute name="icon">
            <iconset resource="../../res/resources.qrc">
             <normaloff>:/icons/icons/outputpane.png</normaloff>:/icons/icons/outputpane.png</iconset>
@@ -1318,7 +1318,7 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tab_2">
+         <widget class="QWidget" name="debug_pg">
           <attribute name="icon">
            <iconset resource="../../res/resources.qrc">
             <normaloff>:/icons/icons/debug.png</normaloff>:/icons/icons/debug.png</iconset>

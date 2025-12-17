@@ -18,81 +18,34 @@
 
 #include "functionwidget.h"
 #include "guiutilsns.h"
+#include "customuistyle.h"
 
 FunctionWidget::FunctionWidget(QWidget *parent): BaseFunctionWidget(parent, ObjectType::Function)
 {
-	QGridLayout *function_grid = nullptr;
-	QVBoxLayout *vbox = nullptr;
-	QHBoxLayout *options_hbox = nullptr, *ret_methods_hbox = nullptr;
-	std::map<QString, std::vector<QWidget *> > fields_map;
-	std::map<QWidget *, std::vector<QString> > value_map;
-
 	Ui_FunctionWidget::setupUi(this);
 
-	options_hbox = new QHBoxLayout;
-	options_hbox->addWidget(window_func_chk);
-	options_hbox->addWidget(leakproof_chk);
+	CustomUiStyle::setStyleHint(CustomUiStyle::AltDefaultFrmHint, func_opts_frm);
 
-	ret_methods_hbox = new QHBoxLayout;
-	ret_methods_hbox->addWidget(simple_rb);
-	ret_methods_hbox->addWidget(set_rb);
-	ret_methods_hbox->addWidget(table_rb);
+	ret_type = GuiUtilsNs::createWidgetInParent<PgSQLTypeWidget>(0, ret_type_parent, tr("Return type"));
+	ret_type_parent->layout()->addItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Expanding));
 
-	function_grid = new QGridLayout;
-	function_grid->setContentsMargins(0, 0, 0, 0);
-	function_grid->addWidget(hline_frm, 0, 0, 1, 4);
-	function_grid->addWidget(func_type_lbl, 1, 0, 1, 1);
-	function_grid->addWidget(func_type_cmb, 1, 1, 1, 1);
-	function_grid->addWidget(return_rows_lbl, 1, 2, 1, 1);
-	function_grid->addWidget(rows_ret_spb, 1, 3, 1, 1);
-	function_grid->addWidget(behavior_lbl, 2, 0, 1, 1);
-	function_grid->addWidget(behavior_cmb, 2, 1, 1, 1);
-	function_grid->addWidget(exec_cost_lbl, 2, 2, 1, 1);
-	function_grid->addWidget(exec_cost_spb, 2, 3, 1, 1);
-	function_grid->addWidget(parallel_lbl, 3, 0, 1, 1);
-	function_grid->addWidget(parallel_cmb, 3, 1, 1, 1);
-	function_grid->addWidget(options_lbl, 3, 2, 1, 1);
-	function_grid->addLayout(options_hbox, 3, 3, 1, 1);
-	function_grid->addWidget(hline1_frm, 4, 0, 1, 4);
-	function_grid->addWidget(ret_method_lbl, 5, 0, 1, 1);
-	function_grid->addWidget(ret_table_gb, 6, 0, 1, 4);
-	function_grid->addLayout(ret_methods_hbox, 5, 1, 1, 3);
-
-	ret_type_parent = new QWidget(this);
-	ret_type = new PgSQLTypeWidget(this);
-	vbox = new QVBoxLayout;
-	vbox->addWidget(ret_type);
-	vbox->setContentsMargins(0, 0, 0, 0);
-	vbox->addSpacerItem(new QSpacerItem(5, 5, QSizePolicy::Preferred, QSizePolicy::Expanding));
-	ret_type_parent->setLayout(vbox);
-	function_grid->addWidget(ret_type_parent, function_grid->count() + 1 , 0, 1, 4);
-
-	return_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
-																			CustomTableWidget::UpdateButton, true, this);
+	return_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																																	 CustomTableWidget::AllButtons ^
+																																	 CustomTableWidget::UpdateButton, true,
+																																	 ret_table_grp);
 	return_tab->setColumnCount(2);
 	return_tab->setHeaderLabel(tr("Column"), 0);
-	return_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("column")), 0);
+	return_tab->setHeaderIcon(GuiUtilsNs::getIcon("column"), 0);
 	return_tab->setHeaderLabel(tr("Type"), 1);
-	return_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("usertype")), 1);
+	return_tab->setHeaderIcon(GuiUtilsNs::getIcon("usertype"), 1);
 
-	vbox = new QVBoxLayout;
-	vbox->addWidget(return_tab);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
-	ret_table_gb->setLayout(vbox);
-	ret_table_gb->setVisible(false);
-
-	attributes_vbox->addLayout(function_grid);
-
-	configureFormLayout(base_function_grid, ObjectType::Function);
+	ret_table_grp->setVisible(false);
 
 	func_type_cmb->addItems(FunctionType::getTypes());
 	behavior_cmb->addItems(BehaviorType::getTypes());
 	parallel_cmb->addItems(ParallelType::getTypes());
 
-	connect(simple_rb, &QRadioButton::clicked, this, &FunctionWidget::alternateReturnTypes);
-	connect(set_rb, &QRadioButton::clicked, this, &FunctionWidget::alternateReturnTypes);
-	connect(table_rb, &QRadioButton::clicked, this, &FunctionWidget::alternateReturnTypes);
-
+	connect(ret_method_cmb, &QComboBox::activated, this, &FunctionWidget::alternateReturnTypes);
 	connect(parameters_tab, &CustomTableWidget::s_rowAdded, this, &FunctionWidget::showParameterForm);
 	connect(parameters_tab, &CustomTableWidget::s_rowEdited, this, &FunctionWidget::showParameterForm);
 	connect(parameters_tab,  &CustomTableWidget::s_rowDuplicated, this, &FunctionWidget::duplicateParameter);
@@ -101,9 +54,20 @@ FunctionWidget::FunctionWidget(QWidget *parent): BaseFunctionWidget(parent, Obje
 	connect(return_tab, &CustomTableWidget::s_rowEdited, this, &FunctionWidget::showParameterForm);
 	connect(return_tab, &CustomTableWidget::s_rowDuplicated, this, &FunctionWidget::duplicateParameter);
 
+	lang_security_lt->insertWidget(lang_security_lt->count() - 1 , opts_ret_met_wgt);
+
+	QLayout *attribs_lt = attributes_tab->layout();
+	attribs_lt->addWidget(settings_grp);
+	attribs_lt->addWidget(ret_type_parent);
+	attribs_lt->addWidget(ret_table_grp);
+
+	configureTabbedLayout(func_config_twg);
 	setRequiredField(ret_method_lbl);
+
+	ret_method_cmb->setMinimumWidth(ret_method_lbl->width());
+
 	configureTabOrder();
-	setMinimumSize(650, 700);
+	setMinimumSize(650, 500);
 }
 
 void FunctionWidget::handleParameter(Parameter param, int result)
@@ -153,18 +117,18 @@ void FunctionWidget::setAttributes(DatabaseModel *model, OperationList *op_list,
 		parallel_cmb->setCurrentIndex(parallel_cmb->findText(~func->getParallelType()));
 
 		if(func->isReturnSetOf())
-			set_rb->setChecked(true);
+			ret_method_cmb->setCurrentIndex(SetOfReturn);
 		else if(func->isReturnTable())
-			table_rb->setChecked(true);
+			ret_method_cmb->setCurrentIndex(TableReturn);
 		else
-			simple_rb->setChecked(true);
+			ret_method_cmb->setCurrentIndex(SimpleReturn);
 
 		count = func->getReturnedTableColumnCount();
 		return_tab->blockSignals(true);
 
 		if(count > 0)
 		{
-			ret_table_gb->setVisible(true);
+			ret_table_grp->setVisible(true);
 			ret_type_parent->setVisible(false);
 
 			for(i = 0; i < count; i++)
@@ -194,10 +158,8 @@ void FunctionWidget::setAttributes(DatabaseModel *model, OperationList *op_list,
 
 void FunctionWidget::alternateReturnTypes()
 {
-	QObject *obj_sender = sender();
-	bool is_ret_table = obj_sender == table_rb;
-
-	ret_table_gb->setVisible(is_ret_table);
+	bool is_ret_table = (ret_method_cmb->currentIndex() == TableReturn);
+	ret_table_grp->setVisible(is_ret_table);
 	ret_type_parent->setVisible(!is_ret_table);
 }
 
@@ -341,10 +303,12 @@ void FunctionWidget::applyConfiguration()
 		func->setBehaviorType(behavior_cmb->currentText());
 		func->setParalleType(parallel_cmb->currentText());
 
-		if(simple_rb->isChecked() || set_rb->isChecked())
+		int curr_ret_met = ret_method_cmb->currentIndex();
+
+		if(curr_ret_met == SimpleReturn || curr_ret_met == SetOfReturn)
 		{
 			func->setReturnType(ret_type->getPgSQLType());
-			func->setReturnSetOf(set_rb->isChecked());
+			func->setReturnSetOf(curr_ret_met == SetOfReturn);
 		}
 		else
 		{

@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>520</width>
+    <width>600</width>
     <height>400</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>520</width>
-    <height>380</height>
+    <width>600</width>
+    <height>400</height>
    </size>
   </property>
   <property name="windowTitle">
    <string/>
   </property>
-  <layout class="QGridLayout" name="policy_grid">
+  <layout class="QVBoxLayout" name="policy_lt">
    <property name="leftMargin">
     <number>5</number>
    </property>
@@ -32,90 +32,57 @@
    <property name="bottomMargin">
     <number>5</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="0" column="0">
-    <widget class="QGroupBox" name="basics_grp">
-     <property name="title">
-      <string>&amp;Basics</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <property name="leftMargin">
-       <number>5</number>
-      </property>
-      <property name="topMargin">
-       <number>5</number>
-      </property>
-      <property name="rightMargin">
-       <number>5</number>
-      </property>
-      <property name="bottomMargin">
-       <number>5</number>
-      </property>
-      <property name="spacing">
-       <number>5</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="command_lbl">
-        <property name="text">
-         <string>Command:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QCheckBox" name="permissive_chk">
-        <property name="text">
-         <string>Permissive</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="command_cmb">
-        <property name="iconSize">
-         <size>
-          <width>28</width>
-          <height>28</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>200</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="0" column="2">
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Policy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>10</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
+   <item>
+    <layout class="QHBoxLayout" name="command_mode_lt">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="command_lbl">
+         <property name="text">
+          <string>Command</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="command_cmb">
+         <property name="iconSize">
+          <size>
+           <width>28</width>
+           <height>28</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Mode</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="mode_cmb">
+         <item>
+          <property name="text">
+           <string>Restrictive</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Permissive</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </item>
-   <item row="1" column="0">
+   <item>
     <widget class="QTabWidget" name="attribs_tbw">
      <property name="currentIndex">
       <number>0</number>
@@ -126,27 +93,24 @@
        <height>22</height>
       </size>
      </property>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="roles_pg">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/role.png</normaloff>:/icons/icons/role.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Roles</string>
+       <string>Roles</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="expressions_pg">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/validatesch.png</normaloff>:/icons/icons/validatesch.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>E&amp;xpressions</string>
+       <string>Expressions</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <property name="spacing">
-        <number>5</number>
-       </property>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
        <property name="leftMargin">
         <number>5</number>
        </property>
@@ -160,38 +124,46 @@
         <number>5</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>USING:</string>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>USING</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QWidget" name="using_wgt" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
-        <widget class="QWidget" name="using_wgt" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>CHECK:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="check_wgt" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>CHECK</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QWidget" name="check_wgt" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -201,7 +173,6 @@
  </widget>
  <tabstops>
   <tabstop>command_cmb</tabstop>
-  <tabstop>permissive_chk</tabstop>
   <tabstop>attribs_tbw</tabstop>
  </tabstops>
  <resources>

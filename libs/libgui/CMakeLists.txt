@@ -116,7 +116,6 @@ set(SOURCES
     src/widgets/modelwidget.cpp src/widgets/modelwidget.h
     src/widgets/newobjectoverlaywidget.cpp src/widgets/newobjectoverlaywidget.h
     src/widgets/numberedtexteditor.cpp src/widgets/numberedtexteditor.h
-    src/widgets/objectdepsrefswidget.cpp src/widgets/objectdepsrefswidget.h
     src/widgets/objectrenamewidget.cpp src/widgets/objectrenamewidget.h
     src/widgets/objectsearchwidget.cpp src/widgets/objectsearchwidget.h
     src/widgets/objectselectorwidget.cpp src/widgets/objectselectorwidget.h
@@ -125,11 +124,13 @@ set(SOURCES
     src/widgets/operationlistwidget.cpp src/widgets/operationlistwidget.h
     src/widgets/sceneinfowidget.cpp src/widgets/sceneinfowidget.h
     src/widgets/searchreplacewidget.cpp src/widgets/searchreplacewidget.h
-    src/widgets/sourcecodewidget.cpp src/widgets/sourcecodewidget.h
+
+    src/widgets/codepreviewwidget.cpp src/widgets/codepreviewwidget.h
     src/widgets/tabledatawidget.cpp src/widgets/tabledatawidget.h
     src/widgets/taskprogresswidget.cpp src/widgets/taskprogresswidget.h
     src/widgets/updatenotifierwidget.cpp src/widgets/updatenotifierwidget.h
-    src/widgets/welcomewidget.cpp src/widgets/welcomewidget.h)
+    src/widgets/welcomewidget.cpp src/widgets/welcomewidget.h
+    src/widgets/objectassociationswidget.cpp src/widgets/objectassociationswidget.h)
 
 set(FORMS
     ui/baseform.ui
@@ -209,7 +210,8 @@ set(FORMS
     ui/widgets/objectsearchwidget.ui
     ui/widgets/objecttypeslistwidget.ui
     ui/widgets/searchreplacewidget.ui
-    ui/widgets/sourcecodewidget.ui
+
+    ui/widgets/codepreviewwidget.ui
     ui/widgets/fileselectorwidget.ui
     ui/widgets/modeloverviewwidget.ui
     ui/widgets/objectselectorwidget.ui
@@ -222,13 +224,13 @@ set(FORMS
     ui/widgets/taskprogresswidget.ui
     ui/widgets/csvloadwidget.ui
     ui/widgets/layerswidget.ui
-    ui/widgets/objectdepsrefswidget.ui
     ui/widgets/operationlistwidget.ui
     ui/widgets/updatenotifierwidget.ui
     ui/widgets/customsqlwidget.ui
     ui/widgets/modelnavigationwidget.ui
     ui/widgets/sceneinfowidget.ui
-    ui/widgets/welcomewidget.ui)
+    ui/widgets/welcomewidget.ui
+    ui/widgets/objectassociationswidget.ui)
 
 set(RESOURCES res/resources.qrc)
 

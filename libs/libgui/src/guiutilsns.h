@@ -35,6 +35,9 @@
 #include "csvdocument.h"
 #include "settings/appearanceconfigwidget.h"
 #include <QMargins>
+#include <qboxlayout.h>
+#include <qmargins.h>
+#include <qwidget.h>
 
 namespace GuiUtilsNs {
 	/*! \brief WidgetCornerId used by resizeFloatingWidget() to determine
@@ -52,6 +55,8 @@ namespace GuiUtilsNs {
 		AllCorners = 31
 	};
 
+	static constexpr char FontAdjustedProp[] { "font-adjusted" };
+
 	static constexpr int LtMargin = 5,
 	LtSpacing = 5;
 
@@ -64,18 +69,18 @@ namespace GuiUtilsNs {
 		HugeFontFactor
 	};
 
-	extern __libgui void configureWidgetFont(QWidget *widget, FontFactorId factor_id);
-	extern __libgui void __configureWidgetFont(QWidget *widget, double factor);
-	extern __libgui void configureWidgetsFont(const QWidgetList widgets, FontFactorId factor_id);
+	extern __libgui void configureWidgetFont(QWidget *widget, FontFactorId factor_id, bool bold = false, bool italic = false);
+	extern __libgui void __configureWidgetFont(QWidget *widget, double factor, bool bold = false, bool italic = false);
+	extern __libgui void configureWidgetsFont(const QWidgetList widgets, FontFactorId factor_id, bool bold = false, bool italic = false);
 
-	/*! \brief Creates an item in the specified QTreeWidget instance.
+	/*! \brief Creates an item in the specified QTreeWidget instance with the specified text and ico.
 		The new item is automatically inserted on the QTreeWidget object.
 		Setting word_wrap will create a QLabel instance into item's and assign the text to it. */
-	extern __libgui QTreeWidgetItem *createOutputTreeItem(QTreeWidget *output_trw, const QString &text, const QPixmap &ico=QPixmap(),
+	extern __libgui QTreeWidgetItem *createOutputTreeItem(QTreeWidget *output_trw, const QString &text, const QIcon &ico=QIcon(),
 																													QTreeWidgetItem *parent=nullptr, bool expand_item=true, bool word_wrap=false);
 
 	//! \brief Creates an item in the specified QListWidget instance with the specified text and ico
-	extern __libgui void createOutputListItem(QListWidget *output_lst, const QString &text, const QPixmap &ico=QPixmap(), bool is_formated=true);
+	extern __libgui void createOutputListItem(QListWidget *output_lst, const QString &text, const QIcon &ico=QIcon(), bool is_formated=true);
 
 	/*! \brief Toggles the SQL code for the object. This function also toggles the SQL of the references
 		related to the input object */
@@ -96,6 +101,24 @@ namespace GuiUtilsNs {
 	 *  and constraints have sub types being for relationships the Relationship::RelType enum and
 	 *  constraints the class ConstraintType */
 	extern __libgui QString getIconPath(ObjectType obj_type, int sub_type = -1);
+
+	//! \brief Returns an instance of QIcon of the provided icon name, in the icons resource (.qrc)
+	extern __libgui QIcon getIcon(const QString &icon_name);
+
+	/*! \brief Returns a QIcon instance containing the the icon of the provided object type
+	 *  The parameter sub_type is used to retrive the sub type icon. Currently only relationships
+	 *  and constraints have sub types being for relationships the Relationship::RelType enum and
+	 *  constraints the class ConstraintType */
+	extern __libgui QIcon getIcon(ObjectType obj_type, int sub_type = -1);
+
+	//! \brief Returns an instance of QPixmap of the provided icon name, in the icons resource (.qrc)
+	extern __libgui QPixmap getPixmap(const QString &icon_name);
+
+	/*! \brief Returns a QPixmap instance containing the the icon of the provided object type
+	 *  The parameter sub_type is used to retrive the sub type icon. Currently only relationships
+	 *  and constraints have sub types being for relationships the Relationship::RelType enum and
+	 *  constraints the class ConstraintType */
+	extern __libgui QPixmap getPixmap(ObjectType obj_type, int sub_type = -1);
 
 	//! \brief Resizes the provided widget considering font dpi changes as well screen size
 	extern __libgui void resizeWidget(QWidget *widget);
@@ -214,10 +237,66 @@ namespace GuiUtilsNs {
 		}
 	}
 
+	/*! \brief Creates an empty layout manager.
+	 *  Custom margins and spacing values can be specified, as well as the
+	 *  layout class constructor arguments (generally a parent widget) */
+	template<class LtClass, typename ...CtorArgs,
+					 std::enable_if_t<std::is_base_of_v<QLayout, LtClass>, bool> = true>
+	LtClass *createLayout(QMargins lt_margins, int lt_spacing, CtorArgs... new_lt_ctor_args)
+	{
+		LtClass *layout { new LtClass(new_lt_ctor_args...) };
+		layout->setContentsMargins(lt_margins);
+		layout->setSpacing(lt_spacing);
+		return layout;
+	}
+
+	/*! \brief Creates an empty layout manager.
+	 *  Custom margins (the same for all edges) and spacing values can be specified,
+	 *  as well as the layout class constructor arguments (generally a parent widget) */
+	template<class LtClass, typename ...CtorArgs,
+					 std::enable_if_t<std::is_base_of_v<QLayout, LtClass>, bool> = true>
+	LtClass *createLayout(int lt_margins, int lt_spacing, CtorArgs... new_lt_ctor_args)
+	{
+		return createLayout<LtClass>({ lt_margins, lt_margins, lt_margins, lt_margins },
+																 lt_spacing, new_lt_ctor_args...);
+	}
+
+	//! \brief Creates a QVBoxLayout with the provided margins, spacing and parent widget
+	extern __libgui QVBoxLayout *createVBoxLayout(int lt_margins,
+																								int lt_spacing = LtSpacing,
+																								QWidget *parent = nullptr);
+
+	extern __libgui QVBoxLayout *createVBoxLayout(QMargins lt_margins,
+																								int lt_spacing = LtSpacing,
+																								QWidget *parent = nullptr);
+
+	//! \brief Creates a QHBoxLayout with the provided margins, spacing and parent widget
+	extern __libgui QHBoxLayout *createHBoxLayout(int lt_margins,
+																								int lt_spacing = LtSpacing,
+																								QWidget *parent = nullptr);
+
+	extern __libgui QHBoxLayout *createHBoxLayout(QMargins lt_margins,
+																								int lt_spacing = LtSpacing,
+																								QWidget *parent = nullptr);
+
+	//! \brief Creates a QGridLayout with the provided margins, spacing and parent widget
+	extern __libgui QGridLayout *createGridLayout(int lt_margins,
+																								int lt_spacing = LtSpacing,
+																								QWidget *parent = nullptr);
+
+	extern __libgui QGridLayout *createGridLayout(QMargins lt_margins,
+																								int lt_spacing = LtSpacing,
+																								QWidget *parent = nullptr);
+
 	/*! \brief Creates a wiget in a parent. If the parent has no layout configured then
-	 * this function also creates a layout for the parent and puts the new widget there.
-	 * The user can specify the layout margins. If no parent is provided the object is an
-	 * orphan one, meaning the user needs to take care of its destruction */
+	 * this function also creates a vertical layout for the parent and puts the new widget there.
+	 *
+	 * If the parent already has a box layout (vertical or horizontal) then the method puts the
+	 * widget at the end of the layout.
+	 *
+	 * The user can specify the layout margins if the layout need to be created.
+	 * If no parent is provided the object is an orphan one, meaning the user needs to
+	 * take care of its allocations in a layout as well as its destruction. */
 	template<class WgtClass, typename ...CtorArgs,
 					 std::enable_if_t<std::is_base_of_v<QWidget, WgtClass>, bool> = true>
 	WgtClass *createWidgetInParent(int lt_margins, CtorArgs... new_wgt_ctor_args)
@@ -225,26 +304,21 @@ namespace GuiUtilsNs {
 		WgtClass *new_wgt = new WgtClass(new_wgt_ctor_args...);
 		QWidget *parent = qobject_cast<QWidget *>(new_wgt->parent());
 
-		if(parent && !parent->layout())
+		if(parent)
 		{
-			QVBoxLayout *vbox = new QVBoxLayout(parent);
-			vbox->addWidget(new_wgt);
-			vbox->setContentsMargins(lt_margins, lt_margins, lt_margins, lt_margins);
-			vbox->setSpacing(LtSpacing);
+			QLayout *layout = parent->layout();
+
+			if(!layout)
+			{
+				QVBoxLayout *vbox = createLayout<QVBoxLayout>(lt_margins, LtSpacing, parent);
+				vbox->addWidget(new_wgt);
+			}
+			// We add the item into widget only if the parent's layout is QBoxLayout
+			else if(qobject_cast<QBoxLayout *>(layout))
+				layout->addWidget(new_wgt);
 		}
 
 		return new_wgt;
-	}
-
-	/*! \brief Creates a wiget in a parent. If the parent has no layout configured then
-	 * this function also creates a layout for the parent and puts the new widget there.
-	 * This version, creates the layout in parent with no margins. If no parent is provided
-	 * the object is an orphan one, meaning the user needs to take care of its destruction */
-	template<class WgtClass, typename ...CtorArgs,
-					 std::enable_if_t<std::is_base_of_v<QWidget, WgtClass>, bool> = true>
-	WgtClass *createWidgetInParent(CtorArgs... new_wgt_ctor_args)
-	{
-		return createWidgetInParent<WgtClass>(0, new_wgt_ctor_args...);
 	}
 
 	/*! \brief Creates a NumberedTextEditor instance automatically assigning it to 'parent'.
@@ -252,6 +326,15 @@ namespace GuiUtilsNs {
 	 * the function will do nothing. If parent is null creates an orphan object which means the
 	 * user must take care of the destruction of the object */
 	extern __libgui NumberedTextEditor *createNumberedTextEditor(QWidget *parent, bool act_btns_enabled = false, qreal custom_fnt_size = 0);
+
+	extern __libgui void configureBuddyWidget(QLayout *lt);
+
+	//! \brief Configures all buddy labels in the provided widget
+	extern __libgui void configureBuddyWidgets(QWidget *widget);
+
+	//! \brief Creates a layout that contains a label and a widget arranged vertically
+	extern __libgui QLayout *createBuddyWidgetLayout(QLabel *label, QWidget *widget, QWidget *append_widget = nullptr,
+																										 int margin = 0, int spacing = 0);
 }
 
 #endif

@@ -28,8 +28,8 @@ DataHandlingForm::DataHandlingForm(QWidget * parent, Qt::WindowFlags f): QDialog
 	setupUi(this);
 	setWindowFlags(Qt::Dialog | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
 
-	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, db_info_frm);
-	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator_ln_2);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint,
+															{ db_info_frm, separator_ln_2 });
 
 	curr_grid_wgt = nullptr;
 
@@ -301,7 +301,7 @@ DataGridWidget *DataHandlingForm::addDataGrid(const QString &schema, const QStri
 
 	data_grid_wgt->setObjectName(data_grid_name);
 	int tab_idx = data_grids_tbw->addTab(data_grid_wgt,
-																			 QIcon(GuiUtilsNs::getIconPath(obj_type)),
+																			 GuiUtilsNs::getIcon(obj_type),
 																			 table);
 
 	data_grids_tbw->setCurrentIndex(tab_idx);
@@ -334,6 +334,7 @@ void DataHandlingForm::duplicateDataGrid(DataGridWidget *grid)
 		// Setting the filter tab visibility
 		filter_tb->setChecked(toggle_filter);
 		data_grid_wgt->limit_spb->setValue(grid->limit_spb->value());
+		data_grid_wgt->limit_chk->setChecked(grid->limit_chk->isChecked());
 
 		// Setting the same order by columns
 		for(int row = 0; row < grid->ord_columns_lst->count(); row++)
@@ -438,7 +439,7 @@ void DataHandlingForm::listObjects(QComboBox *combo, std::vector<ObjectType> obj
 
 			for(; idx < count; idx++)
 			{
-				combo->setItemIcon(idx, QPixmap(GuiUtilsNs::getIconPath(obj_type)));
+				combo->setItemIcon(idx, GuiUtilsNs::getIcon(obj_type));
 				combo->setItemData(idx, enum_t(obj_type));
 			}
 

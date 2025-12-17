@@ -22,56 +22,55 @@
 
 RoleWidget::RoleWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Role)
 {
-	CustomTableWidget *obj_tab=nullptr;
-	QGridLayout *grid=nullptr;
-	QFrame *frame=nullptr;
+	CustomTableWidget *obj_tab = nullptr;
+	QGridLayout *grid = nullptr;
+	QFrame *frame = nullptr;
 	std::map<QString, std::vector<QWidget *> > fields_map;
 	unsigned i;
 
 	Ui_RoleWidget::setupUi(this);
-	configureFormLayout(role_grid, ObjectType::Role);
 
-	object_selection_wgt=new ModelObjectsWidget(true);
+	object_selection_wgt = new ModelObjectsWidget(true);
 
-	frame=generateInformationFrame(tr("Assigning <strong><em>-1</em></strong> to <strong><em>Connections</em></strong> creates a role without connection limit.<br/>\
-										  Unchecking <strong><em>Validity</em></strong> creates an role that never expires."));
+	frame = generateInformationFrame(tr("Assigning <strong><em>-1</em></strong> to <strong><em>Connections</em></strong> creates a role without connection limit.<br/>\
+											Unchecking <strong><em>Validity</em></strong> creates an role that never expires."));
 
-	role_grid->addWidget(frame, role_grid->count()+1, 0, 1, 4);
-	frame->setParent(this);
+	attributes_lt->addWidget(frame);
+	frame->setParent(attributes_tab);
 
 	connect(validity_chk, &QCheckBox::toggled, validity_dte, &QDateTimeEdit::setEnabled);
 	connect(members_twg, &QTabWidget::currentChanged, this, &RoleWidget::configureRoleSelection);
 
 	//Alocation of the member role tables
-	for(i=0; i < 3; i++)
+	for(auto &tab : { members_tab, adm_members_tab, members_of_tab })
 	{
-		obj_tab=new CustomTableWidget(CustomTableWidget::AllButtons ^
-																	(CustomTableWidget::UpdateButton | CustomTableWidget::DuplicateButton), true, this);
-		members_tab[i]=obj_tab;
+		obj_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(
+								GuiUtilsNs::LtMargin,
+								CustomTableWidget::AllButtons ^
+								(CustomTableWidget::UpdateButton | CustomTableWidget::DuplicateButton),
+								true, tab);
 
+		member_roles_tabs[tab] = obj_tab;
 		obj_tab->setColumnCount(4);
 
-		obj_tab->setHeaderLabel(tr("Role"),0);
-		obj_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("role")),0);
+		obj_tab->setHeaderLabel(tr("Role"), 0);
+		obj_tab->setHeaderIcon(GuiUtilsNs::getIcon("role"), 0);
 
-		obj_tab->setHeaderLabel(tr("Validity"),1);
-		obj_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("validity")),1);
+		obj_tab->setHeaderLabel(tr("Validity"), 1);
+		obj_tab->setHeaderIcon(GuiUtilsNs::getIcon("validity"), 1);
 
-		obj_tab->setHeaderLabel(tr("Members"),2);
-		obj_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("role")),2);
+		obj_tab->setHeaderLabel(tr("Members"), 2);
+		obj_tab->setHeaderIcon(GuiUtilsNs::getIcon("role"), 2);
 
-		obj_tab->setHeaderLabel(tr("Admin option"),3);
-		obj_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("role")),3);
-
-		grid=new QGridLayout;
-		grid->addWidget(obj_tab,0,0,1,1);
-		grid->setContentsMargins(GuiUtilsNs::LtMargins);
-		members_twg->widget(i)->setLayout(grid);
+		obj_tab->setHeaderLabel(tr("Admin option"), 3);
+		obj_tab->setHeaderIcon(GuiUtilsNs::getIcon("role"), 3);
 	}
+
+	configureTabbedLayout(members_twg);
 
 	connect(object_selection_wgt, qOverload<BaseObject *, bool>(&ModelObjectsWidget::s_visibilityChanged), this, &RoleWidget::showSelectedRoleData);
 
-	setMinimumSize(580, 550);
+	setMinimumSize(600, 320);
 }
 
 RoleWidget::~RoleWidget()
@@ -81,13 +80,18 @@ RoleWidget::~RoleWidget()
 
 void RoleWidget::configureRoleSelection()
 {
+	QWidget *curr_tab = members_twg->currentWidget();
+
+	if(!member_roles_tabs.count(curr_tab))
+		return;
+
 	//Disconnects all signals from the member role tables
-	for(auto & memb_tb : members_tab)
-		disconnect(memb_tb, nullptr,this, nullptr);
+	for(auto &[owner_tab, table_wgt] : member_roles_tabs)
+		disconnect(table_wgt, nullptr, this, nullptr);
 
 	//Connects the signal/slots only on the current table
-	connect(members_tab[members_twg->currentIndex()], &CustomTableWidget::s_rowAdded, this, &RoleWidget::selectMemberRole);
-	connect(members_tab[members_twg->currentIndex()], &CustomTableWidget::s_rowEdited, this, &RoleWidget::selectMemberRole);
+	connect(member_roles_tabs[curr_tab], &CustomTableWidget::s_rowAdded, this, &RoleWidget::selectMemberRole);
+	connect(member_roles_tabs[curr_tab], &CustomTableWidget::s_rowEdited, this, &RoleWidget::selectMemberRole);
 }
 
 void RoleWidget::selectMemberRole()
@@ -102,7 +106,7 @@ void RoleWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Rol
 	if(role)
 	{
 		conn_limit_sb->setValue(role->getConnectionLimit());
-		passwd_edt->setText(role->getPassword());
+		password_edt->setText(role->getPassword());
 
 		validity_chk->setChecked(!role->getValidity().isEmpty());
 		validity_dte->setDateTime(QDateTime::fromString(role->getValidity(), "yyyy-MM-dd hh:mm:ss"));
@@ -122,55 +126,63 @@ void RoleWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Rol
 	configureRoleSelection();
 }
 
-void RoleWidget::showRoleData(Role *role, unsigned table_id, unsigned row)
+void RoleWidget::showRoleData(Role *role, CustomTableWidget *role_tab, unsigned row)
 {
-	if(role)
+	if(!role || !role_tab)
+		throw Exception(ErrorCode::OprNotAllocatedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
+
+	QStringList rl_names;
+	Role *aux_role = nullptr;
+
+	role_tab->setRowData(QVariant::fromValue(reinterpret_cast<void *>(role)), row);
+	role_tab->setCellText(role->getName(), row, 0);
+	role_tab->setCellText(role->getValidity(), row, 1);
+
+	for(auto &type_id : { Role::MemberRole, Role::AdminRole })
 	{
-		QStringList rl_names;
-		Role *aux_role=nullptr;
-
-		if(table_id > 3)
-			throw Exception(ErrorCode::RefObjectInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-		members_tab[table_id]->setRowData(QVariant::fromValue(reinterpret_cast<void *>(role)), row);
-		members_tab[table_id]->setCellText(role->getName(), row, 0);
-		members_tab[table_id]->setCellText(role->getValidity(), row, 1);
-
-		for(auto type_id : { Role::MemberRole, Role::AdminRole })
+		for(unsigned rl_id = 0; rl_id < role->getRoleCount(type_id); rl_id++)
 		{
-			for(unsigned i=0; i < role->getRoleCount(type_id); i++)
-			{
-				aux_role = role->getRole(type_id, i);
-				rl_names.append(aux_role->getName());
-			}
-
-			members_tab[table_id]->setCellText(rl_names.join(", "), row, 2 + type_id);
-			rl_names.clear();
+			aux_role = role->getRole(type_id, rl_id);
+			rl_names.append(aux_role->getName());
 		}
+
+		role_tab->setCellText(rl_names.join(", "), row, 2 + type_id);
+		rl_names.clear();
 	}
+}
+
+CustomTableWidget *RoleWidget::getRolesTable(Role::RoleType rl_type)
+{
+	QWidget *tab = (rl_type == Role::MemberRole ? members_tab : adm_members_tab);
+
+	if(!member_roles_tabs.count(tab))
+		return nullptr;
+
+	return member_roles_tabs[tab];
 }
 
 void RoleWidget::fillMembersTable()
 {
-	if(this->object)
+	if(!this->object)
+		return;
+
+	Role *aux_role = nullptr, *role = dynamic_cast<Role *>(this->object);
+	CustomTableWidget *role_tab = nullptr;
+
+	for(auto &rl_type : { Role::MemberRole, Role::AdminRole })
 	{
-		Role *aux_role=nullptr, *role=nullptr;
-		role=dynamic_cast<Role *>(this->object);
+		role_tab = getRolesTable(rl_type);
+		role_tab->blockSignals(true);
 
-		for(auto type_id : { Role::MemberRole, Role::AdminRole })
+		for(unsigned rl_id = 0; rl_id < role->getRoleCount(rl_type); rl_id++)
 		{
-			members_tab[type_id]->blockSignals(true);
-
-			for(unsigned i=0; i < role->getRoleCount(type_id); i++)
-			{
-				aux_role=role->getRole(type_id, i);
-				members_tab[type_id]->addRow();
-				showRoleData(aux_role, type_id, i);
-			}
-
-			members_tab[type_id]->blockSignals(false);
-			members_tab[type_id]->clearSelection();
+			aux_role = role->getRole(rl_type, rl_id);
+			role_tab->addRow();
+			showRoleData(aux_role, role_tab, rl_id);
 		}
+
+		role_tab->blockSignals(false);
+		role_tab->clearSelection();
 	}
 }
 
@@ -179,30 +191,32 @@ void RoleWidget::showSelectedRoleData()
 	try
 	{
 		unsigned idx_tab = 0;
-		int lin = 0, idx_lin = -1;
-		BaseObject *obj_sel=nullptr;
+		int row = 0, idx_row = -1;
+		BaseObject *obj_sel = nullptr;
+		CustomTableWidget *role_tab = member_roles_tabs[members_twg->currentWidget()];
+		Role::RoleType rl_type = members_twg->currentWidget() == members_tab ? Role::MemberRole : Role::AdminRole;
 
-					 //Get the selected role
-		obj_sel=object_selection_wgt->getSelectedObject();
+		//Get the selected role
+		obj_sel = object_selection_wgt->getSelectedObject();
 
-					 //Gets the index of the table where the role data is displayed
-		idx_tab=members_twg->currentIndex();
-		lin=members_tab[idx_tab]->getSelectedRow();
+		//Gets the index of the table where the role data is displayed
+		idx_tab = members_twg->currentIndex();
+		row = role_tab->getSelectedRow();
 
 		if(obj_sel)
-			idx_lin=members_tab[idx_tab]->getRowIndex(QVariant::fromValue<void *>(dynamic_cast<void *>(obj_sel)));
+			idx_row = role_tab->getRowIndex(QVariant::fromValue<void *>(dynamic_cast<void *>(obj_sel)));
 
-		if(obj_sel && idx_lin < 0)
-			showRoleData(dynamic_cast<Role *>(obj_sel), idx_tab, lin);
+		if(obj_sel && idx_row < 0)
+			showRoleData(dynamic_cast<Role *>(obj_sel), role_tab, row);
 		else
 		{
 			/* If the current row does not has a value indicates that it is recently added and does not have
 				 data, in this case it will be removed */
-			if(!members_tab[idx_tab]->getRowData(lin).value<void *>())
-				members_tab[idx_tab]->removeRow(lin);
+			if(!role_tab->getRowData(row).value<void *>())
+				role_tab->removeRow(row);
 
 			//Raises an error if the role already is in the table
-			if(obj_sel && idx_lin >= 0)
+			if(obj_sel && idx_row >= 0)
 			{
 				Messagebox::error(Exception::getErrorMessage(ErrorCode::InsDuplicatedRole).arg(obj_sel->getName(), name_edt->text()),
 													ErrorCode::InsDuplicatedRole, PGM_FUNC, PGM_FILE, PGM_LINE);
@@ -225,7 +239,7 @@ void RoleWidget::applyConfiguration()
 
 		role=dynamic_cast<Role *>(this->object);
 		role->setConnectionLimit(conn_limit_sb->value());
-		role->setPassword(passwd_edt->text());
+		role->setPassword(password_edt->text());
 
 		if(validity_chk->isChecked())
 			role->setValidity(validity_dte->dateTime().toString("yyyy-MM-dd hh:mm"));
@@ -240,22 +254,27 @@ void RoleWidget::applyConfiguration()
 		role->setOption(Role::OpReplication, can_replicate_chk->isChecked());
 		role->setOption(Role::OpBypassRls, bypass_rls_chk->isChecked());
 
+		CustomTableWidget *role_tab = nullptr;
+
 		for(auto rl_type : { Role::MemberRole, Role::AdminRole })
 		{
+			role_tab = getRolesTable(rl_type);
 			role->removeRoles(rl_type);
 
-			for(unsigned i = 0; i < members_tab[rl_type]->getRowCount(); i++)
+			for(unsigned rl_id = 0; rl_id < role_tab->getRowCount(); rl_id++)
 			{
-				aux_role=reinterpret_cast<Role *>(members_tab[rl_type]->getRowData(i).value<void *>());
+				aux_role = reinterpret_cast<Role *>(role_tab->getRowData(rl_id).value<void *>());
 				role->addRole(rl_type, aux_role);
 			}
 		}
 
 		/* Special case for Member Of tab, here we try to add the role being edited
 		 * as a member of the the roles in the table */
-		for(unsigned i = 0; i < members_tab[2]->getRowCount(); i++)
+		role_tab = member_roles_tabs[members_of_tab];
+
+		for(unsigned rl_id = 0; rl_id < role_tab->getRowCount(); rl_id++)
 		{
-			aux_role = reinterpret_cast<Role *>(members_tab[2]->getRowData(i).value<void *>());
+			aux_role = reinterpret_cast<Role *>(role_tab->getRowData(rl_id).value<void *>());
 
 			/* Raises an error if the role to be added is the postgres one
 			 * For now, there is no way to assign roles direct to the postgres role due to

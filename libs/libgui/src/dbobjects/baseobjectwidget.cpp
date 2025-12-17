@@ -17,6 +17,7 @@
 */
 
 #include "baseobjectwidget.h"
+#include "baseobject.h"
 #include "customuistyle.h"
 #include "messagebox.h"
 #include "permissionwidget.h"
@@ -25,67 +26,42 @@
 #include "settings/generalconfigwidget.h"
 #include "utilsns.h"
 #include "dbobjects/pgsqltypewidget.h"
-#include "guiutilsns.h"
 
 BaseObjectWidget::BaseObjectWidget(QWidget *parent, ObjectType obj_type): QWidget(parent)
 {
-	QSpacerItem *spacer=nullptr;
-
 	setWindowTitle("");
 	setupUi(this);
 
-	handled_obj_type=obj_type;
-	operation_count=0;
-	new_object=false;
-	model=nullptr;
-	table=nullptr;
-	relationship=nullptr;
-	prev_schema=nullptr;
-	op_list=nullptr;
-	object=nullptr;
-	object_px=DNaN;
-	object_py=DNaN;
-	schema_sel=nullptr;
-	owner_sel=nullptr;
-	tablespace_sel=nullptr;
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, protected_obj_frm);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, id_icon_frm);
+
+	handled_obj_type = obj_type;
+	operation_count = 0;
+	new_object = false;
+	model = nullptr;
+	table = nullptr;
+	relationship = nullptr;
+	prev_schema = nullptr;
+	op_list = nullptr;
+	object = nullptr;
+	object_px = DNaN;
+	object_py = DNaN;
+	schema_sel = nullptr;
+	owner_sel = nullptr;
+	tablespace_sel = nullptr;
+	obj_assoc_wgt = nullptr;
+	sql_preview_pg = nullptr;
 	object_protected = false;
 
 	connect(edt_perms_tb, &QPushButton::clicked, this, &BaseObjectWidget::editPermissions);
 	connect(append_sql_tb, &QPushButton::clicked, this, &BaseObjectWidget::editCustomSQL);
 
-	schema_sel=new ObjectSelectorWidget(ObjectType::Schema, this);
-	collation_sel=new ObjectSelectorWidget(ObjectType::Collation, this);
-	tablespace_sel=new ObjectSelectorWidget(ObjectType::Tablespace, this);
-	owner_sel=new ObjectSelectorWidget(ObjectType::Role, this);
+	schema_sel = new ObjectSelectorWidget(ObjectType::Schema, this);
+	collation_sel = new ObjectSelectorWidget(ObjectType::Collation, this);
+	tablespace_sel = new ObjectSelectorWidget(ObjectType::Tablespace, this);
+	owner_sel = new ObjectSelectorWidget(ObjectType::Role, this);
 
-	baseobject_grid = new QGridLayout;
-	baseobject_grid->setObjectName("objetobase_grid");
-	baseobject_grid->addWidget(protected_obj_frm, 0, 0, 1, 0);
-	baseobject_grid->addWidget(name_lbl, 1, 0, 1, 1);
-	baseobject_grid->addWidget(name_edt, 1, 1, 1, 1);
-	baseobject_grid->addWidget(id_ico_wgt, 1, 2, 1, 3);
-	baseobject_grid->addWidget(logical_name_lbl, 2, 0, 1, 1);
-	baseobject_grid->addWidget(alias_edt, 2, 1, 1, 1);
-	baseobject_grid->addWidget(schema_lbl, 4, 0, 1, 1);
-	baseobject_grid->addWidget(schema_sel, 4, 1, 1, 4);
-	baseobject_grid->addWidget(collation_lbl, 5, 0, 1, 1);
-	baseobject_grid->addWidget(collation_sel, 5, 1, 1, 4);
-	baseobject_grid->addWidget(tablespace_lbl, 6, 0, 1, 1);
-	baseobject_grid->addWidget(tablespace_sel, 6, 1, 1, 4);
-	baseobject_grid->addWidget(owner_lbl, 7, 0, 1, 1);
-	baseobject_grid->addWidget(owner_sel, 7, 1, 1, 4);
-	baseobject_grid->addWidget(comment_lbl, 8, 0, 1, 1);
-	baseobject_grid->addWidget(comment_edt, 8, 1, 1, 4);
-
-	misc_btns_lt=new QHBoxLayout;
-	spacer=new QSpacerItem(20,1,QSizePolicy::Expanding);
-
-	misc_btns_lt->addItem(spacer);
-	misc_btns_lt->addWidget(append_sql_tb);
-	misc_btns_lt->addWidget(edt_perms_tb);
-	misc_btns_lt->addWidget(disable_sql_chk);
-
-	baseobject_grid->addLayout(misc_btns_lt,9,0,1,5);
+	configureBaseLayout();
 }
 
 bool BaseObjectWidget::eventFilter(QObject *object, QEvent *event)
@@ -126,12 +102,13 @@ void BaseObjectWidget::setRequiredField(QWidget *widget)
 {
 	if(widget)
 	{
-		QLabel *lbl=qobject_cast<QLabel *>(widget);
-		QLineEdit *edt=qobject_cast<QLineEdit *>(widget);
-		QTextEdit *txt=qobject_cast<QTextEdit *>(widget);
-		QGroupBox *grp=qobject_cast<QGroupBox *>(widget);
-		ObjectSelectorWidget *sel=dynamic_cast<ObjectSelectorWidget *>(widget);
-		PgSQLTypeWidget *pgtype=dynamic_cast<PgSQLTypeWidget *>(widget);
+		QLabel *lbl = qobject_cast<QLabel *>(widget);
+		QLineEdit *edt = qobject_cast<QLineEdit *>(widget);
+		QTextEdit *txt = qobject_cast<QTextEdit *>(widget);
+		QGroupBox *grp = qobject_cast<QGroupBox *>(widget);
+		ObjectSelectorWidget *sel = dynamic_cast<ObjectSelectorWidget *>(widget);
+		FileSelectorWidget *file_sel = dynamic_cast<FileSelectorWidget *>(widget);
+		PgSQLTypeWidget *pgtype = dynamic_cast<PgSQLTypeWidget *>(widget);
 		QString str_aux = " <span style='color: #ff0000;'>*</span> ";
 		QColor border_color = CustomTableWidget::getTableItemColor(CustomTableWidget::RemovedItemBgColor);
 
@@ -140,23 +117,25 @@ void BaseObjectWidget::setRequiredField(QWidget *widget)
 			if(lbl)
 				lbl->setText(str_aux + lbl->text());
 
-			if(pgtype || grp)
-				widget->setStyleSheet("QGroupBox {	font-weight: bold; }");
-			else if(lbl)
-				widget->setStyleSheet("QWidget {	font-weight: bold; }");
+			if(pgtype && !grp)
+				grp = pgtype->findChild<QGroupBox *>();
+
+			if(grp)
+				grp->setTitle("* " + grp->title());
 		}
-		else if(edt || txt || sel)
+		else if(edt || txt || sel || file_sel)
 		{
-			if(sel)
+			if(sel || file_sel)
 			{
-				widget = sel->obj_name_edt;
-				widget->setStyleSheet(QString("ObjectSelectorWidget > QLineEdit { border: 2px solid %2; padding-top: 2px; padding-bottom: 2px; border-radius: 4px; }").arg(border_color.name()));
+				widget->setStyleSheet(QString("%1 > QLineEdit { border: 2px solid %2; padding-top: 2px; padding-bottom: 2px; border-radius: 4px; }")
+															.arg(widget->metaObject()->className(), border_color.name()));
 			}
 			else
-				widget->setStyleSheet(QString("%1 { border: 2px solid %2; padding-top: 2px; padding-bottom: 2px; border-radius: 4px; }").arg(widget->metaObject()->className()).arg(border_color.name()));
+				widget->setStyleSheet(QString("%1 { border: 2px solid %2; padding-top: 2px; padding-bottom: 2px; border-radius: 4px; }")
+															.arg(widget->metaObject()->className()).arg(border_color.name()));
 		}
 
-		str_aux=(!widget->toolTip().isEmpty() ? "\n" : "");
+		str_aux = (!widget->toolTip().isEmpty() ? "\n" : "");
 		widget->setToolTip(widget->toolTip() + str_aux + tr("Required field. Leaving this empty will raise errors!"));
 	}
 }
@@ -237,6 +216,14 @@ BaseObject *BaseObjectWidget::getHandledObject()
 	return object;
 }
 
+QString BaseObjectWidget::getSQLCodePreview()
+{
+	if(!object)
+		return "";
+
+	return object->getSourceCode(SchemaParser::SqlCode);
+}
+
 void BaseObjectWidget::cancelChainedOperation()
 {
 	bool op_list_changed=false;
@@ -261,15 +248,15 @@ void BaseObjectWidget::cancelChainedOperation()
 
 void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_list, BaseObject *object, BaseObject *parent_obj, double obj_px, double obj_py, bool uses_op_list)
 {
-	ObjectType obj_type, parent_type=ObjectType::BaseObject;
+	ObjectType obj_type, parent_type = ObjectType::BaseObject;
 
 	/* Reseting the objects attributes in order to force them to be redefined
 	every time this method is called */
-	this->object=nullptr;
-	this->model=nullptr;
-	this->op_list=nullptr;
-	this->relationship=nullptr;
-	this->table=nullptr;
+	this->object = nullptr;
+	this->model = nullptr;
+	this->op_list = nullptr;
+	this->relationship = nullptr;
+	this->table = nullptr;
 
 	if(!model || (uses_op_list && !op_list))
 		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
@@ -277,51 +264,55 @@ void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 	if(op_list)
 	  operation_count = op_list->getCurrentSize();
 
-	this->model=model;
+	this->model = model;
 
 	if(parent_obj)
 	{
-		parent_type=parent_obj->getObjectType();
+		parent_type = parent_obj->getObjectType();
 
 		if(BaseTable::isBaseTable(parent_type))
-			this->table=dynamic_cast<BaseTable *>(parent_obj);
-		else if(parent_type==ObjectType::Relationship)
-			this->relationship=dynamic_cast<Relationship *>(parent_obj);
-		else if(parent_type!=ObjectType::Database && parent_type!=ObjectType::Schema)
-			throw Exception(ErrorCode::AsgObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
+			this->table = dynamic_cast<BaseTable *>(parent_obj);
+		else if(parent_type == ObjectType::Relationship)
+			this->relationship = dynamic_cast<Relationship *>(parent_obj);
+		else if(parent_type != ObjectType::Database && parent_type != ObjectType::Schema)
+			throw Exception(ErrorCode::AsgObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 	else
 	{
-		TableObject *tab_obj=dynamic_cast<TableObject *>(object);
+		TableObject *tab_obj = dynamic_cast<TableObject *>(object);
 
 		if(object && object->getSchema())
-			parent_obj=object->getSchema();
+			parent_obj = object->getSchema();
 		else if(tab_obj && tab_obj->getParentTable())
-			parent_obj=tab_obj->getParentTable();
+			parent_obj = tab_obj->getParentTable();
 		else
-			parent_obj=model;
+			parent_obj = model;
 	}
 
 	if(dynamic_cast<BaseGraphicObject *>(object))
 		dynamic_cast<BaseGraphicObject *>(object)->setModified(false);
 
-	this->op_list=op_list;
-	this->object=object;
+	this->op_list = op_list;
+	this->object = object;
+
+	// Updating the object's dependencies and references widget
+	if(obj_assoc_wgt)
+		obj_assoc_wgt->setAttributes(object, false);
 
 	if(this->table)
 	{
-		this->object_px=this->table->getPosition().x();
-		this->object_py=this->table->getPosition().y();
+		this->object_px = this->table->getPosition().x();
+		this->object_py = this->table->getPosition().y();
 	}
 	else
 	{
-		this->object_px=obj_px;
-		this->object_py=obj_py;
+		this->object_px = obj_px;
+		this->object_py = obj_py;
 	}
 
 	name_edt->setFocus();
-	edt_perms_tb->setEnabled(object!=nullptr && !new_object);
-	append_sql_tb->setEnabled(object!=nullptr && !new_object);
+	edt_perms_tb->setEnabled(object != nullptr && !new_object);
+	append_sql_tb->setEnabled(object != nullptr && !new_object);
 
 	owner_sel->setModel(model);
 	owner_sel->setSelectedObject(model->getDefaultObject(ObjectType::Role));
@@ -338,7 +329,7 @@ void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 	if(object)
 	{
 		obj_id_lbl->setVisible(true);
-		obj_id_lbl->setText(QString("ID: %1").arg(object->getObjectId()));
+		obj_id_lbl->setText(QString("#%1").arg(object->getObjectId()));
 
 		if(handled_obj_type != ObjectType::BaseObject)
 			name_edt->setText(object->getName());
@@ -363,11 +354,11 @@ void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 		else if(new_object && object->getSchema())
 			schema_sel->setSelectedObject(object->getSchema());
 
-		obj_type=object->getObjectType();
-		object_protected=(parent_type!=ObjectType::Relationship &&
-																	 (object->isProtected() ||
-																		(TableObject::isTableObject(obj_type) &&
-																		 dynamic_cast<TableObject *>(object)->isAddedByRelationship())));
+		obj_type = object->getObjectType();
+		object_protected = (parent_type != ObjectType::Relationship &&
+												(object->isProtected() ||
+												 (TableObject::isTableObject(obj_type) &&
+													dynamic_cast<TableObject *>(object)->isAddedByRelationship())));
 		protected_obj_frm->setVisible(object_protected);
 		disable_sql_chk->setChecked(object->isSQLDisabled());
 	}
@@ -377,59 +368,298 @@ void BaseObjectWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 		obj_id_lbl->setVisible(false);
 		protected_obj_frm->setVisible(false);
 
-		if(parent_obj && parent_obj->getObjectType()==ObjectType::Schema)
+		if(parent_obj && parent_obj->getObjectType() == ObjectType::Schema)
 			schema_sel->setSelectedObject(parent_obj);
 	}
 }
 
-void BaseObjectWidget::configureFormLayout(QGridLayout *grid, ObjectType obj_type)
+void BaseObjectWidget::configureBaseLayout()
 {
-	if(!grid)
-		setLayout(baseobject_grid);
-	else
-	{
-		QLayoutItem *item = nullptr;
-		int lin = 0, col = 0, col_span = 0,
-				row_span = 0, item_id = 0, item_count = 0;
-
-		/* Move all the widgets of the passed grid layout one row down,
-		 permiting the insertion of the 'baseobject_grid' at the top
-		 of the items */
-		item_count = grid->count();
-		for(item_id = item_count-1; item_id >= 0; item_id--)
+	const std::map<QList<ObjectType>, QList<FieldLayoutCfg>> field_confs {
 		{
-			item = grid->itemAt(item_id);
-			grid->getItemPosition(item_id, &lin, &col, &row_span, &col_span);
-			grid->removeItem(item);
-			grid->addItem(item, lin+1, col, row_span, col_span);
+			// Objects that has only the name field visible
+			{ ObjectType::BaseObject, ObjectType::Cast, ObjectType::Role,
+				ObjectType::Transform, ObjectType::GenericSql, ObjectType::Tag,
+				ObjectType::Textbox, ObjectType::Parameter },
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0 } }
+		},
 
-			/* Configuring QTextEdit to accept tabs as focus changes. This code
-			only applies to widgets directly linked to the layout. If there is some
-			QTextEdit nested in some child widget this is not applied */
-			if(dynamic_cast<QTextEdit *>(item->widget()))
-				dynamic_cast<QTextEdit *>(item->widget())->setTabChangesFocus(true);
+		{	// Objects that has the name and owner fields visible
+			{ ObjectType::Language, ObjectType::Tablespace, ObjectType::EventTrigger,
+				ObjectType::ForeignDataWrapper, ObjectType::ForeignServer, ObjectType::UserMapping },
+			{ { name_lbl, name_edt, 0, 0 },
+				{ owner_lbl, owner_sel, id_icon_frm, 0, 1 } },
+		},
+
+		{	// Objects that has the name and alias fields visible
+			{ ObjectType::Relationship, ObjectType::BaseRelationship,
+				ObjectType::Rule, ObjectType::Policy, ObjectType::Trigger },
+			{ { name_lbl, name_edt, 0, 0 },
+				{ alias_lbl, alias_edt, id_icon_frm, 0, 1 } },
+		},
+
+		{	// Objects that has the name and schema fields visible
+			{ ObjectType::Extension },
+			{ { name_lbl, name_edt, 0, 0 },
+				{ schema_lbl, schema_sel, id_icon_frm, 0, 1 } },
+		},
+
+		{	// Objects that has the name, tablespace and owner fields visible
+			{ ObjectType::Database },
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
+				{ tablespace_lbl, tablespace_sel, 1, 0 },
+				{ owner_lbl, owner_sel, 1, 1 } },
+		},
+
+		{
+			// Objects that has the name, alias and collation field visible
+			{ ObjectType::Column },
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
+				{ alias_lbl, alias_edt, 1, 0 },
+				{ collation_lbl, collation_sel, 1, 1 } },
+		},
+
+		{	// Objects that has the name, alias and tablespace fields visible
+			{ ObjectType::Constraint, ObjectType::Index },
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
+				{ alias_lbl, alias_edt, 1, 0 },
+				{ tablespace_lbl, tablespace_sel, 1, 1 } },
+		},
+
+		{	// Objects that has the name, schema and owner fields visible
+			{ ObjectType::Aggregate, ObjectType::Conversion, ObjectType::Function,
+				ObjectType::OpClass, ObjectType::Operator, ObjectType::OpFamily,
+				ObjectType::Procedure, ObjectType::Sequence },
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
+				{ schema_lbl, schema_sel, 1, 0 },
+				{ owner_lbl, owner_sel, 1, 1 } },
+		},
+
+		{	// Objects that has the name, alias and owner fields visible
+			{ ObjectType::Schema },
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
+				{ alias_lbl, alias_edt, 1, 0 },
+				{ owner_lbl, owner_sel, 1, 1 } },
+		},
+
+		{	// Objects that has the name, alias, schema and owner fields visible
+			{ ObjectType::ForeignTable },
+			{ { name_lbl, name_edt, 0, 0 },
+				{ alias_lbl, alias_edt, id_icon_frm, 0, 1 },
+				{ schema_lbl, schema_sel, 1, 0 },
+				{ owner_lbl, owner_sel, 1, 1 } },
+		},
+
+		{	// Objects that has the name, schema, collation and owner fields visible
+			{ ObjectType::Collation, ObjectType::Domain, ObjectType::Type },
+			{ { name_lbl, name_edt, 0, 0 },
+				{ schema_lbl, schema_sel, id_icon_frm, 0, 1 },
+				{ collation_lbl, collation_sel, 1, 0 },
+				{ owner_lbl, owner_sel, 1, 1 } },
+		},
+
+		{	// Objects that has the name, alias, schema, tablespace and owner fields visible
+			{ ObjectType::Table, ObjectType::View },
+			{ { name_lbl, name_edt, id_icon_frm, 0, 0, 1, 2 },
+				{ schema_lbl, schema_sel, 1, 0 },
+				{ alias_lbl, alias_edt, 1, 1 },
+				{ tablespace_lbl, tablespace_sel, 2, 0 },
+				{ owner_lbl, owner_sel, 2, 1 } },
+		},
+	};
+
+	baseobject_grid = GuiUtilsNs::createGridLayout(GuiUtilsNs::LtMargin, GuiUtilsNs::LtSpacing);
+	baseobject_grid->setObjectName("baseobject_grid");
+
+	misc_btns_lt = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing);
+	misc_btns_lt->setObjectName("misc_btns_lt");
+
+	extra_wgts_lt = GuiUtilsNs::createVBoxLayout(0, GuiUtilsNs::LtSpacing);
+	extra_wgts_lt->setObjectName("extra_wgts_lt ");
+
+	baseobject_grid->addWidget(protected_obj_frm, 0, 0, 1, 0);
+
+	for(auto &[obj_types, fields] : field_confs)
+	{
+		if(!obj_types.contains(handled_obj_type))
+			continue;
+		
+		for(auto &field : fields)
+		{
+			/* Adding the pair (label/widget) to the grid layout. We shift the row by one
+				* in order to leave the first row for the protected object frame */
+			baseobject_grid->addLayout(GuiUtilsNs::createBuddyWidgetLayout(field.label, field.widget, field.append_widget),
+																 field.row + 1, field.col,
+																 field.row_span, field.col_span);
 		}
 
-		//Adding the base layout on the top
-		grid->addLayout(baseobject_grid, 0,0,1,0);
-		baseobject_grid = grid;
+		break;
 	}
 
-	baseobject_grid->setContentsMargins(GuiUtilsNs::LtMargins);
-	configureFormFields(obj_type, obj_type != ObjectType::BaseObject);
+	baseobject_grid->addLayout(GuiUtilsNs::createBuddyWidgetLayout(comment_lbl, comment_edt),
+															baseobject_grid->count(), 0, 1, 0);
+	baseobject_grid->addLayout(extra_wgts_lt, baseobject_grid->count(), 0, 1, 0);
+
+	misc_btns_lt->addWidget(append_sql_tb);
+	misc_btns_lt->addWidget(edt_perms_tb);
+	misc_btns_lt->addWidget(disable_sql_chk);
+	misc_btns_lt->addItem(new QSpacerItem(20, 1, QSizePolicy::Expanding));
+
+	baseobject_grid->addLayout(misc_btns_lt, baseobject_grid->count(), 0, 1, 0);
+}
+
+void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget, bool create_general_pg, bool create_assoc_pg)
+{
+	if(!tab_widget || !tab_widget->parentWidget())
+		return;
+
+	tab_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+	if(create_general_pg)
+	{
+		// General/basics fields page
+		QWidget *page =  new QWidget(tab_widget);
+		page->setObjectName("baseobject_tab");
+		page->setLayout(baseobject_grid);
+
+		tab_widget->insertTab(0, page, GuiUtilsNs::getIcon("objects"), tr("General"));
+		tab_widget->setCurrentIndex(0);
+	}
+
+	if(create_assoc_pg && handled_obj_type != ObjectType::Textbox)
+	{
+		// Dependencies and references page
+		obj_assoc_wgt = new ObjectAssociationsWidget(tab_widget);
+		obj_assoc_wgt->setObjectName("obj_assoc_tab");
+		obj_assoc_wgt->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
+		tab_widget->addTab(obj_assoc_wgt, GuiUtilsNs::getIcon("associations"), tr("Associations"));
+	}
+
+	if(handled_obj_type != ObjectType::Tag &&
+		 handled_obj_type != ObjectType::Textbox)
+	{
+		// Source code preview page
+		sql_preview_pg = new QWidget(tab_widget);
+		sql_preview_pg->setObjectName("sql_preview_tab");
+		tab_widget->addTab(sql_preview_pg, GuiUtilsNs::getIcon("sqlpreview"), tr("SQL preview"));
+		NumberedTextEditor *source_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin, sql_preview_pg, false);
+		source_txt->setReadOnly(true);
+
+		try
+		{
+			SyntaxHighlighter *source_hl = new SyntaxHighlighter(source_txt);
+			source_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
+		}
+		catch(Exception &e)
+		{
+			source_txt->setPlainText(tr("** Failed to load the syntax highlight configuration! ** \n\n %1").arg(e.getExceptionsText()));
+		}
+
+		// Connecting the signal to handle source code preview
+		connect(tab_widget, &QTabWidget::currentChanged, this, [this, source_txt, tab_widget](int){
+			if(sql_preview_pg && tab_widget->currentWidget() == sql_preview_pg)
+			{
+				try
+				{
+					source_txt->setPlainText(getSQLCodePreview());
+				}
+				catch(Exception &e)
+				{
+					source_txt->setPlainText(QString("/* %1 */").arg(e.getExceptionsText()));
+				}
+			}
+		});
+	}
+
+	/* Moving the frame that displays the protected object message
+	 * to outside general tab, thus, it'll be places at the very top
+	 * of the widget's layout so it can be visible above the tab widget */
+	QVBoxLayout *wgt_lt = qobject_cast<QVBoxLayout *>(layout());
+
+	if(wgt_lt)
+	{
+		baseobject_grid->removeWidget(protected_obj_frm);
+		wgt_lt->insertWidget(0, protected_obj_frm);
+	}
+	else
+	{
+		/* If the widget's layout is not a QVBoxLayout we just display a debug
+		 * message and keep the alert message in the general tab */
+		qDebug().noquote().nospace() << "BaseObjectWidget::configureTabbedLayout(QTabWidget *, bool): The widget's ("
+		<< tab_widget->parentWidget()->metaObject()->className() << ") layout must be QHBoxLayout or QVBoxLayout.";
+	}
+
+	configureFormFields(handled_obj_type);
+	GuiUtilsNs::configureBuddyWidgets(tab_widget);
+}
+
+void BaseObjectWidget::configureTabbedLayout(bool create_attr_page, const QString &attr_pg_name, const QString &attr_pg_icon)
+{
+	QLayout *curr_layout = layout();
+	bool is_hbox = qobject_cast<QHBoxLayout *>(curr_layout) != nullptr,
+			 is_vbox = qobject_cast<QVBoxLayout *>(curr_layout) != nullptr;
+
+	if(!is_hbox && !is_vbox)
+	{
+		qDebug().noquote() << "BaseObjectWidget::configureTabbedLayout(bool, QString, QString): The widget's layout must be QHBoxLayout or QVBoxLayout.";
+		return;
+	}
+
+	QLayout *new_layout = nullptr;
+	QLayoutItem *item = nullptr;
+	QTabWidget *attribs_tbw = nullptr;
+
+	if(is_hbox)
+		new_layout = new QHBoxLayout;
+	else
+		new_layout = new QVBoxLayout;
+
+	new_layout->setContentsMargins(curr_layout->contentsMargins());
+	new_layout->setSpacing(curr_layout->spacing());
+	new_layout->setObjectName(curr_layout->objectName());
+
+	/* Moving all items from the current widget's layout
+	 * to the new layout */
+	while(!curr_layout->isEmpty())
+	{
+		item = curr_layout->takeAt(0);
+
+		if(item)
+			new_layout->addItem(item);
+	}
+
+	/* We have to delete the current layout to be able
+	 * to reconfigure the widget's layout */
+	delete curr_layout;
+
+	// Create a default tab widget and configure a tabbed layout in it
+	attribs_tbw = GuiUtilsNs::createWidgetInParent<QTabWidget>(GuiUtilsNs::LtMargin, this);
+
+	if(create_attr_page)
+	{
+		QWidget *attr_page = new QWidget(this);
+		attr_page->setLayout(new_layout);
+		attribs_tbw->addTab(attr_page,
+												attr_pg_icon.isEmpty() ? GuiUtilsNs::getIcon("attribute") : GuiUtilsNs::getIcon(attr_pg_icon),
+												attr_pg_name.isEmpty() ? tr("Attributes") : attr_pg_name);
+	}
+	else
+	{
+		// Adding the new layout in the middle space in extra_wgts_lt
+		extra_wgts_lt->addLayout(new_layout);
+	}
+
+	configureTabbedLayout(attribs_tbw);
 }
 
 void BaseObjectWidget::configureFormFields(ObjectType obj_type, bool inst_ev_filter)
 {
-	QObjectList chld_list;
-	QWidget *wgt = nullptr;
-
 	disable_sql_chk->setVisible(obj_type!=ObjectType::BaseObject && obj_type!=ObjectType::Permission &&
 															obj_type!=ObjectType::Textbox && obj_type!=ObjectType::Tag &&
 															obj_type!=ObjectType::Parameter);
 
 	alias_edt->setVisible(BaseObject::acceptsAlias(obj_type));
-	logical_name_lbl->setVisible(BaseObject::acceptsAlias(obj_type));
+	alias_lbl->setVisible(BaseObject::acceptsAlias(obj_type));
 
 	edt_perms_tb->setVisible(Permission::acceptsPermission(obj_type));
 	append_sql_tb->setVisible(BaseObject::acceptsCustomSQL(obj_type));
@@ -449,9 +679,9 @@ void BaseObjectWidget::configureFormFields(ObjectType obj_type, bool inst_ev_fil
 	comment_lbl->setVisible(BaseObject::acceptsComment(obj_type));
 	comment_edt->setVisible(BaseObject::acceptsComment(obj_type));
 
-	if(obj_type!=ObjectType::BaseObject)
+	if(obj_type != ObjectType::BaseObject)
 	{
-		obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(obj_type)));
+		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(obj_type));
 		obj_icon_lbl->setToolTip(BaseObject::getTypeName(obj_type));
 
 		if(obj_type != ObjectType::Permission && obj_type != ObjectType::Cast &&
@@ -462,7 +692,7 @@ void BaseObjectWidget::configureFormFields(ObjectType obj_type, bool inst_ev_fil
 		}
 		else
 		{
-			QFont font=name_edt->font();
+			QFont font = name_edt->font();
 			name_edt->setReadOnly(true);
 			font.setItalic(true);
 			name_edt->setFont(font);
@@ -478,19 +708,13 @@ void BaseObjectWidget::configureFormFields(ObjectType obj_type, bool inst_ev_fil
 	if(inst_ev_filter)
 	{
 		//Install the event filter into all children object in order to capture key press
-		chld_list = this->children();
-
-		while(!chld_list.isEmpty())
+		for(auto &wgt : this->findChildren<QWidget *>())
 		{
-			wgt=dynamic_cast<QWidget *>(chld_list.front());
-
 			//Avoids install event filters in objects that are inteneded to edit multiple lines
 			if(wgt &&
-					wgt->metaObject()->className()!=QString("QPlainTextEdit") &&
-					wgt->metaObject()->className()!=QString("NumberedTextEditor"))
+					wgt->metaObject()->className() != QString("QPlainTextEdit") &&
+					wgt->metaObject()->className() != QString("NumberedTextEditor"))
 				wgt->installEventFilter(this);
-
-			chld_list.pop_front();
 		}
 	}
 }
@@ -511,9 +735,9 @@ QString BaseObjectWidget::generateVersionsInterval(unsigned ver_interv_id, const
 
 QFrame *BaseObjectWidget::generateInformationFrame(const QString &msg)
 {
-	QFrame *info_frm=nullptr;
-	QGridLayout *grid=nullptr;
-	QLabel *ico_lbl=nullptr, *msg_lbl=nullptr;
+	QFrame *info_frm = nullptr;
+	QHBoxLayout *hbox = nullptr;
+	QLabel *ico_lbl = nullptr, *msg_lbl = nullptr;
 	QFont font;
 
 	info_frm = new QFrame;
@@ -528,30 +752,26 @@ QFrame *BaseObjectWidget::generateInformationFrame(const QString &msg)
 	info_frm->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, info_frm);
 
-	grid = new QGridLayout(info_frm);
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
-	grid->setObjectName("grid");
+	hbox = GuiUtilsNs::createHBoxLayout(GuiUtilsNs::LtMargin, GuiUtilsNs::LtSpacing, info_frm);
+	hbox->setObjectName("grid");
 
 	ico_lbl = new QLabel(info_frm);
 	ico_lbl->setObjectName("icon_lbl");
 	ico_lbl->setMinimumSize(QSize(25, 25));
 	ico_lbl->setMaximumSize(QSize(25, 25));
 	ico_lbl->setScaledContents(true);
-	ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("info")));
+	ico_lbl->setPixmap(GuiUtilsNs::getPixmap("info"));
 	ico_lbl->setAlignment(Qt::AlignLeft|Qt::AlignTop);
-
-	grid->addWidget(ico_lbl, 0, 0, 1, 1);
 
 	msg_lbl = new QLabel(info_frm);
 	msg_lbl->setFont(font);
 	msg_lbl->setObjectName("message_lbl");
 	msg_lbl->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
 	msg_lbl->setWordWrap(true);
-
 	msg_lbl->setText(msg);
 
-	grid->addWidget(msg_lbl, 0, 1, 1, 1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
+	hbox->addWidget(ico_lbl);
+	hbox->addWidget(msg_lbl);
 
 	return info_frm;
 }
@@ -587,9 +807,9 @@ void BaseObjectWidget::highlightVersionSpecificFields(std::map<QString, std::vec
 QFrame *BaseObjectWidget::generateVersionWarningFrame(std::map<QString, std::vector<QWidget *> > &fields,
 																											std::map< QWidget *, std::vector<QString> > *values)
 {
-	QFrame *alert_frm=nullptr;
-	QGridLayout *grid=nullptr;
-	QLabel *ico_lbl=nullptr, *msg_lbl=nullptr;
+	QFrame *alert_frm = nullptr;
+	QHBoxLayout *layout = nullptr;
+	QLabel *ico_lbl = nullptr, *msg_lbl = nullptr;
 	QFont font;
 
 	highlightVersionSpecificFields(fields, values);
@@ -604,18 +824,21 @@ QFrame *BaseObjectWidget::generateVersionWarningFrame(std::map<QString, std::vec
 	alert_frm->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
-	grid = new QGridLayout(alert_frm);
-	grid->setObjectName("grid");
+	layout = GuiUtilsNs::createHBoxLayout(GuiUtilsNs::LtMargin,
+																				GuiUtilsNs::LtSpacing,
+																				alert_frm);
+
+	layout->setObjectName("version_warn_lt");
 
 	ico_lbl = new QLabel(alert_frm);
 	ico_lbl->setObjectName("icon_lbl");
 	ico_lbl->setMinimumSize(QSize(25, 25));
 	ico_lbl->setMaximumSize(QSize(25, 25));
 	ico_lbl->setScaledContents(true);
-	ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("alert")));
+	ico_lbl->setPixmap(GuiUtilsNs::getPixmap("alert"));
 	ico_lbl->setAlignment(Qt::AlignLeft|Qt::AlignTop);
 
-	grid->addWidget(ico_lbl, 0, 0, 1, 1);
+	layout->addWidget(ico_lbl);
 
 	msg_lbl = new QLabel(alert_frm);
 	msg_lbl->setFont(font);
@@ -626,21 +849,20 @@ QFrame *BaseObjectWidget::generateVersionWarningFrame(std::map<QString, std::vec
 	msg_lbl->setText(tr("The <em><u><strong>highlighted</strong></u></em> fields in the form or one of their values are available only on specific PostgreSQL versions. \
 							Generating SQL code for versions other than those specified in the fields' tooltips may create incompatible code."));
 
-	grid->addWidget(msg_lbl, 0, 1, 1, 1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
-
+	layout->addWidget(msg_lbl);
 	alert_frm->adjustSize();
+
 	return alert_frm;
 }
 
 void BaseObjectWidget::editPermissions()
 {
-	BaseObject *parent_obj=nullptr;
+	BaseObject *parent_obj = nullptr;
 	BaseForm parent_form(this);
 	PermissionWidget *permission_wgt=new PermissionWidget;
 
 	if(this->relationship)
-		parent_obj=this->relationship;
+		parent_obj = this->relationship;
 
 	permission_wgt->setAttributes(this->model, parent_obj, this->object);
 	parent_form.setMainWidget(permission_wgt);
@@ -654,7 +876,7 @@ void BaseObjectWidget::editPermissions()
 void BaseObjectWidget::editCustomSQL()
 {
 	BaseForm parent_form(this);
-	CustomSQLWidget *customsql_wgt=new CustomSQLWidget;
+	CustomSQLWidget *customsql_wgt = new CustomSQLWidget;
 
 	customsql_wgt->setAttributes(this->model, this->object);
 	parent_form.setMainWidget(customsql_wgt);

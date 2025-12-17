@@ -40,7 +40,7 @@ SQLToolWidget::SQLToolWidget(QWidget * parent) : QWidget(parent)
 
 	sql_exec_corner_tb = new QToolButton(sql_exec_tbw);
 	sql_exec_corner_tb->setObjectName("sql_exec_corner_btn");
-	sql_exec_corner_tb->setIcon(QIcon(GuiUtilsNs::getIconPath("newtab")));
+	sql_exec_corner_tb->setIcon(GuiUtilsNs::getIcon("newtab"));
 	sql_exec_corner_tb->setToolTip(tr("Add a new execution tab for the current database (%1)").arg(QKeySequence("Ctrl+T").toString()));
 
 	corner_wgt = new QWidget(sql_exec_tbw);
@@ -48,23 +48,18 @@ SQLToolWidget::SQLToolWidget(QWidget * parent) : QWidget(parent)
 	corner_wgt->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 	sql_exec_tbw->setCornerWidget(corner_wgt);
 
-	corner_wgt_lt = new QVBoxLayout;
-	corner_wgt_lt->setContentsMargins(0, 0,
-																		corner_wgt->width() / 2,
-																		corner_wgt->height());
-	corner_wgt->setLayout(corner_wgt_lt);
+	corner_wgt_lt = GuiUtilsNs::createVBoxLayout({ 0, 0,
+																								 corner_wgt->width() / 2,
+																								 corner_wgt->height() }, 0, corner_wgt);
 
-	QVBoxLayout *vbox=new QVBoxLayout;
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargin, 0, sourcecode_gb);
 	sourcecode_txt=new NumberedTextEditor(sourcecode_gb);
 	sourcecode_txt->setReadOnly(true);
 	sourcecode_txt->installEventFilter(this);
 
 	sourcecode_hl=new SyntaxHighlighter(sourcecode_txt);
 	sourcecode_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
-
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
 	vbox->addWidget(sourcecode_txt);
-	sourcecode_gb->setLayout(vbox);
 
 	connect(connections_cmb, &QComboBox::activated, this, __slot(this, SQLToolWidget::connectToServer));
 	connect(connections_cmb, &QComboBox::currentIndexChanged, this, [this](int idx) {
@@ -225,7 +220,10 @@ void SQLToolWidget::connectToServer()
 		if(connections_cmb->currentIndex()==connections_cmb->count()-1)
 		{
 			if(ConnectionsConfigWidget::openConnectionsConfiguration(connections_cmb, true))
+			{
+				clearDatabases();
 				emit s_connectionsUpdateRequested();
+			}
 		}
 		else
 		{

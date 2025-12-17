@@ -30,21 +30,15 @@ const QString TableDataWidget::PlaceholderColumn {"$placeholder$"};
 TableDataWidget::TableDataWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::BaseObject)
 {
 	Ui_TableDataWidget::setupUi(this);
+
 	configureFormLayout(tabledata_grid, ObjectType::BaseObject);
- 	
+
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
+	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, hint_frm);
 
-	obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(ObjectType::Table)));
-
-	comment_lbl->setVisible(false);
-	comment_edt->setVisible(false);
-
+	obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(ObjectType::Table));
 	data_tbw->setItemDelegate(new PlainTextItemDelegate(this, false));
-
-	QFont font=name_edt->font();
-	font.setItalic(true);
 	name_edt->setReadOnly(true);
-	name_edt->setFont(font);
 
 	add_row_tb->setToolTip(add_row_tb->toolTip() + QString(" (%1)").arg(add_row_tb->shortcut().toString()));
 	del_rows_tb->setToolTip(del_rows_tb->toolTip() + QString(" (%1)").arg(del_rows_tb->shortcut().toString()));
@@ -56,12 +50,7 @@ TableDataWidget::TableDataWidget(QWidget *parent): BaseObjectWidget(parent, Obje
 	data_tbw->removeEventFilter(this);
 	csv_load_parent->setVisible(false);
 
-	csv_load_wgt = new CsvLoadWidget(this, true);
-	QVBoxLayout *layout = new QVBoxLayout;
-
-	layout->addWidget(csv_load_wgt);
-	layout->setContentsMargins(0,0,0,0);
-	csv_load_parent->setLayout(layout);
+	csv_load_wgt = GuiUtilsNs::createWidgetInParent< CsvLoadWidget>(0, csv_load_parent, true);
 	csv_load_parent->setMinimumSize(csv_load_wgt->minimumSize());
 
 	setMinimumSize(640, 480);
@@ -333,10 +322,9 @@ void TableDataWidget::enableButtons()
 void TableDataWidget::setAttributes(DatabaseModel *model, PhysicalTable *table)
 {
 	BaseObjectWidget::setAttributes(model, table, nullptr);
-	bool enable=(object != nullptr);
+	bool enable = (object != nullptr);
 
 	protected_obj_frm->setVisible(false);
-	obj_id_lbl->setVisible(false);
 	data_tbw->setEnabled(enable);
 	add_row_tb->setEnabled(enable);
 

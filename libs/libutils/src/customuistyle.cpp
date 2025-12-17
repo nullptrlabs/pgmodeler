@@ -39,6 +39,10 @@
 #include <QPalette>
 #include <QPen>
 #include <QPoint>
+#include <QTimer>
+#include <QElapsedTimer>
+#include <QDateTime>
+#include <cmath>
 
 QMap<QStyle::PixelMetric, int> CustomUiStyle::pixel_metrics;
 
@@ -269,7 +273,7 @@ void CustomUiStyle::drawCCGroupBox(ComplexControl control, const QStyleOptionCom
 	painter->save();
 
 	QRect group_rect = group_box_opt->rect,
-		  title_rect, frame_rect = group_rect;
+			title_rect, frame_rect = group_rect;
 
 	// Calculate title area if there's text
 	bool has_title = !group_box_opt->text.isEmpty();
@@ -279,20 +283,21 @@ void CustomUiStyle::drawCCGroupBox(ComplexControl control, const QStyleOptionCom
 		// Create bold font with 80% size to calculate text height
 		QFont title_font = painter->font();
 		title_font.setBold(true);
-		title_font.setPointSizeF(title_font.pointSizeF() * 0.80);
+		title_font.setPointSizeF(title_font.pointSizeF() * GrpBoxTitleFontSize);
 
 		QFontMetrics fm(title_font);
 		int text_height = fm.height();
-		int padding = 3; // 3px padding above and below title
-		int total_title_height = text_height + (2 * padding);
+		int total_title_height = text_height + (2 * GrpBoxTitlePadding);
 
 		// Title takes the top portion including padding
 		title_rect = QRect(group_rect.left(), group_rect.top(),
-						group_rect.width(), total_title_height);
+											 group_rect.width(), total_title_height);
 
-		// Frame starts below the title (including padding)
-		frame_rect = QRect(group_rect.left(), group_rect.top() + total_title_height,
-						group_rect.width(), group_rect.height() - total_title_height);
+		// Frame starts below the title and extends to the bottom of the group box
+		int frame_top = group_rect.top() + total_title_height;
+		int frame_height = group_rect.bottom() - frame_top + 1;
+		frame_rect = QRect(group_rect.left(), frame_top,
+											 group_rect.width(), frame_height);
 	}
 
 	// Draw the frame below the title
@@ -318,8 +323,8 @@ void CustomUiStyle::drawCCGroupBox(ComplexControl control, const QStyleOptionCom
 		// Use state-aware text color
 		painter->setPen(getStateColor(QPalette::WindowText, group_box_opt));
 
-		// Draw the text in the title area with 3px padding (centered vertically)
-		title_rect.adjust(0, 3, 0, -3); // Apply 3px padding top/bottom
+		// Draw the text in the title area with 2px padding (centered vertically)
+		title_rect.adjust(0, GrpBoxTitlePadding, 0, -GrpBoxTitlePadding); // Apply 2px padding top/bottom
 		painter->drawText(title_rect,
 						group_box_opt->textAlignment | Qt::AlignVCenter,
 						group_box_opt->text);
@@ -697,6 +702,44 @@ int CustomUiStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *o
 
 	// Use the default pixel metric attribute value if there's no custom value defined
 	return QProxyStyle::pixelMetric(metric, option, widget);
+}
+
+QRect CustomUiStyle::subControlRect(ComplexControl control, const QStyleOptionComplex *option, SubControl sub_control, const QWidget *widget) const
+{
+	QRect rect = QProxyStyle::subControlRect(control, option, sub_control, widget);
+
+	// Adjust GroupBox content rectangle to account for custom title height
+	if(control == CC_GroupBox && sub_control == SC_GroupBoxContents)
+	{
+		const QStyleOptionGroupBox *group_box_opt = qstyleoption_cast<const QStyleOptionGroupBox *>(option);
+
+		if(group_box_opt && !group_box_opt->text.isEmpty())
+		{
+			// Create bold font with 80% size to calculate text height (same as in drawCCGroupBox)
+			QFont title_font = widget ? widget->font() : QApplication::font();
+			title_font.setBold(true);
+			title_font.setPointSizeF(title_font.pointSizeF() * GrpBoxTitleFontSize);
+
+			QFontMetrics fm(title_font);
+			int text_height = fm.height(),
+					total_title_height = text_height + (2 * GrpBoxTitlePadding);
+
+			// Get the default rect from the base style
+			QRect default_rect = QProxyStyle::subControlRect(control, option, sub_control, widget);
+
+			/* Adjust the top position to account for our custom title height
+			 * The frame starts at total_title_height, so content should start a bit below that */
+			int frame_margin = pixelMetric(PM_DefaultFrameWidth, option, widget) + 1;
+
+			// Adjusting the rect so the top/bottom margins are the same as left/right margins
+			rect = QRect(default_rect.left() - 1,
+									 group_box_opt->rect.top() + total_title_height + frame_margin,
+									 default_rect.width() + 2,
+									 group_box_opt->rect.height() - total_title_height - (frame_margin * 2));
+		}
+	}
+
+	return rect;
 }
 
 void CustomUiStyle::polish(QWidget *widget)
@@ -1124,6 +1167,9 @@ void CustomUiStyle::drawPEHintFramePanel(PrimitiveElement element, const QStyleO
 		// For DefaultFrmHint we use the midlight color as background
 		if(hint == DefaultFrmHint)
 			bg_color = getStateColor(isDarkPalette() ? QPalette::Midlight : QPalette::Light, option);
+		// For AltDefFrmHint we use the same background as QGroupBox
+		else if(hint == AltDefaultFrmHint)
+			bg_color = getAdjustedColor(getStateColor(QPalette::Dark, option), XMinFactor, MinFactor);
 		else
 		{
 			if(isDarkPalette())
@@ -1177,6 +1223,9 @@ void CustomUiStyle::drawPEGenericElemFrame(PrimitiveElement element, const QStyl
 			// For DefaultFrmHint we use a standard border color based on theme
 			if(hint == DefaultFrmHint)
 				border_color = getStateColor(isDarkPalette() ? QPalette::Light : QPalette::Midlight, option);
+			// For AltDefFrmHint we use the same border color as QGroupBox
+			else if(hint == AltDefaultFrmHint)
+				border_color = getAdjustedColor(getStateColor(QPalette::Mid, option), XMinFactor, -XMinFactor);
 			else
 				// For other hints, use the custom color with slight adjustments
 				border_color = getAdjustedColor(widget->property(StyleHintColor).value<QColor>(), XMinFactor, -XMinFactor);
@@ -1244,7 +1293,7 @@ void CustomUiStyle::drawPEGroupBoxFrame(PrimitiveElement element, const QStyleOp
 	painter->setPen(QPen(border_color, PenWidth));
 	painter->setBrush(Qt::NoBrush);
 	painter->drawPath(createControlShape(option->rect, FrameRadius, AllCorners,
-					0.5, 0.5, -0.5, -0.5));
+																			 0.5, 0.5, -0.5, -0.5));
 
 	painter->restore();
 }
@@ -1369,7 +1418,8 @@ void CustomUiStyle::drawCEProgressBar(ControlElement element, const QStyleOption
 	QPainterPath shape;
 	QColor bg_color, border_color, fill_color;
 	bool has_progress = (pb_opt->progress > pb_opt->minimum),
-		 is_horizontal = qobject_cast<const QProgressBar *>(widget)->orientation() == Qt::Horizontal;
+		 is_horizontal = qobject_cast<const QProgressBar *>(widget)->orientation() == Qt::Horizontal,
+		 is_busy = (pb_opt->minimum == 0 && pb_opt->maximum == 0);
 
 	// Handle different progress bar elements
 	if(element == CE_ProgressBarGroove)
@@ -1395,8 +1445,110 @@ void CustomUiStyle::drawCEProgressBar(ControlElement element, const QStyleOption
 		return;
 	}
 
-	if(element == CE_ProgressBarContents && has_progress)
+	if(element == CE_ProgressBarContents && (has_progress || is_busy))
 	{
+		// Setup busy indicator animation timer if in busy mode
+		if(is_busy)
+		{
+			// Property names as constants to avoid repetition
+			static constexpr char BusyAnimTimerProp[] = "__busy_anim_timer",
+														BusyElapsedTimerProp[] = "__busy_elapsed_timer";
+			
+			QProgressBar *pb = const_cast<QProgressBar *>(qobject_cast<const QProgressBar *>(widget));
+			
+			// Check if animation timer exists, create if not
+			QTimer *anim_timer = pb->findChild<QTimer *>(BusyAnimTimerProp, Qt::FindDirectChildrenOnly);
+
+			if(!anim_timer)
+			{
+				anim_timer = new QTimer(pb);
+				anim_timer->setObjectName(BusyAnimTimerProp);
+				anim_timer->setInterval(16); // ~60 FPS (16ms = 62.5 FPS)
+				anim_timer->setTimerType(Qt::PreciseTimer); // Use precise timer for smoother animation
+
+				QObject::connect(anim_timer, &QTimer::timeout, pb, [pb]() {
+					pb->update();
+				});
+
+				// Initialize animation elapsed timer (more precise than QDateTime)
+				QElapsedTimer *elapsed_timer = new QElapsedTimer();
+				elapsed_timer->start();
+				pb->setProperty(BusyElapsedTimerProp, QVariant::fromValue(static_cast<void*>(elapsed_timer)));
+				anim_timer->start();
+			}
+
+			// Calculate busy indicator position using precise elapsed timer
+			QElapsedTimer *elapsed_timer = static_cast<QElapsedTimer*>(pb->property(BusyElapsedTimerProp).value<void*>());
+			qint64 elapsed = elapsed_timer ? elapsed_timer->elapsed() : 0;
+
+			// Animation parameters
+			static constexpr qreal AnimDuration = 10000.0; // Duration for one full cycle in ms (slower movement)
+			static constexpr qreal BusyIndicatorSize = 0.05; // 5% of total width/height
+
+			// Calculate position (0.0 to beyond 1.0 to allow full exit/entry)
+			// Position goes from -BusyIndicatorSize (fully outside left) to 1.0 (fully outside right)
+			qreal time_normalized = static_cast<qreal>(elapsed % static_cast<qint64>(AnimDuration)) / AnimDuration;
+			
+			// Simple linear movement from left (-size) to right (1.0), then reset
+			// This allows the indicator to fully exit on the right and re-enter from the left
+			qreal position = -BusyIndicatorSize + (time_normalized * (1.0 + BusyIndicatorSize));
+
+			// Calculate indicator rectangle
+			QRect content_rect = option->rect;
+			QRectF indicator_rect; // Use QRectF for sub-pixel precision
+			static constexpr qreal MinIndicatorSize = 20.0; // Minimum size in pixels
+
+			if(is_horizontal)
+			{
+				qreal indicator_width = content_rect.width() * BusyIndicatorSize;
+				// Ensure minimum size of 20px
+				indicator_width = std::max(indicator_width, MinIndicatorSize);
+				
+				// Position can be negative (off-screen left) to > 1.0 (off-screen right)
+				qreal x_pos = content_rect.x() + (content_rect.width() * position);
+				indicator_rect = QRectF(x_pos, content_rect.y(), indicator_width, content_rect.height());
+			}
+			else
+			{
+				qreal indicator_height = content_rect.height() * BusyIndicatorSize;
+				// Ensure minimum size of 20px
+				indicator_height = std::max(indicator_height, MinIndicatorSize);
+				
+				// For vertical: move from bottom to top (reverse direction)
+				qreal y_pos = content_rect.y() + content_rect.height() - (content_rect.height() * (position + BusyIndicatorSize));
+				indicator_rect = QRectF(content_rect.x(), y_pos, content_rect.width(), indicator_height);
+			}
+
+			// Draw the busy indicator
+			fill_color = getStateColor(QPalette::Highlight, option);
+			border_color = getStateColor(QPalette::Highlight, option).lighter(MidFactor);
+			
+			// Use QRectF for sub-pixel rendering (smoother animation)
+			QPainterPath shape_f;
+			qreal radius = InputRadius;
+			shape_f.addRoundedRect(indicator_rect.adjusted(0.5, 0.5, -0.5, -0.5), radius, radius);
+
+			painter->save();
+			painter->setRenderHint(QPainter::Antialiasing, true);
+			painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
+			
+			// Clip to content rect to avoid drawing artifacts outside the progress bar
+			painter->setClipRect(content_rect);
+			
+			painter->setBrush(fill_color);
+			painter->setPen(Qt::NoPen);
+			painter->drawPath(shape_f);
+
+			// Draw border
+			painter->setPen(QPen(border_color, PenWidth));
+			painter->setBrush(Qt::NoBrush);
+			painter->drawPath(shape_f);
+			painter->restore();
+			
+
+			return;
+		}
+
 		// Calculate progress percentage and content rectangle
 		int range = pb_opt->maximum - pb_opt->minimum;
 		qreal prog_ratio = range > 0 ? static_cast<qreal>(pb_opt->progress - pb_opt->minimum) / range : 0.0;
@@ -2119,6 +2271,12 @@ void CustomUiStyle::drawPEHeaderArrow(const QStyleOption *option, QPainter *pain
 	drawControlArrow(&arrow_opt, painter, widget, arrow_type);
 }
 
+void CustomUiStyle::setStyleHint(StyleHint hint, const QList<QFrame *> &frames)
+{
+	for(auto &frm : frames)
+		setStyleHint(hint, frm);
+}
+
 void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
 {
 	if(!frame || hint == NoHint)
@@ -2135,8 +2293,10 @@ void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
 	frame->setProperty(StyleHintProp, static_cast<int>(hint));
 
 	QColor hint_color;
+	bool is_def_hint = (hint == DefaultFrmHint ||
+											hint == AltDefaultFrmHint);
 
-	if(hint != DefaultFrmHint)
+	if(!is_def_hint)
 		hint_color = frm_colors.at(hint);
 
 	frame->setProperty(StyleHintColor, hint_color);
@@ -2147,7 +2307,7 @@ void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
 	// For HLine/VLine frames, apply border color via stylesheet
 	if(shape == QFrame::HLine || shape == QFrame::VLine)
 	{
-		QString color_role = hint == DefaultFrmHint ? "light" : "midlight";
+		QString color_role = is_def_hint ? "light" : "midlight";
 		frame->setStyleSheet(QString("QFrame { border: %1px solid palette(%2); }")
 												 .arg(PenWidth)
 												 .arg(color_role));

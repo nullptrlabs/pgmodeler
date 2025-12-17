@@ -58,6 +58,7 @@ const QString PgModelerCliApp::DropObjects {"--drop-objects"};
 const QString PgModelerCliApp::NonTransactional {"--non-transactional"};
 const QString PgModelerCliApp::PgSqlVer {"--pgsql-ver"};
 const QString PgModelerCliApp::Help {"--help"};
+const QString PgModelerCliApp::Version {"--version"};
 const QString PgModelerCliApp::ShowGrid {"--show-grid"};
 const QString PgModelerCliApp::ShowDelimiters {"--show-delimiters"};
 const QString PgModelerCliApp::PageByPage {"--page-by-page"};
@@ -134,7 +135,7 @@ std::map<QString, bool> PgModelerCliApp::long_opts {
 	{ ExportToFile, false },	{ ExportToPng, false },	{ ExportToSvg, false },
 	{ ExportToDbms, false },	{ ImportDb, false },	{ Diff, false },
 	{ DropDatabase, false },	{ DropObjects, false },	{ PgSqlVer, true },
-	{ Help, false },	{ ShowGrid, false },	{ ShowDelimiters, false },
+	{ Help, false },	{ Version, false }, { ShowGrid, false },	{ ShowDelimiters, false },
 	{ PageByPage, false },	{ IgnoreDuplicates, false },	{ OverrideBgColor, false },
 	{ IgnoreErrorCodes, true }, { ConnAlias, true },	{ Host, true },	{ Port, true },
 	{ User, true },	{ Passwd, true },	{ InitialDb, true },
@@ -161,7 +162,7 @@ attribs_map PgModelerCliApp::short_opts {
 	{ ExportToFile, "-ef" },	{ ExportToPng, "-ep" },	{ ExportToSvg, "-es" },
 	{ ExportToDbms, "-ed" },	{ ExportToDict, "-ec" },	{ ImportDb, "-im" },
 	{ Diff, "-df" },	{ DropDatabase, "-dd" },	{ DropObjects, "-do" },
-	{ PgSqlVer, "-v" },	{ Help, "-h" },	{ ShowGrid, "-sg" },
+	{ PgSqlVer, "-pv" },	{ Help, "-h" },	{ Version, "-v" }, { ShowGrid, "-sg" },
 	{ ShowDelimiters, "-sl" },	{ PageByPage, "-pp" },
 	{ IgnoreDuplicates, "-ir" }, { OverrideBgColor, "-oc" },
 	{ IgnoreErrorCodes, "-ic" },	{ ConnAlias, "-ca" },	{ Host, "-H" },
@@ -456,9 +457,17 @@ bool PgModelerCliApp::isOptionRecognized(QString &op, bool &accepts_val)
 	return found;
 }
 
-void PgModelerCliApp::showVersionInfo()
+void PgModelerCliApp::showVersionInfo(bool only_ver_num)
 {
 	printMessage();
+
+	if(only_ver_num)
+	{
+		printMessage(QString("pgmodeler-cli %1 %2").arg(GlobalAttributes::PgModelerVersion, GlobalAttributes::PgModelerBuildNumber));
+		printMessage();
+		return;
+	}
+
 	printMessage(tr("pgModeler %1 command line interface.").arg(
 							 #ifdef PRIVATE_PLUGINS_SYMBOLS
 								"Plus"
@@ -474,7 +483,7 @@ void PgModelerCliApp::showVersionInfo()
 
 void PgModelerCliApp::showMenu()
 {
-	showVersionInfo();
+	showVersionInfo(false);
 
 	printText(tr("Usage: pgmodeler-cli [OPTIONS]"));
 	printText(tr("This CLI tool provides operations with database models and databases without requiring the use of pgModeler's graphical interface. All available options are described below."));
@@ -497,6 +506,7 @@ void PgModelerCliApp::showMenu()
 	#endif
 
 	printText(tr(" %1, %2\t\t\t  Shows this help menu.").arg(short_opts[Help], Help));
+	printText(tr(" %1, %2\t\t\t  Prints the version info and exit.").arg(short_opts[Version], Version));
 	printText();
 
 	printText(tr("General options: "));
@@ -728,6 +738,12 @@ void PgModelerCliApp::listConnections()
 
 void PgModelerCliApp::parseOptions(attribs_map &opts)
 {
+	if(opts.empty() || opts.count(Help) || opts.count(Version))
+	{
+		parsed_opts = opts;
+		return;
+	}
+
 	//Loading connections
 	if(opts.count(ListConns) || opts.count(ExportToDbms) || opts.count(ImportDb) || opts.count(Diff))
 	{
@@ -756,275 +772,269 @@ void PgModelerCliApp::parseOptions(attribs_map &opts)
 		diff_hlp = new ModelsDiffHelper;
 	}
 
-	if(opts.empty() || opts.count(Help))
-		showMenu();
-	else
+	QString curr_op_mode;
+	int exp_mode_cnt = 0, other_modes_cnt = 0, plugin_modes_cnt = 0;
+
+	bool export_dbms = (opts.count(ExportToDbms) > 0),
+			export_file = (opts.count(ExportToFile) > 0);
+
+	fix_model = (opts.count(FixModel) > 0);
+	upd_mime = (opts.count(DbmMimeType) > 0);
+	import_db = (opts.count(ImportDb) > 0);
+	diff = (opts.count(Diff) > 0);
+	create_configs= (opts.count(CreateConfigs) > 0);
+	list_conns = (opts.count(ListConns) > 0);
+	list_plugins = (opts.count(ListPlugins) > 0);
+	plugin_op = false;
+	export_op = false;
+
+	plugin_modes_cnt = definePluginsExecOrder(opts);
+
+	for(auto &itr : accepted_opts)
 	{
-		QString curr_op_mode;
-		int exp_mode_cnt = 0, other_modes_cnt = 0, plugin_modes_cnt = 0;
+		if(itr.first == Attributes::Connection)
+			continue;
 
-		bool export_dbms = (opts.count(ExportToDbms) > 0),
-				export_file = (opts.count(ExportToFile) > 0);
-
-		fix_model = (opts.count(FixModel) > 0);
-		upd_mime = (opts.count(DbmMimeType) > 0);
-		import_db = (opts.count(ImportDb) > 0);
-		diff = (opts.count(Diff) > 0);
-		create_configs= (opts.count(CreateConfigs) > 0);
-		list_conns = (opts.count(ListConns) > 0);
-		list_plugins = (opts.count(ListPlugins) > 0);
-		plugin_op = false;
-		export_op = false;
-
-		plugin_modes_cnt = definePluginsExecOrder(opts);
-
-		for(auto &itr : accepted_opts)
+		if(opts.count(itr.first))
 		{
-			if(itr.first == Attributes::Connection)
-				continue;
+			curr_op_mode = itr.first;
 
-			if(opts.count(itr.first))
+			if(itr.first == ExportToFile || itr.first == ExportToPng ||
+				 itr.first == ExportToSvg || itr.first == ExportToDbms ||
+				 itr.first == ExportToDict)
 			{
-				curr_op_mode = itr.first;
-
-				if(itr.first == ExportToFile || itr.first == ExportToPng ||
-					 itr.first == ExportToSvg || itr.first == ExportToDbms ||
-					 itr.first == ExportToDict)
-				{
-					exp_mode_cnt++;
-					export_op = true;
-				}
-				else
-					other_modes_cnt++;
+				exp_mode_cnt++;
+				export_op = true;
 			}
+			else
+				other_modes_cnt++;
 		}
-
-		plugin_op = (plugin_modes_cnt > 0);
-
-		if(opts.count(ZoomFactor))
-			zoom = opts[ZoomFactor].toDouble()/static_cast<double>(100);
-
-		if(other_modes_cnt == 0 && exp_mode_cnt == 0)
-			throw Exception(tr("No operation mode was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-		
-		if((exp_mode_cnt > 0 && (fix_model || upd_mime || import_db || diff || create_configs || list_conns || list_plugins)) ||
-			 (exp_mode_cnt == 0 && other_modes_cnt > 1))
-			throw Exception(tr("Multiple operation modes were specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-		
-		if(!fix_model && !upd_mime && !plugin_op && exp_mode_cnt > 1)
-			throw Exception(tr("Multiple export modes were specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-		
-		if(!plugin_op && !list_conns && !list_plugins && !upd_mime && !import_db &&
-			 !diff && !create_configs && !opts.count(Input))
-			throw Exception(tr("No input file was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-		if(import_db && !opts.count(InputDb))
-			throw Exception(tr("No input database was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-		if(!plugin_op && !export_dbms && !upd_mime && !list_conns &&
-			 !list_plugins && !diff && !create_configs && !opts.count(Output))
-			throw Exception(tr("No output file was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-		
-		if(!export_dbms && !upd_mime && !import_db && !list_conns && !list_plugins &&
-			 !create_configs && opts.count(Input) && opts.count(Output) &&
-			 QFileInfo(opts[Input]).absoluteFilePath() == QFileInfo(opts[Output]).absoluteFilePath())
-			throw Exception(tr("The input file must be different from the output file!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-		
-		if(export_dbms && !opts.count(ConnAlias) &&
-			 (!opts.count(Host) || !opts.count(User) || !opts.count(Passwd) || !opts.count(InitialDb)) )
-			throw Exception(tr("Incomplete connection information!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-		
-		if(export_dbms && opts.count(Force) && !opts.count(DropDatabase))
-			throw Exception(tr("The option `%1' must be used only with `%2' when exporting to DBMS!").arg(Force, DropDatabase), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-		if(export_dbms && opts.count(Simulate) && opts.count(NonTransactional))
-			throw Exception(tr("The options `%1' and `%2' cannot be used together when exporting to DBMS!").arg(Simulate, NonTransactional), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-		if(export_dbms && (opts.count(IgnoreErrorCodes) || opts.count(IgnoreDuplicates)) && !opts.count(NonTransactional))
-			throw Exception(tr("The options `%1' and `%2' cannot be used in transactional export mode. Use `%3' to enable these options!").arg(IgnoreErrorCodes, IgnoreDuplicates, NonTransactional), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-		if(opts.count(ExportToPng) && (zoom < ModelWidget::MinimumZoom || zoom > ModelWidget::MaximumZoom))
-			throw Exception(tr("Invalid zoom factor specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-		
-		if(upd_mime && opts[DbmMimeType] != Install && opts[DbmMimeType] != Uninstall)
-			throw Exception(tr("Invalid action specified for MIME type update option!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-		if(create_configs && opts.count(Force) && opts.count(MissingOnly))
-			throw Exception(tr("The options `%1' and `%2' cannot be used together when handling configuration files!").arg(Force, MissingOnly), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-		if(opts.count(DependenciesSql) || opts.count(ChildrenSql) || opts.count(GroupByType))
-		{
-			unsigned num_opts = opts.count(DependenciesSql) ? 1 : 0;
-			num_opts += opts.count(ChildrenSql) ? 1 : 0;
-			num_opts += opts.count(GroupByType) ? 1 : 0;
-
-			if(!export_file || (export_file && !opts.count(Split)))
-				throw Exception(tr("The options `%1', `%2', and `%3' must be used together with the split mode option `%4'!").arg(DependenciesSql, ChildrenSql, GroupByType, Split), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-			if(num_opts > 1)
-				throw Exception(tr("The options `%1', `%2', and `%3' cannot be used simultaneously!").arg(DependenciesSql, ChildrenSql, GroupByType), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-		}
-
-		if(diff)
-		{
-			// If the user wants to compare two models we force the use of --save
-			if(opts.count(CompareFile) && !opts.count(SaveDiff))
-				 opts[SaveDiff] = Attributes::True;
-
-			if(!opts.count(Input) && !opts.count(InputDb))
-				throw Exception(tr("No input file or database was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-			if(opts.count(Input) && opts.count(InputDb))
-				throw Exception(tr("The input file and input database cannot be used simultaneously!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-			if(!opts.count(CompareDb) && !opts.count(CompareFile))
-				throw Exception(tr("No database or model file to compare was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-			if(opts.count(InputDb) && opts.count(CompareFile))
-				throw Exception(tr("Diff between a database and a model is not supported!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-			if(!opts.count(SaveDiff) && !opts.count(ApplyDiff))
-				throw Exception(tr("No diff action (save or apply) was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-			if(opts.count(CompareFile) && opts.count(ApplyDiff))
-				throw Exception(tr("The option `%1' cannot be used together with `%2'!").arg(CompareFile, ApplyDiff), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-			if(opts.count(SaveDiff) && opts[Output].isEmpty())
-				throw Exception(tr("No output file for the diff code was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-			if(opts.count(PartialDiff) && opts[Input].isEmpty() && (opts.count(StartDate) || opts.count(EndDate)))
-				throw Exception(tr("Date filters are allowed only for partial diff operations using an input model!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-			if(opts.count(PartialDiff) && opts.count(FilterObjects) && (opts.count(StartDate) || opts.count(EndDate)))
-				throw Exception(tr("Date filters and object filters cannot be used together!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-			if(opts.count(PartialDiff) && !opts.count(FilterObjects) && !opts.count(StartDate) && !opts.count(EndDate))
-				throw Exception(tr("Partial diff enabled but no object filter was provided!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-
-			// For partial diff we force the --only-matching option and --force-children = all
-			if(opts.count(PartialDiff))
-			{
-				opts[ForceChildren] = AllChildren;
-				opts[OnlyMatching] = "";
-			}
-
-			// Validating the date formats in the provided start/end dates
-			QDateTime *dates[2] = { &start_date, &end_date };
-			QStringList dt_params = { StartDate, EndDate };
-
-			for(int idx = 0; idx < 2; idx++)
-			{
-				if(opts.count(dt_params[idx]))
-				{
-					*dates[idx] = QDateTime::fromString(opts[dt_params[idx]], Qt::ISODate);
-
-					if(!dates[idx]->isValid())
-						throw Exception(tr("Invalid date format `%1' in option `%2'!").arg(opts[dt_params[idx]], dt_params[idx]), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-				}
-			}
-
-			/* If any of the dates are correctly parsed we need to force
-			 * the signature name matching, the forced filtering of all table children objects
-			 * and the only-matching option, so the objects can be correctly retrieved from
-			 * the destination database */
-			if(start_date.isValid() || end_date.isValid())
-			{
-				parsed_opts.erase(MatchByName);
-				parsed_opts[ForceChildren] = AllChildren;
-				parsed_opts[OnlyMatching] = "";
-			}
-		}
-		
-		//Converting input and output files to absolute paths to avoid that they are read/written on the app's working dir
-		if(opts.count(Input))
-			opts[Input] = QFileInfo(opts[Input]).absoluteFilePath();
-
-		if(opts.count(Output))
-			opts[Output] = QFileInfo(opts[Output]).absoluteFilePath();
-
-		/* Special treatment for filter parameters:
-		 * Since several filter parameters can be specified, we need to join
-		 * everything in a single string list so it can be passed to the import helper correctly */
-		if(opts.count(FilterObjects))
-		{
-			opts.erase(FilterObjects);
-
-			for(auto &op : opts)
-			{
-				if(op.first.contains(FilterObjects))
-					obj_filters.append(op.second);
-			}
-		}
-
-		/* Performing a final validation on the parsed options which consists
-		 * in checking if all provided options are compatible with the operation mode selected */
-		QStringList acc_opts = accepted_opts[curr_op_mode];
-		QString long_opt;
-		static QRegularExpression num_rx { "[0-9]+$" };
-
-		// Diff, import and export (to DBMS) share the same connection options
-		if(diff || import_db || export_dbms)
-			acc_opts.append(accepted_opts[ConnOptions]);
-
-		// Diff also accepts all import parameters
-		if(diff)
-			acc_opts.append(accepted_opts[ImportDb]);
-
-		for(auto &itr : opts)
-		{
-			long_opt = itr.first;
-
-			if(long_opt == curr_op_mode || long_opt == Silent)
-				continue;
-
-			/* Before validating the option we need to remove any appended number to the option name
-			 * This happens for options related to object filters and connections */
-			long_opt.remove(num_rx);
-
-			if(!acc_opts.contains(long_opt))
-			{
-				throw Exception(tr("The option `%1' is not accepted by the operation mode `%2'!").arg(long_opt, curr_op_mode),
-												ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
-			}
-		}
-
-		parsed_opts = opts;
 	}
+
+	plugin_op = (plugin_modes_cnt > 0);
+
+	if(opts.count(ZoomFactor))
+		zoom = opts[ZoomFactor].toDouble()/static_cast<double>(100);
+
+	if(other_modes_cnt == 0 && exp_mode_cnt == 0)
+		throw Exception(tr("No operation mode was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if((exp_mode_cnt > 0 && (fix_model || upd_mime || import_db || diff || create_configs || list_conns || list_plugins)) ||
+		 (exp_mode_cnt == 0 && other_modes_cnt > 1))
+		throw Exception(tr("Multiple operation modes were specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(!fix_model && !upd_mime && !plugin_op && exp_mode_cnt > 1)
+		throw Exception(tr("Multiple export modes were specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(!plugin_op && !list_conns && !list_plugins && !upd_mime && !import_db &&
+		 !diff && !create_configs && !opts.count(Input))
+		throw Exception(tr("No input file was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(import_db && !opts.count(InputDb))
+		throw Exception(tr("No input database was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(!plugin_op && !export_dbms && !upd_mime && !list_conns &&
+		 !list_plugins && !diff && !create_configs && !opts.count(Output))
+		throw Exception(tr("No output file was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(!export_dbms && !upd_mime && !import_db && !list_conns && !list_plugins &&
+		 !create_configs && opts.count(Input) && opts.count(Output) &&
+		 QFileInfo(opts[Input]).absoluteFilePath() == QFileInfo(opts[Output]).absoluteFilePath())
+		throw Exception(tr("The input file must be different from the output file!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(export_dbms && !opts.count(ConnAlias) &&
+		 (!opts.count(Host) || !opts.count(User) || !opts.count(Passwd) || !opts.count(InitialDb)) )
+		throw Exception(tr("Incomplete connection information!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(export_dbms && opts.count(Force) && !opts.count(DropDatabase))
+		throw Exception(tr("The option `%1' must be used only with `%2' when exporting to DBMS!").arg(Force, DropDatabase), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(export_dbms && opts.count(Simulate) && opts.count(NonTransactional))
+		throw Exception(tr("The options `%1' and `%2' cannot be used together when exporting to DBMS!").arg(Simulate, NonTransactional), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(export_dbms && (opts.count(IgnoreErrorCodes) || opts.count(IgnoreDuplicates)) && !opts.count(NonTransactional))
+		throw Exception(tr("The options `%1' and `%2' cannot be used in transactional export mode. Use `%3' to enable these options!").arg(IgnoreErrorCodes, IgnoreDuplicates, NonTransactional), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(opts.count(ExportToPng) && (zoom < ModelWidget::MinimumZoom || zoom > ModelWidget::MaximumZoom))
+		throw Exception(tr("Invalid zoom factor specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(upd_mime && opts[DbmMimeType] != Install && opts[DbmMimeType] != Uninstall)
+		throw Exception(tr("Invalid action specified for MIME type update option!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(create_configs && opts.count(Force) && opts.count(MissingOnly))
+		throw Exception(tr("The options `%1' and `%2' cannot be used together when handling configuration files!").arg(Force, MissingOnly), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(opts.count(DependenciesSql) || opts.count(ChildrenSql) || opts.count(GroupByType))
+	{
+		unsigned num_opts = opts.count(DependenciesSql) ? 1 : 0;
+		num_opts += opts.count(ChildrenSql) ? 1 : 0;
+		num_opts += opts.count(GroupByType) ? 1 : 0;
+
+		if(!export_file || (export_file && !opts.count(Split)))
+			throw Exception(tr("The options `%1', `%2', and `%3' must be used together with the split mode option `%4'!").arg(DependenciesSql, ChildrenSql, GroupByType, Split), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+		if(num_opts > 1)
+			throw Exception(tr("The options `%1', `%2', and `%3' cannot be used simultaneously!").arg(DependenciesSql, ChildrenSql, GroupByType), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+	}
+
+	if(diff)
+	{
+		// If the user wants to compare two models we force the use of --save
+		if(opts.count(CompareFile) && !opts.count(SaveDiff))
+			 opts[SaveDiff] = Attributes::True;
+
+		if(!opts.count(Input) && !opts.count(InputDb))
+			throw Exception(tr("No input file or database was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+		if(opts.count(Input) && opts.count(InputDb))
+			throw Exception(tr("The input file and input database cannot be used simultaneously!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+		if(!opts.count(CompareDb) && !opts.count(CompareFile))
+			throw Exception(tr("No database or model file to compare was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+		if(opts.count(InputDb) && opts.count(CompareFile))
+			throw Exception(tr("Diff between a database and a model is not supported!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+		if(!opts.count(SaveDiff) && !opts.count(ApplyDiff))
+			throw Exception(tr("No diff action (save or apply) was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+		if(opts.count(CompareFile) && opts.count(ApplyDiff))
+			throw Exception(tr("The option `%1' cannot be used together with `%2'!").arg(CompareFile, ApplyDiff), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+		if(opts.count(SaveDiff) && opts[Output].isEmpty())
+			throw Exception(tr("No output file for the diff code was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+		if(opts.count(PartialDiff) && opts[Input].isEmpty() && (opts.count(StartDate) || opts.count(EndDate)))
+			throw Exception(tr("Date filters are allowed only for partial diff operations using an input model!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+		if(opts.count(PartialDiff) && opts.count(FilterObjects) && (opts.count(StartDate) || opts.count(EndDate)))
+			throw Exception(tr("Date filters and object filters cannot be used together!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+		if(opts.count(PartialDiff) && !opts.count(FilterObjects) && !opts.count(StartDate) && !opts.count(EndDate))
+			throw Exception(tr("Partial diff enabled but no object filter was provided!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+		// For partial diff we force the --only-matching option and --force-children = all
+		if(opts.count(PartialDiff))
+		{
+			opts[ForceChildren] = AllChildren;
+			opts[OnlyMatching] = "";
+		}
+
+		// Validating the date formats in the provided start/end dates
+		QDateTime *dates[2] = { &start_date, &end_date };
+		QStringList dt_params = { StartDate, EndDate };
+
+		for(int idx = 0; idx < 2; idx++)
+		{
+			if(opts.count(dt_params[idx]))
+			{
+				*dates[idx] = QDateTime::fromString(opts[dt_params[idx]], Qt::ISODate);
+
+				if(!dates[idx]->isValid())
+					throw Exception(tr("Invalid date format `%1' in option `%2'!").arg(opts[dt_params[idx]], dt_params[idx]), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+			}
+		}
+
+		/* If any of the dates are correctly parsed we need to force
+		 * the signature name matching, the forced filtering of all table children objects
+		 * and the only-matching option, so the objects can be correctly retrieved from
+		 * the destination database */
+		if(start_date.isValid() || end_date.isValid())
+		{
+			parsed_opts.erase(MatchByName);
+			parsed_opts[ForceChildren] = AllChildren;
+			parsed_opts[OnlyMatching] = "";
+		}
+	}
+
+	//Converting input and output files to absolute paths to avoid that they are read/written on the app's working dir
+	if(opts.count(Input))
+		opts[Input] = QFileInfo(opts[Input]).absoluteFilePath();
+
+	if(opts.count(Output))
+		opts[Output] = QFileInfo(opts[Output]).absoluteFilePath();
+
+	/* Special treatment for filter parameters:
+	 * Since several filter parameters can be specified, we need to join
+	 * everything in a single string list so it can be passed to the import helper correctly */
+	if(opts.count(FilterObjects))
+	{
+		opts.erase(FilterObjects);
+
+		for(auto &op : opts)
+		{
+			if(op.first.contains(FilterObjects))
+				obj_filters.append(op.second);
+		}
+	}
+
+	/* Performing a final validation on the parsed options which consists
+	 * in checking if all provided options are compatible with the operation mode selected */
+	QStringList acc_opts = accepted_opts[curr_op_mode];
+	QString long_opt;
+	static QRegularExpression num_rx { "[0-9]+$" };
+
+	// Diff, import and export (to DBMS) share the same connection options
+	if(diff || import_db || export_dbms)
+		acc_opts.append(accepted_opts[ConnOptions]);
+
+	// Diff also accepts all import parameters
+	if(diff)
+		acc_opts.append(accepted_opts[ImportDb]);
+
+	for(auto &itr : opts)
+	{
+		long_opt = itr.first;
+
+		if(long_opt == curr_op_mode || long_opt == Silent)
+			continue;
+
+		/* Before validating the option we need to remove any appended number to the option name
+		 * This happens for options related to object filters and connections */
+		long_opt.remove(num_rx);
+
+		if(!acc_opts.contains(long_opt))
+		{
+			throw Exception(tr("The option `%1' is not accepted by the operation mode `%2'!").arg(long_opt, curr_op_mode),
+											ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+		}
+	}
+
+	parsed_opts = opts;
 }
 
 int PgModelerCliApp::exec()
 {
 	try
 	{
-		if(!parsed_opts.empty())
+		showVersionInfo(parsed_opts.count(Version) > 0);
+
+		if(parsed_opts.empty() || parsed_opts.count(Help))
+			showMenu();
+		else if(list_conns)
+			listConnections();
+		else if(list_plugins)
+			listPlugins();
+		else if(!parsed_opts.count(Version))
 		{
-			showVersionInfo();
+			runPluginsPreOperations();
 
-			if(list_conns)
-				listConnections();
-			else if(list_plugins)
-				listPlugins();
+			if(fix_model)
+				fixModel();
+			else if(upd_mime)
+				updateMimeType();
+			else if(create_configs)
+				createConfigurations();
+			else if(import_db)
+				importDatabase();
+			else if(diff)
+				diffModels();
+			else if(export_op)
+				exportModel();
 			else
-			{
-				runPluginsPreOperations();
+				runPluginsOperations();
 
-				if(fix_model)
-					fixModel();
-				else if(upd_mime)
-					updateMimeType();
-				else if(create_configs)
-					createConfigurations();
-				else if(import_db)
-					importDatabase();
-				else if(diff)
-					diffModels();
-				else if(export_op)
-					exportModel();
-				else
-					runPluginsOperations();
-
-				runPluginsPostOperations();
-			}
+			runPluginsPostOperations();
 		}
 
 		return 0;
@@ -2941,14 +2951,14 @@ int PgModelerCliApp::definePluginsExecOrder(const attribs_map &opts)
 	int plug_op_modes = 0;
 	PgModelerCliPlugin::OperationId op_id;
 	QString acc_op_key;
-	bool is_op_mode = false;
+	bool is_op_mode = false, stg_plugin = false;
 
-	QStringList valid_opts, export_opts = {
+	QStringList valid_opts, export_ops = {
 		ExportToFile, ExportToPng, ExportToSvg,
 		ExportToDbms, ExportToDict
 	};
 
-	std::map<PgModelerCliPlugin::OperationId, QString> cli_op = {
+	std::map<PgModelerCliPlugin::OperationId, QString> cli_ops = {
 		{ PgModelerCliPlugin::ExportToFile, ExportToFile},
 		{ PgModelerCliPlugin::ExportToPng, ExportToPng },
 		{ PgModelerCliPlugin::ExportToSvg, ExportToSvg },
@@ -2964,30 +2974,57 @@ int PgModelerCliApp::definePluginsExecOrder(const attribs_map &opts)
 	{
 		for(auto &plugin : plugins)
 		{
+			stg_plugin = false;
 			valid_opts = plugin->getValidOptions();
 			is_op_mode = plugin->isOpModeOption(opt);
+			op_id = plugin->getOperationId();
 
+			/* We discard the plugin immediately if
+			 * the current option isn't part of the
+			 * valid options set of the plugin or
+			 * the plugin is already stagged for
+			 * execution */
 			if(!valid_opts.contains(opt) ||
-				 !is_op_mode ||
 				 plug_exec_order.contains(plugin))
 				continue;
 
-			plug_exec_order.append(plugin);
-			op_id = plugin->getOperationId();
-
-			if(op_id == PgModelerCliPlugin::CustomCliOp &&
-				 is_op_mode && !accepted_opts.count(opt))
+			/* If the plugin run in any export operation we
+			 * have to include its valid options in the valid
+			 * options sets of each export option so the CLI
+			 * recognizes the plugin options in use */
+			if(op_id == PgModelerCliPlugin::Export)
 			{
-				acc_op_key = opt;
-				plug_op_modes++;
-			}
-			else if(op_id == PgModelerCliPlugin::Export && export_opts.contains(opt))
-				acc_op_key = opt;
-			else if(cli_op.count(op_id))
-				acc_op_key = cli_op[op_id];
+				for(auto &exp_op : export_ops)
+				{
+					accepted_opts[exp_op].append(valid_opts);
+					accepted_opts[exp_op].append(IgnoreFaultyPlugins);
+				}
 
-			accepted_opts[acc_op_key].append(valid_opts);
-			accepted_opts[acc_op_key].append(IgnoreFaultyPlugins);
+				stg_plugin = true;
+			}
+			/* If the plugin runs o an individual CLI operation
+			 * we copy the plugin's valid options to the set
+			 * of option to the related CLI operation */
+			else if((op_id == PgModelerCliPlugin::CustomCliOp &&
+							 is_op_mode && !accepted_opts.count(opt)) ||
+							cli_ops.count(op_id))
+			{
+				if(op_id == PgModelerCliPlugin::CustomCliOp)
+				{
+					acc_op_key = opt;
+					plug_op_modes++;
+				}
+				else
+					acc_op_key = cli_ops[op_id];
+
+				accepted_opts[acc_op_key].append(valid_opts);
+				accepted_opts[acc_op_key].append(IgnoreFaultyPlugins);
+				stg_plugin = true;
+			}
+
+			// Stagging the plugin for execution
+			if(stg_plugin)
+				plug_exec_order.append(plugin);
 		}
 	}
 

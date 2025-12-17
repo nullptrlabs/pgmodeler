@@ -26,16 +26,14 @@ PgSQLTypeWidget::PgSQLTypeWidget(QWidget *parent, const QString &label) : QWidge
 	QStringList interval_lst, spatial_lst;
 
 	setupUi(this);
-
 	allow_qualifiers = true;
 
 	if(!label.isEmpty())
-		groupBox->setTitle(label);
+		data_type_gb->setTitle(label);
 
-	this->setWindowTitle(groupBox->title());
+	this->setWindowTitle(data_type_gb->title());
 
-	format_hl=nullptr;
-	format_hl=new SyntaxHighlighter(format_txt, true, false, font().pointSizeF());
+	format_hl = new SyntaxHighlighter(format_txt, true, false, font().pointSizeF());
 	format_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 	this->adjustSize();
 
@@ -90,29 +88,39 @@ void PgSQLTypeWidget::updateTypeFormat()
 			type = data.toUInt();
 
 		length_sb->setEnabled(allow_qualifiers && type.hasVariableLength());
+		length_sb->setVisible(allow_qualifiers);
+		length_lbl->setVisible(allow_qualifiers);
+
 		timezone_chk->setVisible(type.acceptsTimezone());
-		timezone_lbl->setVisible(type.acceptsTimezone());
+
 		precision_sb->setEnabled(allow_qualifiers && type.acceptsPrecision());
+		precision_sb->setVisible(allow_qualifiers);
+		precision_lbl->setVisible(allow_qualifiers);
+
 		dimension_sb->setEnabled(type != "void");
+		dimension_sb->setVisible(dimension_sb->isEnabled());
+		dimension_lbl->setVisible(dimension_sb->isEnabled());
 
 		interval_cmb->setVisible(type == "interval");
-		interval_lbl->setVisible(interval_cmb->isVisible());
-		interval_cmb->setEnabled(allow_qualifiers);
+		interval_lbl->setVisible(allow_qualifiers && interval_cmb->isVisible());
+		interval_cmb->setVisible(allow_qualifiers && interval_cmb->isVisible());
 
-		spatial_cmb->setEnabled(allow_qualifiers);
-		spatial_cmb->setVisible(type.isPostGisGeoType());
-		spatial_lbl->setVisible(type.isPostGisGeoType());
-		variation_lbl->setVisible(type.isPostGisGeoType());
+		bool is_spatial_type = allow_qualifiers && type.isPostGisGeoType();
 
-		srid_lbl->setVisible(type.isPostGisGeoType());
-		srid_spb->setEnabled(allow_qualifiers);
-		srid_spb->setVisible(type.isPostGisGeoType());
+		spatial_cmb->setEnabled(is_spatial_type);
+		spatial_cmb->setVisible(is_spatial_type);
+		spatial_lbl->setVisible(is_spatial_type);
+		variation_lbl->setVisible(is_spatial_type);
 
-		var_m_chk->setEnabled(allow_qualifiers);
-		var_m_chk->setVisible(type.isPostGisGeoType());
+		srid_spb->setEnabled(is_spatial_type);
+		srid_lbl->setVisible(is_spatial_type);
+		srid_spb->setVisible(is_spatial_type);
 
-		var_z_chk->setEnabled(allow_qualifiers);
-		var_z_chk->setVisible(type.isPostGisGeoType());
+		var_m_chk->setEnabled(is_spatial_type);
+		var_m_chk->setVisible(is_spatial_type);
+
+		var_z_chk->setEnabled(is_spatial_type);
+		var_z_chk->setVisible(is_spatial_type);
 
 		if(spatial_cmb->isVisible())
 		{
@@ -184,10 +192,7 @@ void PgSQLTypeWidget::setAttributes(PgSqlType type, DatabaseModel *model, bool a
 		QString type_name;
 
 		this->allow_qualifiers = allow_qualifiers;
-
-		//type_cmb->blockSignals(true);
 		listPgSQLTypes(type_cmb, model, usr_type_conf, oid_types, pseudo_types);
-		//type_cmb->blockSignals(false);
 
 		//Get the passed type index
 		type_name=~type;

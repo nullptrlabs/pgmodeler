@@ -33,6 +33,7 @@ ObjectRenameWidget::ObjectRenameWidget(QWidget * parent) : QDialog(parent)
 	setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 	setAttribute(Qt::WA_TranslucentBackground, true);
 
+	GuiUtilsNs::configureWidgetFont(rename_lbl, GuiUtilsNs::SmallFontFactor, true);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
 	connect(new_name_edt, &QLineEdit::returnPressed, apply_btn, &QPushButton::click);
@@ -82,17 +83,17 @@ void ObjectRenameWidget::updateLabelsButtons()
 	if(objects.size() == 1)
 	{
 		BaseObject *obj = objects.front();
-		obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(obj->getSchemaName())));
+		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(obj->getSchemaName()));
 		obj_icon_lbl->setToolTip(obj->getTypeName());
 		new_name_edt->setText(obj->getName());
-		rename_lbl->setText(tr("Rename %1 <strong>%2</strong> to:").arg(obj->getTypeName().toLower(), obj->getName()));
+		rename_lbl->setText(tr("Rename %1 <strong><u>%2</u></strong> to").arg(obj->getTypeName().toLower(), obj->getName()));
 	}
 	else
 	{
 		new_name_edt->setText("");
-		obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("objects")));
+		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap("objects"));
 		obj_icon_lbl->setToolTip("");
-		rename_lbl->setText(tr("Rename <strong>%1</strong> object(s) to:").arg(objects.size()));
+		rename_lbl->setText(tr("Rename %1 object(s) to").arg(objects.size()));
 	}
 
 	use_defaults_chk->setVisible(paste_mode);
@@ -101,7 +102,7 @@ void ObjectRenameWidget::updateLabelsButtons()
 	if(!paste_mode)
 	{
 		cancel_btn->setText(tr("Cancel"));
-		cancel_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("close1")));
+		cancel_btn->setIcon(GuiUtilsNs::getIcon("close1"));
 
 		disconnect(apply_btn, nullptr, this, nullptr);
 		connect(apply_btn, &QPushButton::clicked, this, &ObjectRenameWidget::applyRenaming, Qt::UniqueConnection);
@@ -109,7 +110,7 @@ void ObjectRenameWidget::updateLabelsButtons()
 	else
 	{
 		cancel_btn->setText(tr("Ignore"));
-		cancel_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("cancel")));
+		cancel_btn->setIcon(GuiUtilsNs::getIcon("cancel"));
 
 		disconnect(apply_btn, nullptr, this, nullptr);
 		connect(apply_btn, &QPushButton::clicked, this, &ObjectRenameWidget::validateName, Qt::UniqueConnection);

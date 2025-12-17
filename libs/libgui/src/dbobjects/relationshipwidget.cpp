@@ -31,105 +31,93 @@ RelationshipWidget::RelationshipWidget(QWidget *parent): BaseObjectWidget(parent
 {
 	Ui_RelationshipWidget::setupUi(this);
 
+	ref_table_sel = new ObjectSelectorWidget({ ObjectType::Table,
+																						 ObjectType::View,
+																						 ObjectType::ForeignTable }, this);
+	ref_table_sel->setReadOnly(true);
+
+	ref_table_lt->insertWidget(0, ref_table_sel);
+
+	recv_table_sel = new ObjectSelectorWidget({ ObjectType::Table,
+																							ObjectType::View,
+																							ObjectType::ForeignTable }, this);
+	recv_table_sel->setReadOnly(true);
+	recv_table_lt->insertWidget(0, recv_table_sel);
+
 	QStringList list;
-	QGridLayout *grid=nullptr;
-	QVBoxLayout *vlayout=nullptr;
-	QFrame *frame=nullptr;
-	QWidgetList pattern_fields={ src_col_pattern_txt, dst_col_pattern_txt,
+	QGridLayout *grid = nullptr;
+	QVBoxLayout *vlayout = nullptr;
+	QFrame *frame = nullptr;
+	QWidgetList pattern_fields { src_col_pattern_txt, dst_col_pattern_txt,
 															 src_fk_pattern_txt, dst_fk_pattern_txt,
 															 pk_pattern_txt, uq_pattern_txt,
 															 pk_col_pattern_txt, fk_idx_pattern_txt };
 
-	table1_hl=nullptr;
-	table1_hl=new SyntaxHighlighter(ref_table_txt, true, false, font().pointSizeF());
-	table1_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
-
-	table2_hl=nullptr;
-	table2_hl=new SyntaxHighlighter(recv_table_txt, true, false, font().pointSizeF());
-	table2_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
-
-	for(int i=0; i < pattern_fields.size(); i++)
+	for(int i = 0; i < pattern_fields.size(); i++)
 	{
-		patterns_hl[i]=new SyntaxHighlighter(qobject_cast<QPlainTextEdit *>(pattern_fields[i]), true, false, font().pointSizeF());
+		patterns_hl[i] = new SyntaxHighlighter(qobject_cast<QPlainTextEdit *>(pattern_fields[i]), true, false, font().pointSizeF());
 		patterns_hl[i]->loadConfiguration(GlobalAttributes::getPatternHighlightConfPath());
 	}
 
-	attributes_tab=new CustomTableWidget(CustomTableWidget::AllButtons ^
-										 (CustomTableWidget::UpdateButton |
-											CustomTableWidget::MoveButtons), true, this);
+	attributes_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																																			 CustomTableWidget::AllButtons ^
+																																			 (CustomTableWidget::UpdateButton |
+																																				CustomTableWidget::MoveButtons), true,
+																																			 attributes_pg);
 
-	constraints_tab=new CustomTableWidget(CustomTableWidget::AllButtons  ^
-											(CustomTableWidget::UpdateButton |
-											 CustomTableWidget::MoveButtons), true, this);
+	constraints_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																																				CustomTableWidget::AllButtons  ^
+																																				(CustomTableWidget::UpdateButton |
+																																				 CustomTableWidget::MoveButtons), true,
+																																				constraints_pg);
 
-	advanced_objs_tab=new CustomTableWidget(CustomTableWidget::EditButton, true, this);
+	advanced_objs_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																																					CustomTableWidget::EditButton, true,
+																																					advanced_pg);
 
 	attributes_tab->setColumnCount(2);
 	attributes_tab->setHeaderLabel(tr("Attribute"), 0);
-	attributes_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("column")),0);
+	attributes_tab->setHeaderIcon(GuiUtilsNs::getIcon("column"),0);
 	attributes_tab->setHeaderLabel(tr("Type"), 1);
-	attributes_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("usertype")),1);
+	attributes_tab->setHeaderIcon(GuiUtilsNs::getIcon("usertype"),1);
 
 	constraints_tab->setColumnCount(2);
 	constraints_tab->setHeaderLabel(tr("Constraint"), 0);
-	constraints_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("constraint")),0);
+	constraints_tab->setHeaderIcon(GuiUtilsNs::getIcon("constraint"),0);
 	constraints_tab->setHeaderLabel(tr("Type"), 1);
-	constraints_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("usertype")),1);
+	constraints_tab->setHeaderIcon(GuiUtilsNs::getIcon("usertype"),1);
 
 	advanced_objs_tab->setColumnCount(2);
 	advanced_objs_tab->setHeaderLabel(tr("Name"), 0);
-	advanced_objs_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("column")),0);
+	advanced_objs_tab->setHeaderIcon(GuiUtilsNs::getIcon("column"),0);
 	advanced_objs_tab->setHeaderLabel(tr("Type"), 1);
-	advanced_objs_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("usertype")),1);
+	advanced_objs_tab->setHeaderIcon(GuiUtilsNs::getIcon("usertype"),1);
 
 	connect(advanced_objs_tab, &CustomTableWidget::s_rowEdited, this, &RelationshipWidget::showAdvancedObject);
 
-	grid=new QGridLayout;
-	grid->addWidget(attributes_tab, 0,0,1,1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
-	rel_attribs_tbw->widget(AttributesTab)->setLayout(grid);
+	QVBoxLayout *layout  = dynamic_cast<QVBoxLayout *>(special_pk_pg->layout());
+	frame = generateInformationFrame(tr("Use the special primary key if you want to create a primary key containing generated columns in the receiver table. <strong>NOTE:</strong> if this is a new relationship, it's mandatory to finish its creation and reopen this dialog to create the special primary key."));
+	frame->setParent(special_pk_pg);
+	layout->addWidget(frame);
 
-	grid=new QGridLayout;
-	grid->addWidget(constraints_tab, 0,0,1,1);
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
-	rel_attribs_tbw->widget(ConstraintsTab)->setLayout(grid);
+	layout = dynamic_cast<QVBoxLayout *>(advanced_pg->layout());
+	frame = generateInformationFrame(tr("This advanced tab shows the objects (columns or table) automatically created by the relationship's connection as well as the foreign keys that represent the link between the involved tables."));
+	layout->addWidget(frame);
 
-	grid=dynamic_cast<QGridLayout *>(rel_attribs_tbw->widget(SpecialPkTab)->layout());
-	frame=generateInformationFrame(tr("Use the special primary key if you want to include a primary key containing generated columns to the receiver table. <strong>Important:</strong> if this is a new relationship there is a need to finish its creation and reopen this dialog to create the special primary key."));
+	custom_color_cl = new ColorPickerWidget(1,this);
+	custom_color_cl->setEnabled(false);
+	custom_color_lt->insertWidget(1, custom_color_cl);
 
-	grid->addWidget(frame, 1, 0, 1, 1);
-	frame->setParent(rel_attribs_tbw->widget(SpecialPkTab));
+	baseobject_grid->setContentsMargins(0,0,0,0);
+	base_fields_lt->addLayout(baseobject_grid);
 
-	grid=new QGridLayout;
-	grid->setContentsMargins(GuiUtilsNs::LtMargins);
+	configureTabbedLayout(rel_attribs_tbw, false);
 
-	grid->addWidget(advanced_objs_tab, 0, 0, 1, 1);
-
-	frame=generateInformationFrame(tr("This advanced tab shows the objects (columns or table) auto created by the relationship's connection as well the foreign keys that represents the link between the participant tables."));
-	grid->addWidget(frame, 1, 0, 1, 1);
-
-	rel_attribs_tbw->widget(AdvancedTab)->setLayout(grid);
-
-	color_picker=new ColorPickerWidget(1,this);
-	color_picker->setEnabled(false);
-	grid=dynamic_cast<QGridLayout *>(rel_attribs_tbw->widget(GeneralTab)->layout());
-	grid->addWidget(color_picker, 0, 1);
-
-	configureFormLayout(relationship_grid, ObjectType::Relationship);
+	baseobject_grid->removeWidget(disable_sql_chk);
+	rel_attribs_grid->addWidget(disable_sql_chk, rel_attribs_grid->count(), 0, 1, 0);
+	options_lt->insertWidget(options_lt->count() - 1, disable_sql_chk);
 
 	deferral_cmb->addItems(DeferralType::getTypes());
-
-	frame=generateInformationFrame(tr("Available tokens to define name patterns:<br/>\
-				<strong>%1</strong> = Reference (source) primary key column name. <em>(Ignored on constraint patterns)</em><br/> \
-				<strong>%2</strong> = Reference (source) table name.<br/> \
-				<strong>%3</strong> = Receiver (destination) table name.<br/> \
-				<strong>%4</strong> = Generated table name. <em>(Only for n:n relationships)</em>")
-				.arg(Relationship::SrcColToken)
-				.arg(Relationship::SrcTabToken)
-				.arg(Relationship::DstTabToken)
-				.arg(Relationship::GenTabToken));
-	vlayout=dynamic_cast<QVBoxLayout *>(name_patterns_grp->layout());
-	vlayout->addWidget(frame);
 
 	list = ActionType::getTypes();
 	list.prepend(tr("Default"));
@@ -141,21 +129,20 @@ RelationshipWidget::RelationshipWidget(QWidget *parent): BaseObjectWidget(parent
 	for(auto &type : IndexingType::getTypes())
 		index_type_cmb->addItem(type, type);
 
-	tabs={ nullptr, rel_attribs_tbw->widget(SettingsTab),
-				 rel_attribs_tbw->widget(AttributesTab), rel_attribs_tbw->widget(ConstraintsTab),
-				 rel_attribs_tbw->widget(SpecialPkTab), rel_attribs_tbw->widget(AdvancedTab) };
+	tabs = { nullptr, rel_attribs_tbw->widget(SettingsTab),
+					 rel_attribs_tbw->widget(AttributesTab), rel_attribs_tbw->widget(ConstraintsTab),
+					 rel_attribs_tbw->widget(SpecialPkTab), rel_attribs_tbw->widget(AdvancedTab) };
 
-	tab_labels=QStringList{ "", rel_attribs_tbw->tabText(SettingsTab),
-						 rel_attribs_tbw->tabText(AttributesTab), rel_attribs_tbw->tabText(ConstraintsTab),
-						 rel_attribs_tbw->tabText(SpecialPkTab), rel_attribs_tbw->tabText(AdvancedTab)};
+	tab_labels = { "", rel_attribs_tbw->tabText(SettingsTab),
+								 rel_attribs_tbw->tabText(AttributesTab), rel_attribs_tbw->tabText(ConstraintsTab),
+								 rel_attribs_tbw->tabText(SpecialPkTab), rel_attribs_tbw->tabText(AdvancedTab) };
 
-	part_bound_expr_txt=new NumberedTextEditor(this, true);
-	part_bound_expr_hl=new SyntaxHighlighter(part_bound_expr_txt);
+	part_bound_expr_txt = new NumberedTextEditor(this, true);
+	part_bound_expr_hl = new SyntaxHighlighter(part_bound_expr_txt);
 	part_bound_expr_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
-	dynamic_cast<QGridLayout *>(part_bound_expr_gb->layout())->addWidget(part_bound_expr_txt, 1, 0);
+	part_bound_expr_gb->layout()->addWidget(part_bound_expr_txt);
 
 	connect(deferrable_chk, &QCheckBox::toggled, deferral_cmb, &QComboBox::setEnabled);
-	connect(deferrable_chk, &QCheckBox::toggled, deferral_lbl, &QLabel::setEnabled);
 
 	connect(identifier_chk, &QCheckBox::toggled, this, [this](){
 		table1_mand_chk->setDisabled(identifier_chk->isChecked());
@@ -187,14 +174,14 @@ RelationshipWidget::RelationshipWidget(QWidget *parent): BaseObjectWidget(parent
 	connect(storage_chk, &QCheckBox::toggled, this, &RelationshipWidget::selectCopyOptions);
 	connect(all_chk, &QCheckBox::toggled, this, &RelationshipWidget::selectCopyOptions);
 
-	connect(custom_color_chk, &QCheckBox::toggled, color_picker, &ColorPickerWidget::setEnabled);
+	connect(custom_color_chk, &QCheckBox::toggled, custom_color_cl, &ColorPickerWidget::setEnabled);
 
 	connect(fk_gconf_chk, &QCheckBox::toggled, this, &RelationshipWidget::useFKGlobalSettings);
 	connect(patterns_gconf_chk, &QCheckBox::toggled, this, &RelationshipWidget::usePatternGlobalSettings);
 	connect(gen_bound_expr_btn, &QPushButton::clicked, this, &RelationshipWidget::generateBoundingExpr);
 	connect(default_part_chk, &QCheckBox::toggled, part_bound_expr_txt, &NumberedTextEditor::setDisabled);
 
-	setMinimumSize(600, 380);
+	setMinimumSize(650, 450);
 }
 
 void RelationshipWidget::setAttributes(DatabaseModel *model, OperationList *op_list, PhysicalTable *src_tab, PhysicalTable *dst_tab, BaseRelationship::RelType rel_type)
@@ -205,8 +192,8 @@ void RelationshipWidget::setAttributes(DatabaseModel *model, OperationList *op_l
 	{
 		rel=new Relationship(rel_type, src_tab, dst_tab);
 
-		color_picker->generateRandomColors();
-		rel->setCustomColor(color_picker->getColor(0));
+		custom_color_cl->generateRandomColors();
+		rel->setCustomColor(custom_color_cl->getColor(0));
 
 		this->new_object=true;
 		this->setAttributes(model, op_list, rel);
@@ -237,8 +224,7 @@ void RelationshipWidget::setAttributes(DatabaseModel *model, OperationList *op_l
 	}
 
 	rel_type=base_rel->getRelationshipType();
-	rel_type_name_lbl->setText(base_rel->getRelationshipTypeName());
-	rel_icon_lbl->setPixmap(GuiUtilsNs::getIconPath(base_rel->getRelTypeAttribute().replace("rel", "relationship")));
+	obj_icon_lbl->setPixmap(GuiUtilsNs::getIconPath(base_rel->getRelTypeAttribute().replace("rel", "relationship")));
 
 	aux_rel=dynamic_cast<Relationship *>(base_rel);
 	has_foreign_tab = (base_rel->getTable(BaseRelationship::SrcTable)->getObjectType() == ObjectType::ForeignTable ||
@@ -248,54 +234,54 @@ void RelationshipWidget::setAttributes(DatabaseModel *model, OperationList *op_l
 	{
 		if(base_rel->getRelationshipType()!=BaseRelationship::RelationshipFk)
 		{
-			ref_table_lbl->setText(tr("Referrer view:"));
-			ref_table_txt->setToolTip(tr("<p>Referrer view references one or more columns of a table to construct it's own columns.</p>"));
-			recv_table_txt->setToolTip(tr("<p>Referenced table has its columns referenced by a view in order to construct the columns of this latter.</p>"));
+			ref_table_lbl->setText(tr("Referrer view"));
+			ref_table_sel->setToolTip(tr("<p>Referrer view references one or more columns of a table to construct it's own columns.</p>"));
+			recv_table_sel->setToolTip(tr("<p>Referenced table has its columns referenced by a view in order to construct the columns of this latter.</p>"));
 		}
 		else
 		{
-			ref_table_lbl->setText(tr("Referrer table:"));
-			ref_table_txt->setToolTip(tr("<p>Referrer table references one or more columns of a table through foreign keys. This is the (n) side of relationship.</p>"));
-			recv_table_txt->setToolTip(tr("<p>Referenced table has its columns referenced by a table's foreign key. This is the (1) side of relationship.</p>"));
+			ref_table_lbl->setText(tr("Referrer table"));
+			ref_table_sel->setToolTip(tr("<p>Referrer table references one or more columns of a table through foreign keys. This is the (n) side of relationship.</p>"));
+			recv_table_sel->setToolTip(tr("<p>Referenced table has its columns referenced by a table's foreign key. This is the (1) side of relationship.</p>"));
 		}
 
-		recv_table_lbl->setText(tr("Referenced table:"));
+		recv_table_lbl->setText(tr("Referenced table"));
 
-		ref_table_txt->setPlainText(base_rel->getTable(BaseRelationship::SrcTable)->getName(true));
-		recv_table_txt->setPlainText(base_rel->getTable(BaseRelationship::DstTable)->getName(true));
+		ref_table_sel->setSelectedObject(base_rel->getTable(BaseRelationship::SrcTable));
+		recv_table_sel->setSelectedObject(base_rel->getTable(BaseRelationship::DstTable));
 	}
 	else if(aux_rel)
 	{
 		if(rel_type == BaseRelationship::RelationshipPart)
 		{
-			ref_table_lbl->setText(tr("Partitioned table:"));
-			ref_table_txt->setToolTip(tr("<p>Partitioned table is the one which is splitted into smaller pieces (partitions). This table is where the partitioning strategy or type is defined.</p>"));
+			ref_table_lbl->setText(tr("Partitioned table"));
+			ref_table_sel->setToolTip(tr("<p>Partitioned table is the one which is splitted into smaller pieces (partitions). This table is where the partitioning strategy or type is defined.</p>"));
 
-			recv_table_lbl->setText(tr("Partition table:"));
-			recv_table_txt->setToolTip(tr("<p>Partition table is the one attached to a partitioned table in which operations over data will be routed (according to the paritionig rule) when trying to handle the partitioned table.</p>"));
+			recv_table_lbl->setText(tr("Partition table"));
+			recv_table_sel->setToolTip(tr("<p>Partition table is the one attached to a partitioned table in which operations over data will be routed (according to the paritionig rule) when trying to handle the partitioned table.</p>"));
 
-			ref_table_txt->setPlainText(aux_rel->getReferenceTable()->getName(true));
-			recv_table_txt->setPlainText(aux_rel->getReceiverTable()->getName(true));
+			ref_table_sel->setSelectedObject(aux_rel->getReferenceTable());
+			recv_table_sel->setSelectedObject(aux_rel->getReceiverTable());
 		}
 		else if(rel_type!=BaseRelationship::RelationshipNn)
 		{
-			ref_table_lbl->setText(tr("Reference table:"));
-			ref_table_txt->setToolTip(tr("<p>Reference table has the columns from its primary key will copied to the receiver table in order to represent the linking between them. This is the (1) side of relationship.</p>"));
+			ref_table_lbl->setText(tr("Reference table"));
+			ref_table_sel->setToolTip(tr("<p>Reference table has the columns from its primary key will copied to the receiver table in order to represent the linking between them. This is the (1) side of relationship.</p>"));
 
-			recv_table_lbl->setText(tr("Receiver table:"));
-			recv_table_txt->setToolTip(tr("<p>Receiver (or referer) table will receive the generated columns and the foreign key in order to represent the linking between them. This is the (n) side of relationship.</p>"));
+			recv_table_lbl->setText(tr("Receiver table"));
+			recv_table_sel->setToolTip(tr("<p>Receiver (or referer) table will receive the generated columns and the foreign key in order to represent the linking between them. This is the (n) side of relationship.</p>"));
 
-			ref_table_txt->setPlainText(aux_rel->getReferenceTable()->getName(true));
-			recv_table_txt->setPlainText(aux_rel->getReceiverTable()->getName(true));
+			ref_table_sel->setSelectedObject(aux_rel->getReferenceTable());
+			recv_table_sel->setSelectedObject(aux_rel->getReceiverTable());
 		}
 		else
 		{
-			ref_table_lbl->setText(tr("Reference table:"));
-			ref_table_txt->setToolTip(tr("<p>In many-to-many relationships both tables are used as reference to generate the table that represents the linking. Columns from both tables are copied to the resultant table and two foreign keys are created as well in order to reference each participant table.</p>"));
-			recv_table_lbl->setText(tr("Reference Table:"));
-			recv_table_txt->setToolTip(ref_table_txt->toolTip());
-			ref_table_txt->setPlainText(base_rel->getTable(BaseRelationship::SrcTable)->getName(true));
-			recv_table_txt->setPlainText(base_rel->getTable(BaseRelationship::DstTable)->getName(true));
+			ref_table_lbl->setText(tr("Reference table"));
+			ref_table_sel->setToolTip(tr("<p>In many-to-many relationships both tables are used as reference to generate the table that represents the linking. Columns from both tables are copied to the resultant table and two foreign keys are created as well in order to reference each participant table.</p>"));
+			recv_table_lbl->setText(tr("Reference Table"));
+			recv_table_sel->setToolTip(ref_table_sel->toolTip());
+			ref_table_sel->setSelectedObject(base_rel->getTable(BaseRelationship::SrcTable));
+			recv_table_sel->setSelectedObject(base_rel->getTable(BaseRelationship::DstTable));
 		}
 
 		if(rel_type == BaseRelationship::RelationshipPart)
@@ -308,7 +294,12 @@ void RelationshipWidget::setAttributes(DatabaseModel *model, OperationList *op_l
 		}
 	}
 
-	disable_sql_chk->setVisible(base_rel->getObjectType()==ObjectType::Relationship);
+	bool hide_sql_prev = (aux_rel != nullptr &&
+												aux_rel->getRelationshipType() != BaseRelationship::RelationshipGen &&
+												aux_rel->getRelationshipType() != BaseRelationship::RelationshipPart);
+
+	disable_sql_chk->setVisible(hide_sql_prev);
+	rel_attribs_tbw->setTabVisible(rel_attribs_tbw->indexOf(sql_preview_pg), hide_sql_prev);
 
 	if(aux_rel)
 	{
@@ -390,22 +381,22 @@ void RelationshipWidget::setAttributes(DatabaseModel *model, OperationList *op_l
 	table2_mand_chk->setEnabled(rel_type == BaseRelationship::Relationship11);
 	table2_mand_chk->setVisible(rel1n);
 
-	identifier_wgt->setVisible(rel1n && !base_rel->isSelfRelationship());
+	identifier_chk->setVisible(rel1n && !base_rel->isSelfRelationship());
 	foreign_key_gb->setVisible(rel1n || relnn);
-	single_pk_wgt->setVisible(relnn);
+	single_pk_chk->setVisible(relnn);
 
 	relnn_tab_name_lbl->setVisible(relnn);
 	relnn_tab_name_edt->setVisible(relnn);
 
 	part_bound_expr_gb->setVisible(rel_type == BaseRelationship::RelationshipPart);
 
-	for(unsigned i=SettingsTab; i <= AdvancedTab; i++)
-		rel_attribs_tbw->setTabVisible(i, false);
+	for(unsigned tab_idx = SettingsTab; tab_idx  <= AdvancedTab; tab_idx++)
+		rel_attribs_tbw->setTabVisible(tab_idx, false);
 
 	if(!relgen_dep)
 	{
-		for(unsigned i=SettingsTab; i <= SpecialPkTab; i++)
-			rel_attribs_tbw->setTabVisible(i, true);
+		for(unsigned tab_idx = SettingsTab; tab_idx  <= SpecialPkTab; tab_idx++)
+			rel_attribs_tbw->setTabVisible(tab_idx, true);
 	}
 	else if(relgen_dep && base_rel->getObjectType()==ObjectType::Relationship && !has_foreign_tab)
 	{
@@ -422,7 +413,7 @@ void RelationshipWidget::setAttributes(DatabaseModel *model, OperationList *op_l
 															 base_rel->getRelationshipType() == BaseRelationship::RelationshipDep);
 
 	custom_color_chk->setChecked(base_rel->getCustomColor()!=Qt::transparent);
-	color_picker->setColor(0, base_rel->getCustomColor());
+	custom_color_cl->setColor(0, base_rel->getCustomColor());
 	listAdvancedObjects();
 
 	if(rel1n || relnn)
@@ -468,7 +459,7 @@ QSize RelationshipWidget::getIdealSize()
 void RelationshipWidget::useFKGlobalSettings(bool value)
 {
 	int idx = -1;
-	fk_wgt->setEnabled(!value);
+	fk_conf_wgt->setEnabled(!value);
 
 	if(value)
 	{
@@ -560,33 +551,34 @@ void RelationshipWidget::generateBoundingExpr()
 
 void RelationshipWidget::listObjects(ObjectType obj_type)
 {
-	CustomTableWidget *tab=nullptr;
-	Relationship *rel=nullptr;
-	unsigned count, i;
+	CustomTableWidget *tab = nullptr;
+	Relationship *rel = nullptr;
+	unsigned count = 0, i = 0;
 
 	try
 	{
-		if(obj_type==ObjectType::Column)
-			tab=attributes_tab;
+		if(obj_type == ObjectType::Column)
+			tab = attributes_tab;
 		else
-			tab=constraints_tab;
+			tab = constraints_tab;
 
-		rel=dynamic_cast<Relationship *>(this->object);
+		rel = dynamic_cast<Relationship *>(this->object);
 
 		tab->blockSignals(true);
 		tab->removeRows();
 
-		count=rel->getObjectCount(obj_type);
-		for(i=0; i < count; i++)
+		count = rel->getObjectCount(obj_type);
+		for(i = 0; i < count; i++)
 		{
 			tab->addRow();
 			showObjectData(rel->getObject(i, obj_type), i);
 		}
+
 		tab->clearSelection();
 		tab->blockSignals(false);
 
 		constraints_tab->setButtonsEnabled(CustomTableWidget::AddButton,
-										   attributes_tab->getRowCount() > 0);
+																			 attributes_tab->getRowCount() > 0);
 	}
 	catch(Exception &e)
 	{
@@ -788,22 +780,11 @@ int RelationshipWidget::openEditingForm(TableObject *object, BaseObject *parent)
 
 void RelationshipWidget::addObject()
 {
-	ObjectType obj_type=ObjectType::BaseObject;
+	ObjectType obj_type = ObjectType::BaseObject;
 
 	try
 	{
-		if(sender()==attributes_tab)
-		{
-			obj_type=ObjectType::Column;
-			tab=attributes_tab;
-		}
-		else
-		{
-			obj_type=ObjectType::Constraint;
-			tab=constraints_tab;
-		}
-
-		if(obj_type==ObjectType::Column)
+		if(obj_type == ObjectType::Column)
 			openEditingForm<Column,ColumnWidget>(nullptr);
 		else
 			openEditingForm<Constraint,ConstraintWidget>(nullptr);
@@ -1111,7 +1092,7 @@ void RelationshipWidget::applyConfiguration()
 		BaseObjectWidget::applyConfiguration();
 
 		if(custom_color_chk->isChecked())
-			base_rel->setCustomColor(color_picker->getColor(0));
+			base_rel->setCustomColor(custom_color_cl->getColor(0));
 		else
 			base_rel->setCustomColor(Qt::transparent);
 

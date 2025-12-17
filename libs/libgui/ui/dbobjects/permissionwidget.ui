@@ -25,7 +25,10 @@
   <property name="windowTitle">
    <string>Edit permissions</string>
   </property>
-  <layout class="QGridLayout" name="permission_grid">
+  <layout class="QVBoxLayout" name="permission_lt">
+   <property name="spacing">
+    <number>5</number>
+   </property>
    <property name="leftMargin">
     <number>5</number>
    </property>
@@ -38,11 +41,8 @@
    <property name="bottomMargin">
     <number>5</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="0" column="0">
-    <widget class="QTabWidget" name="tabWidget">
+   <item>
+    <widget class="QTabWidget" name="perm_settings_tbw">
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -52,13 +52,13 @@
        <height>22</height>
       </size>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="permissions_pg">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/permission.png</normaloff>:/icons/icons/permission.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Permissions</string>
+       <string>Permissions</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">
@@ -90,12 +90,63 @@
             <number>5</number>
            </property>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <property name="spacing">
-              <number>5</number>
+            <layout class="QHBoxLayout" name="obj_sig_icon_lt">
+             <property name="bottomMargin">
+              <number>0</number>
              </property>
              <item>
-              <widget class="QLabel" name="id_lbl">
+              <layout class="QVBoxLayout" name="obj_signature_lt">
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="obj_signature_lbl">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Object</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="obj_signature_edt">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <italic>false</italic>
+                  </font>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="id_lbl_2">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                  <horstretch>0</horstretch>
@@ -109,27 +160,21 @@
                 </size>
                </property>
                <property name="text">
-                <string>ID:</string>
+                <string>Permission ID</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QLineEdit" name="perm_id_edt">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>25</height>
-                </size>
-               </property>
                <property name="font">
                 <font>
-                 <italic>true</italic>
+                 <italic>false</italic>
                 </font>
                </property>
                <property name="readOnly">
@@ -140,7 +185,7 @@
              <item>
               <widget class="QCheckBox" name="perm_disable_sql_chk">
                <property name="text">
-                <string>Disable SQL code</string>
+                <string>Disable permissions SQL code</string>
                </property>
               </widget>
              </item>
@@ -174,7 +219,7 @@
                </size>
               </property>
               <property name="title">
-               <string>&amp;Roles</string>
+               <string>Roles</string>
               </property>
              </widget>
              <widget class="QGroupBox" name="privileges_gb">
@@ -197,7 +242,7 @@
                </size>
               </property>
               <property name="title">
-               <string>P&amp;rivileges</string>
+               <string>Privileges</string>
               </property>
               <layout class="QGridLayout" name="gridLayout">
                <property name="leftMargin">
@@ -429,45 +474,9 @@
            </size>
           </property>
           <property name="title">
-           <string>P&amp;ermissions</string>
+           <string>Permissions</string>
           </property>
          </widget>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_2">
-      <attribute name="icon">
-       <iconset resource="../../res/resources.qrc">
-        <normaloff>:/icons/icons/sqlpreview.png</normaloff>:/icons/icons/sqlpreview.png</iconset>
-      </attribute>
-      <attribute name="title">
-       <string>Code pre&amp;view</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <property name="leftMargin">
-        <number>5</number>
-       </property>
-       <property name="topMargin">
-        <number>5</number>
-       </property>
-       <property name="rightMargin">
-        <number>5</number>
-       </property>
-       <property name="bottomMargin">
-        <number>5</number>
-       </property>
-       <property name="spacing">
-        <number>5</number>
-       </property>
-       <item row="0" column="0">
-        <widget class="QPlainTextEdit" name="code_txt">
-         <property name="font">
-          <font/>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
         </widget>
        </item>
       </layout>
@@ -477,9 +486,7 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
-  <tabstop>perm_id_edt</tabstop>
-  <tabstop>perm_disable_sql_chk</tabstop>
+  <tabstop>perm_settings_tbw</tabstop>
   <tabstop>grant_rb</tabstop>
   <tabstop>revoke_rb</tabstop>
   <tabstop>cascade_chk</tabstop>
@@ -487,7 +494,6 @@
   <tabstop>add_perm_tb</tabstop>
   <tabstop>upd_perm_tb</tabstop>
   <tabstop>cancel_tb</tabstop>
-  <tabstop>code_txt</tabstop>
  </tabstops>
  <resources>
   <include location="../../res/resources.qrc"/>

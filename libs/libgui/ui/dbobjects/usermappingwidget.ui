@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>462</width>
-    <height>210</height>
+    <width>294</width>
+    <height>156</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -16,7 +16,7 @@
     <height>0</height>
    </size>
   </property>
-  <layout class="QGridLayout" name="server_grid">
+  <layout class="QVBoxLayout" name="usermapping_lt">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -29,48 +29,39 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="0" column="0">
-    <widget class="QLabel" name="server_lbl">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Server:</string>
-     </property>
-    </widget>
+   <item>
+    <layout class="QVBoxLayout" name="server_lt">
+     <item>
+      <widget class="QLabel" name="server_lbl">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Server</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
-   <item row="1" column="0" colspan="3">
+   <item>
     <widget class="QGroupBox" name="options_gb">
-     <property name="title">
-      <string>&amp;Options</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1" colspan="2">
-    <widget class="QWidget" name="server_wgt" native="true">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>20</height>
-      </size>
+     <property name="title">
+      <string>Options</string>
      </property>
     </widget>
    </item>

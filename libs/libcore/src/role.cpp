@@ -61,36 +61,36 @@ void Role::addRole(RoleType role_type, Role *role)
 {
 	//Raises an error if the role to be added is not allocated
 	if(!role)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+		throw Exception(ErrorCode::AsgNotAllocattedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	//Raises an error if the role to be added is the 'this' role
-	if(role && this==role)
+	if(role && this == role)
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgRoleMemberItself)
 						.arg(role->getName()),
-						ErrorCode::AsgRoleMemberItself,PGM_FUNC,PGM_FILE,PGM_LINE);
+						ErrorCode::AsgRoleMemberItself, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	bool role_mem = false, role_adm = false,
 			role_mem1 = false, role_adm1 = false;
 
 	//Check if the role to be added already exists in one of the internal role list
-	role_mem=this->isRoleExists(MemberRole, role);
-	role_adm=this->isRoleExists(AdminRole, role);
+	role_mem = this->isRoleExists(MemberRole, role);
+	role_adm = this->isRoleExists(AdminRole, role);
 
 	/* Check if the role 'this' is referenced in one of the internal role list
 	 of the role to be added */
-	role_mem1=role->isRoleExists(MemberRole, this);
-	role_adm1=role->isRoleExists(AdminRole, this);
+	role_mem1 = role->isRoleExists(MemberRole, this);
+	role_adm1 = role->isRoleExists(AdminRole, this);
 
 	//Raises an error if the role already exists in one of the internal list
-	if((role_type==MemberRole && (role_mem || role_adm)) ||
-			(role_type==AdminRole && (role_adm || role_mem)))
+	if((role_type == MemberRole && (role_mem || role_adm)) ||
+			(role_type == AdminRole && (role_adm || role_mem)))
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InsDuplicatedRole)
 						.arg(role->getName())
 						.arg(this->getName()),
-						ErrorCode::InsDuplicatedRole,PGM_FUNC,PGM_FILE,PGM_LINE);
+						ErrorCode::InsDuplicatedRole, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	// Checking for redundant reference between roles.
@@ -98,7 +98,7 @@ void Role::addRole(RoleType role_type, Role *role)
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgRoleReferenceRedundancy)
 						.arg(role->getName(), this->getName(), this->getName(), role->getName()),
-						ErrorCode::AsgRoleReferenceRedundancy,PGM_FUNC,PGM_FILE,PGM_LINE);
+						ErrorCode::AsgRoleReferenceRedundancy, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	getRoleList(role_type)->push_back(role);

@@ -19,6 +19,7 @@
 #include "colorpickerwidget.h"
 #include <QToolTip>
 #include "exception.h"
+#include "guiutilsns.h"
 
 ColorPickerWidget::ColorPickerWidget(int color_count, QWidget * parent) : QWidget(parent)
 {
@@ -36,19 +37,18 @@ ColorPickerWidget::ColorPickerWidget(int color_count, QWidget * parent) : QWidge
 	else if(color_count > MaxColorButtons)
 		color_count=MaxColorButtons;
 
-	hbox=new QHBoxLayout(this);
-	hbox->setContentsMargins(0,0,0,0);
+	hbox = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing, this);
 
 	for(int i=0; i < color_count; i++)
 	{
-		btn=new QToolButton(this);
+		btn = new QToolButton(this);
 		btn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 		btn->setMinimumHeight(random_color_tb->iconSize().height());
 		btn->setMaximumHeight(random_color_tb->iconSize().height() * 1.5);
 		btn->setMinimumWidth(random_color_tb->iconSize().width() * 2);
 		btn->installEventFilter(this);
 
-		disable_color=btn->palette().color(QPalette::Button);
+		disable_color = btn->palette().color(QPalette::Button);
 		buttons.push_back(btn);
 		colors.push_back(disable_color);
 

@@ -299,7 +299,7 @@ class __libgui ModelWidget: public QWidget {
 		*action_copy,
 		*action_paste,
 		*action_cut,
-		*action_deps_refs,
+		*action_associations,
 		*action_new_object,
 		*action_rename,
 		*action_moveto_schema,
@@ -519,7 +519,7 @@ class __libgui ModelWidget: public QWidget {
 		void showObjectMenu();
 
 		//! \brief Shows the widget containing the dependencies and references to the object
-		void showDependenciesReferences();
+		void showObjectAssociations();
 
 		//! \brief Triggers the object editing
 		void editObject();

@@ -34,9 +34,6 @@ ModelExportWidget::ModelExportWidget(QWidget *parent) : QWidget(parent)
 	setupUi(this);
 
 	alert_frm->setVisible(false);
-	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
-	GuiUtilsNs::configureWidgetsFont({ export_btn, cancel_btn }, GuiUtilsNs::BigFontFactor);
-
 	model_sel_wgt = new ModelDbSelectorWidget(this);
 	input_model_gb->layout()->addWidget(model_sel_wgt);
 
@@ -46,7 +43,7 @@ ModelExportWidget::ModelExportWidget(QWidget *parent) : QWidget(parent)
 	sql_file_sel->setAllowFilenameInput(true);
 	sql_file_sel->setFileIsMandatory(false);
 	sql_file_sel->setAppendSuffix(true);
-	export_to_file_grid->addWidget(sql_file_sel, 1, 1);
+	sql_file_lt->addWidget(sql_file_sel);
 
 	img_file_sel = new FileSelectorWidget(this);
 	img_file_sel->setFileDialogTitle(tr("Export model to graphics file"));
@@ -54,14 +51,14 @@ ModelExportWidget::ModelExportWidget(QWidget *parent) : QWidget(parent)
 	img_file_sel->setAllowFilenameInput(true);
 	img_file_sel->setFileIsMandatory(false);
 	img_file_sel->setAppendSuffix(true);
-	export_to_img_grid->addWidget(img_file_sel, 2, 1, 1, 3);
+	img_file_lt->addWidget(img_file_sel);
 
 	dict_file_sel = new FileSelectorWidget(this);
 	dict_file_sel->setFileDialogTitle(tr("Export model to data dictionary"));
 	dict_file_sel->setAllowFilenameInput(true);
 	dict_file_sel->setFileIsMandatory(false);
 	dict_file_sel->setAppendSuffix(true);
-	export_to_dict_grid->addWidget(dict_file_sel, 1, 1, 1, 5);
+	dict_file_lt->addWidget(dict_file_sel);
 
 	htmlitem_del=new HtmlItemDelegate(this);
 	output_trw->setItemDelegateForColumn(0, htmlitem_del);
@@ -82,6 +79,13 @@ ModelExportWidget::ModelExportWidget(QWidget *parent) : QWidget(parent)
 	radios_grp->addButton(export_to_img_tb);
 
 	h_splitter->setSizes({800, 700});
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
+	GuiUtilsNs::configureWidgetsFont({ export_btn, cancel_btn }, GuiUtilsNs::BigFontFactor);
+	GuiUtilsNs::configureBuddyWidgets(export_to_dbms_wgt);
+	GuiUtilsNs::configureBuddyWidgets(export_to_file_wgt);
+	GuiUtilsNs::configureBuddyWidgets(export_to_img_wgt);
+	GuiUtilsNs::configureBuddyWidgets(export_to_dict_wgt);
 
 	connect(model_sel_wgt, &ModelDbSelectorWidget::s_selectionChanged, this, [this](){
 		model_wgt = model_sel_wgt->getSelectedModel();
@@ -157,9 +161,7 @@ ModelExportWidget::ModelExportWidget(QWidget *parent) : QWidget(parent)
 	connect(ignore_error_codes_chk, &QCheckBox::toggled, error_codes_edt, &QLineEdit::setEnabled);
 	connect(dict_mode_cmb, &QComboBox::currentIndexChanged, this, &ModelExportWidget::selectDataDictMode);
 	connect(dict_format_cmb, &QComboBox::currentIndexChanged, this, &ModelExportWidget::selectDataDictMode);
-	connect(sql_standalone_rb, &QRadioButton::toggled, this, &ModelExportWidget::selectSQLExportMode);
-	connect(sql_split_rb, &QRadioButton::toggled, this, &ModelExportWidget::selectSQLExportMode);
-	connect(sql_split_rb, &QRadioButton::toggled, code_options_cmb, &QComboBox::setEnabled);
+	connect(sql_file_mode_cmb, &QComboBox::activated, this, &ModelExportWidget::selectSQLExportMode);
 
 	pgsqlvers_cmb->addItems(PgSqlVersions::AllVersions);
 	pgsqlvers1_cmb->addItems(PgSqlVersions::AllVersions);
@@ -176,7 +178,7 @@ ModelExportWidget::ModelExportWidget(QWidget *parent) : QWidget(parent)
 
 	selectImageFormat();
 	selectDataDictMode();
-	selectSQLExportMode();
+	selectSQLExportMode(StandaloneFile);
 }
 
 void ModelExportWidget::setLowVerbosity(bool value)
@@ -225,12 +227,12 @@ void ModelExportWidget::handleErrorIgnored(QString err_code, QString err_msg, QS
 	QTreeWidgetItem *item=nullptr;
 
 	item=GuiUtilsNs::createOutputTreeItem(output_trw, tr("Error code <strong>%1</strong> found and ignored. Proceeding with export.").arg(err_code),
-																					 QPixmap(GuiUtilsNs::getIconPath("alert")), nullptr, false);
+																					 GuiUtilsNs::getPixmap("alert"), nullptr, false);
 
 	GuiUtilsNs::createOutputTreeItem(output_trw, UtilsNs::formatMessage(err_msg),
-																			QPixmap(GuiUtilsNs::getIconPath("alert")),	item, false, true);
+																			GuiUtilsNs::getPixmap("alert"),	item, false, true);
 
-	GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QPixmap(), item, false, true);
+	GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QIcon(), item, false, true);
 }
 
 void ModelExportWidget::updateProgress(int progress, QString msg, ObjectType obj_type, QString cmd, bool is_code_gen)
@@ -243,11 +245,11 @@ void ModelExportWidget::updateProgress(int progress, QString msg, ObjectType obj
 	progress_pb->setValue(progress);
 
 	if(obj_type != ObjectType::BaseObject)
-		ico = QPixmap(GuiUtilsNs::getIconPath(obj_type));
+		ico = GuiUtilsNs::getPixmap(obj_type);
 	else if(!cmd.isEmpty())
-		ico = QPixmap(GuiUtilsNs::getIconPath("sqlcode"));
+		ico = GuiUtilsNs::getPixmap("sqlcode");
 	else
-		ico = QPixmap(GuiUtilsNs::getIconPath("info"));
+		ico = GuiUtilsNs::getPixmap("info");
 
 	ico_lbl->setPixmap(ico);
 
@@ -257,7 +259,7 @@ void ModelExportWidget::updateProgress(int progress, QString msg, ObjectType obj
 		item=GuiUtilsNs::createOutputTreeItem(output_trw, text, ico, nullptr, false);
 
 		if(!cmd.isEmpty())
-			GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QPixmap(), item, false);
+			GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QIcon(), item, false);
 	}
 }
 
@@ -310,14 +312,14 @@ void ModelExportWidget::exportModel()
 
 			if(low_verbosity)
 				GuiUtilsNs::createOutputTreeItem(output_trw, tr("<strong>Low verbosity is set:</strong> only key informations and errors will be displayed."),
-																						QPixmap(GuiUtilsNs::getIconPath("alert")), nullptr, false);
+																						GuiUtilsNs::getPixmap("alert"), nullptr, false);
 
 			//Exporting to sql file
 			if(export_to_file_tb->isChecked())
 			{
 				progress_lbl->setText(tr("Saving file '%1'").arg(sql_file_sel->getSelectedFile()));
 				export_hlp.setExportToSQLParams(model_wgt->db_model, sql_file_sel->getSelectedFile(),
-																				pgsqlvers_cmb->currentText(), sql_split_rb->isChecked(),
+																				pgsqlvers_cmb->currentText(), sql_file_mode_cmb->currentIndex() == SplitFiles,
 																				static_cast<DatabaseModel::CodeGenMode>(code_options_cmb->currentIndex()),
 																				gen_drop_file_chk->isChecked());
 			}
@@ -374,11 +376,11 @@ void ModelExportWidget::selectExportMode()
 void ModelExportWidget::captureThreadError(Exception e)
 {
 	QTreeWidgetItem *item=GuiUtilsNs::createOutputTreeItem(output_trw, UtilsNs::formatMessage(e.getErrorMessage()),
-																														QPixmap(GuiUtilsNs::getIconPath("error")), nullptr, false, true);
+																														GuiUtilsNs::getPixmap("error"), nullptr, false, true);
 
 	GuiUtilsNs::createExceptionsTree(output_trw, e, item);
 
-	ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("error")));
+	ico_lbl->setPixmap(GuiUtilsNs::getPixmap("error"));
 	finishExport(tr("Exporting process aborted!"));
 
 	Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
@@ -392,7 +394,7 @@ void ModelExportWidget::cancelExport()
 
 void ModelExportWidget::handleExportCanceled()
 {
-	QPixmap ico=QPixmap(GuiUtilsNs::getIconPath("alert"));
+	QPixmap ico=GuiUtilsNs::getPixmap("alert");
 	QString msg=tr("Exporting process canceled by user!");
 
 	finishExport(msg);
@@ -402,7 +404,7 @@ void ModelExportWidget::handleExportCanceled()
 
 void ModelExportWidget::handleExportFinished()
 {
-	QPixmap ico=QPixmap(GuiUtilsNs::getIconPath("info"));
+	QPixmap ico=GuiUtilsNs::getPixmap("info");
 	QString msg=tr("Exporting process sucessfully ended!");
 
 	finishExport(msg);
@@ -473,11 +475,11 @@ void ModelExportWidget::enableExport()
 	alert_frm->setVisible(model_wgt && model_wgt->getDatabaseModel()->isInvalidated());
 
 	export_btn->setEnabled(model_wgt &&
-												 (export_to_dbms_tb->isChecked() && connections_cmb->currentIndex() > 0 &&
-													connections_cmb->currentIndex() != connections_cmb->count() - 1) ||
+												 ((export_to_dbms_tb->isChecked() && connections_cmb->currentIndex() > 0 &&
+													 connections_cmb->currentIndex() != connections_cmb->count() - 1) ||
 												 (export_to_file_tb->isChecked() && !sql_file_sel->hasWarning()) ||
 												 (export_to_img_tb->isChecked() && !img_file_sel->hasWarning()) ||
-												 (export_to_dict_tb->isChecked() && !dict_file_sel->hasWarning()));
+												 (export_to_dict_tb->isChecked() && !dict_file_sel->hasWarning())));
 }
 
 void ModelExportWidget::selectImageFormat()
@@ -504,7 +506,7 @@ void ModelExportWidget::selectImageFormat()
 
 void ModelExportWidget::selectDataDictMode()
 {
-	if(dict_mode_cmb->currentIndex() == 0)
+	if(dict_mode_cmb->currentIndex() == StandaloneFile)
 	{
 		if(dict_format_cmb->currentIndex() == 0)
 		{
@@ -531,18 +533,22 @@ void ModelExportWidget::selectDataDictMode()
 	}
 }
 
-void ModelExportWidget::selectSQLExportMode()
+void ModelExportWidget::selectSQLExportMode(int curr_idx)
 {
-	if(sql_standalone_rb->isChecked())
+	// Standalone SQL file export
+	if(curr_idx == StandaloneFile)
 	{
+		code_options_cmb->setEnabled(false);
 		sql_file_sel->setMimeTypeFilters({"application/sql", "application/octet-stream"});
 		sql_file_sel->setDefaultSuffix("sql");
 		sql_file_sel->setFileMustExist(false);
 		sql_file_sel->setDirectoryMode(false);
 		sql_file_sel->setAcceptMode(QFileDialog::AcceptSave);
 	}
+	// Split SQL file export
 	else
 	{
+		code_options_cmb->setEnabled(true);
 		sql_file_sel->setMimeTypeFilters({});
 		sql_file_sel->setDefaultSuffix("");
 		sql_file_sel->setAcceptMode(QFileDialog::AcceptOpen);

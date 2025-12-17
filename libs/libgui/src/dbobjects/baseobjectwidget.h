@@ -30,16 +30,43 @@
 #include "widgets/objectselectorwidget.h"
 #include "ui_baseobjectwidget.h"
 #include "qtconnectmacros.h"
+#include "widgets/objectassociationswidget.h"
+#include "guiutilsns.h"
 
 class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 	Q_OBJECT
+
+	private:
+		struct FieldLayoutCfg {
+			QLabel *label = nullptr;
+			QWidget *widget = nullptr, *append_widget = nullptr;
+			int row = 0, col = 0, row_span = 1, col_span = 1;
+
+			FieldLayoutCfg(QLabel *label, QWidget *widget, QWidget *append_widget, 
+										 int row, int col, int row_span = 1, int col_span = 1) :
+				label(label), widget(widget), append_widget(append_widget), 
+				row(row), col(col), row_span(row_span), col_span(col_span) {}
+
+			FieldLayoutCfg(QLabel *label, QWidget *widget, int row, int col, 
+										 int row_span = 1, int col_span = 1) :
+				FieldLayoutCfg(label, widget, nullptr, row, col, row_span, col_span) {}
+		};
+
+		void configureBaseLayout();
 
 	protected:
 		static constexpr int MaxObjectSize=16777215;
 
 		bool object_protected;
 
+		/*! \brief This horizontal layout arranges the buttons "Custom" SQL and "Edit permissions"
+		 *  as well as the checkbox "Disable SQL code" */
 		QHBoxLayout *misc_btns_lt;
+
+		/*! \brief This vertical layout, initially empty, can be used by derived classes to
+		 *  insert custom widgets/layouts in the middle of the form, between the main fields
+		 *  (name, schema, comment, etc) and the layout misc_btns_lt */
+		QVBoxLayout *extra_wgts_lt;
 
 		//! \brief Store the kind of object being handled by the widget (configured in the constructor)
 		ObjectType handled_obj_type;
@@ -86,11 +113,78 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		*owner_sel,
 		*tablespace_sel,
 		*collation_sel;
+
+		//! \brief Object selectors for schema, owner, tablespace and collation
+		ObjectAssociationsWidget *obj_assoc_wgt;
+
+		/*! \brief Holds the reference to the SQL preview tab when in tabbed layout
+		 *  This attribute is nullptr for objects that don't generate SQL code */
+		QWidget *sql_preview_pg;
 		
-		/*! \brief Merges the specified grid layout with the 'baseobject_grid' creating a single form.
-			The obj_type parameter must be specified to show the object type icon */
-		void configureFormLayout(QGridLayout *grid=nullptr, ObjectType obj_type=ObjectType::BaseObject);
-		
+		/*! \brief Merges the specified layout with the 'baseobject_grid' creating a single form.
+		 * The obj_type parameter must be specified to show the object type icon */
+		template<class LayoutClass, std::enable_if_t<std::is_base_of_v<QLayout, LayoutClass>, bool> = true>
+		void configureFormLayout(LayoutClass *layout, ObjectType obj_type)
+		{
+			if(!layout)
+			{
+				setLayout(baseobject_grid);
+				return;
+			}
+
+			baseobject_grid->setContentsMargins(0, 0, 0, 0);
+			baseobject_grid->setSpacing(layout->spacing());
+
+			if constexpr(std::is_same_v<QGridLayout, LayoutClass>)
+			{
+				QLayoutItem *item = nullptr;
+				int lin = 0, col = 0, col_span = 0,
+						row_span = 0, item_id = 0, item_count = 0;
+
+				/* Move all the widgets of the passed grid layout one row down,
+				 * permiting the insertion of the 'baseobject_grid' at the top
+				 * of the items */
+				item_count = layout->count();
+
+				for(item_id = item_count - 1; item_id >= 0; item_id--)
+				{
+					item = layout->itemAt(item_id);
+					layout->getItemPosition(item_id, &lin, &col, &row_span, &col_span);
+					layout->removeItem(item);
+					layout->addItem(item, lin + 1, col, row_span, col_span);
+				}
+
+				//Adding the base layout on the top
+				layout->addLayout(baseobject_grid, 0, 0, 1, 0);
+				baseobject_grid = layout;
+			}
+			else
+			{
+				layout->insertLayout(0, baseobject_grid);
+			}
+
+			// Configuring QTextEdit to accept tabs as focus changes.
+			for(auto &txt_wgt : baseobject_grid->findChildren<QTextEdit *>())
+				txt_wgt->setTabChangesFocus(true);
+
+			configureFormFields(obj_type, obj_type != ObjectType::BaseObject);
+			GuiUtilsNs::configureBuddyWidgets(this);
+		}
+
+		/*! \brief Configures a form layout in tabbed way.
+		 *  The tab_widget is the QTabWidget instance that will hold
+		 *  all pages. By default, this method add three new pages in
+		 *  the tab widget: General (baseobject_grid), Associations and SQL preview.
+		 *  If create_general_pg is false then the general page is not created. */
+		void configureTabbedLayout(QTabWidget *tab_widget, bool create_general_pg = true, bool create_assoc_pg = true);
+
+		/*! \brief Configures a tabbed layout from a simple QHBoxLayout-ed
+		 *  or a QVBoxLayout-ed widget. When create_attr_page is false this method creates a
+		 *  QTabWidget instance and move all widgets/sublayouts of the orignal widget's layout
+		 *  to the "General" page. If create_attr_page is true then the widget/sublayouts are moved
+		 *  to a page named "Attributes", but the "General" page is still created with basic fields. */
+		void configureTabbedLayout(bool create_attr_page, const QString &attr_pg_name = "", const QString &attr_pg_icon = "");
+
 		/*! \brief Configures the state of commom fields related to database objects enabling/disabling/hidding
 		 * according to the object type. The parameter inst_ev_filter indicates if the special event filter
 		 * must be installed on input fields. The event filter calls applyConfiguration() when ENTER/RETURN is pressed */
@@ -122,9 +216,16 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		//! \brief Disable the object's refereces SQL code
 		void disableReferencesSQL(BaseObject *object);
 		
+		[[deprecated]]
 		void configureTabOrder(std::vector<QWidget *> widgets={});
 
 		BaseObject *getHandledObject();
+
+		/*! \brief This method can be reimplemented in each derived class
+		 * to return the a custom SQL code preview of the object being
+		 * handled so it can be displayed in the SQL preview tab.
+		 * The default implementation returns the current SQL code of the object. */
+		virtual QString getSQLCodePreview();
 			
 	public:
 		//! \brief Constants used to generate version intervals for version alert frame
@@ -132,7 +233,9 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		VersionsInterval=1,
 		AfterVersion=2;
 		
-		BaseObjectWidget(QWidget * parent = nullptr, ObjectType obj_type=ObjectType::BaseObject);
+		BaseObjectWidget(QWidget * parent = nullptr,
+										 ObjectType obj_type = ObjectType::BaseObject);
+
 		~BaseObjectWidget() override = default;
 
 		//! \brief Generates a string containing the specified version interval
@@ -142,9 +245,11 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 			PostgreSQL versions. On the first map (fields) the key is the PostgreSQL versions and
 			the values are the reference to the widget. The second map is used to specify the values
 			of widgets specific for each version. */
+		[[deprecated]]
 		static QFrame *generateVersionWarningFrame(std::map<QString, std::vector<QWidget *> > &fields, std::map<QWidget *, std::vector<QString> > *values=nullptr);
 		
 		//! \brief Generates a informative frame containing the specified message
+		[[deprecated]]
 		static QFrame *generateInformationFrame(const QString &msg);
 
 		static void highlightVersionSpecificFields(std::map<QString, std::vector<QWidget *> > &fields, std::map<QWidget *, std::vector<QString> > *values=nullptr);
@@ -159,7 +264,7 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		ObjectType getHandledObjectType();
 
 		virtual bool isHandledObjectProtected();
-		
+
 	protected slots:
 		void editPermissions();
 		void editCustomSQL();
@@ -186,7 +291,7 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 };
 
 template<class Class>
-void BaseObjectWidget::startConfiguration(void)
+void BaseObjectWidget::startConfiguration()
 {
 	try
 	{

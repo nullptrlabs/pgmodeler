@@ -39,9 +39,9 @@ class __libgui GenericSQLWidget: public BaseObjectWidget, public Ui::GenericSQLW
 	private:
 		ReferencesWidget *obj_refs_wgt;
 
-		NumberedTextEditor *definition_txt, *preview_txt;
+		NumberedTextEditor *definition_txt;
 
-		SyntaxHighlighter *definition_hl, *preview_hl;
+		SyntaxHighlighter *definition_hl;
 
 		CodeCompletionWidget *definition_cp;
 
@@ -57,8 +57,8 @@ class __libgui GenericSQLWidget: public BaseObjectWidget, public Ui::GenericSQLW
 	public slots:
 		void applyConfiguration() override;
 
-	private slots:
-		void updateCodePreview();
+	protected:
+		QString getSQLCodePreview() override;
 };
 
 #endif

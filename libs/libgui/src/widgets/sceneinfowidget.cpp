@@ -24,17 +24,16 @@
 SceneInfoWidget::SceneInfoWidget(QWidget *parent): QWidget(parent)
 {
 	setupUi(this);
-	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, cursor_pos_info_frm);
-	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator_ln);
- 	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, obj_sel_info_frm);
-	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint, separator_ln2);
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint,
+															{ cursor_pos_info_frm, separator_ln,
+																obj_sel_info_frm, separator_ln2 });
 }
 
 void SceneInfoWidget::updateSelectedObject(BaseObjectView *object)
 {
 	if(!object)
 	{
-		sel_obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("close1")));
+		sel_obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap("close1"));
 		sel_obj_count_lbl->setText(tr("None"));
 		obj_pos_info_lbl->setText(tr("None"));
 	}
@@ -64,7 +63,7 @@ void SceneInfoWidget::updateSelectedObjects(int obj_count, const QRectF &objs_re
 	if(!rect.isValid())
 		rect = QRect(0,0,0,0);
 
-	sel_obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("selectmove")));
+	sel_obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap("selectmove"));
 	sel_obj_count_lbl->setText(tr("Selected: <strong>%1</strong>").arg(obj_count));
 	obj_pos_info_lbl->setText(QString("(%1, %2) [w: %3, h: %4]")
 														.arg(rect.left())

@@ -32,7 +32,7 @@
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -43,8 +43,13 @@
      <height>16777215</height>
     </size>
    </property>
+   <property name="font">
+    <font>
+     <bold>false</bold>
+    </font>
+   </property>
    <property name="text">
-    <string>Name:</string>
+    <string>Name</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="name_edt">
@@ -57,7 +62,7 @@
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -94,7 +99,7 @@
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -111,8 +116,13 @@
      <height>16777215</height>
     </size>
    </property>
+   <property name="font">
+    <font>
+     <bold>false</bold>
+    </font>
+   </property>
    <property name="text">
-    <string>Comment:</string>
+    <string>Comment</string>
    </property>
   </widget>
   <widget class="QLabel" name="tablespace_lbl">
@@ -125,13 +135,18 @@
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="font">
+    <font>
+     <bold>false</bold>
+    </font>
+   </property>
    <property name="text">
-    <string>Tablespace:</string>
+    <string>Tablespace</string>
    </property>
   </widget>
   <widget class="QLabel" name="schema_lbl">
@@ -144,13 +159,18 @@
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="font">
+    <font>
+     <bold>false</bold>
+    </font>
+   </property>
    <property name="text">
-    <string>Schema:</string>
+    <string>Schema</string>
    </property>
   </widget>
   <widget class="QPushButton" name="edt_perms_tb">
@@ -264,7 +284,7 @@
        </font>
       </property>
       <property name="text">
-       <string>This object is protected thus no change in form will be applied to it.</string>
+       <string>This object is protected! Thus changes made in the form will be ignored.</string>
       </property>
       <property name="wordWrap">
        <bool>true</bool>
@@ -276,8 +296,8 @@
   <widget class="QCheckBox" name="disable_sql_chk">
    <property name="geometry">
     <rect>
-     <x>465</x>
-     <y>314</y>
+     <x>310</x>
+     <y>380</y>
      <width>131</width>
      <height>24</height>
     </rect>
@@ -309,13 +329,18 @@ This will disable the code of all child and referrer objects.</string>
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="font">
+    <font>
+     <bold>false</bold>
+    </font>
+   </property>
    <property name="text">
-    <string>Collation:</string>
+    <string>Collation</string>
    </property>
   </widget>
   <widget class="QPushButton" name="append_sql_tb">
@@ -369,61 +394,54 @@ This will disable the code of all child and referrer objects.</string>
     </rect>
    </property>
    <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Owner</string>
+   </property>
+  </widget>
+  <widget class="QFrame" name="id_icon_frm">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>80</y>
+     <width>91</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
     <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <property name="text">
-    <string>Owner:</string>
-   </property>
-  </widget>
-  <widget class="QWidget" name="id_ico_wgt" native="true">
-   <property name="geometry">
-    <rect>
-     <x>200</x>
-     <y>80</y>
-     <width>161</width>
-     <height>31</height>
-    </rect>
+   <property name="frameShape">
+    <enum>QFrame::Shape::StyledPanel</enum>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <property name="spacing">
      <number>5</number>
     </property>
     <property name="leftMargin">
-     <number>0</number>
+     <number>5</number>
     </property>
     <property name="topMargin">
-     <number>0</number>
+     <number>5</number>
     </property>
     <property name="rightMargin">
-     <number>0</number>
+     <number>5</number>
     </property>
     <property name="bottomMargin">
-     <number>0</number>
+     <number>5</number>
     </property>
-    <item>
-     <widget class="QLabel" name="obj_id_lbl">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="toolTip">
-       <string/>
-      </property>
-      <property name="text">
-       <string>ID:</string>
-      </property>
-     </widget>
-    </item>
     <item>
      <widget class="QLabel" name="obj_icon_lbl">
       <property name="sizePolicy">
@@ -455,6 +473,27 @@ This will disable the code of all child and referrer objects.</string>
       </property>
      </widget>
     </item>
+    <item>
+     <widget class="QLabel" name="obj_id_lbl">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string/>
+      </property>
+      <property name="text">
+       <string>ID:</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QPlainTextEdit" name="comment_edt">
@@ -466,6 +505,12 @@ This will disable the code of all child and referrer objects.</string>
      <height>70</height>
     </rect>
    </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="minimumSize">
     <size>
      <width>0</width>
@@ -475,7 +520,7 @@ This will disable the code of all child and referrer objects.</string>
    <property name="maximumSize">
     <size>
      <width>16777215</width>
-     <height>80</height>
+     <height>16777215</height>
     </size>
    </property>
    <property name="tabChangesFocus">
@@ -492,7 +537,7 @@ This will disable the code of all child and referrer objects.</string>
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -522,7 +567,7 @@ This will disable the code of all child and referrer objects.</string>
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="logical_name_lbl">
+  <widget class="QLabel" name="alias_lbl">
    <property name="geometry">
     <rect>
      <x>8</x>
@@ -532,7 +577,7 @@ This will disable the code of all child and referrer objects.</string>
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -543,8 +588,13 @@ This will disable the code of all child and referrer objects.</string>
      <height>16777215</height>
     </size>
    </property>
+   <property name="font">
+    <font>
+     <bold>false</bold>
+    </font>
+   </property>
    <property name="text">
-    <string>Alias:</string>
+    <string>Alias</string>
    </property>
   </widget>
  </widget>

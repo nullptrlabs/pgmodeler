@@ -17,36 +17,33 @@
 */
 
 #include "castwidget.h"
+#include "guiutilsns.h"
 
 CastWidget::CastWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Cast)
 {
-	QFrame *frame=nullptr;
-	QSpacerItem *spacer=new QSpacerItem(10,1,QSizePolicy::Fixed,QSizePolicy::Expanding);
-
 	Ui_CastWidget::setupUi(this);
 
-	src_datatype=new PgSQLTypeWidget(this, tr("Source data type"));
-	trg_datatype=new PgSQLTypeWidget(this, tr("Target data type"));
-	conv_func_sel=new ObjectSelectorWidget(ObjectType::Function, this);
+	src_datatype = new PgSQLTypeWidget(this, tr("Source data type"));
+	trg_datatype = new PgSQLTypeWidget(this, tr("Target data type"));
+	conv_func_sel = GuiUtilsNs::createWidgetInParent<ObjectSelectorWidget>(GuiUtilsNs::LtMargin,
+																																				 ObjectType::Function, conv_func_gb);
+	data_types_lt->addWidget(src_datatype);
+	data_types_lt->addWidget(trg_datatype);
 
-	cast_grid->addWidget(conv_func_sel,1,1,1,4);
-	cast_grid->addWidget(src_datatype,2,0,1,5);
-	cast_grid->addWidget(trg_datatype,3,0,1,5);
+	configureTabbedLayout(false);
+	cast_lt->addItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::MinimumExpanding));
 
-	configureFormLayout(cast_grid, ObjectType::Cast);
-
-	frame=generateInformationFrame(tr("The function to be assigned to a cast from <em><strong>typeA</strong></em> to <em><strong>typeB</strong></em> must have the following signature: <em><strong>typeB</strong> function(<strong>typeA</strong>, integer, boolean)</em>."));
-	cast_grid->addItem(spacer, cast_grid->count()+1, 0, 1, 0);
-	cast_grid->addWidget(frame, cast_grid->count()+1, 0, 1, 0);
-	frame->setParent(this);
+	cast_type_cmb->addItem(tr("Implict"), Cast::Implicit);
+	cast_type_cmb->addItem(tr("Explict"), Cast::Explicit);
+	cast_type_cmb->addItem(tr("Assignment"), Cast::Assignment);
 
 	setRequiredField(src_datatype);
 	setRequiredField(trg_datatype);
 
-	configureTabOrder({ explicit_rb, implicit_rb, assignment_rb, input_output_chk,
+	configureTabOrder({ cast_type_cmb, input_output_chk,
 											 conv_func_sel, src_datatype, trg_datatype });
 
-	setMinimumSize(520, 460);
+	setMinimumSize(650, 500);
 }
 
 void CastWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Cast *cast)
@@ -58,14 +55,12 @@ void CastWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Cas
 
 	if(cast)
 	{
-		src_type=cast->getDataType(Cast::SrcType);
-		trg_type=cast->getDataType(Cast::DstType);
+		src_type = cast->getDataType(Cast::SrcType);
+		trg_type = cast->getDataType(Cast::DstType);
 
 		conv_func_sel->setSelectedObject(cast->getCastFunction());
 		input_output_chk->setChecked(cast->isInOut());
-		explicit_rb->setChecked(cast->getCastType()==Cast::Explicit);
-		implicit_rb->setChecked(cast->getCastType()==Cast::Implicit);
-		assignment_rb->setChecked(cast->getCastType()==Cast::Assignment);
+		cast_type_cmb->setCurrentIndex(cast_type_cmb->findData(cast->getCastType()));
 	}
 
 	src_datatype->setAttributes(src_type, model, false);
@@ -76,22 +71,16 @@ void CastWidget::applyConfiguration()
 {
 	try
 	{
-		Cast *cast=nullptr;
+		Cast *cast = nullptr;
 
 		startConfiguration<Cast>();
 
-		cast=dynamic_cast<Cast *>(this->object);
+		cast = dynamic_cast<Cast *>(this->object);
 		cast->setDataType(Cast::SrcType, src_datatype->getPgSQLType());
 		cast->setDataType(Cast::DstType, trg_datatype->getPgSQLType());
 		cast->setInOut(input_output_chk->isChecked());
 
-		if(implicit_rb->isChecked())
-			cast->setCastType(Cast::Implicit);
-		else if(assignment_rb->isChecked())
-			cast->setCastType(Cast::Assignment);
-		else
-			cast->setCastType(Cast::Explicit);
-
+		cast->setCastType(static_cast<Cast::CastType>(cast_type_cmb->currentData().toInt()));
 		cast->setCastFunction(dynamic_cast<Function*>(conv_func_sel->getSelectedObject()));
 
 		BaseObjectWidget::applyConfiguration();

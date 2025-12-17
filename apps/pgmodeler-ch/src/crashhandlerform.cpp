@@ -28,10 +28,10 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 {
 	QFile input;
 	QString buf;
-	QWidget *wgt=new QWidget;
-	QHBoxLayout *layout=new QHBoxLayout;
+	QWidget *wgt = new QWidget;
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, hint_frm);
+	QHBoxLayout *layout = GuiUtilsNs::createHBoxLayout(GuiUtilsNs::LtMargin);
 
 	setWindowTitle(tr("pgModeler crash handler"));
 	setWindowIcon(QPixmap(":/images/images/crashhandler.png"));
@@ -42,11 +42,10 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 	stack_txt->setLineWrapMode(QPlainTextEdit::NoWrap);
 
 	layout->addWidget(stack_txt);
-	layout->setContentsMargins(GuiUtilsNs::LtMargins);
 	wgt->setLayout(layout);
 
 	logo_lbl->setPixmap(QPixmap(":/images/images/crashhandler.png"));
-	report_twg->addTab(wgt, QIcon(GuiUtilsNs::getIconPath("alert")), tr("Stack trace"));
+	report_twg->addTab(wgt, GuiUtilsNs::getIcon("alert"), tr("Stack trace"));
 
 	//Open for reading the stack trace file generated on the last crash
 	input.setFileName(GlobalAttributes::getTemporaryFilePath(GlobalAttributes::StacktraceFile));
@@ -66,14 +65,13 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 	}
 
 	//Creating an input field in order to select the input report file
-	input_wgt=new QWidget(this);
+	input_wgt = new QWidget(this);
 	input_wgt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-	layout=new QHBoxLayout(input_wgt);
-	layout->setContentsMargins(0, 0, 0, 0);
+	layout = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing, input_wgt);
 
-	input_lbl=new QLabel(input_wgt);
-	input_lbl->setText(tr("Input:"));
+	input_lbl = new QLabel(input_wgt);
+	input_lbl->setText(tr("Input"));
 	layout->addWidget(input_lbl);
 
 	input_sel = new FileSelectorWidget(this);
@@ -85,7 +83,7 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 	layout->addWidget(input_sel);
 
 	save_tb=new QToolButton(input_wgt);
-	save_tb->setIcon(QIcon(GuiUtilsNs::getIconPath("save")));
+	save_tb->setIcon(GuiUtilsNs::getIcon("save"));
 	save_tb->setSizePolicy(attach_tb->sizePolicy());
 	save_tb->setToolButtonStyle(attach_tb->toolButtonStyle());
 	save_tb->setIconSize(attach_tb->iconSize());

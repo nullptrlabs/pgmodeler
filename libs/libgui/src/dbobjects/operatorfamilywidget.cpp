@@ -21,15 +21,13 @@
 OperatorFamilyWidget::OperatorFamilyWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::OpFamily)
 {
 	Ui_OperatorFamilyWidget::setupUi(this);
-	configureFormLayout(opfamily_grid, ObjectType::OpFamily);
 
 	indexing_cmb->addItems(IndexingType::getTypes());
 
-	setRequiredField(indexing_lbl);	
-	opfamily_grid->addItem(new QSpacerItem(10,10,QSizePolicy::Minimum,QSizePolicy::Expanding), opfamily_grid->count()+1, 0, 1, 0);
-
+	setRequiredField(indexing_lbl);
+	configureTabbedLayout(false);
 	configureTabOrder();
-	setMinimumSize(500, 290);
+	setMinimumSize(550, 350);
 }
 
 void OperatorFamilyWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, OperatorFamily *op_family)

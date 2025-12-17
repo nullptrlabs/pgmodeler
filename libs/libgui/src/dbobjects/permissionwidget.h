@@ -29,14 +29,11 @@
 #include "ui_permissionwidget.h"
 #include "widgets/customtablewidget.h"
 #include "widgets/modelobjectswidget.h"
-#include "utils/syntaxhighlighter.h"
 
 class __libgui PermissionWidget: public BaseObjectWidget, public Ui::PermissionWidget {
 	Q_OBJECT
 
 	private:
-		SyntaxHighlighter *code_hl;
-
 		//! \brief Stores the permission to be edited
 		Permission *permission;
 
@@ -55,12 +52,16 @@ class __libgui PermissionWidget: public BaseObjectWidget, public Ui::PermissionW
 
 	public:
 		PermissionWidget(QWidget * parent = nullptr);
+
 		~PermissionWidget() override;
 
 		void setAttributes(DatabaseModel *model, BaseObject *parent_obj, BaseObject *object);
 
 	public slots:
 		void applyConfiguration() override;
+
+	protected:
+		QString getSQLCodePreview() override;
 
 	private slots:
 		//! \brief Shows the object selection window
@@ -95,9 +96,6 @@ class __libgui PermissionWidget: public BaseObjectWidget, public Ui::PermissionW
 
 		//! \brief Shows the selected role data on the role tables
 		void showSelectedRoleData();
-
-		//! \brief Updates the sql code for object's permissions
-		void updateCodePreview();
 
 		void enableEditButtons();
 

@@ -30,25 +30,22 @@ PluginsConfigWidget::PluginsConfigWidget(QWidget *parent) : BaseConfigWidget(par
 	root_dir_sel->setDirectoryMode(true);
 	root_dir_sel->setSelectedFile(GlobalAttributes::getPluginsPath());
 
-	QVBoxLayout *vbox = new QVBoxLayout(plugins_root_gb);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargins, 0, plugins_root_gb);
 	vbox->addWidget(root_dir_sel);
 
 	plugins_tab = new CustomTableWidget(CustomTableWidget::EditButton |
 																			CustomTableWidget::ResizeColsButton, false, this);
 	plugins_tab->setColumnCount(3);
 	plugins_tab->setHeaderLabel(tr("Plugin"),0);
-	plugins_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("plugins")),0);
+	plugins_tab->setHeaderIcon(GuiUtilsNs::getIcon("plugins"),0);
 	plugins_tab->setHeaderLabel(tr("Version"),1);
 	plugins_tab->setHeaderLabel(tr("Library"), 2);
 	plugins_tab->setSortingEnabled(true);
 
 	connect(plugins_tab, &CustomTableWidget::s_rowEdited, this, &PluginsConfigWidget::showPluginInfo);
 
-	vbox = new QVBoxLayout(loaded_plugins_gb);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargins);
+	vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargins, 0, loaded_plugins_gb);
 	vbox->addWidget(plugins_tab);
-	loaded_plugins_gb->setLayout(vbox);
 }
 
 PluginsConfigWidget::~PluginsConfigWidget()
@@ -130,7 +127,7 @@ void PluginsConfigWidget::loadConfiguration()
 
 			plugins_tab->addRow();
 			plugins_tab->setCellText(plugin->getPluginTitle(), plugins_tab->getRowCount()-1, 0);
-			plugins_tab->setCellIcon(QIcon(plugin->getPluginIcon(plugin_name)), plugins_tab->getRowCount()-1, 0);
+			plugins_tab->setCellIcon(plugin->getPluginIcon(plugin_name), plugins_tab->getRowCount()-1, 0);
 			plugins_tab->setCellText(plugin->getPluginVersion(), plugins_tab->getRowCount()-1, 1);
 			plugins_tab->setCellText(fi.fileName(), plugins_tab->getRowCount()-1, 2);
 			plugins_tab->setRowData(QVariant::fromValue<void *>(plugin), row++);

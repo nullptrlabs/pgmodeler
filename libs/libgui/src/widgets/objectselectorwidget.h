@@ -33,6 +33,9 @@ class __libgui ObjectSelectorWidget: public QWidget, public Ui::ObjectSelectorWi
 	Q_OBJECT
 
 	private:
+		//! \brief Indicates whether the object id label must be displayed
+		bool show_id_label;
+
 		//! \brief An object view widget instance used as object picker
 		ModelObjectsWidget *obj_view_wgt;
 
@@ -51,9 +54,9 @@ class __libgui ObjectSelectorWidget: public QWidget, public Ui::ObjectSelectorWi
 		bool eventFilter(QObject *obj, QEvent *evnt) override;
 
 	public:
-		ObjectSelectorWidget(ObjectType sel_obj_type, QWidget * parent = nullptr);
+		explicit ObjectSelectorWidget(ObjectType sel_obj_type, QWidget * parent, bool show_id_lbl = false);
 
-		ObjectSelectorWidget(std::vector<ObjectType> sel_obj_types, QWidget * parent = nullptr);
+		explicit ObjectSelectorWidget(std::vector<ObjectType> sel_obj_types, QWidget * parent, bool show_id_lbl = false);
 
 		~ObjectSelectorWidget() override;
 
@@ -71,6 +74,14 @@ class __libgui ObjectSelectorWidget: public QWidget, public Ui::ObjectSelectorWi
 
 		//! \brief Defines the model which the selector will search the objects
 		void setModel(DatabaseModel *model);
+
+		/*! \brief Defines the selector as readonly, hiding the clear and object browse buttons
+		 *  Also, disables the event filter over the object name input to avoid displaying the
+		 *  object selection dialog. The method setSelectedObject still defines the object to
+		 *  be displayed, only user interactions in the UI are disabled. */
+		void setReadOnly(bool ro);
+
+		void setSizePolicy(QSizePolicy::Policy horiz_pol, QSizePolicy::Policy vert_pol);
 
 	private slots:
 		void showSelectedObject(BaseObject *obj_sel, bool=false);

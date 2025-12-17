@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>858</width>
-    <height>1258</height>
+    <width>649</width>
+    <height>972</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -28,7 +28,10 @@
     <height>16777215</height>
    </size>
   </property>
-  <layout class="QGridLayout" name="relationship_grid" rowstretch="0,0">
+  <layout class="QVBoxLayout" name="relationship_lt">
+   <property name="spacing">
+    <number>5</number>
+   </property>
    <property name="leftMargin">
     <number>5</number>
    </property>
@@ -41,10 +44,7 @@
    <property name="bottomMargin">
     <number>5</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="1" column="0">
+   <item>
     <widget class="QTabWidget" name="rel_attribs_tbw">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -67,15 +67,15 @@
        <height>22</height>
       </size>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="general_pg">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
-        <normaloff>:/icons/icons/attribute.png</normaloff>:/icons/icons/attribute.png</iconset>
+        <normaloff>:/icons/icons/objects.png</normaloff>:/icons/icons/objects.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;General</string>
+       <string>General</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
        <property name="leftMargin">
         <number>5</number>
        </property>
@@ -88,97 +88,322 @@
        <property name="bottomMargin">
         <number>5</number>
        </property>
-       <property name="spacing">
-        <number>5</number>
-       </property>
-       <item row="1" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <item>
-          <widget class="QLabel" name="rel_icon_lbl">
+       <item>
+        <layout class="QVBoxLayout" name="base_fields_lt"/>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="rel_attribs_grid">
+         <item row="0" column="0">
+          <layout class="QVBoxLayout" name="ref_table_grp_lt">
+           <item>
+            <widget class="QLabel" name="ref_table_lbl">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Table 1</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="ref_table_lt">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <item>
+              <widget class="QCheckBox" name="table1_mand_chk">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Required</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item row="0" column="1">
+          <layout class="QVBoxLayout" name="recv_table_grp_lt">
+           <item>
+            <widget class="QLabel" name="recv_table_lbl">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Table 2</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="recv_table_lt">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <item>
+              <widget class="QCheckBox" name="table2_mand_chk">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Required</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item row="1" column="0" colspan="2">
+          <layout class="QVBoxLayout" name="relnn_tab_name_lt">
+           <item>
+            <widget class="QLabel" name="relnn_tab_name_lbl">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>Name of the table generated from many to many relationship</string>
+             </property>
+             <property name="text">
+              <string>Generated table name</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="relnn_tab_name_edt">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string/>
+             </property>
+             <property name="statusTip">
+              <string>Name of the table generated from many to many relationship</string>
+             </property>
+             <property name="clearButtonEnabled">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="3" column="0" colspan="2">
+          <widget class="QGroupBox" name="part_bound_expr_gb">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="minimumSize">
-            <size>
-             <width>28</width>
-             <height>28</height>
-            </size>
+           <property name="title">
+            <string>Bounding expression</string>
            </property>
-           <property name="maximumSize">
-            <size>
-             <width>28</width>
-             <height>28</height>
-            </size>
-           </property>
-           <property name="scaledContents">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="rel_type_name_lbl">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>rel_type</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Policy::Fixed</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>10</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QWidget" name="identifier_wgt" native="true">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <layout class="QVBoxLayout" name="verticalLayout_17">
             <property name="spacing">
              <number>5</number>
             </property>
             <property name="leftMargin">
-             <number>0</number>
+             <number>5</number>
             </property>
             <property name="topMargin">
-             <number>0</number>
+             <number>5</number>
             </property>
             <property name="rightMargin">
-             <number>0</number>
+             <number>5</number>
             </property>
             <property name="bottomMargin">
-             <number>0</number>
+             <number>5</number>
             </property>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <property name="spacing">
+               <number>5</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label">
+                <property name="text">
+                 <string>Partitioning type:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="part_type_lbl">
+                <property name="font">
+                 <font>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>NONE</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Policy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="default_part_chk">
+                <property name="toolTip">
+                 <string>&lt;p&gt;Default partitions are only supported on &lt;strong&gt;PostgreSQL 11+&lt;/strong&gt;. Using this option and exporting the code to PostgreSQL 10 syntax errors will be raised.&lt;/p&gt;</string>
+                </property>
+                <property name="statusTip">
+                 <string/>
+                </property>
+                <property name="text">
+                 <string>Default partition</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="gen_bound_expr_btn">
+                <property name="toolTip">
+                 <string>Generate the partition bounding expression based upon the partitioning type in use.</string>
+                </property>
+                <property name="text">
+                 <string>Generate expression</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../../res/resources.qrc">
+                  <normaloff>:/icons/icons/sqlcode.png</normaloff>:/icons/icons/sqlcode.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>25</width>
+                  <height>25</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="2" column="0" colspan="2">
+          <widget class="QGroupBox" name="options_grp">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="title">
+            <string>Options</string>
+           </property>
+           <layout class="QHBoxLayout" name="options_lt">
+            <property name="leftMargin">
+             <number>5</number>
+            </property>
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="rightMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item>
+             <layout class="QHBoxLayout" name="custom_color_lt">
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QCheckBox" name="custom_color_chk">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Custom line color</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
             <item>
              <widget class="QCheckBox" name="identifier_chk">
               <property name="sizePolicy">
@@ -198,33 +423,6 @@
               </property>
              </widget>
             </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QWidget" name="single_pk_wgt" native="true">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <property name="spacing">
-             <number>5</number>
-            </property>
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
             <item>
              <widget class="QCheckBox" name="single_pk_chk">
               <property name="sizePolicy">
@@ -244,339 +442,8 @@
               </property>
              </widget>
             </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="0" column="0">
-        <widget class="QCheckBox" name="custom_color_chk">
-         <property name="text">
-          <string>Custom Color:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="rel_type_lbl">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Relationship type:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="ref_table_lbl">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Table 1:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="relnn_tab_name_lbl">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Name of the table generated from many to many relationship</string>
-         </property>
-         <property name="text">
-          <string>Gen. table name:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="recv_table_lbl">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Table 2:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="0" colspan="2">
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Policy::Expanding</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="2">
-        <spacer name="horizontalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Orientation::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="2" column="1" colspan="2">
-        <widget class="QLineEdit" name="relnn_tab_name_edt">
-         <property name="toolTip">
-          <string/>
-         </property>
-         <property name="statusTip">
-          <string>Name of the table generated from many to many relationship</string>
-         </property>
-         <property name="clearButtonEnabled">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1" colspan="2">
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QPlainTextEdit" name="ref_table_txt">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <italic>true</italic>
-            </font>
-           </property>
-           <property name="verticalScrollBarPolicy">
-            <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-           </property>
-           <property name="horizontalScrollBarPolicy">
-            <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-           </property>
-           <property name="tabChangesFocus">
-            <bool>true</bool>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="table1_mand_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Is required</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="4" column="1" colspan="2">
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
-         <item>
-          <widget class="QPlainTextEdit" name="recv_table_txt">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <italic>true</italic>
-            </font>
-           </property>
-           <property name="verticalScrollBarPolicy">
-            <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-           </property>
-           <property name="horizontalScrollBarPolicy">
-            <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-           </property>
-           <property name="tabChangesFocus">
-            <bool>true</bool>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="table2_mand_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Is required</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="5" column="0" colspan="3">
-        <widget class="QGroupBox" name="part_bound_expr_gb">
-         <property name="title">
-          <string>Bounding expression</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_7">
-          <property name="leftMargin">
-           <number>5</number>
-          </property>
-          <property name="topMargin">
-           <number>5</number>
-          </property>
-          <property name="rightMargin">
-           <number>5</number>
-          </property>
-          <property name="bottomMargin">
-           <number>5</number>
-          </property>
-          <property name="spacing">
-           <number>5</number>
-          </property>
-          <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <property name="spacing">
-             <number>5</number>
-            </property>
             <item>
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Partitioning type:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="part_type_lbl">
-              <property name="font">
-               <font>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>NONE</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_3">
-              <property name="orientation">
-               <enum>Qt::Orientation::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Policy::Fixed</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="default_part_chk">
-              <property name="toolTip">
-               <string>&lt;p&gt;Default partitions are only supported on &lt;strong&gt;PostgreSQL 11+&lt;/strong&gt;. Using this option and exporting the code to PostgreSQL 10 syntax errors will be raised.&lt;/p&gt;</string>
-              </property>
-              <property name="statusTip">
-               <string/>
-              </property>
-              <property name="text">
-               <string>Default partition</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_2">
+             <spacer name="horizontalSpacer">
               <property name="orientation">
                <enum>Qt::Orientation::Horizontal</enum>
               </property>
@@ -588,42 +455,35 @@
               </property>
              </spacer>
             </item>
-            <item>
-             <widget class="QPushButton" name="gen_bound_expr_btn">
-              <property name="toolTip">
-               <string>Generate the partition bounding expression based upon the partitioning type in use.</string>
-              </property>
-              <property name="text">
-               <string>Generate expression</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../../res/resources.qrc">
-                <normaloff>:/icons/icons/sqlcode.png</normaloff>:/icons/icons/sqlcode.png</iconset>
-              </property>
-              <property name="iconSize">
-               <size>
-                <width>25</width>
-                <height>25</height>
-               </size>
-              </property>
-             </widget>
-            </item>
            </layout>
-          </item>
-         </layout>
-        </widget>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_6">
+     <widget class="QWidget" name="settings_pg">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/config.png</normaloff>:/icons/icons/config.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Settings</string>
+       <string>Settings</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_8">
        <property name="leftMargin">
         <number>5</number>
        </property>
@@ -636,717 +496,7 @@
        <property name="bottomMargin">
         <number>5</number>
        </property>
-       <property name="spacing">
-        <number>5</number>
-       </property>
-       <item row="2" column="0">
-        <widget class="QGroupBox" name="name_patterns_grp">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <italic>false</italic>
-          </font>
-         </property>
-         <property name="focusPolicy">
-          <enum>Qt::FocusPolicy::StrongFocus</enum>
-         </property>
-         <property name="title">
-          <string>&amp;Name patterns</string>
-         </property>
-         <property name="checkable">
-          <bool>false</bool>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <property name="spacing">
-           <number>5</number>
-          </property>
-          <property name="leftMargin">
-           <number>5</number>
-          </property>
-          <property name="topMargin">
-           <number>5</number>
-          </property>
-          <property name="rightMargin">
-           <number>5</number>
-          </property>
-          <property name="bottomMargin">
-           <number>5</number>
-          </property>
-          <item>
-           <widget class="QCheckBox" name="patterns_gconf_chk">
-            <property name="focusPolicy">
-             <enum>Qt::FocusPolicy::WheelFocus</enum>
-            </property>
-            <property name="toolTip">
-             <string>Use the values defined in settings dialogs for the fields below</string>
-            </property>
-            <property name="text">
-             <string>Use global settings</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="patterns_wgt" native="true">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_6">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <property name="spacing">
-              <number>5</number>
-             </property>
-             <item row="0" column="0">
-              <widget class="QLabel" name="src_col_pattern_lbl">
-               <property name="toolTip">
-                <string>Pattern for columns generated based upon reference table's pk (1-1 and 1-n) or based upon source table's pk (n-n).</string>
-               </property>
-               <property name="text">
-                <string>Column (source):</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QLabel" name="dst_col_pattern_lbl">
-               <property name="toolTip">
-                <string>Pattern for columns generated based upon target table's pk (n-n).</string>
-               </property>
-               <property name="text">
-                <string>Column (target):</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="src_fk_pattern_lbl">
-               <property name="toolTip">
-                <string>Pattern for foreign key generated based upon reference table's pk (1-1 and 1-n) or based upon source table's pk (n-n).</string>
-               </property>
-               <property name="text">
-                <string>Foreign key (source):</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QLabel" name="dst_fk_pattern_lbl">
-               <property name="toolTip">
-                <string>Pattern for foreign key generated based upon target table's pk (n-n).</string>
-               </property>
-               <property name="text">
-                <string>Foreign key (target):</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="pk_pattern_lbl">
-               <property name="toolTip">
-                <string>Pattern for primary key generated by identifier relationship.</string>
-               </property>
-               <property name="text">
-                <string>Primary key name:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="2">
-              <widget class="QLabel" name="uq_pattern_lbl">
-               <property name="toolTip">
-                <string>Pattern for unique key generated by the relationship.</string>
-               </property>
-               <property name="text">
-                <string>Unique key name:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="pk_col_pattern_lbl">
-               <property name="toolTip">
-                <string>Pattern for primary key generated by identifier relationship.</string>
-               </property>
-               <property name="text">
-                <string>Primary key column:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QPlainTextEdit" name="src_col_pattern_txt">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::FocusPolicy::WheelFocus</enum>
-               </property>
-               <property name="verticalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="tabChangesFocus">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QPlainTextEdit" name="src_fk_pattern_txt">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::FocusPolicy::WheelFocus</enum>
-               </property>
-               <property name="verticalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="tabChangesFocus">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QPlainTextEdit" name="pk_pattern_txt">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::FocusPolicy::WheelFocus</enum>
-               </property>
-               <property name="verticalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="tabChangesFocus">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QPlainTextEdit" name="pk_col_pattern_txt">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::FocusPolicy::WheelFocus</enum>
-               </property>
-               <property name="verticalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="tabChangesFocus">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="3">
-              <widget class="QPlainTextEdit" name="dst_col_pattern_txt">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::FocusPolicy::WheelFocus</enum>
-               </property>
-               <property name="verticalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="tabChangesFocus">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="3">
-              <widget class="QPlainTextEdit" name="dst_fk_pattern_txt">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::FocusPolicy::WheelFocus</enum>
-               </property>
-               <property name="verticalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="tabChangesFocus">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="3">
-              <widget class="QPlainTextEdit" name="uq_pattern_txt">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::FocusPolicy::WheelFocus</enum>
-               </property>
-               <property name="verticalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="tabChangesFocus">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="3">
-              <widget class="QPlainTextEdit" name="fk_idx_pattern_txt">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::FocusPolicy::WheelFocus</enum>
-               </property>
-               <property name="verticalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="tabChangesFocus">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="2">
-              <widget class="QLabel" name="fk_idx_pattern_lbl">
-               <property name="toolTip">
-                <string>Pattern for primary key generated by identifier relationship.</string>
-               </property>
-               <property name="text">
-                <string>FK Index name:</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QGroupBox" name="foreign_key_gb">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="focusPolicy">
-          <enum>Qt::FocusPolicy::StrongFocus</enum>
-         </property>
-         <property name="title">
-          <string>&amp;Foreign key settings</string>
-         </property>
-         <property name="checkable">
-          <bool>false</bool>
-         </property>
-         <property name="checked">
-          <bool>false</bool>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <property name="spacing">
-           <number>5</number>
-          </property>
-          <property name="leftMargin">
-           <number>5</number>
-          </property>
-          <property name="topMargin">
-           <number>5</number>
-          </property>
-          <property name="rightMargin">
-           <number>5</number>
-          </property>
-          <property name="bottomMargin">
-           <number>5</number>
-          </property>
-          <item>
-           <widget class="QCheckBox" name="fk_gconf_chk">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::FocusPolicy::WheelFocus</enum>
-            </property>
-            <property name="toolTip">
-             <string>Use the values defined on settings dialogs for the fields below</string>
-            </property>
-            <property name="text">
-             <string>Use global settings</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="fk_wgt" native="true">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>20</height>
-             </size>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_5">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <property name="spacing">
-              <number>5</number>
-             </property>
-             <item row="0" column="1">
-              <widget class="QCheckBox" name="deferrable_chk">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::FocusPolicy::WheelFocus</enum>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="on_delete_lbl">
-               <property name="text">
-                <string>ON DELETE:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QComboBox" name="del_action_cmb">
-               <property name="focusPolicy">
-                <enum>Qt::FocusPolicy::WheelFocus</enum>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>28</width>
-                 <height>28</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="3">
-              <widget class="QComboBox" name="upd_action_cmb">
-               <property name="focusPolicy">
-                <enum>Qt::FocusPolicy::WheelFocus</enum>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>28</width>
-                 <height>28</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="deferrable_lbl">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>90</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>90</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Deferrable:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QLabel" name="deferral_lbl">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Deferral:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QLabel" name="on_update_lbl">
-               <property name="text">
-                <string>ON UPDATE:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="3">
-              <widget class="QComboBox" name="deferral_cmb">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::FocusPolicy::WheelFocus</enum>
-               </property>
-               <property name="sizeAdjustPolicy">
-                <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>28</width>
-                 <height>28</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="index_type_lbl">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>90</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>90</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Index type:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QComboBox" name="index_type_cmb"/>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="0" column="0">
+       <item>
         <widget class="QGroupBox" name="copy_options_grp">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1358,7 +508,7 @@
           <enum>Qt::FocusPolicy::StrongFocus</enum>
          </property>
          <property name="title">
-          <string>&amp;Copy options</string>
+          <string>Copy options</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
           <property name="leftMargin">
@@ -1437,7 +587,7 @@
              <enum>Qt::FocusPolicy::WheelFocus</enum>
             </property>
             <property name="text">
-             <string>E&amp;XCLUDING</string>
+             <string>EXCLUDING</string>
             </property>
            </widget>
           </item>
@@ -1550,7 +700,722 @@
          </layout>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item>
+        <widget class="QGroupBox" name="foreign_key_gb">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::FocusPolicy::StrongFocus</enum>
+         </property>
+         <property name="title">
+          <string>Foreign key settings</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <property name="leftMargin">
+           <number>5</number>
+          </property>
+          <property name="topMargin">
+           <number>5</number>
+          </property>
+          <property name="rightMargin">
+           <number>5</number>
+          </property>
+          <property name="bottomMargin">
+           <number>5</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="fk_conf_wgt" native="true">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <layout class="QGridLayout" name="gridLayout">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item row="0" column="0">
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QCheckBox" name="deferrable_chk">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::WheelFocus</enum>
+                 </property>
+                 <property name="text">
+                  <string>Deferrable</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="deferral_cmb">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::WheelFocus</enum>
+                 </property>
+                 <property name="sizeAdjustPolicy">
+                  <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>28</width>
+                   <height>28</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="0" column="1">
+              <layout class="QVBoxLayout" name="verticalLayout_6">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="index_type_lbl">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Index type</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="index_type_cmb">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="1" column="0">
+              <layout class="QVBoxLayout" name="verticalLayout_4">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="on_delete_lbl">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="text">
+                  <string>ON DELETE</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="del_action_cmb">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::WheelFocus</enum>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>28</width>
+                   <height>28</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="1" column="1">
+              <layout class="QVBoxLayout" name="verticalLayout_5">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="on_update_lbl">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="text">
+                  <string>ON UPDATE</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="upd_action_cmb">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::WheelFocus</enum>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>28</width>
+                   <height>28</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="fk_gconf_chk">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::FocusPolicy::WheelFocus</enum>
+            </property>
+            <property name="toolTip">
+             <string>Use the values defined on settings dialogs for the fields below</string>
+            </property>
+            <property name="text">
+             <string>Use global settings</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="name_patterns_grp">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <italic>false</italic>
+          </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::FocusPolicy::StrongFocus</enum>
+         </property>
+         <property name="title">
+          <string>Name patterns</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_16">
+          <property name="leftMargin">
+           <number>5</number>
+          </property>
+          <property name="topMargin">
+           <number>5</number>
+          </property>
+          <property name="rightMargin">
+           <number>5</number>
+          </property>
+          <property name="bottomMargin">
+           <number>5</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="patterns_wgt" native="true">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_2">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item row="0" column="0">
+              <layout class="QVBoxLayout" name="verticalLayout">
+               <item>
+                <widget class="QLabel" name="src_col_pattern_lbl">
+                 <property name="toolTip">
+                  <string>&lt;p&gt;Pattern for columns generated based upon reference table's pk (1-1 and 1-n) or based upon source table's pk (n-n).&lt;/p&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Column (source)</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPlainTextEdit" name="src_col_pattern_txt">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::WheelFocus</enum>
+                 </property>
+                 <property name="verticalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="horizontalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="tabChangesFocus">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="0" column="1">
+              <layout class="QVBoxLayout" name="verticalLayout_9">
+               <item>
+                <widget class="QLabel" name="dst_col_pattern_lbl">
+                 <property name="toolTip">
+                  <string>&lt;p&gt;Pattern for columns generated based upon target table's pk (n-n).&lt;/p&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Column (target)</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPlainTextEdit" name="dst_col_pattern_txt">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::WheelFocus</enum>
+                 </property>
+                 <property name="verticalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="horizontalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="tabChangesFocus">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="0" column="3">
+              <layout class="QVBoxLayout" name="verticalLayout_11">
+               <item>
+                <widget class="QLabel" name="dst_fk_pattern_lbl">
+                 <property name="toolTip">
+                  <string>&lt;p&gt;Pattern for foreign key generated based upon target table's pk (n-n).&lt;/p&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Foreign key (target)</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPlainTextEdit" name="dst_fk_pattern_txt">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::WheelFocus</enum>
+                 </property>
+                 <property name="verticalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="horizontalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="tabChangesFocus">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="1" column="0">
+              <layout class="QVBoxLayout" name="verticalLayout_12">
+               <item>
+                <widget class="QLabel" name="pk_pattern_lbl">
+                 <property name="toolTip">
+                  <string>&lt;p&gt;Pattern for primary key generated by identifier relationship.&lt;/p&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Primary key name</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPlainTextEdit" name="pk_pattern_txt">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::WheelFocus</enum>
+                 </property>
+                 <property name="verticalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="horizontalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="tabChangesFocus">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="1" column="1">
+              <layout class="QVBoxLayout" name="verticalLayout_14">
+               <item>
+                <widget class="QLabel" name="pk_col_pattern_lbl">
+                 <property name="toolTip">
+                  <string>&lt;p&gt;Pattern for primary key generated by identifier relationship.&lt;/p&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Primary key column</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPlainTextEdit" name="pk_col_pattern_txt">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::WheelFocus</enum>
+                 </property>
+                 <property name="verticalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="horizontalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="tabChangesFocus">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="1" column="2">
+              <layout class="QVBoxLayout" name="verticalLayout_13">
+               <item>
+                <widget class="QLabel" name="uq_pattern_lbl">
+                 <property name="toolTip">
+                  <string>&lt;p&gt;Pattern for unique key generated by the relationship.&lt;/p&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Unique key name</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPlainTextEdit" name="uq_pattern_txt">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::WheelFocus</enum>
+                 </property>
+                 <property name="verticalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="horizontalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="tabChangesFocus">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="1" column="3">
+              <layout class="QVBoxLayout" name="verticalLayout_15">
+               <item>
+                <widget class="QLabel" name="fk_idx_pattern_lbl">
+                 <property name="toolTip">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string>FK Index name</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPlainTextEdit" name="fk_idx_pattern_txt">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::WheelFocus</enum>
+                 </property>
+                 <property name="verticalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="horizontalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="tabChangesFocus">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="0" column="2">
+              <layout class="QVBoxLayout" name="verticalLayout_10">
+               <item>
+                <widget class="QLabel" name="src_fk_pattern_lbl">
+                 <property name="toolTip">
+                  <string>&lt;p&gt;Pattern for foreign key generated based upon reference table's pk (1-1 and 1-n) or based upon source table's pk (n-n).&lt;/p&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Foreign key (source)</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPlainTextEdit" name="src_fk_pattern_txt">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::WheelFocus</enum>
+                 </property>
+                 <property name="verticalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="horizontalScrollBarPolicy">
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                 </property>
+                 <property name="tabChangesFocus">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="patterns_gconf_chk">
+         <property name="focusPolicy">
+          <enum>Qt::FocusPolicy::WheelFocus</enum>
+         </property>
+         <property name="toolTip">
+          <string>Use the values defined in settings dialogs for the fields below</string>
+         </property>
+         <property name="text">
+          <string>Use global settings</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Orientation::Vertical</enum>
@@ -1565,33 +1430,36 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_3">
+     <widget class="QWidget" name="attributes_pg">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/column.png</normaloff>:/icons/icons/column.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Attributes</string>
+       <string>Attributes</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="constraints_pg">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/constraint.png</normaloff>:/icons/icons/constraint.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>Co&amp;nstraints</string>
+       <string>Constraints</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="tab_4">
+     <widget class="QWidget" name="special_pk_pg">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/constraint_pk.png</normaloff>:/icons/icons/constraint_pk.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>&amp;Primary key</string>
+       <string>Primary key</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout">
+      <layout class="QVBoxLayout" name="special_pk_lt">
+       <property name="spacing">
+        <number>5</number>
+       </property>
        <property name="leftMargin">
         <number>5</number>
        </property>
@@ -1604,10 +1472,7 @@
        <property name="bottomMargin">
         <number>5</number>
        </property>
-       <property name="spacing">
-        <number>5</number>
-       </property>
-       <item row="0" column="0">
+       <item>
         <widget class="QListWidget" name="rel_columns_lst">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -1640,13 +1505,13 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_5">
+     <widget class="QWidget" name="advanced_pg">
       <attribute name="icon">
        <iconset resource="../../res/resources.qrc">
         <normaloff>:/icons/icons/moreactions.png</normaloff>:/icons/icons/moreactions.png</iconset>
       </attribute>
       <attribute name="title">
-       <string>A&amp;dvanced</string>
+       <string>Advanced</string>
       </attribute>
      </widget>
     </widget>
@@ -1654,13 +1519,7 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>rel_attribs_tbw</tabstop>
-  <tabstop>custom_color_chk</tabstop>
-  <tabstop>identifier_chk</tabstop>
-  <tabstop>single_pk_chk</tabstop>
   <tabstop>relnn_tab_name_edt</tabstop>
-  <tabstop>ref_table_txt</tabstop>
-  <tabstop>recv_table_txt</tabstop>
   <tabstop>default_part_chk</tabstop>
   <tabstop>gen_bound_expr_btn</tabstop>
   <tabstop>copy_options_grp</tabstop>
@@ -1676,13 +1535,7 @@
   <tabstop>identity_chk</tabstop>
   <tabstop>statistics_chk</tabstop>
   <tabstop>foreign_key_gb</tabstop>
-  <tabstop>fk_gconf_chk</tabstop>
-  <tabstop>deferrable_chk</tabstop>
-  <tabstop>deferral_cmb</tabstop>
-  <tabstop>del_action_cmb</tabstop>
-  <tabstop>upd_action_cmb</tabstop>
   <tabstop>name_patterns_grp</tabstop>
-  <tabstop>patterns_gconf_chk</tabstop>
   <tabstop>src_col_pattern_txt</tabstop>
   <tabstop>dst_col_pattern_txt</tabstop>
   <tabstop>src_fk_pattern_txt</tabstop>

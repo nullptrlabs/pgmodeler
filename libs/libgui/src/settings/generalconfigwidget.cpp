@@ -46,7 +46,7 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 	confs_dir_sel->setReadOnly(true);
 	confs_dir_sel->setDirectoryMode(true);
 	confs_dir_sel->setSelectedFile(GlobalAttributes::getConfigurationsPath());
-	general_grid->addWidget(confs_dir_sel, 1, 1, 1, 1);
+	confs_dir_lt->addWidget(confs_dir_sel);
 
 	source_editor_sel = new FileSelectorWidget(this);
 	source_editor_sel->setAllowFilenameInput(true);
@@ -55,7 +55,13 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 	source_editor_sel->setWindowTitle(tr("Select application"));
 	source_editor_sel->setToolTip(tr("External source code editor application"));
 	source_editor_sel->setCheckExecutionFlag(true);
-	general_grid->addWidget(source_editor_sel, 2, 1, 1, 1);
+	source_editor_lt->addWidget(source_editor_sel);
+
+	GuiUtilsNs::configureBuddyWidgets(this);
+	GuiUtilsNs::configureWidgetsFont({ sql_history_lbl, trunc_columns_data_chk,
+																		 width_lbl, height_lbl, left_lbl,
+																		 right_lbl, top_lbl, bottom_lbl },
+																	 GuiUtilsNs::SmallFontFactor, true);
 
 	int i = 0;
 	for(auto &pg_id : page_ids)
@@ -683,12 +689,8 @@ void GeneralConfigWidget::convertMarginUnity()
 
 void GeneralConfigWidget::selectPaperSize()
 {
-	bool visible=paper_cmb->currentIndex()==paper_cmb->count()-1;
-
-	width_lbl->setVisible(visible);
-	height_lbl->setVisible(visible);
-	width_spb->setVisible(visible);
-	height_spb->setVisible(visible);
+	bool visible = (paper_cmb->currentIndex()== paper_cmb->count() - 1);
+	custom_page_sz_grp->setVisible(visible);
 }
 
 void GeneralConfigWidget::setConfigurationChanged(bool changed)

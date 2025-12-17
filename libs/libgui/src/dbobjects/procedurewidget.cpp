@@ -20,15 +20,22 @@
 
 ProcedureWidget::ProcedureWidget(QWidget *parent): BaseFunctionWidget(parent, ObjectType::Procedure)
 {
-	func_config_twg->widget(0)->layout()->addItem(new QSpacerItem(20, 20, QSizePolicy::Preferred, QSizePolicy::Expanding));
-	configureFormLayout(base_function_grid, ObjectType::Procedure);
+	configureTabbedLayout(func_config_twg);
+
+	/* Moving the contents of attributes tab to general
+	 * To avoid having just two fields in that tab. */
+	attributes_tab->layout()->removeItem(lang_security_lt);
+	extra_wgts_lt->addLayout(lang_security_lt);
+
+	// Remove the tab since it'll not be used anymore
+	func_config_twg->removeTab(func_config_twg->indexOf(attributes_tab));
 
 	connect(parameters_tab, &CustomTableWidget::s_rowAdded, this, __slot(this, ProcedureWidget::showParameterForm));
 	connect(parameters_tab, &CustomTableWidget::s_rowEdited, this, __slot(this, ProcedureWidget::showParameterForm));
 	connect(parameters_tab, &CustomTableWidget::s_rowDuplicated, this, &ProcedureWidget::duplicateParameter);
 
 	configureTabOrder();
-	setMinimumSize(650, 700);
+	setMinimumSize(650, 500);
 }
 
 void ProcedureWidget::handleParameter(Parameter param, int result)

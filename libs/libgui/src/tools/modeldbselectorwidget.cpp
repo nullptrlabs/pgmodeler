@@ -21,6 +21,7 @@
 #include "settings/connectionsconfigwidget.h"
 #include "databaseimporthelper.h"
 #include "databaseimportwidget.h"
+#include "guiutilsns.h"
 
 ModelDbSelectorWidget::ModelDbSelectorWidget(QWidget *parent) : QWidget(parent)
 {
@@ -29,6 +30,8 @@ ModelDbSelectorWidget::ModelDbSelectorWidget(QWidget *parent) : QWidget(parent)
 	
 	alert_frm->setVisible(false);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
+
+	GuiUtilsNs::configureBuddyWidgets(db_ctrl_wgt);
 
 	connect(connections_cmb, &QComboBox::activated, this, &ModelDbSelectorWidget::listDatabases);
 	connect(database_cmb, &QComboBox::activated, this, &ModelDbSelectorWidget::s_selectionChanged);

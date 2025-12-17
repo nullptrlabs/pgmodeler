@@ -67,15 +67,14 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		show_act_btns = true;
 		font.setPointSizeF(font.pointSizeF() * 0.90);
 
-		QVBoxLayout *top_wgt_lt = new QVBoxLayout;
-		top_wgt_lt->setContentsMargins(GuiUtilsNs::LtMargins);
 		top_widget = new QWidget(this);
 		top_widget->setObjectName("top_widget");
 		top_widget->setAutoFillBackground(true);
-		top_widget->setLayout(top_wgt_lt);
 
-		//pal.setColor(QPalette::Window, LineNumbersWidget::getBackgroundColor());
-		//top_widget->setPalette(pal);
+		QVBoxLayout *top_wgt_lt = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargins,
+																													 GuiUtilsNs::LtSpacing,
+																													 top_widget);
+
 		top_widget->setVisible(act_btns_enabled);
 		top_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
@@ -85,33 +84,29 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		search_wgt->setVisible(false);
 		search_wgt->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
 
-		QHBoxLayout *buttons_lt = new QHBoxLayout;
-		buttons_lt->setContentsMargins(0, 0, 0, 0);
-
+		QHBoxLayout *buttons_lt = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing);
 		top_wgt_lt->addLayout(buttons_lt);
 
 		QLabel *ico = new QLabel(top_widget);
 		msg_lbl = new QLabel(top_widget);
 		msg_lbl->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
-		ico->setPixmap(QPixmap(GuiUtilsNs::getIconPath("alert")));
+		ico->setPixmap(GuiUtilsNs::getPixmap("alert"));
 		ico->setScaledContents(true);
 
 		editor_alert_wgt = new QWidget(top_widget);
 		editor_alert_wgt->setFont(font);
 
-		QHBoxLayout *alert_lt = new QHBoxLayout;
-		alert_lt->setContentsMargins(0,0,0,0);
+		QHBoxLayout *alert_lt = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing, editor_alert_wgt);
 		alert_lt->addWidget(ico);
 		alert_lt->addWidget(msg_lbl);
 		editor_alert_wgt->setVisible(false);
-		editor_alert_wgt->setLayout(alert_lt);
 
 		buttons_lt->addWidget(editor_alert_wgt);
 		buttons_lt->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Expanding));
 
 		load_file_btn = new QToolButton(top_widget);
-		load_file_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("open")));
+		load_file_btn->setIcon(GuiUtilsNs::getIcon("open"));
 		load_file_btn->setAutoRaise(true);
 		load_file_btn->setText(tr("Load"));
 		load_file_btn->setShortcut(QKeySequence("Ctrl+L"));
@@ -122,7 +117,7 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		buttons_lt->addWidget(load_file_btn);
 
 		save_file_btn = new QToolButton(top_widget);
-		save_file_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("save")));
+		save_file_btn->setIcon(GuiUtilsNs::getIcon("save"));
 		save_file_btn->setAutoRaise(true);
 		save_file_btn->setText(tr("Save"));
 		save_file_btn->setShortcut(QKeySequence("Ctrl+S"));
@@ -133,7 +128,7 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		buttons_lt->addWidget(save_file_btn);
 
 		copy_btn = new QToolButton(top_widget);
-		copy_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("copy")));
+		copy_btn->setIcon(GuiUtilsNs::getIcon("copy"));
 		copy_btn->setAutoRaise(true);
 		copy_btn->setDisabled(true);
 		copy_btn->setText(tr("Copy"));
@@ -145,7 +140,7 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		buttons_lt->addWidget(copy_btn);
 
 		edit_src_btn = new QToolButton(top_widget);
-		edit_src_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("edit")));
+		edit_src_btn->setIcon(GuiUtilsNs::getIcon("edit"));
 		edit_src_btn->setAutoRaise(true);
 		edit_src_btn->setText(tr("Edit"));
 		edit_src_btn->setShortcut(QKeySequence("Ctrl+E"));
@@ -156,7 +151,7 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		buttons_lt->addWidget(edit_src_btn);
 
 		search_btn = new QToolButton(top_widget);
-		search_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("findtext")));
+		search_btn->setIcon(GuiUtilsNs::getIcon("findtext"));
 		search_btn->setAutoRaise(true);
 		search_btn->setCheckable(true);
 		search_btn->setText(tr("Search"));
@@ -168,7 +163,7 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		buttons_lt->addWidget(search_btn);
 
 		word_wrap_btn = new QToolButton(top_widget);
-		word_wrap_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("wordwrap")));
+		word_wrap_btn->setIcon(GuiUtilsNs::getIcon("wordwrap"));
 		word_wrap_btn->setAutoRaise(true);
 		word_wrap_btn->setCheckable(true);
 		word_wrap_btn->setText(tr("Wrap"));
@@ -181,7 +176,7 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		buttons_lt->addWidget(word_wrap_btn);
 
 		clear_btn = new QToolButton(top_widget);
-		clear_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("cleartext")));
+		clear_btn->setIcon(GuiUtilsNs::getIcon("cleartext"));
 		clear_btn->setAutoRaise(true);
 		clear_btn->setText(tr("Clear"));
 		clear_btn->setToolTip(tr("Clears the entire text"));

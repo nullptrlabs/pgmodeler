@@ -7587,7 +7587,7 @@ QString DatabaseModel::__getSourceCode(SchemaParser::CodeType def_type)
 	}
 }
 
-QString DatabaseModel::getSQLDefinition(const std::vector<BaseObject *> objects, CodeGenMode code_gen_mode)
+QString DatabaseModel::getSQLDefinition(const std::vector<BaseObject *> objects, CodeGenMode code_gen_mode, bool is_preview)
 {
 	if(objects.empty())
 		return "";
@@ -7618,7 +7618,11 @@ QString DatabaseModel::getSQLDefinition(const std::vector<BaseObject *> objects,
 		{
 			obj_type = obj->getObjectType();
 
-			if((obj->isSQLDisabled() && !gen_dis_objs_code) ||
+			/* We ignore the generation of code for objects with SQL disabled
+			 * when the current call to this method is not for previewing
+			 * code (is_preview). Objects that don't produce any SQL code
+			 * are also ignored */
+			if((obj->isSQLDisabled() && !gen_dis_objs_code && !is_preview) ||
 				 obj_type == ObjectType::Textbox || obj_type == ObjectType::Tag ||
 				 (obj_type == ObjectType::BaseRelationship &&
 					dynamic_cast<BaseRelationship *>(obj)->getRelationshipType() !=

@@ -22,17 +22,8 @@
 CollationWidget::CollationWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Collation)
 {
 	QStringList loc_list, encodings, providers;
-	QFrame *frame=nullptr;
 
 	Ui_CollationWidget::setupUi(this);
-
-	frame=generateInformationFrame(tr("The fields <strong><em>Collation</em></strong>, <strong><em>Locale</em></strong>, <strong><em>LC_COLLATE & LC_CTYPE</em></strong> are mutually exclusive, so you have to set only one of them in order to properly handle a collation."));
-
-	collation_grid->addItem(new QSpacerItem(10,10, QSizePolicy::Minimum,QSizePolicy::Expanding), collation_grid->count()+1, 0, 1, 0);
-	collation_grid->addWidget(frame, collation_grid->count()+1, 0, 1, 0);
-	frame->setParent(this);
-
-	configureFormLayout(collation_grid, ObjectType::Collation);
 
 	std::map<QString, std::vector<QWidget *> > fields_map;
 	fields_map[generateVersionsInterval(AfterVersion, PgSqlVersions::PgSqlVersion100)].push_back(provider_lbl);
@@ -45,9 +36,9 @@ CollationWidget::CollationWidget(QWidget *parent): BaseObjectWidget(parent, Obje
 	encoding_cmb->addItems(encodings);
 
 	//Configures the localizations combobox
-	for(int i=QLocale::C; i <= QLocale::Chewa; i++)
+	for(int i = QLocale::C; i <= QLocale::Chewa; i++)
 	{
-		for(int i1=QLocale::Afghanistan; i1 <= QLocale::Zimbabwe; i1++)
+		for(int i1 = QLocale::Afghanistan; i1 <= QLocale::Zimbabwe; i1++)
 			loc_list.append(QLocale(static_cast<QLocale::Language>(i),static_cast<QLocale::Country>(i1)).name());
 	}
 
@@ -72,7 +63,8 @@ CollationWidget::CollationWidget(QWidget *parent): BaseObjectWidget(parent, Obje
 	lcctype_mod_lbl->setToolTip(locale_mod_lbl->toolTip());
 	lccollate_mod_lbl->setToolTip(locale_mod_lbl->toolTip());
 
-	setMinimumSize(540, 500);
+	configureTabbedLayout(true);
+	setMinimumSize(600, 400);
 }
 
 void CollationWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, Collation *collation)

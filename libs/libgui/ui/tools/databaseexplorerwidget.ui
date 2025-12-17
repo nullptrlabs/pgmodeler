@@ -50,10 +50,10 @@
       </size>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
@@ -89,7 +89,7 @@
          <string/>
         </property>
         <property name="textFormat">
-         <enum>Qt::AutoText</enum>
+         <enum>Qt::TextFormat::AutoText</enum>
         </property>
         <property name="pixmap">
          <pixmap resource="../../res/resources.qrc">:/icons/icons/alert.png</pixmap>
@@ -158,10 +158,10 @@
         </size>
        </property>
        <property name="popupMode">
-        <enum>QToolButton::InstantPopup</enum>
+        <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
        </property>
        <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonIconOnly</enum>
+        <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
        </property>
        <property name="autoRaise">
         <bool>true</bool>
@@ -210,7 +210,7 @@
         <bool>true</bool>
        </property>
        <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonIconOnly</enum>
+        <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
        </property>
        <property name="autoRaise">
         <bool>true</bool>
@@ -285,7 +285,7 @@
         <string>Alt+G</string>
        </property>
        <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonIconOnly</enum>
+        <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
        </property>
        <property name="autoRaise">
         <bool>true</bool>
@@ -365,7 +365,7 @@
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -380,7 +380,7 @@
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
      <property name="handleWidth">
       <number>5</number>
@@ -405,25 +405,25 @@
           </size>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Sunken</enum>
+          <enum>QFrame::Shadow::Sunken</enum>
          </property>
          <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAsNeeded</enum>
+          <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
          </property>
          <property name="sizeAdjustPolicy">
-          <enum>QAbstractScrollArea::AdjustIgnored</enum>
+          <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustIgnored</enum>
          </property>
          <property name="editTriggers">
-          <set>QAbstractItemView::NoEditTriggers</set>
+          <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
          </property>
          <property name="alternatingRowColors">
           <bool>true</bool>
          </property>
          <property name="selectionMode">
-          <enum>QAbstractItemView::SingleSelection</enum>
+          <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
          </property>
          <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectRows</enum>
+          <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
          </property>
          <property name="iconSize">
           <size>
@@ -432,7 +432,7 @@
           </size>
          </property>
          <property name="textElideMode">
-          <enum>Qt::ElideRight</enum>
+          <enum>Qt::TextElideMode::ElideRight</enum>
          </property>
          <property name="indentation">
           <number>20</number>
@@ -509,7 +509,7 @@
             <item>
              <spacer name="horizontalSpacer_4">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -586,7 +586,7 @@
             <item>
              <spacer name="horizontalSpacer_5">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -599,7 +599,7 @@
            </layout>
           </item>
           <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_7">
+           <layout class="QHBoxLayout" name="filter_lt">
             <property name="spacing">
              <number>5</number>
             </property>
@@ -621,7 +621,7 @@
                <string/>
               </property>
               <property name="text">
-               <string>Filter:</string>
+               <string>Filter</string>
               </property>
              </widget>
             </item>
@@ -678,19 +678,19 @@
        <item>
         <widget class="QTableWidget" name="properties_tbw">
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::Shape::StyledPanel</enum>
          </property>
          <property name="lineWidth">
           <number>1</number>
          </property>
          <property name="sizeAdjustPolicy">
-          <enum>QAbstractScrollArea::AdjustIgnored</enum>
+          <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustIgnored</enum>
          </property>
          <property name="autoScrollMargin">
           <number>16</number>
          </property>
          <property name="editTriggers">
-          <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+          <set>QAbstractItemView::EditTrigger::DoubleClicked|QAbstractItemView::EditTrigger::EditKeyPressed</set>
          </property>
          <property name="tabKeyNavigation">
           <bool>false</bool>
@@ -705,10 +705,10 @@
           <bool>true</bool>
          </property>
          <property name="selectionMode">
-          <enum>QAbstractItemView::ContiguousSelection</enum>
+          <enum>QAbstractItemView::SelectionMode::ContiguousSelection</enum>
          </property>
          <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectItems</enum>
+          <enum>QAbstractItemView::SelectionBehavior::SelectItems</enum>
          </property>
          <property name="iconSize">
           <size>
@@ -720,7 +720,7 @@
           <bool>true</bool>
          </property>
          <property name="gridStyle">
-          <enum>Qt::SolidLine</enum>
+          <enum>Qt::PenStyle::SolidLine</enum>
          </property>
          <property name="sortingEnabled">
           <bool>true</bool>
@@ -791,7 +791,6 @@
   <tabstop>raw_attrib_names_chk</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>
