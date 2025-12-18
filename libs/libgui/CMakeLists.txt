@@ -256,10 +256,19 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS
     ui/widgets
     ui/tools)
 
+find_package(Qt6 REQUIRED COMPONENTS Core)
+
 pgm_add_library(gui
     ${SOURCES}
     ${FORMS}
     ${RESOURCES})
+
+target_link_libraries(gui PRIVATE Qt6::Core)
+
+target_sources(gui
+	PRIVATE
+		src/utils/tabordermanager.h src/utils/tabordermanager.cpp
+)
 
 # We create the global variable LIBGUI_AUTOGEN_INC that storse the path to the
 # gui_autogen/include folder to be reused by other subprojects

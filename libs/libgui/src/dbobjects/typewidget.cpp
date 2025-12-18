@@ -102,9 +102,9 @@ TypeWidget::TypeWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Ty
 	extra_wgts_lt->addLayout(configuration_lt);
 	configureTabbedLayout(type_attribs_twg);
 
-	configureTabOrder({ attrib_name_edt, attrib_collation_sel, attrib_type_wgt,
+	/* configureTabOrder({ attrib_name_edt, attrib_collation_sel, attrib_type_wgt,
 										 opclass_sel, functions_sel[Type::CanonicalFunc], functions_sel[Type::SubtypeDiffFunc],
-										 type_attribs_twg});
+										 type_attribs_twg}); */
 
 	setMinimumSize(600, 480);
 }

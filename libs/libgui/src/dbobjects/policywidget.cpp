@@ -52,7 +52,7 @@ PolicyWidget::PolicyWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 	extra_wgts_lt->addLayout(command_mode_lt);
 	configureTabbedLayout(attribs_tbw);
 
-	configureTabOrder({ command_cmb, mode_cmb, attribs_tbw });
+	//configureTabOrder({ command_cmb, mode_cmb, attribs_tbw });
 
 	connect(roles_tab, &CustomTableWidget::s_rowAdded, model_objs_wgt, &ModelObjectsWidget::show);
 	connect(model_objs_wgt, qOverload<BaseObject *, bool>(&ModelObjectsWidget::s_visibilityChanged), this, &PolicyWidget::selectRole);

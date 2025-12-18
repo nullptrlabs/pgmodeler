@@ -63,7 +63,7 @@ ConstraintWidget::ConstraintWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	extra_wgts_lt->addLayout(constr_attribs_grid);
 	configureTabbedLayout(constr_attribs_tbw);
 
-	configureTabOrder();
+	//configureTabOrder();
 	setMinimumSize(600, 450);
 }
 

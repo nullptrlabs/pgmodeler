@@ -62,11 +62,11 @@ TriggerWidget::TriggerWidget(QWidget *parent): BaseObjectWidget(parent, ObjectTy
 	configureTabbedLayout(trig_attribs_tbw);
 	setMinimumSize(600, 350);
 
-	configureTabOrder({ insert_chk, delete_chk, update_chk,
+	/* configureTabOrder({ insert_chk, delete_chk, update_chk,
 											truncate_chk, firing_mode_cmb, exec_per_row_chk, function_sel,
 											old_table_edt, new_table_edt, argument_edt, arguments_tab,
 											col_picker_wgt, deferrable_chk, deferral_type_cmb,
-											ref_table_sel, cond_expr_txt });
+											ref_table_sel, cond_expr_txt }); */
 }
 
 void TriggerWidget::selectUpdateEvent()

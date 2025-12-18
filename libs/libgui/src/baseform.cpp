@@ -18,11 +18,13 @@
 
 #include "baseform.h"
 #include "guiutilsns.h"
+#include "tabordermanager.h"
 
 BaseForm::BaseForm(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f)
 {
 	setupUi(this);
-	setWindowFlags((this->windowFlags() | Qt::WindowMinMaxButtonsHint) /* ^ Qt::WindowContextHelpButtonHint */);
+	setWindowFlags(this->windowFlags() | Qt::WindowMinMaxButtonsHint);
+	installEventFilter(new TabOrderManager(this));
 }
 
 void BaseForm::setButtonConfiguration(Messagebox::ButtonsId button_conf)

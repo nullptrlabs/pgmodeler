@@ -31,7 +31,7 @@ TablespaceWidget::TablespaceWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	configureTabbedLayout(false);
 	setRequiredField(directory_lbl);
 	setRequiredField(directory_sel);
-	configureTabOrder();
+	//configureTabOrder();
 
 	setMinimumSize(550, 300);
 }

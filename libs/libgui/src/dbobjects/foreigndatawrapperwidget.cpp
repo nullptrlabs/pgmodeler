@@ -44,7 +44,7 @@ ForeignDataWrapperWidget::ForeignDataWrapperWidget(QWidget *parent): BaseObjectW
 	options_tab->setHeaderLabel(tr("Value"), 1);
 
 	configureTabbedLayout(attributes_tbw);
-	configureTabOrder({ func_handler_sel, func_validator_sel, options_tab });
+	//configureTabOrder({ func_handler_sel, func_validator_sel, options_tab });
 
 	setMinimumSize(600, 420);
 }

@@ -18,7 +18,7 @@ ExtensionWidget::ExtensionWidget(QWidget * parent) : BaseObjectWidget(parent, Ob
 	types_tab->setHeaderIcon(GuiUtilsNs::getIcon("schema"), 1);
 
 	configureTabbedLayout(ext_attribs_tbw);
-	configureTabOrder({ cur_ver_edt, old_ver_edt, types_tab });
+	//configureTabOrder({ cur_ver_edt, old_ver_edt, types_tab });
 
 	setMinimumSize(550, 350);
 }

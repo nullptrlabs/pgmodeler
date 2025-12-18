@@ -94,8 +94,8 @@ PermissionWidget::PermissionWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	configureTabbedLayout(perm_settings_tbw, false, false);
 	setMinimumSize(700, 600);
 
-	configureTabOrder({ perm_id_edt, perm_disable_sql_chk, roles_tab, grant_rb, revoke_rb, cascade_chk,
-											privileges_tbw, add_perm_tb, upd_perm_tb, cancel_tb, permissions_tab });
+	/* configureTabOrder({ perm_id_edt, perm_disable_sql_chk, roles_tab, grant_rb, revoke_rb, cascade_chk,
+											privileges_tbw, add_perm_tb, upd_perm_tb, cancel_tb, permissions_tab }); */
 }
 
 PermissionWidget::~PermissionWidget()

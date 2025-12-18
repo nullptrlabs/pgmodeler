@@ -35,7 +35,7 @@ IndexWidget::IndexWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::
 	connect(fill_factor_chk, &QCheckBox::toggled, fill_factor_sb, &QSpinBox::setEnabled);
 
 	configureTabbedLayout(attributes_tbw);
-	configureTabOrder();
+	//configureTabOrder();
 	selectIndexingType();
 
 	setMinimumSize(600, 400);

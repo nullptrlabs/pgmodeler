@@ -66,7 +66,7 @@ FunctionWidget::FunctionWidget(QWidget *parent): BaseFunctionWidget(parent, Obje
 
 	ret_method_cmb->setMinimumWidth(ret_method_lbl->width());
 
-	configureTabOrder();
+	//configureTabOrder();
 	setMinimumSize(650, 500);
 }
 

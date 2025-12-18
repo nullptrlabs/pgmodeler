@@ -40,8 +40,8 @@ CastWidget::CastWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Ca
 	setRequiredField(src_datatype);
 	setRequiredField(trg_datatype);
 
-	configureTabOrder({ cast_type_cmb, input_output_chk,
-											 conv_func_sel, src_datatype, trg_datatype });
+	/* configureTabOrder({ cast_type_cmb, input_output_chk,
+											 conv_func_sel, src_datatype, trg_datatype }); */
 
 	setMinimumSize(650, 500);
 }

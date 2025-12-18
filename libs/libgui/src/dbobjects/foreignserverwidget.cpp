@@ -40,7 +40,7 @@ ForeignServerWidget::ForeignServerWidget(QWidget *parent): BaseObjectWidget(pare
 	setRequiredField(fdw_sel);
 	setRequiredField(fdw_lbl);
 	configureTabbedLayout(attributes_tbw);
-	configureTabOrder({ type_edt, version_edt, fdw_sel, options_tab });
+	//configureTabOrder({ type_edt, version_edt, fdw_sel, options_tab });
 
 	setMinimumSize(600, 420);
 }

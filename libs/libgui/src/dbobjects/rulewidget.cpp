@@ -51,7 +51,7 @@ RuleWidget::RuleWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Ru
 	configureTabbedLayout(rule_attribs_tbw);
 
 	setRequiredField(event_lbl);
-	configureTabOrder();
+	//configureTabOrder();
 
 	setMinimumSize(550, 450);
 }

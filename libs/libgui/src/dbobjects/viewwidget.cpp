@@ -124,7 +124,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 	extra_wgts_lt->addLayout(type_sec_tag_lt);
 	configureTabbedLayout(attributes_tbw);
 
-	configureTabOrder({ tag_sel, view_type_cmb, with_no_data_chk, attributes_tbw });
+	//configureTabOrder({ tag_sel, view_type_cmb, with_no_data_chk, attributes_tbw });
 	setMinimumSize(700, 650);
 }
 
