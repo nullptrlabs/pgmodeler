@@ -23,54 +23,48 @@ QList<PgModelerGuiPlugin *> PgModelerGuiPlugin::reg_plugins;
 
 PgModelerGuiPlugin::PgModelerGuiPlugin()
 {
-	QFont font;
-
 	main_window = nullptr;
 	plugin_info_frm = new BaseForm;
 
 	QWidget *widget = new QWidget;
 	widget->setWindowTitle(QT_TRANSLATE_NOOP("PgModelerGuiPlugin", "Plugin information"));
 
-	QGridLayout *grid = GuiUtilsNs::createGridLayout(GuiUtilsNs::LtMargins,
-																									 GuiUtilsNs::LtSpacing,
-																									 widget);
+	QGroupBox *info_grp = GuiUtilsNs::createWidgetInParent<QGroupBox>(GuiUtilsNs::LtMargin, widget);
+	info_grp->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	info_grp->setTitle(QT_TRANSLATE_NOOP("PgModelerGuiPlugin", "Version info"));
+
+	title_lbl = GuiUtilsNs::createWidgetInParent<QLabel>(GuiUtilsNs::LtMargin, info_grp);
+	author_lbl = GuiUtilsNs::createWidgetInParent<QLabel>(GuiUtilsNs::LtMargin, info_grp);
+	version_lbl = GuiUtilsNs::createWidgetInParent<QLabel>(GuiUtilsNs::LtMargin, info_grp);
+
+	GuiUtilsNs::configureWidgetFont(title_lbl, GuiUtilsNs::BigFontFactor, true);
+	GuiUtilsNs::configureWidgetsFont({ author_lbl, version_lbl}, GuiUtilsNs::BigFontFactor);
+
+	QHBoxLayout *hbox = GuiUtilsNs::createHBoxLayout(0);
 
 	icon_lbl = new QLabel(widget);
 	icon_lbl->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	icon_lbl->setMinimumSize(QSize(64, 64));
 	icon_lbl->setMaximumSize(QSize(64, 64));
 	icon_lbl->setScaledContents(true);
-	grid->addWidget(icon_lbl, 0, 0, 2, 1);
 
-	title_lbl = new QLabel(widget);
-	title_lbl->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-	font.setPointSize(12);
-	font.setBold(true);
-	font.setItalic(true);
-	title_lbl->setFont(font);
-	grid->addWidget(title_lbl, 0, 1, 1, 1);
+	hbox->addWidget(info_grp);
+	hbox->addWidget(icon_lbl);
+	hbox->setAlignment(icon_lbl, Qt::AlignVCenter | Qt::AlignHCenter);
 
-	author_lbl = new QLabel(widget);
-	author_lbl->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-	author_lbl->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	grid->addWidget(author_lbl, 1, 1, 2, 1);
+	widget->layout()->addItem(hbox);
 
-	grid->addItem(new QSpacerItem(20, 18, QSizePolicy::Minimum, QSizePolicy::Expanding),
-								2, 0, 2, 1);
+	QGroupBox *description_grp = GuiUtilsNs::createWidgetInParent<QGroupBox>(GuiUtilsNs::LtMargin, widget);
+	description_grp->setTitle(QT_TRANSLATE_NOOP("PgModelerGuiPlugin", "Description"));
+	description_grp->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	version_lbl = new QLabel(widget);
-	version_lbl->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-	version_lbl->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	grid->addWidget(version_lbl, 3, 1, 1, 1);
-
-	description_lbl = new QLabel(widget);
-	description_lbl->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+	description_lbl = GuiUtilsNs::createWidgetInParent<QLabel>(GuiUtilsNs::LtMargin, description_grp);
+	description_lbl->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	description_lbl->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
 	description_lbl->setWordWrap(true);
 	description_lbl->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	grid->addWidget(description_lbl, 4, 0, 1, 2);
 
-	widget->setMinimumSize(480, 240);
+	widget->setMinimumSize(500, 250);
 	plugin_info_frm->setMainWidget(widget);
 }
 
@@ -168,8 +162,8 @@ void PgModelerGuiPlugin::postInitPlugin()
 void PgModelerGuiPlugin::configurePluginInfo(const QString &title, const QString &version, const QString &author, const QString &description)
 {
 	title_lbl->setText(title);
-	version_lbl->setText(QString(QT_TRANSLATE_NOOP("PgModelerPlugin", "<strong>Version:</strong> %1")).arg(version));
-	author_lbl->setText(QString(QT_TRANSLATE_NOOP("PgModelerPlugin","<strong>Author:</strong> %1")).arg(author));
+	version_lbl->setText(QString(QT_TRANSLATE_NOOP("PgModelerPlugin", "<strong>Version</strong> %1")).arg(version));
+	author_lbl->setText(QString(QT_TRANSLATE_NOOP("PgModelerPlugin","<strong>Author</strong> %1")).arg(author));
 	description_lbl->setText(description);
 	icon_lbl->setPixmap(getPluginPixmap(getPluginName()));
 }
