@@ -55,10 +55,22 @@ bool TabOrderManager::eventFilter(QObject *object, QEvent *event)
 			qDebug().noquote().nospace() << QDateTime::currentDateTime().toString() << " :: " << "KeyPress";
 			int idx = tab_order_list.indexOf(object);
 
-			if(idx < tab_order_list.size() - 1)
-				idx++;
-			else
-				idx = 0;
+			// Navigating onwards when no modifier key is held
+			if(kevent->modifiers() == Qt::NoModifier)
+			{
+				if(idx < tab_order_list.size() - 1)
+					idx++;
+				else
+					idx = 0;
+			}
+			// Navigating backwards when shift is held
+			else if(kevent->modifiers() == Qt::ShiftModifier)
+			{
+				if(idx > 0)
+					idx--;
+				else
+					idx = tab_order_list.size() - 1;
+			}
 
 			tab_order_list[idx]->setFocus(Qt::TabFocusReason);
 			return true;
@@ -93,7 +105,7 @@ void TabOrderManager::retrieveChildWidgets(QWidget *widget, QHash<QWidget *, QWi
 		{
 			QTabWidget *tab_wgt = qobject_cast<QTabWidget *>(widget);
 			child_wgts = tab_wgt->count() > 0 ?
-									 tab_wgt->currentWidget()->findChildren<QWidget *>(Qt::FindDirectChildrenOnly) : QWidgetList();
+									 tab_wgt->currentWidget()->findChildren<QWidget *>() : QWidgetList();
 		}
 		else
 			child_wgts = widget->findChildren<QWidget *>(Qt::FindDirectChildrenOnly);
@@ -101,12 +113,20 @@ void TabOrderManager::retrieveChildWidgets(QWidget *widget, QHash<QWidget *, QWi
 		for(auto &wgt : child_wgts)
 			retrieveChildWidgets(wgt, ord_map);
 	}
-	else if(wgt_class != "QLabel")
+	else
 	{
-		ord_map[widget->parentWidget()].append(widget);
+		QWidget *parent_wgt = nullptr;
 
-		//if(!basic_wgt_classes.contains(wgt_class))
-		//	ord_map[widget->parentWidget()].append(widget->findChildren<QWidget *>(Qt::FindDirectChildrenOnly));
+		if(!ord_map.contains(widget->parentWidget()) &&
+				widget->parentWidget() && ord_map.contains(widget->parentWidget()->parentWidget()))
+			parent_wgt = widget->parentWidget()->parentWidget();
+		else
+			parent_wgt = widget->parentWidget();
+
+		if(!basic_wgt_classes.contains(wgt_class))
+			ord_map[parent_wgt].append(widget->findChildren<QWidget *>(Qt::FindDirectChildrenOnly));
+		else
+			ord_map[parent_wgt].append(widget);
 	}
 }
 
@@ -125,7 +145,7 @@ QWidgetList TabOrderManager::getTabOrderList(const QHash<QWidget *, QWidgetList>
 	{
 		for(auto &wgt : child_wgts)
 		{
-			pos = wgt->pos();
+			pos = root_wgt->mapFromGlobal(wgt->mapToGlobal(wgt->pos()));
 			vh_ord_wgts[pos.y()][pos.x()].append(wgt);
 		}
 
@@ -134,6 +154,8 @@ QWidgetList TabOrderManager::getTabOrderList(const QHash<QWidget *, QWidgetList>
 			for(const auto &[h_pos, wgts] : h_ord_wgts.asKeyValueRange())
 				parent_ord_wgts[parent_wgt].append(wgts);
 		}
+
+		vh_ord_wgts.clear();
 	}
 
 	/* Final positional ordering: we need to order vertically and horizontally
@@ -144,6 +166,7 @@ QWidgetList TabOrderManager::getTabOrderList(const QHash<QWidget *, QWidgetList>
 	for(const auto &[parent_wgt, child_wgts] : parent_ord_wgts.asKeyValueRange())
 	{
 		pos = root_wgt->mapFromGlobal(parent_wgt->mapToGlobal(parent_wgt->pos()));
+		//pos = parent_wgt->mapToGlobal(parent_wgt->pos());
 		vh_ord_wgts[pos.y()][pos.x()].append(parent_wgt);
 	}
 
@@ -151,10 +174,15 @@ QWidgetList TabOrderManager::getTabOrderList(const QHash<QWidget *, QWidgetList>
 	{
 		for(const auto &[h_pos, wgts] : h_ord_wgts.asKeyValueRange())
 		{
-			tab_ord_list.append(wgts);
-			//tab_ord_list.append(parent_ord_wgts[wgts[0]]);
+			//tab_ord_list.append(wgts);
+			tab_ord_list.append(parent_ord_wgts[wgts[0]]);
 		}
 	}
+
+	tab_ord_list.removeIf([](const QWidget *wgt){
+		return wgt->metaObject()->className() == QString("QLabel") ||
+					 !wgt->isVisible() || !wgt->isEnabled();
+	});
 
 	return tab_ord_list;
 }
@@ -168,12 +196,6 @@ void TabOrderManager::configureTabOrder()
 	QWidgetList child_wgts = parent_wgt->findChildren<QWidget *>(Qt::FindDirectChildrenOnly);
 	QHash<QWidget *, QWidgetList> selected_wgts;
 
-	/* static const QStringList accepted_classes {
-		"QLineEdit", "QToolButton", "QPushButton",
-		"QCheckBox", "QRadioButton", "QSpinBox",
-		"QDoubleSpinBox", "QPlainTextEdit", "QComboBox"
-	}; */
-
 	for(auto &wgt : tab_order_list)
 		wgt->removeEventFilter(this);
 
@@ -181,7 +203,7 @@ void TabOrderManager::configureTabOrder()
 
 	for(auto &wgt : child_wgts)
 	{
-		//wgt->setFocusPolicy(Qt::NoFocus);
+		wgt->setFocusPolicy(Qt::NoFocus);
 
 		if(!wgt->isVisible() || !wgt->isEnabled())
 			continue;
@@ -199,11 +221,11 @@ void TabOrderManager::configureTabOrder()
 	for(int idx = 0; idx < count; idx++)
 	{
 		tab_order_list[idx]->installEventFilter(this);
-		tab_order_list[idx]->setFocusPolicy(Qt::StrongFocus);
+			tab_order_list[idx]->setFocusPolicy(Qt::StrongFocus);
 
 		if(idx <= (count - 2))
 			QWidget::setTabOrder(tab_order_list[idx], tab_order_list[idx + 1]);
 	}
 
-	tab_order_list[0]->setFocus();
+	tab_order_list[0]->setFocus(Qt::TabFocusReason);
 }
