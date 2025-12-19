@@ -29,6 +29,7 @@
 #include "messagebox.h"
 #include "dbobjects/baseobjectwidget.h"
 #include <type_traits>
+#include "tabordermanager.h"
 
 class __libgui BaseForm: public QDialog, public Ui::BaseForm {
 	Q_OBJECT
@@ -76,6 +77,8 @@ class __libgui BaseForm: public QDialog, public Ui::BaseForm {
 				setWindowTitle(tr("%1 properties").arg(BaseObject::getTypeName(widget->getHandledObjectType())));
 			else
 				setWindowTitle(widget->windowTitle());
+
+			widget->installEventFilter(new TabOrderManager(widget));
 
 			apply_ok_btn->setDisabled(widget->isHandledObjectProtected());
 			resizeForm(widget);

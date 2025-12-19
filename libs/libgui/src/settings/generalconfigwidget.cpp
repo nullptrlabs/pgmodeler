@@ -39,7 +39,9 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 																			 QPageSize::B7, QPageSize::B8, QPageSize::B9, QPageSize::C5E, QPageSize::Comm10E, QPageSize::DLE,
 																			 QPageSize::Executive, QPageSize::Folio, QPageSize::Ledger, QPageSize::Legal, QPageSize::Letter,
 																			 QPageSize::Tabloid, QPageSize::Custom };
+
 	Ui_GeneralConfigWidget::setupUi(this);
+	installEventFilter(new TabOrderManager(this));
 
 	confs_dir_sel = new FileSelectorWidget(this);
 	confs_dir_sel->setToolTip(tr("pgModeler configurations directory for the current user"));

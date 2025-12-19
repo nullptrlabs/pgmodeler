@@ -27,6 +27,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QWidget>
 
 class TabOrderManager: public QObject {
 	Q_OBJECT
@@ -34,11 +35,13 @@ class TabOrderManager: public QObject {
 	private:
 		QTimer cfg_timer;
 
+		QWidgetList tab_order_list;
+
 	protected:
 		bool eventFilter(QObject *object, QEvent *event) override;
 
 	public:
-		explicit TabOrderManager(QObject *parent);
+		explicit TabOrderManager(QWidget *parent);
 
 		~TabOrderManager() override;
 
