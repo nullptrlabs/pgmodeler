@@ -20,6 +20,7 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QKeyEvent>
+#include <QTabWidget>
 
 TabOrderManager::TabOrderManager(QWidget *parent)	: QObject { parent }
 {
@@ -67,52 +68,131 @@ bool TabOrderManager::eventFilter(QObject *object, QEvent *event)
 	return QObject::eventFilter(object, event);
 }
 
+void TabOrderManager::retrieveChildWidgets(QWidget *widget, QHash<QWidget *, QWidgetList> &ord_map)
+{
+	if(!widget)
+		return;
+
+	static const QStringList container_classes {
+		"QFrame", "QGroupBox", "QTabWidget"
+	},
+
+	basic_wgt_classes {
+		"QLineEdit", "QToolButton", "QPushButton",
+		"QCheckBox", "QRadioButton", "QSpinBox",
+		"QDoubleSpinBox", "QPlainTextEdit", "QComboBox"
+	};
+
+	QString wgt_class = widget->metaObject()->className();
+
+	if(container_classes.contains(wgt_class))
+	{
+		QWidgetList child_wgts;
+
+		if(wgt_class == QString("QTabWidget"))
+		{
+			QTabWidget *tab_wgt = qobject_cast<QTabWidget *>(widget);
+			child_wgts = tab_wgt->count() > 0 ?
+									 tab_wgt->currentWidget()->findChildren<QWidget *>(Qt::FindDirectChildrenOnly) : QWidgetList();
+		}
+		else
+			child_wgts = widget->findChildren<QWidget *>(Qt::FindDirectChildrenOnly);
+
+		for(auto &wgt : child_wgts)
+			retrieveChildWidgets(wgt, ord_map);
+	}
+	else if(wgt_class != "QLabel")
+	{
+		ord_map[widget->parentWidget()].append(widget);
+
+		//if(!basic_wgt_classes.contains(wgt_class))
+		//	ord_map[widget->parentWidget()].append(widget->findChildren<QWidget *>(Qt::FindDirectChildrenOnly));
+	}
+}
+
+QWidgetList TabOrderManager::getTabOrderList(const QHash<QWidget *, QWidgetList> &ord_map)
+{
+	if(ord_map.isEmpty())
+		return {};
+
+	QMap<int, QMap<int, QWidgetList>> vh_ord_wgts;
+	QHash<QWidget *, QWidgetList> parent_ord_wgts;
+	QWidgetList tab_ord_list;
+	QPoint pos;
+	QWidget *root_wgt = qobject_cast<QWidget *>(parent());
+
+	for(const auto &[parent_wgt, child_wgts] : ord_map.asKeyValueRange())
+	{
+		for(auto &wgt : child_wgts)
+		{
+			pos = wgt->pos();
+			vh_ord_wgts[pos.y()][pos.x()].append(wgt);
+		}
+
+		for(const auto &[v_pos, h_ord_wgts] : vh_ord_wgts.asKeyValueRange())
+		{
+			for(const auto &[h_pos, wgts] : h_ord_wgts.asKeyValueRange())
+				parent_ord_wgts[parent_wgt].append(wgts);
+		}
+	}
+
+	/* Final positional ordering: we need to order vertically and horizontally
+	 * all the retrieved parent widgets so we can get the sorted children lists
+	 * in the correct order */
+	vh_ord_wgts.clear();
+
+	for(const auto &[parent_wgt, child_wgts] : parent_ord_wgts.asKeyValueRange())
+	{
+		pos = root_wgt->mapFromGlobal(parent_wgt->mapToGlobal(parent_wgt->pos()));
+		vh_ord_wgts[pos.y()][pos.x()].append(parent_wgt);
+	}
+
+	for(const auto &[v_pos, h_ord_wgts] : vh_ord_wgts.asKeyValueRange())
+	{
+		for(const auto &[h_pos, wgts] : h_ord_wgts.asKeyValueRange())
+		{
+			tab_ord_list.append(wgts);
+			//tab_ord_list.append(parent_ord_wgts[wgts[0]]);
+		}
+	}
+
+	return tab_ord_list;
+}
+
 void TabOrderManager::configureTabOrder()
 {
 	qDebug().noquote().nospace() << QDateTime::currentDateTime().toString() << " :: " << "configureTabOrder";
 	cfg_timer.stop();
 
 	QWidget *parent_wgt = qobject_cast<QWidget *>(parent());
-	QWidgetList child_wgts = parent_wgt->findChildren<QWidget *>();
-	QMap<int, QMap<int, QWidgetList>> ord_wgts;
-	QPoint pos;
+	QWidgetList child_wgts = parent_wgt->findChildren<QWidget *>(Qt::FindDirectChildrenOnly);
+	QHash<QWidget *, QWidgetList> selected_wgts;
 
-	static const QStringList accepted_classes {
+	/* static const QStringList accepted_classes {
 		"QLineEdit", "QToolButton", "QPushButton",
 		"QCheckBox", "QRadioButton", "QSpinBox",
 		"QDoubleSpinBox", "QPlainTextEdit", "QComboBox"
-	};
+	}; */
 
 	for(auto &wgt : tab_order_list)
 		wgt->removeEventFilter(this);
 
+	tab_order_list.clear();
+
 	for(auto &wgt : child_wgts)
 	{
-		wgt->setFocusPolicy(Qt::NoFocus);
+		//wgt->setFocusPolicy(Qt::NoFocus);
 
 		if(!wgt->isVisible() || !wgt->isEnabled())
 			continue;
 
-		if(wgt->objectName().startsWith("qt_") ||
-			 !accepted_classes.contains(wgt->metaObject()->className()))
-			continue;
-
-		pos = parent_wgt->mapFromGlobal(wgt->mapToGlobal(wgt->pos()));
-		ord_wgts[pos.y()][pos.x()].append(wgt);
-
-		qDebug().noquote() << wgt->objectName() << " -> " << pos;
+		retrieveChildWidgets(wgt, selected_wgts);
 	}
 
-	if(ord_wgts.isEmpty())
+	tab_order_list = getTabOrderList(selected_wgts);
+
+	if(tab_order_list.isEmpty())
 		return;
-
-	tab_order_list.clear();
-
-	for(const auto &[v_key, h_ord_map] : ord_wgts.asKeyValueRange())
-	{
-		for(const auto &[h_key, wgt_list] : h_ord_map.asKeyValueRange())
-			tab_order_list.append(wgt_list);
-	}
 
 	int count = tab_order_list.size();
 
@@ -123,8 +203,6 @@ void TabOrderManager::configureTabOrder()
 
 		if(idx <= (count - 2))
 			QWidget::setTabOrder(tab_order_list[idx], tab_order_list[idx + 1]);
-
-		//qDebug().noquote().nospace() << tab_order_list[idx]->objectName() << " :: " << tab_order_list[idx]->metaObject()->className();
 	}
 
 	tab_order_list[0]->setFocus();

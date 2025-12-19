@@ -37,6 +37,10 @@ class TabOrderManager: public QObject {
 
 		QWidgetList tab_order_list;
 
+		void retrieveChildWidgets(QWidget *root_wgt, QHash<QWidget *, QWidgetList> &ord_map);
+
+		QWidgetList getTabOrderList(const QHash<QWidget *, QWidgetList> &ord_map);
+
 	protected:
 		bool eventFilter(QObject *object, QEvent *event) override;
 
