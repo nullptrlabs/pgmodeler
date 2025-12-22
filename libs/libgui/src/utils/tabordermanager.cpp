@@ -21,6 +21,7 @@
 #include <QDateTime>
 #include <QKeyEvent>
 #include <QTabWidget>
+#include <QToolTip>
 
 TabOrderManager::TabOrderManager(QWidget *parent)	: QObject { parent }
 {
@@ -44,6 +45,11 @@ bool TabOrderManager::eventFilter(QObject *object, QEvent *event)
 			qDebug().noquote().nospace() << QDateTime::currentDateTime().toString() << " :: " << "LayoutRequest | QUEUEING";
 			cfg_timer.start(100);
 		}
+	}
+	else if(object != parent() &&
+					event->type() == QEvent::EnabledChange)
+	{
+		configureTabOrder();
 	}
 	else if(object != parent() &&
 					event->type() == QEvent::KeyPress)
@@ -73,6 +79,10 @@ bool TabOrderManager::eventFilter(QObject *object, QEvent *event)
 			}
 
 			tab_order_list[idx]->setFocus(Qt::TabFocusReason);
+
+			QToolTip::showText(tab_order_list[idx]->mapToGlobal(QPoint(0,0)), tab_order_list[idx]->objectName(),
+												 tab_order_list[idx], tab_order_list[idx]->geometry(), 2000);
+
 			return true;
 		}
 	}
@@ -99,7 +109,8 @@ QWidgetList TabOrderManager::getTabOrderList(const QWidgetList &wgt_list)
 	{
 		for(auto &wgt : child_wgts)
 		{
-			pos = root_wgt->mapFromGlobal(wgt->mapToGlobal(wgt->pos()));
+//		pos = root_wgt->mapFromGlobal(wgt->mapToGlobal(wgt->pos()));
+			pos = root_wgt->mapFromGlobal(wgt->mapToGlobal(wgt->geometry().center()));
 			vh_ord_wgts[pos.y()][pos.x()].append(wgt);
 		}
 
@@ -153,7 +164,8 @@ void TabOrderManager::configureTabOrder()
 
 		return ignored_classes.contains(wgt->metaObject()->className()) ||
 					 !wgt->isVisible() || !wgt->isEnabled() ||
-					 wgt->objectName().startsWith("qt_");
+					 wgt->objectName().startsWith("qt_") ||
+					 wgt->objectName().isEmpty();
 	});
 
 	tab_order_list = getTabOrderList(child_wgts);
@@ -163,8 +175,12 @@ void TabOrderManager::configureTabOrder()
 
 	int count = tab_order_list.size();
 
+	qDebug().noquote() << "** Tab order **";
+
 	for(int idx = 0; idx < count; idx++)
 	{
+		qDebug().noquote() << tab_order_list[idx]->objectName() << " " << tab_order_list[idx]->metaObject()->className();
+
 		tab_order_list[idx]->installEventFilter(this);
 		tab_order_list[idx]->setFocusPolicy(Qt::StrongFocus);
 
