@@ -35,7 +35,9 @@ class TabOrderManager: public QObject {
 	private:
 		QTimer cfg_timer;
 
-		QWidgetList tab_order_list;
+		QWidget *curr_focus_wgt;
+
+		QWidgetList tab_order_list, sel_child_wgts;
 
 		QWidgetList getTabOrderList(const QWidgetList &wgt_list);
 
@@ -45,7 +47,7 @@ class TabOrderManager: public QObject {
 	public:
 		explicit TabOrderManager(QWidget *parent);
 
-		~TabOrderManager() override;
+		~TabOrderManager() = default;
 
 	private slots:
 		void configureTabOrder();

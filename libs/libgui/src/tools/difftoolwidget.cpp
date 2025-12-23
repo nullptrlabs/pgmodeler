@@ -24,6 +24,7 @@
 #include "utilsns.h"
 #include "pgsqlversions.h"
 #include <QButtonGroup>
+#include "tabordermanager.h"
 
 bool DiffToolWidget::low_verbosity { false };
 std::map<QString, attribs_map> DiffToolWidget::config_params;
@@ -35,6 +36,8 @@ DiffToolWidget::DiffToolWidget(QWidget *parent) : BaseConfigWidget (parent)
 	setupUi(this);
 
 	inv_model_alert_frm->setVisible(false);
+
+	installEventFilter(new TabOrderManager(this));
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint,
 															{ inv_model_alert_frm, diff_wgt_alert_frm });
