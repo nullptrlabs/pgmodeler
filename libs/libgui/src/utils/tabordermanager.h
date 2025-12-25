@@ -35,11 +35,11 @@ class TabOrderManager: public QObject {
 	private:
 		QTimer cfg_timer;
 
-		QWidget *curr_focus_wgt;
+		//QWidget *curr_focus_wgt;
 
-		QWidgetList tab_order_list, sel_child_wgts;
+		QWidgetList tab_order_list; //, sel_child_wgts;
 
-		QWidgetList getTabOrderList(const QWidgetList &wgt_list);
+		//QWidgetList getTabOrderList(const QWidgetList &wgt_list);
 
 		void __collectChildWidget(QWidget *root, QWidgetList &child_wgts);
 
@@ -52,7 +52,7 @@ class TabOrderManager: public QObject {
 		~TabOrderManager() override = default;
 
 	private slots:
-		void configureTabOrder();
+		//void configureTabOrder();
 		void __configureTabOrder();
 };
 
