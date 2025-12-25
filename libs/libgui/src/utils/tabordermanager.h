@@ -25,23 +25,20 @@
 #ifndef TAB_ORDER_MANAGER_H
 #define TAB_ORDER_MANAGER_H
 
+#include "guiglobal.h"
 #include <QObject>
 #include <QTimer>
 #include <QWidget>
 
-class TabOrderManager: public QObject {
+class __libgui  TabOrderManager: public QObject {
 	Q_OBJECT
 
 	private:
 		QTimer cfg_timer;
 
-		//QWidget *curr_focus_wgt;
+		QWidgetList tab_order_list;
 
-		QWidgetList tab_order_list; //, sel_child_wgts;
-
-		//QWidgetList getTabOrderList(const QWidgetList &wgt_list);
-
-		void __collectChildWidget(QWidget *root, QWidgetList &child_wgts);
+		void collectChildWidgets(QWidget *root, QWidgetList &child_wgts);
 
 	protected:
 		bool eventFilter(QObject *object, QEvent *event) override;
@@ -52,8 +49,7 @@ class TabOrderManager: public QObject {
 		~TabOrderManager() override = default;
 
 	private slots:
-		//void configureTabOrder();
-		void __configureTabOrder();
+		void configureTabOrder();
 };
 
 #endif

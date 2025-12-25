@@ -18,10 +18,12 @@
 
 #include "fixtoolswidget.h"
 #include "guiutilsns.h"
+#include "tabordermanager.h"
 
 FixToolsWidget::FixToolsWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
+	installEventFilter(new TabOrderManager(this));
 
 	GuiUtilsNs::configureWidgetsFont({ run_tool_btn, cancel_btn }, GuiUtilsNs::BigFontFactor);
 

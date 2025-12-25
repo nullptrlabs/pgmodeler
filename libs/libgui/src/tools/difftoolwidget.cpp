@@ -34,10 +34,9 @@ const QString DiffToolWidget::ForceObjsBtnLabel { QT_TR_NOOP("Force re-creation 
 DiffToolWidget::DiffToolWidget(QWidget *parent) : BaseConfigWidget (parent)
 {
 	setupUi(this);
+	installEventFilter(new TabOrderManager(this));
 
 	inv_model_alert_frm->setVisible(false);
-
-	installEventFilter(new TabOrderManager(this));
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint,
 															{ inv_model_alert_frm, diff_wgt_alert_frm });

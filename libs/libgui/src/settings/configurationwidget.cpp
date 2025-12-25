@@ -19,10 +19,12 @@
 #include "configurationwidget.h"
 #include "guiutilsns.h"
 #include <QButtonGroup>
+#include "tabordermanager.h"
 
 ConfigurationWidget::ConfigurationWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
+	installEventFilter(new TabOrderManager(this));
 
 	general_conf = new GeneralConfigWidget;
 	appearance_conf = new AppearanceConfigWidget;

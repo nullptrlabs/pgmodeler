@@ -23,10 +23,12 @@
 #include "pgsqlversions.h"
 #include <QThread>
 #include <QClipboard>
+#include "tabordermanager.h"
 
 ModelValidationWidget::ModelValidationWidget(QWidget *parent): QWidget(parent)
 {
 	setupUi(this);
+	installEventFilter(new TabOrderManager(this));
 
 	GuiUtilsNs::configureBuddyWidgets(conn_opts_wgt);
 

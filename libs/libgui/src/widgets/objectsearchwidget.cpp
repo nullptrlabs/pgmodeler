@@ -19,10 +19,13 @@
 #include "objectsearchwidget.h"
 #include "guiutilsns.h"
 #include "objectslistmodel.h"
+#include "tabordermanager.h"
 
 ObjectSearchWidget::ObjectSearchWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
+
+	installEventFilter(new TabOrderManager(this));
 	GuiUtilsNs::configureWidgetFont(pattern_lbl, GuiUtilsNs::SmallFontFactor, true);
 
 	filter_wgt = new QWidget(this);
