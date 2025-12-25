@@ -41,16 +41,19 @@ class TabOrderManager: public QObject {
 
 		QWidgetList getTabOrderList(const QWidgetList &wgt_list);
 
+		void __collectChildWidget(QWidget *root, QWidgetList &child_wgts);
+
 	protected:
 		bool eventFilter(QObject *object, QEvent *event) override;
 
 	public:
 		explicit TabOrderManager(QWidget *parent);
 
-		~TabOrderManager() = default;
+		~TabOrderManager() override = default;
 
 	private slots:
 		void configureTabOrder();
+		void __configureTabOrder();
 };
 
 #endif
