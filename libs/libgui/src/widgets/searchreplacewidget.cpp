@@ -21,6 +21,7 @@
 #include <QTimer>
 #include "exception.h"
 #include "guiutilsns.h"
+#include "tabordermanager.h"
 
 SearchReplaceWidget::SearchReplaceWidget(QPlainTextEdit *txt_edit, QWidget *parent): QWidget(parent)
 {
@@ -28,6 +29,8 @@ SearchReplaceWidget::SearchReplaceWidget(QPlainTextEdit *txt_edit, QWidget *pare
 		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setupUi(this);
+	installEventFilter(new TabOrderManager(this));
+
 	text_edt = txt_edit;
 
 	GuiUtilsNs::configureWidgetsFont({ search_lbl, replace_lbl },

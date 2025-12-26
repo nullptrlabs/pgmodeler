@@ -24,6 +24,7 @@
 #include "utilsns.h"
 #include "pgsqlversions.h"
 #include <QButtonGroup>
+#include "tabordermanager.h"
 
 bool DiffToolWidget::low_verbosity { false };
 std::map<QString, attribs_map> DiffToolWidget::config_params;
@@ -33,6 +34,7 @@ const QString DiffToolWidget::ForceObjsBtnLabel { QT_TR_NOOP("Force re-creation 
 DiffToolWidget::DiffToolWidget(QWidget *parent) : BaseConfigWidget (parent)
 {
 	setupUi(this);
+	installEventFilter(new TabOrderManager(this));
 
 	inv_model_alert_frm->setVisible(false);
 

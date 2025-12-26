@@ -18,11 +18,12 @@
 
 #include "baseform.h"
 #include "guiutilsns.h"
+#include "tabordermanager.h"
 
 BaseForm::BaseForm(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f)
 {
 	setupUi(this);
-	setWindowFlags((this->windowFlags() | Qt::WindowMinMaxButtonsHint) /* ^ Qt::WindowContextHelpButtonHint */);
+	setWindowFlags(this->windowFlags() | Qt::WindowMinMaxButtonsHint);
 }
 
 void BaseForm::setButtonConfiguration(Messagebox::ButtonsId button_conf)
@@ -147,7 +148,8 @@ void BaseForm::closeEvent(QCloseEvent *)
 
 void BaseForm::setMainWidget(QWidget *widget)
 {
-	if(!widget)	return;
+	if(!widget)
+		return;
 
 	setWindowTitle(widget->windowTitle());
 
@@ -156,7 +158,9 @@ void BaseForm::setMainWidget(QWidget *widget)
 	else
 		setWindowIcon(GuiUtilsNs::getIcon("pgmodeler_logo"));
 
+	widget->installEventFilter(new TabOrderManager(widget));
 	resizeForm(widget);
+
 	setButtonConfiguration(Messagebox::OkButton);
 	connect(cancel_btn, &QPushButton::clicked, this, &BaseForm::reject);
 	connect(apply_ok_btn, &QPushButton::clicked, this, &BaseForm::accept);

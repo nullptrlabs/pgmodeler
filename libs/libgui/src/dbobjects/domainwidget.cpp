@@ -53,7 +53,7 @@ DomainWidget::DomainWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 	configureTabbedLayout(dom_attribs_tbw);
 
 	setRequiredField(data_type);
-	configureTabOrder({ def_value_edt, not_null_chk,	data_type, constr_name_edt, check_expr_txt });
+	//configureTabOrder({ def_value_edt, not_null_chk,	data_type, constr_name_edt, check_expr_txt });
 
 	setMinimumSize(600, 500);
 }

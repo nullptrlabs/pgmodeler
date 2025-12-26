@@ -34,7 +34,7 @@ ConversionWidget::ConversionWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	trg_encoding_cmb->addItems(EncodingType::getTypes());
 
 	configureTabbedLayout(false);
-	configureTabOrder({ src_encoding_cmb, trg_encoding_cmb, conv_func_sel });
+	//configureTabOrder({ src_encoding_cmb, trg_encoding_cmb, conv_func_sel });
 	setMinimumSize(600, 450);
 }
 

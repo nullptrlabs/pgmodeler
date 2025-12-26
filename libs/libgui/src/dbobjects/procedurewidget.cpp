@@ -34,7 +34,7 @@ ProcedureWidget::ProcedureWidget(QWidget *parent): BaseFunctionWidget(parent, Ob
 	connect(parameters_tab, &CustomTableWidget::s_rowEdited, this, __slot(this, ProcedureWidget::showParameterForm));
 	connect(parameters_tab, &CustomTableWidget::s_rowDuplicated, this, &ProcedureWidget::duplicateParameter);
 
-	configureTabOrder();
+	//configureTabOrder();
 	setMinimumSize(650, 500);
 }
 

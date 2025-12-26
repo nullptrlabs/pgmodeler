@@ -22,10 +22,12 @@
 #include "globalattributes.h"
 #include <QDir>
 #include <QFileInfo>
+#include "tabordermanager.h"
 
 ModelRestorationForm::ModelRestorationForm(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f)
 {
 	setupUi(this);
+	installEventFilter(new TabOrderManager(this));
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 

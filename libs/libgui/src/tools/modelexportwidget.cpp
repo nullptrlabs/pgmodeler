@@ -24,6 +24,7 @@
 #include "pgsqlversions.h"
 #include <QThread>
 #include <QButtonGroup>
+#include "tabordermanager.h"
 
 bool ModelExportWidget::low_verbosity {false};
 
@@ -31,7 +32,9 @@ ModelExportWidget::ModelExportWidget(QWidget *parent) : QWidget(parent)
 {
 	model_wgt = nullptr;
 	viewp = nullptr;
+
 	setupUi(this);
+	installEventFilter(new TabOrderManager(this));
 
 	alert_frm->setVisible(false);
 	model_sel_wgt = new ModelDbSelectorWidget(this);

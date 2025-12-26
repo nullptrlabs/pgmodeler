@@ -26,7 +26,7 @@ SequenceWidget::SequenceWidget(QWidget *parent): BaseObjectWidget(parent, Object
 	column_lt->insertWidget(0, column_sel);
 
 	configureTabbedLayout(true);
-	configureTabOrder();
+	//configureTabOrder();
 
 	def_values_cmb->addItem(tr("User defined"));
 	def_values_cmb->addItem("smallserial");

@@ -43,7 +43,7 @@ EventTriggerWidget::EventTriggerWidget(QWidget *parent): BaseObjectWidget(parent
 	event_cmb->addItems(EventTriggerType::getTypes());
 
 	setRequiredField(function_lbl);
-	configureTabOrder({ event_cmb, function_sel, filter_tab });
+	//configureTabOrder({ event_cmb, function_sel, filter_tab });
 	configureTabbedLayout(attributes_tbw);
 
 	setMinimumSize(550, 350);

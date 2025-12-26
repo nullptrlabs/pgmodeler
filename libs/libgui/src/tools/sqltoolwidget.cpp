@@ -23,10 +23,12 @@
 #include "utilsns.h"
 #include "tools/databaseimportwidget.h"
 #include "pgsqlversions.h"
+#include "tabordermanager.h"
 
 SQLToolWidget::SQLToolWidget(QWidget * parent) : QWidget(parent)
 {
 	setupUi(this);
+	installEventFilter(new TabOrderManager(this));
 
 	ignore_auto_browse_flag = false;
 

@@ -31,7 +31,7 @@ LanguageWidget::LanguageWidget(QWidget *parent): BaseObjectWidget(parent, Object
 	func_inline_lt->addWidget(func_inline_sel);
 
 	configureTabbedLayout(false);
-	configureTabOrder({ trusted_chk, func_handler_sel, func_validator_sel, func_inline_sel });
+	//configureTabOrder({ trusted_chk, func_handler_sel, func_validator_sel, func_inline_sel });
 
 	setMinimumSize(600, 500);
 }

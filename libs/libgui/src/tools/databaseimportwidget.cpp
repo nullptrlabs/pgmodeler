@@ -25,6 +25,7 @@
 #include "settings/connectionsconfigwidget.h"
 #include "settings/generalconfigwidget.h"
 #include "objectslistmodel.h"
+#include "tabordermanager.h"
 
 bool DatabaseImportWidget::low_verbosity {false};
 
@@ -34,6 +35,7 @@ DatabaseImportWidget::DatabaseImportWidget(QWidget *parent) : QWidget(parent)
 	rand_num_engine.seed(rand_seed());
 
 	setupUi(this);
+	installEventFilter(new TabOrderManager(this));
 
 	model_wgt = nullptr;
 	create_model = true;

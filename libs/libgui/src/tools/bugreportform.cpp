@@ -23,6 +23,7 @@
 #include "messagebox.h"
 #include "guiutilsns.h"
 #include "utilsns.h"
+#include "tabordermanager.h"
 
 BugReportForm::BugReportForm(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f)
 {
@@ -31,6 +32,8 @@ BugReportForm::BugReportForm(QWidget *parent, Qt::WindowFlags f) : QDialog(paren
 								 Qt::WindowTitleHint |
 								 Qt::WindowMinMaxButtonsHint |
 								 Qt::WindowCloseButtonHint);
+
+	installEventFilter(new TabOrderManager(this));
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, hint_frm);
 

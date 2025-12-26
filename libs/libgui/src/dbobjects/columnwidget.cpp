@@ -41,7 +41,7 @@ ColumnWidget::ColumnWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 	column_lt->insertWidget(0, data_type);
 
 	configureTabbedLayout(false);
-	configureTabOrder({ data_type });
+	//configureTabOrder({ data_type });
 
 	std::map<QString, std::vector<QWidget *> > fields_map;
 	fields_map[generateVersionsInterval(AfterVersion, PgSqlVersions::PgSqlVersion120)].push_back(generated_chk);

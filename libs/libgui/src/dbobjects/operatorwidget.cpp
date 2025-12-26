@@ -57,7 +57,7 @@ OperatorWidget::OperatorWidget(QWidget *parent): BaseObjectWidget(parent, Object
 
 	setRequiredField(operator_func_lbl);
 	setRequiredField(functions_sel[0]);
-	configureTabOrder({ functions_sel[0], merges_chk, hashes_chk, arg_types[0], arg_types[1] });
+	//configureTabOrder({ functions_sel[0], merges_chk, hashes_chk, arg_types[0], arg_types[1] });
 
 	setMinimumSize(600, 500);
 }

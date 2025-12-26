@@ -519,7 +519,7 @@ void BaseObjectWidget::configureTabbedLayout(QTabWidget *tab_widget, bool create
 	{
 		// General/basics fields page
 		QWidget *page =  new QWidget(tab_widget);
-		page->setObjectName("baseobject_tab");
+		page->setObjectName("general_tab");
 		page->setLayout(baseobject_grid);
 
 		tab_widget->insertTab(0, page, GuiUtilsNs::getIcon("objects"), tr("General"));
