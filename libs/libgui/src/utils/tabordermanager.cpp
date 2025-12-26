@@ -67,10 +67,12 @@ void TabOrderManager::configureTabOrder()
 	tab_order_list.removeIf([](const QWidget *wgt){
 		static const QStringList ignored_classes {
 			"QFrame", "QGroupBox", "QTabWidget", "QLabel",
-			"QLineEditIconButton", "QWidget", "QStackedWidget"
+			"QLineEditIconButton", "QWidget", "QStackedWidget",
+			"QProgressBar", "QSplitter"
 		};
 
 		return ignored_classes.contains(wgt->metaObject()->className()) ||
+					 !wgt->isVisible() ||
 					 wgt->objectName().startsWith("qt_") ||
 					 wgt->objectName().isEmpty() ||
 					 /* Special case for pgModeler's container widget
