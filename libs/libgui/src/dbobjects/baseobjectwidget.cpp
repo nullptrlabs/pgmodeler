@@ -804,57 +804,6 @@ void BaseObjectWidget::highlightVersionSpecificFields(std::map<QString, std::vec
 	}
 }
 
-QFrame *BaseObjectWidget::generateVersionWarningFrame(std::map<QString, std::vector<QWidget *> > &fields,
-																											std::map< QWidget *, std::vector<QString> > *values)
-{
-	QFrame *alert_frm = nullptr;
-	QHBoxLayout *layout = nullptr;
-	QLabel *ico_lbl = nullptr, *msg_lbl = nullptr;
-	QFont font;
-
-	highlightVersionSpecificFields(fields, values);
-
-	alert_frm = new QFrame;
-	font.setItalic(false);
-	font.setBold(false);
-
-	alert_frm->setObjectName("alert_frm");
-	alert_frm->setFrameShape(QFrame::StyledPanel);
-	alert_frm->setFrameShadow(QFrame::Raised);
-	alert_frm->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
-
-	layout = GuiUtilsNs::createHBoxLayout(GuiUtilsNs::LtMargin,
-																				GuiUtilsNs::LtSpacing,
-																				alert_frm);
-
-	layout->setObjectName("version_warn_lt");
-
-	ico_lbl = new QLabel(alert_frm);
-	ico_lbl->setObjectName("icon_lbl");
-	ico_lbl->setMinimumSize(QSize(25, 25));
-	ico_lbl->setMaximumSize(QSize(25, 25));
-	ico_lbl->setScaledContents(true);
-	ico_lbl->setPixmap(GuiUtilsNs::getPixmap("alert"));
-	ico_lbl->setAlignment(Qt::AlignLeft|Qt::AlignTop);
-
-	layout->addWidget(ico_lbl);
-
-	msg_lbl = new QLabel(alert_frm);
-	msg_lbl->setFont(font);
-	msg_lbl->setObjectName("mensagelm_lb");
-	msg_lbl->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-	msg_lbl->setWordWrap(true);
-
-	msg_lbl->setText(tr("The <em><u><strong>highlighted</strong></u></em> fields in the form or one of their values are available only on specific PostgreSQL versions. \
-							Generating SQL code for versions other than those specified in the fields' tooltips may create incompatible code."));
-
-	layout->addWidget(msg_lbl);
-	alert_frm->adjustSize();
-
-	return alert_frm;
-}
-
 void BaseObjectWidget::editPermissions()
 {
 	BaseObject *parent_obj = nullptr;

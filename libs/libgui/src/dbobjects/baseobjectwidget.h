@@ -241,15 +241,7 @@ class __libgui BaseObjectWidget: public QWidget, public Ui::BaseObjectWidget {
 		//! \brief Generates a string containing the specified version interval
 		static QString generateVersionsInterval(unsigned ver_interv_id, const QString &ini_ver, const QString &end_ver="");
 		
-		/*! \brief Generates a alert frame highlighting the fields of exclusive use on the specified
-			PostgreSQL versions. On the first map (fields) the key is the PostgreSQL versions and
-			the values are the reference to the widget. The second map is used to specify the values
-			of widgets specific for each version. */
-		[[deprecated]]
-		static QFrame *generateVersionWarningFrame(std::map<QString, std::vector<QWidget *> > &fields, std::map<QWidget *, std::vector<QString> > *values=nullptr);
-		
 		//! \brief Generates a informative frame containing the specified message
-		[[deprecated]]
 		static QFrame *generateInformationFrame(const QString &msg);
 
 		static void highlightVersionSpecificFields(std::map<QString, std::vector<QWidget *> > &fields, std::map<QWidget *, std::vector<QString> > *values=nullptr);
