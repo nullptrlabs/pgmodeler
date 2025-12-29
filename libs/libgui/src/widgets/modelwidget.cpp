@@ -2116,8 +2116,10 @@ void ModelWidget::saveModel(const QString &filename)
 		 * If we have a empty file something went wrong during the saving process (disk failure, thread errors, etc)
 		 * so we raise an error to the user and restore the backup file to its original path */
 		if(fi.size() == 0)
+		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::ModelFileInvalidSize).arg(filename),
 											ErrorCode::ModelFileInvalidSize,PGM_FUNC,PGM_FILE,PGM_LINE);
+		}
 
 		// Removing the backup file if the model was successfully saved
 		if(has_bkp_file)

@@ -813,10 +813,13 @@ void ModelValidationHelper::applyFixes()
 
 void ModelValidationHelper::cancelValidation()
 {
-	valid_canceled=true;
-	fix_mode=false;
+	valid_canceled = true;
+	fix_mode = false;
 	val_infos.clear();
+
 	export_helper.cancelExport();
+	db_model->setCancelSaving(false);
+
 	emitValidationCanceled();
 }
 

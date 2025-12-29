@@ -3819,11 +3819,6 @@ QString DatabaseModel::getErrorExtraInfo()
 	return extra_info;
 }
 
-/*void DatabaseModel::setLoadingModel(bool value)
-{
-	loading_model = value;
-}*/
-
 void DatabaseModel::setCancelSaving(bool value)
 {
 	cancel_saving = value;
@@ -8293,12 +8288,16 @@ void DatabaseModel::saveSplitSQLDefinition(const QString &path, CodeGenMode code
 	QDir dir;
 
 	if(fi.exists() && !fi.isDir())
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvOutputDirectory).arg(path),
 										ErrorCode::InvOutputDirectory,PGM_FUNC,PGM_FILE,PGM_LINE);
+	}
 
 	if(code_gen_mode > GroupByType)
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvCodeGenerationMode).arg(code_gen_mode),
 										ErrorCode::InvCodeGenerationMode,PGM_FUNC,PGM_FILE,PGM_LINE);
+	}
 
 	if(!fi.exists())
 		dir.mkdir(path);

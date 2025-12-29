@@ -36,6 +36,19 @@ void ModelExportHelper::abortExport(Exception &e)
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 }
 
+void ModelExportHelper::finishExport()
+{
+	if(export_canceled)
+		emit s_exportCanceled();
+	else
+		emit s_exportFinished();
+
+	/* When the export to SQL file is cancelled we
+	 * need to reset the flag cancelSaving of DatabaseModel
+	 * so next attempts of saving the file can happen normally */
+	db_model->setCancelSaving(false);
+}
+
 void ModelExportHelper::handleSQLError(Exception &e, const QString &sql_cmd, bool ignore_dup)
 {
 	//Ignoring the error if it is in the ignored list
@@ -91,10 +104,7 @@ void ModelExportHelper::exportToSQL(DatabaseModel *db_model, const QString &file
 			emit s_progressUpdated(100, tr("SQL files successfully written in `%1'.").arg(filename), ObjectType::BaseObject);
 		}
 
-		if(export_canceled)
-			emit s_exportCanceled();
-		else
-			emit s_exportFinished();
+		finishExport();
 	}
 	catch(Exception &e)
 	{
@@ -235,12 +245,9 @@ void ModelExportHelper::exportToPNG(ObjectsScene *scene, const QString &filename
 		scene->update();
 
 		if(!export_canceled)
-		{
 			emit s_progressUpdated(100, tr("Output image `%1' successfully written.").arg(filename), ObjectType::BaseObject);
-			emit s_exportFinished();
-		}
-		else
-			emit s_exportCanceled();
+
+		finishExport();
 
 		if(view != viewp)
 			delete view;
@@ -574,10 +581,7 @@ void ModelExportHelper::exportToDBMS(DatabaseModel *db_model, Connection conn, c
 
 		conn.close();
 
-		if(!export_canceled)
-			emit s_exportFinished();
-		else
-			emit s_exportCanceled();
+		finishExport();
 	}
 	catch(Exception &e)
 	{
@@ -1258,11 +1262,7 @@ void ModelExportHelper::exportToDBMS()
 			try
 			{
 				exportBufferToDBMS(sql_buffer, *connection, false, transactional);
-
-				if(export_canceled)
-					emit s_exportCanceled();
-				else
-					emit s_exportFinished();
+				finishExport();
 			}
 			catch(Exception &e)
 			{

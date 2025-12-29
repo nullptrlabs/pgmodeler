@@ -910,6 +910,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 
 	friend class DatabaseImportHelper;
 	friend class ModelExportHelper;
+	friend class ModelValidationHelper;
 	friend class ModelWidget;
 	friend class PgModelerCliApp;
 	friend class OperationList;

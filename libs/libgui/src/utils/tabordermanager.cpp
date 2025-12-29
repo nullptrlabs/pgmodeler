@@ -56,6 +56,8 @@ void TabOrderManager::configureTabOrder()
 	// We need to work only on direct children only
 	QWidgetList child_wgts = parent_wgt->findChildren<QWidget *>(Qt::FindDirectChildrenOnly);
 
+	tab_order_list.clear();
+
 	// Recursively collect the children of the parent widget
 	for(auto &wgt : child_wgts)
 		collectChildWidgets(parent_wgt, tab_order_list);
