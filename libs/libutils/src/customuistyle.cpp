@@ -1065,7 +1065,8 @@ void CustomUiStyle::drawPEButtonPanel(PrimitiveElement element, const QStyleOpti
 	{
 		if(wgt_st.has_custom_color && !wgt_st.is_pressed)
 			bg_color = getStateColor(widget->palette(), QPalette::Button, option);
-		else if(!wgt_st.is_pressed && (wgt_st.is_default || wgt_st.is_checked))
+		else if(!wgt_st.is_pressed && !wgt_st.is_focused &&
+						(wgt_st.is_default || wgt_st.is_checked))
 		{
 			QColor base_bg_color = getStateColor(QPalette::Highlight, option);
 			
@@ -1241,7 +1242,8 @@ void CustomUiStyle::drawPEGenericElemFrame(PrimitiveElement element, const QStyl
 			border_color = getStateColor(widget->palette(), QPalette::Button, option);
 			border_color = border_color.lighter(QColor(border_color).lightness() < 128 ? MidFactor : MaxFactor);
 		}
-		else if(!wgt_st.is_pressed && (wgt_st.is_default || wgt_st.is_checked))
+		// Handle default/checked buttons first (they have special coloring)
+		else if(!wgt_st.is_focused && !wgt_st.is_pressed && (wgt_st.is_default || wgt_st.is_checked))
 		{
 			QColor base_border_cl = getStateColor(QPalette::Highlight, option);
 
@@ -1250,10 +1252,16 @@ void CustomUiStyle::drawPEGenericElemFrame(PrimitiveElement element, const QStyl
 			else
 				border_color = getAdjustedColor(base_border_cl, MidFactor, -MinFactor);
 		}
+		// Handle pressed state
 		else if(wgt_st.is_pressed && !is_edit_frm && !is_basic_frm)
 			border_color = getAdjustedColor(getStateColor(QPalette::Button, option), NoFactor, -MidFactor);
+		// Handle focused state for non-default buttons (only border changes)
+		else if(wgt_st.is_focused && !wgt_st.is_default && !is_edit_frm && !is_basic_frm)
+			border_color = getStateColor(QPalette::Highlight, option);
+		// Handle hover state
 		else if(wgt_st.is_hovered && !is_edit_frm && !is_basic_frm)
 			border_color = getAdjustedColor(getStateColor(QPalette::Light, option), MinFactor, -XMinFactor);
+		// Handle focused state for edit fields and frames
 		else if(wgt_st.is_focused)
 			border_color = getStateColor(QPalette::Highlight, option);
 	}
