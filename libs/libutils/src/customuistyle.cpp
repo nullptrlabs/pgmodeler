@@ -42,6 +42,13 @@
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QDateTime>
+#include <QLineEdit>
+#include <QPlainTextEdit>
+#include <QTextEdit>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QSpinBox>
+#include <QDoubleSpinBox>
 #include <cmath>
 
 QMap<QStyle::PixelMetric, int> CustomUiStyle::pixel_metrics;
@@ -240,11 +247,33 @@ void CustomUiStyle::drawCCComboBox(ComplexControl control, const QStyleOptionCom
 	bool is_editable = combo_widget && combo_widget->isEditable();
 
 	if(is_editable)
+	{
 		// For editable combo boxes, draw custom background and border
 		drawEditableComboBox(combo_opt, painter, widget);
+	}
 	else
-		// For non-editable combo boxes, use default implementation
+	{
+		// For non-editable combo boxes, use default implementation but with custom border
 		QProxyStyle::drawComplexControl(control, option, painter, widget);
+		
+		// Draw custom focus border if focused
+		WidgetState wgt_st(option, widget);
+		
+		if(wgt_st.is_focused && wgt_st.is_enabled)
+		{
+			QColor border_color = getStateColor(QPalette::Highlight, option);
+
+			QPainterPath border_shape = createControlShape(combo_opt->rect, InputRadius, AllCorners,
+																										0.5, 0.5, -0.5, -0.5);
+
+			painter->save();
+			painter->setRenderHint(QPainter::Antialiasing, true);
+			painter->setPen(QPen(border_color, PenWidth));
+			painter->setBrush(Qt::NoBrush);
+			painter->drawPath(border_shape);
+			painter->restore();
+		}
+	}
 
 	// Draw custom arrow if the drop down button is visible
 	if(combo_opt->subControls & SC_ComboBoxArrow)
@@ -524,7 +553,10 @@ void CustomUiStyle::drawControl(ControlElement element, const QStyleOption *opti
 		return;
 	}
 
-	if(element == CE_ProgressBar || element == CE_ProgressBarContents || element == CE_ProgressBarGroove || element == CE_ProgressBarLabel)
+	if(element == CE_ProgressBar ||
+		 element == CE_ProgressBarContents ||
+		 element == CE_ProgressBarGroove ||
+		 element == CE_ProgressBarLabel)
 	{
 		drawCEProgressBar(element, option, painter, widget);
 		return;
@@ -545,6 +577,12 @@ void CustomUiStyle::drawControl(ControlElement element, const QStyleOption *opti
 	if(element == CE_MenuItem)
 	{
 		drawCEMenuItem(element, option, painter, widget);
+		return;
+	}
+
+	if(element == CE_CheckBox || element == CE_RadioButton)
+	{
+		drawCECheckBoxRadioButton(element, option, painter, widget);
 		return;
 	}
 
@@ -577,7 +615,9 @@ void CustomUiStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *
 		const QStyleOption *curr_opt = option;
 
 		// Adjust button rect for QTabBar scroll buttons to fit inside the tab bar		
-		if(widget && (widget->objectName() == "ScrollLeftButton" || widget->objectName() == "ScrollRightButton"))
+		if(widget &&
+			 (widget->objectName() == "ScrollLeftButton" ||
+				widget->objectName() == "ScrollRightButton"))
 		{
 			adjusted_opt = *option;
 			adjusted_opt.rect.adjust(1, 1, -1, -1);
@@ -596,7 +636,9 @@ void CustomUiStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *
 		/* Don't draw panel and frame if this LineEdit is part of a SpinBox or ComboBox.
 		 * The method drawSpinBoxEditField handle all drawing for SpinBox controls
 		 * and drawCCComboBox handles all drawing for ComboBox controls */
-		if(!widget || (!qobject_cast<const QAbstractSpinBox *>(widget->parentWidget()) && !qobject_cast<const QComboBox *>(widget->parentWidget())))
+		if(!widget ||
+			 (!qobject_cast<const QAbstractSpinBox *>(widget->parentWidget()) &&
+				!qobject_cast<const QComboBox *>(widget->parentWidget())))
 		{
 			drawPELineEditPanel(element, option, painter, widget);
 			drawPEGenericElemFrame(PE_FrameLineEdit, option, painter, widget, InputRadius);
@@ -650,15 +692,19 @@ void CustomUiStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *
 	}
 
 	// Handle QTabBar scroll button arrows (left/right navigation)
-	if((element == PE_IndicatorArrowLeft || element == PE_IndicatorArrowRight) && 
-		  widget && (widget->objectName() == "ScrollLeftButton" || widget->objectName() == "ScrollRightButton"))
+	if((element == PE_IndicatorArrowLeft ||
+			element == PE_IndicatorArrowRight) &&
+			widget &&
+		 (widget->objectName() == "ScrollLeftButton" ||
+			widget->objectName() == "ScrollRightButton"))
 	{
 		// Adjust arrow position to match the button size and position
 		QStyleOption scroll_btn_opt = *option;
 
 		// Same adjustment as button: reduce height and move down
 		scroll_btn_opt.rect.adjust(1, 1, -1, -1);
-		scroll_btn_opt.rect.moveTo(scroll_btn_opt.rect.left() + 1, scroll_btn_opt.rect.top() + 1);
+		scroll_btn_opt.rect.moveTo(scroll_btn_opt.rect.left() + 1,
+															 scroll_btn_opt.rect.top() + 1);
 		
 		ArrowType arrow_type = (element == PE_IndicatorArrowLeft) ? LeftArrow : RightArrow;
 		drawControlArrow(&scroll_btn_opt, painter, widget, arrow_type);
@@ -667,7 +713,9 @@ void CustomUiStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *
 	}
 
 	// Handle QToolButton and QPushButton menu arrow positioning
-	if(element == PE_IndicatorArrowDown && widget && (qobject_cast<const QToolButton *>(widget) || qobject_cast<const QPushButton *>(widget)))
+	if(element == PE_IndicatorArrowDown && widget &&
+		 (qobject_cast<const QToolButton *>(widget) ||
+			qobject_cast<const QPushButton *>(widget)))
 	{
 		drawButtonMenuArrow(option, painter, widget);
 		return;
@@ -758,6 +806,23 @@ void CustomUiStyle::polish(QWidget *widget)
 		widget->setPalette(pal);
 		widget->setAutoFillBackground(true);
 	}
+
+	// Install event filter for widgets with hover effects
+	if(qobject_cast<QLineEdit *>(widget) ||
+		 qobject_cast<QPlainTextEdit *>(widget) ||
+		 qobject_cast<QTextEdit *>(widget) ||
+		 qobject_cast<QPushButton *>(widget) ||
+		 qobject_cast<QToolButton *>(widget) ||
+		 qobject_cast<QCheckBox *>(widget) ||
+		 qobject_cast<QRadioButton *>(widget) ||
+		 qobject_cast<QComboBox *>(widget) ||
+		 qobject_cast<QSpinBox *>(widget) ||
+		 qobject_cast<QDoubleSpinBox *>(widget))
+	{
+		// Enable hover events for these widgets
+		widget->setAttribute(Qt::WA_Hover);
+		widget->installEventFilter(const_cast<CustomUiStyle *>(this));
+	}
 }
 
 QPolygonF CustomUiStyle::rotatePolygon(const QPolygonF &polygon, qreal degrees)
@@ -841,10 +906,6 @@ void CustomUiStyle::drawControlArrow(const QStyleOption *option, QPainter *paint
 	WidgetState wgt_st(option, nullptr);
 
 	// Adjust arrow color based on button state for better visibility
-	// if(!wgt_st.is_enabled)
-	//	arr_color = arr_color.lighter(MidFactor); // Lighter for disabled state
-	// else
-
 	if(wgt_st.is_enabled && wgt_st.is_pressed)
 		arr_color = arr_color.darker(MinFactor); // Slightly darker when pressed
 
@@ -1015,12 +1076,6 @@ void CustomUiStyle::drawEditableComboBox(const QStyleOptionComboBox *option, QPa
 
 	WidgetState wgt_st(option, widget);
 
-	/* if(!wgt_st.is_enabled)
-	{
-		bg_color = bg_color.darker(MinFactor);
-		border_color = border_color.darker(MinFactor);
-	}
-	else */
 	if(wgt_st.is_enabled)
 	{
 		if(wgt_st.is_focused)
@@ -1065,7 +1120,8 @@ void CustomUiStyle::drawPEButtonPanel(PrimitiveElement element, const QStyleOpti
 	{
 		if(wgt_st.has_custom_color && !wgt_st.is_pressed)
 			bg_color = getStateColor(widget->palette(), QPalette::Button, option);
-		else if(!wgt_st.is_pressed && (wgt_st.is_default || wgt_st.is_checked))
+		else if(!wgt_st.is_pressed && !wgt_st.is_focused &&
+						(wgt_st.is_default || wgt_st.is_checked))
 		{
 			QColor base_bg_color = getStateColor(QPalette::Highlight, option);
 			
@@ -1138,6 +1194,55 @@ void CustomUiStyle::drawPECheckBoxRadioBtn(PrimitiveElement element, const QStyl
 	}
 
 	painter->restore();
+}
+
+void CustomUiStyle::drawCECheckBoxRadioButton(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
+{
+	if((element != CE_CheckBox && element != CE_RadioButton) || !option || !painter || !widget)
+		return;
+
+	WidgetState wgt_st(option, widget);
+
+	// Draw hover background first (behind everything)
+	if(wgt_st.is_hovered && wgt_st.is_enabled)
+	{
+		// Use button-like hover color with adjustments for theme
+		QColor hover_color = getAdjustedColor(getStateColor(QPalette::Button, option), MinFactor, -XMinFactor);
+		hover_color.setAlpha(100); // Semi-transparent
+
+		painter->save();
+		painter->setRenderHint(QPainter::Antialiasing, true);
+		painter->setBrush(hover_color);
+		painter->setPen(Qt::NoPen);
+
+		QRectF hover_rect = option->rect;
+		painter->drawRoundedRect(hover_rect, ChkRadioFocusRadius, ChkRadioFocusRadius);
+
+		painter->restore();
+	}
+
+	// Then, let the default implementation draw the control (indicator + text)
+	QProxyStyle::drawControl(element, option, painter, widget);
+
+	// Finally, draw focus border around the entire widget if focused
+	if(wgt_st.is_focused && wgt_st.is_enabled)
+	{
+		QColor border_color = getStateColor(QPalette::Highlight, option);
+
+		painter->save();
+		painter->setRenderHint(QPainter::Antialiasing, true);
+
+		// Draw focus border around the entire control (indicator + text)
+		painter->setBrush(Qt::NoBrush);
+		painter->setPen(QPen(border_color, PenWidth));
+
+		QRectF focus_rect = option->rect;
+		focus_rect.adjust(0.5, 0.5, -0.5, -0.5);
+
+		painter->drawRoundedRect(focus_rect, ChkRadioFocusRadius, ChkRadioFocusRadius);
+
+		painter->restore();
+	}
 }
 
 void CustomUiStyle::drawPEHintFramePanel(PrimitiveElement element, const QStyleOption *option,
@@ -1241,7 +1346,8 @@ void CustomUiStyle::drawPEGenericElemFrame(PrimitiveElement element, const QStyl
 			border_color = getStateColor(widget->palette(), QPalette::Button, option);
 			border_color = border_color.lighter(QColor(border_color).lightness() < 128 ? MidFactor : MaxFactor);
 		}
-		else if(!wgt_st.is_pressed && (wgt_st.is_default || wgt_st.is_checked))
+		// Handle default/checked buttons first (they have special coloring)
+		else if(!wgt_st.is_focused && !wgt_st.is_pressed && (wgt_st.is_default || wgt_st.is_checked))
 		{
 			QColor base_border_cl = getStateColor(QPalette::Highlight, option);
 
@@ -1250,10 +1356,19 @@ void CustomUiStyle::drawPEGenericElemFrame(PrimitiveElement element, const QStyl
 			else
 				border_color = getAdjustedColor(base_border_cl, MidFactor, -MinFactor);
 		}
+		// Handle pressed state
 		else if(wgt_st.is_pressed && !is_edit_frm && !is_basic_frm)
 			border_color = getAdjustedColor(getStateColor(QPalette::Button, option), NoFactor, -MidFactor);
+		// Handle focused state for non-default buttons
+		else if(wgt_st.is_focused && !wgt_st.is_default && !is_edit_frm && !is_basic_frm)
+			border_color = getStateColor(QPalette::Highlight, option);
+		// Handle hover state for buttons
 		else if(wgt_st.is_hovered && !is_edit_frm && !is_basic_frm)
 			border_color = getAdjustedColor(getStateColor(QPalette::Light, option), MinFactor, -XMinFactor);
+		// Handle hover state for edit fields and frames (lighter border) but not when focused
+		else if(wgt_st.is_hovered && !wgt_st.is_focused && (is_edit_frm || is_basic_frm))
+			border_color = border_color.lighter(MaxFactor);
+		// Handle focused state for edit fields and frames
 		else if(wgt_st.is_focused)
 			border_color = getStateColor(QPalette::Highlight, option);
 	}
@@ -1305,6 +1420,10 @@ void CustomUiStyle::drawPELineEditPanel(PrimitiveElement element, const QStyleOp
 
 	QColor bg_color = getStateColor(QPalette::Base, option);
 	WidgetState wgt_st(option, widget);
+
+	// Apply hover effect (lighter background) when hovered but not focused
+	if(wgt_st.is_enabled && wgt_st.is_hovered && !wgt_st.is_focused)
+		bg_color = bg_color.lighter(MaxFactor);
 
 	// Check if this LineEdit is part of a SpinBox
 	bool is_spinbox_child =
@@ -1451,8 +1570,8 @@ void CustomUiStyle::drawCEProgressBar(ControlElement element, const QStyleOption
 		if(is_busy)
 		{
 			// Property names as constants to avoid repetition
-			static constexpr char BusyAnimTimerProp[] = "__busy_anim_timer",
-														BusyElapsedTimerProp[] = "__busy_elapsed_timer";
+			static constexpr char BusyAnimTimerProp[] = "busy-anim-timer",
+														BusyElapsedTimerProp[] = "busy-elapsed-timer";
 			
 			QProgressBar *pb = const_cast<QProgressBar *>(qobject_cast<const QProgressBar *>(widget));
 			

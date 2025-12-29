@@ -150,6 +150,10 @@ class __libutils CustomUiStyle : public QProxyStyle {
 		void drawPECheckBoxRadioBtn(PrimitiveElement element, const QStyleOption *option,
 																QPainter *painter, const QWidget *widget) const;
 
+		// Draws control elements (CE) of checkboxes and radio buttons (full widget including text)
+		void drawCECheckBoxRadioButton(ControlElement element, const QStyleOption *option,
+																	 QPainter *painter, const QWidget *widget) const;
+
 		// Draws primitive elements (PE) of frame background (when StyleHint is set)
 		void drawPEHintFramePanel(PrimitiveElement element, const QStyleOption *option,
 															QPainter *painter, const QWidget *widget) const;
@@ -228,7 +232,8 @@ class __libutils CustomUiStyle : public QProxyStyle {
 		TabWgtRadius = 2,
 		TabBarRadius = 5,
 		ScrollBarRadius = 2,
-		GrpBoxTitlePadding = 2;
+		GrpBoxTitlePadding = 2,
+		ChkRadioFocusRadius = 3;
 
 		static constexpr double GrpBoxTitleFontSize = 0.80;
 
