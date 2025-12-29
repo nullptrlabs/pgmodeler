@@ -548,6 +548,12 @@ void CustomUiStyle::drawControl(ControlElement element, const QStyleOption *opti
 		return;
 	}
 
+	if(element == CE_CheckBox || element == CE_RadioButton)
+	{
+		drawCECheckBoxRadioButton(element, option, painter, widget);
+		return;
+	}
+
 	QProxyStyle::drawControl(element, option, painter, widget);
 }
 
@@ -1139,6 +1145,37 @@ void CustomUiStyle::drawPECheckBoxRadioBtn(PrimitiveElement element, const QStyl
 	}
 
 	painter->restore();
+}
+
+void CustomUiStyle::drawCECheckBoxRadioButton(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
+{
+	if((element != CE_CheckBox && element != CE_RadioButton) || !option || !painter || !widget)
+		return;
+
+	// First, let the default implementation draw the control (indicator + text)
+	QProxyStyle::drawControl(element, option, painter, widget);
+
+	// Then, draw focus border around the entire widget if focused
+	WidgetState wgt_st(option, widget);
+
+	if(wgt_st.is_focused && wgt_st.is_enabled)
+	{
+		QColor focus_color = getStateColor(QPalette::Highlight, option);
+
+		painter->save();
+		painter->setRenderHint(QPainter::Antialiasing, true);
+
+		// Draw focus border around the entire control (indicator + text)
+		painter->setBrush(Qt::NoBrush);
+		painter->setPen(QPen(focus_color, PenWidth));
+
+		QRectF focus_rect = option->rect;
+		focus_rect.adjust(0.5, 0.5, -0.5, -0.5);
+
+		painter->drawRoundedRect(focus_rect, ChkRadioFocusRadius, ChkRadioFocusRadius);
+
+		painter->restore();
+	}
 }
 
 void CustomUiStyle::drawPEHintFramePanel(PrimitiveElement element, const QStyleOption *option,
