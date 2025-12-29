@@ -553,7 +553,10 @@ void CustomUiStyle::drawControl(ControlElement element, const QStyleOption *opti
 		return;
 	}
 
-	if(element == CE_ProgressBar || element == CE_ProgressBarContents || element == CE_ProgressBarGroove || element == CE_ProgressBarLabel)
+	if(element == CE_ProgressBar ||
+		 element == CE_ProgressBarContents ||
+		 element == CE_ProgressBarGroove ||
+		 element == CE_ProgressBarLabel)
 	{
 		drawCEProgressBar(element, option, painter, widget);
 		return;
@@ -612,7 +615,9 @@ void CustomUiStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *
 		const QStyleOption *curr_opt = option;
 
 		// Adjust button rect for QTabBar scroll buttons to fit inside the tab bar		
-		if(widget && (widget->objectName() == "ScrollLeftButton" || widget->objectName() == "ScrollRightButton"))
+		if(widget &&
+			 (widget->objectName() == "ScrollLeftButton" ||
+				widget->objectName() == "ScrollRightButton"))
 		{
 			adjusted_opt = *option;
 			adjusted_opt.rect.adjust(1, 1, -1, -1);
@@ -631,7 +636,9 @@ void CustomUiStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *
 		/* Don't draw panel and frame if this LineEdit is part of a SpinBox or ComboBox.
 		 * The method drawSpinBoxEditField handle all drawing for SpinBox controls
 		 * and drawCCComboBox handles all drawing for ComboBox controls */
-		if(!widget || (!qobject_cast<const QAbstractSpinBox *>(widget->parentWidget()) && !qobject_cast<const QComboBox *>(widget->parentWidget())))
+		if(!widget ||
+			 (!qobject_cast<const QAbstractSpinBox *>(widget->parentWidget()) &&
+				!qobject_cast<const QComboBox *>(widget->parentWidget())))
 		{
 			drawPELineEditPanel(element, option, painter, widget);
 			drawPEGenericElemFrame(PE_FrameLineEdit, option, painter, widget, InputRadius);
@@ -685,15 +692,19 @@ void CustomUiStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *
 	}
 
 	// Handle QTabBar scroll button arrows (left/right navigation)
-	if((element == PE_IndicatorArrowLeft || element == PE_IndicatorArrowRight) && 
-		  widget && (widget->objectName() == "ScrollLeftButton" || widget->objectName() == "ScrollRightButton"))
+	if((element == PE_IndicatorArrowLeft ||
+			element == PE_IndicatorArrowRight) &&
+			widget &&
+		 (widget->objectName() == "ScrollLeftButton" ||
+			widget->objectName() == "ScrollRightButton"))
 	{
 		// Adjust arrow position to match the button size and position
 		QStyleOption scroll_btn_opt = *option;
 
 		// Same adjustment as button: reduce height and move down
 		scroll_btn_opt.rect.adjust(1, 1, -1, -1);
-		scroll_btn_opt.rect.moveTo(scroll_btn_opt.rect.left() + 1, scroll_btn_opt.rect.top() + 1);
+		scroll_btn_opt.rect.moveTo(scroll_btn_opt.rect.left() + 1,
+															 scroll_btn_opt.rect.top() + 1);
 		
 		ArrowType arrow_type = (element == PE_IndicatorArrowLeft) ? LeftArrow : RightArrow;
 		drawControlArrow(&scroll_btn_opt, painter, widget, arrow_type);
@@ -702,7 +713,9 @@ void CustomUiStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *
 	}
 
 	// Handle QToolButton and QPushButton menu arrow positioning
-	if(element == PE_IndicatorArrowDown && widget && (qobject_cast<const QToolButton *>(widget) || qobject_cast<const QPushButton *>(widget)))
+	if(element == PE_IndicatorArrowDown && widget &&
+		 (qobject_cast<const QToolButton *>(widget) ||
+			qobject_cast<const QPushButton *>(widget)))
 	{
 		drawButtonMenuArrow(option, painter, widget);
 		return;
@@ -810,12 +823,6 @@ void CustomUiStyle::polish(QWidget *widget)
 		widget->setAttribute(Qt::WA_Hover);
 		widget->installEventFilter(const_cast<CustomUiStyle *>(this));
 	}
-}
-
-bool CustomUiStyle::eventFilter(QObject *obj, QEvent *event)
-{
-	// Event filter is only used for hover effects, no need for focus animation
-	return QProxyStyle::eventFilter(obj, event);
 }
 
 QPolygonF CustomUiStyle::rotatePolygon(const QPolygonF &polygon, qreal degrees)

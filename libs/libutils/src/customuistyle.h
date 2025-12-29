@@ -278,8 +278,6 @@ class __libutils CustomUiStyle : public QProxyStyle {
 
 		void polish(QWidget *widget) override;
 
-		bool eventFilter(QObject *obj, QEvent *event) override;
-
 		QPixmap generatedIconPixmap(QIcon::Mode icon_mode, const QPixmap &pixmap, const QStyleOption *option) const override;
 
 		int pixelMetric(PixelMetric metric, const QStyleOption * option = nullptr, const QWidget * widget = nullptr) const override;
