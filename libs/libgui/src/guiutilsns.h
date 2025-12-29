@@ -71,7 +71,24 @@ namespace GuiUtilsNs {
 
 	extern __libgui void configureWidgetFont(QWidget *widget, FontFactorId factor_id, bool bold = false, bool italic = false);
 	extern __libgui void __configureWidgetFont(QWidget *widget, double factor, bool bold = false, bool italic = false);
-	extern __libgui void configureWidgetsFont(const QWidgetList widgets, FontFactorId factor_id, bool bold = false, bool italic = false);
+	extern __libgui void configureWidgetsFont(const QWidgetList &widgets, FontFactorId factor_id, bool bold = false, bool italic = false);
+
+	template<class WgtClass, std::enable_if_t<std::is_base_of_v<QWidget, WgtClass>, bool> = true>
+	void configureWidgetsFont(QWidget *parent_wgt, FontFactorId factor_id, bool bold = false, bool italic = false, const QList<WgtClass *> &excl_wgts = {})
+	{
+		if(!parent_wgt)
+			return;
+
+		QList<WgtClass *> child_wgts = parent_wgt->findChildren<WgtClass *>();
+
+		for(auto &wgt : child_wgts)
+		{
+			if(excl_wgts.contains(wgt))
+				continue;
+
+			configureWidgetFont(wgt, factor_id, bold, italic);
+		}
+	}
 
 	/*! \brief Creates an item in the specified QTreeWidget instance with the specified text and ico.
 		The new item is automatically inserted on the QTreeWidget object.

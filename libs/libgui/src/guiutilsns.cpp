@@ -244,7 +244,7 @@ namespace GuiUtilsNs {
 		widget->setFont(font);
 	}
 
-	void configureWidgetsFont(const QWidgetList widgets, FontFactorId factor_id, bool bold, bool italic)
+	void configureWidgetsFont(const QWidgetList &widgets, FontFactorId factor_id, bool bold, bool italic)
 	{
 		for(auto &wgt : widgets)
 			configureWidgetFont(wgt, factor_id, bold, italic);

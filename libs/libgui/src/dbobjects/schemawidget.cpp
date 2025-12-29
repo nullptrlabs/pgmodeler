@@ -29,7 +29,6 @@ SchemaWidget::SchemaWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 	name_color_lt->addWidget(name_color_picker);
 
 	configureTabbedLayout(false);
-	//configureTabOrder({ fill_color_picker, name_color_picker, show_rect_chk });
 
 	setMinimumSize(550, 400);
 }

@@ -536,6 +536,12 @@
            </item>
            <item>
             <widget class="QSpinBox" name="port_sbp">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimum">
               <number>1</number>
              </property>
@@ -627,6 +633,12 @@
            </property>
            <item>
             <widget class="QSpinBox" name="timeout_sbp">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="suffix">
               <string> second(s)</string>
              </property>
@@ -643,7 +655,7 @@
              <property name="sizeHint" stdset="0">
               <size>
                <width>40</width>
-               <height>20</height>
+               <height>27</height>
               </size>
              </property>
             </spacer>
