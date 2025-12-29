@@ -24,6 +24,11 @@ TabOrderManager::TabOrderManager(QWidget *parent)	: QObject { parent }
 	connect(&cfg_timer, &QTimer::timeout, this, &TabOrderManager::configureTabOrder);
 }
 
+TabOrderManager::~TabOrderManager()
+{
+	clearTabOrder();
+}
+
 bool TabOrderManager::eventFilter(QObject *object, QEvent *event)
 {
 	/* We (re)start the configuration timer every time the LayoutRequest event
@@ -43,20 +48,13 @@ void TabOrderManager::configureTabOrder()
 {
 	QWidget *parent_wgt = qobject_cast<QWidget *>(parent());
 
-	if(!parent_wgt->isVisible())
+	// Avoiding invisible or inactive parent widget to have tab order configured
+	if(!parent_wgt->isVisible() ||
+		 !parent_wgt->isActiveWindow())
 		return;
-
-	cfg_timer.stop();
 
 	// We need to work only on direct children only
 	QWidgetList child_wgts = parent_wgt->findChildren<QWidget *>(Qt::FindDirectChildrenOnly);
-
-	/* Uninstalling the event filter installed in the previous iteration
-	 * to avoid the now hidden and disabled widgets to respond to events */
-	for(auto &wgt : tab_order_list)
-		wgt->removeEventFilter(this);
-
-	tab_order_list.clear();
 
 	// Recursively collect the children of the parent widget
 	for(auto &wgt : child_wgts)
@@ -135,4 +133,10 @@ void TabOrderManager::collectChildWidgets(QWidget *root_wgt, QWidgetList &child_
 		if(!wgt->childrenRect().isNull())
 			collectChildWidgets(wgt, child_wgts);
 	}
+}
+
+void TabOrderManager::clearTabOrder()
+{
+	cfg_timer.stop();
+	tab_order_list.clear();
 }

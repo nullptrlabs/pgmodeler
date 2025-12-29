@@ -22,10 +22,12 @@
 #include "utilsns.h"
 #include "attributes.h"
 #include "globalattributes.h"
+#include "tabordermanager.h"
 
 BaseConfigWidget::BaseConfigWidget(QWidget *parent) : QWidget(parent)
 {
-	config_changed=false;
+	config_changed = false;
+	installEventFilter(new TabOrderManager(this));
 }
 
 void BaseConfigWidget::setConfigurationSection(std::map<QString, attribs_map> &config_params, const QString &section_id, const attribs_map &params)

@@ -78,8 +78,6 @@ class __libgui BaseForm: public QDialog, public Ui::BaseForm {
 			else
 				setWindowTitle(widget->windowTitle());
 
-			widget->installEventFilter(new TabOrderManager(widget));
-
 			apply_ok_btn->setDisabled(widget->isHandledObjectProtected());
 			resizeForm(widget);
 			setButtonConfiguration(Messagebox::OkCancelButtons);

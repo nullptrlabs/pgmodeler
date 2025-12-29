@@ -40,13 +40,18 @@ class __libgui  TabOrderManager: public QObject {
 
 		void collectChildWidgets(QWidget *root, QWidgetList &child_wgts);
 
+		/*! \brief This method stops the configuration timer and
+		 *  clear the tab order list and uninstall the event filter
+		 *  from childer widgets */
+		void clearTabOrder();
+
 	protected:
 		bool eventFilter(QObject *object, QEvent *event) override;
 
 	public:
 		explicit TabOrderManager(QWidget *parent);
 
-		~TabOrderManager() override = default;
+		~TabOrderManager() override;
 
 	private slots:
 		void configureTabOrder();

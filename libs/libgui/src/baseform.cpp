@@ -158,7 +158,6 @@ void BaseForm::setMainWidget(QWidget *widget)
 	else
 		setWindowIcon(GuiUtilsNs::getIcon("pgmodeler_logo"));
 
-	widget->installEventFilter(new TabOrderManager(widget));
 	resizeForm(widget);
 
 	setButtonConfiguration(Messagebox::OkButton);
