@@ -606,6 +606,8 @@ BaseObject *DatabaseModel::getObject(const QString &name, ObjectType obj_type, i
 	std::vector<BaseObject *>::iterator itr, itr_end;
 	bool found = false;
 	QString aux_name1;
+	Qt::CaseSensitivity case_mode = BaseObject::isQuotingDisabled() ?
+																	Qt::CaseInsensitive : Qt::CaseSensitive;
 
 	obj_list = getObjectList(obj_type);
 
@@ -619,8 +621,8 @@ BaseObject *DatabaseModel::getObject(const QString &name, ObjectType obj_type, i
 
 	while(itr!=itr_end && !found)
 	{
-		if((*itr)->getSignature().remove("\"") == aux_name1 ||
-				(*itr)->getName(false) == aux_name1)
+		if((*itr)->getSignature().remove("\"").compare(aux_name1, case_mode) == 0 ||
+			 (*itr)->getName(false).compare(aux_name1, case_mode) == 0)
 		{
 			found = true;
 			break;

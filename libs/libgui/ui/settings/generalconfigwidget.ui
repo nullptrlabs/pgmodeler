@@ -490,7 +490,7 @@
               <bool>false</bool>
              </property>
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -1092,6 +1092,16 @@
            </property>
            <property name="text">
             <string>Disable render smoothness</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="disable_name_quoting_chk">
+           <property name="toolTip">
+            <string>&lt;p&gt;Disables the automatic object name quoting mechanism. This feature is &lt;strong&gt;experimental&lt;/strong&gt; and may lead to database model corruption. Use it at &lt;strong&gt;your own risk&lt;/strong&gt;.&lt;/p&gt;</string>
+           </property>
+           <property name="text">
+            <string>Disable automatic name quoting</string>
            </property>
           </widget>
          </item>

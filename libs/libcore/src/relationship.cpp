@@ -848,24 +848,26 @@ TableObject *Relationship::getObject(unsigned obj_idx, ObjectType obj_type)
 TableObject *Relationship::getObject(const QString &name, ObjectType obj_type)
 {
 	std::vector<TableObject *>::iterator itr, itr_end;
-	std::vector<TableObject *> *list=nullptr;
-	TableObject *obj_aux=nullptr;
-	bool found=false;
+	std::vector<TableObject *> *list = nullptr;
+	TableObject *obj_aux = nullptr;
+	bool found = false;
+	Qt::CaseSensitivity case_mode = BaseObject::isQuotingDisabled() ?
+																	Qt::CaseInsensitive : Qt::CaseSensitive;
 
-	if(obj_type==ObjectType::Column)
-		list=&rel_attributes;
-	else if(obj_type==ObjectType::Constraint)
-		list=&rel_constraints;
+	if(obj_type == ObjectType::Column)
+		list = &rel_attributes;
+	else if(obj_type == ObjectType::Constraint)
+		list = &rel_constraints;
 	else
 		throw Exception(ErrorCode::RefObjectInvalidType, PGM_FUNC,PGM_FILE,PGM_LINE);
 
-	itr=list->begin();
-	itr_end=list->end();
+	itr = list->begin();
+	itr_end = list->end();
 
-	while(itr!=itr_end && !found)
+	while(itr != itr_end && !found)
 	{
-		obj_aux=(*itr);
-		found=(obj_aux->getName()==name);
+		obj_aux = (*itr);
+		found = (obj_aux->getName().compare(name, case_mode) == 0);
 		itr++;
 	}
 

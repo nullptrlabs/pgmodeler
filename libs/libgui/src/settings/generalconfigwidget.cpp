@@ -117,6 +117,7 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 	config_params[Attributes::Configuration][Attributes::LowVerbosity]="";
 	config_params[Attributes::Configuration][Attributes::DefaultSchema]="";
 	config_params[Attributes::Configuration][Attributes::HideEmptyObjGroups]="";
+	config_params[Attributes::Configuration][Attributes::DisableNameQuoting]="";
 
 	selectPaperSize();
 
@@ -188,6 +189,23 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 	});
 
 	connect(reset_alerts_choices_btn, &QPushButton::clicked, this, &GeneralConfigWidget::resetAlertChoices);
+
+	connect(disable_name_quoting_chk, &QCheckBox::toggled, this, [this](bool checked){
+		if(checked && config_params[Attributes::Configuration][Attributes::AlertDisableQuoting] == Attributes::True)
+		{
+			Messagebox msgbox;
+
+			msgbox.setCustomOptionText(tr("Don't alert me again"));
+
+			msgbox.show(tr("<strong>WARNING:</strong> Disabling automatic name quoting compromises core features of the tool and significantly increases the risk of database model corruption.\
+										 Critical features such as export, import and diff operations may produce invalid or inconsistent results.\
+										 This option is unsafe for general use and should remain disabled unless <strong>you fully understand the implications</strong>.\
+										 <strong>This configuration is dangerous. Use it entirely at your own risk.</strong>"), Messagebox::Alert, Messagebox::OkButton);
+
+			config_params[Attributes::Configuration][Attributes::AlertDisableQuoting] =
+					msgbox.isCustomOptionChecked() ? Attributes::False : Attributes::True;
+		}
+	});
 }
 
 void GeneralConfigWidget::showEvent(QShowEvent *)
@@ -195,7 +213,8 @@ void GeneralConfigWidget::showEvent(QShowEvent *)
 	reset_alerts_choices_btn->setEnabled(config_params[Attributes::Configuration][Attributes::AlertUnsavedModels] != Attributes::True ||
 																			 config_params[Attributes::Configuration][Attributes::AlertOpenSqlTabs] != Attributes::True ||
 																			 config_params[Attributes::Configuration][Attributes::UseDefDisambiguation] == Attributes::True ||
-																			 config_params[Attributes::Configuration][Attributes::AlertApplyMetadata] == Attributes::False);
+																			 config_params[Attributes::Configuration][Attributes::AlertApplyMetadata] == Attributes::False ||
+																			 config_params[Attributes::Configuration][Attributes::AlertDisableQuoting] != Attributes::True);
 
 }
 
@@ -205,6 +224,7 @@ void GeneralConfigWidget::resetAlertChoices()
 	config_params[Attributes::Configuration][Attributes::AlertOpenSqlTabs] = Attributes::True;
 	config_params[Attributes::Configuration][Attributes::UseDefDisambiguation] = Attributes::False;
 	config_params[Attributes::Configuration][Attributes::AlertApplyMetadata] = Attributes::True;
+	config_params[Attributes::Configuration][Attributes::AlertDisableQuoting] = Attributes::True;
 	reset_alerts_choices_btn->setEnabled(false);
 }
 
@@ -224,7 +244,8 @@ void GeneralConfigWidget::loadConfiguration()
 		if(!config_params[Attributes::Configuration].count(Attributes::AlertUnsavedModels) ||
 			 !config_params[Attributes::Configuration].count(Attributes::AlertOpenSqlTabs) ||
 			 !config_params[Attributes::Configuration].count(Attributes::UseDefDisambiguation) ||
-			 !config_params[Attributes::Configuration].count(Attributes::AlertApplyMetadata))
+			 !config_params[Attributes::Configuration].count(Attributes::AlertApplyMetadata) ||
+			 !config_params[Attributes::Configuration].count(Attributes::AlertDisableQuoting))
 			resetAlertChoices();
 
 		oplist_size_spb->setValue((config_params[Attributes::Configuration][Attributes::OpListSize]).toUInt());
@@ -295,6 +316,10 @@ void GeneralConfigWidget::loadConfiguration()
 		hide_cur_pos_zoom_info_chk->setChecked(config_params[Attributes::Configuration][Attributes::HideCurPosZoomInfo]==Attributes::True);
 
 		hide_empty_obj_grps_chk->setChecked(config_params[Attributes::Configuration][Attributes::HideEmptyObjGroups]==Attributes::True);
+
+		disable_name_quoting_chk->blockSignals(true);
+		disable_name_quoting_chk->setChecked(config_params[Attributes::Configuration][Attributes::DisableNameQuoting] == Attributes::True);
+		disable_name_quoting_chk->blockSignals(false);
 
 		int ui_idx = ui_language_cmb->findData(config_params[Attributes::Configuration][Attributes::UiLanguage]);
 		ui_language_cmb->setCurrentIndex(ui_idx >= 0 ? ui_idx : 0);
@@ -509,6 +534,8 @@ void GeneralConfigWidget::saveConfiguration()
 
 		config_params[Attributes::Configuration][Attributes::HideEmptyObjGroups]=(hide_empty_obj_grps_chk->isChecked() ? Attributes::True : "");
 
+		config_params[Attributes::Configuration][Attributes::DisableNameQuoting]=(disable_name_quoting_chk->isChecked() ? Attributes::True : "");
+
 		config_params[Attributes::Configuration][Attributes::File]="";
 		config_params[Attributes::Configuration][Attributes::RecentModels]="";
 
@@ -591,6 +618,7 @@ void GeneralConfigWidget::applyConfiguration()
 	  widgets_geom.clear();
 
 	BaseObject::setEscapeComments(escape_comments_chk->isChecked());
+	BaseObject::setQuotingDisabled(disable_name_quoting_chk->isChecked());
 
 	QPageLayout page_lt;
 	QPageSize::PageSizeId size_id = static_cast<QPageSize::PageSizeId>(paper_cmb->itemData(paper_cmb->currentIndex()).toInt());

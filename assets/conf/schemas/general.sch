@@ -56,10 +56,12 @@
 {spc} [alert-unsaved-models="] {alert-unsaved-models} ["] \n
 {spc} [alert-open-sqltabs="] {alert-open-sqltabs} ["] \n
 {spc} [alert-apply-metadata="] {alert-apply-metadata} ["] \n
+{spc} [alert-disable-quoting="] {alert-disable-quoting} ["] \n
 {spc} [use-def-disambiguation="] {use-def-disambiguation} ["] \n
 {spc} [hide-objects-sel-info="] %if {hide-objects-sel-info} %then true %else false %end ["] \n
 {spc} [hide-cur-pos-zoom-info="] %if {hide-cur-pos-zoom-info} %then true %else false %end ["] \n
 {spc} [hide-empty-obj-groups="] %if {hide-empty-obj-groups} %then true %else false %end ["] \n
+{spc} [disable-name-quoting="] %if {disable-name-quoting} %then true %else false %end ["] \n
 
 %if {source-editor-app} %then
 	{spc} [source-editor-app="] &{source-editor-app} ["] \n

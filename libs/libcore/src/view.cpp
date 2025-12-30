@@ -506,19 +506,23 @@ int View::getObjectIndex(const QString &name, ObjectType obj_type)
 		return -1;
 
 	std::vector<TableObject *>::iterator itr, itr_end;
-	std::vector<TableObject *> *obj_list=getObjectList(obj_type);
-	bool found=false, format=name.contains('"');
+	std::vector<TableObject *> *obj_list = getObjectList(obj_type);
+	bool found = false, format = name.contains('"');
+	Qt::CaseSensitivity case_mode = BaseObject::isQuotingDisabled() ?
+																	Qt::CaseInsensitive : Qt::CaseSensitive;
 
 	if(!obj_list)
 		return -1;
 
-	itr=obj_list->begin();
-	itr_end=obj_list->end();
+	itr = obj_list->begin();
+	itr_end = obj_list->end();
 
-	while(itr!=itr_end && !found)
+	while(itr != itr_end && !found)
 	{
-		found=((*itr)->getName(format)==name);
-		if(!found) itr++;
+		found=((*itr)->getName(format).compare(name, case_mode) == 0);
+
+		if(!found)
+			itr++;
 	}
 
 	if(found)

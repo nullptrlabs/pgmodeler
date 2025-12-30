@@ -51,10 +51,12 @@
 <!ATTLIST configuration alert-unsaved-models (false|true) "true">
 <!ATTLIST configuration alert-open-sqltabs (false|true) "true">
 <!ATTLIST configuration alert-apply-metadata (false|true) "true">
+<!ATTLIST configuration alert-disable-quoting (false|true) "true">
 <!ATTLIST configuration use-def-disambiguation (false|true) "true">
 <!ATTLIST configuration hide-objects-sel-info (false|true) "false">
 <!ATTLIST configuration hide-cur-pos-zoom-info (false|true) "false">
 <!ATTLIST configuration hide-empty-obj-groups (false|true) "false">
+<!ATTLIST configuration disable-name-quoting (false|true) "false">
 
 <!ELEMENT session (file+)>
 <!ELEMENT recent-models (file+)>

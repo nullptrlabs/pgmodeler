@@ -94,7 +94,16 @@ class __libcore BaseObject {
 		static bool escape_comments,
 
 		//! \brief Indicates if the dependences/references of the object must be erased on the destructor
-		clear_deps_in_dtor;
+		clear_deps_in_dtor,
+
+		/*! \brief This attribute when true disables the automatic object name quoting.
+		 *  WARNING: Disabling the name quoting is is an EXPERIMENTAL feature which can lead
+		 *  to braking models that was created in previous version of pgModeler.
+		 *
+		 *  Basically this will ignore object name cases, treating things like table_a, Table_A and TABLE_A
+		 *  as being the same object. There are also a huge impact in reverese engineering and diff features
+		 *  which can produce errors and/or unreliable results. */
+		quoting_disabled;
 
 		//! \brief Stores the set of special (valid) chars that forces the object's name quoting
 		static const QByteArray special_chars;
@@ -281,7 +290,7 @@ class __libcore BaseObject {
 		void setBasicAttributes(bool format_name);
 
 		/*! \brief Compares two xml buffers and returns if they differs from each other. The user can specify which attributes
-	and tags must be ignored when makin the comparison. NOTE: only the name for attributes and tags must be informed */
+		 * and tags must be ignored when makin the comparison. NOTE: only the name for attributes and tags must be informed */
 		bool isCodeDiffersFrom(const QString &xml_def1, const QString &xml_def2, const QStringList &ignored_attribs, const QStringList &ignored_tags);
 
 		/*! \brief Copies the non-empty attributes on the map at parameter to the own object attributes map. This method is used
@@ -356,6 +365,18 @@ class __libcore BaseObject {
 		 This method can be used when a class needs to directly write some attributes of
 		 another class but does not have permission. */
 		void setAttribute(const QString &attrib, const QString &value);
+
+		/*! \brief Disables the automatic name quoting feature,
+		 *  WARNING: this is an EXPERIMENTAL FEATURE and can lead
+		 *  to undesired results in several other features of the
+		 *  tool, including but not limited to export, import,
+		 *  diff and validation. It's not recommeded to use this
+		 *  if you already have models created in older versions of the
+		 *  tool and objects in that model are already quoted. */
+		static void setQuotingDisabled(bool value);
+
+		//! \brief Returns the whether the automatic name quoting feature is disabled or not
+		static bool isQuotingDisabled();
 
 		/*! \brief Returns whether the object name is in conformity with the PostgreSQL object naming rule.
 		 (e.g. 63 bytes long and chars in set [a-zA-z0-9_] */
@@ -517,7 +538,7 @@ class __libcore BaseObject {
 		objects differs. */
 		virtual QString getAlterCode(BaseObject *object, bool ignore_name_diff);
 
-		//!brief Returns the DROP statement for the object
+		//! \brief Returns the DROP statement for the object
 		virtual QString getDropCode(bool cascade);
 
 		//! \brief Returns if the specified type accepts to have a schema assigned

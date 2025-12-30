@@ -906,9 +906,11 @@ BaseObject *PhysicalTable::getObject(const QString &name, ObjectType obj_type, i
 	BaseObject *object=nullptr;
 	bool found=false, format=false;
 	std::vector<TableObject *> *obj_list=getObjectList(obj_type);
+	Qt::CaseSensitivity case_mode = BaseObject::isQuotingDisabled() ?
+																	Qt::CaseInsensitive : Qt::CaseSensitive;
 
 	//Checks if the name contains ", if so, the search will consider formatted names
-	format=name.contains('"');
+	format = name.contains('"');
 
 	if(TableObject::isTableObject(obj_type) && obj_list)
 	{
@@ -918,11 +920,13 @@ BaseObject *PhysicalTable::getObject(const QString &name, ObjectType obj_type, i
 		itr=obj_list->begin();
 		itr_end=obj_list->end();
 
-		while(itr!=itr_end)
+		while(itr != itr_end)
 		{
-			found=((*itr)->getName(format)==aux_name);
-			if(!found) itr++;
-			else break;
+			found = ((*itr)->getName(format).compare(aux_name, case_mode) == 0);
+			if(!found)
+				itr++;
+			else
+				break;
 		}
 
 		if(found)
@@ -930,26 +934,30 @@ BaseObject *PhysicalTable::getObject(const QString &name, ObjectType obj_type, i
 			obj_idx=(itr-obj_list->begin());
 			object=(*itr);
 		}
-		else obj_idx=-1;
+		else
+			obj_idx=-1;
 	}
 	else if(isPhysicalTable(obj_type))
 	{
 		std::vector<PhysicalTable *>::iterator itr_tab, itr_end_tab;
-		QString tab_name, aux_name=name;
+		QString tab_name, aux_name = name;
 
 		aux_name.remove('"');
-		itr_tab=ancestor_tables.begin();
-		itr_end_tab=ancestor_tables.end();
+		itr_tab = ancestor_tables.begin();
+		itr_end_tab = ancestor_tables.end();
 
-		while(itr_tab!=itr_end_tab)
+		while(itr_tab != itr_end_tab)
 		{
 			/* Unlike other object types, tables are always compared with the FORMATTED NAME
 			because they must be 'schema-qualified' preventing a table of the same name
 			but different schemas are confused */
-			tab_name=(*itr_tab)->getName(true).remove('"');
-			found=(tab_name==aux_name);
-			if(!found) itr_tab++;
-			else break;
+			tab_name = (*itr_tab)->getName(true).remove('"');
+			found = (tab_name.compare(aux_name, case_mode) == 0);
+
+			if(!found)
+				itr_tab++;
+			else
+				break;
 		}
 
 		if(found)

@@ -58,25 +58,28 @@ void BaseFunction::addParameter(Parameter param)
 {
 	std::vector<Parameter>::iterator itr,itr_end;
 	bool found=false;
+	Qt::CaseSensitivity case_mode = BaseObject::isQuotingDisabled() ?
+																	Qt::CaseInsensitive : Qt::CaseSensitive;
 
-	itr=parameters.begin();
-	itr_end=parameters.end();
+	itr = parameters.begin();
+	itr_end = parameters.end();
 
 	//Checks the duplicity of parameter names
-	while(itr!=itr_end && !found)
+	while(itr != itr_end && !found)
 	{
 		/* Compares the parameters name storing in the 'found' flag
 		 if already exists in the function */
-		found=(itr->getName()==param.getName());
+		found=(itr->getName().compare(param.getName(), case_mode) == 0);
 		itr++;
 	}
 
 	//If a duplicated parameter is found an error is raised
 	if(found)
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgDuplicatedParameterFunction)
-						.arg(param.getName())
-						.arg(this->signature),
+						.arg(param.getName(), this->signature),
 						ErrorCode::AsgDuplicatedParameterFunction,PGM_FUNC,PGM_FILE,PGM_LINE);
+	}
 
 	//Inserts the parameter in the function
 	parameters.push_back(param);

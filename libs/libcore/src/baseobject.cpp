@@ -26,6 +26,7 @@ QString BaseObject::pgsql_ver { PgSqlVersions::DefaulVersion };
 bool BaseObject::escape_comments {true};
 bool BaseObject::clear_deps_in_dtor {true};
 bool BaseObject::ignore_db_version {false};
+bool BaseObject::quoting_disabled {false};
 
 unsigned BaseObject::global_id {5000};
 
@@ -191,14 +192,28 @@ QString BaseObject::getSQLName(ObjectType obj_type)
 
 QString BaseObject::formatName(const QString &name, bool is_operator)
 {
-	bool is_formated=false;
+	bool is_formated = false;
 	QString frmt_name;
 	QByteArray raw_name;
 	unsigned char chr, chr1, chr2;
-	QRegularExpression fmt_name_regexp(QRegularExpression::anchoredPattern("(\")(.)+(\")"));
+	static QRegularExpression fmt_name_regexp(QRegularExpression::anchoredPattern("(\")(.)+(\")"));
 
 	//Checking if the name is already formated enclosed by quotes
 	is_formated = fmt_name_regexp.match(name).hasMatch();
+
+	/* If the name is formatted and the name quoting is disabled
+	 * we erase the quote char from name */
+	if(is_formated && quoting_disabled)
+	{
+		frmt_name = name;
+		frmt_name.remove('"');
+		return frmt_name;
+	}
+
+	/* If the name is not formatted and the name quoting is disabled
+	 * we just return the name as-is */
+	if(!is_formated && quoting_disabled)
+		return name;
 
 	/* If the name is not formatted or it symbolizes the name of an operator
 		(which has characters invalid according to the rule and is the only exception
@@ -208,12 +223,13 @@ QString BaseObject::formatName(const QString &name, bool is_operator)
 	{
 		bool needs_fmt=false;
 		unsigned i = 0, qtd = 0;
+		static QRegularExpression num_regexp("^[0-9]+");
 
 		raw_name.append(name.toUtf8());
 
 		/* Checks if the name has some upper case letter. If its the
 		 case the name will be enclosed in quotes */
-		needs_fmt = (!is_operator && name.contains(QRegularExpression("^[0-9]+")));
+		needs_fmt = (!is_operator && name.contains(num_regexp));
 
 		for(int idx = 0; idx < special_chars.size() && !needs_fmt; idx++)
 			needs_fmt = (!is_operator && special_chars.at(idx) != '_' && name.indexOf(special_chars.at(idx)) >= 0);
@@ -273,7 +289,7 @@ QString BaseObject::formatName(const QString &name, bool is_operator)
 
 bool BaseObject::isValidName(const QString &name)
 {
-	QString aux_name=name;
+	QString aux_name = name;
 
 	// Remove the quotes from the start/end of the name to calculate the exact length
 	if(aux_name.contains(QRegularExpression::anchoredPattern("(\")(.)+(\")")))
@@ -1017,7 +1033,17 @@ QString BaseObject::getSourceCode(SchemaParser::CodeType def_type, bool reduced_
 
 void BaseObject::setAttribute(const QString &attrib, const QString &value)
 {
-	attributes[attrib]=value;
+	attributes[attrib] = value;
+}
+
+void BaseObject::setQuotingDisabled(bool value)
+{
+	quoting_disabled = value;
+}
+
+bool BaseObject::isQuotingDisabled()
+{
+	return quoting_disabled;
 }
 
 void BaseObject::clearAttributes()
