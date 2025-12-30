@@ -28,6 +28,7 @@
 #include <QClipboard>
 #include "messagebox.h"
 #include "utilsns.h"
+#include <QTextDocumentFragment>
 
 bool NumberedTextEditor::line_nums_visible {true};
 bool NumberedTextEditor::highlight_lines {true};
@@ -199,7 +200,10 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		connect(edit_src_btn,  &QToolButton::clicked, this, __slot(this, NumberedTextEditor::editSource));
 
 		connect(copy_btn,  &QToolButton::clicked, this, [this](){
-			qApp->clipboard()->setText(toPlainText());
+			if(textCursor().hasSelection())
+				qApp->clipboard()->setText(textCursor().selection().toPlainText());
+			else
+				qApp->clipboard()->setText(toPlainText());
 		});
 
 		connect(search_btn, &QToolButton::toggled, this, [this](bool checked){
