@@ -64,14 +64,18 @@ void TabOrderManager::configureTabOrder()
 
 	/* Removing container widgets and Qt-internal widgets
 	 * that don't need to be in our tab ordering */
-	tab_order_list.removeIf([](const QWidget *wgt){
+	tab_order_list.removeIf([parent_wgt](const QWidget *wgt){
 		static const QStringList ignored_classes {
 			"QFrame", "QGroupBox", "QTabWidget", "QLabel",
 			"QLineEditIconButton", "QWidget", "QStackedWidget",
 			"QProgressBar", "QSplitter"
 		};
-
-		return ignored_classes.contains(wgt->metaObject()->className()) ||
+					/* Comparing the window of the widget with its parent
+					 * this will avoid trying to configure a tab order with
+					 * widgets from different windows, which raises a warning
+					 * in application console */
+		return wgt->window() != parent_wgt->window() ||
+					 ignored_classes.contains(wgt->metaObject()->className()) ||
 					 !wgt->isVisible() ||
 					 wgt->objectName().startsWith("qt_") ||
 					 wgt->objectName().isEmpty() ||
