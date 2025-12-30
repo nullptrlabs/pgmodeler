@@ -84,9 +84,9 @@ class __libgui ObjectsListModel: public QAbstractTableModel {
  public:
 
 	enum ColumnId: int {
+		ObjId,
 		ObjName,
 		ObjType,
-		ObjId,
 		ParentName,
 		ParentType,
 		SearchAttr

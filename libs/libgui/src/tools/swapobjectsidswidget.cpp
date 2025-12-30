@@ -1,6 +1,7 @@
 #include "swapobjectsidswidget.h"
 #include "customuistyle.h"
 #include "guiutilsns.h"
+#include "objectslistmodel.h"
 
 SwapObjectsIdsWidget::SwapObjectsIdsWidget(QWidget *parent, Qt::WindowFlags f) : QWidget(parent, f)
 {
@@ -103,7 +104,9 @@ void SwapObjectsIdsWidget::fillCreationOrderGrid()
 	objects_view->horizontalHeader()->blockSignals(true);
 	GuiUtilsNs::populateObjectsTable(objects_view, objects, "");
 
-	if(!filter_edt->text().isEmpty() || hide_rels_chk->isChecked() || hide_sys_objs_chk->isChecked())
+	if(!filter_edt->text().isEmpty() ||
+		 hide_rels_chk->isChecked() ||
+		 hide_sys_objs_chk->isChecked())
 		filterObjects();
 
 	objects_view->sortByColumn(sort_column, sort_order);
@@ -236,7 +239,6 @@ void SwapObjectsIdsWidget::swapObjectsIds()
 	}
 	catch(Exception &e)
 	{
-		//qApp->restoreOverrideCursor();
 		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
@@ -247,7 +249,9 @@ void SwapObjectsIdsWidget::filterObjects()
 	bool is_rel = false, is_sys_obj = false;
 
 	QAbstractItemModel *model = objects_view->model();
-	QList<QModelIndex> indexes = model->match(model->index(0,0), Qt::DisplayRole, filter_edt->text(),	-1);
+	QList<QModelIndex> indexes = model->match(model->index(0, ObjectsListModel::ObjName),
+																						Qt::DisplayRole,
+																						filter_edt->text(),	-1);
 	QModelIndex index;
 
 	for(int row = 0; row < objects_view->model()->rowCount(); row++)
@@ -264,7 +268,8 @@ void SwapObjectsIdsWidget::filterObjects()
 			continue;
 		}
 
-		is_rel = (object->getObjectType() == ObjectType::BaseRelationship || object->getObjectType() == ObjectType::Relationship);
+		is_rel = (object->getObjectType() == ObjectType::BaseRelationship ||
+							object->getObjectType() == ObjectType::Relationship);
 		is_sys_obj = object->isSystemObject();
 
 		if((!is_rel && !is_sys_obj) ||
@@ -278,7 +283,8 @@ void SwapObjectsIdsWidget::filterObjects()
 
 void SwapObjectsIdsWidget::selectItem(const QModelIndex &index)
 {
-	QModelIndex aux_index = index.column() == 0 ? index : objects_view->model()->index(index.row(), 0);
+	QModelIndex aux_index = index.column() == ObjectsListModel::ObjId ?
+													index : objects_view->model()->index(index.row(),  ObjectsListModel::ObjId);
 	BaseObject *obj = reinterpret_cast<BaseObject *>(aux_index.data(Qt::UserRole).value<void *>());
 
 	if(selector_idx == 0)

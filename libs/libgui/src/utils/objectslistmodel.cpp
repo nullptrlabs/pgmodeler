@@ -26,12 +26,12 @@
 #include "utilsns.h"
 
 const QStringList ObjectsListModel::HeaderTexts {
-	QT_TR_NOOP("Object"), QT_TR_NOOP("Type"), QT_TR_NOOP("ID"),
+	QT_TR_NOOP("ID"), QT_TR_NOOP("Object"), QT_TR_NOOP("Type"),
 	QT_TR_NOOP("Parent"), QT_TR_NOOP("Parent type")
 };
 
 const QStringList ObjectsListModel::HeaderIcons {
-	"objects", "usertype", "typeoid",
+	"typeoid", "objects", "usertype",
 	"schema", "usertype", "attribute"
 };
 
@@ -182,12 +182,20 @@ void ObjectsListModel::fillModel(const std::vector<BaseObject*>& obj_list, const
 		else if(obj_type == ObjectType::Constraint)
 			sub_type = dynamic_cast<Constraint *>(obj)->getConstraintType().getTypeId();
 
-		//First column: Object name
+		//First column: Object id
+		item_dt.clear();
+		item_dt.id = obj->getObjectId();
+		item_dt.text = QString::number(obj->getObjectId());
+		item_dt.object = obj;
+		item_dt.sz_hint = fm.boundingRect(item_dt.text).size() + QSize(h_margin_no_ico, v_margin);
+		item_data.append(item_dt);
+
+		//Second column: Object name
 		item_dt.clear();
 		item_dt.text = obj->getName();
-		item_dt.sz_hint = fm.boundingRect(item_dt.text).size() + QSize(h_margin, v_margin);
-		item_dt.icon = GuiUtilsNs::getIconPath(obj_type, sub_type);
 		item_dt.object = obj;
+		item_dt.sz_hint = fm.boundingRect(item_dt.text).size() + QSize(h_margin, v_margin);		
+		item_dt.icon = GuiUtilsNs::getIconPath(obj_type, sub_type);
 
 		if(obj->isProtected() || obj->isSystemObject())
 		{
@@ -204,19 +212,12 @@ void ObjectsListModel::fillModel(const std::vector<BaseObject*>& obj_list, const
 		item_dt.strikeout = obj->isSQLDisabled() && !obj->isSystemObject();
 		item_data.append(item_dt);
 
-		//Second column: Object type
+		//Third column: Object type
 		item_dt.clear();
 		item_dt.text = obj->getTypeName();
 		item_dt.obj_type = obj ? obj->getObjectType() : ObjectType::BaseObject;
 		item_dt.sz_hint = fm.boundingRect(item_dt.text).size() + QSize(h_margin_no_ico, v_margin);
 		item_dt.italic = true;
-		item_data.append(item_dt);
-
-		//Third column: Object id
-		item_dt.clear();
-		item_dt.id = obj->getObjectId();
-		item_dt.text = QString::number(obj->getObjectId());
-		item_dt.sz_hint = fm.boundingRect(item_dt.text).size() + QSize(h_margin_no_ico, v_margin);
 		item_data.append(item_dt);
 
 		//Fourth column: Parent object name
