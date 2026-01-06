@@ -41,7 +41,7 @@ namespace UtilsNs {
 		output.close();
 	}
 
-	QByteArray loadFile(const QString &filename)
+	QByteArray loadFile(const QString &filename, qint64 max_len)
 	{
 		QFile input;
 
@@ -58,7 +58,12 @@ namespace UtilsNs {
 		/* In order to avoid storing the contents of the file in a local variable
 		 * and returning it making two copies we just return the result of readAll().
 		 * The file descriptor will be closed in the destructor of QFile */
-		return input.readAll();
+		if(max_len <= 0)
+			// Read all contents if the max_len is not set
+			return input.readAll();
+
+		// Reading only the first max_len bytes of the file
+		return input.read(max_len);
 	}
 
 	QString convertToXmlEntities(QString value)

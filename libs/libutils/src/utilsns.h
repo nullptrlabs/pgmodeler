@@ -61,8 +61,11 @@ namespace UtilsNs {
 	extern __libutils void saveFile(const QString &filename, const QByteArray &buffer);
 
 	/*! \brief Read the contents of the file specified by its filename returning its contents.
-	 * Raises an exception in case of the file couldn,t be open */
-	extern __libutils QByteArray loadFile(const QString &filename);
+	 * Raises an exception in case of the file couldn't be open.
+	 * The optional parameter max_len can be specified and determines the maximum length of
+	 * data read from the file. If max_len is <= 0 then the function returns the entire content
+	 * of the file. */
+	extern __libutils QByteArray loadFile(const QString &filename, qint64 max_len = 0);
 
 	//! \brief Converts any chars (operators) < > " to the respective XML entities.
 	extern __libutils QString convertToXmlEntities(const QString value);
