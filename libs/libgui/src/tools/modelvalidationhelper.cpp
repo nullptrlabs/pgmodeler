@@ -56,7 +56,8 @@ void ModelValidationHelper::generateValidationInfo(ValidationInfo::ValType val_t
 		//Configures a validation info
 		ValidationInfo info = ValidationInfo(val_type, object, refs);
 
-		if(val_type == ValidationInfo::UniqueSameAsPk)
+		if(val_type == ValidationInfo::UniqueSameAsPk ||
+			 val_type == ValidationInfo::FkSetNullNotNullCol)
 			warn_count++;
 		else
 			error_count++;
@@ -343,12 +344,19 @@ void ModelValidationHelper::validateModel()
 		 * is the need to do a revalidation of all relationships */
 		checkInvalidatedRels();
 
-		/*Step 5: Checking if unique constraints on tables reference the same columns as the primary keys.
-		 * In this, pgModeler emits an alert instead of a validation error this because PostgreSQL will
-		 * ignore the unique constraint having the mentioned configuration but without warn the user.
+		/*Step 5: Checking constraint semantics. The first one is if unique constraints on tables reference
+		 * the same columns as the primary keys. In this, pgModeler emits an alert instead of a validation
+		 * error this because PostgreSQL will ignore the unique constraint having the mentioned configuration
+		 * but without warn the user.
+		 *
+		 * The second checking is to verify if foreign key constraints that have SET NULL actions references
+		 * not null columns. Despite being possible to create this (PostgreSQL don't validate the DDL semantics)
+		 * errors may be raised by the RDBMS when the foreign key constraint tries to update the columns
+		 * when a operation happens over a row.
+		 *
 		 * So this step is just here to help the user to understand why PostgreSQL doesn't create the
-		 * constraints */
-		checkUselessUqConstrs();
+		 * unique constraints or errors are raised even the foreign key is "correctly" configured */
+		checkConstraintSemantics();
 
 		if(!valid_canceled && !fix_mode)
 		{
@@ -712,11 +720,11 @@ void ModelValidationHelper::checkInvalidatedRels()
 	}
 }
 
-void ModelValidationHelper::checkUselessUqConstrs()
+void ModelValidationHelper::checkConstraintSemantics()
 {
 	PhysicalTable *table = nullptr;
 	Constraint *pk = nullptr;
-	Constraint *uq = nullptr;
+	Constraint *constr = nullptr;
 	std::vector<BaseObject *> tabs;
 
 	tabs.assign(db_model->getObjectList(ObjectType::Table)->begin(),
@@ -734,17 +742,32 @@ void ModelValidationHelper::checkUselessUqConstrs()
 		table = dynamic_cast<PhysicalTable *>(tab);
 		pk = table->getPrimaryKey();
 
-		if(!pk)
-			continue;
-
 		for(auto &tab_obj : *table->getObjectList(ObjectType::Constraint))
 		{
-			uq = dynamic_cast<Constraint *>(tab_obj);
+			constr = dynamic_cast<Constraint *>(tab_obj);
 
-			if(uq->getConstraintType() == ConstraintType::Unique &&
-				 uq->isColumnsExist(pk->getColumns(Constraint::SourceCols), Constraint::SourceCols, true))
+			if(pk &&
+				 constr->getConstraintType() == ConstraintType::Unique &&
+				 constr->isColumnsExist(pk->getColumns(Constraint::SourceCols),
+																							 Constraint::SourceCols, true))
 			{
-				generateValidationInfo(ValidationInfo::UniqueSameAsPk, uq, { pk });
+				generateValidationInfo(ValidationInfo::UniqueSameAsPk, constr, { pk });
+			}
+			else if(constr->getConstraintType() == ConstraintType::ForeignKey &&
+							(constr->getActionType(Constraint::DeleteAction) == ActionType::SetNull ||
+							 constr->getActionType(Constraint::UpdateAction) == ActionType::SetNull))
+			{
+				/* Validating if the foreign key is SET NULL on delete or update but
+				 * references columns that are not nullable. Despite this is accepted by
+				 * PostgreSQL we generate a warning */
+				for(auto &col : constr->getColumns(Constraint::SourceCols))
+				{
+					if(col->isNotNull())
+					{
+						generateValidationInfo(ValidationInfo::FkSetNullNotNullCol, constr, { col });
+						break;
+					}
+				}
 			}
 		}
 	}

@@ -39,6 +39,7 @@ class __libgui ValidationInfo {
 			BrokenRelConfig,
 			MissingExtension,
 			UniqueSameAsPk,
+			FkSetNullNotNullCol,
 			SqlValidationError,
 			ValidationAborted
 		};
