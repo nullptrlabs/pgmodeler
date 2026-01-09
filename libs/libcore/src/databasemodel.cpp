@@ -1111,7 +1111,7 @@ bool DatabaseModel::updateExtensionObjects(Extension *ext)
 														ErrorCode::AddExtDupChildObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 					}
 
-					// If the retrieved type is one of the extension's child types we just skip it
+					// If the retrieved object is one of the extension's child types we just skip it
 					continue;
 				}
 
@@ -1135,9 +1135,14 @@ bool DatabaseModel::updateExtensionObjects(Extension *ext)
 				obj->setName(ext_obj.getName());
 				obj->setSystemObject(true);
 				obj->setSQLDisabled(true);
-				obj->setDependency(ext);
 
+				/* After adding the object in the model we have to force
+				 * the extension as a dependency of that object right after.
+				 * That's because, if we call setDependency before adding the
+				 * object the method addObject will clear the current dependency
+				 * list of the object */
 				addObject(obj);
+				obj->setDependency(ext);
 
 				/* Store the object in a temporary list so, in case of error,
 				 * it will be removed in the catch section */
