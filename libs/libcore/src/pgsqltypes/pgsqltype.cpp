@@ -383,30 +383,36 @@ QString PgSqlType::getTypeName(bool incl_dimension)
 QString PgSqlType::getTypeSql()
 {
 	QString fmt_type, type, aux;
-	//unsigned idx;
 
 	type = ~(*this);
 	fmt_type = type;
 
 	//Generation the definition for the spatial types (PostGiS)
-	if(type=="geometry" || type=="geography")
+	if(type == "geometry" || type == "geography")
 		fmt_type=type + (*spatial_type);
 	else if(hasVariableLength())
 	{
 		//Configuring the precision
-		if((type=="numeric" || type=="decimal") && length >= 1 && precision>=0 && precision<=static_cast<int>(length))
-			aux=QString("%1(%2,%3)").arg(type_names[type_idx]).arg(length).arg(precision);
+		if((type == "numeric" || type == "decimal") &&
+			 length >= 1 && precision >= 0 &&
+			 precision <= static_cast<int>(length))
+			aux = QString("%1(%2,%3)").arg(type_names[type_idx]).arg(length).arg(precision);
+
 		//Configuring the length for the type
 		else if(length >= 1)
-			aux=QString("%1(%2)").arg(type_names[type_idx]).arg(length);
+		{
+			aux = QString("%1(%2)").arg(isUserType() ?
+																	getUserTypeName(type_idx) : type_names[type_idx])
+														 .arg(length);
+		}
 		else
-			aux=type;
+			aux = type;
 
 		fmt_type=aux;
 	}
-	else if(type!="numeric" && type!="decimal" && acceptsPrecision())
+	else if(type != "numeric" && type != "decimal" && acceptsPrecision())
 	{
-		if(type!="interval")
+		if(type != "interval")
 		{
 			aux = type_names[type_idx];
 
@@ -428,14 +434,10 @@ QString PgSqlType::getTypeSql()
 		}
 
 		fmt_type=aux;
-		}
-
-
-	if(type!="void" && dimension > 0)
-	{
-		//for(idx=0; idx < dimension; idx++)
-		fmt_type+=QString("[]").repeated(dimension);
 	}
+
+	if(type != "void" && dimension > 0)
+		fmt_type += QString("[]").repeated(dimension);
 
 	return fmt_type;
 }
@@ -684,10 +686,8 @@ unsigned PgSqlType::getUserTypeIndex(const QString &type_name, BaseObject* ptype
 
 QString PgSqlType::getUserTypeName(unsigned type_id)
 {
-	unsigned lim1, lim2;
-
-	lim1=PseudoEnd + 1;
-	lim2=lim1 + user_types.size();
+	unsigned lim1 = PseudoEnd + 1,
+			lim2 = lim1 + user_types.size();
 
 	if(user_types.size() > 0 &&
 			(type_id >= lim1 && type_id < lim2))
@@ -859,19 +859,26 @@ bool PgSqlType::isIntegerType()
 
 bool PgSqlType::hasVariableLength()
 {
-	QString curr_type=(!isUserType() ? type_names[this->type_idx] : "");
+	QString curr_type = (!isUserType() ? type_names[this->type_idx] : "");
 
-	return (!isUserType() &&
-					(curr_type=="numeric" || curr_type=="decimal" ||
-					 curr_type=="character varying" || curr_type=="varchar" ||
-					 curr_type=="character" || curr_type=="char" ||
-					 curr_type=="bit" || curr_type=="bit varying" ||
-					 curr_type=="varbit"));
+	/* If the current type is a user type and it handles a
+	 * common/base data type or a domain, then we make it
+	 * with variable length */
+	return ((getUserTypeConfig() == UserTypeConfig::BaseType ||
+					 getUserTypeConfig() == UserTypeConfig::DomainType)) ||
+
+					/* Otherwise, only the types below has variable length
+					 * as documented by PostgreSQL docs */
+					(curr_type == "numeric" || curr_type=="decimal" ||
+					 curr_type == "character varying" || curr_type=="varchar" ||
+					 curr_type == "character" || curr_type=="char" ||
+					 curr_type == "bit" || curr_type=="bit varying" ||
+					 curr_type == "varbit");
 }
 
 bool PgSqlType::isCharacterType()
 {
-	QString curr_type = getTypeName(false); //(!isUserType() ? type_names[this->type_idx] : "");
+	QString curr_type = getTypeName(false);
 
 	return !isUserType() &&
 				 (curr_type=="\"char\"" || curr_type=="char" ||
