@@ -864,8 +864,7 @@ bool PgSqlType::hasVariableLength()
 	/* If the current type is a user type and it handles a
 	 * common/base data type or a domain, then we make it
 	 * with variable length */
-	return ((getUserTypeConfig() == UserTypeConfig::BaseType ||
-					 getUserTypeConfig() == UserTypeConfig::DomainType)) ||
+	return (getUserTypeConfig() == UserTypeConfig::BaseType ||
 
 					/* Otherwise, only the types below has variable length
 					 * as documented by PostgreSQL docs */
@@ -873,7 +872,7 @@ bool PgSqlType::hasVariableLength()
 					 curr_type == "character varying" || curr_type=="varchar" ||
 					 curr_type == "character" || curr_type=="char" ||
 					 curr_type == "bit" || curr_type=="bit varying" ||
-					 curr_type == "varbit");
+					 curr_type == "varbit"));
 }
 
 bool PgSqlType::isCharacterType()

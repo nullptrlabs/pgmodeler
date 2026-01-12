@@ -50,11 +50,11 @@ struct __libcore UserTypeConfig {
 
 		UserTypeConfig()
 		{
-			name="";
-			ptype=nullptr;
-			pmodel=nullptr;
-			invalidated=false;
-			type_conf=BaseType;
+			name = "";
+			ptype = nullptr;
+			pmodel = nullptr;
+			invalidated = false;
+			type_conf = BaseType;
 		}
 
 	protected:
