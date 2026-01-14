@@ -45,8 +45,13 @@ void ModelExportHelper::finishExport()
 
 	/* When the export to SQL file is cancelled we
 	 * need to reset the flag cancelSaving of DatabaseModel
-	 * so next attempts of saving the file can happen normally */
-	db_model->setCancelSaving(false);
+	 * so next attempts of saving the file can happen normally.
+	 *
+	 * Here we also need to check if the database model exists because
+	 * if the export operation is happening in a diff process, the model
+	 * may not exist anymore (destroyed by the owner thread) */
+	if(db_model)
+		db_model->setCancelSaving(false);
 }
 
 void ModelExportHelper::handleSQLError(Exception &e, const QString &sql_cmd, bool ignore_dup)
