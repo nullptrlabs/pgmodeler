@@ -768,6 +768,7 @@ void DiffToolWidget::exportDiff(bool confirm)
 		process_paused = true;
 		settings_tbw->setCurrentIndex(2);
 		settings_tbw->setTabEnabled(2, true);
+		apply_on_server_btn->setEnabled(true);
 		apply_on_server_btn->setVisible(true);
 		output_trw->collapseItem(diff_item);
 		GuiUtilsNs::createOutputTreeItem(output_trw,
