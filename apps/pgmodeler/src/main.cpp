@@ -21,6 +21,11 @@
 #include <signal.h>
 #include <QSplashScreen>
 
+#ifdef PRIV_CODE_SYMBOLS
+	#warning "Testing private core code include"
+	#include "privcoreinit.h"
+#endif
+
 #ifndef Q_OS_WIN
 	#include "execinfo.h"
 #endif
@@ -114,15 +119,19 @@ int main(int argc, char **argv)
 		//Creates the main form
 		MainWindow fmain;
 
-		// Displaying the splash for one second after displaying the main window
-		QTimer::singleShot(1000, &splash, [&splash, &fmain]() {
-			fmain.show();
-			splash.finish(&fmain);
-		 });
+		#ifdef PRIV_CODE_SYMBOLS
+			__pgm_plus_init
+		#else
+			// Displaying the splash for one second after displaying the main window
+			QTimer::singleShot(1000, &splash, [&splash, &fmain]() {
+				fmain.show();
+				splash.finish(&fmain);
+			});
+		#endif
 
 		//Loading models via command line on MacOSX are disabled until the file association work correclty on that system
 		#ifndef Q_OS_MACOS
-			QStringList params=app.arguments();
+			QStringList params = app.arguments();
 			params.pop_front();
 
 			//If the user specifies a list of files to be loaded

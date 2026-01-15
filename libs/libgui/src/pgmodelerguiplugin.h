@@ -29,7 +29,7 @@
 #include "baseform.h"
 #include "pgmodelerplugin.h"
 
-#if defined(PRIVATE_PLUGINS_SYMBOLS)
+#ifdef PRIV_CODE_SYMBOLS
 	#include "privpluginsns.h"
 #endif
 

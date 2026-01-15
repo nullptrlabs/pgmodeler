@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 	pending_op = NoPendingOp;
 	window_title = tr("pgModeler %1 - PostgreSQL Database Modeler %2");
 
-	#ifdef PRIVATE_PLUGINS_SYMBOLS
+	#ifdef PRIV_CODE_SYMBOLS
 		window_title = window_title.arg("Plus", GlobalAttributes::PgModelerVersion);
 	#else
 		window_title = window_title.arg("", GlobalAttributes::PgModelerVersion);

@@ -234,7 +234,7 @@ set(FORMS
 
 set(RESOURCES res/resources.qrc)
 
-if(BUILD_PRIV_PLUGINS)
+if(BUILD_PRIV_CODE)
     list(APPEND SOURCES
         ${PRIV_PLUGINS_SRC}/privpluginsns.h
         ${PRIV_PLUGINS_SRC}/privpluginsns.cpp)
@@ -262,6 +262,8 @@ pgm_add_library(gui
     ${SOURCES}
     ${FORMS}
     ${RESOURCES})
+
+pgm_inc_priv_core_sources(${PGM_TARGET})
 
 target_link_libraries(gui PRIVATE Qt6::Core)
 

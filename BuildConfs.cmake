@@ -31,29 +31,34 @@ link_libraries(
     Qt::Svg
     Qt::Widgets)
 
-# Enable the compilation of sample plugins
-# if their sources exists in plugins/*
-set(PLUGINS_DIR plugins)
-set(PLUGINS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PLUGINS_DIR})
-
-if(EXISTS ${PLUGINS_ROOT})
-    # Enabling the plugins build
-    set(BUILD_PLUGINS ON)
-endif()
-
-# Private plugins source detection
-# If the folder when the sources are stored we configure a
+# Private plugins/core code source detection
+# If the folder where the sources are stored exist we configure a
 # set of variables and compiler defs that instruct cmake to
 # include private code and resources
 set(PRIV_PLUGINS_DIR priv-plugins)
 set(PRIV_PLUGINS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PRIV_PLUGINS_DIR})
 set(PRIV_PLUGINS_RES ${PRIV_PLUGINS_ROOT}/res)
 
+set(PRIV_CORE_DIR priv-core)
+set(PRIV_CORE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PRIV_CORE_DIR})
+set(PRIV_CORE_RES ${PRIV_CORE_ROOT}/res)
+
 if(NOT DEMO_VERSION AND PLUS_VERSION AND EXISTS ${PRIV_PLUGINS_ROOT})
-    # Enabling the private plugins build
-    set(BUILD_PRIV_PLUGINS ON)
+		# Enabling the private plugins/core code build
+		set(BUILD_PRIV_CODE ON)
+		set(PRIV_CORE_SRC ${PRIV_CORE_ROOT}/src)
     set(PRIV_PLUGINS_SRC ${PRIV_PLUGINS_ROOT}/src)
-    add_compile_definitions(PRIVATE_PLUGINS_SYMBOLS)
+		add_compile_definitions(PRIV_CODE_SYMBOLS)
+endif()
+
+# Enable the compilation of sample plugins
+# if their sources exists in plugins/*
+set(PLUGINS_DIR plugins)
+set(PLUGINS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PLUGINS_DIR})
+
+if(EXISTS ${PLUGINS_ROOT} AND NOT BUILD_PRIV_CODE)
+		# Enabling the plugins build
+		set(BUILD_PLUGINS ON)
 endif()
 
 # Adding custom C defs if some cmake variables are set
@@ -95,7 +100,7 @@ function(pgm_add_executable TARGET)
   if(WIN32)
     set(PRIV_ICO_RES ${PRIV_PLUGINS_RES}/${TARGET}/windows_ico.rc)
 
-    if((PLUS_VERSION OR BUILD_PRIV_PLUGINS) AND EXISTS ${PRIV_ICO_RES})
+		if((PLUS_VERSION OR BUILD_PRIV_CODE) AND EXISTS ${PRIV_ICO_RES})
       set(EXEC_ICO_RES ${PRIV_ICO_RES})
     else()
       set(EXEC_ICO_RES res/windows_ico.rc)
@@ -181,4 +186,27 @@ function(pgm_install_executable TARGET IS_PRIVBIN)
     install(TARGETS ${TARGET}
 				BUNDLE DESTINATION ${DEST}
         RUNTIME DESTINATION ${DEST})
+endfunction()
+
+# This function includes priv-core sources into the current target.
+# It automatically appends source files, forms, and resources to the
+# caller's SOURCES, FORMS, and RESOURCES lists (if they exist).
+# It also adds the necessary include directories to the current target.
+function(pgm_inc_priv_core_sources TARGET)
+	if(NOT BUILD_PRIV_CODE)
+		return()
+	endif()
+
+	# Add include directories to the current target (PGM_TARGET must be set)
+	if(DEFINED TARGET)
+		target_sources(${TARGET} PRIVATE ${PRIV_CORE_SOURCES} ${PRIV_CORE_FORMS})
+		target_include_directories(${TARGET} PRIVATE ${PRIV_CORE_INC})
+		
+		# Enable AUTOUIC for this target if there are UI forms
+		if(PRIV_CORE_FORMS)
+			set_target_properties(${TARGET} PROPERTIES AUTOUIC ON)
+			# Set the search path for .ui files
+			set_property(TARGET ${TARGET} APPEND PROPERTY AUTOUIC_SEARCH_PATHS ${PRIV_CORE_ROOT}/ui)
+		endif()
+	endif()
 endfunction()

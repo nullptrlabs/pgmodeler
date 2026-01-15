@@ -31,7 +31,7 @@ link_libraries(
     parsers
     utils)
 
-if(BUILD_PRIV_PLUGINS)
+if(BUILD_PRIV_CODE)
     set(PRIV_GUI_SOURCES
         ${PRIV_PLUGINS_SRC}/pluginwidget.h
         ${PRIV_PLUGINS_SRC}/privateguiplugin.cpp
@@ -67,6 +67,7 @@ endfunction()
 # parent scope that registers the name of the plugin
 function(pgm_add_gui_plugin TARGET IS_PRIV_PLUGIN)
     pgm_add_plugin(${TARGET} ${IS_PRIV_PLUGIN} OFF)
+		pgm_inc_priv_core_sources(${TARGET})
     set(PGM_TARGET ${PGM_TARGET} PARENT_SCOPE)
 endfunction()
 

@@ -469,7 +469,7 @@ void PgModelerCliApp::showVersionInfo(bool only_ver_num)
 	}
 
 	printMessage(tr("pgModeler %1 command line interface.").arg(
-							 #ifdef PRIVATE_PLUGINS_SYMBOLS
+							 #ifdef PRIV_CODE_SYMBOLS
 								"Plus"
 							#else
 								 ""
