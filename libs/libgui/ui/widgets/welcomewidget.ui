@@ -128,9 +128,6 @@
           <property name="text">
            <string/>
           </property>
-          <property name="pixmap">
-           <pixmap resource="../../res/resources.qrc">:/images/images/nullptrlabs_dark.png</pixmap>
-          </property>
           <property name="scaledContents">
            <bool>true</bool>
           </property>

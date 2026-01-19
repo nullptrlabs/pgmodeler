@@ -836,6 +836,7 @@ void DatabaseModel::destroyObjects()
 	while(ritr != ritr_end)
 	{
 		object = ritr->second;
+		object->clearAllDepsRefs();
 		ritr++;
 
 		// We ignore the database itself, permission objects (destroyed separetely) and table children objects
