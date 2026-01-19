@@ -18,12 +18,9 @@
 
 #include "pgmodelerapp.h"
 #include "mainwindow.h"
+#include "privcodemacros.h"
 #include <signal.h>
 #include <QSplashScreen>
-
-#ifdef PRIV_CODE_SYMBOLS
-	#include "privcoreclasses.h"
-#endif
 
 #ifndef Q_OS_WIN
 	#include "execinfo.h"

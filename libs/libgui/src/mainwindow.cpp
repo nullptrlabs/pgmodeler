@@ -26,10 +26,6 @@
 #include <QMimeData>
 #include <QDesktopServices>
 
-#ifdef PRIV_CODE_SYMBOLS
-	#include "privcoreclasses.h"
-#endif
-
 int MainWindow::ToolsActionsCount {0};
 bool MainWindow::confirm_validation {true};
 QList<QAction *> MainWindow::view_actions {};

@@ -25,9 +25,7 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-#ifdef PRIV_CODE_SYMBOLS
-	#include "privcoreinit.h"
-#endif
+#include "privcodemacros.h"
 
 #include <QMainWindow>
 #include <QPrintDialog>
