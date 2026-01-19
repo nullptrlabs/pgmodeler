@@ -26,9 +26,15 @@
 #include <QMimeData>
 #include <QDesktopServices>
 
+#ifdef PRIV_CODE_SYMBOLS
+	#include "privcoreclasses.h"
+#endif
+
 int MainWindow::ToolsActionsCount {0};
 bool MainWindow::confirm_validation {true};
 QList<QAction *> MainWindow::view_actions {};
+
+__pgm_plus_mwnd_sw_impl
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {	
@@ -2470,6 +2476,8 @@ void MainWindow::changeCurrentView(bool checked)
 		action_print->setEnabled(enable);
 		action_close_model->setEnabled(enable);
 		action_save_as->setEnabled(enable);
+		about_wgt->hide();
+		donate_wgt->hide();
 
 		QList<ModelWidget *> models = model_nav_wgt->getModelWidgets();
 

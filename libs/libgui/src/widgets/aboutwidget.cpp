@@ -19,6 +19,7 @@
 #include "aboutwidget.h"
 #include "guiutilsns.h"
 #include "baseobjectview.h"
+#include <QDesktopServices>
 
 AboutWidget::AboutWidget(QWidget *parent) : QWidget(parent)
 {
@@ -26,6 +27,8 @@ AboutWidget::AboutWidget(QWidget *parent) : QWidget(parent)
 
 	GuiUtilsNs::createDropShadow(this, 5, 5, 30);
 	GuiUtilsNs::configureWidgetsFont({ pgmodeler_ver_lbl, build_num_lbl }, GuiUtilsNs::BigFontFactor);
+
+	nullptrlabs_lbl->installEventFilter(this);
 
 	pgmodeler_ver_lbl->setText(QString("v%1 ").arg(GlobalAttributes::PgModelerVersion));
 	build_num_lbl->setText(QString("%1 Qt %2").arg(GlobalAttributes::PgModelerBuildNumber).arg(QT_VERSION_STR));
@@ -39,4 +42,12 @@ AboutWidget::AboutWidget(QWidget *parent) : QWidget(parent)
 	double factor = BaseObjectView::getScreenDpiFactor();
 	this->adjustSize();
 	this->resize(this->minimumWidth() * factor, this->minimumHeight() * factor);
+}
+
+bool AboutWidget::eventFilter(QObject *object, QEvent *event)
+{
+	if(object == nullptrlabs_lbl && event->type() == QEvent::MouseButtonPress)
+		QDesktopServices::openUrl(GlobalAttributes::NullptrLabsSite);
+
+	return QWidget::eventFilter(object, event);
 }

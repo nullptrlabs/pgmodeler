@@ -80,7 +80,10 @@
        <number>0</number>
       </property>
       <item row="0" column="0">
-       <layout class="QGridLayout" name="buttons_lt">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>5</number>
+        </property>
         <property name="leftMargin">
          <number>5</number>
         </property>
@@ -93,10 +96,7 @@
         <property name="bottomMargin">
          <number>5</number>
         </property>
-        <property name="spacing">
-         <number>5</number>
-        </property>
-        <item row="0" column="0">
+        <item>
          <widget class="QLabel" name="pgmodeler_name_lbl">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -133,7 +133,20 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <widget class="QPushButton" name="apply_ok_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -174,7 +187,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="3">
+        <item>
          <widget class="QPushButton" name="cancel_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -214,19 +227,6 @@
            <bool>false</bool>
           </property>
          </widget>
-        </item>
-        <item row="0" column="1">
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </item>

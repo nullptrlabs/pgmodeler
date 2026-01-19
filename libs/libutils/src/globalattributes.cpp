@@ -55,6 +55,8 @@ const QString GlobalAttributes::PgModelerDownloadURL { PgModelerSite + "/downloa
 const QString GlobalAttributes::PgModelerDonateURL { PgModelerSite + "/#donationForm" };
 const QString GlobalAttributes::PgModelerUpdateCheckURL { PgModelerSite + "/checkupdate?version=%1&mode=%2" };
 
+const QString GlobalAttributes::NullptrLabsSite { "https://nullptrlabs.io" };
+
 const QString GlobalAttributes::EnvSchemasPath {"PGMODELER_SCHEMAS_PATH"};
 const QString GlobalAttributes::EnvConfPath {"PGMODELER_CONF_PATH"};
 const QString GlobalAttributes::EnvTmplConfPath {"PGMODELER_TMPL_CONF_PATH"};

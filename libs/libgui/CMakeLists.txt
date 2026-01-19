@@ -263,7 +263,7 @@ pgm_add_library(gui
     ${FORMS}
     ${RESOURCES})
 
-pgm_inc_priv_core_sources(${PGM_TARGET})
+pgm_inc_priv_core_sources(${PGM_TARGET} ON)
 
 target_link_libraries(gui PRIVATE Qt6::Core)
 

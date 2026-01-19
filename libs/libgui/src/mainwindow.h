@@ -25,6 +25,10 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
+#ifdef PRIV_CODE_SYMBOLS
+	#include "privcoreinit.h"
+#endif
+
 #include <QMainWindow>
 #include <QPrintDialog>
 #include "ui_mainwindow.h"
@@ -52,6 +56,8 @@
 
 class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 	Q_OBJECT
+
+	__pgm_plus_mwnd_sw_decl
 
 	public:
 		enum MWViewsId {

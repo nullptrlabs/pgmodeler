@@ -67,7 +67,7 @@ endfunction()
 # parent scope that registers the name of the plugin
 function(pgm_add_gui_plugin TARGET IS_PRIV_PLUGIN)
     pgm_add_plugin(${TARGET} ${IS_PRIV_PLUGIN} OFF)
-		pgm_inc_priv_core_sources(${TARGET})
+		pgm_inc_priv_core_sources(${TARGET} OFF)
     set(PGM_TARGET ${PGM_TARGET} PARENT_SCOPE)
 endfunction()
 

@@ -304,5 +304,7 @@
         <file>images/conn_fktopk.png</file>
         <file>images/conn_tabcenter.png</file>
         <file>images/conn_tabedges.png</file>
+        <file>images/nullptrlabs_dark.png</file>
+        <file>images/nullptrlabs_light.png</file>
     </qresource>
 </RCC>

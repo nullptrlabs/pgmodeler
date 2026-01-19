@@ -30,6 +30,9 @@
 class __libgui WelcomeWidget: public QWidget, public Ui::WelcomeWidget {
 	Q_OBJECT
 
+	protected:
+		bool eventFilter(QObject *object, QEvent *event) override;
+
 	public:
 		WelcomeWidget(QWidget * parent = nullptr);
 		

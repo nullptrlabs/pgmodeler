@@ -151,6 +151,8 @@ class __libutils GlobalAttributes {
 		PgModelerDonateURL,
 		PgModelerUpdateCheckURL,
 
+		NullptrLabsSite,
+
 		EnvSchemasPath,
 		EnvConfPath,
 		EnvTmplConfPath,

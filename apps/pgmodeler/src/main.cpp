@@ -22,8 +22,7 @@
 #include <QSplashScreen>
 
 #ifdef PRIV_CODE_SYMBOLS
-	#warning "Testing private core code include"
-	#include "privcoreinit.h"
+	#include "privcoreclasses.h"
 #endif
 
 #ifndef Q_OS_WIN
@@ -118,16 +117,10 @@ int main(int argc, char **argv)
 
 		//Creates the main form
 		MainWindow fmain;
+		__pgm_plus_gui_init
 
-		#ifdef PRIV_CODE_SYMBOLS
-			__pgm_plus_init
-		#else
-			// Displaying the splash for one second after displaying the main window
-			QTimer::singleShot(1000, &splash, [&splash, &fmain]() {
-				fmain.show();
-				splash.finish(&fmain);
-			});
-		#endif
+		fmain.show();
+		splash.finish(&fmain);
 
 		//Loading models via command line on MacOSX are disabled until the file association work correclty on that system
 		#ifndef Q_OS_MACOS

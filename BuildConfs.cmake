@@ -66,6 +66,12 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
     add_compile_definitions(PGMODELER_DEBUG)
 endif()
 
+# AddressSanitizer option (can be enabled with -DUSE_ADDR_SANITIZER=ON)
+if(USE_ADDR_SANITIZER)
+	add_compile_options(-fsanitize=address -fno-omit-frame-pointer -g)
+	add_link_options(-fsanitize=address)
+endif()
+
 if(NOT DEFINED NO_CHECK_CURR_VER)
     add_compile_definitions(CHECK_CURR_VER)
 endif()
@@ -192,21 +198,29 @@ endfunction()
 # It automatically appends source files, forms, and resources to the
 # caller's SOURCES, FORMS, and RESOURCES lists (if they exist).
 # It also adds the necessary include directories to the current target.
-function(pgm_inc_priv_core_sources TARGET)
+# Parameters:
+#   TARGET - The target to add sources/includes to
+#   INCLUDE_SOURCES - If ON, adds sources and UI forms (needed by libgui)
+#                     If OFF, adds only include directories (executables/plugins)
+function(pgm_inc_priv_core_sources TARGET INCLUDE_SOURCES)
 	if(NOT BUILD_PRIV_CODE)
 		return()
 	endif()
 
 	# Add include directories to the current target (PGM_TARGET must be set)
 	if(DEFINED TARGET)
-		target_sources(${TARGET} PRIVATE ${PRIV_CORE_SOURCES} ${PRIV_CORE_FORMS})
 		target_include_directories(${TARGET} PRIVATE ${PRIV_CORE_INC})
 		
-		# Enable AUTOUIC for this target if there are UI forms
-		if(PRIV_CORE_FORMS)
-			set_target_properties(${TARGET} PROPERTIES AUTOUIC ON)
-			# Set the search path for .ui files
-			set_property(TARGET ${TARGET} APPEND PROPERTY AUTOUIC_SEARCH_PATHS ${PRIV_CORE_ROOT}/ui)
+		# Only add sources if INCLUDE_SOURCES is ON (to avoid ODR violation)
+		if(INCLUDE_SOURCES)
+			target_sources(${TARGET} PRIVATE ${PRIV_CORE_SOURCES} ${PRIV_CORE_FORMS})
+			
+			# Enable AUTOUIC for this target if there are UI forms
+			if(PRIV_CORE_FORMS)
+				set_target_properties(${TARGET} PROPERTIES AUTOUIC ON)
+				# Set the search path for .ui files
+				set_property(TARGET ${TARGET} APPEND PROPERTY AUTOUIC_SEARCH_PATHS ${PRIV_CORE_ROOT}/ui)
+			endif()
 		endif()
 	endif()
 endfunction()
