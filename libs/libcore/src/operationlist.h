@@ -94,7 +94,7 @@ class __libcore OperationList: public QObject {
 		unsigned getChainSize();
 
 	public:
-		OperationList(DatabaseModel *model);
+		OperationList(DatabaseModel *model, QObject *parent = nullptr);
 
 		~OperationList() override;
 

@@ -161,8 +161,9 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 
 	db_model = new DatabaseModel(this);
 	xmlparser = db_model->getXMLParser();
-	op_list = new OperationList(db_model);
-	scene = new ObjectsScene;
+	op_list = new OperationList(db_model, this);
+
+	scene = new ObjectsScene(this);
 	scene->installEventFilter(this);
 
 	viewport = new QGraphicsView(scene, this);
@@ -703,6 +704,10 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 
 ModelWidget::~ModelWidget()
 {
+	/* Forcing the deletion of db_model only after everything else was destroyed
+	 * to avoid memory leaks */
+	db_model->deleteLater();
+
 	/* If there are copied/cutted objects that belongs to the database model
 	 being destroyed, then the cut/copy operation are cancelled by emptying
 	 the lists, avoiding crashes when trying to paste them */
@@ -721,8 +726,6 @@ ModelWidget::~ModelWidget()
 	owners_menu.clear();
 	tags_menu.clear();
 	break_rel_menu.clear();
-
-	delete scene;
 }
 
 void ModelWidget::setModified(bool value)

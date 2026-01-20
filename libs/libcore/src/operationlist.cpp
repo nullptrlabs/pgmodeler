@@ -21,7 +21,7 @@
 
 unsigned OperationList::max_size {500};
 
-OperationList::OperationList(DatabaseModel *model)
+OperationList::OperationList(DatabaseModel *model, QObject *parent) : QObject(parent)
 {
 	/* Raises an error if the user tries to allocate an operation list linked to
 		to an unallocated model */

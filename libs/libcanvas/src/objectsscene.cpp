@@ -55,7 +55,7 @@ double ObjectsScene::delimiter_scale {1};
 double ObjectsScene::min_scene_width { page_layout.paintRect().width() };
 double ObjectsScene::min_scene_height { page_layout.paintRect().height() };
 
-ObjectsScene::ObjectsScene()
+ObjectsScene::ObjectsScene(QObject *parent) : QGraphicsScene(parent)
 {		
 	is_layer_rects_visible=is_layer_names_visible=false;
 	moving_objs=move_scene=false;

@@ -232,7 +232,7 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		static constexpr unsigned DefaultLayer = 0;
 
-		ObjectsScene();
+		ObjectsScene(QObject *parent = nullptr);
 
 		~ObjectsScene() override;
 
