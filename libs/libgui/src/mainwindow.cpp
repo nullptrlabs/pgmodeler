@@ -30,8 +30,6 @@ int MainWindow::ToolsActionsCount {0};
 bool MainWindow::confirm_validation {true};
 QList<QAction *> MainWindow::view_actions {};
 
-__pgm_plus_mwnd_sw_impl
-
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {	
 	setupUi(this);
@@ -72,7 +70,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 	connectSignalsToSlots();
 	showRightWidgetsBar();
 	showBottomWidgetsBar();
-	//updateConnections();
 	updateRecentModelsMenu();
 	configureSamplesMenu();
 	applyConfigurations();
@@ -108,36 +105,10 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 	//Positioning the update notifier widget before showing it (if there is an update)
 	setFloatingWidgetPos(update_notifier_wgt, action_update_found, model_acts_tb, false);
 	action_update_found->setVisible(false);
-	QTimer::singleShot(1000, this, &MainWindow::restoreTemporaryModels);
 
 	//If there's no previuos geometry registered for the mainwindow display it maximized
 	if(!GeneralConfigWidget::restoreWidgetGeometry(this))
 		this->setWindowState(Qt::WindowMaximized);
-
-	#ifdef NO_UPDATE_CHECK
-		#warning "NO UPDATE CHECK: Update checking is disabled."
-	#else
-		//Enabling update check at startup
-		if(confs[Attributes::Configuration][Attributes::CheckUpdate]==Attributes::True)
-		{
-			update_notifier_wgt->setCheckVersions(confs[Attributes::Configuration][Attributes::CheckVersions]);
-			QTimer::singleShot(15000, update_notifier_wgt, &UpdateNotifierWidget::checkForUpdate);
-		}
-	#endif
-
-	#ifdef DEMO_VERSION
-		#warning "DEMO VERSION: demonstration version startup alert."
-		QTimer::singleShot(2000, this, [this](){
-			showDemoVersionWarning();
-		});
-	#endif
-
-	#ifdef CHECK_CURR_VER
-		//Showing the donate widget in the first run or if the version registered in the file diverges from the current
-		if(confs[Attributes::Configuration][Attributes::FirstRun] != Attributes::False ||
-			 confs[Attributes::Configuration][Attributes::PgModelerVersion] != GlobalAttributes::PgModelerVersion)
-			QTimer::singleShot(1000, action_donate, &QAction::trigger);
-	#endif
 
 	// Post initilize plug-ins	
 	PluginsConfigWidget *plugins_conf_wgt = configuration_wgt->getConfigurationWidget<PluginsConfigWidget>();
@@ -213,7 +184,7 @@ void MainWindow::handleImportFinished(bool aborted_by_error)
 	else if(current_model)
 		updateDockWidgets();
 
-	stopTimers(false);
+	stopSaveTimers(false);
 	action_design->setChecked(!aborted_by_error);
 }
 
@@ -696,7 +667,7 @@ void MainWindow::connectSignalsToSlots()
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, model_objs_wgt, &ModelObjectsWidget::setDisabled);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, obj_finder_wgt, &ObjectSearchWidget::setDisabled);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, models_tbw, &QTabWidget::setDisabled);
-	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, this, &MainWindow::stopTimers);
+	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, this, &MainWindow::stopSaveTimers);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, layers_btn, &QToolButton::setDisabled);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, layers_cfg_wgt, &LayersConfigWidget::close);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, changelog_btn, &QToolButton::setDisabled);
@@ -731,7 +702,7 @@ void MainWindow::connectSignalsToSlots()
 	});
 
 	connect(db_import_wgt, &DatabaseImportWidget::s_importStarted, this, [this](){
-		stopTimers(true);
+		stopSaveTimers(true);
 	});
 
 	connect(db_import_wgt, &DatabaseImportWidget::s_importFinished, this, &MainWindow::handleImportFinished);
@@ -741,19 +712,19 @@ void MainWindow::connectSignalsToSlots()
 	});
 
 	connect(diff_tool_wgt, &DiffToolWidget::s_diffStarted, this, [this](){
-		stopTimers(true);
+		stopSaveTimers(true);
 	});
 
 	connect(diff_tool_wgt, &DiffToolWidget::s_diffCanceled, this, [this](){
-		stopTimers(false);
+		stopSaveTimers(false);
 	});
 
 	connect(model_export_wgt, &ModelExportWidget::s_exportStarted, this, [this](){
-		stopTimers(true);
+		stopSaveTimers(true);
 	});
 
 	connect(model_export_wgt, &ModelExportWidget::s_exportFinished, this, [this](){
-		stopTimers(false);
+		stopSaveTimers(false);
 	});
 
 	connect(diff_tool_wgt, &DiffToolWidget::s_loadDiffInSQLTool, this, &MainWindow::loadDiffInSQLTool);
@@ -902,7 +873,7 @@ void MainWindow::restoreLastSession()
 	}
 }
 
-void MainWindow::stopTimers(bool value)
+void MainWindow::stopSaveTimers(bool value)
 {
 	if(value)
 	{
@@ -916,6 +887,44 @@ void MainWindow::stopTimers(bool value)
 		if(model_save_timer.interval() < InfinityInterval)
 			model_save_timer.start();
 	}
+}
+
+void MainWindow::startOtherTimers()
+{
+	static bool started = false;
+
+	if(started)
+		return;
+
+	std::map<QString, attribs_map >confs = GeneralConfigWidget::getConfigurationParams();
+
+	started = true;
+	QTimer::singleShot(1000, this, &MainWindow::restoreTemporaryModels);
+
+	#ifdef NO_UPDATE_CHECK
+		#warning "NO UPDATE CHECK: Update checking is disabled."
+	#else
+		//Enabling update check at startup
+		if(confs[Attributes::Configuration][Attributes::CheckUpdate]==Attributes::True)
+		{
+			update_notifier_wgt->setCheckVersions(confs[Attributes::Configuration][Attributes::CheckVersions]);
+			QTimer::singleShot(15000, update_notifier_wgt, &UpdateNotifierWidget::checkForUpdate);
+		}
+	#endif
+
+	#ifdef DEMO_VERSION
+		#warning "DEMO VERSION: demonstration version startup alert."
+		QTimer::singleShot(2000, this, [this](){
+			showDemoVersionWarning();
+		});
+	#endif
+
+	#ifdef CHECK_CURR_VER
+		//Showing the donate widget in the first run or if the version registered in the file diverges from the current
+		if(confs[Attributes::Configuration][Attributes::FirstRun] != Attributes::False ||
+			 confs[Attributes::Configuration][Attributes::PgModelerVersion] != GlobalAttributes::PgModelerVersion)
+			QTimer::singleShot(1000, action_donate, &QAction::trigger);
+	#endif
 }
 
 void MainWindow::resizeEvent(QResizeEvent *)
@@ -932,6 +941,16 @@ void MainWindow::resizeEvent(QResizeEvent *)
 
 	toggleLayersWidget(layers_cfg_wgt->isVisible());
 	toggleChangelogWidget(changelog_wgt->isVisible());
+}
+
+void MainWindow::showEvent(QShowEvent *event)
+{
+	#ifdef PRIV_CODE_SYMBOLS
+		__pgm_plus_mwnd_impl;
+	#else
+		if(!event->spontaneous())
+			startOtherTimers();
+	#endif
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -1854,7 +1873,7 @@ void MainWindow::saveModel(ModelWidget *model)
 				}
 			}
 
-			stopTimers(true);
+			stopSaveTimers(true);
 
 			if((!confirm_validation ||
 					(!db_model->isInvalidated() ||
@@ -1909,13 +1928,13 @@ void MainWindow::saveModel(ModelWidget *model)
 				emit s_modelSaved(model);
 			}
 
-			stopTimers(false);
+			stopSaveTimers(false);
 			action_save_model->setEnabled(model->isModified());
 		}
 	}
 	catch(Exception &e)
 	{
-		stopTimers(false);
+		stopSaveTimers(false);
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 #endif

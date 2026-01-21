@@ -145,6 +145,12 @@ int Messagebox::show(const QString &msg, MessageType icon_type, ButtonsId button
 	return show("", msg,  icon_type, buttons);
 }
 
+void Messagebox::error(const QString &title, const QString &msg)
+{
+	Messagebox msgbox;
+	msgbox.show(title, msg, Error);
+}
+
 void Messagebox::error(const QString &msg)
 {
 	Messagebox msgbox;

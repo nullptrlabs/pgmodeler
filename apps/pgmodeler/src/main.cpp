@@ -18,9 +18,13 @@
 
 #include "pgmodelerapp.h"
 #include "mainwindow.h"
-#include "privcodemacros.h"
 #include <signal.h>
 #include <QSplashScreen>
+
+#ifdef PRIV_CODE_SYMBOLS
+	#include "privcoreinit.h"
+	#include "privcoreclasses.h"
+#endif
 
 #ifndef Q_OS_WIN
 	#include "execinfo.h"
@@ -114,7 +118,10 @@ int main(int argc, char **argv)
 
 		//Creates the main form
 		MainWindow fmain;
-		__pgm_plus_gui_init
+
+		#ifdef PRIV_CODE_SYMBOLS
+			__pgm_plus_gui_init
+		#endif
 
 		fmain.show();
 		splash.finish(&fmain);

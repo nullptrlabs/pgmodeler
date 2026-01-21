@@ -80,6 +80,7 @@ class __libgui Messagebox: public QDialog, public Ui::Messagebox {
 		//! \brief Shows a simple message box with the title automatically defined by the icon type
 		int show(const QString &msg, MessageType icon_type=None, ButtonsId buttons=OkButton);
 
+
 		/*! \brief Shows an error message box in which can an error code and exact local of the code is specified.
 		 *  Additionally, a reference to a captured exception can be specified and will be used to fill up the stack trace.
 		 * Also, it uses an error icon and only OK button */
@@ -101,6 +102,9 @@ class __libgui Messagebox: public QDialog, public Ui::Messagebox {
 
 		//! \brief Shows an error message box with the provided message, an error icon and only OK button
 		static void error(const QString &msg);
+
+		//! \brief Shows an error message box with the provided title and message, an error icon and only OK button
+		static void error(const QString &title, const QString &msg);
 
 		/*! \brief Shows an alert message box with the provided message, an alert icon and only OK button
 		 *  If an exception is provided, the stacktrace will also be enabled */

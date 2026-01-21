@@ -25,7 +25,10 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-#include "privcodemacros.h"
+#ifdef PRIV_CODE_SYMBOLS
+	#include "privcoreinit.h"
+	#include "privcoreclasses.h"
+#endif
 
 #include <QMainWindow>
 #include <QPrintDialog>
@@ -54,8 +57,6 @@
 
 class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 	Q_OBJECT
-
-	__pgm_plus_mwnd_sw_decl
 
 	public:
 		enum MWViewsId {
@@ -201,6 +202,8 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		void resizeEvent(QResizeEvent *) override;
 
+		void showEvent(QShowEvent *) override;
+
 		//! \brief Set the postion of a floating widget based upon an action at a tool bar
 		void setFloatingWidgetPos(QWidget *widget, QAction *act, QToolBar *toolbar, bool map_to_window);
 
@@ -262,6 +265,11 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		//! \brief Returns the current working database model widget
 		ModelWidget *getCurrentModel();
+
+		/*! \brief Start the timers related to update check, model restoration and others
+		 *  This method works only on its first call. Any attempt to call it again will
+		 *  do nothing. The timers will be already running */
+		void startOtherTimers();
 
 	public slots:
 		/*! \brief Creates a new empty model inside the main window. If the parameter 'filename' is specified,
@@ -376,7 +384,7 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		/*! \brief Stop the saving timers. This is used when validating the model
 		in order to avoid the saving while the validation is working */
-		void stopTimers(bool value);
+		void stopSaveTimers(bool value);
 
 		//! \brief Executes one of the pending operations (save, export, diff) after validate the model
 		void executePendingOperation(bool valid_error);
