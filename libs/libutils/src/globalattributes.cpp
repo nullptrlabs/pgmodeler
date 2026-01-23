@@ -49,9 +49,13 @@ const QString GlobalAttributes::PgModelerOldAppName {"pgmodeler-1.2"};
 const QString GlobalAttributes::PgModelerURI {"pgmodeler.io"};
 const QString GlobalAttributes::PgModelerBuildNumber { QString("%1.%2").arg(BUILDDATE).arg(BUILDNUM) };
 
-#warning "Testing..."
-// const QString GlobalAttributes::PgModelerSite {"https://pgmodeler.io" };
-const QString GlobalAttributes::PgModelerSite {"http://localhost:8000" };
+const QString GlobalAttributes::PgModelerSite {
+#ifdef PGMODELER_DEBUG
+	 "http://localhost:8000"
+#else
+	"https://pgmodeler.io"
+#endif
+};
 
 const QString GlobalAttributes::PgModelerSupport { PgModelerSite + "/support/docs" };
 const QString GlobalAttributes::PgModelerSourceURL { "https://github.com/pgmodeler/pgmodeler/releases" };
