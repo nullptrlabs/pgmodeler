@@ -362,7 +362,7 @@ void ObjectSearchWidget::showObjectMenu()
 
 void ObjectSearchWidget::editObject()
 {
-	if(selected_obj)
+	if(selected_obj && model_wgt->isInteractive())
 	{
 		if(selected_obj->getObjectType() == ObjectType::Permission)
 			model_wgt->showObjectForm(ObjectType::Permission, dynamic_cast<Permission *>(selected_obj)->getObject());

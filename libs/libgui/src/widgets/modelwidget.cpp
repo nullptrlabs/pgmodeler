@@ -1282,7 +1282,7 @@ void ModelWidget::emitSceneInteracted()
 void ModelWidget::setProtected(bool protect)
 {
 	QLabel *msg_lbl = protected_model_frm->findChild<QLabel *>("message_lbl");
-	msg_lbl->setText(tr("<strong>ATTENTION:</strong> The database model is protected. Modifications are disabled!"));
+	msg_lbl->setText(tr("The database model is protected. Modifications are disabled!"));
 
 	protected_model_frm->setVisible(protect);
 	db_model->setProtected(protect);
@@ -1291,7 +1291,7 @@ void ModelWidget::setProtected(bool protect)
 void ModelWidget::setInteractive(bool interact)
 {
 	QLabel *msg_lbl = protected_model_frm->findChild<QLabel *>("message_lbl");
-	msg_lbl->setText(tr("<strong>ATTENTION:</strong> The database model is being accessed by another operation (diff or import). Modifications are temporarily disabled until the operation finishes!"));
+	msg_lbl->setText(tr("The interaction over the database model is blocked. Modifications are temporarily disabled until the blocking operation finishes!"));
 
 	protected_model_frm->setVisible(!interact);
 	viewport->setInteractive(interact);

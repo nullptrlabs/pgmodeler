@@ -351,18 +351,7 @@ void MainWindow::configureMenusActionsWidgets()
 		 * be uniquely identified when handling styles via Qt Stylesheets */
 		btn->setObjectName(act->objectName() + "_tb");
 		btn->setProperty("view_btn", true);
-		//GuiUtilsNs::createDropShadow(btn, 1, 1, 5);
 	}
-
-	/* for(auto &act : model_acts_tb->actions())
-	{
-		btn = qobject_cast<QToolButton *>(model_acts_tb->widgetForAction(act));
-
-		if(!btn)
-			continue;
-
-		GuiUtilsNs::createDropShadow(btn, 1, 1, 5);
-	} */
 
 	ToolsActionsCount = tools_acts_tb->actions().size();
 	QList<QAction *> actions = model_acts_tb->actions();

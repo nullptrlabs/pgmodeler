@@ -41,7 +41,6 @@ set(PRIV_PLUGINS_RES ${PRIV_PLUGINS_ROOT}/res)
 
 set(PRIV_CORE_DIR priv-core)
 set(PRIV_CORE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PRIV_CORE_DIR})
-set(PRIV_CORE_RES ${PRIV_CORE_ROOT}/res)
 
 if(NOT DEMO_VERSION AND PLUS_VERSION AND EXISTS ${PRIV_PLUGINS_ROOT})
 		# Enabling the private plugins/core code build
@@ -213,13 +212,18 @@ function(pgm_inc_priv_core_sources TARGET INCLUDE_SOURCES)
 		
 		# Only add sources if INCLUDE_SOURCES is ON (to avoid ODR violation)
 		if(INCLUDE_SOURCES)
-			target_sources(${TARGET} PRIVATE ${PRIV_CORE_SOURCES} ${PRIV_CORE_FORMS})
+			target_sources(${TARGET} PRIVATE ${PRIV_CORE_SOURCES} ${PRIV_CORE_FORMS} ${PRIV_CORE_RESOURCES})
 			
 			# Enable AUTOUIC for this target if there are UI forms
 			if(PRIV_CORE_FORMS)
 				set_target_properties(${TARGET} PROPERTIES AUTOUIC ON)
 				# Set the search path for .ui files
 				set_property(TARGET ${TARGET} APPEND PROPERTY AUTOUIC_SEARCH_PATHS ${PRIV_CORE_ROOT}/ui)
+			endif()
+			
+			# Enable AUTORCC for this target if there are QRC resources
+			if(PRIV_CORE_RESOURCES)
+				set_target_properties(${TARGET} PROPERTIES AUTORCC ON)
 			endif()
 		endif()
 	endif()

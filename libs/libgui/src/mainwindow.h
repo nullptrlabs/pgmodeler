@@ -204,9 +204,6 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		void showEvent(QShowEvent *) override;
 
-		//! \brief Set the postion of a floating widget based upon an action at a tool bar
-		void setFloatingWidgetPos(QWidget *widget, QAction *act, QToolBar *toolbar, bool map_to_window);
-
 		void setBottomFloatingWidgetPos(QWidget *widget, QAbstractButton *btn);
 
 		void configureSamplesMenu();
@@ -318,6 +315,9 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		//! \brief Shows a error dialog informing that the model demands a fix after the error ocurred when loading the filename.
 		void showFixMessage(Exception &e, const QString &filename);
 
+		//! \brief Set the postion of a floating widget based upon an action at a tool bar
+		void setFloatingWidgetPos(QWidget *widget, QAction *act, QToolBar *toolbar, bool map_to_window);
+
 	private slots:
 		void showMainMenu();
 
@@ -350,8 +350,6 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		//! \brief Executes the validation before the export process
 		void validateBeforeOperation();
 
-		//! \brief Executes the model <> database comparison
-		//void diffModelDatabase();
 
 		//! \brief Updates the opened models with new configurations
 		void applyConfigurations();
