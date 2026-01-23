@@ -179,6 +179,12 @@ void Messagebox::error(Exception &e, const QString &method, const QString &file,
 	error(e.getErrorMessage(), e.getErrorCode(), method, file, line, &e);
 }
 
+void Messagebox::alert(const QString &title, const QString &msg)
+{
+	Messagebox msgbox;
+	msgbox.show(title, msg, Alert);
+}
+
 void Messagebox::alert(const QString &msg, Exception *ex)
 {
 	Messagebox msgbox;

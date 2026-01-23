@@ -268,6 +268,9 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		 *  do nothing. The timers will be already running */
 		void startOtherTimers();
 
+		//! \brief Switches the current view on main window
+		void changeCurrentView(MWViewsId view_id);
+
 	public slots:
 		/*! \brief Creates a new empty model inside the main window. If the parameter 'filename' is specified,
 		creates the model loading it from a file */
