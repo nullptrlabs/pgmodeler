@@ -27,11 +27,12 @@ AboutWidget::AboutWidget(QWidget *parent) : QWidget(parent)
 
 	GuiUtilsNs::createDropShadow(this, 5, 5, 30);
 	GuiUtilsNs::configureWidgetsFont({ pgmodeler_ver_lbl, build_num_lbl }, GuiUtilsNs::BigFontFactor);
+	GuiUtilsNs::configureWidgetFont(version_info_lbl, GuiUtilsNs::SmallFontFactor, true);
 
 	nullptrlabs_lbl->installEventFilter(this);
 
 	pgmodeler_ver_lbl->setText(QString("v%1 ").arg(GlobalAttributes::PgModelerVersion));
-	build_num_lbl->setText(QString("%1 Qt %2").arg(GlobalAttributes::PgModelerBuildNumber).arg(QT_VERSION_STR));
+	build_num_lbl->setText(QString("%1 Qt %2").arg(GlobalAttributes::PgModelerBuildNumber, QT_VERSION_STR));
 	os_type_lbl->setText(QSysInfo::prettyProductName());
 
 	connect(hide_tb, &QToolButton::clicked, this, [this](){
