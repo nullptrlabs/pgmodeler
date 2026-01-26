@@ -50,15 +50,14 @@ void TaskProgressWidget::show()
 	 to be shown before start the progress update. In tasks too quick, if the event loop above
 	 isn't used the task is not shown properly and sometimes stay only on taskbar not poping up
 	 to the user. */
-	QEventLoop eventLoop;
+	QEventLoop event_loop;
 	GuiUtilsNs::resizeWidget(this);
 	QDialog::show();
-	QTimer t;
 
 	//Gives 100ms to the task to be shown and update its contents
-	t.singleShot(100, &eventLoop, &QEventLoop::quit);
+	QTimer::singleShot(100, &event_loop, &QEventLoop::quit);
 	text_lbl->setText(tr("Waiting task to start..."));
-	eventLoop.exec(QEventLoop::AllEvents);
+	event_loop.exec(QEventLoop::AllEvents);
 }
 
 void TaskProgressWidget::updateProgress(int progress, unsigned icon_id)
@@ -87,11 +86,10 @@ void TaskProgressWidget::updateProgress(int progress, QString text, unsigned ico
 		 the task progress is not correctly updated. The event loop causes a little
 		 delay (1ms) and it`s sufficient to update the entire widget */
 #ifdef Q_OS_MACOS
-	QEventLoop eventLoop;
-	QTimer t;
-	//Gives 1ms to the task to be shown and update its contents
-	t.singleShot(1, &eventLoop, &QEventLoop::quit);
-	eventLoop.exec(QEventLoop::AllEvents);
+	QEventLoop event_loop;
+	//Gives 5ms to the task to be shown and update its contents
+	QTimer::singleShot(5, &eventLoop, &QEventLoop::quit);
+	event_loop.exec(QEventLoop::AllEvents);
 #endif
 }
 
