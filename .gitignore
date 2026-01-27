@@ -48,8 +48,7 @@ moc/*
 obj/*
 plugins
 plugins/*
-priv-plugins
-priv-plugins/*
+priv-*/*
 release/*
 apps/pgmodeler-se/pgmodeler-se
 apps/pgmodeler/pgmodeler
