@@ -30,6 +30,11 @@
 #include <QSettings>
 #include <QPluginLoader>
 
+#ifdef PRIV_CODE_SYMBOLS
+	#include "privcoreinit.h"
+	#include "privcoreclasses.h"
+#endif
+
 QTextStream PgModelerCliApp::out {stdout};
 
 const QRegularExpression PgModelerCliApp::PasswordRegExp { "(password)(=)(.)*( )" };
@@ -223,6 +228,7 @@ PgModelerCliApp::PgModelerCliApp(int argc, char **argv) : Application(argc, argv
 		attribs_map opts;
 		QStringList args = arguments();
 
+		silent_mode = false;
 		has_fix_log = false;
 		buffer_size = 0;
 		input_model = nullptr;
@@ -475,9 +481,13 @@ void PgModelerCliApp::showVersionInfo(bool only_ver_num)
 								 ""
 							#endif
 							));
+
 	printMessage(tr("Version ") + GlobalAttributes::PgModelerVersion + QString(" - %1 Qt %2").arg(GlobalAttributes::PgModelerBuildNumber, QT_VERSION_STR));
-	printMessage(tr("PostgreSQL Database Modeler Project - pgmodeler.io") );
-	printMessage(tr("Copyright 2006-%1 Raphael Araújo e Silva <raphael@pgmodeler.io>").arg(QDate::currentDate().year()));
+	printMessage();
+	printMessage(tr("PostgreSQL Database Modeler Project - pgmodeler.io"));
+	printMessage(tr("(c) Copyright 2006-%1 Raphael Araújo e Silva <raphael@pgmodeler.io>").arg(QDate::currentDate().year()));
+	printMessage(tr("    Development, maintenance and commercial distribution by:"));
+	printMessage(tr("    Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>"));
 	printMessage();
 }
 
@@ -1007,9 +1017,9 @@ int PgModelerCliApp::exec()
 {
 	try
 	{
-		showVersionInfo(parsed_opts.count(Version) > 0);
-
-		if(parsed_opts.empty() || parsed_opts.count(Help))
+		if(parsed_opts.count(Version) > 0)
+			showVersionInfo(true);
+		else if(parsed_opts.empty() || parsed_opts.count(Help))
 			showMenu();
 		else if(list_conns)
 			listConnections();
@@ -1017,6 +1027,10 @@ int PgModelerCliApp::exec()
 			listPlugins();
 		else if(!parsed_opts.count(Version))
 		{
+			#ifdef PRIV_CODE_SYMBOLS
+				__pgm_plus_cli_init
+			#endif
+
 			runPluginsPreOperations();
 
 			if(fix_model)

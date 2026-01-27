@@ -25,14 +25,14 @@
 
 namespace CompatNs {
 	//! \brief Create a view object taking as input the legacy XML code for views
-	extern View *createLegacyView(const QString &xml_code, DatabaseModel *dbmodel);
+	View *createLegacyView(const QString &xml_code, DatabaseModel *dbmodel);
 
 	//! \brief Converts a legacy view object to the new one introduced by pgModeler 1.1.0-beta
-	extern QString convertToNewView(View *old_view);
+	QString convertToNewView(View *old_view);
 
 	/*! \brief Auxiliary method used by createLegacyView to fill basic attributes of the object
 	 *  by reading values from the XML code */
-	extern void setBasicAttributes(BaseObject *object, DatabaseModel *dbmodel);
+	void setBasicAttributes(BaseObject *object, DatabaseModel *dbmodel);
 }
 
 #endif

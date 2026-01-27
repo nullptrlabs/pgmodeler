@@ -36,4 +36,5 @@ target_link_libraries(${PGM_TARGET} PUBLIC
     parsers
     utils)
 
+pgm_inc_priv_core_sources(${PGM_TARGET} OFF)
 pgm_install_library(${PGM_TARGET})

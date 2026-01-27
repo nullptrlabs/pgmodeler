@@ -30,7 +30,7 @@
 #include <QDir>
 #include "globalattributes.h"
 
-extern void logMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+__libutils void logMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
 class __libutils Application: public QApplication {
 	Q_OBJECT
