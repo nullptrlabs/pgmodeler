@@ -41,6 +41,22 @@ class __libcli PgModelerCliApp: public Application {
 	Q_OBJECT
 
 	private:
+		struct MenuItem {
+			QString section, option, value, text;
+
+			MenuItem() = default;
+
+			MenuItem(const QString &_section) :
+				section(_section) {};
+
+			MenuItem(const QString &_option, const QString &_value, const QString &_text) :
+				option(_option), value(_value), text(_text){}
+
+			bool isEmpty() const
+			{ return section.isEmpty() && option.isEmpty() &&
+							 value.isEmpty() && text.isEmpty(); }
+		};
+
 		XmlParser *xmlparser;
 
 		qint64 buffer_size;
@@ -281,7 +297,9 @@ class __libcli PgModelerCliApp: public Application {
 		ModelFixLog,
 
 		MsgFileAssociated,
-		MsgNoFileAssociation;
+		MsgNoFileAssociation,
+
+		MenuItemOptTmpl;
 
 		PgModelerCliApp(int argc, char **argv);
 		~PgModelerCliApp() override;
@@ -297,12 +315,17 @@ class __libcli PgModelerCliApp: public Application {
 		void printText(const QString &txt = "");
 
 	/*! \brief Prints a menu item with automatic line breaking
-	 * \param short_opt Short option (e.g., "-ef")
-	 * \param long_opt Long option (e.g., "--export-to-file")
+	 * \param item Long option (e.g., "export-to-file")
+	 * \param opt_value Optional value accepted by the option (e.g., "[FILE]", "[DBNAME]")
 	 * \param description Description text
 	 * \param ini_pos Initial position for description text. If -1, uses length of options + 4 spaces
 	 * \param break_pos Position where line should break (counted from line start) */
-	void printMenuItem(const QString &short_opt, const QString &long_opt, const QString &description, int ini_pos = -1, int break_pos = 120);
+		void printMenuItem(const MenuItem &item, int ini_pos = -1, int break_pos = 120);
+
+	/*! \brief Prints multiple menu items with consistent alignment
+	 * \param items List of tuples containing (long_opt, opt_value, description). If only long_opt has content, it's treated as a section title
+	 * \param break_pos Position where line should break (counted from line start) */
+	void printMenuItems(const QList<MenuItem> &items, int break_pos = 120);
 
 	//! \brief Prints to the stdout only if the silent mode is not active
 	void printMessage(const QString &txt = "");
