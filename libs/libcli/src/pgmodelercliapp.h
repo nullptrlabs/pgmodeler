@@ -296,18 +296,24 @@ class __libcli PgModelerCliApp: public Application {
 		 * even if the silent mode is active. */
 		void printText(const QString &txt = "");
 
-		//! \brief Prints to the stdout only if the silent mode is not active
-		void printMessage(const QString &txt = "");
+	/*! \brief Prints a menu item with automatic line breaking
+	 * \param short_opt Short option (e.g., "-ef")
+	 * \param long_opt Long option (e.g., "--export-to-file")
+	 * \param description Description text
+	 * \param ini_pos Initial position for description text. If -1, uses length of options + 4 spaces
+	 * \param break_pos Position where line should break (counted from line start) */
+	void printMenuItem(const QString &short_opt, const QString &long_opt, const QString &description, int ini_pos = -1, int break_pos = 120);
 
-		//! \brief Returns the options parsed when calling the application
-		attribs_map getParsedOptions();
+	//! \brief Prints to the stdout only if the silent mode is not active
+	void printMessage(const QString &txt = "");
+	//! \brief Returns the options parsed when calling the application
+	attribs_map getParsedOptions();
 
-		//! \brief Returns a single parsed option value
-		QString getParsedOptValue(const QString &opt);
+	//! \brief Returns a single parsed option value
+	QString getParsedOptValue(const QString &opt);
 
-		//! \brief Replaces the value of a single parsed option
-		void setParsedOptValue(const QString &opt, const QString &value);
-
+	//! \brief Replaces the value of a single parsed option
+	void setParsedOptValue(const QString &opt, const QString &value);
 		void fixModel();
 		void exportModel();
 		void importDatabase();
