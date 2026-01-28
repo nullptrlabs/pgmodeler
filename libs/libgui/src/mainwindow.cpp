@@ -2448,7 +2448,7 @@ void MainWindow::changeCurrentView(MWViewsId view_id)
 
 	actions = tools_acts_tb->actions();
 	for(int i = ToolsActionsCount; i < actions.count(); i++)
-		actions[i]->setEnabled(enable && current_model && current_model->isInteractive());
+		actions[i]->setVisible(enable && current_model && current_model->isInteractive());
 
 	if(!enable)
 		overview_wgt->close();
