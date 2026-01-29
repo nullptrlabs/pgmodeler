@@ -240,9 +240,7 @@ if(BUILD_PRIV_CODE)
         ${PRIV_PLUGINS_SRC}/privpluginsns.cpp)
 endif()
 
-if(PLUS_VERSION)
-    list(APPEND RESOURCES ${PRIV_PLUGINS_RES}/logoicons.qrc)
-else()
+if(NOT PLUS_VERSION)
     list(APPEND RESOURCES res/logoicons.qrc)
 endif()
 
