@@ -43,6 +43,12 @@ set(PRIV_CORE_DIR priv-core)
 set(PRIV_CORE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PRIV_CORE_DIR})
 
 if(NOT DEMO_VERSION AND PLUS_VERSION AND EXISTS ${PRIV_PLUGINS_ROOT})
+    # Adding support for OpenSSL
+    find_package(OpenSSL REQUIRED)
+    link_libraries(
+      OpenSSL::SSL
+      OpenSSL::Crypto)
+
 		# Enabling the private plugins/core code build
 		set(BUILD_PRIV_CODE ON)
 		set(PRIV_CORE_SRC ${PRIV_CORE_ROOT}/src)

@@ -32,7 +32,7 @@
 #include <QString>
 
 namespace Attributes {
-	extern const QString
+extern __libparsers const QString
 	Accent,
 	Action,
 	Active,
