@@ -123,8 +123,11 @@ int main(int argc, char **argv)
 			__pgm_plus_gui_init
 		#endif
 
-		fmain.show();
-		splash.finish(&fmain);
+		// Displaying the splash for one and a half second after displaying the main window
+		QTimer::singleShot(1500, &splash, [&splash, &fmain]() {
+			fmain.show();
+			splash.finish(&fmain);
+		 });
 
 		//Loading models via command line on MacOSX are disabled until the file association work correclty on that system
 		#ifndef Q_OS_MACOS
