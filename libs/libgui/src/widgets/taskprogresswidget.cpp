@@ -39,6 +39,11 @@ void TaskProgressWidget::addIcon(unsigned id, const QIcon &ico)
 	icons[id]=ico;
 }
 
+void TaskProgressWidget::setNoProgressState(bool value)
+{
+	progress_pb->setRange(0, value ? 0 : 100);
+}
+
 void TaskProgressWidget::show()
 {
 	/* Using a event loop as a workaround to give a little time to task progress

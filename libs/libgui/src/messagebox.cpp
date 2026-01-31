@@ -150,6 +150,12 @@ void Messagebox::error(const QString &msg)
 	msgbox.show(msg, ErrorIcon);
 }
 
+void Messagebox::error(const QString &title, const QString &msg)
+{
+	Messagebox msgbox;
+	msgbox.show(title, msg, ErrorIcon);
+}
+
 void Messagebox::error(const QString &msg, ErrorCode error_code, const QString &method, const QString &file, int line, Exception *e)
 {
 	Messagebox msgbox;
@@ -180,6 +186,12 @@ void Messagebox::alert(const QString &msg, Exception *ex)
 		msgbox.show(*ex, msg, AlertIcon);
 	else
 		msgbox.show(msg, AlertIcon);
+}
+
+void Messagebox::alert(const QString &title, const QString &msg)
+{
+	Messagebox msgbox;
+	msgbox.show(title, msg, AlertIcon);
 }
 
 void Messagebox::info(const QString &msg)

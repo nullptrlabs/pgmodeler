@@ -101,9 +101,15 @@ class __libgui Messagebox: public QDialog, public Ui::Messagebox {
 		//! \brief Shows an error message box with the provided message, an error icon and only OK button
 		static void error(const QString &msg);
 
+		//! \brief Shows an error message box with the provided title and message, an error icon and only OK button
+		static void error(const QString &title, const QString &msg);
+
 		/*! \brief Shows an alert message box with the provided message, an alert icon and only OK button
 		 *  If an exception is provided, the stacktrace will also be enabled */
 		static void alert(const QString &msg, Exception *ex = nullptr);
+
+		//! \brief Shows an alert message box with the provided title and message, an alert icon and only OK button
+		static void alert(const QString &title, const QString &msg);
 
 		//! \brief Shows an info message box with the provided message, an info icon and only OK button
 		static void info(const QString &msg);

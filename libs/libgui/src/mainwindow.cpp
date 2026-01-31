@@ -109,36 +109,10 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 	//Positioning the update notifier widget before showing it (if there is an update)
 	setFloatingWidgetPos(update_notifier_wgt, action_update_found, model_acts_tb, false);
 	action_update_found->setVisible(false);
-	QTimer::singleShot(1000, this, &MainWindow::restoreTemporaryModels);
 
 	//If there's no previuos geometry registered for the mainwindow display it maximized
 	if(!GeneralConfigWidget::restoreWidgetGeometry(this))
 		this->setWindowState(Qt::WindowMaximized);
-
-	#ifdef NO_UPDATE_CHECK
-		#warning "NO UPDATE CHECK: Update checking is disabled."
-	#else
-		//Enabling update check at startup
-		if(confs[Attributes::Configuration][Attributes::CheckUpdate]==Attributes::True)
-		{
-			update_notifier_wgt->setCheckVersions(confs[Attributes::Configuration][Attributes::CheckVersions]);
-			QTimer::singleShot(15000, update_notifier_wgt, &UpdateNotifierWidget::checkForUpdate);
-		}
-	#endif
-
-	#ifdef DEMO_VERSION
-		#warning "DEMO VERSION: demonstration version startup alert."
-		QTimer::singleShot(2000, this, [this](){
-			showDemoVersionWarning();
-		});
-	#endif
-
-	#ifdef CHECK_CURR_VER
-		//Showing the donate widget in the first run or if the version registered in the file diverges from the current
-		if(confs[Attributes::Configuration][Attributes::FirstRun] != Attributes::False ||
-			 confs[Attributes::Configuration][Attributes::PgModelerVersion] != GlobalAttributes::PgModelerVersion)
-			QTimer::singleShot(1000, action_donate, &QAction::trigger);
-	#endif
 
 	// Post initilize plug-ins
 	PluginsConfigWidget *plugins_conf_wgt = dynamic_cast<PluginsConfigWidget *>(configuration_form->getConfigurationWidget(ConfigurationForm::PluginsConfWgt));
@@ -211,6 +185,16 @@ void MainWindow::addNewLayer(const QString &layer_name)
 void MainWindow::dropEvent(QDropEvent *event)
 {
 	loadModelsFromMimeData(event->mimeData());
+}
+
+void MainWindow::showEvent(QShowEvent *event)
+{
+	#ifdef PRIVATE_PLUGINS_SYMBOLS
+		__pgm_plus_mwnd_impl;
+	#else
+		if(!event->spontaneous())
+			startOtherTimers();
+	#endif
 }
 
 void MainWindow::configureMenusActionsWidgets()
@@ -446,6 +430,44 @@ void MainWindow::handleInitializationFailure(Exception &e)
 			proc.waitForFinished();
 		}
 	}
+}
+
+void MainWindow::startOtherTimers()
+{
+	static bool started = false;
+
+	if(started)
+		return;
+
+	std::map<QString, attribs_map >confs = GeneralConfigWidget::getConfigurationParams();
+
+	started = true;
+	QTimer::singleShot(1000, this, &MainWindow::restoreTemporaryModels);
+
+	#ifdef NO_UPDATE_CHECK
+		#warning "NO UPDATE CHECK: Update checking is disabled."
+	#else
+		//Enabling update check at startup
+		if(confs[Attributes::Configuration][Attributes::CheckUpdate]==Attributes::True)
+		{
+			update_notifier_wgt->setCheckVersions(confs[Attributes::Configuration][Attributes::CheckVersions]);
+			QTimer::singleShot(15000, update_notifier_wgt, &UpdateNotifierWidget::checkForUpdate);
+		}
+	#endif
+
+	#ifdef DEMO_VERSION
+		#warning "DEMO VERSION: demonstration version startup alert."
+		QTimer::singleShot(2000, this, [this](){
+			showDemoVersionWarning();
+		});
+	#endif
+
+	#ifdef CHECK_CURR_VER
+		//Showing the donate widget in the first run or if the version registered in the file diverges from the current
+		if(confs[Attributes::Configuration][Attributes::FirstRun] != Attributes::False ||
+			 confs[Attributes::Configuration][Attributes::PgModelerVersion] != GlobalAttributes::PgModelerVersion)
+			QTimer::singleShot(1000, action_donate, &QAction::trigger);
+	#endif
 }
 
 void MainWindow::createMainWidgets()

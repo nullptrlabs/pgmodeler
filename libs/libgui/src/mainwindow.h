@@ -25,6 +25,11 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
+#ifdef PRIVATE_PLUGINS_SYMBOLS
+	#include "privcoreinit.h"
+	#include "privcoreclasses.h"
+#endif
+
 #include <QMainWindow>
 #include <QPrintDialog>
 #include "ui_mainwindow.h"
@@ -168,9 +173,6 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		void resizeEvent(QResizeEvent *) override;
 
-		//! \brief Set the postion of a floating widget based upon an action at a tool bar
-		void setFloatingWidgetPos(QWidget *widget, QAction *act, QToolBar *toolbar, bool map_to_window);
-
 		void setBottomFloatingWidgetPos(QWidget *widget, QToolButton *btn);
 
 		void configureSamplesMenu();
@@ -205,9 +207,16 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		void dropEvent(QDropEvent *event) override;
 
+		void showEvent(QShowEvent *event) override;
+
 		/*! \brief Tries to restore the default configuration files and restart pgModeler
 		 *  in case of any configuration file is broken or missing */
 		void handleInitializationFailure(Exception &e);
+
+		/*! \brief Start the timers related to update check, model restoration and others
+		 *  This method works only on its first call. Any attempt to call it again will
+		 *  do nothing. The timers will be already running */
+		void startOtherTimers();
 
 public:
 		enum MWViewsId {
@@ -281,6 +290,9 @@ public:
 
 		//! \brief Shows a error dialog informing that the model demands a fix after the error ocurred when loading the filename.
 		void showFixMessage(Exception &e, const QString &filename);
+
+		//! \brief Set the postion of a floating widget based upon an action at a tool bar
+		void setFloatingWidgetPos(QWidget *widget, QAction *act, QToolBar *toolbar, bool map_to_window);
 
 	private slots:
 		void showMainMenu();

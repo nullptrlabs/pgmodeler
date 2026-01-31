@@ -39,6 +39,7 @@ class __libgui TaskProgressWidget: public QDialog, public Ui::TaskProgressWidget
 	public:
 		TaskProgressWidget(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::Widget);
 		void addIcon(unsigned id, const QIcon &ico);
+		void setNoProgressState(bool value);
 
 	public slots:
 		void show();

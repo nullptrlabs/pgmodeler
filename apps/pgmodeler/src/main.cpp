@@ -24,6 +24,11 @@
 #include "execinfo.h"
 #endif
 
+#ifdef PRIVATE_PLUGINS_SYMBOLS
+	#include "privcoreinit.h"
+	#include "privcoreclasses.h"
+#endif
+
 void startCrashHandler(int signal)
 {
 	QFile output;
@@ -111,6 +116,10 @@ int main(int argc, char **argv)
 
 		//Creates the main form
 		MainWindow fmain;
+
+		#ifdef PRIVATE_PLUGINS_SYMBOLS
+			__pgm_plus_gui_init
+		#endif
 
 		fmain.show();
 		splash.finish(&fmain);
