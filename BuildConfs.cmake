@@ -122,6 +122,12 @@ function(pgm_add_executable TARGET)
 
   add_executable(${TARGET} ${_SOURCES})
 
+  # Strip symbols in release builds for security
+  if(CMAKE_BUILD_TYPE STREQUAL Release)
+    set_target_properties(${TARGET} PROPERTIES
+                          LINK_FLAGS_RELEASE "-s")
+  endif()
+
   if(WIN32)
     set_target_properties(${TARGET} PROPERTIES
                           WIN32_EXECUTABLE TRUE
@@ -166,6 +172,12 @@ function(pgm_add_library TARGET)
   add_compile_definitions(${LIB_SYMBOLS})
 
   add_library(${TARGET} SHARED ${ARGN})
+
+  # Strip symbols in release builds for security
+  if(CMAKE_BUILD_TYPE STREQUAL Release)
+    set_target_properties(${TARGET} PROPERTIES
+                          LINK_FLAGS_RELEASE "-s")
+  endif()
 
 	if(APPLE)
 		set_target_properties(${TARGET} PROPERTIES
