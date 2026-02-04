@@ -1,6 +1,102 @@
 Changelog
 ---------
 
+v2.0.0-alpha1
+------
+*Release date: February 13, 2026*
+
+* [New] Added the class TabOrderManager that automatically configures tab order for editing forms and complex widgets.
+* [New] Added the template method GuiUtilsNs::configureWidgetsFont that allows configuring font properties for multiple widgets at once.
+* [New] Added the method GuiUtilsNs::createLabeledWidgetLayout to create labeled widget layouts.
+* [New] Added support for configuring buddy labels via GuiUtilsNs::configureWidgetsBuddyLabels.
+* [New] Added the class CodePreviewWidget as an improved version of SourceCodeWidget for code preview and filtering.
+* [New] Added the class ObjectAssociationsWidget to replace ObjectDepsRefsWidget with improved UI for object associations.
+* [New] Added busy indicator animation to QProgressBar in CustomUiStyle.
+* [New] Added custom UI style hint AltDefaultFrmHint for alternative default frame appearance.
+* [New] Added support for comment field in GenericSQL objects.
+* [New] Added custom hover effects for input widgets, buttons, checkboxes and radio buttons in CustomUiStyle.
+* [New] Added focus border styling for QCheckBox and QRadioButton widgets.
+* [New] Added checkbox rendering support for checkable QGroupBox titles in CustomUiStyle.
+* [New] Added the method ModelExportHelper::finishExport to properly emit signals when export finishes or is canceled.
+* [New] Added experimental support for name quoting disabling, allowing pgModeler to treat object names as case insensitive.
+* [New] Added checking in ModelValidationHelper to detect FK with SET NULL action tied to NOT NULL columns.
+* [New] Added an optional qint64 parameter to UtilsNs::loadFile to allow loading just a portion of a file in bytes.
+* [New] Added support for CLI version-only printing for integration with deployment pipelines.
+* [New] Added the method Messagebox::alert as a convenience overload.
+* [New] Added multiple icons support in TaskProgressWidget.
+* [New] Added convenience layout helpers in GuiUtilsNs to reduce explicit layout instantiation.
+* [New] Added custom disabled icon styling with dynamic theme color blending in CustomUiStyle.
+* [New] Added support for icon display in ObjectSelectorWidget.
+* [Change] Major refactoring of editing forms UI to modern tabbed and vertical layouts.
+* [Change] Refactored BaseObjectWidget::configureFormLayout to a template method for better code reusability.
+* [Change] Refactored ReferencesWidget UI to modern vertical layout pattern.
+* [Change] Improved form sizing and layout calculations in BaseForm.
+* [Change] Refactored plugin icon management to support both QIcon and QPixmap.
+* [Change] Optimized icon loading by replacing QIcon/QPixmap(GuiUtilsNs::getIconPath()) with GuiUtilsNs::getIcon/getPixmap().
+* [Change] Refactored plugin info UI to use GuiUtilsNs helpers.
+* [Change] Improved label consistency and widget organization across configuration widgets.
+* [Change] Improved UI consistency in Data Grid filter/limit interface.
+* [Change] Improved ModelDbSelectorWidget layout and label consistency.
+* [Change] Refactored checkbox font configuration across multiple widgets.
+* [Change] Modernized ObjectSearchWidget, SwapObjectsIdsWidget, ObjectRenameWidget interfaces.
+* [Change] Improved ModelExportWidget UI with refactored checkbox configurations.
+* [Change] Refactored SnippetsConfigWidget and ConnectionsConfigWidget layouts for better consistency.
+* [Change] Refactored TabOrderManager to simplify widget discovery logic and improve tab navigation with Shift+Tab support.
+* [Change] Minor adjustments in TabOrderManager to exclude hidden widgets from tab order list.
+* [Change] Removed unused deprecated method BaseObjectWidget::generateVersionWarningFrame.
+* [Change] Improved PgSqlType class to allow user types to have variable length, needed for extension-created types.
+* [Change] Minor adjustment in PgSqlType::hasVariableLength.
+* [Change] Adjusted MainWindow::changeCurrentView to hide model actions when not in design view.
+* [Change] Adjusted MainWindow::closeEvent behavior to discard any unchanged models.
+* [Change] Improved UI and code organization in main window and widgets.
+* [Change] Refactored view switching logic in MainWindow.
+* [Change] Refactored namespace patterns across libraries for better standardization.
+* [Change] Refactored CLI help menu with automatic line wrapping and sentence-based breaks.
+* [Change] Added the method PgModelerCliApp::printMenuItem for automatic line wrapping in CLI help menu.
+* [Change] Moved about text configuration to AboutWidget constructor.
+* [Change] Copyright updates on source files.
+* [Change] Logo and icon updates for improved visual consistency.
+* [Change] Minor adjustments in some CMake scripts.
+* [Change] Minor adjustment in TaskProgressWidget::show.
+* [Change] Adjusted business logo design.
+* [Change] Adjusted the construcutors of ObjectsScene and OperationList to associate a parent object.
+* [Change] Centralized private code includes in privcodemacros.h.
+* [Change] Improved CustomUiStyle and AppearanceConfigWidget for better theme detection.
+* [Change] Fixed QGroupBox frame and content alignment in CustomUiStyle.
+* [Change] Removed obsolete code and finalized UI modernization across multiple widgets.
+* [Change] Improved connection/database info widgets in DataHandlingForm and SQLExecutionWidget.
+* [Fix] Fixed a crash when editing connections while browsing database in SQLToolWidget.
+* [Fix] Fixed a crash in ModelExportWidget.
+* [Fix] Fixed the method PgModelerCliApp::definePluginsExecOrder that was ignoring valid plugins options.
+* [Fix] Fixed a bug in NumberedTextEditor that was copying all text when hitting Ctrl+C with only a portion selected.
+* [Fix] Minor fix in TabOrderManager to avoid mixing widgets from different windows in the same tab order sequence.
+* [Fix] Fixed a bug in ModelValidationHelper that was not properly swapping ids between table children objects and their dependencies.
+* [Fix] Minor adjustment in ObjectsListModel to make the "Id" column the first one in the header.
+* [Fix] Minor adjustment in TabOrderManager::configureTabOrder to operate only if the parent widget is active/visible.
+* [Fix] Minor adjustment in ModelExportHelper::finishExport to check if the database model still exists.
+* [Fix] Minor fix in DiffToolWidget so the apply diff button can be enabled correctly.
+* [Fix] Fixed a bug in DatabaseModel::loadObjectsMetadata that was causing crashes in some circumstances.
+* [Fix] Fixed a bug in DatabaseModel::updateExtensionObjects that was not setting the dependency between data type and extension correctly.
+* [Fix] Minor fix in displaying the splash screen.
+* [Fix] Minor fix in build process for Windows.
+* [Fix] Minor adjustment in sqlexecutionwidget.ui to display long error messages.
+* [Fix] Fixed heap-use-after-free by clearing object dependencies before destruction.
+* [Fix] Minor adjustment in .gitignore.
+
+v1.2.3
+------
+<em>Release date: February 6, 2026</em><br/>
+
+* [New] Added the method TaskProgressWidget::setNoProgressState.
+* [Change] Refactored MainWindow initialization by moving startup timers to a new startOtherTimers method.
+* [Change] Improved MainWindow initialization control by overriding the showEvent method.
+* [Change] Updated AboutWidget and WelcomeWidget UI layouts.
+* [Change] Updated GlobalAttributes with new site URL.
+* [Fix] Fixed a bug in DatabaseModel::loadObjectsMetadata that was causing crashes in some circumstances.
+* [Fix] Fixed a bug in NumberedTextEditor that was copying all text when hitting Ctrl+C when there was only a portion of the text selected.
+* [Fix] Fixed a bug in ModelValidationHelper that was not properly swapping ids between table children objects and their dependencies (e.g., trigger -> function).
+* [Fix] Fixed a bug in the Connection class that was creating an invalid connection string when other params were manually specified.
+
 v2.0.0-alpha
 ------
 *Release date: October 30, 2025*
