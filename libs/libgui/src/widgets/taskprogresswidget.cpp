@@ -91,7 +91,7 @@ void TaskProgressWidget::updateProgress(int progress, QString text, unsigned ico
 #ifdef Q_OS_MACOS
 	QEventLoop event_loop;
 	//Gives 5ms to the task to be shown and update its contents
-	QTimer::singleShot(5, &eventLoop, &QEventLoop::quit);
+	QTimer::singleShot(5, &event_loop, &QEventLoop::quit);
 	event_loop.exec(QEventLoop::AllEvents);
 #endif
 }

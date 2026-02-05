@@ -43,11 +43,24 @@ set(PRIV_CORE_DIR priv-core)
 set(PRIV_CORE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PRIV_CORE_DIR})
 
 if(NOT DEMO_VERSION AND PLUS_VERSION AND EXISTS ${PRIV_PLUGINS_ROOT})
-    # Adding support for OpenSSL
-    find_package(OpenSSL REQUIRED)
-    link_libraries(
-      OpenSSL::SSL
-      OpenSSL::Crypto)
+		# Specific logic to add OpenSSL support on macOS
+		# We expect that the the library and its headers is on the
+		# folder openssl_build in the root of pgModeler's source
+		if(APPLE)
+			set(OPENSSL_ROOT_DIR "${CMAKE_SOURCE_DIR}/openssl_build")
+			# Forcing the static usage of OpenSSL
+			set(OPENSSL_USE_STATIC_LIBS TRUE)
+
+			# Hiding OpenSSL symbols in pgModeler code to avoid
+			# conflicts with other libs or plugins
+			set(LIB_SSL "${OPENSSL_ROOT_DIR}/lib/libssl.a")
+			set(LIB_CRYPTO "${OPENSSL_ROOT_DIR}/lib/libcrypto.a")
+			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-load_hidden,${LIB_SSL} -Wl,-load_hidden,${LIB_CRYPTO}")
+		endif()
+
+		# Adding support for OpenSSL
+		find_package(OpenSSL REQUIRED)
+		link_libraries(OpenSSL::SSL OpenSSL::Crypto)
 
 		# Enabling the private plugins/core code build
 		set(BUILD_PRIV_CODE ON)
