@@ -51,3 +51,7 @@ DEPENDPATH += $$LIBCANVAS_ROOT \
 			$$LIBPARSERS_ROOT \
 			$$LIBUTILS_ROOT \
 			$$LIBGUI_ROOT
+
+# Deployment settings
+target.path = $$PRIVATELIBDIR
+INSTALLS = target
