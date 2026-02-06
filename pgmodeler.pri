@@ -8,7 +8,7 @@ MOC_DIR = moc
 OBJECTS_DIR = obj
 UI_DIR = src
 
-contains(CONFIG, debug):{
+CONFIG(debug, debug|release): {
 	DEFINES+=PGMODELER_DEBUG
 
 	# Enabling ccache (https://ccache.dev) in debug mode to speed up recompilations

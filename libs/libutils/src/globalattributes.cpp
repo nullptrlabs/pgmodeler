@@ -54,7 +54,7 @@ const QString GlobalAttributes::PgModelerBuildNumber { QString("%1.%2").arg(BUIL
 
 const QString GlobalAttributes::PgModelerSite {
 #ifdef PGMODELER_DEBUG
-	 "http://localhost:8000"
+    "http://localhost:8000"
 #else
 	"https://pgmodeler.io"
 #endif
