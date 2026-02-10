@@ -283,6 +283,11 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Restore the layer information of FK relationship during loading process
 		void restoreFKRelationshipLayers();
 
+		/*! \brief This method returns the value of the flag loading_model
+		 *  which is set by loadModel to indicate that objects are being
+		 *  read from dbm file. At the end of the load process, the flag is reset */
+		bool isModelLoading();
+
 	protected:
 		//! \brief Set the layer names (only to be written in the XML definition)
 		void setLayers(const QStringList &layers);

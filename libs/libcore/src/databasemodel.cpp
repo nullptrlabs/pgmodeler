@@ -1696,6 +1696,11 @@ void DatabaseModel::restoreFKRelationshipLayers()
 	fk_rel_layers.clear();
 }
 
+bool DatabaseModel::isModelLoading()
+{
+	return loading_model;
+}
+
 void DatabaseModel::updateViewRelationships(View *view, bool force_rel_removal)
 {
 	PhysicalTable *table = nullptr;
@@ -8784,14 +8789,14 @@ void DatabaseModel::createSystemObjects(bool create_public)
 	a system object. This strategy permits the user controls the schema rectangle behavior */
 	if(create_public && getObjectIndex("public", ObjectType::Schema) < 0)
 	{
-		public_sch=new Schema;
+		public_sch = new Schema;
 		public_sch->setName("public");
 		public_sch->setSystemObject(true);
 		addSchema(public_sch);
 	}
 
 	//Create the pg_catalog schema in order to insert default collations in
-	pg_catalog=new Schema;
+	pg_catalog = new Schema;
 	pg_catalog->BaseObject::setName("pg_catalog");
 	pg_catalog->setSystemObject(true);
 	addSchema(pg_catalog);
@@ -8819,19 +8824,19 @@ void DatabaseModel::createSystemObjects(bool create_public)
 		}
 	}
 
-	tbspace=new Tablespace;
+	tbspace = new Tablespace;
 	tbspace->BaseObject::setName("pg_global");
 	tbspace->setDirectory("_pg_global_dir_");
 	tbspace->setSystemObject(true);
 	addTablespace(tbspace);
 
-	tbspace=new Tablespace;
+	tbspace = new Tablespace;
 	tbspace->BaseObject::setName("pg_default");
 	tbspace->setDirectory("_pg_default_dir_");
 	tbspace->setSystemObject(true);
 	addTablespace(tbspace);
 
-	postgres=new Role;
+	postgres= new Role;
 	postgres->setName(QString("postgres"));
 	postgres->setOption(Role::OpSuperuser, true);
 	postgres->setSystemObject(true);

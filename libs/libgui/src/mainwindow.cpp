@@ -1355,9 +1355,9 @@ void MainWindow::addModel(const QString &filename)
 		models_tbw->setUpdatesEnabled(true);
 		models_tbw->setVisible(true);
 
+		setCurrentModel();
 		model_tab->setModified(false);
 		model_tab->db_model->setInvalidated(false);
-		setCurrentModel();
 
 		if(start_timers)
 		{
@@ -1701,15 +1701,15 @@ void MainWindow::closeModel(int model_id)
 		//Ask the user to save the model if its modified
 		if(model->isModified())
 		{
-			Messagebox::confirm(tr("Save model"),
-													tr("The model <strong>%1</strong> was modified! Do you really want to close without saving it?")
-													.arg(model->getDatabaseModel()->getName()),
-													Messagebox::YesNoButtons);
+			msg_res = Messagebox::confirm(tr("Save model"),
+																		tr("The model <strong>%1</strong> was modified! Do you really want to close without saving it?")
+																		.arg(model->getDatabaseModel()->getName()),
+																		Messagebox::YesNoButtons);
 		}
 #endif
 
 		if(!model->isModified() ||
-				(model->isModified() && msg_res == Messagebox::Accepted))
+			 (model->isModified() && msg_res == Messagebox::Accepted))
 		{
 			model_nav_wgt->removeModel(model_id);
 			model_tree_states.remove(model);

@@ -79,7 +79,7 @@ void ModelNavigationWidget::addModel(ModelWidget *model)
 		setEnabled(true);
 		models_cmb->blockSignals(true);
 
-		tooltip=model->getFilename();
+		tooltip = model->getFilename();
 
 		if(tooltip.isEmpty())
 			tooltip=tr("(Model not saved yet)");
@@ -89,9 +89,9 @@ void ModelNavigationWidget::addModel(ModelWidget *model)
 		models_cmb->setToolTip(tooltip);
 
 		models_cmb->blockSignals(false);
-
 		model_wgts.append(model);
 
+		setCurrentModelModified(model->isModified());
 		enableNavigationButtons();
 	}
 }

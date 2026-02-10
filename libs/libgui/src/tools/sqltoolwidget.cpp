@@ -303,11 +303,15 @@ DatabaseExplorerWidget *SQLToolWidget::browseDatabase()
 			Connection conn=(*reinterpret_cast<Connection *>(connections_cmb->itemData(connections_cmb->currentIndex()).value<void *>()));
 			QString maintainance_db=conn.getConnectionParam(Connection::ParamDbName);
 
+			qApp->setOverrideCursor(Qt::WaitCursor);
+
 			db_explorer_wgt=new DatabaseExplorerWidget;
 			db_explorer_wgt->setObjectName(database_cmb->currentText());
 			conn.setConnectionParam(Connection::ParamDbName, database_cmb->currentText());
 			db_explorer_wgt->setConnection(conn, maintainance_db);
 			db_explorer_wgt->listObjects();
+
+			qApp->restoreOverrideCursor();
 
 			databases_tbw->addTab(db_explorer_wgt, database_cmb->currentText());
 			databases_tbw->setTabToolTip(databases_tbw->count() - 1, db_explorer_wgt->getConnection().getConnectionId(true, true));

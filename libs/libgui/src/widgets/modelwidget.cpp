@@ -1048,7 +1048,10 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 		if(item)
 		{
 			scene->addItem(item, blink_new_objs);
-			setModified(true);
+
+			if(!db_model->loading_model)
+				setModified(true);
+
 			emit s_objectAdded(graph_obj);
 
 			if(blink_new_objs)
@@ -1891,7 +1894,6 @@ void ModelWidget::loadModel(const QString &filename)
 		adjustSceneRect(true);
 
 		task_prog_wgt.close();
-		//protected_model_frm->setVisible(db_model->isProtected());
 		setProtected(db_model->isProtected());
 		setModified(false);
 

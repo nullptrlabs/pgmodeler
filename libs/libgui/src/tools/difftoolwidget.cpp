@@ -578,9 +578,7 @@ void DiffToolWidget::startDiff()
 	if(!model_to_model_tb->isChecked())
 		importDatabase(db_to_db_tb->isChecked() ? InputImpThread : ComparedImpThread);
 	else
-	{
 		diffModels();
-	}
 }
 
 void DiffToolWidget::importDatabase(ThreadId thread_id)
@@ -590,6 +588,7 @@ void DiffToolWidget::importDatabase(ThreadId thread_id)
 		if(thread_id != InputImpThread && thread_id != ComparedImpThread)
 			throw Exception(ErrorCode::AllocationObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
 
+		qApp->setOverrideCursor(Qt::WaitCursor);
 		createThread(thread_id);
 
 		QThread *thread = (thread_id == InputImpThread ? input_imp_thread : compared_imp_thread);
@@ -669,6 +668,7 @@ void DiffToolWidget::importDatabase(ThreadId thread_id)
 		import_hlp->setImportOptions(import_sys_objs_chk->isChecked(), import_ext_objs_chk->isChecked(), true,
 																 ignore_errors_chk->isChecked(), debug_mode_chk->isChecked(), false, false, false);
 		thread->start();
+		qApp->restoreOverrideCursor();
 	}
 	catch(Exception &e)
 	{
