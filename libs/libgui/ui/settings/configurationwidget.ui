@@ -23,7 +23,7 @@
    <string>pgModeler settings</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../../../priv-plugins/res/logoicons.qrc">
+   <iconset resource="../../../../priv-core/res/logoicons.qrc">
     <normaloff>:/icons/icons/pgmodeler_logo.png</normaloff>:/icons/icons/pgmodeler_logo.png</iconset>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -402,41 +402,6 @@
        <property name="spacing">
         <number>5</number>
        </property>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="defaults_btn">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Defaults</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../../res/resources.qrc">
-           <normaloff>:/icons/icons/defaults.png</normaloff>:/icons/icons/defaults.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>28</width>
-           <height>28</height>
-          </size>
-         </property>
-         <property name="autoDefault">
-          <bool>false</bool>
-         </property>
-         <property name="default">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
        <item row="3" column="0">
         <spacer name="verticalSpacer_2">
          <property name="orientation">
@@ -449,41 +414,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-       <item row="1" column="0">
-        <widget class="QPushButton" name="revert_btn">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Discard</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../../res/resources.qrc">
-           <normaloff>:/icons/icons/delete.png</normaloff>:/icons/icons/delete.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>28</width>
-           <height>28</height>
-          </size>
-         </property>
-         <property name="flat">
-          <bool>false</bool>
-         </property>
-        </widget>
        </item>
        <item row="0" column="0">
         <widget class="QPushButton" name="apply_btn">
@@ -520,7 +450,137 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1" rowspan="4">
+       <item row="1" column="0">
+        <widget class="QPushButton" name="revert_btn">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Discard</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../../res/resources.qrc">
+           <normaloff>:/icons/icons/delete.png</normaloff>:/icons/icons/delete.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>28</width>
+           <height>28</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="defaults_btn">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Defaults</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../../res/resources.qrc">
+           <normaloff>:/icons/icons/defaults.png</normaloff>:/icons/icons/defaults.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>28</width>
+           <height>28</height>
+          </size>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+         <property name="default">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>11</number>
+         </property>
+         <property name="bottomMargin">
+          <number>11</number>
+         </property>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="nullptrlabs_lbl">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>197</width>
+             <height>80</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>197</width>
+             <height>80</height>
+            </size>
+           </property>
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="scaledContents">
+            <bool>true</bool>
+           </property>
+           <property name="openExternalLinks">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="0" column="1" rowspan="3">
         <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Orientation::Horizontal</enum>
@@ -548,8 +608,17 @@
   <tabstop>plugins_tb</tabstop>
  </tabstops>
  <resources>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
   <include location="../../res/resources.qrc"/>
-  <include location="../../../../priv-plugins/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
  </resources>
  <connections/>
 </ui>
