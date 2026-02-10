@@ -73,6 +73,12 @@
       </property>
       <item row="3" column="1">
        <layout class="QGridLayout" name="gridLayout">
+        <property name="rightMargin">
+         <number>5</number>
+        </property>
+        <property name="bottomMargin">
+         <number>5</number>
+        </property>
         <item row="1" column="0">
          <spacer name="horizontalSpacer_5">
           <property name="orientation">
@@ -180,7 +186,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="../../../../priv-plugins/res/logoicons.qrc">:/images/images/pgmodeler_splash.png</pixmap>
+           <pixmap resource="../../../../priv-core/res/logoicons.qrc">:/images/images/pgmodeler_splash.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -501,8 +507,17 @@
   <tabstop>support_tb</tabstop>
  </tabstops>
  <resources>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
   <include location="../../res/resources.qrc"/>
-  <include location="../../../../priv-plugins/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../../../priv-core/res/logoicons.qrc"/>
  </resources>
  <connections/>
 </ui>

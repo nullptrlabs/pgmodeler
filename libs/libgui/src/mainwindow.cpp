@@ -2255,7 +2255,7 @@ void MainWindow::setFloatingWidgetPos(QWidget *widget, QAction *act, QToolBar *t
 	QPoint pos_orig=(wgt ? wgt->pos() : QPoint(0,0)), pos;
 
 	if(map_to_window)
-		pos=wgt->mapTo(this, pos);
+		pos = wgt->mapTo(this, pos);
 
 	pos.setX(pos_orig.x() - 10);
 	pos.setY(toolbar->pos().y() + toolbar->height() /* - 10 */);
