@@ -16,8 +16,11 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
     include(ClangTidyConf)
 endif()
 
-if(BUILD_PRIV_CODE)
-		add_subdirectory(${PRIV_CORE_DIR})
+# Include priv-core if assets are needed (PLUS or DEMO versions)
+# DEMO: includes only assets (logoicons.qrc and resources.qrc)
+# PLUS: includes full code + assets
+if(BUILD_PRIV_ASSETS)
+	add_subdirectory(${PRIV_CORE_DIR})
 endif()
 
 add_subdirectory(${LIBS_DIR}/${LIBUTILS})

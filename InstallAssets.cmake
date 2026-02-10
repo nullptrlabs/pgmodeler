@@ -27,7 +27,7 @@ install(DIRECTORY assets/conf/
         PATTERN "*.dbm"
         PATTERN "*.png")
 
-if(PLUS_VERSION OR BUILD_PRIV_CODE)
+if(PLUS_VERSION OR BUILD_PRIV_ASSETS)
 		install(FILES ${PRIV_CORE_ROOT}/res/icons/pgmodeler_logo.png
             DESTINATION ${PGM_CONFDIR})
 endif()
