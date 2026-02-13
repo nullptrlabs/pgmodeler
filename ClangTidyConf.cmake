@@ -30,7 +30,7 @@ else()
 	find_program(CLANG_TIDY_EXE NAMES "clang-tidy")
 endif()
 
-if(CLANG_TIDY_EXE AND USE_CLANG_TIDY)
+if(USE_CLANG_TIDY AND CLANG_TIDY_EXE)
 	# Validate that the executable is actually clang-tidy
 	execute_process(
 		COMMAND "${CLANG_TIDY_EXE}" --version
@@ -78,7 +78,7 @@ if(CLANG_TIDY_EXE AND USE_CLANG_TIDY)
 			CACHE STRING "clang-tidy command line" FORCE
 		)
 	endif()
-elseif(NOT CLANG_TIDY_EXE)
+elseif(NOT CLANG_TIDY_EXE AND USE_CLANG_TIDY)
 	# Disable USE_CLANG_TIDY if clang-tidy executable not found
 	set(USE_CLANG_TIDY OFF CACHE BOOL FORCE)
 endif()

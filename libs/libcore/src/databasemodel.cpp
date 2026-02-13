@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -836,6 +839,7 @@ void DatabaseModel::destroyObjects()
 	while(ritr != ritr_end)
 	{
 		object = ritr->second;
+		object->clearAllDepsRefs();
 		ritr++;
 
 		// We ignore the database itself, permission objects (destroyed separetely) and table children objects
@@ -1690,6 +1694,11 @@ void DatabaseModel::restoreFKRelationshipLayers()
 	}
 
 	fk_rel_layers.clear();
+}
+
+bool DatabaseModel::isModelLoading()
+{
+	return loading_model;
 }
 
 void DatabaseModel::updateViewRelationships(View *view, bool force_rel_removal)
@@ -8780,14 +8789,14 @@ void DatabaseModel::createSystemObjects(bool create_public)
 	a system object. This strategy permits the user controls the schema rectangle behavior */
 	if(create_public && getObjectIndex("public", ObjectType::Schema) < 0)
 	{
-		public_sch=new Schema;
+		public_sch = new Schema;
 		public_sch->setName("public");
 		public_sch->setSystemObject(true);
 		addSchema(public_sch);
 	}
 
 	//Create the pg_catalog schema in order to insert default collations in
-	pg_catalog=new Schema;
+	pg_catalog = new Schema;
 	pg_catalog->BaseObject::setName("pg_catalog");
 	pg_catalog->setSystemObject(true);
 	addSchema(pg_catalog);
@@ -8815,19 +8824,19 @@ void DatabaseModel::createSystemObjects(bool create_public)
 		}
 	}
 
-	tbspace=new Tablespace;
+	tbspace = new Tablespace;
 	tbspace->BaseObject::setName("pg_global");
 	tbspace->setDirectory("_pg_global_dir_");
 	tbspace->setSystemObject(true);
 	addTablespace(tbspace);
 
-	tbspace=new Tablespace;
+	tbspace = new Tablespace;
 	tbspace->BaseObject::setName("pg_default");
 	tbspace->setDirectory("_pg_default_dir_");
 	tbspace->setSystemObject(true);
 	addTablespace(tbspace);
 
-	postgres=new Role;
+	postgres= new Role;
 	postgres->setName(QString("postgres"));
 	postgres->setOption(Role::OpSuperuser, true);
 	postgres->setSystemObject(true);

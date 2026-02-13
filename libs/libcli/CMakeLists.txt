@@ -9,7 +9,7 @@ set(SOURCES
     src/pgmodelercliapp.cpp src/pgmodelercliapp.h
     src/pgmodelercliplugin.cpp src/pgmodelercliplugin.h)
 
-if(BUILD_PRIV_PLUGINS)
+if(BUILD_PRIV_CODE)
     list(APPEND SOURCES
         ${PRIV_PLUGINS_SRC}/privpluginsns.h
         ${PRIV_PLUGINS_SRC}/privpluginsns.cpp)
@@ -36,4 +36,5 @@ target_link_libraries(${PGM_TARGET} PUBLIC
     parsers
     utils)
 
+pgm_inc_priv_core_sources(${PGM_TARGET} OFF)
 pgm_install_library(${PGM_TARGET})

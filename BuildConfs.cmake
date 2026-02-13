@@ -31,34 +31,74 @@ link_libraries(
     Qt::Svg
     Qt::Widgets)
 
-# Enable the compilation of sample plugins
-# if their sources exists in plugins/*
-set(PLUGINS_DIR plugins)
-set(PLUGINS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PLUGINS_DIR})
-
-if(EXISTS ${PLUGINS_ROOT})
-    # Enabling the plugins build
-    set(BUILD_PLUGINS ON)
-endif()
-
-# Private plugins source detection
-# If the folder when the sources are stored we configure a
+# Private plugins/core code source detection
+# If the folder where the sources are stored exist we configure a
 # set of variables and compiler defs that instruct cmake to
 # include private code and resources
 set(PRIV_PLUGINS_DIR priv-plugins)
 set(PRIV_PLUGINS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PRIV_PLUGINS_DIR})
 set(PRIV_PLUGINS_RES ${PRIV_PLUGINS_ROOT}/res)
 
-if(NOT DEMO_VERSION AND PLUS_VERSION AND EXISTS ${PRIV_PLUGINS_ROOT})
-    # Enabling the private plugins build
-    set(BUILD_PRIV_PLUGINS ON)
-    set(PRIV_PLUGINS_SRC ${PRIV_PLUGINS_ROOT}/src)
-    add_compile_definitions(PRIVATE_PLUGINS_SYMBOLS)
+set(PRIV_CORE_DIR priv-core)
+set(PRIV_CORE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PRIV_CORE_DIR})
+
+# Check if we are building DEMO version with PLUS resources
+# DEMO_VERSION: only includes priv-core assets (logoicons.qrc and resources.qrc)
+#               but NO license checking code - no OpenSSL needed
+if(DEMO_VERSION AND EXISTS ${PRIV_CORE_ROOT})
+	# Enabling only priv-core assets (logo and icons) for demo
+	set(BUILD_PRIV_ASSETS ON)
+	set(PRIV_CORE_SRC ${PRIV_CORE_ROOT}/src)
+	# NO license checking symbols for demo version
+	# NO OpenSSL for demo version
+elseif(NOT DEMO_VERSION AND PLUS_VERSION AND EXISTS ${PRIV_PLUGINS_ROOT})
+	# PLUS version: include full private code and resources
+	# Specific logic to add OpenSSL support on macOS
+	# We expect that the the library and its headers is on the
+	# folder openssl_build in the root of pgModeler's source
+	if(APPLE)
+		set(OPENSSL_ROOT_DIR "${CMAKE_SOURCE_DIR}/openssl_build")
+		# Forcing the static usage of OpenSSL
+		set(OPENSSL_USE_STATIC_LIBS TRUE)
+
+		# Hiding OpenSSL symbols in pgModeler code to avoid
+		# conflicts with other libs or plugins
+		set(LIB_SSL "${OPENSSL_ROOT_DIR}/lib/libssl.a")
+		set(LIB_CRYPTO "${OPENSSL_ROOT_DIR}/lib/libcrypto.a")
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-load_hidden,${LIB_SSL} -Wl,-load_hidden,${LIB_CRYPTO}")
+	endif()
+
+	# Adding support for OpenSSL
+	find_package(OpenSSL REQUIRED)
+	link_libraries(OpenSSL::SSL OpenSSL::Crypto)
+
+	# Enabling the private plugins/core code build (full features with license checking)
+	set(BUILD_PRIV_CODE ON)
+	set(BUILD_PRIV_ASSETS ON)
+	set(PRIV_CORE_SRC ${PRIV_CORE_ROOT}/src)
+	set(PRIV_PLUGINS_SRC ${PRIV_PLUGINS_ROOT}/src)
+	add_compile_definitions(PRIV_CODE_SYMBOLS)
+endif()
+
+# Enable the compilation of sample plugins
+# if their sources exists in plugins/*
+set(PLUGINS_DIR plugins)
+set(PLUGINS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PLUGINS_DIR})
+
+if(EXISTS ${PLUGINS_ROOT} AND NOT BUILD_PRIV_CODE)
+		# Enabling the plugins build
+		set(BUILD_PLUGINS ON)
 endif()
 
 # Adding custom C defs if some cmake variables are set
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
     add_compile_definitions(PGMODELER_DEBUG)
+endif()
+
+# AddressSanitizer option (can be enabled with -DUSE_ADDR_SANITIZER=ON)
+if(USE_ADDR_SANITIZER)
+	add_compile_options(-fsanitize=address -fno-omit-frame-pointer -g)
+	add_link_options(-fsanitize=address)
 endif()
 
 if(NOT DEFINED NO_CHECK_CURR_VER)
@@ -95,7 +135,7 @@ function(pgm_add_executable TARGET)
   if(WIN32)
     set(PRIV_ICO_RES ${PRIV_PLUGINS_RES}/${TARGET}/windows_ico.rc)
 
-    if((PLUS_VERSION OR BUILD_PRIV_PLUGINS) AND EXISTS ${PRIV_ICO_RES})
+		if((PLUS_VERSION OR BUILD_PRIV_ASSETS) AND EXISTS ${PRIV_ICO_RES})
       set(EXEC_ICO_RES ${PRIV_ICO_RES})
     else()
       set(EXEC_ICO_RES res/windows_ico.rc)
@@ -105,6 +145,12 @@ function(pgm_add_executable TARGET)
   endif()
 
   add_executable(${TARGET} ${_SOURCES})
+
+  # Strip symbols in release builds for security
+  if(CMAKE_BUILD_TYPE STREQUAL Release)
+    set_target_properties(${TARGET} PROPERTIES
+                          LINK_FLAGS_RELEASE "-s")
+  endif()
 
   if(WIN32)
     set_target_properties(${TARGET} PROPERTIES
@@ -151,6 +197,12 @@ function(pgm_add_library TARGET)
 
   add_library(${TARGET} SHARED ${ARGN})
 
+  # Strip symbols in release builds for security
+  if(CMAKE_BUILD_TYPE STREQUAL Release)
+    set_target_properties(${TARGET} PROPERTIES
+                          LINK_FLAGS_RELEASE "-s")
+  endif()
+
 	if(APPLE)
 		set_target_properties(${TARGET} PROPERTIES
 				BUILD_WITH_INSTALL_RPATH TRUE
@@ -181,4 +233,44 @@ function(pgm_install_executable TARGET IS_PRIVBIN)
     install(TARGETS ${TARGET}
 				BUNDLE DESTINATION ${DEST}
         RUNTIME DESTINATION ${DEST})
+endfunction()
+
+# This function includes priv-core sources into the current target.
+# It automatically appends source files, forms, and resources to the
+# caller's SOURCES, FORMS, and RESOURCES lists (if they exist).
+# It also adds the necessary include directories to the current target.
+# Parameters:
+#   TARGET - The target to add sources/includes to
+#   INCLUDE_SOURCES - If ON, adds sources and UI forms (needed by libgui)
+#                     If OFF, adds only include directories (executables/plugins)
+# Note: In DEMO_VERSION mode, only assets (resources) are included, no license code
+function(pgm_inc_priv_core_sources TARGET INCLUDE_SOURCES)
+	if(NOT BUILD_PRIV_ASSETS)
+		return()
+	endif()
+
+	# Add include directories to the current target (only if BUILD_PRIV_CODE is ON)
+	if(DEFINED TARGET AND BUILD_PRIV_CODE)
+		target_include_directories(${TARGET} PRIVATE ${PRIV_CORE_INC})
+		
+		# Only add sources if INCLUDE_SOURCES is ON (to avoid ODR violation)
+		if(INCLUDE_SOURCES)
+			target_sources(${TARGET} PRIVATE ${PRIV_CORE_SOURCES} ${PRIV_CORE_FORMS})
+			
+			# Enable AUTOUIC for this target if there are UI forms
+			if(PRIV_CORE_FORMS)
+				set_target_properties(${TARGET} PROPERTIES AUTOUIC ON)
+				# Set the search path for .ui files
+				set_property(TARGET ${TARGET} APPEND PROPERTY AUTOUIC_SEARCH_PATHS ${PRIV_CORE_ROOT}/ui)
+			endif()
+		endif()
+	endif()
+
+	# Always add resources if they exist (works for both PLUS and DEMO versions)
+	if(DEFINED TARGET AND PRIV_CORE_RESOURCES)
+		target_sources(${TARGET} PRIVATE ${PRIV_CORE_RESOURCES})
+		
+		# Enable AUTORCC for this target
+		set_target_properties(${TARGET} PROPERTIES AUTORCC ON)
+	endif()
 endfunction()

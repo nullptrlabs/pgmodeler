@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -362,7 +365,7 @@ void ObjectSearchWidget::showObjectMenu()
 
 void ObjectSearchWidget::editObject()
 {
-	if(selected_obj)
+	if(selected_obj && model_wgt->isInteractive())
 	{
 		if(selected_obj->getObjectType() == ObjectType::Permission)
 			model_wgt->showObjectForm(ObjectType::Permission, dynamic_cast<Permission *>(selected_obj)->getObject());

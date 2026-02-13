@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,9 +58,9 @@ namespace GuiUtilsNs {
 		AllCorners = 31
 	};
 
-	static constexpr char FontAdjustedProp[] { "font-adjusted" };
+	constexpr char FontAdjustedProp[] { "font-adjusted" };
 
-	static constexpr int LtMargin = 5,
+	constexpr int LtMargin = 5,
 	LtSpacing = 5;
 
 	static const QMargins LtMargins { LtMargin, LtMargin, LtMargin, LtMargin };
@@ -69,9 +72,9 @@ namespace GuiUtilsNs {
 		HugeFontFactor
 	};
 
-	extern __libgui void configureWidgetFont(QWidget *widget, FontFactorId factor_id, bool bold = false, bool italic = false);
-	extern __libgui void __configureWidgetFont(QWidget *widget, double factor, bool bold = false, bool italic = false);
-	extern __libgui void configureWidgetsFont(const QWidgetList &widgets, FontFactorId factor_id, bool bold = false, bool italic = false);
+	__libgui void configureWidgetFont(QWidget *widget, FontFactorId factor_id, bool bold = false, bool italic = false);
+	__libgui void __configureWidgetFont(QWidget *widget, double factor, bool bold = false, bool italic = false);
+	__libgui void configureWidgetsFont(const QWidgetList &widgets, FontFactorId factor_id, bool bold = false, bool italic = false);
 
 	template<class WgtClass, std::enable_if_t<std::is_base_of_v<QWidget, WgtClass>, bool> = true>
 	void configureWidgetsFont(QWidget *parent_wgt, FontFactorId factor_id, bool bold = false, bool italic = false, const QList<WgtClass *> &excl_wgts = {})
@@ -93,93 +96,93 @@ namespace GuiUtilsNs {
 	/*! \brief Creates an item in the specified QTreeWidget instance with the specified text and ico.
 		The new item is automatically inserted on the QTreeWidget object.
 		Setting word_wrap will create a QLabel instance into item's and assign the text to it. */
-	extern __libgui QTreeWidgetItem *createOutputTreeItem(QTreeWidget *output_trw, const QString &text, const QIcon &ico=QIcon(),
+	__libgui QTreeWidgetItem *createOutputTreeItem(QTreeWidget *output_trw, const QString &text, const QIcon &ico=QIcon(),
 																													QTreeWidgetItem *parent=nullptr, bool expand_item=true, bool word_wrap=false);
 
 	//! \brief Creates an item in the specified QListWidget instance with the specified text and ico
-	extern __libgui void createOutputListItem(QListWidget *output_lst, const QString &text, const QIcon &ico=QIcon(), bool is_formated=true);
+	__libgui void createOutputListItem(QListWidget *output_lst, const QString &text, const QIcon &ico=QIcon(), bool is_formated=true);
 
 	/*! \brief Toggles the SQL code for the object. This function also toggles the SQL of the references
 		related to the input object */
-	extern __libgui void disableObjectSQL(BaseObject *object, bool disable);
+	__libgui void disableObjectSQL(BaseObject *object, bool disable);
 
 	//! \brief Recursively toggles the specified object's references SQL
-	extern __libgui void disableReferencesSQL(BaseObject *object);
+	__libgui void disableReferencesSQL(BaseObject *object);
 
 	/*! \brief Fills a tree widget with all the stack trace provided by the passed Exception. A root item
 	can be specified so all created child items are appended to it */
-	extern __libgui void createExceptionsTree(QTreeWidget *exceptions_trw, Exception &e, QTreeWidgetItem *root);
+	__libgui void createExceptionsTree(QTreeWidget *exceptions_trw, Exception &e, QTreeWidgetItem *root);
 
 	//! \brief Returns the path, in the icon resource, to the provided icon name
-	extern __libgui QString getIconPath(const QString &icon);
+	__libgui QString getIconPath(const QString &icon);
 
 	/*! \brief Returns the path, in the icon resource, to the icon of the provided object type
 	 *  The parameter sub_type is used to retrive the sub type icon. Currently only relationships
 	 *  and constraints have sub types being for relationships the Relationship::RelType enum and
 	 *  constraints the class ConstraintType */
-	extern __libgui QString getIconPath(ObjectType obj_type, int sub_type = -1);
+	__libgui QString getIconPath(ObjectType obj_type, int sub_type = -1);
 
 	//! \brief Returns an instance of QIcon of the provided icon name, in the icons resource (.qrc)
-	extern __libgui QIcon getIcon(const QString &icon_name);
+	__libgui QIcon getIcon(const QString &icon_name);
 
 	/*! \brief Returns a QIcon instance containing the the icon of the provided object type
 	 *  The parameter sub_type is used to retrive the sub type icon. Currently only relationships
 	 *  and constraints have sub types being for relationships the Relationship::RelType enum and
 	 *  constraints the class ConstraintType */
-	extern __libgui QIcon getIcon(ObjectType obj_type, int sub_type = -1);
+	__libgui QIcon getIcon(ObjectType obj_type, int sub_type = -1);
 
 	//! \brief Returns an instance of QPixmap of the provided icon name, in the icons resource (.qrc)
-	extern __libgui QPixmap getPixmap(const QString &icon_name);
+	__libgui QPixmap getPixmap(const QString &icon_name);
 
 	/*! \brief Returns a QPixmap instance containing the the icon of the provided object type
 	 *  The parameter sub_type is used to retrive the sub type icon. Currently only relationships
 	 *  and constraints have sub types being for relationships the Relationship::RelType enum and
 	 *  constraints the class ConstraintType */
-	extern __libgui QPixmap getPixmap(ObjectType obj_type, int sub_type = -1);
+	__libgui QPixmap getPixmap(ObjectType obj_type, int sub_type = -1);
 
 	//! \brief Resizes the provided widget considering font dpi changes as well screen size
-	extern __libgui void resizeWidget(QWidget *widget);
+	__libgui void resizeWidget(QWidget *widget);
 
 	//! brief Changes the values of the grid selection at once
-	extern __libgui void openColumnDataForm(QTableWidget *results_tbw);
+	__libgui void openColumnDataForm(QTableWidget *results_tbw);
 
 	//! brief Opens the bulk data edit in readonly mode and display the text of the provided model index
-	extern __libgui void openColumnDataForm(const QModelIndex &index);
+	__libgui void openColumnDataForm(const QModelIndex &index);
 
 	//! \brief Creates drop shadown on a widget
-	extern __libgui void createDropShadow(QWidget *wgt, int x_offset = 2, int y_offset = 2, int radius = 5, const QColor &color = QColor(0, 0, 0, 100));
+	__libgui void createDropShadow(QWidget *wgt, int x_offset = 2, int y_offset = 2, int radius = 5, const QColor &color = QColor(0, 0, 0, 100));
 
 	//! \brief Creates drop shadown on a widget based on the current UI theme
-	extern __libgui void updateDropShadow(QWidget *wgt);
+	__libgui void updateDropShadow(QWidget *wgt);
 
 	//! \brief Changes drop shadows color and offset to match the current theme.
-	extern __libgui void updateDropShadows(QWidgetList widgets, const QString &class_name = "QToolButton");
+	__libgui void updateDropShadows(QWidgetList widgets, const QString &class_name = "QToolButton");
 
 	/*! \brief Handles the currently provided file dialog state to file.
 	 * If save_state is true, then the dialog's state is saved to file
 	 * otherwise is restored */
-	extern __libgui void handleFileDialogState(QFileDialog *file_dlg, bool save_state);
+	__libgui void handleFileDialogState(QFileDialog *file_dlg, bool save_state);
 
 	//! \brief Saves the currently provided file dialog state to file
-	extern  __libgui void saveFileDialogState(QFileDialog *file_dlg);
+	__libgui void saveFileDialogState(QFileDialog *file_dlg);
 
 	//! \brief Restores the saved filed dialog from file/memory and applies to the provided file dialog
-	extern __libgui void restoreFileDialogState(QFileDialog *file_dlg);
+	__libgui void restoreFileDialogState(QFileDialog *file_dlg);
 
 	/*! \brief Lists the objects in a QTableView using a list of database model objects as data source.
 	 * The first column on each row of table contains the reference to the object.
 	 * The parameter search_attr is used to display the attribute value in which the search was performed. */
-	extern __libgui void populateObjectsTable(QTableView *table_vw, const std::vector<BaseObject *> &objects, const QString &search_attr = "");
+	__libgui void populateObjectsTable(QTableView *table_vw, const std::vector<BaseObject *> &objects, const QString &search_attr = "");
 
 	//! \brief Lists the objects in a QTableView using a list of object attributes (see Catalog::getObjects) as data source.
-	extern __libgui void populateObjectsTable(QTableView *table_vw, const std::vector<attribs_map> &attribs);
+	__libgui void populateObjectsTable(QTableView *table_vw, const std::vector<attribs_map> &attribs);
 
 	//! \brief Populates the provided table widget with the data in a parsed CSV document.
-	extern __libgui void populateTable(QTableWidget *tab_wgt, const CsvDocument &csv_doc);
+	__libgui void populateTable(QTableWidget *tab_wgt, const CsvDocument &csv_doc);
 
 	/*! \brief Opens an instance of QFileDialog with the provided attributes.
 	 *  The method returns the files/directories selected by the user in the dialog */
-	extern __libgui QStringList selectFiles(const QString &title = QT_TR_NOOP("Select file..."), QFileDialog::FileMode file_mode = QFileDialog::AnyFile,
+	__libgui QStringList selectFiles(const QString &title = QT_TR_NOOP("Select file..."), QFileDialog::FileMode file_mode = QFileDialog::AnyFile,
 																					QFileDialog::AcceptMode accept_mode = QFileDialog::AcceptOpen,	const QStringList &name_filters = {},
 																					const QStringList &mime_filters = {}, const QString &default_suffix = "", const QString &selected_file = "");
 
@@ -187,38 +190,38 @@ namespace GuiUtilsNs {
 	 * Custom attributes for the QFileDialog instance can be provided.
 	 * Raises an exception in case of the file couldn't be saved.
 	 * The method does nothing if file_mode is different from QFileDialog::ExistingFile and QFileDialog::AnyFile */
-	extern __libgui bool selectAndSaveFile(const QByteArray &buffer, const QString &title = QT_TR_NOOP("Save file..."),
-																				 QFileDialog::FileMode file_mode = QFileDialog::AnyFile, const QStringList &name_filters = {},
-																				 const QStringList &mime_filters = {}, const QString &default_suffix = "", const QString &selected_file = "");
+	__libgui bool selectAndSaveFile(const QByteArray &buffer, const QString &title = QT_TR_NOOP("Save file..."),
+																	 QFileDialog::FileMode file_mode = QFileDialog::AnyFile, const QStringList &name_filters = {},
+																	 const QStringList &mime_filters = {}, const QString &default_suffix = "", const QString &selected_file = "");
 
 	/*! \brief Loads a file which path is selected via QFileDialog returning the buffer with the contents of the file.
 	 * Custom attributes for the QFileDialog instance can be provided.
 	 * Raises an exception in case of the file couldn't be loaded.
 	 * The method does nothing if file_mode is different from QFileDialog::ExistingFile and QFileDialog::AnyFile */
-	extern __libgui  bool selectAndLoadFile(QByteArray &buffer,
-																					const QString &title = QT_TR_NOOP("Load file..."), QFileDialog::FileMode file_mode = QFileDialog::AnyFile,
-																					const QStringList &name_filters = {}, const QStringList &mime_filters = {}, const QString &selected_file = "");
+	__libgui  bool selectAndLoadFile(QByteArray &buffer,
+																		const QString &title = QT_TR_NOOP("Load file..."), QFileDialog::FileMode file_mode = QFileDialog::AnyFile,
+																		const QStringList &name_filters = {}, const QStringList &mime_filters = {}, const QString &selected_file = "");
 
 	//! \brief Creates an action in a QLineEdit that controls the visibility of passwords
-	extern __libgui void createPasswordShowAction(QLineEdit *parent_edt);
+	__libgui void createPasswordShowAction(QLineEdit *parent_edt);
 
 	/*! \brief Resizes the toolbuttons under the widget wgt according to its width.
 	 *  If the widget's width isn't enough to display the tool buttons with icons and texts
 	 *  the this function changes the tool buttons to icon-only style */
-	extern __libgui void resizeChildToolButtons(QWidget *wgt, const QSize &new_size);
+	__libgui void resizeChildToolButtons(QWidget *wgt, const QSize &new_size);
 
 	/*! \brief Returns the corner id (see WidgetCornerId) that is currently hovered in the provided widget.
 	 *  The event_wgt is the widget that has triggered the mouse event.
 	 *  The corners params holds the corner ids that the hovered is allowed for the widget */
-	extern __libgui WidgetCornerId getWidgetHoveredCorner(QWidget *widget, QWidget *event_wgt, QMouseEvent *event, WidgetCornerId corners);
+	__libgui WidgetCornerId getWidgetHoveredCorner(QWidget *widget, QWidget *event_wgt, QMouseEvent *event, WidgetCornerId corners);
 
 	/*! \brief Resizes a widget based a mouse move event.
 	 *  The corner param is used to identify from which corner the widget must be resized */
-	extern __libgui void resizeFloatingWidget(QWidget *widget, QMouseEvent *event, WidgetCornerId corner);
+	__libgui void resizeFloatingWidget(QWidget *widget, QMouseEvent *event, WidgetCornerId corner);
 
 	/*! \brief Moves a widget based a mouse move event that is captured by a handle widget
 	 *  in the the edge of the widget */
-	extern __libgui void moveFloatingWidget(QWidget *widget, QWidget *event_wgt, QMouseEvent *event);
+	__libgui void moveFloatingWidget(QWidget *widget, QWidget *event_wgt, QMouseEvent *event);
 
 	/*! \brief Configures the font family/size of the provided QPlainTextEdit instance
 	 *  to use the global settings defined in AppearanceSettingsWidget */
@@ -279,31 +282,31 @@ namespace GuiUtilsNs {
 	}
 
 	//! \brief Creates a QVBoxLayout with the provided margins, spacing and parent widget
-	extern __libgui QVBoxLayout *createVBoxLayout(int lt_margins,
-																								int lt_spacing = LtSpacing,
-																								QWidget *parent = nullptr);
+	__libgui QVBoxLayout *createVBoxLayout(int lt_margins,
+																				int lt_spacing = LtSpacing,
+																				QWidget *parent = nullptr);
 
-	extern __libgui QVBoxLayout *createVBoxLayout(QMargins lt_margins,
-																								int lt_spacing = LtSpacing,
-																								QWidget *parent = nullptr);
+	__libgui QVBoxLayout *createVBoxLayout(QMargins lt_margins,
+																				int lt_spacing = LtSpacing,
+																				QWidget *parent = nullptr);
 
 	//! \brief Creates a QHBoxLayout with the provided margins, spacing and parent widget
-	extern __libgui QHBoxLayout *createHBoxLayout(int lt_margins,
-																								int lt_spacing = LtSpacing,
-																								QWidget *parent = nullptr);
+	__libgui QHBoxLayout *createHBoxLayout(int lt_margins,
+																				int lt_spacing = LtSpacing,
+																				QWidget *parent = nullptr);
 
-	extern __libgui QHBoxLayout *createHBoxLayout(QMargins lt_margins,
-																								int lt_spacing = LtSpacing,
-																								QWidget *parent = nullptr);
+	__libgui QHBoxLayout *createHBoxLayout(QMargins lt_margins,
+																				int lt_spacing = LtSpacing,
+																				QWidget *parent = nullptr);
 
 	//! \brief Creates a QGridLayout with the provided margins, spacing and parent widget
-	extern __libgui QGridLayout *createGridLayout(int lt_margins,
-																								int lt_spacing = LtSpacing,
-																								QWidget *parent = nullptr);
+	__libgui QGridLayout *createGridLayout(int lt_margins,
+																				int lt_spacing = LtSpacing,
+																				QWidget *parent = nullptr);
 
-	extern __libgui QGridLayout *createGridLayout(QMargins lt_margins,
-																								int lt_spacing = LtSpacing,
-																								QWidget *parent = nullptr);
+	__libgui QGridLayout *createGridLayout(QMargins lt_margins,
+																				int lt_spacing = LtSpacing,
+																				QWidget *parent = nullptr);
 
 	/*! \brief Creates a wiget in a parent. If the parent has no layout configured then
 	 * this function also creates a vertical layout for the parent and puts the new widget there.
@@ -342,16 +345,16 @@ namespace GuiUtilsNs {
 	 * This function will create a layout if 'parent' doesn't has one. If parent has a layout
 	 * the function will do nothing. If parent is null creates an orphan object which means the
 	 * user must take care of the destruction of the object */
-	extern __libgui NumberedTextEditor *createNumberedTextEditor(QWidget *parent, bool act_btns_enabled = false, qreal custom_fnt_size = 0);
+	__libgui NumberedTextEditor *createNumberedTextEditor(QWidget *parent, bool act_btns_enabled = false, qreal custom_fnt_size = 0);
 
-	extern __libgui void configureBuddyWidget(QLayout *lt);
+	__libgui void configureBuddyWidget(QLayout *lt);
 
 	//! \brief Configures all buddy labels in the provided widget
-	extern __libgui void configureBuddyWidgets(QWidget *widget);
+	__libgui void configureBuddyWidgets(QWidget *widget);
 
 	//! \brief Creates a layout that contains a label and a widget arranged vertically
-	extern __libgui QLayout *createBuddyWidgetLayout(QLabel *label, QWidget *widget, QWidget *append_widget = nullptr,
-																										 int margin = 0, int spacing = 0);
+	__libgui QLayout *createBuddyWidgetLayout(QLabel *label, QWidget *widget, QWidget *append_widget = nullptr,
+																						 int margin = 0, int spacing = 0);
 }
 
 #endif

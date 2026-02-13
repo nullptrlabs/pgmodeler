@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,12 +51,22 @@ const QString GlobalAttributes::PgModelerOldAppName {"pgmodeler-1.2"};
 
 const QString GlobalAttributes::PgModelerURI {"pgmodeler.io"};
 const QString GlobalAttributes::PgModelerBuildNumber { QString("%1.%2").arg(BUILDDATE).arg(BUILDNUM) };
-const QString GlobalAttributes::PgModelerSite {"https://pgmodeler.io" };
-const QString GlobalAttributes::PgModelerSupport {"https://pgmodeler.io/support/docs" };
-const QString GlobalAttributes::PgModelerSourceURL {"https://github.com/pgmodeler/pgmodeler/releases" };
+
+const QString GlobalAttributes::PgModelerSite {
+#ifdef PGMODELER_DEBUG
+	 "http://localhost:8000"
+#else
+	"https://pgmodeler.io"
+#endif
+};
+
+const QString GlobalAttributes::PgModelerSupport { PgModelerSite + "/support/docs" };
+const QString GlobalAttributes::PgModelerSourceURL { "https://github.com/nullptrlabs/pgmodeler/releases" };
 const QString GlobalAttributes::PgModelerDownloadURL { PgModelerSite + "/download" };
 const QString GlobalAttributes::PgModelerDonateURL { PgModelerSite + "/#donationForm" };
 const QString GlobalAttributes::PgModelerUpdateCheckURL { PgModelerSite + "/checkupdate?version=%1&mode=%2" };
+
+const QString GlobalAttributes::NullptrLabsSite { "https://nullptrlabs.io" };
 
 const QString GlobalAttributes::EnvSchemasPath {"PGMODELER_SCHEMAS_PATH"};
 const QString GlobalAttributes::EnvConfPath {"PGMODELER_CONF_PATH"};

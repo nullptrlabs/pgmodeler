@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,9 +30,10 @@
 
 #include "utilsglobal.h"
 #include <QString>
+#include <QCryptographicHash>
 
 namespace UtilsNs {
-	static const QString EntityAmp("&amp;"),
+	inline const QString EntityAmp("&amp;"),
 	EntityLt("&lt;"),
 	EntityGt("&gt;"),
 	EntityQuot("&quot;"),
@@ -58,22 +62,27 @@ namespace UtilsNs {
 
 	/*! \brief Writes the provided buffer to the file specified by its filename
 	 * Raises an exception in case of the file couldn,t be open */
-	extern __libutils void saveFile(const QString &filename, const QByteArray &buffer);
+	__libutils void saveFile(const QString &filename, const QByteArray &buffer);
 
 	/*! \brief Read the contents of the file specified by its filename returning its contents.
 	 * Raises an exception in case of the file couldn't be open.
 	 * The optional parameter max_len can be specified and determines the maximum length of
 	 * data read from the file. If max_len is <= 0 then the function returns the entire content
 	 * of the file. */
-	extern __libutils QByteArray loadFile(const QString &filename, qint64 max_len = 0);
+	__libutils QByteArray loadFile(const QString &filename, qint64 max_len = 0);
 
 	//! \brief Converts any chars (operators) < > " to the respective XML entities.
-	extern __libutils QString convertToXmlEntities(const QString value);
+	__libutils QString convertToXmlEntities(const QString value);
 
-	extern __libutils QString getStringHash(const QString &string);
+	__libutils QString getStringHash(const QString &string,
+																					QCryptographicHash::Algorithm algorithm = QCryptographicHash::Md5);
+
+	__libutils QString getStringHash(const QByteArray &string,
+																					QCryptographicHash::Algorithm algorithm = QCryptographicHash::Md5);
+
 
 	//! \brief Replaces the sequence of chars [`'] by html tags <strong></strong> and [()] by <em></em>
-	extern __libutils QString formatMessage(const QString &msg);
+	__libutils QString formatMessage(const QString &msg);
 }
 
 #endif

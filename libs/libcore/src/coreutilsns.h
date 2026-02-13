@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,13 +34,13 @@
 namespace CoreUtilsNs {
 	/*! \brief Holds the check mark character for use in data dictionary
 	 *  to indicate constraints applied to the column */
-	const QString DataDictCheckMark("&#10003;");
+	inline const QString DataDictCheckMark("&#10003;");
 
 	/*! \brief Filters a list of objects by excluding the elements by their type.
 	 * If the current object type is in the excl_types list then the object will not be present
 	 * in the returned list.
 	 * NOTE: This function returns a new list of objects letting the input object list unchanged. */
-	extern __libcore std::vector<BaseObject *> filterObjectsByType(const std::vector<BaseObject *> &list,
+	__libcore std::vector<BaseObject *> filterObjectsByType(const std::vector<BaseObject *> &list,
 																																	const std::vector<ObjectType> &excl_types);
 
 	/*! \brief Template function that makes a copy from 'copy_obj' to 'psrc_obj' doing the cast to the
@@ -45,14 +48,14 @@ namespace CoreUtilsNs {
 		 before copying. Both objects must be the same type if both are allocated.
 		 -- Brainfuck syntax style! :p -- */
 	template <class Class>
-	extern __libcore void copyObject(BaseObject **psrc_obj, Class *copy_obj);
+	__libcore void copyObject(BaseObject **psrc_obj, Class *copy_obj);
 
 	/*! \brief This functions is a second way to make a copy between two objects. It simply calls
 		 the template function above. */
-	extern __libcore void copyObject(BaseObject **psrc_obj, BaseObject *copy_obj, ObjectType obj_type);
+	__libcore void copyObject(BaseObject **psrc_obj, BaseObject *copy_obj, ObjectType obj_type);
 
 	//! \brief Returns true if the specified word is a PostgreSQL reserved word.
-	extern __libcore bool isReservedKeyword(const QString &word);
+	__libcore bool isReservedKeyword(const QString &word);
 
 	/*! \brief Generates an unique name based on the specified object and the list of objects of the same type.
 	 * The user can specify a suffix for the generated name as well if the comparison inside the method must take into account

@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -145,6 +148,12 @@ int Messagebox::show(const QString &msg, MessageType icon_type, ButtonsId button
 	return show("", msg,  icon_type, buttons);
 }
 
+void Messagebox::error(const QString &title, const QString &msg)
+{
+	Messagebox msgbox;
+	msgbox.show(title, msg, Error);
+}
+
 void Messagebox::error(const QString &msg)
 {
 	Messagebox msgbox;
@@ -171,6 +180,12 @@ void Messagebox::error(ErrorCode error_code, const QString &method, const QStrin
 void Messagebox::error(Exception &e, const QString &method, const QString &file, int line)
 {
 	error(e.getErrorMessage(), e.getErrorCode(), method, file, line, &e);
+}
+
+void Messagebox::alert(const QString &title, const QString &msg)
+{
+	Messagebox msgbox;
+	msgbox.show(title, msg, Alert);
 }
 
 void Messagebox::alert(const QString &msg, Exception *ex)

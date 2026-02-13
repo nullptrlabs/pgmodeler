@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,6 +32,11 @@
 #include "compat/compatns.h"
 #include <QSettings>
 #include <QPluginLoader>
+
+#ifdef PRIV_CODE_SYMBOLS
+	#include "privcoreinit.h"
+	#include "privcoreclasses.h"
+#endif
 
 QTextStream PgModelerCliApp::out {stdout};
 
@@ -121,6 +129,7 @@ const QString PgModelerCliApp::EndTagExpr {"</%1"};
 const QString PgModelerCliApp::AttributeExpr {"(%1)( )*(=)(\")(\\w|\\d|,|\\.|\\&|\\;|\\)|\\(|\\-| )+(\")"};
 
 const QString PgModelerCliApp::ModelFixLog {"model_fix.log"};
+const QString PgModelerCliApp::MenuItemOptTmpl { "  %1, %2" };
 
 const QString PgModelerCliApp::MsgFileAssociated {
 	QString(QT_TR_NOOP("Database model files (*%1) are already associated with pgModeler! Use the option `%2' to force the file association installation.")).arg(GlobalAttributes::DbModelExt, Force)
@@ -223,6 +232,7 @@ PgModelerCliApp::PgModelerCliApp(int argc, char **argv) : Application(argc, argv
 		attribs_map opts;
 		QStringList args = arguments();
 
+		silent_mode = false;
 		has_fix_log = false;
 		buffer_size = 0;
 		input_model = nullptr;
@@ -469,151 +479,298 @@ void PgModelerCliApp::showVersionInfo(bool only_ver_num)
 	}
 
 	printMessage(tr("pgModeler %1 command line interface.").arg(
-							 #ifdef PRIVATE_PLUGINS_SYMBOLS
+							 #ifdef PRIV_CODE_SYMBOLS
 								"Plus"
 							#else
 								 ""
 							#endif
 							));
+
 	printMessage(tr("Version ") + GlobalAttributes::PgModelerVersion + QString(" - %1 Qt %2").arg(GlobalAttributes::PgModelerBuildNumber, QT_VERSION_STR));
-	printMessage(tr("PostgreSQL Database Modeler Project - pgmodeler.io") );
-	printMessage(tr("Copyright 2006-%1 Raphael Araújo e Silva <raphael@pgmodeler.io>").arg(QDate::currentDate().year()));
 	printMessage();
+	printMessage(tr("PostgreSQL Database Modeler Project - pgmodeler.io"));
+	printMessage(tr("(c) Copyright 2006-%1 Raphael Araújo e Silva <raphael@pgmodeler.io>").arg(QDate::currentDate().year()));
+	printMessage(tr("    Development, maintenance and commercial distribution by:"));
+	printMessage(tr("    Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>"));
+	printMessage();
+}
+
+void PgModelerCliApp::printMenuItem(const MenuItem &item, int ini_pos, int break_pos)
+{
+	// Formats the options part: " -short, --long [VALUE]"
+	QString opt_part = MenuItemOptTmpl.arg(short_opts[item.option], item.option);
+	
+	if(!item.value.isEmpty())
+		opt_part += " " + item.value;
+	
+	// Calculates ini_pos if it's -1
+	if(ini_pos < 0)
+		ini_pos = opt_part.length() + 2;
+	
+	// Checks if the entire line fits within the limit without breaking
+	int total_len = ini_pos + item.text.length();
+	QStringList sentences;
+	
+	// If the entire line fits within the limit, don't break
+	if(total_len <= break_pos)
+		sentences.append(item.text);
+	else
+	{
+		// Regex to find sentence breaks: period followed by space and uppercase letter
+		static QRegularExpression sentence_break(R"(\.\s+(?=[A-Z]))");
+		
+		// Breaks the description into sentences
+		int last_pos = 0;
+		QRegularExpressionMatchIterator matches = sentence_break.globalMatch(item.text);
+		
+		while(matches.hasNext())
+		{
+			QRegularExpressionMatch match = matches.next();
+			int match_pos = match.capturedStart();
+			
+			// Extracts the sentence (from the last period to this one)
+			QString sentence = item.text.mid(last_pos, match_pos - last_pos + 1).trimmed();
+			
+			if(!sentence.isEmpty())
+				sentences.append(sentence);
+			
+			last_pos = match.capturedEnd();
+		}
+		
+		// Adds the last part (or everything if there are no breaks)
+		if(last_pos <  item.text.length())
+		{
+			QString sentence =  item.text.mid(last_pos).trimmed();
+			
+			if(!sentence.isEmpty())
+				sentences.append(sentence);
+		}
+		
+		// If no sentences found, uses the entire description
+		if(sentences.isEmpty())
+			sentences.append(item.text);
+	}
+	
+	// Prints the first sentence with the options
+	QString ini_pad = opt_part.leftJustified(ini_pos, ' ');
+	
+	// If there are subsequent sentences, adds break symbol at the end
+	if(sentences.size() > 1)
+		printText(ini_pad + sentences.first() + " ↲");
+	else
+		printText(ini_pad + sentences.first());
+	
+	// Prints the subsequent sentences
+	QString next_line;
+
+	for(int i = 1; i < sentences.size(); i++)
+	{
+		next_line = QString(ini_pos, ' ') + sentences[i];
+		
+		// Adds break symbol if it's not the last sentence
+		if(i < sentences.size() - 1)
+			next_line += " ↲";
+		
+		printText(next_line);
+	}
+}
+
+void PgModelerCliApp::printMenuItems(const QList<PgModelerCliApp::MenuItem> &items, int break_pos)
+{
+	// Calculates the maximum option length for alignment
+	int max_opt_length = 0;
+	
+	for(auto &item : items)
+	{
+		// Ignores section titles
+		if(item.isEmpty() || !item.section.isEmpty())
+			continue;
+		
+		// Calculates the options part length: " -short, --long [VALUE]"
+		QString options_part = MenuItemOptTmpl.arg(short_opts[item.option], item.option);
+		
+		if(!item.value.isEmpty())
+			options_part += " " + item.value;
+		
+		if(options_part.length() > max_opt_length)
+			max_opt_length = options_part.length();
+	}
+	
+	// Adds a 2-space margin after options
+	int ini_pos = max_opt_length + 2;
+	
+	// Prints each item
+	for(auto &item : items)
+	{
+		// Empty line
+		if(item.isEmpty())
+		{
+			printText();
+			continue;
+		}
+		
+		// Section title
+		if(!item.section.isEmpty())
+		{
+			printText("# " + item.section + ":");
+			continue;
+		}
+		
+		// Item normal - chama printMenuItem com ini_pos calculado
+		printMenuItem(item, ini_pos, break_pos);
+	}
 }
 
 void PgModelerCliApp::showMenu()
 {
 	showVersionInfo(false);
 
+	printText(tr("This tool provides a command-line interface for the main operations\navailable in GUI. All available options are described below."));
+	printText();
 	printText(tr("Usage: pgmodeler-cli [OPTIONS]"));
-	printText(tr("This CLI tool provides operations with database models and databases without requiring the use of pgModeler's graphical interface. All available options are described below."));
 	printText();
 
-	printText(tr("Operation mode options: "));
-	printText(tr(" %1, %2\t\t  Exports the input model to SQL script file(s).").arg(short_opts[ExportToFile], ExportToFile));
-	printText(tr(" %1, %2\t\t  Exports the input model to a PNG image.").arg(short_opts[ExportToPng], ExportToPng));
-	printText(tr(" %1, %2\t\t  Exports the input model to a SVG file.").arg(short_opts[ExportToSvg], ExportToSvg));
-	printText(tr(" %1, %2\t\t  Exports the input model to a data dictionary in HTML format.").arg(short_opts[ExportToDict], ExportToDict));
-	printText(tr(" %1, %2\t\t  Exports the input model directly to a PostgreSQL server.").arg(short_opts[ExportToDbms], ExportToDbms));
-	printText(tr(" %1, %2\t\t  Lists the available connections in file %3.").arg(short_opts[ListConns], ListConns, GlobalAttributes::ConnectionsConf + GlobalAttributes::ConfigurationExt));
-	printText(tr(" %1, %2\t\t  Imports a database to an output file.").arg(short_opts[ImportDb], ImportDb));
-	printText(tr(" %1, %2\t\t\t  Compares a model and a database or two databases, generating an SQL script to sync the latter with the former.").arg(short_opts[Diff], Diff));
-	printText(tr(" %1, %2\t\t  Tries to fix the structure of the input model file to make it loadable again.").arg(short_opts[FixModel], FixModel));
-	printText(tr(" %1, %2\t\t  Creates pgModeler's configuration folder and files in the user's local storage.").arg(short_opts[CreateConfigs], CreateConfigs));
-
+	// List of all menu options
+	QList<MenuItem> menu_items;
+	
+	// Operation mode options
+	menu_items.append(MenuItem(tr("Operation mode options")));
+	menu_items.append(MenuItem(ExportToFile, "", tr("Exports the input model to SQL script file(s).")));
+	menu_items.append(MenuItem(ExportToPng, "", tr("Exports the input model to a PNG image.")));
+	menu_items.append(MenuItem(ExportToSvg, "", tr("Exports the input model to an SVG file.")));
+	menu_items.append(MenuItem(ExportToDict, "", tr("Exports the input model to a data dictionary in HTML format.")));
+	menu_items.append(MenuItem(ExportToDbms, "", tr("Exports the input model directly to a PostgreSQL server.")));
+	menu_items.append(MenuItem(ListConns, "", tr("Lists the available connections. File location: %1.").arg(GlobalAttributes::ConnectionsConf + GlobalAttributes::ConfigurationExt)));
+	menu_items.append(MenuItem(ImportDb, "", tr("Imports a database to an output file.")));
+	menu_items.append(MenuItem(Diff, "", tr("Compares a model and a database or two databases. Generates an SQL script to synchronize the latter with the former.")));
+	menu_items.append(MenuItem(FixModel, "", tr("Tries to fix the structure of the input model file to make it loadable again.")));
+	menu_items.append(MenuItem(CreateConfigs, "", tr("Creates pgModeler's configuration folder and files. Stored in the user's local storage.")));
+	
 	#ifndef Q_OS_MACOS
-		printText(tr(" %1, %2 [ACTION]\t  Handles the DBM file association to pgModeler binaries. The ACTION can be [%3 | %4].").arg(short_opts[DbmMimeType], DbmMimeType, Install, Uninstall));
+		menu_items.append(MenuItem(DbmMimeType, "[ACTION]", tr("Handles the DBM file association to pgModeler binaries. Available actions: [%1 | %2].").arg(Install, Uninstall)));
 	#endif
-
-	printText(tr(" %1, %2\t\t\t  Shows this help menu.").arg(short_opts[Help], Help));
-	printText(tr(" %1, %2\t\t\t  Prints the version info and exit.").arg(short_opts[Version], Version));
-	printText();
-
-	printText(tr("General options: "));
-	printText(tr(" %1, %2 [FILE]\t\t  Input model file (%3). Required for export and model fix operations.").arg(short_opts[Input], Input, GlobalAttributes::DbModelExt));
-	printText(tr(" %1, %2 [DBNAME]\t  Input database name. Required for import operation.").arg(short_opts[InputDb], InputDb));
-	printText(tr(" %1, %2 [FILE|DIRECTORY]   Output file or directory. Required for model fix operations or exporting to SQL, HTML, PNG, or SVG formats.").arg(short_opts[Output], Output));
-	printText(tr(" %1, %2\t\t  Forces PostgreSQL syntax to the specified version when generating SQL code. The version string must be in the format [major].[minor], e.g., %3.").arg(short_opts[PgSqlVer], PgSqlVer, PgSqlVersions::DefaulVersion));
-	printText(tr(" %1, %2\t\t\t  Silent execution. Only critical messages and errors are displayed during the process.").arg(short_opts[Silent], Silent));
-	printText();
-
-	printText(tr("SQL file export options: "));
-	printText(tr(" %1, %2\t\t\t  The database model SQL code is split into several files, one per object.").arg(short_opts[Split], Split));
-	printText(tr(" %1, %2\t\t  Includes the object's dependencies SQL code in the generated file. (Only for split mode)").arg(short_opts[DependenciesSql], DependenciesSql));
-	printText(tr(" %1, %2\t\t  Includes the object's children SQL code in the generated file. (Only for split mode)").arg(short_opts[ChildrenSql], ChildrenSql));
-	printText(tr(" %1, %2\t\t  Instead of creating a separate SQL file per object, groups the SQL code of all objects of the same type in a single file. (Only for split mode)").arg(short_opts[GroupByType], GroupByType));
-	printText(tr(" %1, %2\t\t  Creates a separate script containing DROP commands to destroy database objects.").arg(short_opts[GenDropScript], GenDropScript));
-	printText();
-
-	printText(tr("PNG and SVG export options: "));
-	printText(tr(" %1, %2\t\t  Draws the grid in the exported image.").arg(short_opts[ShowGrid], ShowGrid));
-	printText(tr(" %1, %2\t\t  Draws the page delimiters in the exported image.").arg(short_opts[ShowDelimiters], ShowDelimiters));
-	printText(tr(" %1, %2\t\t  Each page will be exported in a separate image. (Only for PNG images)").arg(short_opts[PageByPage], PageByPage));
-	printText(tr(" %1, %2\t  Overrides the original canvas color in the exported image, using a white background instead. (PNG images only)").arg(short_opts[OverrideBgColor], OverrideBgColor));
-	printText(tr(" %1, %2 [FACTOR]\t\t  Applies zoom (in percent) before exporting to an image. Accepted zoom range: %3 to %4 (PNG images only)").arg(short_opts[ZoomFactor], ZoomFactor).arg(ModelWidget::MinimumZoom).arg(ModelWidget::MaximumZoom));
-	printText();
-
-	printText(tr("Data dictionary export options: "));
-	printText(tr(" %1, %2\t\t\t  The data dictionaries are generated in separate files inside the specified output directory.").arg(short_opts[Split], Split));
-	printText(tr(" %1, %2\t\t  Avoids generating the index that is used to help navigate through the data dictionary.").arg(short_opts[NoIndex], NoIndex));
-	printText(tr(" %1, %2\t\t  Generates a data dictionary in Markdown format (.md) instead of HTML format.").arg(short_opts[Markdown], Markdown));
-	printText();
-
-	printText(tr("DBMS export options: "));
-	printText(tr(" %1, %2\t  Ignores errors related to duplicate objects that may exist on the server.").arg(short_opts[IgnoreDuplicates], IgnoreDuplicates));
-	printText(tr(" %1, %2 [LIST] Ignores additional errors by their error codes. Provide a comma-separated list of alphanumeric codes.").arg(short_opts[IgnoreErrorCodes], IgnoreErrorCodes));
-	printText(tr(" %1, %2\t\t  Drops the database before executing the export process.").arg(short_opts[DropDatabase], DropDatabase));
-	printText(tr(" %1, %2 \t\t\t  Forces termination of all connections to the target database before dropping it. This option is ignored when exporting to PostgreSQL 12 or earlier.").arg(short_opts[Force], Force));
-	printText(tr(" %1, %2\t\t  Executes DROP commands attached to objects with enabled SQL code.").arg(short_opts[DropObjects], DropObjects));
-	printText(tr(" %1, %2\t\t  Simulates the export process by executing all steps but undoing any modifications at the end.").arg(short_opts[Simulate], Simulate));
-	printText(tr(" %1, %2\t\t  Generates temporary names for databases, roles, and tablespaces when in simulation mode.").arg(short_opts[UseTmpNames], UseTmpNames));
-	printText(tr(" %1, %2\t  Executes the export process in non-transactional mode where changes are not rolled back in case of errors.").arg(short_opts[NonTransactional], NonTransactional));
-	printText();
-
-	printText(tr("Connection options: "));
-	printText(tr(" %1, %2 [ALIAS]\t  Connection configuration alias to be used.").arg(short_opts[ConnAlias], ConnAlias));
-	printText(tr(" %1, %2 [HOST]\t\t  PostgreSQL host on which the task will operate.").arg(short_opts[Host], Host));
-	printText(tr(" %1, %2 [PORT]\t\t  PostgreSQL host listening port.").arg(short_opts[Port], Port));
-	printText(tr(" %1, %2 [USER]\t\t  PostgreSQL username.").arg(short_opts[User], User));
-	printText(tr(" %1, %2 [PASSWORD]\t  PostgreSQL user password.").arg(short_opts[Passwd], Passwd));
-	printText(tr(" %1, %2 [DBNAME]\t  Connection's initial database.").arg(short_opts[InitialDb], InitialDb));
-	printText();
-
-	printText(tr("Database import options: "));
-	printText(tr(" %1, %2\t\t  Ignores all errors and tries to create as many objects as possible.").arg(short_opts[IgnoreImportErrors], IgnoreImportErrors));
-	printText(tr(" %1, %2\t\t  Imports built-in system objects. This option may increase model size due to importing unnecessary objects.").arg(short_opts[ImportSystemObjs], ImportSystemObjs));
-	printText(tr(" %1, %2\t\t  Imports extension objects. This option may increase model size due to importing unnecessary objects.").arg(short_opts[ImportExtensionObjs], ImportExtensionObjs));
-	printText(tr(" %1, %2\t  Uses objects' comments as aliases. This option affects objects graphically represented in the database model.").arg(short_opts[CommentsAsAliases], CommentsAsAliases));
-	printText(tr(" %1, %2 [FILTER]   Imports only objects matching the filter(s). The FILTER must be formatted as type:pattern:mode.").arg(short_opts[FilterObjects], FilterObjects));
-	printText(tr(" %1, %2\t\t  Imports only objects matching the provided filter(s). Objects not matching the filter(s) are discarded.").arg(short_opts[OnlyMatching], OnlyMatching));
-	printText(tr(" %1, %2\t\t  Performs object matching based on names instead of signatures ([schema].[name]).").arg(short_opts[MatchByName], MatchByName));
-	printText(tr(" %1, %2 [OBJECTS]  Forces importing children objects related to tables/views/foreign tables matched by the filter(s). Provide a comma-separated list of types.").arg(short_opts[ForceChildren], ForceChildren));
-	printText(tr(" %1, %2\t\t  Executes the import in debug mode, printing all queries executed on the server.").arg(short_opts[DebugMode], DebugMode));
-	printText();
-
-	printText(tr("Diff options: "));
-	printText(tr(" %1, %2 [FILE]\t  The database model file used in the comparison. This option implies the use of option %3.").arg(short_opts[CompareFile], CompareFile, SaveDiff));
-	printText(tr(" %1, %2 [DBNAME]\t  The database used in the comparison. All generated SQL code is applied to it.").arg(short_opts[CompareDb], CompareDb));
-	printText(tr(" %1, %2\t\t\t  Switches to partial diff operation. Provide object filters using the import option %3.").arg(short_opts[PartialDiff], PartialDiff, FilterObjects));
-	printText(tr(" %1, %2\t\t\t  Forces a full diff if the provided filters fail to retrieve objects for a partial diff operation.").arg(short_opts[Force], Force));
-	printText(tr(" %1, %2\t\t  Matches database model objects with modification dates starting from the specified date. (Only for partial diff)").arg(short_opts[StartDate], StartDate));
-	printText(tr(" %1, %2\t\t  Matches database model objects with modification dates ending on the specified date. (Only for partial diff)").arg(short_opts[EndDate], EndDate));
-	printText(tr(" %1, %2\t\t\t  Saves the generated diff code to the output file.").arg(short_opts[SaveDiff], SaveDiff));
-	printText(tr(" %1, %2\t\t\t  Applies the generated diff code to the database server.").arg(short_opts[ApplyDiff], ApplyDiff));
-	printText(tr(" %1, %2\t\t  Skips previewing the generated diff code before applying it to the server.").arg(short_opts[NoDiffPreview], NoDiffPreview));
-	printText(tr(" %1, %2\t  Drops cluster-level objects like roles and tablespaces.").arg(short_opts[DropClusterObjs], DropClusterObjs));
-	printText(tr(" %1, %2\t\t  Revokes existing permissions on the database. New permissions configured in the input model are still applied.").arg(short_opts[RevokePermissions], RevokePermissions));
-	printText(tr(" %1, %2\t\t  Generates DROP commands for objects present in the source model but missing in the compared database.").arg(short_opts[DropMissingObjs], DropMissingObjs));
-	printText(tr(" %1, %2\t\t  Forces dropping missing columns and constraints. Only affects columns and constraints; other missing objects are preserved.").arg(short_opts[ForceDropColsConstrs], ForceDropColsConstrs));
-	printText(tr(" %1, %2\t\t  Renames the destination database when the involved databases have different names.").arg(short_opts[RenameDb], RenameDb));
-	printText(tr(" %1, %2\t\t  Disables cascade mode when dropping objects.").arg(short_opts[NoCascadeDrop], NoCascadeDrop));
-	printText(tr(" %1, %2\t  Disables sequence reuse on serial columns. Drops the existing sequence assigned to a serial column and creates a new one.").arg(short_opts[NoSequenceReuse], NoSequenceReuse));
-	printText(tr(" %1, %2\t\t  Recreates unmodifiable objects (those that cannot be changed via ALTER command).").arg(short_opts[RecreateUnmod], RecreateUnmod));
-	printText(tr(" %1, %2\t\t  Replaces modifiable objects (those that support CREATE OR REPLACE command).").arg(short_opts[ReplaceModified], ReplaceModified));
-	printText(tr(" %1, %2 [OBJECTS] Uses DROP and CREATE commands to completely modify changed objects. Provide a comma-separated list of object types.").arg(short_opts[ForceReCreateObjs], ForceReCreateObjs));
-	printText();
-
-	printText(tr("Model fix options: "));
-	printText(tr(" %1, %2 [NUMBER]\t  Model fix attempts. When reaching the maximum count, invalid objects will be discarded.").arg(short_opts[FixTries], FixTries));
-	printText();
-
+	
+	menu_items.append(MenuItem(Help, "", tr("Shows this help menu.")));
+	menu_items.append(MenuItem(Version, "", tr("Prints the version info and exit.")));
+	menu_items.append(MenuItem());
+	
+	// General options
+	menu_items.append(MenuItem(tr("General options")));
+	menu_items.append(MenuItem(Input, "[FILE]", tr("Input model file (%1). Required for export and model fix operations.").arg(GlobalAttributes::DbModelExt)));
+	menu_items.append(MenuItem(InputDb, "[DBNAME]", tr("Input database name. Required for import operation.")));
+	menu_items.append(MenuItem(Output, "[FILE|DIRECTORY]", tr("Output file or directory. Required for model fix or export to SQL, HTML, PNG, SVG.")));
+	menu_items.append(MenuItem(PgSqlVer, "", tr("Forces PostgreSQL syntax to the specified version when generating SQL code. Version format: [major].[minor], e.g., %1.").arg(PgSqlVersions::DefaulVersion)));
+	menu_items.append(MenuItem(Silent, "", tr("Silent execution. Only critical messages and errors are displayed.")));
+	menu_items.append(MenuItem());
+	
+	// SQL file export options
+	menu_items.append(MenuItem(tr("SQL file export options")));
+	menu_items.append(MenuItem(Split, "", tr("The database model SQL code is split into several files, one per object.")));
+	menu_items.append(MenuItem(DependenciesSql, "", tr("Includes the object's dependencies SQL code in the generated file. Only for split mode.")));
+	menu_items.append(MenuItem(ChildrenSql, "", tr("Includes the object's children SQL code in the generated file. Only for split mode.")));
+	menu_items.append(MenuItem(GroupByType, "", tr("Groups the SQL code of all objects of the same type in a single file. Only for split mode.")));
+	menu_items.append(MenuItem(GenDropScript, "", tr("Creates a separate script with DROP commands. Used to destroy database objects.")));
+	menu_items.append(MenuItem());
+	
+	// PNG and SVG export options
+	menu_items.append(MenuItem(tr("PNG and SVG export options")));
+	menu_items.append(MenuItem(ShowGrid, "", tr("Draws the grid in the exported image.")));
+	menu_items.append(MenuItem(ShowDelimiters, "", tr("Draws the page delimiters in the exported image.")));
+	menu_items.append(MenuItem(PageByPage, "", tr("Each page will be exported as a separate image. Only for PNG images.")));
+	menu_items.append(MenuItem(OverrideBgColor, "", tr("Overrides the original canvas color using a white background. PNG images only.")));
+	menu_items.append(MenuItem(ZoomFactor, "[FACTOR]", tr("Applies zoom before exporting to an image. Accepted range: %1 to %2 (PNG only).").arg(ModelWidget::MinimumZoom).arg(ModelWidget::MaximumZoom)));
+	menu_items.append(MenuItem());
+	
+	// Data dictionary export options
+	menu_items.append(MenuItem(tr("Data dictionary export options")));
+	menu_items.append(MenuItem(Split, "", tr("Data dictionaries are generated in separate files. Placed inside the specified output directory.")));
+	menu_items.append(MenuItem(NoIndex, "", tr("Avoids generating the navigation index. Used to navigate through the data dictionary.")));
+	menu_items.append(MenuItem(Markdown, "", tr("Generates a data dictionary in Markdown format (.md) instead of HTML format.")));
+	menu_items.append(MenuItem());
+	
+	// DBMS export options
+	menu_items.append(MenuItem(tr("DBMS export options"), "", ""));
+	menu_items.append(MenuItem(IgnoreDuplicates, "", tr("Ignores errors related to duplicate objects that may exist on the server.")));
+	menu_items.append(MenuItem(IgnoreErrorCodes, "[LIST]", tr("Ignores additional errors by their error codes. Provide comma-separated alphanumeric codes.")));
+	menu_items.append(MenuItem(DropDatabase, "", tr("Drops the database before executing the export process.")));
+	menu_items.append(MenuItem(Force, "", tr("Forces termination of all connections to the target database before dropping it. Ignored on PostgreSQL 12 or earlier.")));
+	menu_items.append(MenuItem(DropObjects, "", tr("Executes DROP commands attached to objects with enabled SQL code.")));
+	menu_items.append(MenuItem(Simulate, "", tr("Simulates the export process by executing all steps. Rolls back any modifications at the end.")));
+	menu_items.append(MenuItem(UseTmpNames, "", tr("Generates temporary names for databases, roles, and tablespaces. Used in simulation mode.")));
+	menu_items.append(MenuItem(NonTransactional, "", tr("Executes the export process in non-transactional mode. Changes are not rolled back in case of errors.")));
+	menu_items.append(MenuItem());
+	
+	// Connection options
+	menu_items.append(MenuItem(tr("Connection options")));
+	menu_items.append(MenuItem(ConnAlias, "[ALIAS]", tr("Connection configuration alias to be used.")));
+	menu_items.append(MenuItem(Host, "[HOST]", tr("PostgreSQL host on which the task will operate.")));
+	menu_items.append(MenuItem(Port, "[PORT]", tr("PostgreSQL host listening port.")));
+	menu_items.append(MenuItem(User, "[USER]", tr("PostgreSQL username.")));
+	menu_items.append(MenuItem(Passwd, "[PASSWORD]", tr("PostgreSQL user password.")));
+	menu_items.append(MenuItem(InitialDb, "[DBNAME]", tr("Connection's initial database.")));
+	menu_items.append(MenuItem());
+	
+	// Database import options
+	menu_items.append(MenuItem(tr("Database import options")));
+	menu_items.append(MenuItem(IgnoreImportErrors, "", tr("Ignores all errors. Tries to create as many objects as possible.")));
+	menu_items.append(MenuItem(ImportSystemObjs, "", tr("Imports built-in system objects. May increase model size due to unnecessary objects.")));
+	menu_items.append(MenuItem(ImportExtensionObjs, "", tr("Imports extension objects. May increase model size due to unnecessary objects.")));
+	menu_items.append(MenuItem(CommentsAsAliases, "", tr("Uses objects' comments as aliases. Affects objects graphically represented in the model.")));
+	menu_items.append(MenuItem(FilterObjects, "[FILTER]", tr("Imports only objects matching the filter(s). FILTER format: type:pattern:mode.")));
+	menu_items.append(MenuItem(OnlyMatching, "", tr("Imports only objects matching the provided filter(s). Non-matching objects are discarded.")));
+	menu_items.append(MenuItem(MatchByName, "", tr("Performs object matching based on names. Does not use signatures ([schema].[name]).")));
+	menu_items.append(MenuItem(ForceChildren, "[OBJECTS]", tr("Forces importing child objects related to tables/views/foreign tables. Provide comma-separated list of types.")));
+	menu_items.append(MenuItem(DebugMode, "", tr("Executes the import in debug mode. Prints all queries executed on the server.")));
+	menu_items.append(MenuItem());
+	
+	// Diff options
+	menu_items.append(MenuItem(tr("Diff options")));
+	menu_items.append(MenuItem(CompareFile, "[FILE]", tr("The database model file used in the comparison. Implies the use of option %1.").arg(SaveDiff)));
+	menu_items.append(MenuItem(CompareDb, "[DBNAME]", tr("The database used in the comparison. All generated SQL is applied to it.")));
+	menu_items.append(MenuItem(PartialDiff, "", tr("Switches to partial diff operation. Provide object filters using import option %1.").arg(FilterObjects)));
+	menu_items.append(MenuItem(Force, "", tr("Forces a full diff if the provided filters fail. Used for partial diff operations.")));
+	menu_items.append(MenuItem(StartDate, "", tr("Matches model objects with modification dates from the specified date. Only for partial diff.")));
+	menu_items.append(MenuItem(EndDate, "", tr("Matches model objects with modification dates up to the specified date. Only for partial diff.")));
+	menu_items.append(MenuItem(SaveDiff, "", tr("Saves the generated diff code to the output file.")));
+	menu_items.append(MenuItem(ApplyDiff, "", tr("Applies the generated diff code to the database server.")));
+	menu_items.append(MenuItem(NoDiffPreview, "", tr("Skips previewing the generated diff code before applying it to the server.")));
+	menu_items.append(MenuItem(DropClusterObjs, "", tr("Drops cluster-level objects such as roles and tablespaces.")));
+	menu_items.append(MenuItem(RevokePermissions, "", tr("Revokes existing permissions on the database. New permissions from input model are applied.")));
+	menu_items.append(MenuItem(DropMissingObjs, "", tr("Generates DROP commands for objects present in source model. Targets objects missing from compared database.")));
+	menu_items.append(MenuItem(ForceDropColsConstrs, "", tr("Forces dropping missing columns and constraints. Other missing objects are preserved.")));
+	menu_items.append(MenuItem(RenameDb, "", tr("Renames the destination database when the involved databases have different names.")));
+	menu_items.append(MenuItem(NoCascadeDrop, "", tr("Disables cascade mode when dropping objects.")));
+	menu_items.append(MenuItem(NoSequenceReuse, "", tr("Disables sequence reuse on serial columns. Drops existing sequence and creates a new one.")));
+	menu_items.append(MenuItem(RecreateUnmod, "", tr("Recreates unmodifiable objects. These cannot be changed via ALTER command.")));
+	menu_items.append(MenuItem(ReplaceModified, "", tr("Replaces modifiable objects. These support CREATE OR REPLACE command.")));
+	menu_items.append(MenuItem(ForceReCreateObjs, "[OBJECTS]", tr("Uses DROP and CREATE commands to completely modify changed objects. Provide comma-separated list of types.")));
+	menu_items.append(MenuItem());
+	
+	// Model fix options
+	menu_items.append(MenuItem(tr("Model fix options")));
+	menu_items.append(MenuItem(FixTries, "[NUMBER]", tr("Model fix attempts. Invalid objects are discarded when reaching maximum count.")));
+	menu_items.append(MenuItem());
+	
 	#ifndef Q_OS_MACOS
-		printText(tr("File association options: "));
-		printText(tr(" %1, %2\t\t  Applies DBM file association system-wide instead of for the current user only.").arg(short_opts[SystemWide], SystemWide));
-		printText(tr(" %1, %2 \t\t\t  Forces MIME type installation or uninstallation.").arg(short_opts[Force], Force));
-		printText();
+		// File association options
+		menu_items.append(MenuItem(tr("File association options")));
+		menu_items.append(MenuItem(SystemWide, "", tr("Applies DBM file association system-wide instead of for the current user only.")));
+		menu_items.append(MenuItem(Force, "", tr("Forces MIME type installation or uninstallation.")));
+		menu_items.append(MenuItem());
 	#endif
-
-	printText(tr("Config files creation options: "));
-	printText(tr(" %1, %2 \t\t  Copies only missing configuration files to the user's local storage.").arg(short_opts[MissingOnly], MissingOnly));
-	printText(tr(" %1, %2 \t\t\t  Forces recreation of all configuration files and backs up current settings.").arg(short_opts[Force], Force));
-	printText();
-
-	printText(tr("Plugins options: "));
-	printText(tr(" %1, %2 \t\t  Lists available plugins.").arg(short_opts[ListPlugins], ListPlugins));
-	printText(tr(" %1, %2 \t\t  Ignores errors from plugins that failed to load.").arg(short_opts[IgnoreFaultyPlugins], IgnoreFaultyPlugins));
-	printText();
-
+	
+	// Config files creation options
+	menu_items.append(MenuItem(tr("Config files creation options")));
+	menu_items.append(MenuItem(MissingOnly, "", tr("Copies only missing configuration files to the user's local storage.")));
+	menu_items.append(MenuItem(Force, "", tr("Forces recreation of all configuration files and backs up current settings.")));
+	menu_items.append(MenuItem());
+	
+	// Plugins options
+	menu_items.append(MenuItem(tr("Plugins options")));
+	menu_items.append(MenuItem(ListPlugins, "", tr("Lists available plugins.")));
+	menu_items.append(MenuItem(IgnoreFaultyPlugins, "", tr("Ignores errors from plugins that failed to load.")));
+	menu_items.append(MenuItem());
+	
 	// Displaying loaded plugin's options
 	attribs_map p_short_opts, p_opts_desc;
 	std::map<QString, bool> p_long_opts;
@@ -624,20 +781,27 @@ void PgModelerCliApp::showMenu()
 		p_long_opts =  plugin->getLongOptions();
 		p_opts_desc = plugin->getOptsDescription();
 
-		printText(tr("%1 options: ").arg(plugin->getPluginTitle()));
+		// Adds the plugin section title
+		menu_items.append(MenuItem(tr("%1 options").arg(plugin->getPluginTitle())));
 
+		// Adds the plugin options
 		for(auto &itr : p_opts_desc)
-			printText(QString("  %1, %2 \t\t  %3").arg(p_short_opts[itr.first], itr.first, itr.second));
+			menu_items.append(MenuItem(itr.first, "", itr.second));
 
-		printText();
+		// Blank line after plugin options
+		menu_items.append(MenuItem());
 	}
 
+	// Prints all items at once with consistent alignment and sentence-based line breaking
+	printMenuItems(menu_items, 120);
+
 	printText();
-	printText(tr("** When exporting to SQL file in split mode, if none of the options %1, %2, and %3\
-\n   are specified, the generated files will be named to reflect the correct creation order.").arg(DependenciesSql, ChildrenSql, GroupByType));
+	printText(tr("** When exporting to SQL file in split mode, if none of the options %1, %2, \
+\n   and %3 are specified, the generated files will be named to reflect the correct order.")
+						.arg(DependenciesSql, ChildrenSql, GroupByType));
 	printText();
 	printText(tr("** The FILTER value in the %1 option has the form type:pattern:mode. ").arg(FilterObjects));
-	printText(tr("   * The section `type' is the type of object to be filtered and accepts the following values (invalid types ignored): "));
+	printText(tr("   * The section `type' is the type of the filtered object being (invalid types are ignored): "));
 
 	QStringList list;
 	QString child_list;
@@ -662,7 +826,7 @@ void PgModelerCliApp::showMenu()
 	{
 		fmt_types.append(type);
 		i++;
-		if(i % 8 == 0 || i == type_list.size() - 1)
+		if(i % 6 == 0 || i == type_list.size() - 1)
 		{
 			lines.append("     > " + fmt_types.join(", "));
 			fmt_types.clear();
@@ -680,19 +844,20 @@ void PgModelerCliApp::showMenu()
 	printText(tr("     > `%1' treats the pattern as a wildcard string when matching object names.").arg(UtilsNs::FilterWildcard));
 	printText(tr("     > `%1' treats the pattern as a Perl-like regular expression when matching object names.").arg(UtilsNs::FilterRegExp));
 	printText();
-	printText(tr("   * The option %1 takes effect only when used with %2 and prevents discarding children of matched tables.").arg(ForceChildren, OnlyMatching));
-	printText(tr("     Other tables imported as dependencies of matched objects will have their children discarded."));
-	printText(tr("     The comma-separated list of table children objects accepts these values:"));
+	printText(tr("   * The option %1 takes effect only when used with %2 and prevents discarding\
+\n     children of matched tables. Other tables imported as dependencies of matched objects will have their\
+\n     children discarded. The comma-separated list of table child objects accepts these values:").arg(ForceChildren, OnlyMatching));
 	printText(tr("     > %1").arg(child_list));
-	printText(tr("     > Use the special keyword `%1' to include all children objects.").arg(AllChildren));
+	printText(tr("     > Use the special keyword `%1' to include all child objects.").arg(AllChildren));
 	printText();
 	printText(tr("   * NOTE: All comparisons during filtering are case-insensitive."));
 	printText(tr("     Using filtering options may import additional objects due to automatic dependency resolution."));
 	printText();
 	printText(tr("** The diff process supports all import-related options."));
-	printText(tr("   It also accepts these export operation options: `%1', `%2', and `%3'.").arg(IgnoreDuplicates, IgnoreErrorCodes, NonTransactional));
+	printText(tr("   It also accepts these export operation options:\
+\n   `%1', `%2', and `%3'.").arg(IgnoreDuplicates, IgnoreErrorCodes, NonTransactional));
 	printText();
-	printText(tr("** The partial diff operation always forces the options %1 and %2 = %3 for more reliable results.").arg(OnlyMatching, ForceChildren, AllChildren));
+	printText(tr("** The partial diff always forces the options %1 and %2 = %3 for better results.").arg(OnlyMatching, ForceChildren, AllChildren));
 	printText(tr("   * The options %1 and %2 accept ISO8601 date/time format: `yyyy-MM-dd hh:mm:ss'.").arg(StartDate, EndDate));
 	printText();
 	printText(tr("** When diffing between two databases (%1 and %2), you can specify separate connections/aliases.").arg(InputDb, CompareDb));
@@ -936,7 +1101,7 @@ void PgModelerCliApp::parseOptions(attribs_map &opts)
 		}
 
 		/* If any of the dates are correctly parsed we need to force
-		 * the signature name matching, the forced filtering of all table children objects
+		 * the signature name matching, the forced filtering of all table child objects
 		 * and the only-matching option, so the objects can be correctly retrieved from
 		 * the destination database */
 		if(start_date.isValid() || end_date.isValid())
@@ -1007,9 +1172,9 @@ int PgModelerCliApp::exec()
 {
 	try
 	{
-		showVersionInfo(parsed_opts.count(Version) > 0);
-
-		if(parsed_opts.empty() || parsed_opts.count(Help))
+		if(parsed_opts.count(Version) > 0)
+			showVersionInfo(true);
+		else if(parsed_opts.empty() || parsed_opts.count(Help))
 			showMenu();
 		else if(list_conns)
 			listConnections();
@@ -1017,6 +1182,10 @@ int PgModelerCliApp::exec()
 			listPlugins();
 		else if(!parsed_opts.count(Version))
 		{
+			#ifdef PRIV_CODE_SYMBOLS
+				__pgm_plus_cli_init
+			#endif
+
 			runPluginsPreOperations();
 
 			if(fix_model)
@@ -1442,7 +1611,7 @@ void PgModelerCliApp::recreateObjects()
 												 .arg(tr("Object recreated: `%1' (%2)").arg(object->getName(true), object->getTypeName())));
 					}
 
-					//For each sucessful created object the method will try to create a failed one
+					//For each successfully created object the method will try to create a failed one
 					use_fail_obj=(!fail_objs.isEmpty());
 				}				
 				else if(obj_type == ObjectType::Relationship &&
@@ -2006,7 +2175,7 @@ void PgModelerCliApp::fixModel()
 	input_model->saveModel(parsed_opts[Output], SchemaParser::XmlCode);
 
 	if(!has_fix_log)
-		printMessage(tr("Model successfully fixed!"));
+		printMessage(tr("Model fixed successfully!"));
 	else
 	{
 		printMessage(tr("Model fixed with some errors!"));

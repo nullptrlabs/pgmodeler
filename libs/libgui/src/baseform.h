@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -64,6 +67,15 @@ class __libgui BaseForm: public QDialog, public Ui::BaseForm {
 		void setMainWidget(Class *widget, Slot accept_slot);
 
 		/*! \brief Injects the specified object into the form and turns it the main widget.
+		 * The widget is reparented to the stack widget within the form.
+		 * The accept_slot is the fucntion pointer to the slot from the provided widget that can be
+		 * optionally used to replace the default accept() of the form's footer aplly button.
+		 * The cancel_slot is the fucntion pointer to the slot from the provided widget that can be
+		 * optionally used to replace the default reject() of the form's footer cancel button.*/
+		template <class Class, typename Slot>
+		void setMainWidget(Class *widget, Slot accept_slot, Slot cancel_slot);
+
+		/*! \brief Injects the specified object into the form and turns it the main widget.
 		 *  The widget is reparented to the stack widget within the form. This version of method
 		 *  does additional configurations like signal connection, automatic sizing and
 		 *  custom title configuration based upont the object handled by the BaseObjectWidget instance. */
@@ -99,6 +111,16 @@ void BaseForm::setMainWidget(Class *widget, Slot accept_slot)
 	setMainWidget(widget);
 	disconnect(apply_ok_btn, nullptr, this, nullptr);
 	connect(apply_ok_btn, &QPushButton::clicked, widget, accept_slot);
+}
+
+template <class Class, typename Slot>
+void BaseForm::setMainWidget(Class *widget, Slot accept_slot, Slot cancel_slot)
+{
+	if(!widget)
+		return;
+
+	setMainWidget(widget, accept_slot);
+	connect(this, &BaseForm::rejected, widget, cancel_slot);
 }
 
 #endif

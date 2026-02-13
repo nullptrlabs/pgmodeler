@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,6 +52,7 @@
 #include <QRadioButton>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
+#include <QGroupBox>
 #include <cmath>
 
 QMap<QStyle::PixelMetric, int> CustomUiStyle::pixel_metrics;
@@ -301,11 +305,22 @@ void CustomUiStyle::drawCCGroupBox(ComplexControl control, const QStyleOptionCom
 
 	painter->save();
 
+	const QGroupBox *group_box = qobject_cast<const QGroupBox *>(widget);
+	bool is_checkable = group_box && group_box->isCheckable(),
+		is_checked = group_box && group_box->isChecked();
+
 	QRect group_rect = group_box_opt->rect,
 			title_rect, frame_rect = group_rect;
 
 	// Calculate title area if there's text
 	bool has_title = !group_box_opt->text.isEmpty();
+
+	// Get checkbox size if the GroupBox is checkable
+	int checkbox_size = 0,
+		checkbox_spacing = 4; // Space between checkbox and text
+
+	if(is_checkable)
+		checkbox_size = pixelMetric(PM_IndicatorWidth, group_box_opt, widget);
 
 	if(has_title)
 	{
@@ -352,9 +367,53 @@ void CustomUiStyle::drawCCGroupBox(ComplexControl control, const QStyleOptionCom
 		// Use state-aware text color
 		painter->setPen(getStateColor(QPalette::WindowText, group_box_opt));
 
-		// Draw the text in the title area with 2px padding (centered vertically)
-		title_rect.adjust(0, GrpBoxTitlePadding, 0, -GrpBoxTitlePadding); // Apply 2px padding top/bottom
-		painter->drawText(title_rect,
+		// Calculate text rectangle with padding
+		QRect text_rect = title_rect.adjusted(0, GrpBoxTitlePadding, 0, -GrpBoxTitlePadding);
+
+		// Draw checkbox if the GroupBox is checkable
+		if(is_checkable && checkbox_size > 0)
+		{
+			painter->save();
+			painter->setRenderHint(QPainter::Antialiasing, true);
+
+			// Calculate checkbox position - vertically centered in title area
+			int checkbox_x = text_rect.left();
+			int checkbox_y = text_rect.top() + ((text_rect.height() - checkbox_size) / 2);
+			QRectF checkbox_rect(checkbox_x, checkbox_y, checkbox_size, checkbox_size);
+
+			// Prepare colors for checkbox drawing (same as drawPECheckBoxRadioBtn)
+			QColor border_color = getAdjustedColor(getStateColor(QPalette::Dark, group_box_opt), MidFactor, NoFactor),
+				   bg_color = getStateColor(QPalette::Base, group_box_opt),
+				   ind_color = getAdjustedColor(getStateColor(QPalette::Highlight, group_box_opt), MidFactor, -XMinFactor);
+
+			WidgetState wgt_st(group_box_opt, widget);
+
+			if(!wgt_st.is_enabled)
+				ind_color = getStateColor(QPalette::Mid, group_box_opt);
+
+			// Draw checkbox background
+			painter->setBrush(bg_color);
+			painter->setPen(QPen(border_color, PenWidth));
+			checkbox_rect.adjust(0.5, 0.5, -0.5, -0.5);
+			painter->drawRoundedRect(checkbox_rect, 2, 2);
+
+			// Draw indicator if checked
+			if(is_checked)
+			{
+				painter->setBrush(ind_color);
+				painter->setPen(Qt::NoPen);
+				checkbox_rect.adjust(2, 2, -2, -2);
+				painter->drawRoundedRect(checkbox_rect, 1, 1);
+			}
+
+			painter->restore();
+
+			// Offset the text to the right of the checkbox
+			text_rect.adjust(checkbox_size + checkbox_spacing, 0, 0, 0);
+		}
+
+		// Draw the text in the title area (centered vertically)
+		painter->drawText(text_rect,
 						group_box_opt->textAlignment | Qt::AlignVCenter,
 						group_box_opt->text);
 	}

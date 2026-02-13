@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -279,6 +282,11 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 
 		//! \brief Restore the layer information of FK relationship during loading process
 		void restoreFKRelationshipLayers();
+
+		/*! \brief This method returns the value of the flag loading_model
+		 *  which is set by loadModel to indicate that objects are being
+		 *  read from dbm file. At the end of the load process, the flag is reset */
+		bool isModelLoading();
 
 	protected:
 		//! \brief Set the layer names (only to be written in the XML definition)

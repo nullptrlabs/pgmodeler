@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -76,7 +79,7 @@ void ModelNavigationWidget::addModel(ModelWidget *model)
 		setEnabled(true);
 		models_cmb->blockSignals(true);
 
-		tooltip=model->getFilename();
+		tooltip = model->getFilename();
 
 		if(tooltip.isEmpty())
 			tooltip=tr("(Model not saved yet)");
@@ -86,9 +89,9 @@ void ModelNavigationWidget::addModel(ModelWidget *model)
 		models_cmb->setToolTip(tooltip);
 
 		models_cmb->blockSignals(false);
-
 		model_wgts.append(model);
 
+		setCurrentModelModified(model->isModified());
 		enableNavigationButtons();
 	}
 }

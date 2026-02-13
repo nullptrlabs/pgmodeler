@@ -9,6 +9,11 @@ pgm_add_library(parsers
     src/schemaparser.cpp src/schemaparser.h
     src/xmlparser.cpp src/xmlparser.h)
 
+target_sources(parsers
+  PRIVATE
+    src/attributes.cpp
+)
+
 target_include_directories(${PGM_TARGET} PUBLIC
     ${LIBUTILS_INC}
     ${XML2_INC})

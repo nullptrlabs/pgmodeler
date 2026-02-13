@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 	pending_op = NoPendingOp;
 	window_title = tr("pgModeler %1 - PostgreSQL Database Modeler %2");
 
-	#ifdef PRIVATE_PLUGINS_SYMBOLS
+	#ifdef PRIV_CODE_SYMBOLS
 		window_title = window_title.arg("Plus", GlobalAttributes::PgModelerVersion);
 	#else
 		window_title = window_title.arg("", GlobalAttributes::PgModelerVersion);
@@ -70,7 +73,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 	connectSignalsToSlots();
 	showRightWidgetsBar();
 	showBottomWidgetsBar();
-	//updateConnections();
 	updateRecentModelsMenu();
 	configureSamplesMenu();
 	applyConfigurations();
@@ -106,36 +108,10 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 	//Positioning the update notifier widget before showing it (if there is an update)
 	setFloatingWidgetPos(update_notifier_wgt, action_update_found, model_acts_tb, false);
 	action_update_found->setVisible(false);
-	QTimer::singleShot(1000, this, &MainWindow::restoreTemporaryModels);
 
 	//If there's no previuos geometry registered for the mainwindow display it maximized
 	if(!GeneralConfigWidget::restoreWidgetGeometry(this))
 		this->setWindowState(Qt::WindowMaximized);
-
-	#ifdef NO_UPDATE_CHECK
-		#warning "NO UPDATE CHECK: Update checking is disabled."
-	#else
-		//Enabling update check at startup
-		if(confs[Attributes::Configuration][Attributes::CheckUpdate]==Attributes::True)
-		{
-			update_notifier_wgt->setCheckVersions(confs[Attributes::Configuration][Attributes::CheckVersions]);
-			QTimer::singleShot(15000, update_notifier_wgt, &UpdateNotifierWidget::checkForUpdate);
-		}
-	#endif
-
-	#ifdef DEMO_VERSION
-		#warning "DEMO VERSION: demonstration version startup alert."
-		QTimer::singleShot(2000, this, [this](){
-			showDemoVersionWarning();
-		});
-	#endif
-
-	#ifdef CHECK_CURR_VER
-		//Showing the donate widget in the first run or if the version registered in the file diverges from the current
-		if(confs[Attributes::Configuration][Attributes::FirstRun] != Attributes::False ||
-			 confs[Attributes::Configuration][Attributes::PgModelerVersion] != GlobalAttributes::PgModelerVersion)
-			QTimer::singleShot(1000, action_donate, &QAction::trigger);
-	#endif
 
 	// Post initilize plug-ins	
 	PluginsConfigWidget *plugins_conf_wgt = configuration_wgt->getConfigurationWidget<PluginsConfigWidget>();
@@ -211,7 +187,7 @@ void MainWindow::handleImportFinished(bool aborted_by_error)
 	else if(current_model)
 		updateDockWidgets();
 
-	stopTimers(false);
+	stopSaveTimers(false);
 	action_design->setChecked(!aborted_by_error);
 }
 
@@ -378,18 +354,7 @@ void MainWindow::configureMenusActionsWidgets()
 		 * be uniquely identified when handling styles via Qt Stylesheets */
 		btn->setObjectName(act->objectName() + "_tb");
 		btn->setProperty("view_btn", true);
-		//GuiUtilsNs::createDropShadow(btn, 1, 1, 5);
 	}
-
-	/* for(auto &act : model_acts_tb->actions())
-	{
-		btn = qobject_cast<QToolButton *>(model_acts_tb->widgetForAction(act));
-
-		if(!btn)
-			continue;
-
-		GuiUtilsNs::createDropShadow(btn, 1, 1, 5);
-	} */
 
 	ToolsActionsCount = tools_acts_tb->actions().size();
 	QList<QAction *> actions = model_acts_tb->actions();
@@ -653,7 +618,7 @@ void MainWindow::connectSignalsToSlots()
 	for(auto &act : view_actions)
 	{
 		act->setData(static_cast<MWViewsId>(vw_id++));
-		connect(act, &QAction::toggled, this, &MainWindow::changeCurrentView);
+		connect(act, &QAction::toggled, this, qOverload<bool>(&MainWindow::changeCurrentView));
 	}
 
 	connect(action_export, &QAction::toggled, this, &MainWindow::validateBeforeOperation);
@@ -694,7 +659,7 @@ void MainWindow::connectSignalsToSlots()
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, model_objs_wgt, &ModelObjectsWidget::setDisabled);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, obj_finder_wgt, &ObjectSearchWidget::setDisabled);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, models_tbw, &QTabWidget::setDisabled);
-	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, this, &MainWindow::stopTimers);
+	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, this, &MainWindow::stopSaveTimers);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, layers_btn, &QToolButton::setDisabled);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, layers_cfg_wgt, &LayersConfigWidget::close);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, changelog_btn, &QToolButton::setDisabled);
@@ -729,7 +694,7 @@ void MainWindow::connectSignalsToSlots()
 	});
 
 	connect(db_import_wgt, &DatabaseImportWidget::s_importStarted, this, [this](){
-		stopTimers(true);
+		stopSaveTimers(true);
 	});
 
 	connect(db_import_wgt, &DatabaseImportWidget::s_importFinished, this, &MainWindow::handleImportFinished);
@@ -739,19 +704,19 @@ void MainWindow::connectSignalsToSlots()
 	});
 
 	connect(diff_tool_wgt, &DiffToolWidget::s_diffStarted, this, [this](){
-		stopTimers(true);
+		stopSaveTimers(true);
 	});
 
 	connect(diff_tool_wgt, &DiffToolWidget::s_diffCanceled, this, [this](){
-		stopTimers(false);
+		stopSaveTimers(false);
 	});
 
 	connect(model_export_wgt, &ModelExportWidget::s_exportStarted, this, [this](){
-		stopTimers(true);
+		stopSaveTimers(true);
 	});
 
 	connect(model_export_wgt, &ModelExportWidget::s_exportFinished, this, [this](){
-		stopTimers(false);
+		stopSaveTimers(false);
 	});
 
 	connect(diff_tool_wgt, &DiffToolWidget::s_loadDiffInSQLTool, this, &MainWindow::loadDiffInSQLTool);
@@ -900,7 +865,7 @@ void MainWindow::restoreLastSession()
 	}
 }
 
-void MainWindow::stopTimers(bool value)
+void MainWindow::stopSaveTimers(bool value)
 {
 	if(value)
 	{
@@ -914,6 +879,44 @@ void MainWindow::stopTimers(bool value)
 		if(model_save_timer.interval() < InfinityInterval)
 			model_save_timer.start();
 	}
+}
+
+void MainWindow::startOtherTimers()
+{
+	static bool started = false;
+
+	if(started)
+		return;
+
+	std::map<QString, attribs_map >confs = GeneralConfigWidget::getConfigurationParams();
+
+	started = true;
+	QTimer::singleShot(1000, this, &MainWindow::restoreTemporaryModels);
+
+	#ifdef NO_UPDATE_CHECK
+		#warning "NO UPDATE CHECK: Update checking is disabled."
+	#else
+		//Enabling update check at startup
+		if(confs[Attributes::Configuration][Attributes::CheckUpdate]==Attributes::True)
+		{
+			update_notifier_wgt->setCheckVersions(confs[Attributes::Configuration][Attributes::CheckVersions]);
+			QTimer::singleShot(15000, update_notifier_wgt, &UpdateNotifierWidget::checkForUpdate);
+		}
+	#endif
+
+	#ifdef DEMO_VERSION
+		#warning "DEMO VERSION: demonstration version startup alert."
+		QTimer::singleShot(2000, this, [this](){
+			showDemoVersionWarning();
+		});
+	#endif
+
+	#ifdef CHECK_CURR_VER
+		//Showing the donate widget in the first run or if the version registered in the file diverges from the current
+		if(confs[Attributes::Configuration][Attributes::FirstRun] != Attributes::False ||
+			 confs[Attributes::Configuration][Attributes::PgModelerVersion] != GlobalAttributes::PgModelerVersion)
+			QTimer::singleShot(1000, action_donate, &QAction::trigger);
+	#endif
 }
 
 void MainWindow::resizeEvent(QResizeEvent *)
@@ -930,6 +933,16 @@ void MainWindow::resizeEvent(QResizeEvent *)
 
 	toggleLayersWidget(layers_cfg_wgt->isVisible());
 	toggleChangelogWidget(changelog_wgt->isVisible());
+}
+
+void MainWindow::showEvent(QShowEvent *event)
+{
+	#ifdef PRIV_CODE_SYMBOLS
+		__pgm_plus_mwnd_impl;
+	#else
+		if(!event->spontaneous())
+			startOtherTimers();
+	#endif
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -1342,9 +1355,9 @@ void MainWindow::addModel(const QString &filename)
 		models_tbw->setUpdatesEnabled(true);
 		models_tbw->setVisible(true);
 
+		setCurrentModel();
 		model_tab->setModified(false);
 		model_tab->db_model->setInvalidated(false);
-		setCurrentModel();
 
 		if(start_timers)
 		{
@@ -1688,15 +1701,15 @@ void MainWindow::closeModel(int model_id)
 		//Ask the user to save the model if its modified
 		if(model->isModified())
 		{
-			Messagebox::confirm(tr("Save model"),
-													tr("The model <strong>%1</strong> was modified! Do you really want to close without saving it?")
-													.arg(model->getDatabaseModel()->getName()),
-													Messagebox::YesNoButtons);
+			msg_res = Messagebox::confirm(tr("Save model"),
+																		tr("The model <strong>%1</strong> was modified! Do you really want to close without saving it?")
+																		.arg(model->getDatabaseModel()->getName()),
+																		Messagebox::YesNoButtons);
 		}
 #endif
 
 		if(!model->isModified() ||
-				(model->isModified() && msg_res == Messagebox::Accepted))
+			 (model->isModified() && msg_res == Messagebox::Accepted))
 		{
 			model_nav_wgt->removeModel(model_id);
 			model_tree_states.remove(model);
@@ -1852,7 +1865,7 @@ void MainWindow::saveModel(ModelWidget *model)
 				}
 			}
 
-			stopTimers(true);
+			stopSaveTimers(true);
 
 			if((!confirm_validation ||
 					(!db_model->isInvalidated() ||
@@ -1907,13 +1920,13 @@ void MainWindow::saveModel(ModelWidget *model)
 				emit s_modelSaved(model);
 			}
 
-			stopTimers(false);
+			stopSaveTimers(false);
 			action_save_model->setEnabled(model->isModified());
 		}
 	}
 	catch(Exception &e)
 	{
-		stopTimers(false);
+		stopSaveTimers(false);
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 #endif
@@ -2242,7 +2255,7 @@ void MainWindow::setFloatingWidgetPos(QWidget *widget, QAction *act, QToolBar *t
 	QPoint pos_orig=(wgt ? wgt->pos() : QPoint(0,0)), pos;
 
 	if(map_to_window)
-		pos=wgt->mapTo(this, pos);
+		pos = wgt->mapTo(this, pos);
 
 	pos.setX(pos_orig.x() - 10);
 	pos.setY(toolbar->pos().y() + toolbar->height() /* - 10 */);
@@ -2413,9 +2426,72 @@ void MainWindow::executePendingOperation(bool valid_error)
 	pending_op = NoPendingOp;
 }
 
+void MainWindow::changeCurrentView(MWViewsId view_id)
+{
+	layers_cfg_wgt->setVisible(false);
+	changelog_wgt->setVisible(false);
+
+	bool enable = (view_id == DesignView);
+	QList<QAction *> actions;
+
+	for(auto &vw_act : view_actions)
+	{
+		vw_act->blockSignals(true);
+		vw_act->setChecked(false);
+
+		if(view_id == static_cast<MWViewsId>(vw_act->data().toInt()) &&
+			 !vw_act->isChecked())
+		{
+			vw_act->setChecked(true);
+			views_stw->setCurrentIndex(view_id);
+		}
+
+		vw_act->blockSignals(false);
+	}
+
+	actions = tools_acts_tb->actions();
+	for(int i = ToolsActionsCount; i < actions.count(); i++)
+		actions[i]->setVisible(enable && current_model && current_model->isInteractive());
+
+	if(!enable)
+		overview_wgt->close();
+
+	actions = edit_menu->actions();
+	actions.removeOne(action_configure);
+
+	for(auto &act : actions)
+		act->setEnabled(enable);
+
+	actions = canvas_menu->actions();
+	for(auto &act : actions)
+		act->setEnabled(enable);
+
+	model_nav_wgt->setEnabled(enable);
+	action_print->setEnabled(enable);
+	action_close_model->setEnabled(enable);
+	action_save_as->setEnabled(enable);
+	about_wgt->hide();
+	donate_wgt->hide();
+
+	QList<ModelWidget *> models = model_nav_wgt->getModelWidgets();
+
+	if(view_id == DiffView)
+		diff_tool_wgt->updateModels(models);
+
+	if(view_id == ExportView)
+		model_export_wgt->updateModels(models);
+
+	if(view_id == ImportView)
+		db_import_wgt->updateModels(models);
+
+	if(view_id == FixView)
+		fix_tools_wgt->updateModels(models);
+}
+
 void MainWindow::changeCurrentView(bool checked)
 {
 	QAction *curr_act = qobject_cast<QAction *>(sender());
+	MWViewsId view_id = static_cast<MWViewsId>(curr_act->data().toInt());
 
 	/* If the user let uncommited configuration changes
 	 * we don't change the view and keep the configuration view open */
@@ -2431,60 +2507,7 @@ void MainWindow::changeCurrentView(bool checked)
 	changelog_wgt->setVisible(false);
 
 	if(checked)
-	{
-		bool enable = (curr_act == action_design);
-		QList<QAction *> actions;
-
-		for(auto &vw_act : view_actions)
-		{
-			vw_act->blockSignals(true);
-			vw_act->setChecked(false);
-
-			if(!curr_act->isChecked())
-			{
-				curr_act->setChecked(true);
-				views_stw->setCurrentIndex(curr_act->data().toInt());
-			}
-
-			vw_act->blockSignals(false);
-		}
-
-		actions = tools_acts_tb->actions();
-		for(int i = ToolsActionsCount; i < actions.count(); i++)
-			actions[i]->setEnabled(enable && current_model && current_model->isInteractive());
-
-		if(!enable)
-			overview_wgt->close();
-
-		actions = edit_menu->actions();
-		actions.removeOne(action_configure);
-
-		for(auto &act : actions)
-			act->setEnabled(enable);
-
-		actions = canvas_menu->actions();
-		for(auto &act : actions)
-			act->setEnabled(enable);
-
-		model_nav_wgt->setEnabled(enable);
-		action_print->setEnabled(enable);
-		action_close_model->setEnabled(enable);
-		action_save_as->setEnabled(enable);
-
-		QList<ModelWidget *> models = model_nav_wgt->getModelWidgets();
-
-		if(curr_act == action_diff)
-			diff_tool_wgt->updateModels(models);
-
-		if(curr_act == action_export)
-			model_export_wgt->updateModels(models);
-
-		if(curr_act == action_import)
-			db_import_wgt->updateModels(models);
-
-		if(curr_act == action_fix)
-			fix_tools_wgt->updateModels(models);
-	}
+		changeCurrentView(view_id);
 	else
 	{
 		curr_act->blockSignals(true);

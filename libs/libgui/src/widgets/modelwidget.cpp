@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -161,8 +164,9 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 
 	db_model = new DatabaseModel(this);
 	xmlparser = db_model->getXMLParser();
-	op_list = new OperationList(db_model);
-	scene = new ObjectsScene;
+	op_list = new OperationList(db_model, this);
+
+	scene = new ObjectsScene(this);
 	scene->installEventFilter(this);
 
 	viewport = new QGraphicsView(scene, this);
@@ -703,6 +707,10 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 
 ModelWidget::~ModelWidget()
 {
+	/* Forcing the deletion of db_model only after everything else was destroyed
+	 * to avoid memory leaks */
+	db_model->deleteLater();
+
 	/* If there are copied/cutted objects that belongs to the database model
 	 being destroyed, then the cut/copy operation are cancelled by emptying
 	 the lists, avoiding crashes when trying to paste them */
@@ -721,8 +729,6 @@ ModelWidget::~ModelWidget()
 	owners_menu.clear();
 	tags_menu.clear();
 	break_rel_menu.clear();
-
-	delete scene;
 }
 
 void ModelWidget::setModified(bool value)
@@ -1042,7 +1048,10 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 		if(item)
 		{
 			scene->addItem(item, blink_new_objs);
-			setModified(true);
+
+			if(!db_model->loading_model)
+				setModified(true);
+
 			emit s_objectAdded(graph_obj);
 
 			if(blink_new_objs)
@@ -1279,7 +1288,7 @@ void ModelWidget::emitSceneInteracted()
 void ModelWidget::setProtected(bool protect)
 {
 	QLabel *msg_lbl = protected_model_frm->findChild<QLabel *>("message_lbl");
-	msg_lbl->setText(tr("<strong>ATTENTION:</strong> The database model is protected. Modifications are disabled!"));
+	msg_lbl->setText(tr("The database model is protected. Modifications are disabled!"));
 
 	protected_model_frm->setVisible(protect);
 	db_model->setProtected(protect);
@@ -1288,7 +1297,7 @@ void ModelWidget::setProtected(bool protect)
 void ModelWidget::setInteractive(bool interact)
 {
 	QLabel *msg_lbl = protected_model_frm->findChild<QLabel *>("message_lbl");
-	msg_lbl->setText(tr("<strong>ATTENTION:</strong> The database model is being accessed by another operation (diff or import). Modifications are temporarily disabled until the operation finishes!"));
+	msg_lbl->setText(tr("The interaction over the database model is blocked. Modifications are temporarily disabled until the blocking operation finishes!"));
 
 	protected_model_frm->setVisible(!interact);
 	viewport->setInteractive(interact);
@@ -1885,7 +1894,6 @@ void ModelWidget::loadModel(const QString &filename)
 		adjustSceneRect(true);
 
 		task_prog_wgt.close();
-		//protected_model_frm->setVisible(db_model->isProtected());
 		setProtected(db_model->isProtected());
 		setModified(false);
 

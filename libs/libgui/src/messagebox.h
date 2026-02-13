@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -80,6 +83,7 @@ class __libgui Messagebox: public QDialog, public Ui::Messagebox {
 		//! \brief Shows a simple message box with the title automatically defined by the icon type
 		int show(const QString &msg, MessageType icon_type=None, ButtonsId buttons=OkButton);
 
+
 		/*! \brief Shows an error message box in which can an error code and exact local of the code is specified.
 		 *  Additionally, a reference to a captured exception can be specified and will be used to fill up the stack trace.
 		 * Also, it uses an error icon and only OK button */
@@ -102,9 +106,15 @@ class __libgui Messagebox: public QDialog, public Ui::Messagebox {
 		//! \brief Shows an error message box with the provided message, an error icon and only OK button
 		static void error(const QString &msg);
 
+		//! \brief Shows an error message box with the provided title and message, an error icon and only OK button
+		static void error(const QString &title, const QString &msg);
+
 		/*! \brief Shows an alert message box with the provided message, an alert icon and only OK button
 		 *  If an exception is provided, the stacktrace will also be enabled */
 		static void alert(const QString &msg, Exception *ex = nullptr);
+
+		//! \brief Shows an alert message box with the provided title and message, an alert icon and only OK button
+		static void alert(const QString &title, const QString &msg);
 
 		//! \brief Shows an info message box with the provided message, an info icon and only OK button
 		static void info(const QString &msg);

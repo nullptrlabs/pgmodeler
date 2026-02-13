@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -528,6 +531,8 @@ void DatabaseImportWidget::listObjects()
 			Connection *conn = reinterpret_cast<Connection *>(connections_cmb->itemData(connections_cmb->currentIndex()).value<void *>());
 			QStringList obj_filter = objs_filter_wgt->getObjectFilters();
 
+			qApp->setOverrideCursor(Qt::WaitCursor);
+
 			dbg_output_wgt->showActionButtons(false);
 			dbg_output_wgt->clear();
 
@@ -587,6 +592,8 @@ Do you really want to proceed?"),
 		}
 
 		enableImportControls(true);
+
+		qApp->restoreOverrideCursor();
 	}
 	catch(Exception &e)
 	{
@@ -921,6 +928,7 @@ void DatabaseImportWidget::listDatabases(DatabaseImportHelper &import_helper, QC
 		QStringList list;
 		std::map<QString, unsigned> oids;
 
+		qApp->setOverrideCursor(Qt::WaitCursor);
 		db_attribs=import_helper.getObjects(ObjectType::Database);
 		dbcombo->blockSignals(true);
 		dbcombo->clear();
@@ -951,6 +959,7 @@ void DatabaseImportWidget::listDatabases(DatabaseImportHelper &import_helper, QC
 
 		dbcombo->setCurrentIndex(0);
 		dbcombo->blockSignals(false);
+		qApp->restoreOverrideCursor();
 	}
 	catch(Exception &e)
 	{

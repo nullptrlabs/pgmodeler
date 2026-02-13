@@ -1,7 +1,10 @@
 /*
 # Projeto: Modelador de Banco de Dados PostgreSQL (pgsqlDBM)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +34,7 @@
 #include "attribsmap.h"
 #include "pgmodelerplugin.h"
 
-#if defined(PRIVATE_PLUGINS_SYMBOLS)
+#ifdef PRIV_CODE_SYMBOLS
 	#include "privpluginsns.h"
 #endif
 

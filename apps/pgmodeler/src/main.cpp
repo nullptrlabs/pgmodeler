@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +23,11 @@
 #include "mainwindow.h"
 #include <signal.h>
 #include <QSplashScreen>
+
+#ifdef PRIV_CODE_SYMBOLS
+	#include "privcoreinit.h"
+	#include "privcoreclasses.h"
+#endif
 
 #ifndef Q_OS_WIN
 	#include "execinfo.h"
@@ -114,15 +122,19 @@ int main(int argc, char **argv)
 		//Creates the main form
 		MainWindow fmain;
 
-		// Displaying the splash for one second after displaying the main window
-		QTimer::singleShot(1000, &splash, [&splash, &fmain]() {
+		#ifdef PRIV_CODE_SYMBOLS
+			__pgm_plus_gui_init
+		#endif
+
+		// Displaying the splash for one and a half second after displaying the main window
+		QTimer::singleShot(1500, &splash, [&splash, &fmain]() {
 			fmain.show();
 			splash.finish(&fmain);
 		 });
 
 		//Loading models via command line on MacOSX are disabled until the file association work correclty on that system
 		#ifndef Q_OS_MACOS
-			QStringList params=app.arguments();
+			QStringList params = app.arguments();
 			params.pop_front();
 
 			//If the user specifies a list of files to be loaded

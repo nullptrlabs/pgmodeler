@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +33,7 @@
 #include <QDir>
 #include "globalattributes.h"
 
-extern void logMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+__libutils void logMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
 class __libutils Application: public QApplication {
 	Q_OBJECT

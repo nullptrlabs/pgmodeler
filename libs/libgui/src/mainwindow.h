@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +27,11 @@
 
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
+
+#ifdef PRIV_CODE_SYMBOLS
+	#include "privcoreinit.h"
+	#include "privcoreclasses.h"
+#endif
 
 #include <QMainWindow>
 #include <QPrintDialog>
@@ -197,8 +205,7 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		void resizeEvent(QResizeEvent *) override;
 
-		//! \brief Set the postion of a floating widget based upon an action at a tool bar
-		void setFloatingWidgetPos(QWidget *widget, QAction *act, QToolBar *toolbar, bool map_to_window);
+		void showEvent(QShowEvent *) override;
 
 		void setBottomFloatingWidgetPos(QWidget *widget, QAbstractButton *btn);
 
@@ -259,6 +266,14 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		//! \brief Returns the current working database model widget
 		ModelWidget *getCurrentModel();
 
+		/*! \brief Start the timers related to update check, model restoration and others
+		 *  This method works only on its first call. Any attempt to call it again will
+		 *  do nothing. The timers will be already running */
+		void startOtherTimers();
+
+		//! \brief Switches the current view on main window
+		void changeCurrentView(MWViewsId view_id);
+
 	public slots:
 		/*! \brief Creates a new empty model inside the main window. If the parameter 'filename' is specified,
 		creates the model loading it from a file */
@@ -306,6 +321,9 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		//! \brief Shows a error dialog informing that the model demands a fix after the error ocurred when loading the filename.
 		void showFixMessage(Exception &e, const QString &filename);
 
+		//! \brief Set the postion of a floating widget based upon an action at a tool bar
+		void setFloatingWidgetPos(QWidget *widget, QAction *act, QToolBar *toolbar, bool map_to_window);
+
 	private slots:
 		void showMainMenu();
 
@@ -338,8 +356,6 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		//! \brief Executes the validation before the export process
 		void validateBeforeOperation();
 
-		//! \brief Executes the model <> database comparison
-		//void diffModelDatabase();
 
 		//! \brief Updates the opened models with new configurations
 		void applyConfigurations();
@@ -372,7 +388,7 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		/*! \brief Stop the saving timers. This is used when validating the model
 		in order to avoid the saving while the validation is working */
-		void stopTimers(bool value);
+		void stopSaveTimers(bool value);
 
 		//! \brief Executes one of the pending operations (save, export, diff) after validate the model
 		void executePendingOperation(bool valid_error);

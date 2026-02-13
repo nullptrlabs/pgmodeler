@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,21 +42,25 @@ void TaskProgressWidget::addIcon(unsigned id, const QIcon &ico)
 	icons[id]=ico;
 }
 
+void TaskProgressWidget::setNoProgressState(bool value)
+{
+	progress_pb->setRange(0, 0);
+}
+
 void TaskProgressWidget::show()
 {
 	/* Using a event loop as a workaround to give a little time to task progress
 	 to be shown before start the progress update. In tasks too quick, if the event loop above
 	 isn't used the task is not shown properly and sometimes stay only on taskbar not poping up
 	 to the user. */
-	QEventLoop eventLoop;
+	QEventLoop event_loop;
 	GuiUtilsNs::resizeWidget(this);
 	QDialog::show();
-	QTimer t;
 
 	//Gives 100ms to the task to be shown and update its contents
-	t.singleShot(100, &eventLoop, &QEventLoop::quit);
+	QTimer::singleShot(100, &event_loop, &QEventLoop::quit);
 	text_lbl->setText(tr("Waiting task to start..."));
-	eventLoop.exec(QEventLoop::AllEvents);
+	event_loop.exec(QEventLoop::AllEvents);
 }
 
 void TaskProgressWidget::updateProgress(int progress, unsigned icon_id)
@@ -82,11 +89,10 @@ void TaskProgressWidget::updateProgress(int progress, QString text, unsigned ico
 		 the task progress is not correctly updated. The event loop causes a little
 		 delay (1ms) and it`s sufficient to update the entire widget */
 #ifdef Q_OS_MACOS
-	QEventLoop eventLoop;
-	QTimer t;
-	//Gives 1ms to the task to be shown and update its contents
-	t.singleShot(1, &eventLoop, &QEventLoop::quit);
-	eventLoop.exec(QEventLoop::AllEvents);
+	QEventLoop event_loop;
+	//Gives 5ms to the task to be shown and update its contents
+	QTimer::singleShot(5, &event_loop, &QEventLoop::quit);
+	event_loop.exec(QEventLoop::AllEvents);
 #endif
 }
 
@@ -97,4 +103,3 @@ void TaskProgressWidget::close()
 	text_lbl->clear();
 	icon_lbl->clear();
 }
-

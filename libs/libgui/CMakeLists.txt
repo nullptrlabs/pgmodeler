@@ -234,15 +234,13 @@ set(FORMS
 
 set(RESOURCES res/resources.qrc)
 
-if(BUILD_PRIV_PLUGINS)
+if(BUILD_PRIV_CODE)
     list(APPEND SOURCES
         ${PRIV_PLUGINS_SRC}/privpluginsns.h
         ${PRIV_PLUGINS_SRC}/privpluginsns.cpp)
 endif()
 
-if(PLUS_VERSION)
-    list(APPEND RESOURCES ${PRIV_PLUGINS_RES}/logoicons.qrc)
-else()
+if(NOT PLUS_VERSION)
     list(APPEND RESOURCES res/logoicons.qrc)
 endif()
 
@@ -262,6 +260,8 @@ pgm_add_library(gui
     ${SOURCES}
     ${FORMS}
     ${RESOURCES})
+
+pgm_inc_priv_core_sources(${PGM_TARGET} ON)
 
 target_link_libraries(gui PRIVATE Qt6::Core)
 
