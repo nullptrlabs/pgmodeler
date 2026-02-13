@@ -322,6 +322,9 @@ void ModelValidationHelper::validateModel()
 				// Validating broken references to the object
 				checkObjectBrokenRefs(object);
 
+				// Validating extension's broken references to its data types
+				checkExtBrokenTypeRefs(object);
+
 				/* Validating a special object. The validation made here is to check if the special object
 				 * (constraint/index/trigger/view) references a column added by a relationship and
 				 *  that relationship is being created after the creation of the special object */
@@ -417,6 +420,7 @@ void ModelValidationHelper::checkObjectBrokenRefs(BaseObject *object)
 	TableObject *tab_obj = nullptr;
 	Constraint *constr = nullptr;
 	Column *col = nullptr;
+	unsigned obj_id = object->getObjectId();
 
 	for(auto &obj : object->getReferences())
 	{
@@ -427,10 +431,9 @@ void ModelValidationHelper::checkObjectBrokenRefs(BaseObject *object)
 		 * An example is a schema created by an extension, in this case,
 		 * since the schema is created by pgModeler there is no need
 		 * to check for broken reference */
-		if(obj->isSystemObject())
+		if(obj->isSystemObject() && obj->getObjectType() != ObjectType::Type)
 			continue;
 
-		//Checking if the referrer object is a table object. In this case its parent table is considered
 		tab_obj = dynamic_cast<TableObject *>(obj);
 		constr = dynamic_cast<Constraint *>(tab_obj);
 		col = dynamic_cast<Column *>(tab_obj);
@@ -444,8 +447,8 @@ void ModelValidationHelper::checkObjectBrokenRefs(BaseObject *object)
 		if(object != obj &&
 			 (
 				 ((col || (constr && constr->getConstraintType() != ConstraintType::ForeignKey)) &&
-					(tab_obj->getParentTable()->getObjectId() <= object->getObjectId())) ||
-				 (!constr && !col && obj->getObjectId() <= object->getObjectId()))
+					(tab_obj->getParentTable()->getObjectId() <= obj_id)) ||
+				 (!constr && !col && obj->getObjectId() <= obj_id))
 			 )
 		{
 			if(col || constr)
@@ -458,6 +461,61 @@ void ModelValidationHelper::checkObjectBrokenRefs(BaseObject *object)
 	}
 
 	generateValidationInfo(ValidationInfo::BrokenReference, object, refs_aux);
+}
+
+void ModelValidationHelper::checkExtBrokenTypeRefs(BaseObject *object)
+{
+	Extension *ext = dynamic_cast<Extension *>(object);
+
+	if(!ext)
+		return;
+
+	std::vector<BaseObject *> refs;
+	std::vector<Extension::ExtObject> ext_objs = ext->getObjects(ObjectType::Type);
+	Type *type = nullptr;
+	TableObject *tab_obj = nullptr;
+	unsigned ext_id = ext->getObjectId();
+	QString sch_name = ext->getSchema()->getSignature(),
+			type_name;
+
+	/* Special case: For types owned by extensions, we need to consider the extension id
+	 * in the comparision instead of the type id itself. This will avoid the validator
+	 * to ignore cases when the extension that handles data types are created after
+	 * a table that uses its types, for example. */
+	for(auto &ext_obj : ext_objs)
+	{
+		if(ext_obj.getParent().isEmpty())
+			type_name += sch_name + "." + ext_obj.getName();
+		else
+			type_name = ext_obj.getSignature();
+
+		type = db_model->getType(type_name);
+
+		/* If the type doens't exist of
+		 * if the type is not a child of the extension.
+		 * THIS SHOULDN'T HAPPEN but if it happens means a bug
+		 * and we discard the type to avoid false-positive
+		 * validation info generation */
+		if(!type || !type->isDependingOn(ext))
+			continue;
+
+		for(auto &ref_obj : type->getReferences())
+		{
+			tab_obj = dynamic_cast<TableObject *>(ref_obj);
+
+			/* If ref_obj is a table object (column, constraint, etc)
+			 * we compare the id of the parent table with the extension id */
+			if(tab_obj && tab_obj->getParentTable() &&
+				 tab_obj->getParentTable()->getObjectId() < ext_id)
+				refs.push_back(tab_obj->getParentTable());
+			/* For all other objects that depends on the type we
+			 * compare the object id itself with the extension id */
+			else if(ref_obj->getObjectId() < ext_id)
+				refs.push_back(ref_obj);
+		}
+	}
+
+	generateValidationInfo(ValidationInfo::BrokenReference, ext, refs);
 }
 
 void ModelValidationHelper::checkSpObjectBrokenRefs(BaseObject *object)

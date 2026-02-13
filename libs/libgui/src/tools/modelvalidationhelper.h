@@ -83,6 +83,8 @@ class __libgui ModelValidationHelper: public QObject {
 
 		void checkSpObjectBrokenRefs(BaseObject *object);
 
+		void checkExtBrokenTypeRefs(BaseObject *object);
+
 		void checkConstrNameConflicts();
 
 		void checkMissingPostgisExt();
