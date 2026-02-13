@@ -8,7 +8,7 @@ MOC_DIR = moc
 OBJECTS_DIR = obj
 UI_DIR = src
 
-contains(CONFIG, debug):{
+CONFIG(debug, debug|release): {
 	DEFINES+=PGMODELER_DEBUG
 
 	# Enabling ccache (https://ccache.dev) in debug mode to speed up recompilations
@@ -62,6 +62,12 @@ LIBCLI = libcli
 LIBCLI_ROOT = $$absolute_path($$PWD/libs/$$LIBCLI)
 LIBCLI_LIB = -L$$LIBCLI_ROOT -lcli
 LIBCLI_INC = $$LIBCLI_ROOT/src
+
+# priv-core path for source inclusion
+PRIV_CORE_ROOT = $$absolute_path($$PWD/priv-core)
+PRIV_CORE_SRC = $$PRIV_CORE_ROOT/src
+PRIV_CORE_UI = $$PRIV_CORE_ROOT/ui
+PRIV_CORE_RES = $$PRIV_CORE_ROOT/res
 
 # Set the flag passed to compiler to indicate a snapshot build
 isEqual(SNAPSHOT_BUILD, true): DEFINES+=SNAPSHOT_BUILD

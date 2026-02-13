@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -9567,30 +9570,33 @@ void DatabaseModel::loadObjectsMetadata(const QString &filename, MetaAttrOptions
 
 						xmlparser.restorePosition();
 					}
-					else if(elem_name==Attributes::Info)
+					else if(elem_name == Attributes::Info)
 					{
 						xmlparser.getElementAttributes(attribs);
-						obj_name=attribs[Attributes::Object];
+						obj_name = attribs[Attributes::Object];
 						xmlparser.savePosition();
 
-						obj_type=BaseObject::getObjectType(attribs[Attributes::Type]);
-						progress=xmlparser.getCurrentBufferLine()/static_cast<double>(xmlparser.getBufferLineCount()) * 100;
+						obj_type = BaseObject::getObjectType(attribs[Attributes::Type]);
+						progress = xmlparser.getCurrentBufferLine()/static_cast<double>(xmlparser.getBufferLineCount()) * 100;
 
-						if(obj_type==ObjectType::Database)
+						if(obj_type == ObjectType::Constraint)
+							obj_name.length();
+
+						if(obj_type == ObjectType::Database)
 						{
 							if(load_db_attribs)
 							{
-								QStringList pos=attribs[Attributes::LastPosition].split(',');
+								QStringList pos = attribs[Attributes::LastPosition].split(',');
 
-								default_objs[ObjectType::Schema]=getSchema(attribs[Attributes::DefaultSchema]);
-								default_objs[ObjectType::Role]=getRole(attribs[Attributes::DefaultOwner]);
-								default_objs[ObjectType::Collation]=getCollation(attribs[Attributes::DefaultCollation]);
-								default_objs[ObjectType::Tablespace]=getTablespace(attribs[Attributes::DefaultTablespace]);
-								author=attribs[Attributes::ModelAuthor];
-								last_zoom=attribs[Attributes::LastZoom].toDouble();
+								default_objs[ObjectType::Schema] = getSchema(attribs[Attributes::DefaultSchema]);
+								default_objs[ObjectType::Role] = getRole(attribs[Attributes::DefaultOwner]);
+								default_objs[ObjectType::Collation] = getCollation(attribs[Attributes::DefaultCollation]);
+								default_objs[ObjectType::Tablespace] = getTablespace(attribs[Attributes::DefaultTablespace]);
+								author = attribs[Attributes::ModelAuthor];
+								last_zoom = attribs[Attributes::LastZoom].toDouble();
 
 								if(pos.size()>=2)
-									last_pos=QPoint(pos[0].toInt(), pos[1].toInt());
+									last_pos = QPoint(pos[0].toInt(), pos[1].toInt());
 							}
 
 							if(load_objs_layers_cfg && !attribs[Attributes::Layers].isEmpty() &&
@@ -9609,7 +9615,7 @@ void DatabaseModel::loadObjectsMetadata(const QString &filename, MetaAttrOptions
 								is_layer_rects_visible = attribs[Attributes::ShowLayerRects] == Attributes::True;
 							}
 
-							object=this;
+							object = this;
 						}
 						else if(TableObject::isTableObject(obj_type))
 						{
@@ -9621,12 +9627,12 @@ void DatabaseModel::loadObjectsMetadata(const QString &filename, MetaAttrOptions
 							if(base_tab)
 								object = base_tab->getObject(attribs[Attributes::Object], obj_type);
 
-							//Discarding the object if it was added by relationship
-							if(object && dynamic_cast<TableObject *>(object)->isAddedByRelationship())
+							//Discarding the object if it was added by relationship or the parent table couldnt be found
+							if(!base_tab || (object && dynamic_cast<TableObject *>(object)->isAddedByRelationship()))
 								object = nullptr;
 						}
 						else
-							object=getObject(obj_name, obj_type);
+							object = getObject(obj_name, obj_type);
 
 						/* If the object does not exists but it is a relationship, we try to get the relationship
 						 involving the tables in paramenters src-table and dst-table */

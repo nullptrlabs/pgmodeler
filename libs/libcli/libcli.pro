@@ -7,6 +7,11 @@ windows: DESTDIR = $$PWD
 # Enables shared library symbols exporting
 DEFINES += CLI_SYMBOLS
 
+# Include priv-core sources directly when building with private plugins
+isEqual(PRIVATE_PLUGINS, true) {
+	include(../../priv-core/priv-core.pri)
+}
+
 SOURCES += src/compat/compatns.cpp \
 src/pgmodelercliapp.cpp \
 src/compat/view.cpp \
@@ -30,22 +35,22 @@ unix|windows: LIBS += $$LIBCANVAS_LIB \
 			  $$LIBCORE_LIB \
 			  $$LIBPARSERS_LIB \
 			  $$LIBUTILS_LIB \
-			  $$LIBGUI_LIB
+		  $$LIBGUI_LIB
 
 INCLUDEPATH += $$LIBCANVAS_INC \
-				 $$LIBCONNECTOR_INC \
-				 $$LIBCORE_INC \
-				 $$LIBPARSERS_INC \
-				 $$LIBUTILS_INC \
-				 $$LIBGUI_INC \
-				 $$PWD/src/compat
+			 $$LIBCONNECTOR_INC \
+			 $$LIBCORE_INC \
+			 $$LIBPARSERS_INC \
+			 $$LIBUTILS_INC \
+			 $$LIBGUI_INC \
+			 $$PWD/src/compat
 
 DEPENDPATH += $$LIBCANVAS_ROOT \
-				$$LIBCONNECTOR_ROOT \
-				$$LIBCORE_ROOT \
-				$$LIBPARSERS_ROOT \
-				$$LIBUTILS_ROOT \
-				$$LIBGUI_ROOT
+			$$LIBCONNECTOR_ROOT \
+			$$LIBCORE_ROOT \
+			$$LIBPARSERS_ROOT \
+			$$LIBUTILS_ROOT \
+			$$LIBGUI_ROOT
 
 # Deployment settings
 target.path = $$PRIVATELIBDIR

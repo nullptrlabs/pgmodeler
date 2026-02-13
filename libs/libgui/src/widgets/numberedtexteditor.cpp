@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,6 +31,7 @@
 #include <QClipboard>
 #include "messagebox.h"
 #include "utilsns.h"
+#include <QTextDocumentFragment>
 
 bool NumberedTextEditor::line_nums_visible {true};
 bool NumberedTextEditor::highlight_lines {true};
@@ -199,7 +203,10 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		connect(edit_src_btn,  &QToolButton::clicked, this, __slot(this, NumberedTextEditor::editSource));
 
 		connect(copy_btn,  &QToolButton::clicked, this, [this](){
-			qApp->clipboard()->setText(toPlainText());
+			if(textCursor().hasSelection())
+				qApp->clipboard()->setText(textCursor().selection().toPlainText());
+			else
+				qApp->clipboard()->setText(toPlainText());
 		});
 
 		connect(search_btn, &QToolButton::toggled, this, [this](bool checked){

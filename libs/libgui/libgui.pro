@@ -21,6 +21,11 @@ windows:DESTDIR = $$PWD
 # Enables shared library symbols exporting
 DEFINES += GUI_SYMBOLS
 
+# Include priv-core sources directly when building with private plugins
+isEqual(PRIVATE_PLUGINS, true) {
+	include(../../priv-core/priv-core.pri)
+}
+
 SOURCES += src/baseform.cpp \
 	src/dbobjects/referenceswidget.cpp \
 	src/dbobjects/simplecolumnswidget.cpp \

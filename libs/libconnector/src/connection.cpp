@@ -1,7 +1,10 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2025 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# (c) Copyright 2006-2026 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+#
+# DEVELOPMENT, MAINTENANCE AND COMMERCIAL DISTRIBUTION BY:
+# Nullptr Labs Software e Tecnologia LTDA <contact@nullptrlabs.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -146,7 +149,7 @@ void Connection::generateConnectionString()
 		value.replace("'","\\'");
 
 		if(itr.first==ParamPassword && (value.contains(' ') || value.isEmpty()))
-			value=QString("'%1'").arg(value);
+			value = QString("'%1'").arg(value);
 
 		if(!value.isEmpty())
 		{
@@ -155,7 +158,7 @@ void Connection::generateConnectionString()
 			else if(itr.first != ParamOthers)
 				connection_str += param_str.arg(itr.first, value);
 			else
-				connection_str += value;
+				connection_str += value + " ";
 		}
 	}
 
