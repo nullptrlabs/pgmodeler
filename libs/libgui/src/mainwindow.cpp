@@ -1759,12 +1759,6 @@ void MainWindow::saveModel(ModelWidget *model)
 
 		if(model)
 		{
-			if(model->property(ModelWidget::SaveDisabled).toBool())
-			{
-				Messagebox::alert(tr("The save feature is disabled for this model."));
-				return;
-			}
-
 			Messagebox msg_box;
 			DatabaseModel *db_model=model->getDatabaseModel();
 
