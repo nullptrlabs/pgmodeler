@@ -228,6 +228,8 @@ class __libgui CustomTableWidget: public QWidget, public Ui::CustomTableWidget {
 
 		void setItemContextMenu(QMenu *menu);
 
+		bool hasSelection();
+
 		static void setTableItemColor(TableItemColor color_idx, const QColor color);
 
 		static QColor getTableItemColor(TableItemColor color_idx);

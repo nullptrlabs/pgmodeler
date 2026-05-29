@@ -70,7 +70,7 @@ CustomTableWidget::CustomTableWidget(ButtonConf button_conf, bool conf_exclusion
 	});
 
 	connect(table_tbw, &QTableWidget::itemSelectionChanged, this, [this](){
-		if(table_tbw->selectedRanges().isEmpty())
+		if(!hasSelection())
 			emit s_selectionCleared();
 	});
 
@@ -226,6 +226,11 @@ QToolButton *CustomTableWidget::addCustomButton(const QIcon &icon, const QKeySeq
 	btn->setMaximumSize(add_tb->maximumSize());
 
 	return btn;
+}
+
+bool CustomTableWidget::hasSelection()
+{
+	return !table_tbw->selectedRanges().isEmpty();
 }
 
 void CustomTableWidget::setColumnCount(unsigned col_count)
