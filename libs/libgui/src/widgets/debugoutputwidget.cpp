@@ -34,7 +34,7 @@ DebugOutputWidget::DebugOutputWidget(QWidget *parent) : QWidget(parent)
 	dbg_output_txt->setFilenameFilters({ tr("Text files (*.txt)"), tr("All files (*)") }, "txt");
 }
 
-void DebugOutputWidget::setLogMessages(bool value)
+void DebugOutputWidget::setLogAppMessages(bool value)
 {
 	if(value)
 	{

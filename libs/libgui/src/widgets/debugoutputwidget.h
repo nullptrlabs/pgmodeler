@@ -41,7 +41,10 @@ class __libgui DebugOutputWidget : public QWidget {
 	public:
 		explicit DebugOutputWidget(QWidget *parent = nullptr);
 
-		void setLogMessages(bool value);
+		/*! \brief Toggles the logging of qApp messages sent via
+		 *  Application::s_messageLogged */
+		void setLogAppMessages(bool value);
+
 		void clear();
 
 	public slots:

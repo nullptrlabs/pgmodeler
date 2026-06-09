@@ -82,7 +82,8 @@ class __libgui BaseForm: public QDialog, public Ui::BaseForm {
 		 * The widget is reparented to the stack widget within the form.
 		 * The accept_slot is the fucntion pointer to the slot from the provided widget that can be
 		 * optionally used to replace the default accept() of the form's footer aplly button.
-		 * The accept_on_return when true causes BaseForm to auto-accept when accept_slot successfully returns */
+		 * The accept_on_return when true causes BaseForm to auto-accept when accept_slot
+		 * successfully returns (not throws exception) */
 		template <class Class, typename Slot>
 		void setMainWidget(Class *widget, Slot accept_slot, bool accept_on_return = false);
 
