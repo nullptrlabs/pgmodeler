@@ -274,15 +274,18 @@ int Messagebox::show(const QString &title, const QString &msg, MessageType icon_
 	if(!yes_ico.isEmpty())
 		yes_ok_btn->setIcon(QIcon(yes_ico));
 	else
-		yes_ok_btn->setIcon(buttons != CloseButton ? GuiUtilsNs::getIcon("confirm") : GuiUtilsNs::getIcon("close1"));
+		yes_ok_btn->setIcon(buttons != CloseButton ?
+												GuiUtilsNs::getIcon("confirm") : GuiUtilsNs::getIcon("close1"));
 
-	no_btn->setText(!no_lbl.isEmpty() ? no_lbl : tr("&No"));
-	no_btn->setIcon(!no_ico.isEmpty() ? QIcon(no_ico) : GuiUtilsNs::getIcon("close1"));
+	no_btn->setText(!no_lbl.isEmpty() ? no_lbl :
+									(buttons == OkCloseButtons ? tr("&Close") : tr("&No")));
+	no_btn->setIcon(!no_ico.isEmpty() ?
+									QIcon(no_ico) : GuiUtilsNs::getIcon("close1"));
 
 	cancel_btn->setText(!cancel_lbl.isEmpty() ? cancel_lbl : tr("&Cancel"));
 	cancel_btn->setIcon(!cancel_ico.isEmpty() ? QIcon(cancel_ico) : GuiUtilsNs::getIcon("cancel"));
 
-	no_btn->setVisible(buttons==YesNoButtons || buttons==AllButtons);
+	no_btn->setVisible(buttons==YesNoButtons || buttons==OkCloseButtons || buttons==AllButtons);
 	cancel_btn->setVisible(buttons==OkCancelButtons || buttons==AllButtons);
 
 	for(auto &btn : btns)

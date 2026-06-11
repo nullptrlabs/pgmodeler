@@ -82,6 +82,14 @@ void FileSelectorWidget::showEvent(QShowEvent *)
 	showWarning();
 }
 
+void FileSelectorWidget::changeEvent(QEvent *event)
+{
+	if(event->type() == QEvent::EnabledChange)
+		showWarning();
+
+	QWidget::changeEvent(event);
+}
+
 void FileSelectorWidget::setAllowFilenameInput(bool allow_fl_input)
 {
 	allow_filename_input = allow_fl_input && !read_only;
@@ -269,7 +277,10 @@ void FileSelectorWidget::openFileExternally()
 
 void FileSelectorWidget::showWarning()
 {
-	QColor color = qApp->palette().color(QPalette::Text);
+	QColor color = qApp->palette().color(isEnabled() ?
+																			 QPalette::Active : QPalette::Disabled,
+																			 QPalette::Text);
+	QString cl = color.name();
 	int padding = 0;
 	bool has_warn = !warn_ico_lbl->toolTip().isEmpty();
 
@@ -278,6 +289,10 @@ void FileSelectorWidget::showWarning()
 	if(has_warn)
 	{
 		color.setRgb(255, 0, 0);
+
+		if(!isEnabled())
+			color = color.darker();
+
 		padding = warn_ico_lbl->width();
 	}
 

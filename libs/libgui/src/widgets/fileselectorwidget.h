@@ -57,6 +57,7 @@ class __libgui FileSelectorWidget: public QWidget, public Ui::FileSelectorWidget
 		bool eventFilter(QObject *obj, QEvent *evnt) override;
 		void resizeEvent(QResizeEvent *event) override;
 		void showEvent(QShowEvent *event) override;
+		void changeEvent(QEvent *event) override;
 
 	public:
 		FileSelectorWidget(QWidget * parent = nullptr);

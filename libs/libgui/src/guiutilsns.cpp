@@ -455,7 +455,7 @@ namespace GuiUtilsNs {
 
 		base_form.setMainWidget(col_data_edit_wgt);
 		base_form.setButtonConfiguration(Messagebox::OkCancelButtons);
-		base_form.apply_ok_btn->setShortcut(QKeySequence("Ctrl+Return"));
+		base_form.accept_btn->setShortcut(QKeySequence("Ctrl+Return"));
 
 		if(results_tbw->selectedItems().size() == 1)
 			col_data_edit_wgt->setData(results_tbw->currentItem()->text());

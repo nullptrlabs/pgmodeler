@@ -37,7 +37,11 @@ class __libgui BaseForm: public QDialog, public Ui::BaseForm {
 	Q_OBJECT
 
 	private:
-		bool track_changes, has_changes;
+		bool track_changes,
+
+		has_changes,
+
+		prevent_close;
 
 		//! \brief Store the reference to the main widget
 		QWidget *main_wgt;
@@ -58,6 +62,11 @@ class __libgui BaseForm: public QDialog, public Ui::BaseForm {
 		BaseForm(QWidget * parent = nullptr, Qt::WindowFlags f = Qt::Widget);
 
 		void setButtonConfiguration(Messagebox::ButtonsId button_conf = Messagebox::OkCancelButtons);
+
+		/*! \brief Prevents the form closing by rejecting the QCloseEvent instance
+		 *  in closeEvent().This method is useful for control whether the form
+		 *  can be closed during specific operations */
+		void setPreventClose(bool value);
 
 		/*! \brief Toggles the fields' change statuses. If a single field is changed
 		 *  and the user hits ESC or tries to close the form, a confirmation message
@@ -111,14 +120,14 @@ class __libgui BaseForm: public QDialog, public Ui::BaseForm {
 			else
 				setWindowTitle(widget->windowTitle());
 
-			apply_ok_btn->setDisabled(widget->isHandledObjectProtected());
+			accept_btn->setDisabled(widget->isHandledObjectProtected());
 			resizeForm(widget);
 			setButtonConfiguration(Messagebox::OkCancelButtons);
 
-			connect(cancel_btn, &QPushButton::clicked, widget, __slot(widget, Class::cancelConfiguration));
-			connect(cancel_btn, &QPushButton::clicked, this, &BaseForm::reject);
+			connect(reject_btn, &QPushButton::clicked, widget, __slot(widget, Class::cancelConfiguration));
+			connect(reject_btn, &QPushButton::clicked, this, &BaseForm::reject);
 
-			connect(apply_ok_btn, &QPushButton::clicked, widget, __slot(widget, Class::applyConfiguration));
+			connect(accept_btn, &QPushButton::clicked, widget, __slot(widget, Class::applyConfiguration));
 			connect(widget, &BaseObjectWidget::s_closeRequested, this, &BaseForm::accept);
 		}
 
@@ -136,11 +145,11 @@ void BaseForm::setMainWidget(Class *widget, Slot accept_slot, bool accept_on_ret
 		return;
 
 	setMainWidget(widget);
-	disconnect(apply_ok_btn, nullptr, this, nullptr);
+	disconnect(accept_btn, nullptr, this, nullptr);
 
 	if(accept_on_return)
 	{
-		connect(apply_ok_btn, &QPushButton::clicked, this, [this, widget, accept_slot](){
+		connect(accept_btn, &QPushButton::clicked, this, [this, widget, accept_slot](){
 			__trycatch (
 				std::invoke(accept_slot, widget);
 				accept();
@@ -148,7 +157,7 @@ void BaseForm::setMainWidget(Class *widget, Slot accept_slot, bool accept_on_ret
 		});
 	}
 	else
-		connect(apply_ok_btn, &QPushButton::clicked, widget, accept_slot);
+		connect(accept_btn, &QPushButton::clicked, widget, accept_slot);
 }
 
 template <class Class, typename Slot>
