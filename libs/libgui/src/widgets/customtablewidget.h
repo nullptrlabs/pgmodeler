@@ -195,6 +195,8 @@ class __libgui CustomTableWidget: public QWidget, public Ui::CustomTableWidget {
 		//! \brief Returns the row index currently selected
 		int getSelectedRow();
 
+		QList<int> getSelectedRows();
+
 		/*! \brief Returns the row index search it through the specified row data. If
 		no row is found returns -1 */
 		int getRowIndex(const QVariant &data);
@@ -328,8 +330,8 @@ class __libgui CustomTableWidget: public QWidget, public Ui::CustomTableWidget {
 		//! \brief Signal emitted when a specific cell has its text or other attribute changed. The column and rows indexes are sent together with the signal
 		void s_cellChanged(int, int);
 
-		//! \brief Signal emitted when the table selection is cleared
-		void s_selectionCleared();
+		//! \brief Signal emitted when the table selection changes
+		void s_selectionChanged(bool has_selection);
 
 		//! \brief Signal emitted when the table row count changes by adding, deleting, duplicating rows
 		void s_rowCountChanged(int);

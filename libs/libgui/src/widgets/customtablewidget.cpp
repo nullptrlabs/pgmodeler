@@ -70,8 +70,7 @@ CustomTableWidget::CustomTableWidget(ButtonConf button_conf, bool conf_exclusion
 	});
 
 	connect(table_tbw, &QTableWidget::itemSelectionChanged, this, [this](){
-		if(!hasSelection())
-			emit s_selectionCleared();
+		emit s_selectionChanged(hasSelection());
 	});
 
 	connect(resize_cols_tb, &QToolButton::clicked, this, &CustomTableWidget::resizeContents);
@@ -452,6 +451,19 @@ QVariant CustomTableWidget::getRowData(unsigned row_idx)
 int CustomTableWidget::getSelectedRow()
 {
 	return table_tbw->currentRow();
+}
+
+QList<int> CustomTableWidget::getSelectedRows()
+{
+	QList<int> sel_rows;
+
+	for(auto &range : table_tbw->selectedRanges())
+	{
+		for(int row = range.topRow(); row <= range.bottomRow(); row++)
+			sel_rows.append(row);
+	}
+
+	return sel_rows;
 }
 
 int CustomTableWidget::getRowIndex(const QVariant &data)
