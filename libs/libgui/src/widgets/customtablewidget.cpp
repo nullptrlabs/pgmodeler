@@ -309,6 +309,13 @@ void CustomTableWidget::setCellColors(int row_idx, int col_idx, const QColor &fg
 	item->setBackground(bg_color);
 }
 
+void CustomTableWidget::setCellFont(int row_idx, int col_idx, const QFont &font)
+{
+	QTableWidgetItem *item = getItem(row_idx, col_idx);
+
+	item->setFont(font);
+}
+
 void CustomTableWidget::clearCellText(unsigned row_idx, unsigned col_idx)
 {
 	try

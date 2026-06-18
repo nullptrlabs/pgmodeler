@@ -141,6 +141,9 @@ class __libgui CustomTableWidget: public QWidget, public Ui::CustomTableWidget {
 		//! \brief Sets an individual foreground/background configuration for the specified cell
 		void setCellColors(int row_idx, int col_idx, const QColor &fg_color, const QColor &bg_color = Qt::transparent);
 
+		//! \brief Sets a individual font configuration for the specified cell
+		void setCellFont(int row_idx, int col_idx, const QFont &font);
+
 		//! \brief Sets the data which the specified row stores
 		void setRowData(const QVariant &data, unsigned row_idx);
 
