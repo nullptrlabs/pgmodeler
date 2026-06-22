@@ -63,6 +63,7 @@ CustomTableWidget::CustomTableWidget(ButtonConf button_conf, bool conf_exclusion
 
 	connect(table_tbw, &QTableWidget::cellClicked, this, &CustomTableWidget::s_cellClicked);
 	connect(table_tbw, &QTableWidget::cellChanged, this, &CustomTableWidget::s_cellChanged);
+	connect(table_tbw, &QTableWidget::cellDoubleClicked, this, &CustomTableWidget::s_cellDoubleClicked);
 
 	connect(table_tbw, &QTableWidget::customContextMenuRequested, this, [this](const QPoint &pnt){
 		emit s_contextMenuRequested(table_tbw->mapToGlobal(pnt),

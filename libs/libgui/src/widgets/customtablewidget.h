@@ -330,6 +330,9 @@ class __libgui CustomTableWidget: public QWidget, public Ui::CustomTableWidget {
 		//! \brief Signal emitted when a specific cell is clicked. The column and rows indexes are sent together with the signal
 		void s_cellClicked(int, int);
 
+		//! \brief Signal emitted when a specific cell is double-clicked. The column and rows indexes are sent together with the signal
+		void s_cellDoubleClicked(int, int);
+
 		//! \brief Signal emitted when a specific cell has its text or other attribute changed. The column and rows indexes are sent together with the signal
 		void s_cellChanged(int, int);
 
