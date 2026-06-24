@@ -112,6 +112,7 @@ class __libgui NumberedTextEditor : public QPlainTextEdit {
 		~NumberedTextEditor() override;
 
 		static void setDefaultFont(const QFont &font);
+		static QFont getDefaultFont();
 		static void setLineNumbersVisible(bool value);
 		static void setHighlightLines(bool value);
 		static bool isHighlightLines();

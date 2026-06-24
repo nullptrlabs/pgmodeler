@@ -272,7 +272,12 @@ void NumberedTextEditor::setFilenameFilters(const QStringList &list, const QStri
 
 void NumberedTextEditor::setDefaultFont(const QFont &font)
 {
-	default_font=font;
+	default_font = font;
+}
+
+QFont NumberedTextEditor::getDefaultFont()
+{
+	return default_font;
 }
 
 void NumberedTextEditor::setLineNumbersVisible(bool value)
