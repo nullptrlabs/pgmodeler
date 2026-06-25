@@ -233,6 +233,14 @@ bool CustomTableWidget::hasSelection()
 	return !table_tbw->selectedRanges().isEmpty();
 }
 
+QScrollBar *CustomTableWidget::getScrollBar(Qt::Orientation orientation)
+{
+	if(orientation == Qt::Horizontal)
+		return table_tbw->horizontalScrollBar();
+
+	return table_tbw->verticalScrollBar();
+}
+
 void CustomTableWidget::setColumnCount(unsigned col_count)
 {
 	if(col_count > 0)
@@ -254,12 +262,12 @@ void CustomTableWidget::setColumnCount(unsigned col_count)
 
 void CustomTableWidget::setHeaderLabel(const QString &label, unsigned col_idx)
 {
-	QTableWidgetItem *item=nullptr;
+	QTableWidgetItem *item = nullptr;
 
 	if(col_idx >= static_cast<unsigned>(table_tbw->columnCount()))
-		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
+		throw Exception(ErrorCode::RefColObjectTabInvalidIndex, PGM_FUNC, PGM_FILE, PGM_LINE);
 
-	item=table_tbw->horizontalHeaderItem(col_idx);
+	item = table_tbw->horizontalHeaderItem(col_idx);
 	item->setText(label);
 }
 

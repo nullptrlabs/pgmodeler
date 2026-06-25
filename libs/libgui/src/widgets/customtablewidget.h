@@ -235,6 +235,8 @@ class __libgui CustomTableWidget: public QWidget, public Ui::CustomTableWidget {
 
 		bool hasSelection();
 
+		QScrollBar *getScrollBar(Qt::Orientation orientation);
+
 		static void setTableItemColor(TableItemColor color_idx, const QColor color);
 
 		static QColor getTableItemColor(TableItemColor color_idx);
