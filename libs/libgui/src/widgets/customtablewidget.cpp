@@ -541,7 +541,7 @@ void CustomTableWidget::addRow(unsigned lin_idx)
 
 	for(col_idx=0; col_idx < col_cont; col_idx++)
 	{
-		item=new QTableWidgetItem;		
+		item = new QTableWidgetItem;
 		table_tbw->setItem(lin_idx,col_idx,item);
 	}
 
@@ -845,9 +845,16 @@ void CustomTableWidget::setCellsEditable(bool value)
 
 void CustomTableWidget::resizeContents()
 {
-	table_tbw->resizeColumnsToContents();
+	int col_cnt = getColumnCount();
+
+	if(col_cnt == 0)
+		return;
+
+	for(int col = 0; col < col_cnt; col++)
+		table_tbw->resizeColumnToContents(col);
+
 	table_tbw->resizeRowsToContents();
-	table_tbw->horizontalHeader()->setSectionResizeMode(table_tbw->horizontalHeader()->count() - 1, QHeaderView::Stretch);
+	table_tbw->horizontalHeader()->setSectionResizeMode(col_cnt - 1, QHeaderView::Stretch);
 }
 
 void CustomTableWidget::setButtonsEnabled()

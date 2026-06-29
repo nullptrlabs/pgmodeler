@@ -348,8 +348,6 @@ void MainWindow::configureMenusActionsWidgets()
 		if(!act->shortcut().toString().isEmpty())
 			act->setToolTip(act->toolTip() + QString(" (%1)").arg(act->shortcut().toString()));
 	}
-
-	resizeGeneralToolbarButtons();
 }
 
 void MainWindow::handleInitializationFailure(Exception &e)
@@ -754,24 +752,6 @@ bool MainWindow::isToolButtonsChecked(QHBoxLayout *layout, const QWidgetList &ig
 	}
 
 	return false;
-}
-
-void MainWindow::resizeGeneralToolbarButtons()
-{
-	QToolButton *btn = nullptr;
-
-	if(tools_acts_tb->minimumWidth() == 0)
-		tools_acts_tb->setMinimumWidth(tools_acts_tb->width() *
-																(BaseObjectView::getScreenDpiFactor() < BaseObjectView::MaxDpiFactor ? 0.60 : 0.90));
-
-	for(auto &act : tools_acts_tb->actions())
-	{
-		btn = qobject_cast<QToolButton *>(tools_acts_tb->widgetForAction(act));
-		if(!btn) continue;
-
-		btn->setStyleSheet(QString("QToolButton { min-width: %1px; margin-top: 2px; }")
-											 .arg(models_tbw->count() == 0 ? tools_acts_tb->minimumWidth() : tools_acts_tb->minimumWidth() * 1.10));
-	}
 }
 
 void MainWindow::showRightWidgetsBar()
@@ -1509,7 +1489,6 @@ void MainWindow::setCurrentModel()
 																		 model_tree_v_pos[current_model]);
 
 	model_objs_wgt->saveTreeState(true);
-	resizeGeneralToolbarButtons();
 
 	emit s_currentModelChanged(current_model);
 }
