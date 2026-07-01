@@ -1163,7 +1163,7 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 {
 	try
 	{
-		ModelWidget *model_wgt=nullptr;
+		ModelWidget *model_wgt = nullptr;
 		QString obj_name, tab_name, str_aux;
 		Schema *public_sch = nullptr;
 		bool start_timers = (models_tbw->count() == 0);
@@ -1183,7 +1183,7 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 		models_tbw->blockSignals(true);
 		models_tbw->setUpdatesEnabled(false);
 
-		if(model_idx < 0)
+		if(model_idx < 0 || model_idx >= models_tbw->count())
 			model_idx = models_tbw->addTab(model_wgt, obj_name);
 		else
 		{
@@ -1634,21 +1634,19 @@ bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
 	return model_closed;
 }
 
-void MainWindow::reloadModel(int model_id, const QString &filename)
+void MainWindow::reloadModel(const QString &filename, int model_idx)
 {
 	try
 	{
-		if(model_id < 0 || !closeModel(model_id, true))
+		if(model_idx < 0 || !closeModel(model_idx, true))
 			return;
 
-		/* Check if the filename exists before trying to load
-		 * if not exists, remove the empty tab and display a message */
-		addModel(filename, model_id);
+		emit s_modelLoadRequested(filename, model_idx);
 	}
 	catch(Exception &e)
 	{
-		models_tbw->removeTab(model_id);
-		model_nav_wgt->removeModel(model_id);
+		models_tbw->removeTab(model_idx);
+		model_nav_wgt->removeModel(model_idx);
 		setCurrentModel();
 		throw Exception(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}

@@ -286,7 +286,7 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		/*! \brief Closes/destroys the model in the specified index 'model_id',
 		 *  load a new one and assign it to the parent tab of the closed model */
-		void reloadModel(int model_id, const QString &filename);
+		void reloadModel(const QString &filename, int model_idx);
 
 		//! \brief Returns the currently loaded model count.
 		int getModelCount();
@@ -417,8 +417,11 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		/*! \brief This signal is emitted when an extraneous file (not .dbm) is among
 		 * the list of models to be loaded in loadModels(). The intention of this signal
-		 * is to notify any plugin that may handle the file type to be loaded */
-		void s_modelLoadRequested(const QString &filename);
+		 * is to notify any plugin that may handle the file type to be loaded.
+		 * The optional parameter model_idx indicates the index on the tab widget
+		 * at main window where the loaded model must be inserted. A negative
+		 * model_idx inserts the model on a new tab. (see MainWindow::addModel(QString, int) */
+		void s_modelLoadRequested(const QString &filename, int model_idx = -1);
 };
 
 template<class WgtClass>
