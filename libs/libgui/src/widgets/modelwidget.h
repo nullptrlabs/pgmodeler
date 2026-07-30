@@ -373,7 +373,8 @@ class __libgui ModelWidget: public QWidget {
 		MaximumZoom = ObjectsScene::MaxScaleFactor,
 		ZoomIncrement = 0.050000;
 
-		static constexpr char SaveDisabled[] { "SaveDisabled" };
+		static constexpr char SaveDisabled[] { "save-disabled" },
+		ModelImported[] { "model-imported" };
 
 		ModelWidget(QWidget *parent = nullptr);
 		~ModelWidget() override;
