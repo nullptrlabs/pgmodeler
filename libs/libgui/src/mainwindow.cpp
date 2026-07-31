@@ -1598,14 +1598,6 @@ bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
 		model_tree_states.remove(model);
 		model_tree_v_pos.remove(model);
 
-		/* Remove as entradas do modelo antigo do registro global ANTES de carregar
-		 * o novo modelo. Sem isso, o novo modelo recebe type_idx absolutos que incluem
-		 * as posições das entradas de A; quando o destrutor de A roda mais tarde e as
-		 * remove, o vetor encolhe e todos os type_idx do novo modelo ficam inválidos,
-		 * causando acesso fora dos limites na próxima geração de XML (save). */
-		PgSqlType::invalidateUserTypes(model->getDatabaseModel());
-
-		// Impede que saveTemporaryModels() gere XML com type_idx agora inválidos
 		model->blockSignals(true);
 		model->setModified(false);
 		model->deleteLater();

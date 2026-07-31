@@ -331,7 +331,6 @@ class __libcore PgSqlType: public TemplateType<PgSqlType>{
 		friend class View;
 		friend class Extension;
 		friend class DatabaseModel;
-		friend class MainWindow;
 };
 
 /* Registering the PgSqlType class as a Qt MetaType in order to make
