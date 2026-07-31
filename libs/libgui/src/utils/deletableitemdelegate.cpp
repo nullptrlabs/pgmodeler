@@ -60,11 +60,9 @@ void DeletableItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem 
 		del_btn->setVisible(false);
 }
 
-QSize DeletableItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+QSize DeletableItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &) const
 {
-	return { option.decorationSize.width() +
-					 option.fontMetrics.boundingRect(option.text).width(),
-
+	return { option.decorationSize.width(),
 					 option.decorationSize.height() +
 					 qApp->style()->pixelMetric(QStyle::PM_LineEditIconMargin) };
 }
