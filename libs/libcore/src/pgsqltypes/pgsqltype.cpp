@@ -565,7 +565,6 @@ unsigned PgSqlType::setUserType(BaseObject *ptype)
 	return type_idx;
 }
 
-//void PgSqlType::addUserType(const QString &type_name, BaseObject *ptype, DatabaseModel *pmodel, UserTypeConfig::TypeConf type_conf)
 void PgSqlType::addUserType(const QString &type_name, BaseObject *ptype, UserTypeConfig::TypeConf type_conf)
 {
 	if(!type_name.isEmpty() && ptype && ptype->getDatabase() &&
@@ -582,30 +581,38 @@ void PgSqlType::addUserType(const QString &type_name, BaseObject *ptype, UserTyp
 	}
 }
 
-void PgSqlType::removeUserType(const QString &type_name, BaseObject *ptype)
+void PgSqlType::invalidateUserType(UserTypeConfig &cfg)
 {
-	if(PgSqlType::user_types.size() > 0 &&
-			!type_name.isEmpty() && ptype)
+	cfg.name = "__invalidated_type__";
+	cfg.ptype = nullptr;
+	cfg.pmodel = nullptr;
+	cfg.invalidated = true;
+}
+
+void PgSqlType::invalidateUserType(const QString &type_name, BaseObject *ptype)
+{
+	if(type_name.isEmpty() || !ptype)
+		return;
+
+	for(auto &cfg : user_types)
 	{
-		std::vector<UserTypeConfig>::iterator itr, itr_end;
-
-		itr=PgSqlType::user_types.begin();
-		itr_end=PgSqlType::user_types.end();
-
-		while(itr!=itr_end)
+		if(cfg.name == type_name && cfg.ptype == ptype)
 		{
-			if(itr->name==type_name && itr->ptype==ptype)
-				break;
-
-			itr++;
+			invalidateUserType(cfg);
+			break;
 		}
+	}
+}
 
-		if(itr!=itr_end)
-		{
-			itr->name="__invalidated_type__";
-			itr->ptype=nullptr;
-			itr->invalidated=true;
-		}
+void PgSqlType::invalidateUserTypes(BaseObject *pmodel)
+{
+	if(!pmodel)
+		return;
+
+	for(auto &cfg : user_types)
+	{
+		if(cfg.pmodel == pmodel)
+			invalidateUserType(cfg);
 	}
 }
 
@@ -621,30 +628,6 @@ void PgSqlType::renameUserType(const QString &type_name, BaseObject *ptype, cons
 		{
 			tp.name = new_name;
 			break;
-		}
-	}
-}
-
-void PgSqlType::removeUserTypes(BaseObject *pmodel)
-{
-	if(!pmodel)
-		return;
-
-	std::vector<UserTypeConfig>::iterator itr;
-	unsigned idx=0;
-
-	itr=user_types.begin();
-	while(itr!=user_types.end())
-	{
-		if(itr->pmodel==pmodel)
-		{
-			user_types.erase(itr);
-			itr=user_types.begin() + idx;
-		}
-		else
-		{
-			idx++;
-			itr++;
 		}
 	}
 }

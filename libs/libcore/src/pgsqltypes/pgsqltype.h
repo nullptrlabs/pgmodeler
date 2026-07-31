@@ -74,21 +74,27 @@ class __libcore PgSqlType: public TemplateType<PgSqlType>{
 		// Disabled method.
 		QString getTypeName(unsigned) override { return ""; }
 
+		/*! \brief Invalidates the specified user defined type configuration
+		 *  disabling its use in the database model */
+		static void invalidateUserType(UserTypeConfig &cfg);
+
 	protected:
 		//! \brief Adds a new reference to the user defined type
-		//static void addUserType(const QString &type_name, BaseObject *ptype, DatabaseModel *pmodel, UserTypeConfig::TypeConf type_conf);
 		static void addUserType(const QString &type_name, BaseObject *ptype, UserTypeConfig::TypeConf type_conf);
 
-		//! \brief Removes a reference to the user defined type
-		static void removeUserType(const QString &type_name, BaseObject *ptype);
+		//! \brief Invalidates a reference to the user defined type
+		static void invalidateUserType(const QString &type_name, BaseObject *ptype);
+
+		/*! \brief Invalidates all registered types for the specified database model.
+		 *
+		 * Due to the nature of the implementation of the user_types vectors and the use of
+		 * its indexes to reference user type, we never destroy a position in the vector
+		 * when the type is removed. Invalidating it will preserve the position of all other
+		 * valid types, avoiding wrong references or segfaults */
+		static void invalidateUserTypes(BaseObject *pmodel);
 
 		//! \brief Renames a user defined type
 		static void renameUserType(const QString &type_name, BaseObject *ptype, const QString &new_name);
-
-		/*! \brief Removes all registered types for the specified database model. Caution:
-		This method must be called only when destroying the model. Calling it in any other
-		situation can cause unexpected results */
-		static void removeUserTypes(BaseObject *pmodel);
 
 		//! \brief Returns the name of the type using its id
 		static QString getUserTypeName(unsigned type_id);
@@ -325,6 +331,7 @@ class __libcore PgSqlType: public TemplateType<PgSqlType>{
 		friend class View;
 		friend class Extension;
 		friend class DatabaseModel;
+		friend class MainWindow;
 };
 
 /* Registering the PgSqlType class as a Qt MetaType in order to make

@@ -896,7 +896,7 @@ void DatabaseModel::destroyObjects()
 		delete object;
 	}
 
-	PgSqlType::removeUserTypes(this);
+	PgSqlType::invalidateUserTypes(this);
 
 	for(auto &perm : 	permissions)
 		delete perm;
@@ -957,7 +957,7 @@ void DatabaseModel::removeTable(Table *table, int obj_idx)
 	try
 	{
 		__removeObject(table, obj_idx);
-		PgSqlType::removeUserType(table->getName(true), table);
+		PgSqlType::invalidateUserType(table->getName(true), table);
 		updateTableFKRelationships(table);
 	}
 	catch(Exception &e)
@@ -1537,7 +1537,7 @@ void DatabaseModel::removeForeignTable(ForeignTable *table, int obj_idx)
 	try
 	{
 		__removeObject(table, obj_idx);
-		PgSqlType::removeUserType(table->getName(true), table);
+		PgSqlType::invalidateUserType(table->getName(true), table);
 	}
 	catch(Exception &e)
 	{
@@ -1596,7 +1596,7 @@ void DatabaseModel::removeView(View *view, int obj_idx)
 		updateViewRelationships(view, true);
 
 		__removeObject(view, obj_idx);
-		PgSqlType::removeUserType(view->getName(true), view);
+		PgSqlType::invalidateUserType(view->getName(true), view);
 	}
 	catch(Exception &e)
 	{
@@ -3130,7 +3130,7 @@ void DatabaseModel::removeUserType(BaseObject *object, int obj_idx)
 		__removeObject(object, obj_idx);
 
 		//Removes the user type from the list of base types of pgsql
-		PgSqlType::removeUserType(object->getName(true), object);
+		PgSqlType::invalidateUserType(object->getName(true), object);
 	}
 	catch(Exception &e)
 	{
