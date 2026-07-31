@@ -1597,6 +1597,17 @@ bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
 		model_nav_wgt->removeModel(model_id);
 		model_tree_states.remove(model);
 		model_tree_v_pos.remove(model);
+
+		/* Remove as entradas do modelo antigo do registro global ANTES de carregar
+		 * o novo modelo. Sem isso, o novo modelo recebe type_idx absolutos que incluem
+		 * as posições das entradas de A; quando o destrutor de A roda mais tarde e as
+		 * remove, o vetor encolhe e todos os type_idx do novo modelo ficam inválidos,
+		 * causando acesso fora dos limites na próxima geração de XML (save). */
+		PgSqlType::invalidateUserTypes(model->getDatabaseModel());
+
+		// Impede que saveTemporaryModels() gere XML com type_idx agora inválidos
+		model->blockSignals(true);
+		model->setModified(false);
 		model->deleteLater();
 
 		//Remove the temporary file related to the closed model
@@ -1634,11 +1645,32 @@ bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
 	return model_closed;
 }
 
-void MainWindow::reloadModel(const QString &filename, int model_idx)
+/* void MainWindow::reloadModel(const QString &filename, int model_idx)
 {
 	try
 	{
 		if(model_idx < 0 || !closeModel(model_idx, true))
+			return;
+
+		emit s_modelLoadRequested(filename, model_idx);
+	}
+	catch(Exception &e)
+	{
+		models_tbw->removeTab(model_idx);
+		model_nav_wgt->removeModel(model_idx);
+		setCurrentModel();
+		throw Exception(e, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
+} */
+
+void MainWindow::reloadModel(const QString &filename, int model_idx)
+{
+	try
+	{
+		if(model_idx < 0)
+			return;
+
+		if(!closeModel(model_idx, true))
 			return;
 
 		emit s_modelLoadRequested(filename, model_idx);
