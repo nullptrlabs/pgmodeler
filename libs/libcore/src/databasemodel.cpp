@@ -1566,7 +1566,6 @@ void DatabaseModel::addView(View *view, int obj_idx)
 	try
 	{
 		__addObject(view, obj_idx);
-		//PgSqlType::addUserType(view->getName(true), view, this, UserTypeConfig::ViewType);
 		PgSqlType::addUserType(view->getName(true), view, UserTypeConfig::ViewType);
 
 		updateViewRelationships(view);
