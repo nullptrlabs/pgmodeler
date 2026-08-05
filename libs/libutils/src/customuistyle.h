@@ -296,12 +296,13 @@ class __libutils CustomUiStyle : public QProxyStyle {
 	/*! \brief Sets a style hint on a QFrame to customize its border color and radius
 	 * So it can be rendered as a inlined alert/info/error frames.
 	 * This method forces the frames shape to StyledPanel. */
-		template<class WgtClass>
-		static void __setStyleHint(StyleHint hint, WgtClass *wgt);
+		static void setStyleHint(StyleHint hint, QWidget *wgt);
+		static void setStyleHint(StyleHint hint, const QList<QWidget *> &wgts);
 
-		static void setStyleHint(StyleHint hint, QFrame *frame);
-		static void setStyleHint(StyleHint hint, QAbstractButton *btn);
-		static void setStyleHint(StyleHint hint, const QList<QFrame *> &frames);
+		//static void setStyleHint(StyleHint hint, QFrame *frame);
+		//static void setStyleHint(StyleHint hint, QAbstractButton *btn);
+		//static void setStyleHint(StyleHint hint, const QList<QWidget *> &wgts);
+
 		static bool isWidgetHint(StyleHint hint);
 
 		//! \brief Checks if the current application palette is dark (dark theme)

@@ -2484,10 +2484,12 @@ void CustomUiStyle::drawPEHeaderArrow(const QStyleOption *option, QPainter *pain
 	drawControlArrow(&arrow_opt, painter, widget, arrow_type);
 }
 
-template<class WgtClass>
-void CustomUiStyle::__setStyleHint(StyleHint hint, WgtClass *wgt)
+void CustomUiStyle::setStyleHint(StyleHint hint, QWidget *wgt)
 {
-	if(!wgt || hint == NoHint)
+	QAbstractButton *btn = qobject_cast<QAbstractButton *>(wgt);
+	QFrame *frm = qobject_cast<QFrame *>(wgt);
+
+	if(hint == NoHint || (!btn && !frm))
 		return;
 
 	static const std::map<StyleHint, QColor> frm_colors = {
@@ -2508,10 +2510,10 @@ void CustomUiStyle::__setStyleHint(StyleHint hint, WgtClass *wgt)
 
 	wgt->setProperty(StyleHintColor, hint_color);
 
-	if constexpr (std::is_same_v<WgtClass, QFrame>)
+	if(frm)
 	{
 		// Extract the frame shape using Shape_Mask to ignore shadow
-		QFrame::Shape shape = static_cast<QFrame::Shape>(wgt->frameShape() & QFrame::Shape_Mask);
+		QFrame::Shape shape = static_cast<QFrame::Shape>(frm->frameShape() & QFrame::Shape_Mask);
 
 		// For HLine/VLine frames, apply border color via stylesheet
 		if(shape == QFrame::HLine || shape == QFrame::VLine)
@@ -2523,14 +2525,14 @@ void CustomUiStyle::__setStyleHint(StyleHint hint, WgtClass *wgt)
 			else
 				color_role = "midlight";
 
-			wgt->setStyleSheet(QString("QFrame { border: %1px solid palette(%2); }")
+			frm->setStyleSheet(QString("QFrame { border: %1px solid palette(%2); }")
 												 .arg(PenWidth).arg(color_role));
 		}
 		// For other frames we force the shape to StyledPanel
 		else
-			wgt->setFrameShape(QFrame::StyledPanel);
+			frm->setFrameShape(QFrame::StyledPanel);
 	}
-	else if constexpr (std::is_same_v<WgtClass, QAbstractButton>)
+	else if(btn)
 	{
 		QPalette pal = wgt->palette();
 		hint_color = getAdjustedColor(hint_color, -MidFactor, -MidFactor);
@@ -2539,14 +2541,26 @@ void CustomUiStyle::__setStyleHint(StyleHint hint, WgtClass *wgt)
 		pal.setColor(QPalette::Dark, getAdjustedColor(hint_color, -MinFactor, -MinFactor));
 		pal.setColor(QPalette::Light, getAdjustedColor(hint_color, MinFactor, MinFactor));
 		pal.setColor(QPalette::Highlight, getAdjustedColor(hint_color, MidFactor, MidFactor));
-		wgt->setPalette(pal);
+		btn->setPalette(pal);
 	}
 }
 
-void CustomUiStyle::setStyleHint(StyleHint hint, const QList<QFrame *> &frames)
+void CustomUiStyle::setStyleHint(StyleHint hint, const QList<QWidget *> &wgts)
+{
+	for(auto &wgt : wgts)
+		setStyleHint(hint, wgt);
+}
+
+/*void CustomUiStyle::setStyleHint(StyleHint hint, const QList<QFrame *> &frames)
 {
 	for(auto &frm : frames)
 		setStyleHint(hint, frm);
+}
+
+void CustomUiStyle::setStyleHint(StyleHint hint, const QList<QAbstractButton *> &btns)
+{
+	for(auto &btn : btns)
+		setStyleHint(hint, btn);
 }
 
 void CustomUiStyle::setStyleHint(StyleHint hint, QAbstractButton *btn)
@@ -2557,7 +2571,7 @@ void CustomUiStyle::setStyleHint(StyleHint hint, QAbstractButton *btn)
 void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
 {
 	__setStyleHint<QFrame>(hint, frame);
-}
+} */
 
 bool CustomUiStyle::isWidgetHint(StyleHint hint)
 {
