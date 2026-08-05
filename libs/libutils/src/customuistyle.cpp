@@ -2346,7 +2346,7 @@ QColor CustomUiStyle::getStateColor(const QPalette &pal, QPalette::ColorRole rol
 
 QColor CustomUiStyle::getStateColor(QPalette::ColorRole role, const QStyleOption *option)
 {
-	return getStateColor(qApp->palette(), role, option);
+	return getStateColor(option->palette, role, option);
 }
 
 QColor CustomUiStyle::getAdjustedColor(const QColor &color, int dark_ui_factor, int light_ui_factor)
@@ -2462,15 +2462,10 @@ void CustomUiStyle::drawPEHeaderArrow(const QStyleOption *option, QPainter *pain
 	drawControlArrow(&arrow_opt, painter, widget, arrow_type);
 }
 
-void CustomUiStyle::setStyleHint(StyleHint hint, const QList<QFrame *> &frames)
+template<class WgtClass>
+void CustomUiStyle::__setStyleHint(StyleHint hint, WgtClass *wgt)
 {
-	for(auto &frm : frames)
-		setStyleHint(hint, frm);
-}
-
-void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
-{
-	if(!frame || hint == NoHint)
+	if(!wgt || hint == NoHint)
 		return;
 
 	static const std::map<StyleHint, QColor> frm_colors = {
@@ -2481,7 +2476,7 @@ void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
 		{ SuccessFrmHint, "#4aeb5c" }
 	};
 
-	frame->setProperty(StyleHintProp, static_cast<int>(hint));
+	wgt->setProperty(StyleHintProp, static_cast<int>(hint));
 
 	QColor hint_color;
 	bool is_def_hint = (hint == DefaultFrmHint ||
@@ -2492,26 +2487,54 @@ void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
 	if(!is_def_hint)
 		hint_color = frm_colors.at(hint);
 
-	frame->setProperty(StyleHintColor, hint_color);
+	wgt->setProperty(StyleHintColor, hint_color);
 
-	// Extract the frame shape using Shape_Mask to ignore shadow
-	QFrame::Shape shape = static_cast<QFrame::Shape>(frame->frameShape() & QFrame::Shape_Mask);
-
-	// For HLine/VLine frames, apply border color via stylesheet
-	if(shape == QFrame::HLine || shape == QFrame::VLine)
+	if constexpr (std::is_same_v<WgtClass, QFrame>)
 	{
-		QString color_role;
+		// Extract the frame shape using Shape_Mask to ignore shadow
+		QFrame::Shape shape = static_cast<QFrame::Shape>(wgt->frameShape() & QFrame::Shape_Mask);
 
-		if(is_def_hint)
-			color_role = (hint != TabBarFrmHint ? "light" : "mid");
+		// For HLine/VLine frames, apply border color via stylesheet
+		if(shape == QFrame::HLine || shape == QFrame::VLine)
+		{
+			QString color_role;
+
+			if(is_def_hint)
+				color_role = (hint != TabBarFrmHint ? "light" : "mid");
+			else
+				color_role = "midlight";
+
+			wgt->setStyleSheet(QString("QFrame { border: %1px solid palette(%2); }")
+												 .arg(PenWidth).arg(color_role));
+		}
+		// For other frames we force the shape to StyledPanel
 		else
-			color_role = "midlight";
-
-		frame->setStyleSheet(QString("QFrame { border: %1px solid palette(%2); }")
-												 .arg(PenWidth)
-												 .arg(color_role));
+			wgt->setFrameShape(QFrame::StyledPanel);
 	}
-	// For other frames we force the shape to StyledPanel
-	else
-		frame->setFrameShape(QFrame::StyledPanel);
+	else if constexpr (std::is_same_v<WgtClass, QAbstractButton>)
+	{
+		QPalette pal = wgt->palette();
+		hint_color = getAdjustedColor(hint_color, -MidFactor, -MidFactor);
+		pal.setColor(QPalette::Button, hint_color);
+		pal.setColor(QPalette::Dark, getAdjustedColor(hint_color, -MinFactor, -MinFactor));
+		pal.setColor(QPalette::Light, getAdjustedColor(hint_color, MinFactor, MinFactor));
+		pal.setColor(QPalette::Highlight, getAdjustedColor(hint_color, MinFactor, MinFactor));
+		wgt->setPalette(pal);
+	}
+}
+
+void CustomUiStyle::setStyleHint(StyleHint hint, const QList<QFrame *> &frames)
+{
+	for(auto &frm : frames)
+		setStyleHint(hint, frm);
+}
+
+void CustomUiStyle::setStyleHint(StyleHint hint, QAbstractButton *btn)
+{
+	__setStyleHint<QAbstractButton>(hint, btn);
+}
+
+void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
+{
+	__setStyleHint<QFrame>(hint, frame);
 }
