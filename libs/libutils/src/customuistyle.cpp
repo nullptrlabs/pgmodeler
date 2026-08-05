@@ -1198,6 +1198,13 @@ void CustomUiStyle::drawPEButtonPanel(PrimitiveElement element, const QStyleOpti
 		else if(wgt_st.is_hovered)
 			bg_color = getAdjustedColor(getStateColor(QPalette::Light, option), NoFactor, XMinFactor);
 	}
+	else
+	{
+		// Colored hints: preserve hint identity when disabled, darkening the Active palette color
+		StyleHint hint = static_cast<StyleHint>(widget->property(StyleHintProp).toInt());
+		if(hint != NoHint && !isWidgetHint(hint))
+			bg_color = getAdjustedColor(option->palette.color(QPalette::Active, QPalette::Button), -MinFactor, -MinFactor);
+	}
 
 	painter->save();
 	painter->setRenderHint(QPainter::Antialiasing, true);
@@ -1329,8 +1336,20 @@ void CustomUiStyle::drawPEHintFramePanel(PrimitiveElement element, const QStyleO
 	bg_color;
 
 	if(!wgt_st.is_enabled)
-		bg_color = getStateColor(QPalette::Dark, option);
-	else 
+	{
+		// Colored hints preserve the hint identity when disabled, just darkened
+		if(hint == DefaultFrmHint || hint == GroupBoxFrmHint || hint == MenuBoxFrmHint || hint == TabBarFrmHint)
+			bg_color = getStateColor(QPalette::Dark, option);
+		else
+		{
+			QColor hint_color = frame->property(StyleHintColor).value<QColor>();
+			bg_color.setRedF((hint_color.redF() * 0.25) + (base_color.redF() * 0.75));
+			bg_color.setGreenF((hint_color.greenF() * 0.25) + (base_color.greenF() * 0.75));
+			bg_color.setBlueF((hint_color.blueF() * 0.25) + (base_color.blueF() * 0.75));
+			bg_color = getAdjustedColor(bg_color, -MidFactor, -MidFactor);
+		}
+	}
+	else
 	{	
 		// For DefaultFrmHint we use the midlight color as background
 		if(hint == DefaultFrmHint)
@@ -1403,6 +1422,9 @@ void CustomUiStyle::drawPEGenericElemFrame(PrimitiveElement element, const QStyl
 				// For other hints, use the custom color with slight adjustments
 				border_color = getAdjustedColor(widget->property(StyleHintColor).value<QColor>(), XMinFactor, -XMinFactor);
 		}
+		else if(!isWidgetHint(hint))
+			// Colored hints: darken the hint color to signal disabled state
+			border_color = getAdjustedColor(widget->property(StyleHintColor).value<QColor>(), -MaxFactor, -MaxFactor);
 
 		border_radius = (hint == MenuBoxFrmHint ? 0 : HintFrameRadius);
 	}
@@ -2479,10 +2501,7 @@ void CustomUiStyle::__setStyleHint(StyleHint hint, WgtClass *wgt)
 	wgt->setProperty(StyleHintProp, static_cast<int>(hint));
 
 	QColor hint_color;
-	bool is_def_hint = (hint == DefaultFrmHint ||
-											hint == GroupBoxFrmHint ||
-											hint == MenuBoxFrmHint ||
-											hint == TabBarFrmHint);
+	bool is_def_hint = isWidgetHint(hint);
 
 	if(!is_def_hint)
 		hint_color = frm_colors.at(hint);
@@ -2515,6 +2534,7 @@ void CustomUiStyle::__setStyleHint(StyleHint hint, WgtClass *wgt)
 	{
 		QPalette pal = wgt->palette();
 		hint_color = getAdjustedColor(hint_color, -MidFactor, -MidFactor);
+
 		pal.setColor(QPalette::Button, hint_color);
 		pal.setColor(QPalette::Dark, getAdjustedColor(hint_color, -MinFactor, -MinFactor));
 		pal.setColor(QPalette::Light, getAdjustedColor(hint_color, MinFactor, MinFactor));
@@ -2537,4 +2557,10 @@ void CustomUiStyle::setStyleHint(StyleHint hint, QAbstractButton *btn)
 void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
 {
 	__setStyleHint<QFrame>(hint, frame);
+}
+
+bool CustomUiStyle::isWidgetHint(StyleHint hint)
+{
+	return (hint == DefaultFrmHint || hint == GroupBoxFrmHint ||
+					hint == MenuBoxFrmHint ||	hint == TabBarFrmHint);
 }
