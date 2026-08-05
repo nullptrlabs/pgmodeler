@@ -2518,7 +2518,7 @@ void CustomUiStyle::__setStyleHint(StyleHint hint, WgtClass *wgt)
 		pal.setColor(QPalette::Button, hint_color);
 		pal.setColor(QPalette::Dark, getAdjustedColor(hint_color, -MinFactor, -MinFactor));
 		pal.setColor(QPalette::Light, getAdjustedColor(hint_color, MinFactor, MinFactor));
-		pal.setColor(QPalette::Highlight, getAdjustedColor(hint_color, MinFactor, MinFactor));
+		pal.setColor(QPalette::Highlight, getAdjustedColor(hint_color, MidFactor, MidFactor));
 		wgt->setPalette(pal);
 	}
 }
