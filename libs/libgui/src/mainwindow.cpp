@@ -1320,8 +1320,18 @@ void MainWindow::showMainMenu()
 		file_menu->addAction(action_hide_main_menu);
 }
 
-void MainWindow::setCurrentModel()
+void MainWindow::setCurrentModel(int idx)
 {
+	ModelWidget *prev_model = current_model;
+
+	if(idx < 0 || idx >= models_tbw->count())
+		current_model = dynamic_cast<ModelWidget *>(models_tbw->currentWidget());
+	else
+		current_model = dynamic_cast<ModelWidget *>(models_tbw->widget(idx));
+
+	if(prev_model == current_model)
+		return;
+
 	layers_cfg_wgt->setVisible(false);
 	models_tbw->setVisible(models_tbw->count() > 0);
 
@@ -1343,12 +1353,13 @@ void MainWindow::setCurrentModel()
 	//Avoids the tree state saving in order to restore the current model tree state
 	model_objs_wgt->saveTreeState(false);
 
-	//Restore the tree state
-	if(current_model)
-		model_objs_wgt->saveTreeState(model_tree_states[current_model], model_tree_v_pos[current_model]);
+	if(prev_model)
+	{
+		model_objs_wgt->saveTreeState(model_tree_states[prev_model],
+																	model_tree_v_pos[prev_model]);
+	}
 
 	models_tbw->setCurrentIndex(model_nav_wgt->getCurrentIndex());
-	current_model=dynamic_cast<ModelWidget *>(models_tbw->currentWidget());
 	arrange_menu.menuAction()->setEnabled(current_model != nullptr);
 
 	QFile::remove(GlobalAttributes::getTemporaryFilePath(GlobalAttributes::LastModelFile));
@@ -1485,8 +1496,10 @@ void MainWindow::setCurrentModel()
 	changelog_wgt->setModel(current_model);
 
 	if(current_model)
+	{
 		model_objs_wgt->restoreTreeState(model_tree_states[current_model],
 																		 model_tree_v_pos[current_model]);
+	}
 
 	model_objs_wgt->saveTreeState(true);
 
@@ -1636,24 +1649,6 @@ bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
 
 	return model_closed;
 }
-
-/* void MainWindow::reloadModel(const QString &filename, int model_idx)
-{
-	try
-	{
-		if(model_idx < 0 || !closeModel(model_idx, true))
-			return;
-
-		emit s_modelLoadRequested(filename, model_idx);
-	}
-	catch(Exception &e)
-	{
-		models_tbw->removeTab(model_idx);
-		model_nav_wgt->removeModel(model_idx);
-		setCurrentModel();
-		throw Exception(e, PGM_FUNC, PGM_FILE, PGM_LINE);
-	}
-} */
 
 void MainWindow::reloadModel(const QString &filename, int model_idx)
 {
@@ -1808,7 +1803,9 @@ void MainWindow::saveModel(ModelWidget *model)
 					{
 						model->saveModel(sel_files.at(0));
 						registerRecentModel(sel_files.at(0));
-						model_nav_wgt->updateModelText(models_tbw->indexOf(model), model->getDatabaseModel()->getName(), sel_files.at(0));
+						model_nav_wgt->updateModelText(models_tbw->indexOf(model),
+																					 model->getDatabaseModel()->getName(), sel_files.at(0));
+						emit s_modelSaved(model);
 					}
 				}
 				else
@@ -1834,12 +1831,14 @@ void MainWindow::saveModel(ModelWidget *model)
 					}
 
 					if(save_model)
+					{
 						model->saveModel();
+						emit s_modelSaved(model);
+					}
 				}
 
 				updateWindowTitle();
 				model_valid_wgt->clearOutput();
-				emit s_modelSaved(model);
 			}
 
 			stopSaveTimers(false);

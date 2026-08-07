@@ -318,6 +318,10 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		//! \brief Set the postion of a floating widget based upon an action at a tool bar
 		void setFloatingWidgetPos(QWidget *widget, QAction *act, QToolBar *toolbar, bool map_to_window);
 
+		/*! \brief Stop the saving timers. This is used when validating the model
+		in order to avoid the saving while the validation is working */
+		void stopSaveTimers(bool value);
+
 	protected slots:
 		void showMainMenu();
 
@@ -333,7 +337,7 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		void updateDockWidgets();
 
 		//! \brief Updates the reference to the current model when changing the tab focus
-		void setCurrentModel();
+		void setCurrentModel(int idx = -1);
 
 		//! \brief Loads a model from a file via file dialog
 		void loadModel();
@@ -378,10 +382,6 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		//! \brief Opens the pgModeler Wiki in a web browser window
 		void openSupport();
-
-		/*! \brief Stop the saving timers. This is used when validating the model
-		in order to avoid the saving while the validation is working */
-		void stopSaveTimers(bool value);
 
 		//! \brief Executes one of the pending operations (save, export, diff) after validate the model
 		void executePendingOperation(bool valid_error);
