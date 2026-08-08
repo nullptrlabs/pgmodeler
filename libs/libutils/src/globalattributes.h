@@ -98,6 +98,47 @@ class __libutils GlobalAttributes {
 		 //! \brief Sets the path in which the application should search for its internal folders (schemas, lang, conf, etc)
 		static void setSearchPath(const QString &search_path);
 
+		/*! \brief Returns the path to a file that is under a root path. Generally the root path is the full path to a folder that
+		 * stores assets related to pgModeler (config files, schema files, etc) in its installation root.
+		 *
+		 * The parameter file_ext is the file extension that is appended to the requested file. This is a convenience parameter,
+		 * to avoid writting the extension in the last parameter of the parameter pack pth_elems.
+		 * The parameter root_path is the base path where the file name (and eventually subfolders) will be appended
+		 * The parameter subfolder is a base subfolder where the file is located
+		 * The paramter pack ...pth_elems is the last part of the complete file path. By using this, one can form a path with a
+		 * variable number of subfolders. The last element of the parameter pack will be ALWAYS the file that is needed to be retrieved.
+		 *
+		 * Example:
+		 *
+		 * > Input: file_ext = .sch, root_path = /usr/local/pgmodeler/conf, subfolder = schemas, pth_elems = [ sql, table ]
+		 * > Ouput: /usr/local/pgmodeler/conf/schemas/table.sch
+		 *
+		 * > Input: file_ext = [empty], root_path = ~/.config/pgmodeler, subfolder = tmp, pth_elems = [ tmpModel.dbm ]
+		 * > Ouput: ~/.config/pgmodeler/tmp/tmpModel.dbm
+		 *
+		 * > Input: file_ext = [empty], root_path = ~/.config/pgmodeler, subfolder = [empty], pth_elems = [ empty ]
+		 * > Ouput: ~/.config/pgmodeler
+		 * */
+		template<typename ...args>
+		static QString getFilePath(const QString &file_ext, const QString &root_path, args... pth_elems)
+		{
+			QStringList path_elems = { pth_elems... };
+			QString file, path = root_path;
+
+			path_elems.removeAll("");
+
+			if(path_elems.isEmpty())
+				return path;
+
+			// The last element of the parameter pack is the file to be retrieved
+			file = path_elems.last();
+			path_elems.removeLast();
+
+			for(auto &folder : path_elems)
+				path += DirSeparator + folder;
+
+			return path + DirSeparator + file + (file_ext.isEmpty() ? "" : file_ext);
+		}
 
 	public:
 		static const QString
@@ -292,49 +333,7 @@ class __libutils GlobalAttributes {
 		 *  Returns empty string when the config parameter or the file does not exist. */
 		static QString getConfigParamFromFile(const QString &param_name, const QString &conf_file);
 
-		/*! \brief Returns the path to a file that is under a root path. Generally the root path is the full path to a folder that
-		 * stores assets related to pgModeler (config files, schema files, etc) in its installation root.
-		 *
-		 * The parameter file_ext is the file extension that is appended to the requested file. This is a convenience parameter,
-		 * to avoid writting the extension in the last parameter of the parameter pack pth_elems.
-		 * The parameter root_path is the base path where the file name (and eventually subfolders) will be appended
-		 * The parameter subfolder is a base subfolder where the file is located
-		 * The paramter pack ...pth_elems is the last part of the complete file path. By using this, one can form a path with a
-		 * variable number of subfolders. The last element of the parameter pack will be ALWAYS the file that is needed to be retrieved.
-		 *
-		 * Example:
-		 *
-		 * > Input: file_ext = .sch, root_path = /usr/local/pgmodeler/conf, subfolder = schemas, pth_elems = [ sql, table ]
-		 * > Ouput: /usr/local/pgmodeler/conf/schemas/table.sch
-		 *
-		 * > Input: file_ext = [empty], root_path = ~/.config/pgmodeler, subfolder = tmp, pth_elems = [ tmpModel.dbm ]
-		 * > Ouput: ~/.config/pgmodeler/tmp/tmpModel.dbm
-		 *
-		 * > Input: file_ext = [empty], root_path = ~/.config/pgmodeler, subfolder = [empty], pth_elems = [ empty ]
-		 * > Ouput: ~/.config/pgmodeler
-		 * */
-		template<typename ...args>
-		static QString getFilePath(const QString &file_ext, const QString &root_path, args... pth_elems)
-		{
-			QStringList path_elems = { pth_elems... };
-			QString file, path = root_path;
-
-			path_elems.removeAll("");
-
-			if(path_elems.isEmpty())
-				return path;
-
-			// The last element of the parameter pack is the file to be retrieved
-			file = path_elems.last();
-			path_elems.removeLast();
-
-			for(auto &folder : path_elems)
-				path += DirSeparator + folder;
-
-			return path + DirSeparator + file + (file_ext.isEmpty() ? "" : file_ext);
-		}
-
-		//! \brief Returns a configured path to a file or directory that is under a root path.
+			//! \brief Returns a configured path either to a file or directory that is under a root path.
 		template<typename ...args>
 		static QString getPath(const QString &root_path, args... pth_elems)
 		{
