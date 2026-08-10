@@ -460,7 +460,9 @@ void CodeCompletionWidget::updateList()
 
 	pattern.replace("*", "\\*");
 
-	if(db_model)
+	if(!db_model)
+		name_list->clear();
+	else
 	{
 		//Negative qualifying level means that user called the completion before a space (empty word)
 		if(qualifying_level < 0)
@@ -516,7 +518,6 @@ void CodeCompletionWidget::updateList()
 
 	// Retrieving object names from a external source (e.g. live database)
 	bool objs_retrieved = updateObjectsList();
-	//name_list->clear();
 
 	/* List the keywords if no object was retrived from databas or
 	 * the qualifying level is negative or the completion wasn't triggered
