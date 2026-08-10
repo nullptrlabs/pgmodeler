@@ -1329,7 +1329,7 @@ void MainWindow::setCurrentModel(int idx)
 	else
 		current_model = dynamic_cast<ModelWidget *>(models_tbw->widget(idx));
 
-	if(prev_model == current_model)
+	if(prev_model && (prev_model == current_model))
 		return;
 
 	layers_cfg_wgt->setVisible(false);
