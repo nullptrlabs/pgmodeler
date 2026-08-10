@@ -776,12 +776,18 @@ void MainWindow::restoreLastSession()
 		{
 			qApp->setOverrideCursor(Qt::WaitCursor);
 
-			while(!prev_session_files.isEmpty())
+			for(auto &file : prev_session_files)
 			{
-				this->addModel(prev_session_files.front());
-				prev_session_files.pop_front();
+				if(!file.endsWith(GlobalAttributes::DbModelExt))
+				{
+					emit s_modelLoadRequested(file);
+					continue;
+				}
+
+				this->addModel(file);
 			}
 
+			prev_session_files.clear();
 			action_restore_session->setEnabled(false);
 			welcome_wgt->last_session_tb->setEnabled(false);
 			qApp->restoreOverrideCursor();
@@ -943,18 +949,23 @@ void MainWindow::closeEvent(QCloseEvent *event)
 		conf_wgt->removeConfigurationSection(QRegularExpression(QString("(%1)([0-9])+").arg(Attributes::File)));
 
 		//Saving the session
+		QString filename;
+
 		for(auto i = 0; i < models_tbw->count(); i++)
 		{
 			model = dynamic_cast<ModelWidget *>(models_tbw->widget(i));
+			filename = model->getFilename();
 
-			if(!model->getFilename().isEmpty() &&
-				 /* Models loaded from temporary dir are not included in the session
-					* since they are removed once pgModeler is closed */
-				 !model->getFilename().contains(GlobalAttributes::getTemporaryPath()))
+			/* Models loaded from temporary dir are not included in the session
+			 * since they are removed once pgModeler is closed */
+			if(filename.isEmpty() || filename.contains(GlobalAttributes::getTemporaryPath()))
+				filename = model->property(ModelWidget::AltFilename).toString();
+
+			if(!filename.isEmpty())
 			{
 				param_id = QString("%1%2").arg(Attributes::File).arg(i);
 				attribs[Attributes::Id] = param_id;
-				attribs[Attributes::Path] = model->getFilename();
+				attribs[Attributes::Path] = filename;
 				conf_wgt->setConfigurationSection(param_id, attribs);
 				attribs.clear();
 			}

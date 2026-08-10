@@ -374,7 +374,8 @@ class __libgui ModelWidget: public QWidget {
 		ZoomIncrement = 0.050000;
 
 		static constexpr char SaveDisabled[] { "save-disabled" },
-		ModelImported[] { "model-imported" };
+		ModelImported[] { "model-imported" },
+		AltFilename[] { "alt-filename" };
 
 		ModelWidget(QWidget *parent = nullptr);
 		~ModelWidget() override;
