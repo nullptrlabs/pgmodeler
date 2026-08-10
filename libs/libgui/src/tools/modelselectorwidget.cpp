@@ -62,6 +62,7 @@ void ModelSelectorWidget::updateModels(const QList<ModelWidget *> &models)
 
 	model_cmb->blockSignals(true);
 	model_cmb->clear();
+	model_file_edt->clear();
 
 	if(models.isEmpty())
 		model_cmb->addItem(tr("No models found"));
@@ -77,6 +78,8 @@ void ModelSelectorWidget::updateModels(const QList<ModelWidget *> &models)
 	model_cmb->setCurrentIndex(data_idx < 0 ? 0 : data_idx);
 	model_cmb->setEnabled(!models.isEmpty());
 	model_file_edt->setEnabled(!models.isEmpty());
+
+	emit s_selectionChanged();
 }
 
 void ModelSelectorWidget::updateModelFilename()
