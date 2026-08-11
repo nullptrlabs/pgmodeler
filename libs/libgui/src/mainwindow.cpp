@@ -1273,6 +1273,9 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 	}
 	catch(Exception &e)
 	{
+		if(model_idx >= 0)
+			closeModel(model_idx, false, false);
+
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
