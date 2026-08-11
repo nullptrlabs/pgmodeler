@@ -777,6 +777,16 @@ void CustomUiStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *
 		 (qobject_cast<const QToolButton *>(widget) ||
 			qobject_cast<const QPushButton *>(widget)))
 	{
+		const QToolButton *tb = qobject_cast<const QToolButton *>(widget);
+
+		/* For MenuButtonPopup the platform style owns the CC_ToolButton layout and
+		 * passes here the already-clipped dropdown sub-area rect, so draw directly. */
+		if(tb && tb->popupMode() == QToolButton::MenuButtonPopup)
+		{
+			drawControlArrow(option, painter, widget, DownArrow, true);
+			return;
+		}
+
 		drawButtonMenuArrow(option, painter, widget);
 		return;
 	}
