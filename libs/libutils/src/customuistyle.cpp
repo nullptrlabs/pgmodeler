@@ -1218,13 +1218,6 @@ void CustomUiStyle::drawPEButtonPanel(PrimitiveElement element, const QStyleOpti
 		else if(wgt_st.is_hovered)
 			bg_color = getAdjustedColor(getStateColor(QPalette::Light, option), NoFactor, XMinFactor);
 	}
-	else
-	{
-		// Colored hints: preserve hint identity when disabled, darkening the Active palette color
-		StyleHint hint = static_cast<StyleHint>(widget->property(StyleHintProp).toInt());
-		if(hint != NoHint && !isWidgetHint(hint))
-			bg_color = getAdjustedColor(option->palette.color(QPalette::Active, QPalette::Button), -MinFactor, -MinFactor);
-	}
 
 	painter->save();
 	painter->setRenderHint(QPainter::Antialiasing, true);
@@ -1442,8 +1435,8 @@ void CustomUiStyle::drawPEGenericElemFrame(PrimitiveElement element, const QStyl
 				// For other hints, use the custom color with slight adjustments
 				border_color = getAdjustedColor(widget->property(StyleHintColor).value<QColor>(), XMinFactor, -XMinFactor);
 		}
-		else if(!isWidgetHint(hint))
-			// Colored hints: darken the hint color to signal disabled state
+		else if(!isWidgetHint(hint) && !qobject_cast<const QAbstractButton *>(widget))
+			// Frames with colored hints: darken the hint color to signal disabled state
 			border_color = getAdjustedColor(widget->property(StyleHintColor).value<QColor>(), -MaxFactor, -MaxFactor);
 
 		border_radius = (hint == MenuBoxFrmHint ? 0 : HintFrameRadius);
@@ -2566,6 +2559,15 @@ void CustomUiStyle::setStyleHint(StyleHint hint, QWidget *wgt)
 		pal.setColor(QPalette::Dark, getAdjustedColor(hint_color, -MinFactor, -MinFactor));
 		pal.setColor(QPalette::Light, getAdjustedColor(hint_color, MinFactor, MinFactor));
 		pal.setColor(QPalette::Highlight, getAdjustedColor(hint_color, MidFactor, MidFactor));
+
+		/* Pin the Disabled group to the application defaults so Qt does not derive
+		 * it from the hint color, keeping disabled buttons visually neutral. */
+		const QPalette app_pal = qApp->palette();
+
+		for(auto role : { QPalette::Button, QPalette::Dark, QPalette::Light,
+											QPalette::Midlight, QPalette::Mid, QPalette::ButtonText })
+			pal.setColor(QPalette::Disabled, role, app_pal.color(QPalette::Disabled, role));
+
 		btn->setPalette(pal);
 	}
 }
