@@ -257,7 +257,8 @@ class __libutils CustomUiStyle : public QProxyStyle {
 			ConfirmFrmHint, // Green border (confirmation)
 			AlertFrmHint, // Yellow border (alert)
 			ErrorFrmHint, // Red border (error)
-			SuccessFrmHint // Greenish border (success)
+			SuccessFrmHint, // Greenish border (success)
+			AccentFrmHint // Accent border (according to QPalette::Accent [varies by theme])
 		};
 
 		CustomUiStyle() = default;
@@ -298,10 +299,6 @@ class __libutils CustomUiStyle : public QProxyStyle {
 	 * This method forces the frames shape to StyledPanel. */
 		static void setStyleHint(StyleHint hint, QWidget *wgt);
 		static void setStyleHint(StyleHint hint, const QList<QWidget *> &wgts);
-
-		//static void setStyleHint(StyleHint hint, QFrame *frame);
-		//static void setStyleHint(StyleHint hint, QAbstractButton *btn);
-		//static void setStyleHint(StyleHint hint, const QList<QWidget *> &wgts);
 
 		static bool isWidgetHint(StyleHint hint);
 

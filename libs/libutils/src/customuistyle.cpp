@@ -2502,11 +2502,16 @@ void CustomUiStyle::setStyleHint(StyleHint hint, QWidget *wgt)
 
 	wgt->setProperty(StyleHintProp, static_cast<int>(hint));
 
+	QPalette pal = wgt->palette();
 	QColor hint_color;
 	bool is_def_hint = isWidgetHint(hint);
 
 	if(!is_def_hint)
-		hint_color = frm_colors.at(hint);
+	{
+		hint_color = (hint == AccentFrmHint ?
+										pal.color(QPalette::Accent) :
+										frm_colors.at(hint));
+	}
 
 	wgt->setProperty(StyleHintColor, hint_color);
 
@@ -2534,9 +2539,7 @@ void CustomUiStyle::setStyleHint(StyleHint hint, QWidget *wgt)
 	}
 	else if(btn)
 	{
-		QPalette pal = wgt->palette();
 		hint_color = getAdjustedColor(hint_color, -MidFactor, -MidFactor);
-
 		pal.setColor(QPalette::Button, hint_color);
 		pal.setColor(QPalette::Dark, getAdjustedColor(hint_color, -MinFactor, -MinFactor));
 		pal.setColor(QPalette::Light, getAdjustedColor(hint_color, MinFactor, MinFactor));
@@ -2550,28 +2553,6 @@ void CustomUiStyle::setStyleHint(StyleHint hint, const QList<QWidget *> &wgts)
 	for(auto &wgt : wgts)
 		setStyleHint(hint, wgt);
 }
-
-/*void CustomUiStyle::setStyleHint(StyleHint hint, const QList<QFrame *> &frames)
-{
-	for(auto &frm : frames)
-		setStyleHint(hint, frm);
-}
-
-void CustomUiStyle::setStyleHint(StyleHint hint, const QList<QAbstractButton *> &btns)
-{
-	for(auto &btn : btns)
-		setStyleHint(hint, btn);
-}
-
-void CustomUiStyle::setStyleHint(StyleHint hint, QAbstractButton *btn)
-{
-	__setStyleHint<QAbstractButton>(hint, btn);
-}
-
-void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
-{
-	__setStyleHint<QFrame>(hint, frame);
-} */
 
 bool CustomUiStyle::isWidgetHint(StyleHint hint)
 {
