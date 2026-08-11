@@ -60,6 +60,8 @@ class __libutils CustomUiStyle : public QProxyStyle {
 			TopRight = 2,
 			BottomLeft = 4,
 			BottomRight = 8,
+			LeftCorners = TopLeft | BottomLeft,
+			RightCorners = TopRight | BottomRight,
 			AllCorners = TopLeft | TopRight | BottomLeft | BottomRight
 		};
 
@@ -110,6 +112,9 @@ class __libutils CustomUiStyle : public QProxyStyle {
 
 		// Helper method to add edge with optional rounded corner to QPainterPath
 		void addEdgeWithCorner(QPainterPath &path, const QRectF &rect, OpenEdge side, int radius) const;
+
+		// Returns which corners to round for each half of a MenuButtonPopup QToolButton
+		CornerFlag menuButtonSubCorners(const QStyleOption *option, const QWidget *widget) const;
 
 		// Generic method to create QPainterPath with configurable corner radius and open sides
 		QPainterPath createControlShape(const QRect &rect, int radius, CornerFlag corners = AllCorners,

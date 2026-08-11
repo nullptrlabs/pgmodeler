@@ -119,6 +119,16 @@ void CustomUiStyle::addEdgeWithCorner(QPainterPath &path, const QRectF &rect, Op
 	}
 }
 
+CustomUiStyle::CornerFlag CustomUiStyle::menuButtonSubCorners(const QStyleOption *option, const QWidget *widget) const
+{
+	const QToolButton *tb = qobject_cast<const QToolButton *>(widget);
+
+	if(!tb || tb->popupMode() != QToolButton::MenuButtonPopup || option->rect == widget->rect())
+		return AllCorners;
+
+	return (option->rect.left() == widget->rect().left()) ? LeftCorners : RightCorners;
+}
+
 QPainterPath CustomUiStyle::createControlShape(const QRect &rect, int radius, CustomUiStyle::CornerFlag corners,
 																							 qreal dx, qreal dy, qreal dw, qreal dh, OpenEdge open_edge) const
 {
@@ -1220,7 +1230,7 @@ void CustomUiStyle::drawPEButtonPanel(PrimitiveElement element, const QStyleOpti
 	painter->setRenderHint(QPainter::Antialiasing, true);
 	painter->setBrush(bg_color);
 	painter->setPen(Qt::NoPen);
-	painter->drawRoundedRect(option->rect, ButtonRadius, ButtonRadius);
+	painter->drawPath(createControlShape(option->rect, ButtonRadius, menuButtonSubCorners(option, widget)));
 	painter->restore();
 }
 
@@ -1477,8 +1487,10 @@ void CustomUiStyle::drawPEGenericElemFrame(PrimitiveElement element, const QStyl
 
 	if(border_radius > 0)
 	{
+		CornerFlag frm_corners = menuButtonSubCorners(option, widget);
+		OpenEdge open_edge = (frm_corners == LeftCorners) ? OpenRight : NotOpen;
 		shape = createControlShape(option->rect, border_radius,
-						CustomUiStyle::AllCorners, 0.5, 0.5, -0.5, -0.5);
+						frm_corners, 0.5, 0.5, -0.5, -0.5, open_edge);
 	}
 	else
 	{
