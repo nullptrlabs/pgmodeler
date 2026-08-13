@@ -197,6 +197,7 @@ void ModelExportWidget::setLowVerbosity(bool value)
 
 void ModelExportWidget::updateModels(const QList<ModelWidget *> &models)
 {
+	model_wgt = nullptr;
 	model_sel_wgt->updateModels(models);
 	ConnectionsConfigWidget::fillConnectionsComboBox(connections_cmb, true, Connection::OpExport);
 	selectExportMode();
