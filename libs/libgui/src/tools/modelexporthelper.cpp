@@ -100,7 +100,7 @@ void ModelExportHelper::exportToSQL(DatabaseModel *db_model, const QString &file
 
 		if(!split)
 		{
-			db_model->saveModel(filename, SchemaParser::SqlCode);
+			db_model->saveModel(filename, SchemaParser::SqlCode, gen_drop_file);
 			emit s_progressUpdated(100, tr("SQL file `%1' successfully written.").arg(filename), ObjectType::BaseObject);
 		}
 		else

@@ -73,6 +73,20 @@ class ModelWidget;
 class __libcore DatabaseModel:  public QObject, public BaseObject {
 	Q_OBJECT
 
+	public:
+		/*! \brief Constants used to determine the code generation mode:
+		 *  OriginalSql: generates the SQL for the object only (original behavior)
+		 *  DependenciesSql: generates the original SQL code + dependencies SQL
+		 *  ChildrenSql: generates the original SQL code + children SQL
+		 *  GroupByType: generates the original SQL code but grouping them in a single file
+		 *  for each object type. */
+		enum CodeGenMode: unsigned {
+			OriginalSql,
+			DependenciesSql,
+			ChildrenSql,
+			GroupByType
+		};
+
 	private:
 		//! \brief Constants used to access the tuple columns in the internal changelog
 		enum LogFields: unsigned {
@@ -333,20 +347,10 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief This convenience method forces the redrawn of the tables of a relationship as well as their respective schemas
 		void setRelTablesModified(BaseRelationship *rel);
 
-	public:
-		/*! \brief Constants used to determine the code generation mode:
-		 *  OriginalSql: generates the SQL for the object only (original behavior)
-		 *  DependenciesSql: generates the original SQL code + dependencies SQL
-		 *  ChildrenSql: generates the original SQL code + children SQL
-		 *  GroupByType: generates the original SQL code but grouping them in a single file
-		 *  for each object type. */
-		enum CodeGenMode: unsigned {
-			OriginalSql,
-			DependenciesSql,
-			ChildrenSql,
-			GroupByType
-		};
+		void saveDropScript(const QString &path, std::map<unsigned int, BaseObject *> &objects,
+												CodeGenMode code_gen_mode, bool is_split);
 
+	public:
 		enum MetaAttrOptions: unsigned {
 			MetaNoOpts=0,
 			MetaDbAttributes=1,	//! \brief Handle database model attribute when save/load metadata file
@@ -504,7 +508,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		void setInvalidated(bool value);
 
 		//! \brief Saves the specified code definition for the model on the specified filename
-		void saveModel(const QString &filename, SchemaParser::CodeType def_type);
+		void saveModel(const QString &filename, SchemaParser::CodeType def_type, bool gen_drop_file = false);
 
 		/*! \brief Saves the model's SQL code definition by creating separated files for each object
 		 * The provided path must be a directory. If it does not exists then the method will create
