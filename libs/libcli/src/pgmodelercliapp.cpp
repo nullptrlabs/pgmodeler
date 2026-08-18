@@ -654,13 +654,13 @@ void PgModelerCliApp::showMenu()
 	menu_items.append(MenuItem(ExportToSvg, "", tr("Exports the input model to an SVG file.")));
 	menu_items.append(MenuItem(ExportToDict, "", tr("Exports the input model to a data dictionary in HTML format.")));
 	menu_items.append(MenuItem(ExportToDbms, "", tr("Exports the input model directly to a PostgreSQL server.")));
-	menu_items.append(MenuItem(ListConns, "", tr("Lists the available connections. File location: %1.").arg(GlobalAttributes::ConnectionsConf + GlobalAttributes::ConfigurationExt)));
 
 	#ifdef PRIV_CODE_SYMBOLS
 		menu_items.append(MenuItem(ImportDb, "", tr("Imports a database to an output file.")));
 		menu_items.append(MenuItem(Diff, "", tr("Compares a model and a database or two databases. Generates an SQL script to synchronize the latter with the former.")));
 	#endif
 
+	menu_items.append(MenuItem(ListConns, "", tr("Lists the available connections. File location: %1.").arg(GlobalAttributes::ConnectionsConf + GlobalAttributes::ConfigurationExt)));
 	menu_items.append(MenuItem(FixModel, "", tr("Tries to fix the structure of the input model file to make it loadable again.")));
 	menu_items.append(MenuItem(CreateConfigs, "", tr("Creates pgModeler's configuration folder and files. Stored in the user's local storage.")));
 	
@@ -707,7 +707,7 @@ void PgModelerCliApp::showMenu()
 	menu_items.append(MenuItem());
 	
 	// DBMS export options
-	menu_items.append(MenuItem(tr("DBMS export options"), "", ""));
+	menu_items.append(MenuItem(tr("DBMS export options")));
 	menu_items.append(MenuItem(IgnoreDuplicates, "", tr("Ignores errors related to duplicate objects that may exist on the server.")));
 	menu_items.append(MenuItem(IgnoreErrorCodes, "[LIST]", tr("Ignores additional errors by their error codes. Provide comma-separated alphanumeric codes.")));
 	menu_items.append(MenuItem(DropDatabase, "", tr("Drops the database before executing the export process.")));
