@@ -20,7 +20,6 @@
 */
 
 #include "graphicalview.h"
-#include "utilsns.h"
 
 GraphicalView::GraphicalView(View *view) : BaseTableView(view)
 {

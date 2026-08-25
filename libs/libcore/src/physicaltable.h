@@ -329,9 +329,6 @@ class __libcore PhysicalTable: public BaseTable {
 		//! \brief Returns the specified object type list. Returns null if an invalid object type is provided
 		virtual std::vector<TableObject *> *getObjectList(ObjectType obj_type);
 
-		//! \brief Returns a list of objects that references the providede column.
-		std::vector<TableObject *> getColumnReferences(Column *column);
-
 		//! \brief Reset the current index of the objects created by relationship
 		void resetRelObjectsIndexes();
 
