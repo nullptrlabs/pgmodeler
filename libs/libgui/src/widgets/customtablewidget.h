@@ -229,7 +229,8 @@ class __libgui CustomTableWidget: public QWidget, public Ui::CustomTableWidget {
 		 * The button is returned for extra personalization and
 		 * signal/slot connections */
 		QToolButton *addCustomButton(const QIcon &icon = {}, const QKeySequence &shortcut = {},
-																 const QString &tooltip = {}, const QString &btn_name = {});
+																 const QString &tooltip = {}, const QString &btn_name = {},
+																 Qt::Alignment btn_align = Qt::AlignRight);
 
 		void setItemContextMenu(QMenu *menu);
 

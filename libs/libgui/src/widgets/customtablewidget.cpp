@@ -209,11 +209,16 @@ void CustomTableWidget::setAddRowOnTabPress(bool value)
 }
 
 QToolButton *CustomTableWidget::addCustomButton(const QIcon &icon, const QKeySequence &shortcut,
-																								const QString &tooltip, const QString &btn_name)
+																								const QString &tooltip, const QString &btn_name,
+																								Qt::Alignment btn_align)
 {
 	QToolButton *btn = new QToolButton(this);
 
-	buttons_lt->addWidget(btn);
+	if(btn_align == Qt::AlignRight)
+		buttons_lt->addWidget(btn);
+	else
+		buttons_lt->insertWidget(0, btn);
+
 	btn->setObjectName(btn_name);
 	btn->setToolTip(tooltip +
 									(!shortcut.isEmpty() ?
