@@ -33,10 +33,10 @@ unexpected behavior and crashes.
 #include <QObject>
 
 //! \brief This macro expands to a block of code inside a try/catch blockz
-#define __trycatch(body) \
+#define __trycatch(...) \
 try \
 { \
-	body \
+	__VA_ARGS__ \
 } \
 catch(Exception &e) \
 { \
@@ -124,13 +124,5 @@ catch(Exception &e) \
 [receiver](auto... args) { \
 	__trycatch( (receiver)->method(args...); ) \
 }
-
-/*! \brief This macro is just a placeholder for the original QObject::connect call.
- * It acts just to flag where a original QObject connect is happening.
- * This macro is for TEMPORARY USE and will be replaced by the original call
- * once the signal/slots connections that need to use try/catch versions are refactored.
- */
-/* #define q_connect(sender, signal, receiver, slot, ...) \
-connect(sender, signal, receiver, slot, ##__VA_ARGS__); */
 
 #endif
