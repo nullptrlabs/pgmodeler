@@ -769,7 +769,17 @@ void OperationList::executeOperation(Operation *oper, bool redo)
 				orig_obj->updateDependencies();
 
 			if(aux_obj)
+			{
 				CoreUtilsNs::copyObject(&object, aux_obj, obj_type);
+				Column *aux_col = dynamic_cast<Column *>(object);
+
+				/* When restoring modified columns, in some cases, the parent table
+				 * is null (when the column is created from xml), in that case
+				 * we need to force the assignment of parent table to the
+				 * restored object */
+				if(aux_col && !aux_col->getParentTable() && parent_tab)
+					aux_col->setParentTable(parent_tab);
+			}
 
 			//For pk constraint, after restore the previous configuration, check the not-null flag of the new source columns
 			if(obj_type==ObjectType::Constraint)
