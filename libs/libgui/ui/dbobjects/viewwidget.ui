@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>781</width>
-    <height>289</height>
+    <height>407</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -240,7 +240,10 @@
       <attribute name="title">
        <string>Definition</string>
       </attribute>
-      <layout class="QVBoxLayout" name="sql_definition_lt">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="spacing">
+        <number>5</number>
+       </property>
        <property name="leftMargin">
         <number>5</number>
        </property>
@@ -336,6 +339,38 @@
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSplitter" name="h_splitter">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
+         </property>
+         <property name="childrenCollapsible">
+          <bool>true</bool>
+         </property>
+         <widget class="QSplitter" name="v_splitter">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="childrenCollapsible">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="sql_def_parent" native="true"/>
+          <widget class="QGroupBox" name="sql_preview_gb">
+           <property name="title">
+            <string>SQL preview</string>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QFrame" name="refs_parent">
+          <property name="frameShape">
+           <enum>QFrame::Shape::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Shadow::Raised</enum>
+          </property>
+         </widget>
         </widget>
        </item>
       </layout>

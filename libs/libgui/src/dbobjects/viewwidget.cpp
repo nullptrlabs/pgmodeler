@@ -35,6 +35,9 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 
 	Ui_ViewWidget::setupUi(this);
 
+	v_splitter->setSizes({ 700, 300 });
+	h_splitter->setSizes({ 800, 200 });
+
 	alert_frm->setVisible(false);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
@@ -42,7 +45,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 	check_option_cmb->addItems(CheckOptionType::getTypes());
 	check_option_cmb->setCurrentIndex(0);
 
-	sql_definition_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin, sql_definition_tab, true);
+	sql_definition_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(0, sql_def_parent, true);
 	sql_definition_hl = new SyntaxHighlighter(sql_definition_txt);
 	sql_definition_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
@@ -55,7 +58,8 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 
 	obj_refs_wgt = GuiUtilsNs::createWidgetInParent<ReferencesWidget>(GuiUtilsNs::LtMargin,
 																																		ref_types,
-																																		true, view_refs_tab);
+																																		true, refs_parent);
+	connect(obj_refs_wgt, &ReferencesWidget::s_referencesChanged, this, &ViewWidget::updateCodePreview);
 
 	tag_sel = new ObjectSelectorWidget(ObjectType::Tag, this);
 	tag_lt->insertWidget(1, tag_sel);
@@ -127,8 +131,12 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 	extra_wgts_lt->addLayout(type_sec_tag_lt);
 	configureTabbedLayout(attributes_tbw);
 
-	//configureTabOrder({ tag_sel, view_type_cmb, with_no_data_chk, attributes_tbw });
-	setMinimumSize(700, 650);
+	attributes_tbw->removeTab(attributes_tbw->indexOf(sql_preview_pg));
+	vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargin, GuiUtilsNs::LtSpacing, sql_preview_gb);
+	vbox->addWidget(sql_preview_pg);
+	sql_preview_pg->setVisible(true);
+
+	setMinimumSize(900, 700);
 }
 
 CustomTableWidget *ViewWidget::getObjectTable(ObjectType obj_type)
@@ -404,10 +412,9 @@ void ViewWidget::listObjects(ObjectType obj_type)
 	}
 }
 
-QString ViewWidget::getSQLCodePreview()
+void ViewWidget::updateCodePreview()
 {
-	if(attributes_tbw->currentIndex() != attributes_tbw->count() - 1)
-		return "";
+	NumberedTextEditor *source_txt = sql_preview_gb->findChild<NumberedTextEditor *>();
 
 	try
 	{
@@ -424,11 +431,11 @@ QString ViewWidget::getSQLCodePreview()
 		aux_view.setRecursive(view_type_cmb->currentIndex() == Recursive);
 		aux_view.setWithNoData(with_no_data_chk->isChecked());
 
-		return aux_view.getSourceCode(SchemaParser::SqlCode);
+		source_txt->setPlainText(aux_view.getSourceCode(SchemaParser::SqlCode));
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+		source_txt->setPlainText(QString("/* %1 */").arg(e.getExceptionsText()));
 	}
 }
 
@@ -449,7 +456,11 @@ void ViewWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Sch
 	BaseObjectWidget::setAttributes(model,op_list, view, schema, px, py);
 
 	sql_definition_txt->setPlainText(view->getSqlDefinition());
+
+	obj_refs_wgt->blockSignals(true);
 	obj_refs_wgt->setAttributes(this->model, view->getObjectReferences());
+	updateCodePreview();
+	obj_refs_wgt->blockSignals(false);
 
 	if(view->isMaterialized())
 		view_type_cmb->setCurrentIndex(Materialized);

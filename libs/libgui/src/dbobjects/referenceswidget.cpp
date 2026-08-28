@@ -33,7 +33,7 @@ ReferencesWidget::ReferencesWidget(const std::vector<ObjectType> &types, bool co
 {
 	Ui_ReferencesWidget::setupUi(this);
 
-	CustomUiStyle::setStyleHint(CustomUiStyle::GroupBoxFrmHint, options_frm);
+	CustomUiStyle::setStyleHint(CustomUiStyle::GroupBoxFrmHint, options_gb);
 
 	object_sel = new ObjectSelectorWidget(types, this);
 	references_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
@@ -45,7 +45,9 @@ ReferencesWidget::ReferencesWidget(const std::vector<ObjectType> &types, bool co
 	this->conf_view_refs = conf_view_refs;
 
 	object_lt->addWidget(object_sel);
-	references_lt->addWidget(references_tab);
+
+	QGridLayout *grid = qobject_cast<QGridLayout *>(references_lt);
+	grid->addWidget(references_tab, grid->rowCount(), 0, 1, grid->columnCount());
 
 	references_tab->setColumnCount(conf_view_refs ? 7 : 6);
 
@@ -150,6 +152,8 @@ void ReferencesWidget::clearReferenceForm()
 	format_name_chk->setChecked(false);
 	references_tab->clearSelection();
 	references_tab->setButtonsEnabled(CustomTableWidget::AddButton, false);
+
+	emit s_referencesChanged();
 }
 
 void ReferencesWidget::showReferenceData(int row, BaseObject *object, const QString &ref_name, const QString &ref_alias,
