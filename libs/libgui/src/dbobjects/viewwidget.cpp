@@ -35,8 +35,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 
 	Ui_ViewWidget::setupUi(this);
 
-	v_splitter->setSizes({ 700, 300 });
-	h_splitter->setSizes({ 800, 200 });
+	hz_splitter->setSizes({ 700, 300 });
 
 	alert_frm->setVisible(false);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
@@ -45,7 +44,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 	check_option_cmb->addItems(CheckOptionType::getTypes());
 	check_option_cmb->setCurrentIndex(0);
 
-	sql_definition_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(0, sql_def_parent, true);
+	sql_definition_txt = GuiUtilsNs::createWidgetInParent<NumberedTextEditor>(GuiUtilsNs::LtMargin, def_code_pg, true);
 	sql_definition_hl = new SyntaxHighlighter(sql_definition_txt);
 	sql_definition_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
@@ -132,7 +131,7 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 	configureTabbedLayout(attributes_tbw);
 
 	attributes_tbw->removeTab(attributes_tbw->indexOf(sql_preview_pg));
-	vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargin, GuiUtilsNs::LtSpacing, sql_preview_gb);
+	vbox = GuiUtilsNs::createVBoxLayout(0, 0, code_prev_pg);
 	vbox->addWidget(sql_preview_pg);
 	sql_preview_pg->setVisible(true);
 
@@ -414,7 +413,7 @@ void ViewWidget::listObjects(ObjectType obj_type)
 
 void ViewWidget::updateCodePreview()
 {
-	NumberedTextEditor *source_txt = sql_preview_gb->findChild<NumberedTextEditor *>();
+	NumberedTextEditor *source_txt = code_prev_pg->findChild<NumberedTextEditor *>();
 
 	try
 	{

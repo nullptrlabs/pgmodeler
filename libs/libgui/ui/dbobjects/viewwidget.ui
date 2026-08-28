@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>781</width>
-    <height>407</height>
+    <height>620</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -342,47 +342,53 @@
         </widget>
        </item>
        <item>
-        <widget class="QSplitter" name="h_splitter">
+        <widget class="QSplitter" name="hz_splitter">
          <property name="orientation">
           <enum>Qt::Orientation::Horizontal</enum>
          </property>
          <property name="childrenCollapsible">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
-         <widget class="QSplitter" name="v_splitter">
-          <property name="orientation">
-           <enum>Qt::Orientation::Vertical</enum>
+         <widget class="QTabWidget" name="definition_tbw">
+          <property name="tabPosition">
+           <enum>QTabWidget::TabPosition::South</enum>
           </property>
-          <property name="childrenCollapsible">
-           <bool>true</bool>
+          <property name="currentIndex">
+           <number>0</number>
           </property>
-          <widget class="QWidget" name="sql_def_parent" native="true"/>
-          <widget class="QGroupBox" name="sql_preview_gb">
-           <property name="title">
+          <property name="iconSize">
+           <size>
+            <width>22</width>
+            <height>22</height>
+           </size>
+          </property>
+          <widget class="QWidget" name="def_code_pg">
+           <attribute name="icon">
+            <iconset resource="../../res/resources.qrc">
+             <normaloff>:/icons/icons/sourcecode.png</normaloff>:/icons/icons/sourcecode.png</iconset>
+           </attribute>
+           <attribute name="title">
+            <string>Code</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="code_prev_pg">
+           <attribute name="icon">
+            <iconset resource="../../res/resources.qrc">
+             <normaloff>:/icons/icons/sqlpreview.png</normaloff>:/icons/icons/sqlpreview.png</iconset>
+           </attribute>
+           <attribute name="title">
             <string>SQL preview</string>
-           </property>
+           </attribute>
           </widget>
          </widget>
-         <widget class="QFrame" name="refs_parent">
-          <property name="frameShape">
-           <enum>QFrame::Shape::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Shadow::Raised</enum>
+         <widget class="QGroupBox" name="refs_parent">
+          <property name="title">
+           <string>References</string>
           </property>
          </widget>
         </widget>
        </item>
       </layout>
-     </widget>
-     <widget class="QWidget" name="view_refs_tab">
-      <attribute name="icon">
-       <iconset resource="../../res/resources.qrc">
-        <normaloff>:/icons/icons/reference.png</normaloff>:/icons/icons/reference.png</iconset>
-      </attribute>
-      <attribute name="title">
-       <string>References</string>
-      </attribute>
      </widget>
      <widget class="QWidget" name="columns_tab">
       <attribute name="icon">
