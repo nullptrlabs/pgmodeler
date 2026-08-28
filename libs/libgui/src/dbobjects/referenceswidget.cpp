@@ -34,6 +34,7 @@ ReferencesWidget::ReferencesWidget(const std::vector<ObjectType> &types, bool co
 	Ui_ReferencesWidget::setupUi(this);
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::GroupBoxFrmHint, options_frm);
+	GuiUtilsNs::configureWidgetsFont({ object_lbl, ref_name_lbl, ref_alias_lbl }, GuiUtilsNs::SmallFontFactor, true);
 
 	object_sel = GuiUtilsNs::createWidgetInParent<ObjectSelectorWidget>(0, types, ref_obj_parent);
 	references_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
@@ -147,7 +148,7 @@ void ReferencesWidget::clearReferenceForm()
 	ref_name_edt->clear();
 	ref_alias_edt->clear();
 	use_signature_chk->setChecked(false);
-	format_name_chk->setChecked(false);
+	format_name_chk->setChecked(true);
 	references_tab->clearSelection();
 	references_tab->setButtonsEnabled(CustomTableWidget::AddButton, false);
 

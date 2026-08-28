@@ -30,12 +30,7 @@
 
 ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::View)
 {
-	QGridLayout *grid = nullptr;
-	QVBoxLayout *vbox = nullptr;
-
 	Ui_ViewWidget::setupUi(this);
-
-	hz_splitter->setSizes({ 700, 300 });
 
 	alert_frm->setVisible(false);
 	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
@@ -57,11 +52,15 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 
 	obj_refs_wgt = GuiUtilsNs::createWidgetInParent<ReferencesWidget>(GuiUtilsNs::LtMargin,
 																																		ref_types,
-																																		true, refs_parent);
-	connect(obj_refs_wgt, &ReferencesWidget::s_referencesChanged, this, &ViewWidget::updateCodePreview);
+																																		true, references_tab);
 
-	tag_sel = new ObjectSelectorWidget(ObjectType::Tag, this);
-	tag_lt->insertWidget(1, tag_sel);
+	connect(definition_tbw, &QTabWidget::currentChanged, this, [this](int idx) {
+		if(idx == 2)
+			updateCodePreview();
+	});
+
+	tag_sel = GuiUtilsNs::createWidgetInParent<ObjectSelectorWidget>(GuiUtilsNs::LtMargin,
+																																	 ObjectType::Tag, tag_gb);
 
 	custom_cols_wgt = GuiUtilsNs::createWidgetInParent< SimpleColumnsWidget>(GuiUtilsNs::LtMargin,
 																																					 columns_tab);
@@ -131,11 +130,11 @@ ViewWidget::ViewWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Vi
 	configureTabbedLayout(attributes_tbw);
 
 	attributes_tbw->removeTab(attributes_tbw->indexOf(sql_preview_pg));
-	vbox = GuiUtilsNs::createVBoxLayout(0, 0, code_prev_pg);
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(0, 0, code_prev_pg);
 	vbox->addWidget(sql_preview_pg);
 	sql_preview_pg->setVisible(true);
 
-	setMinimumSize(900, 700);
+	setMinimumSize(750, 650);
 }
 
 CustomTableWidget *ViewWidget::getObjectTable(ObjectType obj_type)
