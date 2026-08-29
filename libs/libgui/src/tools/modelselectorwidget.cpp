@@ -72,12 +72,13 @@ void ModelSelectorWidget::updateModels(const QList<ModelWidget *> &models)
 	for(auto &model_wgt : models)
 		model_cmb->addItem(model_wgt->getDatabaseModel()->getName(), QVariant::fromValue<void *>(model_wgt));
 
-	model_cmb->blockSignals(false);
-
 	int data_idx = model_cmb->findData(data);
 	model_cmb->setCurrentIndex(data_idx < 0 ? 0 : data_idx);
 	model_cmb->setEnabled(!models.isEmpty());
 	model_file_edt->setEnabled(!models.isEmpty());
+
+	updateModelFilename();
+	model_cmb->blockSignals(false);
 
 	emit s_selectionChanged();
 }

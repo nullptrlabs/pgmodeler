@@ -410,10 +410,13 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		void loadModelsFromMimeData(const QMimeData *mime_data);
 		void addNewLayer(const QString &layer_name);
 
+		virtual void updateModelSelectors();
+
 	signals:
 		void s_currentModelChanged(ModelWidget *model_wgt);
 		void s_modelSaved(ModelWidget *model_wgt);
 		void s_modelAdded(ModelWidget *model_wgt);
+		void s_modelClosed();
 
 		/*! \brief This signal is emitted when an extraneous file (not .dbm) is among
 		 * the list of models to be loaded in loadModels(). The intention of this signal

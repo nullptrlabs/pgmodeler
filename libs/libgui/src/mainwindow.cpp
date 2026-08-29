@@ -175,6 +175,13 @@ void MainWindow::addNewLayer(const QString &layer_name)
 	current_model->layers_wgt->setAttributes(current_model);
 }
 
+void MainWindow::updateModelSelectors()
+{
+	QList<ModelWidget *> models = model_nav_wgt->getModelWidgets();
+	model_export_wgt->updateModels(models);
+	fix_tools_wgt->updateModels(models);
+}
+
 void MainWindow::dropEvent(QDropEvent *event)
 {
 	loadModelsFromMimeData(event->mimeData());
@@ -581,22 +588,20 @@ void MainWindow::connectSignalsToSlots()
 	view_actions.insert({
 		{ WelcomeView, action_welcome },
 		{ DesignView , action_design },
-		/*{ ManageView, action_manage },*/ /* action_import, */
-		{ ExportView, action_export }, /* action_diff, */
+		{ ExportView, action_export },
 		{ FixView, action_fix},
 		{ ConfigureView, action_configure }
 	});
 
-	//int vw_id = 0;
-	//for(auto &act : view_actions)
 	for(auto [vw_id, act] : view_actions.asKeyValueRange())
 	{
 		act->setData(vw_id);
 		connect(act, &QAction::toggled, this, qOverload<bool>(&MainWindow::changeCurrentView));
 	}
 
-	//connect(action_export, &QAction::toggled, this, &MainWindow::validateBeforeOperation);
-	//connect(action_diff, &QAction::toggled, this, &MainWindow::validateBeforeOperation);
+	connect(this, &MainWindow::s_modelAdded, this, &MainWindow::updateModelSelectors);
+	connect(this, &MainWindow::s_modelClosed, this, &MainWindow::updateModelSelectors);
+	connect(this, &MainWindow::s_modelSaved, this, &MainWindow::updateModelSelectors);
 
 	connect(action_bug_report, &QAction::triggered, this, &MainWindow::reportBug);
 	connect(action_compact_view, &QAction::triggered, this, &MainWindow::toggleCompactView);
@@ -643,7 +648,11 @@ void MainWindow::connectSignalsToSlots()
 		pending_op = NoPendingOp;
 	});
 
-	connect(model_valid_wgt, &ModelValidationWidget::s_validationFinished, this, &MainWindow::executePendingOperation);
+	connect(model_valid_wgt, &ModelValidationWidget::s_validationFinished, this, [this](bool val_err) {
+		QTimer::singleShot(1000, this, [val_err, this](){
+			executePendingOperation(val_err);
+		});
+	});
 	connect(model_valid_wgt, &ModelValidationWidget::s_fixApplied, this, &MainWindow::removeOperations, Qt::QueuedConnection);
 	connect(model_valid_wgt, &ModelValidationWidget::s_graphicalObjectsUpdated, model_objs_wgt, &ModelObjectsWidget::updateObjectsView, Qt::QueuedConnection);
 
@@ -1659,6 +1668,8 @@ bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
 			tmpmodel_save_timer.stop();
 			models_tbw->setVisible(false);
 		}
+
+		emit s_modelClosed();
 	}
 
 	return model_closed;
@@ -1869,12 +1880,13 @@ void MainWindow::saveModel(ModelWidget *model)
 void MainWindow::validateBeforeOperation()
 {
 	if(!current_model ||
-		 (curr_view != ExportView && curr_view != DiffView))
+		 (curr_view != ExportView && curr_view != DiffView) ||
+		 pending_op != NoPendingOp)
 		return;
 
 	DatabaseModel *db_model = current_model->getDatabaseModel();
 
-	if(confirm_validation && current_model->getDatabaseModel()->isInvalidated())
+	if(confirm_validation && db_model->isInvalidated())
 	{
 		Messagebox msgbox;
 		bool is_export = (curr_view == ExportView);
@@ -1887,12 +1899,10 @@ void MainWindow::validateBeforeOperation()
 
 		if(msgbox.isAccepted())
 		{
-			action_design->toggle();
-			QTimer::singleShot(1000, this, [this, is_export]{
-				validation_btn->setChecked(true);
-				pending_op = is_export ? PendingExportOp : PendingDiffOp;
-				model_valid_wgt->validateModel();
-			});
+			pending_op = is_export ? PendingExportOp : PendingDiffOp;
+			changeCurrentView(DesignView);
+			validation_btn->setChecked(true);
+			model_valid_wgt->validateModel();
 		}
 	}
 }
@@ -2307,6 +2317,9 @@ void MainWindow::executePendingOperation(bool valid_error)
 
 void MainWindow::changeCurrentView(MWViewsId view_id)
 {
+	if(view_id == curr_view)
+		return;
+
 	layers_cfg_wgt->setVisible(false);
 	changelog_wgt->setVisible(false);
 
@@ -2352,16 +2365,6 @@ void MainWindow::changeCurrentView(MWViewsId view_id)
 	action_save_as->setEnabled(enable);
 	about_wgt->hide();
 	donate_wgt->hide();
-
-	QList<ModelWidget *> models = model_nav_wgt->getModelWidgets();
-
-	if(view_id == ExportView)
-		model_export_wgt->updateModels(models);
-
-	if(view_id == FixView)
-		fix_tools_wgt->updateModels(models);
-
-	validateBeforeOperation();
 }
 
 void MainWindow::changeCurrentView(bool checked)
@@ -2383,7 +2386,12 @@ void MainWindow::changeCurrentView(bool checked)
 	changelog_wgt->setVisible(false);
 
 	if(checked)
+	{
 		changeCurrentView(view_id);
+
+		if(view_id == ExportView || view_id == DiffView)
+			validateBeforeOperation();
+	}
 	else
 	{
 		curr_act->blockSignals(true);
