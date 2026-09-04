@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+CAUTION: Do not modify this file unless you know what you are doing.
+ Unexpected results may occur if the code is changed deliberately.
+-->
+<dbmodel pgmodeler-ver="2.0.0-beta1" use-changelog="false" author="Raphael Araújo e Silva" max-obj-count="9"
+	 gen-disabled-objs-code="false" show-sys-schemas-rects="true"
+	 last-position="0,0" last-zoom="0.8" scene-rect="-4.32419,0,1674.69,1378.32"
+	 default-schema="public" default-owner="postgres"
+	 layers="Default layer,rels"
+	 active-layers="0,1"
+	 layer-name-colors="#000000,#000000"
+	 layer-rect-colors="#b4b4b4,#6f116f"
+	 show-layer-names="false" show-layer-rects="false">
+<database name="rentacar" encoding="UTF8" is-template="false" allow-conns="true">
+	<role name="postgres"/>
+	<tablespace name="pg_default"/>
+</database>
+
+<schema name="public" layers="0" fill-color="#e1e1e1" name-color="#000000" sql-disabled="true">
+</schema>
+
+<usertype name="vehicle_category" configuration="enumeration">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<enumeration label="hatchback"/>
+	<enumeration label="sedan"/>
+	<enumeration label="suv"/>
+	<enumeration label="pickup"/>
+	<enumeration label="minivan"/>
+	<enumeration label="sports"/>
+	<enumeration label="van"/>
+</usertype>
+
+<usertype name="vehicle_status" configuration="enumeration">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<enumeration label="available"/>
+	<enumeration label="rented"/>
+	<enumeration label="maintenance"/>
+	<enumeration label="inactive"/>
+</usertype>
+
+<usertype name="rental_status" configuration="enumeration">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<enumeration label="reserved"/>
+	<enumeration label="in_progress"/>
+	<enumeration label="completed"/>
+	<enumeration label="canceled"/>
+</usertype>
+
+<usertype name="vehicle_color" configuration="enumeration">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<enumeration label="silver"/>
+	<enumeration label="white"/>
+	<enumeration label="black"/>
+	<enumeration label="gray"/>
+	<enumeration label="red"/>
+	<enumeration label="blue"/>
+</usertype>
+
+<usertype name="person_type" configuration="enumeration">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<enumeration label="I"/>
+	<enumeration label="C"/>
+</usertype>
+
+<usertype name="address" configuration="composite">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<typeattrib name="state">
+		<type name="character" length="0"/>
+	</typeattrib>
+	<typeattrib name="postal_code">
+		<type name="character varying" length="0"/>
+	</typeattrib>
+	<typeattrib name="city">
+		<type name="character varying" length="0"/>
+	</typeattrib>
+	<typeattrib name="district">
+		<type name="character varying" length="0"/>
+	</typeattrib>
+	<typeattrib name="number">
+		<type name="character varying" length="0"/>
+	</typeattrib>
+	<typeattrib name="street">
+		<type name="character varying" length="0"/>
+	</typeattrib>
+</usertype>
+
+<domain name="email" not-null="false">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<type name="character varying" length="150"/>
+	<constraint name="email_domain_check" type="check">
+		<expression> <![CDATA[((VALUE)::text ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'::text)]]> </expression>
+	</constraint>
+</domain>
+
+<table name="manufacturer" layers="0" collapse-mode="2" max-obj-count="2" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="60" y="240"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS" start="1" increment="1" min-value="1" max-value="2147483647" cache="1">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="varchar" length="50"/>
+	</column>
+	<constraint name="manufacturer_pk" type="pk-constr" table="public.manufacturer">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="manufacturer_name_uq" type="uq-constr" table="public.manufacturer">
+		<columns names="name" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="vehicle_model" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="620" y="600"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS" start="1" increment="1" min-value="1" max-value="2147483647" cache="1">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="varchar" length="50"/>
+	</column>
+	<column name="category" not-null="true">
+		<type name="public.vehicle_category" length="0"/>
+	</column>
+	<column name="doors" not-null="true" default-value="4">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="air_conditioning" not-null="true" default-value="true">
+		<type name="boolean" length="0"/>
+	</column>
+	<constraint name="vehicle_model_doors_ck" type="ck-constr" table="public.vehicle_model">
+			<expression> <![CDATA[doors >= 2]]> </expression>
+	</constraint>
+	<constraint name="vehicle_model_pk" type="pk-constr" table="public.vehicle_model">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="customer" layers="0" collapse-mode="2" max-obj-count="10" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="60" y="1100"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS" start="1" increment="1" min-value="1" max-value="2147483647" cache="1">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="varchar" length="120"/>
+	</column>
+	<column name="document_number" not-null="true">
+		<type name="varchar" length="20"/>
+	</column>
+	<column name="person_type" not-null="true" default-value="'I'">
+		<type name="public.person_type" length="0"/>
+	</column>
+	<column name="email">
+		<type name="public.email" length="0"/>
+	</column>
+	<column name="address" not-null="true">
+		<type name="public.address" length="0"/>
+	</column>
+	<column name="created_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamptz" length="0"/>
+	</column>
+	<column name="phone_number">
+		<type name="varchar" length="20"/>
+	</column>
+	<column name="birth_date">
+		<type name="date" length="0"/>
+	</column>
+	<constraint name="customer_pk" type="pk-constr" table="public.customer">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="customer_document_number_uq" type="uq-constr" table="public.customer">
+		<columns names="document_number" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="vehicle" layers="0" collapse-mode="2" max-obj-count="12" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1280" y="280"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS" start="1" increment="1" min-value="1" max-value="2147483647" cache="1">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="license_plate" not-null="true">
+		<type name="character" length="7"/>
+	</column>
+	<column name="color" not-null="true">
+		<type name="public.vehicle_color" length="0"/>
+	</column>
+	<column name="manufacture_year" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="mileage" not-null="true" default-value="0">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="status" not-null="true" default-value="'available'">
+		<type name="public.vehicle_status" length="0"/>
+	</column>
+	<column name="acquisition_date" not-null="true" default-value="CURRENT_DATE">
+		<type name="date" length="0"/>
+	</column>
+	<column name="base_daily_rate" not-null="true">
+		<type name="numeric" length="10" precision="2"/>
+	</column>
+	<column name="vin">
+		<type name="varchar" length="20"/>
+	</column>
+	<constraint name="vehicle_mileage_ck" type="ck-constr" table="public.vehicle">
+			<expression> <![CDATA[mileage >= 0]]> </expression>
+	</constraint>
+	<constraint name="vehicle_base_daily_rate_ck" type="ck-constr" table="public.vehicle">
+			<expression> <![CDATA[base_daily_rate > 0]]> </expression>
+	</constraint>
+	<constraint name="vehicle_pk" type="pk-constr" table="public.vehicle">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="vehicle_license_plate_uq" type="uq-constr" table="public.vehicle">
+		<columns names="license_plate" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="vehicle_vin_uq" type="uq-constr" alias="vehicle_uq" table="public.vehicle">
+		<columns names="vin" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="rental" layers="0" collapse-mode="2" max-obj-count="13" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="640" y="980"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS" start="1" increment="1" min-value="1" max-value="2147483647" cache="1">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="start_date" not-null="true">
+		<type name="date" length="0"/>
+	</column>
+	<column name="end_date" not-null="true">
+		<type name="date" length="0"/>
+	</column>
+	<column name="daily_rate" not-null="true">
+		<type name="numeric" length="10" precision="2"/>
+	</column>
+	<column name="status" not-null="true" default-value="'reserved'">
+		<type name="public.rental_status" length="0"/>
+	</column>
+	<column name="created_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamptz" length="0"/>
+	</column>
+	<column name="pickup_branch_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="dropoff_branch_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="rental_daily_rate_ck" type="ck-constr" table="public.rental">
+			<expression> <![CDATA[daily_rate > 0]]> </expression>
+	</constraint>
+	<constraint name="rental_dates_ck" type="ck-constr" table="public.rental">
+			<expression> <![CDATA[end_date >= start_date]]> </expression>
+	</constraint>
+	<constraint name="rental_pk" type="pk-constr" table="public.rental">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="vehicle_maintenance" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="640" y="220"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS" start="1" increment="1" min-value="1" max-value="2147483647" cache="1">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="maintenance_date" not-null="true" default-value="CURRENT_DATE">
+		<type name="date" length="0"/>
+	</column>
+	<column name="description" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<column name="cost" not-null="true">
+		<type name="numeric" length="10" precision="2"/>
+	</column>
+	<column name="type" not-null="true">
+		<type name="varchar" length="50"/>
+	</column>
+	<constraint name="vehicle_maintenance_cost_ck" type="ck-constr" table="public.vehicle_maintenance">
+			<expression> <![CDATA[cost >= 0]]> </expression>
+	</constraint>
+	<constraint name="vehicle_maintenance_pk" type="pk-constr" table="public.vehicle_maintenance">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="customer_has_many_rental" type="rel1n" layers="1"
+	 src-col-pattern="{st}_{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#cd83c7"
+	 src-table="public.customer"
+	 dst-table="public.rental"
+	 src-required="true" dst-required="false">
+	<label ref-type="name-label">
+		<position x="100.552" y="5.6774"/>
+	</label>
+</relationship>
+
+<relationship name="vehicle_has_many_rental" type="rel1n" layers="1"
+	 src-col-pattern="{st}_{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#a841f1"
+	 src-table="public.vehicle"
+	 dst-table="public.rental"
+	 src-required="true" dst-required="false">
+	<label ref-type="name-label">
+		<position x="12.5568" y="-84.7941"/>
+	</label>
+</relationship>
+
+<relationship name="vehicle_has_many_vehicle_maintenance" type="rel1n" layers="1"
+	 src-col-pattern="{st}_{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#c1df81"
+	 src-table="public.vehicle"
+	 dst-table="public.vehicle_maintenance"
+	 src-required="true" dst-required="false"/>
+
+<relationship name="vehicle_model_has_many_vehicle" type="rel1n" layers="1"
+	 src-col-pattern="{st}_{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#8646fe"
+	 src-table="public.vehicle_model"
+	 dst-table="public.vehicle"
+	 src-required="true" dst-required="false">
+	<label ref-type="name-label">
+		<position x="4.63849" y="-37.456"/>
+	</label>
+</relationship>
+
+<relationship name="manufacturer_has_many_vehicle_model" type="rel1n" layers="1"
+	 src-col-pattern="{st}_{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#c6a16d"
+	 src-table="public.manufacturer"
+	 dst-table="public.vehicle_model"
+	 src-required="true" dst-required="false"/>
+
+<relationship name="vehicle_model_has_many_rental" type="rel1n" layers="1"
+	 src-col-pattern="{st}_{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#79add2"
+	 src-table="public.vehicle_model"
+	 dst-table="public.rental"
+	 src-required="true" dst-required="false">
+	<label ref-type="name-label">
+		<position x="-32.8615" y="-20.4193"/>
+	</label>
+</relationship>
+
+<view name="vw_model_performance" layers="0" collapse-mode="2" max-obj-count="18" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="60" y="680"/>
+	<reference object="public.manufacturer" type="table" ref-name="tb_mon" ref-alias="mfr" use-signature="true" format-name="true"/>
+	<reference object="public.vehicle_model" type="table" ref-name="tb_mod" ref-alias="vm" use-signature="true" format-name="true"/>
+	<reference object="public.rental" type="table" ref-name="tb_al" ref-alias="r" use-signature="true" format-name="true"/>
+	<reference object="public.rental.id" type="column" ref-name="al_id" format-name="true"/>
+	<reference object="public.rental.start_date" type="column" ref-name="al_dt_inicio"/>
+	<reference object="public.rental.end_date" type="column" ref-name="al_dt_fim"/>
+	<reference object="public.rental.status" type="column" ref-name="al_status"/>
+	<reference object="public.rental.daily_rate" type="column" ref-name="al_val_diaria"/>
+	<reference object="public.rental.vehicle_model_id" type="column" ref-name="al_mod_id"/>
+	<reference object="public.vehicle_model.id" type="column" ref-name="m_id" ref-alias="vehicle_model_id" use-columns="true"/>
+	<reference object="public.vehicle_model.manufacturer_id" type="column" ref-name="m_mon_id"/>
+	<reference object="public.manufacturer.name" type="column" ref-name="mon_nome" ref-alias="manufacturer" use-columns="true"/>
+	<reference object="public.vehicle_model.name" type="column" ref-name="m_nome" ref-alias="model" use-columns="true"/>
+	<reference object="public.vehicle_model.category" type="column" ref-name="m_categoria" use-columns="true"/>
+	<reference object="public.manufacturer.id" type="column" ref-name="mon_id"/>
+	<simplecol name="total_rentals" type="integer"/>
+	<simplecol name="total_revenue" type="numeric(12,2)"/>
+	<definition> <![CDATA[SELECT
+  @{tb_mod}.{m_id} AS @{m_id},
+  @{tb_mon}.{mon_nome} AS @{mon_nome},
+  @{tb_mod}.{m_nome} AS @{m_nome},
+  @{tb_mod}.{m_categoria},
+  COUNT(@{tb_al}.{al_id}) AS total_rentals,
+  COALESCE(
+      SUM(
+          CASE
+              WHEN @{tb_al}.{al_status} IN ('completed', 'in_progress')
+              THEN ((@{tb_al}.{al_dt_fim} -
+                     @{tb_al}.{al_dt_inicio} + 1) *
+                     @{tb_al}.{al_val_diaria})
+              ELSE 0
+          END
+      ), 0.00
+  )::numeric(12,2) AS total_revenue
+FROM {tb_mod} AS @{tb_mod}
+JOIN {tb_mon} AS @{tb_mon}
+  ON @{tb_mod}.{m_mon_id} = @{tb_mon}.{mon_id}
+LEFT JOIN {tb_al} AS @{tb_al}
+  ON @{tb_al}.{al_mod_id} = @{tb_mod}.{m_id}
+GROUP BY @{tb_mod}.{m_id}, @{tb_mon}.{mon_nome},
+         @{tb_mod}.{m_nome},  @{tb_mod}.{m_categoria}
+ORDER BY total_rentals DESC, total_revenue DESC
+]]> </definition>
+</view>
+
+<relationship name="rel_vw_model_performance_vehicle_model" type="reltv" layers="1"
+	 custom-color="#e2337e"
+	 src-table="public.vw_model_performance"
+	 dst-table="public.vehicle_model"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="16.0804" y="14.533"/>
+	</label>
+</relationship>
+
+<relationship name="rel_vw_model_performance_rental" type="reltv" layers="1"
+	 custom-color="#27dc8d"
+	 src-table="public.vw_model_performance"
+	 dst-table="public.rental"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="-173.912" y="-10.3358"/>
+	</label>
+</relationship>
+
+<relationship name="rel_vw_model_performance_manufacturer" type="reltv" layers="1"
+	 custom-color="#cd9041"
+	 src-table="public.vw_model_performance"
+	 dst-table="public.manufacturer"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="-2.24879" y="-62.838"/>
+	</label>
+</relationship>
+
+<usertype name="payment_method" configuration="enumeration">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<enumeration label="debit_card"/>
+	<enumeration label="credit_card"/>
+	<enumeration label="cash"/>
+	<enumeration label="wire_transfer"/>
+</usertype>
+
+<table name="payment" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1300" y="1180"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="amount" not-null="true">
+		<type name="numeric" length="10" precision="2"/>
+	</column>
+	<column name="payment_date" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamptz" length="0"/>
+	</column>
+	<column name="method" not-null="true">
+		<type name="public.payment_method" length="0"/>
+	</column>
+	<column name="rental_id" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<constraint name="payment_pk" type="pk-constr" table="public.payment">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="branch" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1360" y="960"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="varchar" length="100"/>
+	</column>
+	<column name="address" not-null="true">
+		<type name="public.address" length="0"/>
+	</column>
+	<constraint name="branch_pk" type="pk-constr" alias="branch_pk" table="public.branch">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<textbox name="pagila_desc" layers="0" z-value="0" width="481.125" font-size="11">
+	<position x="60" y="40"/>
+	<comment> <![CDATA[[ rentacar database ]
+
+A database model simulating a vehicle rental management system, utilizing views, tables, user-defined types, and domains. This model was created and presented by Raphael Araújo e Silva during the pgModeler 2.0 workshop at PgConf.Brasil 2026 in Blumenau, SC, Brazil.]]> </comment>
+</textbox>
+
+<constraint name="pickup_branch_fk" type="fk-constr" alias="branch_fk" comparison-type="MATCH FULL"
+	 upd-action="CASCADE" del-action="RESTRICT" ref-table="public.branch" table="public.rental">
+	<columns names="pickup_branch_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="dropoff_branch_fk" type="fk-constr" alias="branch_fk" comparison-type="MATCH FULL"
+	 upd-action="CASCADE" del-action="RESTRICT" ref-table="public.branch" table="public.rental">
+	<columns names="dropoff_branch_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="rental_fk" type="fk-constr" alias="payment_fk" comparison-type="MATCH FULL"
+	 upd-action="CASCADE" del-action="RESTRICT" ref-table="public.rental" table="public.payment">
+	<columns names="rental_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<relationship name="rel_payment_rental" type="relfk" layers="0"
+	 custom-color="#53d62a"
+	 src-table="public.payment"
+	 dst-table="public.rental" reference-fk="rental_fk"
+	 src-required="false" dst-required="true">
+	<label ref-type="name-label">
+		<position x="78.308" y="-40.753"/>
+	</label>
+</relationship>
+
+<relationship name="rel_rental_pickup_branch" type="relfk" layers="0"
+	 custom-color="#0287b4"
+	 src-table="public.rental"
+	 dst-table="public.branch" reference-fk="pickup_branch_fk"
+	 src-required="false" dst-required="true">
+	<label ref-type="name-label">
+		<position x="0" y="0"/>
+	</label>
+</relationship>
+
+<relationship name="rel_rental_dropoff_branch" type="relfk" layers="0"
+	 custom-color="#c1c748"
+	 src-table="public.rental"
+	 dst-table="public.branch" reference-fk="dropoff_branch_fk"
+	 src-required="false" dst-required="true">
+	<label ref-type="name-label">
+		<position x="43.5568" y="-49.3911"/>
+	</label>
+</relationship>
+
+</dbmodel>
