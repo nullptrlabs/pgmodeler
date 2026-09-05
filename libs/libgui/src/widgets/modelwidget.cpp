@@ -2801,8 +2801,13 @@ void ModelWidget::selectTaggedTables()
 	for(auto &object : tag->getReferences())
 	{
 		obj_view = dynamic_cast<BaseObjectView *>(dynamic_cast<BaseGraphicObject *>(object)->getOverlyingObject());
+		obj_view->blockSignals(true);
 		obj_view->setSelected(true);
+		obj_view->blockSignals(false);
 	}
+
+	configureObjectSelection();
+	emit emitSceneInteracted();
 }
 
 void ModelWidget::protectObject()
