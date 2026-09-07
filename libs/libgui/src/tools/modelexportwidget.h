@@ -33,7 +33,7 @@
 #include "widgets/modelwidget.h"
 #include "modelexporthelper.h"
 #include "utils/htmlitemdelegate.h"
-#include "widgets/fileselectorwidget.h"
+#include "widgets/pathselectorwidget.h"
 #include "modelselectorwidget.h"
 
 class __libgui ModelExportWidget: public QWidget, public Ui::ModelExportWidget {
@@ -64,7 +64,7 @@ class __libgui ModelExportWidget: public QWidget, public Ui::ModelExportWidget {
 
 		ModelSelectorWidget *model_sel_wgt;
 
-		FileSelectorWidget *sql_file_sel,
+		PathSelectorWidget *sql_file_sel,
 		*img_file_sel,
 		*dict_file_sel;
 

@@ -32,7 +32,7 @@
 #include "ui_pluginsconfigwidget.h"
 #include "widgets/customtablewidget.h"
 #include "pgmodelerguiplugin.h"
-#include "widgets/fileselectorwidget.h"
+#include "widgets/pathselectorwidget.h"
 
 class __libgui PluginsConfigWidget: public BaseConfigWidget, public Ui::PluginsConfigWidget {
 	Q_OBJECT
@@ -44,7 +44,7 @@ class __libgui PluginsConfigWidget: public BaseConfigWidget, public Ui::PluginsC
 		//! \brief Table used to show the loaded plugins
 		CustomTableWidget *plugins_tab;
 
-		FileSelectorWidget *root_dir_sel;
+		PathSelectorWidget *root_dir_sel;
 
 		/* Disabled methods */
 		void applyConfiguration() override {}

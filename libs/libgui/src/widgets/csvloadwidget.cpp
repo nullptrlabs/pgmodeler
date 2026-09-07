@@ -31,8 +31,8 @@ CsvLoadWidget::CsvLoadWidget(QWidget * parent, bool cols_in_first_row) : QWidget
 {
 	setupUi(this);
 
-	file_sel = new FileSelectorWidget(this);
-	file_sel->setFileMustExist(true);
+	file_sel = new PathSelectorWidget(this);
+	file_sel->setPathMustExist(true);
 	file_sel->setFileDialogTitle(tr("Load CSV file"));
 	file_sel->setMimeTypeFilters({"text/csv", "application/octet-stream"});
 	file_lt->addWidget(file_sel);
@@ -54,7 +54,7 @@ CsvLoadWidget::CsvLoadWidget(QWidget * parent, bool cols_in_first_row) : QWidget
 			separator_edt->setVisible(separator_cmb->currentIndex() == separator_cmb->count()-1);
 	});
 
-	connect(file_sel, &FileSelectorWidget::s_selectorChanged, load_btn, &QPushButton::setEnabled);
+	connect(file_sel, &PathSelectorWidget::s_selectorChanged, load_btn, &QPushButton::setEnabled);
 }
 
 CsvDocument CsvLoadWidget::getCsvDocument()
@@ -89,7 +89,7 @@ void CsvLoadWidget::loadCsvFile()
 															 txt_delim_chk->isChecked() ? txt_delim_edt->text().at(0) : CsvDocument::TextDelimiter,
 															 CsvDocument::LineBreak);
 		csv_parser.setColumnInFirstRow(col_names_chk->isChecked());
-		csv_document = csv_parser.parseFile(file_sel->getSelectedFile());
+		csv_document = csv_parser.parseFile(file_sel->getSelectedPath());
 		file_sel->clearSelector();
 
 		emit s_csvFileLoaded();

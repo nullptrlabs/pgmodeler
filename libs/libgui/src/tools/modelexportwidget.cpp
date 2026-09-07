@@ -43,29 +43,29 @@ ModelExportWidget::ModelExportWidget(QWidget *parent) : QWidget(parent)
 	model_sel_wgt = new ModelSelectorWidget(this);
 	input_model_gb->layout()->addWidget(model_sel_wgt);
 
-	sql_file_sel = new FileSelectorWidget(this);
+	sql_file_sel = new PathSelectorWidget(this);
 	sql_file_sel->setObjectName("sql_file_sel");
 	sql_file_sel->setFileDialogTitle(tr("Export model to SQL file"));
 	sql_file_sel->setAcceptMode(QFileDialog::AcceptSave);
-	sql_file_sel->setAllowFilenameInput(true);
-	sql_file_sel->setFileIsMandatory(false);
+	sql_file_sel->setAllowPathInput(true);
+	sql_file_sel->setPathIsMandatory(false);
 	sql_file_sel->setAppendSuffix(true);
 	sql_file_lt->addWidget(sql_file_sel);
 
-	img_file_sel = new FileSelectorWidget(this);
+	img_file_sel = new PathSelectorWidget(this);
 	img_file_sel->setObjectName("img_file_sel");
 	img_file_sel->setFileDialogTitle(tr("Export model to graphics file"));
 	img_file_sel->setAcceptMode(QFileDialog::AcceptSave);
-	img_file_sel->setAllowFilenameInput(true);
-	img_file_sel->setFileIsMandatory(false);
+	img_file_sel->setAllowPathInput(true);
+	img_file_sel->setPathIsMandatory(false);
 	img_file_sel->setAppendSuffix(true);
 	img_file_lt->addWidget(img_file_sel);
 
-	dict_file_sel = new FileSelectorWidget(this);
+	dict_file_sel = new PathSelectorWidget(this);
 	dict_file_sel->setObjectName("dict_file_sel");
 	dict_file_sel->setFileDialogTitle(tr("Export model to data dictionary"));
-	dict_file_sel->setAllowFilenameInput(true);
-	dict_file_sel->setFileIsMandatory(false);
+	dict_file_sel->setAllowPathInput(true);
+	dict_file_sel->setPathIsMandatory(false);
 	dict_file_sel->setAppendSuffix(true);
 	dict_file_lt->addWidget(dict_file_sel);
 
@@ -106,17 +106,17 @@ ModelExportWidget::ModelExportWidget(QWidget *parent) : QWidget(parent)
 	connect(export_to_file_tb, &QToolButton::toggled, export_to_file_wgt, &QWidget::setEnabled);
 	connect(export_to_dict_tb, &QToolButton::toggled, export_to_dict_wgt, &QWidget::setEnabled);
 
-	connect(sql_file_sel, &FileSelectorWidget::s_selectorChanged, this, &ModelExportWidget::enableExport);
-	connect(sql_file_sel, &FileSelectorWidget::s_fileSelected, this, &ModelExportWidget::enableExport);
-	connect(sql_file_sel, &FileSelectorWidget::s_selectorCleared, this, &ModelExportWidget::enableExport);
+	connect(sql_file_sel, &PathSelectorWidget::s_selectorChanged, this, &ModelExportWidget::enableExport);
+	connect(sql_file_sel, &PathSelectorWidget::s_pathSelected, this, &ModelExportWidget::enableExport);
+	connect(sql_file_sel, &PathSelectorWidget::s_selectorCleared, this, &ModelExportWidget::enableExport);
 
-	connect(img_file_sel, &FileSelectorWidget::s_selectorChanged, this, &ModelExportWidget::enableExport);
-	connect(img_file_sel, &FileSelectorWidget::s_fileSelected, this, &ModelExportWidget::enableExport);
-	connect(img_file_sel, &FileSelectorWidget::s_selectorCleared, this, &ModelExportWidget::enableExport);
+	connect(img_file_sel, &PathSelectorWidget::s_selectorChanged, this, &ModelExportWidget::enableExport);
+	connect(img_file_sel, &PathSelectorWidget::s_pathSelected, this, &ModelExportWidget::enableExport);
+	connect(img_file_sel, &PathSelectorWidget::s_selectorCleared, this, &ModelExportWidget::enableExport);
 
-	connect(dict_file_sel, &FileSelectorWidget::s_selectorChanged, this, &ModelExportWidget::enableExport);
-	connect(dict_file_sel, &FileSelectorWidget::s_fileSelected, this, &ModelExportWidget::enableExport);
-	connect(dict_file_sel, &FileSelectorWidget::s_selectorCleared, this, &ModelExportWidget::enableExport);
+	connect(dict_file_sel, &PathSelectorWidget::s_selectorChanged, this, &ModelExportWidget::enableExport);
+	connect(dict_file_sel, &PathSelectorWidget::s_pathSelected, this, &ModelExportWidget::enableExport);
+	connect(dict_file_sel, &PathSelectorWidget::s_selectorCleared, this, &ModelExportWidget::enableExport);
 
 	connect(export_to_file_tb, &QToolButton::clicked, this, &ModelExportWidget::selectExportMode);
 	connect(export_to_dbms_tb, &QToolButton::clicked, this, &ModelExportWidget::selectExportMode);
@@ -283,12 +283,12 @@ void ModelExportWidget::exportModel()
 			viewp=new QGraphicsView(model_wgt->scene);
 
 			if(img_fmt_cmb->currentIndex() == 0)
-				export_hlp.setExportToPNGParams(model_wgt->scene, viewp, img_file_sel->getSelectedFile(),
+				export_hlp.setExportToPNGParams(model_wgt->scene, viewp, img_file_sel->getSelectedPath(),
 																				zoom_cmb->itemData(zoom_cmb->currentIndex()).toDouble(),
 																				show_grid_chk->isChecked(), show_delim_chk->isChecked(),
 																				 page_by_page_chk->isChecked(), override_bg_color_chk->isChecked());
 			else
-				export_hlp.setExportToSVGParams(model_wgt->scene, img_file_sel->getSelectedFile(),
+				export_hlp.setExportToSVGParams(model_wgt->scene, img_file_sel->getSelectedPath(),
 																				show_grid_chk->isChecked(),
 																				show_delim_chk->isChecked());
 		}
@@ -303,15 +303,15 @@ void ModelExportWidget::exportModel()
 			//Exporting to sql file
 			if(export_to_file_tb->isChecked())
 			{
-				progress_lbl->setText(tr("Saving file '%1'").arg(sql_file_sel->getSelectedFile()));
-				export_hlp.setExportToSQLParams(model_wgt->db_model, sql_file_sel->getSelectedFile(),
+				progress_lbl->setText(tr("Saving file '%1'").arg(sql_file_sel->getSelectedPath()));
+				export_hlp.setExportToSQLParams(model_wgt->db_model, sql_file_sel->getSelectedPath(),
 																				pgsqlvers_cmb->currentText(), sql_file_mode_cmb->currentIndex() == SplitFiles,
 																				static_cast<DatabaseModel::CodeGenMode>(code_options_cmb->currentIndex()),
 																				gen_drop_file_chk->isChecked());
 			}
 			else if(export_to_dict_tb->isChecked())
 			{
-				export_hlp.setExportToDataDictParams(model_wgt->db_model, dict_file_sel->getSelectedFile(),
+				export_hlp.setExportToDataDictParams(model_wgt->db_model, dict_file_sel->getSelectedPath(),
 																						 incl_index_chk->isChecked(),
 																						 dict_mode_cmb->currentIndex() == 1,
 																						 dict_format_cmb->currentIndex() == 1);
@@ -351,9 +351,9 @@ void ModelExportWidget::exportModel()
 
 void ModelExportWidget::selectExportMode()
 {
-	sql_file_sel->setFileIsMandatory(export_to_file_tb->isChecked());
-	img_file_sel->setFileIsMandatory(export_to_img_tb->isChecked());
-	dict_file_sel->setFileIsMandatory(export_to_dict_tb->isChecked());
+	sql_file_sel->setPathIsMandatory(export_to_file_tb->isChecked());
+	img_file_sel->setPathIsMandatory(export_to_img_tb->isChecked());
+	dict_file_sel->setPathIsMandatory(export_to_dict_tb->isChecked());
 
 	pgsqlvers1_cmb->setEnabled(export_to_dbms_tb->isChecked() && pgsqlvers_chk->isChecked());
 	enableExport();
@@ -507,14 +507,14 @@ void ModelExportWidget::selectDataDictMode()
 
 		dict_file_sel->setAcceptMode(QFileDialog::AcceptSave);
 		dict_file_sel->setDirectoryMode(false);
-		dict_file_sel->setFileMustExist(false);
+		dict_file_sel->setPathMustExist(false);
 	}
 	else
 	{
 		dict_file_sel->setDefaultSuffix("");
 		dict_file_sel->setMimeTypeFilters({});
 		dict_file_sel->setDirectoryMode(true);
-		dict_file_sel->setFileMustExist(false);
+		dict_file_sel->setPathMustExist(false);
 		dict_file_sel->setAcceptMode(QFileDialog::AcceptOpen);
 	}
 }
@@ -527,7 +527,7 @@ void ModelExportWidget::selectSQLExportMode(int curr_idx)
 		code_options_cmb->setEnabled(false);
 		sql_file_sel->setMimeTypeFilters({"application/sql", "application/octet-stream"});
 		sql_file_sel->setDefaultSuffix("sql");
-		sql_file_sel->setFileMustExist(false);
+		sql_file_sel->setPathMustExist(false);
 		sql_file_sel->setDirectoryMode(false);
 		sql_file_sel->setAcceptMode(QFileDialog::AcceptSave);
 	}
@@ -538,7 +538,7 @@ void ModelExportWidget::selectSQLExportMode(int curr_idx)
 		sql_file_sel->setMimeTypeFilters({});
 		sql_file_sel->setDefaultSuffix("");
 		sql_file_sel->setAcceptMode(QFileDialog::AcceptOpen);
-		sql_file_sel->setFileMustExist(false);
+		sql_file_sel->setPathMustExist(false);
 		sql_file_sel->setDirectoryMode(true);
 	}
 }

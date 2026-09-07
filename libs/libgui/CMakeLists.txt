@@ -94,7 +94,7 @@ set(SOURCES
     src/widgets/customtablewidget.cpp src/widgets/customtablewidget.h
     src/widgets/debugoutputwidget.cpp src/widgets/debugoutputwidget.h
     src/widgets/donatewidget.cpp src/widgets/donatewidget.h
-    src/widgets/fileselectorwidget.cpp src/widgets/fileselectorwidget.h
+		src/widgets/pathselectorwidget.cpp src/widgets/pathselectorwidget.h
     src/widgets/layersconfigwidget.cpp src/widgets/layersconfigwidget.h
     src/widgets/layerswidget.cpp src/widgets/layerswidget.h
     src/widgets/linenumberswidget.cpp src/widgets/linenumberswidget.h
@@ -191,7 +191,7 @@ set(FORMS
     ui/widgets/objecttypeslistwidget.ui
     ui/widgets/searchreplacewidget.ui
     ui/widgets/codepreviewwidget.ui
-    ui/widgets/fileselectorwidget.ui
+		ui/widgets/pathselectorwidget.ui
     ui/widgets/modeloverviewwidget.ui
     ui/widgets/objectselectorwidget.ui
     ui/widgets/changelogwidget.ui

@@ -30,7 +30,7 @@
 
 #include <QProcess>
 #include "ui_modelfixwidget.h"
-#include "widgets/fileselectorwidget.h"
+#include "widgets/pathselectorwidget.h"
 #include "widgets/debugoutputwidget.h"
 
 class __libgui ModelFixWidget: public QWidget, public Ui::ModelFixWidget {
@@ -44,7 +44,7 @@ class __libgui ModelFixWidget: public QWidget, public Ui::ModelFixWidget {
 
 		DebugOutputWidget *dbg_output_wgt;
 
-		FileSelectorWidget *input_file_sel,
+		PathSelectorWidget *input_file_sel,
 		*output_file_sel,
 		*pgmodeler_cli_sel;
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FileSelectorWidget</class>
- <widget class="QWidget" name="FileSelectorWidget">
+ <class>PathSelectorWidget</class>
+ <widget class="QWidget" name="PathSelectorWidget">
   <property name="geometry">
    <rect>
     <x>0</x>

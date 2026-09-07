@@ -19,11 +19,11 @@
 # Also, you can get the complete GNU General Public License at <http://www.gnu.org/licenses/>
 */
 
-#include "fileselectorwidget.h"
+#include "pathselectorwidget.h"
 #include "guiutilsns.h"
 #include <QDesktopServices>
 
-FileSelectorWidget::FileSelectorWidget(QWidget *parent) : QWidget(parent)
+PathSelectorWidget::PathSelectorWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
 	allow_filename_input = read_only = false;
@@ -47,8 +47,8 @@ FileSelectorWidget::FileSelectorWidget(QWidget *parent) : QWidget(parent)
 	warn_ico_lbl->setPixmap(GuiUtilsNs::getPixmap("alert"));
 	warn_ico_lbl->setToolTip(tr("No such file or directory!"));
 
-	connect(sel_file_tb, &QToolButton::clicked, this, &FileSelectorWidget::openFileDialog);
-	connect(rem_file_tb, &QToolButton::clicked, this, &FileSelectorWidget::clearSelector);
+	connect(sel_file_tb, &QToolButton::clicked, this, &PathSelectorWidget::openFileDialog);
+	connect(rem_file_tb, &QToolButton::clicked, this, &PathSelectorWidget::clearSelector);
 
 	connect(filename_edt, &QLineEdit::textChanged, this, [this](const QString &text){
 		validateSelectedFile();
@@ -56,7 +56,7 @@ FileSelectorWidget::FileSelectorWidget(QWidget *parent) : QWidget(parent)
 	});
 }
 
-bool FileSelectorWidget::eventFilter(QObject *obj, QEvent *evnt)
+bool PathSelectorWidget::eventFilter(QObject *obj, QEvent *evnt)
 {
 	if(isEnabled() && evnt->type() == QEvent::MouseButtonPress &&
 		 QApplication::mouseButtons() == Qt::LeftButton && obj == filename_edt)
@@ -71,18 +71,18 @@ bool FileSelectorWidget::eventFilter(QObject *obj, QEvent *evnt)
 	return QWidget::eventFilter(obj, evnt);
 }
 
-void FileSelectorWidget::resizeEvent(QResizeEvent *)
+void PathSelectorWidget::resizeEvent(QResizeEvent *)
 {
 	warn_ico_lbl->move(filename_edt->width() - warn_ico_lbl->width() - 5,
 										 (filename_edt->height() - warn_ico_lbl->height()) / 2);
 }
 
-void FileSelectorWidget::showEvent(QShowEvent *)
+void PathSelectorWidget::showEvent(QShowEvent *)
 {
 	showWarning();
 }
 
-void FileSelectorWidget::changeEvent(QEvent *event)
+void PathSelectorWidget::changeEvent(QEvent *event)
 {
 	if(event->type() == QEvent::EnabledChange)
 		showWarning();
@@ -90,13 +90,13 @@ void FileSelectorWidget::changeEvent(QEvent *event)
 	QWidget::changeEvent(event);
 }
 
-void FileSelectorWidget::setAllowFilenameInput(bool allow_fl_input)
+void PathSelectorWidget::setAllowPathInput(bool allow_fl_input)
 {
 	allow_filename_input = allow_fl_input && !read_only;
 	filename_edt->setReadOnly(!allow_filename_input);
 }
 
-void FileSelectorWidget::setDirectoryMode(bool dir_mode)
+void PathSelectorWidget::setDirectoryMode(bool dir_mode)
 {
 	if(dir_mode)
 		file_mode = QFileDialog::Directory;
@@ -111,33 +111,33 @@ void FileSelectorWidget::setDirectoryMode(bool dir_mode)
 	validateSelectedFile();
 }
 
-void FileSelectorWidget::setAcceptMode(QFileDialog::AcceptMode accept_mode)
+void PathSelectorWidget::setAcceptMode(QFileDialog::AcceptMode accept_mode)
 {
 	this->accept_mode = accept_mode;
 }
 
-void FileSelectorWidget::setNameFilters(const QStringList &filters)
+void PathSelectorWidget::setNameFilters(const QStringList &filters)
 {
 	name_filters = filters;
 }
 
-void FileSelectorWidget::setNamePattern(const QString &pattern)
+void PathSelectorWidget::setNamePattern(const QString &pattern)
 {
 	name_regexp.setPattern(pattern);
 }
 
-void FileSelectorWidget::setCheckExecutionFlag(bool value)
+void PathSelectorWidget::setCheckExecutionFlag(bool value)
 {
 	check_exec_flag = value;
 }
 
-void FileSelectorWidget::setFileIsMandatory(bool value)
+void PathSelectorWidget::setPathIsMandatory(bool value)
 {
 	file_is_mandatory = value;
 	validateSelectedFile();
 }
 
-void FileSelectorWidget::setFileMustExist(bool value)
+void PathSelectorWidget::setPathMustExist(bool value)
 {
 	file_must_exist = value;
 
@@ -147,37 +147,37 @@ void FileSelectorWidget::setFileMustExist(bool value)
 	validateSelectedFile();
 }
 
-void FileSelectorWidget::setFileDialogTitle(const QString &title)
+void PathSelectorWidget::setFileDialogTitle(const QString &title)
 {
 	file_dlg_title = title;
 }
 
-void FileSelectorWidget::setSelectedFile(const QString &file)
+void PathSelectorWidget::setSelectedPath(const QString &file)
 {
 	filename_edt->setText(file);
 }
 
-void FileSelectorWidget::setMimeTypeFilters(const QStringList &filters)
+void PathSelectorWidget::setMimeTypeFilters(const QStringList &filters)
 {
 	mime_filters = filters;
 }
 
-void FileSelectorWidget::setDefaultSuffix(const QString &suffix)
+void PathSelectorWidget::setDefaultSuffix(const QString &suffix)
 {
 	def_suffix = suffix;
 }
 
-void FileSelectorWidget::setAppendSuffix(bool append)
+void PathSelectorWidget::setAppendSuffix(bool append)
 {
 	append_suffix = append;
 }
 
-bool FileSelectorWidget::hasWarning()
+bool PathSelectorWidget::hasWarning()
 {
 	return !warn_ico_lbl->toolTip().isEmpty();
 }
 
-QString FileSelectorWidget::getSelectedFile()
+QString PathSelectorWidget::getSelectedPath()
 {
 	if(append_suffix && allow_filename_input &&
 		 file_mode != QFileDialog::Directory &&
@@ -194,13 +194,13 @@ QString FileSelectorWidget::getSelectedFile()
 	return filename_edt->text();
 }
 
-void FileSelectorWidget::clearCustomWarning()
+void PathSelectorWidget::clearCustomWarning()
 {
 	warn_ico_lbl->setToolTip("");
 	showWarning();
 }
 
-void FileSelectorWidget::setReadOnly(bool value)
+void PathSelectorWidget::setReadOnly(bool value)
 {
 	read_only = value;
 	filename_edt->setReadOnly(value);
@@ -211,36 +211,36 @@ void FileSelectorWidget::setReadOnly(bool value)
 
 	if(value)
 	{
-		disconnect(sel_file_tb, &QToolButton::clicked, this, &FileSelectorWidget::openFileDialog);
-		connect(sel_file_tb, &QToolButton::clicked, this, &FileSelectorWidget::openFileExternally);
+		disconnect(sel_file_tb, &QToolButton::clicked, this, &PathSelectorWidget::openFileDialog);
+		connect(sel_file_tb, &QToolButton::clicked, this, &PathSelectorWidget::openFileExternally);
 	}
 	else
 	{
-		connect(sel_file_tb, &QToolButton::clicked, this, &FileSelectorWidget::openFileDialog);
-		disconnect(sel_file_tb, &QToolButton::clicked, this, &FileSelectorWidget::openFileExternally);
+		connect(sel_file_tb, &QToolButton::clicked, this, &PathSelectorWidget::openFileDialog);
+		disconnect(sel_file_tb, &QToolButton::clicked, this, &PathSelectorWidget::openFileExternally);
 	}
 
 	filename_edt->adjustSize();
 	adjustSize();
 }
 
-bool FileSelectorWidget::isReadOnly()
+bool PathSelectorWidget::isReadOnly()
 {
 	return read_only;
 }
 
-void FileSelectorWidget::setToolTip(const QString &tooltip)
+void PathSelectorWidget::setToolTip(const QString &tooltip)
 {
 	filename_edt->setToolTip(tooltip);
 }
 
-void FileSelectorWidget::setCustomWarning(const QString &warn_msg)
+void PathSelectorWidget::setCustomWarning(const QString &warn_msg)
 {
 	warn_ico_lbl->setToolTip(warn_msg);
 	showWarning();
 }
 
-void FileSelectorWidget::openFileDialog()
+void PathSelectorWidget::openFileDialog()
 {
 	QFileDialog file_dlg;
 
@@ -266,16 +266,16 @@ void FileSelectorWidget::openFileDialog()
 	if(file_dlg.result() == QDialog::Accepted && !file_dlg.selectedFiles().isEmpty())
 	{
 		filename_edt->setText(file_dlg.selectedFiles().at(0));
-		emit s_fileSelected(file_dlg.selectedFiles().at(0));
+		emit s_pathSelected(file_dlg.selectedFiles().at(0));
 	}
 }
 
-void FileSelectorWidget::openFileExternally()
+void PathSelectorWidget::openFileExternally()
 {
 	QDesktopServices::openUrl(QUrl("file:///" + filename_edt->text()));
 }
 
-void FileSelectorWidget::showWarning()
+void PathSelectorWidget::showWarning()
 {
 	QColor color = qApp->palette().color(isEnabled() ?
 																			 QPalette::Active : QPalette::Disabled,
@@ -300,7 +300,7 @@ void FileSelectorWidget::showWarning()
 															.arg(QString::number(padding), color.name()));
 }
 
-void FileSelectorWidget::validateSelectedFile()
+void PathSelectorWidget::validateSelectedFile()
 {
 	QFileInfo fi(filename_edt->text());
 
@@ -346,7 +346,7 @@ void FileSelectorWidget::validateSelectedFile()
 	showWarning();
 }
 
-void FileSelectorWidget::clearSelector()
+void PathSelectorWidget::clearSelector()
 {
 	filename_edt->clear();
 	filename_edt->clearFocus();

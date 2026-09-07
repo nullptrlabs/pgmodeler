@@ -76,9 +76,9 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 	input_lbl->setText(tr("Input"));
 	layout->addWidget(input_lbl);
 
-	input_sel = new FileSelectorWidget(this);
+	input_sel = new PathSelectorWidget(this);
 	input_sel->setFileDialogTitle(tr("Select bug report file"));
-	input_sel->setFileMustExist(true);
+	input_sel->setPathMustExist(true);
 	input_sel->setAcceptMode(QFileDialog::AcceptOpen);
 	input_sel->setNameFilters({ tr("pgModeler bug report (*.bug)"), tr("All files (*.*)") });
 	input_sel->setToolTip(tr("Load report file for analysis"));
@@ -104,12 +104,12 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 
 	setAnalysisMode(analysis_mode);
 
-	connect(input_sel, &FileSelectorWidget::s_fileSelected, this, __slot_n(this, CrashHandlerForm::loadReport));
+	connect(input_sel, &PathSelectorWidget::s_pathSelected, this, __slot_n(this, CrashHandlerForm::loadReport));
 	connect(save_tb, &QToolButton::clicked, this, __slot(this, CrashHandlerForm::saveModel));
 
-	connect(input_sel, &FileSelectorWidget::s_selectorCleared, model_txt, &QPlainTextEdit::clear);
-	connect(input_sel, &FileSelectorWidget::s_selectorCleared, details_txt, &QPlainTextEdit::clear);
-	connect(input_sel, &FileSelectorWidget::s_selectorCleared, stack_txt, &QPlainTextEdit::clear);
+	connect(input_sel, &PathSelectorWidget::s_selectorCleared, model_txt, &QPlainTextEdit::clear);
+	connect(input_sel, &PathSelectorWidget::s_selectorCleared, details_txt, &QPlainTextEdit::clear);
+	connect(input_sel, &PathSelectorWidget::s_selectorCleared, stack_txt, &QPlainTextEdit::clear);
 
 	connect(model_txt, &QPlainTextEdit::textChanged, this, [this](){
 		save_tb->setEnabled(!model_txt->toPlainText().isEmpty());

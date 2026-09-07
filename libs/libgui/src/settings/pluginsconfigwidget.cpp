@@ -27,11 +27,11 @@ PluginsConfigWidget::PluginsConfigWidget(QWidget *parent) : BaseConfigWidget(par
 {
 	setupUi(this);
 
-	root_dir_sel = new FileSelectorWidget(this);
+	root_dir_sel = new PathSelectorWidget(this);
 	root_dir_sel->setToolTip(tr("pgModeler plugins directory"));
 	root_dir_sel->setReadOnly(true);
 	root_dir_sel->setDirectoryMode(true);
-	root_dir_sel->setSelectedFile(GlobalAttributes::getPluginsPath());
+	root_dir_sel->setSelectedPath(GlobalAttributes::getPluginsPath());
 
 	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargins, 0, plugins_root_gb);
 	vbox->addWidget(root_dir_sel);

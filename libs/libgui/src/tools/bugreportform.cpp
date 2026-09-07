@@ -40,12 +40,12 @@ BugReportForm::BugReportForm(QWidget *parent, Qt::WindowFlags f) : QDialog(paren
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, hint_frm);
 
-	output_sel = new FileSelectorWidget(this);
+	output_sel = new PathSelectorWidget(this);
 	output_sel->setWindowTitle(tr("Select report output folder"));
 	output_sel->setDirectoryMode(true);
-	output_sel->setAllowFilenameInput(true);
-	output_sel->setFileMustExist(true);
-	output_sel->setSelectedFile(GlobalAttributes::getTemporaryPath());
+	output_sel->setAllowPathInput(true);
+	output_sel->setPathMustExist(true);
+	output_sel->setSelectedPath(GlobalAttributes::getTemporaryPath());
 	output_lt->addWidget(output_sel);
 	GuiUtilsNs::configureBuddyWidgets(output_wgt);
 
@@ -54,7 +54,7 @@ BugReportForm::BugReportForm(QWidget *parent, Qt::WindowFlags f) : QDialog(paren
 	connect(attach_mod_chk, &QCheckBox::toggled, attach_tb, &QToolButton::setEnabled);
 	connect(attach_tb, &QToolButton::clicked, this, qOverload<>(&BugReportForm::attachModel));
 	connect(details_txt, &QPlainTextEdit::textChanged, this,  &BugReportForm::enableGeneration);
-	connect(output_sel, &FileSelectorWidget::s_selectorChanged, this, &BugReportForm::enableGeneration);
+	connect(output_sel, &PathSelectorWidget::s_selectorChanged, this, &BugReportForm::enableGeneration);
 
 	//Installs a syntax highlighter on model_txt widget
 	hl_model_txt=new SyntaxHighlighter(model_txt);
@@ -94,7 +94,7 @@ void BugReportForm::generateReport()
 
 void BugReportForm::enableGeneration()
 {
-	create_btn->setEnabled(!output_sel->getSelectedFile().isEmpty() &&
+	create_btn->setEnabled(!output_sel->getSelectedPath().isEmpty() &&
 												 !output_sel->hasWarning() &&
 												 !details_txt->toPlainText().isEmpty());
 }
@@ -102,7 +102,7 @@ void BugReportForm::enableGeneration()
 void BugReportForm::generateReport(const QByteArray &buf)
 {
 	QFile output;
-	QFileInfo fi(QString(output_sel->getSelectedFile() +
+	QFileInfo fi(QString(output_sel->getSelectedPath() +
 											 GlobalAttributes::DirSeparator +
 											 GlobalAttributes::BugReportFile)
 											.arg(QDateTime::currentDateTime().toString("_yyyyMMdd_hhmm")));

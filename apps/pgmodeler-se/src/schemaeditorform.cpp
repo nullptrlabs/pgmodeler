@@ -79,7 +79,7 @@ SchemaEditorForm::SchemaEditorForm(QWidget *parent) : QWidget(parent)
 
 	SourceEditorWidget::setDefaultEditorPalette(syntax_txt->palette());
 
-	syntax_conf_sel = new FileSelectorWidget(syntax_conf_wgt);
+	syntax_conf_sel = new PathSelectorWidget(syntax_conf_wgt);
 	syntax_conf_sel->setReadOnly(true);
 
 	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(0, 0, syntax_conf_wgt);
@@ -243,7 +243,7 @@ void SchemaEditorForm::loadSyntaxConfig()
 	try
 	{
 		syntax_txt->setPlainText(UtilsNs::loadFile(filename));
-		syntax_conf_sel->setSelectedFile(filename);
+		syntax_conf_sel->setSelectedPath(filename);
 
 		if(dtd_txt->toPlainText().isEmpty())
 		{
@@ -320,7 +320,7 @@ void SchemaEditorForm::applySyntaxConfig(bool from_temp_file)
 
 void SchemaEditorForm::saveSyntaxConfig()
 {
-	UtilsNs::saveFile(syntax_conf_sel->getSelectedFile(), syntax_txt->toPlainText().toUtf8());
+	UtilsNs::saveFile(syntax_conf_sel->getSelectedPath(), syntax_txt->toPlainText().toUtf8());
 	alert_frm->setVisible(false);
 	applySyntaxConfig(true);
 }

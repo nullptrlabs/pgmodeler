@@ -37,7 +37,7 @@ MetadataHandlingWidget::MetadataHandlingWidget(QWidget *parent) : QWidget(parent
 	root_item = nullptr;
 	output_trw->setItemDelegateForColumn(0, new HtmlItemDelegate(this));
 
-	backup_file_sel = new FileSelectorWidget(this);
+	backup_file_sel = new PathSelectorWidget(this);
 	backup_file_sel->setNameFilters({ tr("Objects metadata file (*%1)").arg(GlobalAttributes::ObjMetadataExt) });
 	backup_file_sel->setWindowTitle(tr("Select backup file"));
 	settings_grid->addWidget(backup_file_sel, 3, 1);
@@ -50,7 +50,7 @@ MetadataHandlingWidget::MetadataHandlingWidget(QWidget *parent) : QWidget(parent
 
 	connect(extract_model_sel, &ModelSelectorWidget::s_selectionChanged, this, &MetadataHandlingWidget::enableMetadataHandling);
 	connect(apply_model_sel, &ModelSelectorWidget::s_selectionChanged, this, &MetadataHandlingWidget::enableMetadataHandling);
-	connect(backup_file_sel, &FileSelectorWidget::s_selectorChanged, this, &MetadataHandlingWidget::enableMetadataHandling);
+	connect(backup_file_sel, &PathSelectorWidget::s_selectorChanged, this, &MetadataHandlingWidget::enableMetadataHandling);
 	connect(operation_cmb, &QComboBox::activated, this, &MetadataHandlingWidget::enableMetadataHandling);
 	connect(operation_cmb, &QComboBox::activated, this, &MetadataHandlingWidget::configureSelector);
 	connect(select_all_btn, &QPushButton::clicked, this, &MetadataHandlingWidget::selectAllOptions);
@@ -109,11 +109,11 @@ bool MetadataHandlingWidget::isMetadataHandlingEnabled()
 
 				 (op_type == OpExtractOnly &&
 					extract_model_sel->isModelSelected() &&
-					!backup_file_sel->getSelectedFile().isEmpty()) ||
+					!backup_file_sel->getSelectedPath().isEmpty()) ||
 
 				 (op_type == OpRestoreOnly &&
 					apply_model_sel->isModelSelected() &&
-					!backup_file_sel->getSelectedFile().isEmpty());
+					!backup_file_sel->getSelectedPath().isEmpty());
 }
 
 void MetadataHandlingWidget::selectAllOptions()
@@ -159,7 +159,7 @@ void MetadataHandlingWidget::handleObjectsMetada()
 			return;
 	}
 
-	QString bkp_filename = backup_file_sel->getSelectedFile();
+	QString bkp_filename = backup_file_sel->getSelectedPath();
 
 	if(!bkp_filename.isEmpty())
 	{
@@ -215,7 +215,7 @@ void MetadataHandlingWidget::handleObjectsMetada()
 		if(op_type == OpExtractRestore || op_type == OpExtractOnly)
 		{
 			if(op_type == OpExtractOnly)
-				metadata_file = backup_file_sel->getSelectedFile();
+				metadata_file = backup_file_sel->getSelectedPath();
 			else
 			{
 				//Configuring the temporary metadata file
@@ -235,7 +235,7 @@ void MetadataHandlingWidget::handleObjectsMetada()
 			{
 				root_item->setExpanded(false);
 				root_item = GuiUtilsNs::createOutputTreeItem(output_trw,
-																										 UtilsNs::formatMessage(tr("Saving backup metadata to file `%1'").arg(backup_file_sel->getSelectedFile())),
+																										 UtilsNs::formatMessage(tr("Saving backup metadata to file `%1'").arg(backup_file_sel->getSelectedPath())),
 																										 GuiUtilsNs::getPixmap("info"), nullptr);
 
 				apply_model->saveObjectsMetadata(bkp_filename);
@@ -294,13 +294,13 @@ void MetadataHandlingWidget::configureSelector()
 	if(op_type == OpExtractRestore || op_type == OpExtractOnly)
 	{
 		backup_file_sel->setFileDialogTitle(tr("Save backup file"));
-		backup_file_sel->setFileMustExist(false);
+		backup_file_sel->setPathMustExist(false);
 		backup_file_sel->setAcceptMode(QFileDialog::AcceptSave);
 	}
 	else
 	{
 		backup_file_sel->setFileDialogTitle(tr("Load backup file"));
-		backup_file_sel->setFileMustExist(true);
+		backup_file_sel->setPathMustExist(true);
 		backup_file_sel->setAcceptMode(QFileDialog::AcceptOpen);
 	}
 }

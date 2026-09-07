@@ -25,7 +25,7 @@ TablespaceWidget::TablespaceWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 {
 	Ui_TablespaceWidget::setupUi(this);
 
-	directory_sel = new FileSelectorWidget(this);
+	directory_sel = new PathSelectorWidget(this);
 	directory_sel->setDirectoryMode(true);
 	directory_sel->setAcceptMode(QFileDialog::AcceptOpen);
 	directory_lt->addWidget(directory_lbl);
@@ -44,7 +44,7 @@ void TablespaceWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 	BaseObjectWidget::setAttributes(model, op_list, tablespc);
 
 	if(tablespc)
-		directory_sel->setSelectedFile(tablespc->getDirectory());
+		directory_sel->setSelectedPath(tablespc->getDirectory());
 }
 
 void TablespaceWidget::applyConfiguration()
@@ -55,7 +55,7 @@ void TablespaceWidget::applyConfiguration()
 
 		startConfiguration<Tablespace>();
 		tablespc = dynamic_cast<Tablespace *>(this->object);
-		tablespc->setDirectory(directory_sel->getSelectedFile());
+		tablespc->setDirectory(directory_sel->getSelectedPath());
 
 		BaseObjectWidget::applyConfiguration();
 

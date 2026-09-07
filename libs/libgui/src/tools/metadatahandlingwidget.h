@@ -30,7 +30,7 @@
 
 #include "ui_metadatahandlingwidget.h"
 #include "widgets/modelwidget.h"
-#include "widgets/fileselectorwidget.h"
+#include "widgets/pathselectorwidget.h"
 #include "tools/modelselectorwidget.h"
 
 class __libgui MetadataHandlingWidget: public QWidget, public Ui::MetadataHandlingWidget {
@@ -39,7 +39,7 @@ class __libgui MetadataHandlingWidget: public QWidget, public Ui::MetadataHandli
 	private:
 		QTreeWidgetItem *root_item;
 
-		FileSelectorWidget *backup_file_sel;
+		PathSelectorWidget *backup_file_sel;
 
 		ModelSelectorWidget *extract_model_sel, *apply_model_sel;
 
