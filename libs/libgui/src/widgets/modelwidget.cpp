@@ -1370,10 +1370,19 @@ void ModelWidget::setBlinkAddedObjects(bool value)
 	blink_new_objs = value;
 }
 
+void ModelWidget::selectObjectsInLayers(const QList<unsigned int> &layer_ids)
+{
+	scene->blockSignals(true);
+	scene->selectObjectsInLayers(layer_ids);
+	scene->blockSignals(false);
+	configureObjectSelection();
+	emitSceneInteracted();
+}
+
 void ModelWidget::configureObjectSelection()
 {
-	QList<QGraphicsItem *> items=scene->selectedItems();
-	BaseObjectView *item=nullptr;
+	QList<QGraphicsItem *> items = scene->selectedItems();
+	BaseObjectView *item = nullptr;
 	std::map<unsigned, QGraphicsItem *> objs_map;
 	std::map<unsigned, QGraphicsItem *>::iterator itr;
 

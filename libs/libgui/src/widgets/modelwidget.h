@@ -637,6 +637,8 @@ class __libgui ModelWidget: public QWidget {
 		 *  to simulate a highlight in the new object */
 		void setBlinkAddedObjects(bool value);
 
+		void selectObjectsInLayers(const QList<unsigned int> &layer_ids);
+
 	public slots:
 		void loadModel(const QString &filename);
 		void saveModel(const QString &filename);

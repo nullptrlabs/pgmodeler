@@ -632,6 +632,7 @@ namespace Attributes {
 	SelectExp("select-exp"),
 	SelectObjects("select-objects"),
 	SelectPriv("select"),
+	SelObjsInLayers("sel-objs-in-layers"),
 	SendFunc("send"),
 	Sequence("sequence"),
 	Sequences("sequences"),

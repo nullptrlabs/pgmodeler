@@ -2259,6 +2259,7 @@ void MainWindow::storeDockWidgetsSettings()
 
 	params[Attributes::LayersConfig] = Attributes::True;
 	params[Attributes::RelsFollowTabsVisibility] = layers_cfg_wgt->rels_tabs_visibility_chk->isChecked() ? Attributes::True : "";
+	params[Attributes::SelObjsInLayers] = layers_cfg_wgt->sel_objects_chk->isChecked() ? Attributes::True : "";
 	conf_wgt->setConfigurationSection(Attributes::LayersConfig, params);
 	params.clear();
 }
@@ -2287,6 +2288,7 @@ void MainWindow::restoreDockWidgetsSettings()
 	if(confs.count(Attributes::LayersConfig))
 	{
 		layers_cfg_wgt->rels_tabs_visibility_chk->setChecked(confs[Attributes::LayersConfig][Attributes::RelsFollowTabsVisibility]==Attributes::True);
+		layers_cfg_wgt->sel_objects_chk->setChecked(confs[Attributes::LayersConfig][Attributes::SelObjsInLayers]==Attributes::True);
 	}
 }
 

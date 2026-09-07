@@ -645,6 +645,7 @@ extern __libparsers const QString
 	SelectExp,
 	SelectObjects,
 	SelectPriv,
+	SelObjsInLayers,
 	SendFunc,
 	Sequence,
 	Sequences,

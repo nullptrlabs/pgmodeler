@@ -23,6 +23,7 @@
 #include "colorpickerwidget.h"
 #include "guiutilsns.h"
 #include "relationshipview.h"
+#include "customuistyle.h"
 
 LayersConfigWidget::LayersConfigWidget(QWidget *parent) : QWidget(parent)
 {
@@ -32,6 +33,8 @@ LayersConfigWidget::LayersConfigWidget(QWidget *parent) : QWidget(parent)
 	curr_item = nullptr;
 	curr_item = nullptr;
 	curr_row = -1;
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::GroupBoxFrmHint, options_frm);
 
 	layers_tab->installEventFilter(this);
 	frame->installEventFilter(this);
@@ -65,6 +68,7 @@ LayersConfigWidget::LayersConfigWidget(QWidget *parent) : QWidget(parent)
 	connect(layers_tab, &QTableWidget::itemChanged, this, &LayersConfigWidget::updateActiveLayers);
 	connect(layers_tab, &QTableWidget::itemSelectionChanged, this, &LayersConfigWidget::finishLayerRenaming);
 	connect(layers_tab, &QTableWidget::itemSelectionChanged, this, &LayersConfigWidget::enableButtons);
+	connect(layers_tab, &QTableWidget::itemSelectionChanged, this, &LayersConfigWidget::selectObjectsInLayers);
 
 	connect(remove_all_btn, &QPushButton::clicked, this, [this](){
 		removeLayer(true);
@@ -111,6 +115,9 @@ bool LayersConfigWidget::eventFilter(QObject *watched, QEvent *event)
 
 void LayersConfigWidget::updateActiveLayers()
 {
+	if(!model)
+		return;
+
 	QList<unsigned> active_layers;
 	QTableWidgetItem *item = nullptr;
 
@@ -216,6 +223,22 @@ void LayersConfigWidget::setLayersActive()
 
 	layers_tab->blockSignals(false);
 	updateActiveLayers();
+}
+
+void LayersConfigWidget::selectObjectsInLayers()
+{
+	if(!sel_objects_chk->isChecked())
+		return;
+
+	QList<unsigned int> sel_layers;
+
+	for(auto &sel_rng : layers_tab->selectedRanges())
+	{
+		for(int row = sel_rng.topRow(); row <= sel_rng.bottomRow(); row++)
+			sel_layers.append(row);
+	}
+
+	model->selectObjectsInLayers(sel_layers);
 }
 
 void LayersConfigWidget::setVisible(bool value)
@@ -333,7 +356,10 @@ void LayersConfigWidget::__addLayer(const QString &name, Qt::CheckState chk_stat
 	color_picker->setColor(0, QColor(0,0,0));
 	name_color_pickers.append(color_picker);
 
-	connect(color_picker, &ColorPickerWidget::s_colorChanged, this, &LayersConfigWidget::updateLayerColors);
+	connect(color_picker, &ColorPickerWidget::s_colorChanged, this, [this]() {
+		updateLayerColors();
+	});
+
 	connect(color_picker, &ColorPickerWidget::s_colorsChanged, this, [this]() {
 		updateLayerColors();
 	});
@@ -346,12 +372,16 @@ void LayersConfigWidget::__addLayer(const QString &name, Qt::CheckState chk_stat
 	color_picker->generateRandomColors();
 	rect_color_pickers.append(color_picker);
 
-	connect(color_picker, &ColorPickerWidget::s_colorChanged, this, &LayersConfigWidget::updateLayerColors);
+	connect(color_picker, &ColorPickerWidget::s_colorChanged, this, [this]() {
+		updateLayerColors();
+	});
+
 	connect(color_picker, &ColorPickerWidget::s_colorsChanged, this, [this]() {
 		updateLayerColors();
 	});
 
 	layers_tab->setCellWidget(row, 2, color_picker);
+
 	layers_tab->horizontalHeader()->setStretchLastSection(false);
 	layers_tab->resizeRowsToContents();
 	layers_tab->resizeColumnsToContents();

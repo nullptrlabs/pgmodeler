@@ -1790,6 +1790,34 @@ void ObjectsScene::clearTablesChildrenSelection()
 	tabs_sel_children.clear();
 }
 
+void ObjectsScene::selectObjectsInLayers(const QList<unsigned int> &layer_ids)
+{
+	clearSelection();
+
+	if(layer_ids.isEmpty())
+		return;
+
+	BaseObjectView *obj_view = nullptr;
+	bool is_in_layer = false;
+
+	for(auto &item : this->items())
+	{
+		obj_view = dynamic_cast<BaseObjectView *>(item);
+
+		if(obj_view && !obj_view->parentItem() && !obj_view->isSelected())
+		{
+			for(auto &idx : layer_ids)
+			{
+				if(obj_view->isInLayer(idx))
+				{
+					obj_view->setSelected(true);
+					break;
+				}
+			}
+		}
+	}
+}
+
 void ObjectsScene::clearSelection()
 {
 	clearTablesChildrenSelection();

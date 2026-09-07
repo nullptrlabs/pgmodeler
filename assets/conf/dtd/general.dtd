@@ -81,6 +81,7 @@
 <!ATTLIST widget show-attributes-grid (false|true) "true">
 <!ATTLIST widget show-source-pane (false|true) "true">
 <!ATTLIST widget rels-follow-tabs-visibility (false|true) "true">
+<!ATTLIST widget sel-objs-in-layers (false|true) "true">
 <!ATTLIST widget x CDATA #IMPLIED>
 <!ATTLIST widget y CDATA #IMPLIED>
 <!ATTLIST widget width CDATA #IMPLIED>
