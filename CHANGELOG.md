@@ -5,61 +5,58 @@ v2.0.0-beta1
 ------
 *Release date: September 14, 2026*
 
-* [New] Refactored `ViewWidget`: replaced `getSQLCodePreview()` with `updateCodePreview()`, which writes directly into a `NumberedTextEditor` inside a dedicated SQL preview tab; the preview is now lazily generated on tab activation instead of on every reference change.
-* [New] Added `s_referencesChanged()` signal to `ReferencesWidget`, emitted whenever the reference list is modified (add, remove, or clear).
-* [New] Added `updateModelSelectors()` to `MainWindow`, centralizing model selector refresh for export and fix tool widgets on model add, close, and save events.
+* [New] Refactored `ViewWidget` to display the SQL preview and the references editor side-by-side in a persistent horizontal splitter, replacing the previous tab-based approach; the preview now refreshes live as references are added or removed.
+* [New] Added `s_referencesChanged()` signal to `ReferencesWidget`, emitted whenever the reference list is modified.
 * [New] Added `s_modelClosed()` signal to `MainWindow`, emitted at the end of `closeModel()` to allow external components and plugins to react to model closure.
+* [New] Added `updateModelSelectors()` to `MainWindow`, centralizing model selector refresh for export and fix tool widgets on model add, close, and save events.
 * [New] Added `AccentFrmHint` style hint to `CustomUiStyle` that renders widget borders using the current `QPalette::Accent` color, producing theme-adaptive accent highlights.
-* [New] Added checked-state visual indicator for icon-bearing `QMenu` actions across all built-in themes (including a new `classicdark` extra stylesheet), using the palette highlight color consistent with checked toolbar buttons.
+* [New] Added checked-state visual indicator for icon-bearing `QMenu` actions across all built-in themes, using the palette highlight color consistent with checked toolbar buttons.
 * [New] Added `OkCloseButtons` button configuration to `BaseForm` and `Messagebox`, displaying Ok + Close without a Cancel button.
-* [New] Added `setPreventClose()` method to `BaseForm` to block form closure via ESC or the window close button.
+* [New] Added `setPreventClose()` method to `BaseForm` to block accidental form closure via ESC or the window close button.
 * [New] Added `s_cellDoubleClicked(int, int)` signal to `CustomTableWidget` to expose cell double-click events without accessing the internal table widget directly.
-* [New] Added `getSelectedRows()` method to `CustomTableWidget`, returning all selected row indices for multi-row selection retrieval.
-* [New] Added `setCellFont()` method to `CustomTableWidget` to set a custom font for individual cells.
+* [New] Added `getSelectedRows()` method to `CustomTableWidget` returning all selected row indices, enabling multi-row selection retrieval.
+* [New] Added `setCellFont()` method to `CustomTableWidget` to allow setting a custom font for individual cells.
 * [New] Added `getScrollBar(Qt::Orientation)` method to `CustomTableWidget` to expose horizontal and vertical scroll bars for external scroll position management.
 * [New] Added `hasSelection()` method to `CustomTableWidget`.
-* [New] Added alignment parameter to `CustomTableWidget::addCustomButton()`, allowing buttons to be placed at the left or right side of the button layout.
+* [New] Added alignment parameter to `CustomTableWidget::addCustomButton()`.
 * [New] Added `getDefaultFont()` static accessor to `NumberedTextEditor`.
-* [New] Added the pure virtual method `BaseTable::getObjectCount()`; derived classes implement it.
-* [New] Added `GlobalAttributes::getPath()` convenience wrapper for path retrieval without the trailing path separator.
-* [New] Added `ModelWidget::AltFilename` property constant for storing an alternate filename for models not yet saved to disk (e.g., models imported from a database).
-* [New] Added `ModelWidget::ModelImported` property constant to mark models that were imported from a database rather than loaded from a `.dbm` file.
-* [New] Extended `s_modelLoadRequested` signal and `MainWindow::addModel()` with an optional `model_idx` parameter to specify the tab position for the loaded model; out-of-bounds indices are treated as append.
+* [New] Added the pure virtual method `BaseTable::getObjectCount`; derived classes implement it.
+* [New] Added an option in `LayersConfigWidget` to select all objects belonging to the currently selected layers, via the new `ObjectsScene::selectObjectsInLayers()` and `ModelWidget::selectObjectsInLayers()` methods.
+* [New] Added support for the `--no-escape-comments` option in `pgmodeler-cli`, disabling automatic escaping of comment content during SQL generation.
+* [New] Added the sample model rentacar.dbm.
 * [Change] Adjusted the minimum required Qt version to 6.6.
-* [Change] BREAKING: Default FK column name patterns in `relationships.conf` changed to table-first convention: `src-col-pattern` from `{sc}_{st}` to `{st}_{sc}` and `dst-col-pattern` for n:n relationships from `{sc}_{dt}` to `{dt}_{sc}`.
-* [Change] `validateBeforeOperation()` in `MainWindow` now guards against re-entry when a pending operation is already set, and defers execution by 1 second after validation finishes to ensure the UI has fully settled.
-* [Change] Refactored `MainWindow::reloadModel()` to emit `s_modelLoadRequested` instead of calling `addModel()` directly, allowing plugins to intercept and handle model reload requests.
-* [Change] Replaced `PgSqlType` user type erasure (`vector::erase`) with in-place invalidation to preserve positional indices across all open models, eliminating heap corruption when closing or reloading models.
-* [Change] Replaced the `__setStyleHint<WgtClass>` function template in `CustomUiStyle` with a runtime-dispatched `setStyleHint(QWidget *)` overload; type detection is done via `qobject_cast`, fixing template argument deduction failures with braced initializer lists.
-* [Change] Improved disabled-state rendering for hint-styled frames and buttons in `CustomUiStyle`: colored hints now blend and darken the hint color instead of falling back to a plain gray fill; hint identity is preserved on disabled widgets.
-* [Change] `MenuButtonPopup` `QToolButton` halves are now rendered as a unified control in `CustomUiStyle`, with per-corner radii and a shared single separator border; `LeftCorners`/`RightCorners` composite flags added to `CornerFlag`.
-* [Change] `__trycatch` macro now accepts variadic arguments (`__VA_ARGS__`), allowing multi-statement bodies without an explicit wrapping block.
-* [Change] `View::generateColumns()` now uses the column alias as the column name when one is defined, falling back to the original column name otherwise.
-* [Change] Column removal in `removeObject()` now distinguishes between direct and indirect reference errors, raising `RemDirectReference` or `RemIndirectReference` for clearer error reporting.
+* [Change] BREAKING: Default FK column name patterns in relationships.conf changed to table-first convention: `src-col-pattern` changed from `{sc}_{st}` to `{st}_{sc}` and `dst-col-pattern` for n:n relationships from `{sc}_{dt}` to `{dt}_{sc}`.
+* [Change] `validateBeforeOperation()` in `MainWindow` now guards against re-entry and defers execution of the pending export or diff operation by 1 second after validation finishes to ensure the UI has fully settled.
+* [Change] Refactored `MainWindow::reloadModel()` to emit `s_modelLoadRequested` signal instead of calling `addModel()` directly, allowing plugins to intercept and handle model reload requests.
+* [Change] Replaced `PgSqlType` user type erasure with in-place invalidation to preserve vector indices across all open models, eliminating heap corruption when closing or reloading models.
+* [Change] Replaced the `__setStyleHint` function template in `CustomUiStyle` with a runtime-dispatched `setStyleHint(QWidget *)` overload; type detection is done via `qobject_cast`, also fixing template argument deduction failures with braced initializer lists.
+* [Change] Improved rendering of disabled state for hint-styled frames and buttons in `CustomUiStyle`: colored hints now blend and darken the hint color instead of falling back to a plain gray fill.
+* [Change] `MenuButtonPopup` `QToolButton` halves are now rendered as a unified control in `CustomUiStyle`, with per-corner radii and a shared single separator border.
+* [Change] Column removal in `removeObject()` now distinguishes between direct and indirect reference errors, raising `RemDirectReference` or `RemIndirectReference` accordingly for clearer error reporting.
 * [Change] Views that reference a table are now force-updated when one of the table's columns is renamed via `ObjectRenameWidget`.
-* [Change] `NumberedTextEditor` button and toolbar background coloring switched from stylesheets to `QPalette`, ensuring correct theme rendering across all built-in and custom themes; button font sizing unified via `GuiUtilsNs::configureWidgetFont`.
-* [Change] `setCurrentModel()` in `MainWindow` now accepts an optional tab index parameter to set a specific model directly; `s_modelSaved` is emitted only when the model file is actually written to disk, not unconditionally.
-* [Change] `CustomTableWidget::resizeContents()` now resizes columns individually via `resizeColumnToContents(col)` to avoid overriding existing per-column resize modes; `adjustColumnToContents()` marked as deprecated.
-* [Change] Replaced `s_selectionCleared()` with `s_selectionChanged(bool has_selection)` in `CustomTableWidget`, covering both selection gains and losses through a single signal.
+* [Change] `__trycatch` macro now accepts variadic arguments, allowing multi-statement bodies to be passed without wrapping in an explicit block.
+* [Change] `View::generateColumns()` now uses the column alias as the column name when one is defined, falling back to the original column name otherwise.
+* [Change] `NumberedTextEditor` button and toolbar background coloring switched from stylesheets to `QPalette`, ensuring correct theme rendering across all built-in and custom themes.
+* [Change] `setCurrentModel()` now accepts an optional tab index parameter; `s_modelSaved` is emitted only when the model file is actually written to disk, not unconditionally.
+* [Change] `CustomTableWidget::resizeContents()` now resizes columns individually to avoid overriding existing per-column resize modes; deprecated `adjustColumnToContents()`.
+* [Change] Replaced `s_selectionCleared` signal with `s_selectionChanged(bool has_selection)` in `CustomTableWidget`, covering both selection gains and losses through a single connection.
 * [Change] Renamed `BaseForm` button members from `apply_ok_btn`/`cancel_btn` to `accept_btn`/`reject_btn` across the entire codebase for API consistency.
-* [Change] Renamed `DebugOutputWidget::setLogMessages()` to `setLogAppMessages()` to clarify that it toggles logging of application-level messages emitted via `Application::s_messageLogged`.
+* [Change] Renamed `DebugOutputWidget::setLogMessages()` to `setLogAppMessages()` to better reflect its purpose of toggling application-level message logging.
 * [Change] `FileSelectorWidget` now overrides `changeEvent()` to refresh the warning label style when the widget is enabled or disabled.
 * [Change] `SyntaxHighlighter::clearConfiguration()` moved to public slots to allow external callers to reset the highlighter state.
-* [Change] Icon-label CSS selectors consolidated across all size configuration files; explicit `qproperty-iconSize` rules added for `SQLExecutionWidget` toolbar buttons; icon sizes adjusted for `model_acts_tb`, `btns_parent_wgt`, and `ModelNavigationWidget`.
+* [Change] Renamed `FileSelectorWidget` to `PathSelectorWidget` across the entire codebase to better reflect the widget's ability to select both files and directories.
 * [Fix] Fixed a crash in model validation when a column was restored from the operation list via an undo operation.
-* [Fix] Fixed the generation of drop scripts when using standalone SQL file generation in the export tool (issue #2078).
+* [Fix] Fixed the generation of drop scripts when using standalone SQL file generation in the export tool.
 * [Fix] Fixed `TypeWidget` type configuration selector not responding to programmatic selection changes by replacing `QComboBox::activated` with `QComboBox::currentIndexChanged`.
 * [Fix] Fixed a stale model pointer in `ModelExportWidget::updateModels` that could cause crashes during export after model changes.
 * [Fix] Fixed orphaned empty tabs being left open when a model fails to load in `addModel()`.
-* [Fix] Fixed a use-after-free race condition in `closeModel()`/`reloadModel()`: `PgSqlType::invalidateUserTypes()` is now called eagerly before `deleteLater()` to neutralize old model type entries immediately regardless of destructor timing; signals are blocked and the modified flag cleared on the dying widget to prevent `saveTemporaryModels()` from accessing stale data.
+* [Fix] Fixed a use-after-free race condition in `closeModel()`/`reloadModel()` caused by deferred destructor timing with `deleteLater()`.
 * [Fix] Fixed `CodeCompletionWidget` duplicating items in the name list widget.
 * [Fix] Fixed `CodeCompletionWidget` popup sizing being constrained to a maximum of 10 items, preventing proper sizing for larger completion lists.
-* [Fix] Fixed `DebugOutputWidget::logMessage()` applying line coloring to wrong lines by switching from post-hoc cursor coloring to `QTextCursor::insertText` with `QTextCharFormat`; fixed auto-scroll to last line via `rangeChanged` connection; fixed horizontal scroll not resetting to 0 after each insertion.
-* [Fix] Fixed `MenuButtonPopup` `QToolButton` dropdown arrow not being drawn in `CustomUiStyle`; the PE_IndicatorArrowDown path now routes correctly to `drawControlArrow()` for `MenuButtonPopup` mode.
-* [Fix] Fixed `DeletableItemDelegate::sizeHint()` always returning zero width because `option.text` is not populated before `initStyleOption()` is called internally by `paint()`; fixed delete button icon size being incorrectly scaled down.
-* [Fix] Fixed `MainWindow::restoreLastSession()` to route non-`.dbm` model files through `s_modelLoadRequested` and to persist `AltFilename` in session configuration for models without a saved path.
-* [Fix] Fixed `ModelSelectorWidget::updateModels()` not emitting `s_selectionChanged` and not clearing `model_file_edt` when the model list is refreshed.
-* [Fix] Fixed CLI app help menu item ordering (`ListConns` now appears after the `PRIV_CODE_SYMBOLS` block) and replaced `MenuItem(str, "", "")` with the correct `MenuItem(str)` constructor for section headers.
+* [Fix] Fixed `DebugOutputWidget::logMessage` applying line coloring to wrong lines and not auto-scrolling to the last line after document layout updates.
+* [Fix] Fixed `MenuButtonPopup` `QToolButton` dropdown arrow not being drawn in `CustomUiStyle`.
+* [Fix] Fixed `ModelObjectsWidget` wrongly clearing the selected objects when the widget lost focus.
+* [Fix] Fixed `RelationshipWidget` opening the constraint editor instead of the column editor when editing columns in the tab attributes.
 
 v2.0.0-beta
 ------
