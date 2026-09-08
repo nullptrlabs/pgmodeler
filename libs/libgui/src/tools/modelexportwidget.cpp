@@ -34,7 +34,6 @@ bool ModelExportWidget::low_verbosity {false};
 ModelExportWidget::ModelExportWidget(QWidget *parent) : QWidget(parent)
 {
 	model_wgt = nullptr;
-	viewp = nullptr;
 
 	setupUi(this);
 	installEventFilter(new TabOrderManager(this));
@@ -156,7 +155,7 @@ ModelExportWidget::ModelExportWidget(QWidget *parent) : QWidget(parent)
 		output_trw->setUniformRowHeights(false);
 	});
 
-	connect(&export_hlp, &ModelExportHelper::s_progressUpdated, this, &ModelExportWidget::updateProgress, Qt::BlockingQueuedConnection);
+	connect(&export_hlp, &ModelExportHelper::s_progressUpdated, this, &ModelExportWidget::updateProgress);
 	connect(&export_hlp, &ModelExportHelper::s_exportFinished, this, &ModelExportWidget::handleExportFinished);
 	connect(&export_hlp, &ModelExportHelper::s_exportCanceled, this, &ModelExportWidget::handleExportCanceled);
 	connect(&export_hlp, &ModelExportHelper::s_errorIgnored, this, &ModelExportWidget::handleErrorIgnored);
@@ -242,10 +241,22 @@ void ModelExportWidget::updateProgress(int progress, QString msg, ObjectType obj
 	// If low_verbosity is set only messages hinted by obj_type == BaseObject are show because they hold key info messages
 	if(!is_code_gen && (!low_verbosity || (low_verbosity && obj_type == ObjectType::BaseObject && cmd.isEmpty())))
 	{
-		item=GuiUtilsNs::createOutputTreeItem(output_trw, text, ico, nullptr, false);
+		item = GuiUtilsNs::createOutputTreeItem(output_trw, text, ico, nullptr, false);
 
 		if(!cmd.isEmpty())
 			GuiUtilsNs::createOutputTreeItem(output_trw, cmd, QIcon(), item, false);
+	}
+
+	/* Forcing the repaint of the output widgets
+	 * when running in synchronous mode */
+	if(!export_thread->isRunning())
+	{
+		progress_lbl->repaint();
+		progress_pb->repaint();
+		ico_lbl->repaint();
+
+		if(item)
+			output_trw->repaint();
 	}
 }
 
@@ -275,22 +286,40 @@ void ModelExportWidget::exportModel()
 		settings_tbw->setTabEnabled(1, true);
 		settings_tbw->setCurrentIndex(1);
 		enableExportModes(false);
-		cancel_btn->setEnabled(true);
+		cancel_btn->setEnabled(!export_to_img_tb->isChecked());
 
 		//Export to png
 		if(export_to_img_tb->isChecked())
 		{
-			viewp=new QGraphicsView(model_wgt->scene);
+			QGraphicsView *viewp = new QGraphicsView(model_wgt->scene);
 
+			emit s_exportStarted();
+			qApp->setOverrideCursor(Qt::WaitCursor);
+
+			/* Due to the nature of Qt Graphics Scene thread affinity limitations,
+			 * the export to png/svg runs sincronously even in GUI. A scene from
+			 * a thread cannot be rendered outside its own thread, when that happens
+			 * Qt raises warnings in console. So to avoid this kind of problem the
+			 * export to image runs in a single shot, not giving the user a chance
+			 * to abort the operation */
 			if(img_fmt_cmb->currentIndex() == 0)
+			{
 				export_hlp.setExportToPNGParams(model_wgt->scene, viewp, img_file_sel->getSelectedPath(),
 																				zoom_cmb->itemData(zoom_cmb->currentIndex()).toDouble(),
 																				show_grid_chk->isChecked(), show_delim_chk->isChecked(),
 																				 page_by_page_chk->isChecked(), override_bg_color_chk->isChecked());
+				export_hlp.exportToPNG();
+			}
 			else
+			{
 				export_hlp.setExportToSVGParams(model_wgt->scene, img_file_sel->getSelectedPath(),
 																				show_grid_chk->isChecked(),
 																				show_delim_chk->isChecked());
+				export_hlp.exportToSVG();
+			}
+
+			delete viewp;
+			qApp->restoreOverrideCursor();
 		}
 		else
 		{
@@ -337,10 +366,10 @@ void ModelExportWidget::exportModel()
 				if(ignore_error_codes_chk->isChecked())
 					export_hlp.setIgnoredErrors(error_codes_edt->text().simplified().split(' '));
 			}
-		}
 
-		export_thread->start();
-		emit s_exportStarted();
+			export_thread->start();
+			emit s_exportStarted();
+		}
 	}
 	catch(Exception &e)
 	{
@@ -380,8 +409,8 @@ void ModelExportWidget::cancelExport()
 
 void ModelExportWidget::handleExportCanceled()
 {
-	QPixmap ico=GuiUtilsNs::getPixmap("alert");
-	QString msg=tr("Exporting process canceled by user!");
+	QPixmap ico = GuiUtilsNs::getPixmap("alert");
+	QString msg = tr("Exporting process canceled by user!");
 
 	finishExport(msg);
 	ico_lbl->setPixmap(ico);
@@ -412,13 +441,6 @@ void ModelExportWidget::finishExport(const QString &msg)
 	progress_pb->setValue(100);
 	progress_lbl->setText(msg);
 	progress_lbl->repaint();
-
-	if(viewp)
-	{
-		export_thread->wait();
-		delete viewp;
-		viewp=nullptr;
-	}
 
 	emit s_exportFinished();
 }

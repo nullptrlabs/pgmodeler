@@ -30,7 +30,7 @@ void ModelExportHelper::abortExport(Exception &e)
 	resetExportParams();
 
 	//When running in a separated thread (other than the main application thread) redirects the error in form of signal
-	if(this->thread() && this->thread()!=qApp->thread())
+	if(this->thread() && this->thread() != qApp->thread())
 		emit s_exportAborted(Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e));
 	else
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
@@ -556,8 +556,8 @@ void ModelExportHelper::exportToDBMS(DatabaseModel *db_model, Connection conn, c
 			new_db_conn=conn;
 			new_db_conn.setConnectionParam(Connection::ParamDbName, db_model->getName());
 			emit s_progressUpdated(progress,
-								   tr("Connecting to database `%1'")
-								   .arg(db_model->getName()));
+									 tr("Connecting to database `%1'")
+									 .arg(db_model->getName()));
 
 			new_db_conn.connect();
 			progress=30;
@@ -667,7 +667,7 @@ void ModelExportHelper::saveGenAtlerCmdsStatus(DatabaseModel *db_model)
 
 	//Store the relationship on the auxiliary vector but only many-to-many are considered
 	objects.insert(objects.end(), db_model->getObjectList(ObjectType::Relationship)->begin(),
-				   db_model->getObjectList(ObjectType::Relationship)->end());
+					 db_model->getObjectList(ObjectType::Relationship)->end());
 
 	alter_cmds_status.clear();
 
@@ -786,9 +786,9 @@ void ModelExportHelper::generateTempObjectNames(DatabaseModel *db_model)
 		tmp_name.clear();
 
 		emit s_progressUpdated(progress, tr("Renaming `%1' (%2) to `%3'")
-							   .arg(old_name)
-							   .arg(obj.first->getTypeName())
-							   .arg(obj.first->getName()));
+								 .arg(old_name)
+								 .arg(obj.first->getTypeName())
+								 .arg(obj.first->getName()));
 	}
 
 	/* Invalidates the codes of all objects on database model in order to generate the SQL referencing the
@@ -810,16 +810,16 @@ void ModelExportHelper::restoreObjectNames()
 bool ModelExportHelper::isDuplicationError(const QString &error_code)
 {
 	/* Error codes treated in this method
-	  42P04 	duplicate_database
-	  42723 	duplicate_function
-	  42P06 	duplicate_schema
-	  42P07 	duplicate_table
-	  42710 	duplicate_object
-	  42701   duplicate_column
-	  42P16   invalid_table_definition
+		42P04 	duplicate_database
+		42723 	duplicate_function
+		42P06 	duplicate_schema
+		42P07 	duplicate_table
+		42710 	duplicate_object
+		42701   duplicate_column
+		42P16   invalid_table_definition
 
 	 Reference:
-	  http://www.postgresql.org/docs/current/static/errcodes-appendix.html*/
+		http://www.postgresql.org/docs/current/static/errcodes-appendix.html*/
 	static QStringList err_codes = {"42P04", "42723", "42P06",
 																	"42P07", "42710", "42701",
 																	"42P16"};
@@ -871,7 +871,7 @@ void ModelExportHelper::exportBufferToDBMS(const QString &buffer, Connection &co
 																 ObjectType::Procedure, ObjectType::Database, ObjectType::BaseObject };
 
 	/* Extract each SQL command from the buffer and execute them separately. This is done
-   to permit the user, in case of error, identify what object is wrongly configured. */
+	 to permit the user, in case of error, identify what object is wrongly configured. */
 	ts.setString(&sql_buf);
 
 	if(!conn.isStablished())

@@ -59,9 +59,6 @@ class __libgui ModelExportWidget: public QWidget, public Ui::ModelExportWidget {
 		//! \brief Thread used to manage the export helper when dealing with dbms export
 		QThread *export_thread;
 
-		//! \brief Auxiliary viewport passed to export helper when dealing with PNG export
-		QGraphicsView *viewp;
-
 		ModelSelectorWidget *model_sel_wgt;
 
 		PathSelectorWidget *sql_file_sel,
