@@ -1646,6 +1646,7 @@ void DatabaseModel::updateTableFKRelationships(Table *table)
 				 (table->getObjectIndex(fk) < 0 && fk->getReferencedTable() == ref_tab))
 			{
 				removeRelationship(rel);
+				invalid_special_objs.push_back(rel);
 				itr = base_relationships.begin() + idx;
 				itr_end = base_relationships.end();
 			}
@@ -1756,6 +1757,7 @@ void DatabaseModel::updateViewRelationships(View *view, bool force_rel_removal)
 				 rel->getTable(BaseRelationship::DstTable)==view)
 			{
 				removeRelationship(rel);
+				invalid_special_objs.push_back(rel);
 				itr=base_relationships.begin() + idx;
 				itr_end=base_relationships.end();
 			}
@@ -1788,6 +1790,7 @@ void DatabaseModel::updateViewRelationships(View *view, bool force_rel_removal)
 				if(!view->isReferencingTable(table))
 				{
 					removeRelationship(rel);
+					invalid_special_objs.push_back(rel);
 					itr = base_relationships.begin() + idx;
 					itr_end =base_relationships.end();
 				}
@@ -7155,12 +7158,14 @@ BaseRelationship *DatabaseModel::createRelationship()
 				base_rel->setName(attribs[Attributes::Name]);
 
 			if(!base_rel)
+			{
 				throw Exception(Exception::getErrorMessage(ErrorCode::RefObjectInexistsModel)
 								.arg(this->getName())
 								.arg(this->getTypeName())
 								.arg(attribs[Attributes::Name])
 					.arg(BaseObject::getTypeName(ObjectType::BaseRelationship)),
 					ErrorCode::RefObjectInexistsModel,PGM_FUNC,PGM_FILE,PGM_LINE);
+			}
 
 			base_rel->blockSignals(loading_model);
 			base_rel->disconnectRelationship();
