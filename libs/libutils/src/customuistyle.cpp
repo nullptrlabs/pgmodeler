@@ -1702,6 +1702,7 @@ void CustomUiStyle::drawCEProgressBar(ControlElement element, const QStyleOption
 				QElapsedTimer *elapsed_timer = new QElapsedTimer();
 				elapsed_timer->start();
 				pb->setProperty(BusyElapsedTimerProp, QVariant::fromValue(static_cast<void*>(elapsed_timer)));
+				QObject::connect(pb, &QObject::destroyed, [elapsed_timer]() { delete elapsed_timer; });
 				anim_timer->start();
 			}
 
