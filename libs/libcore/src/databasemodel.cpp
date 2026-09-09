@@ -2193,7 +2193,6 @@ void DatabaseModel::storeSpecialObjectsXML()
 				for(i = 0; i < count; i++)
 				{
 					tab_obj = dynamic_cast<TableObject *>(table->getObject(i, tp_id));
-					//found = false;
 
 					if(tp_id == ObjectType::Constraint)
 					{
@@ -2244,6 +2243,12 @@ void DatabaseModel::storeSpecialObjectsXML()
 
 						i--; count--;
 					}
+
+					/* To avoid leaks, we store the removed special object
+					 * in the list of invalidated special object that
+					 * are destroyed when the model is also destroyed */
+					if(found)
+						invalid_special_objs.push_back(tab_obj);
 				}
 			}
 		}
@@ -3603,6 +3608,13 @@ void DatabaseModel::loadModel(const QString &filename)
 									 obj_type != ObjectType::Relationship &&
 									 obj_type != ObjectType::BaseRelationship)
 									addObject(object);
+								else
+								{
+									Constraint *constr = dynamic_cast<Constraint *>(object);
+
+									if(constr && constr->getConstraintType() == ConstraintType::Unique)
+										qDebug() << constr->getSignature();
+								}
 
 								emit s_objectLoaded((xmlparser.getCurrentBufferLine()/static_cast<double>(xmlparser.getBufferLineCount()))*100,
 																		tr("Loading: `%1' (%2)")
@@ -3633,12 +3645,12 @@ void DatabaseModel::loadModel(const QString &filename)
 				object=this->getObject(itr.second, itr.first);
 
 				if(!object)
+				{
 					throw Exception(Exception::getErrorMessage(ErrorCode::RefObjectInexistsModel)
-															.arg(this->getName())
-															.arg(this->getTypeName())
-															.arg(itr.second)
-															.arg(BaseObject::getTypeName(itr.first)),
-													ErrorCode::AsgDuplicatedPermission,PGM_FUNC,PGM_FILE,PGM_LINE);
+													.arg(this->getName(), this->getTypeName(),
+															 itr.second, BaseObject::getTypeName(itr.first)),
+													ErrorCode::AsgDuplicatedPermission, PGM_FUNC, PGM_FILE, PGM_LINE);
+				}
 
 				this->setDefaultObject(object);
 			}
@@ -5313,9 +5325,9 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 
 			//Identifies the correct parent type
 			if(PhysicalTable::isPhysicalTable(obj_type))
-				table=dynamic_cast<PhysicalTable *>(parent_obj);
-			else if(obj_type==ObjectType::Relationship)
-				rel=dynamic_cast<Relationship *>(parent_obj);
+				table = dynamic_cast<PhysicalTable *>(parent_obj);
+			else if(obj_type == ObjectType::Relationship)
+				rel = dynamic_cast<Relationship *>(parent_obj);
 			else
 				//Raises an error if the user tries to create a constraint in a invalid parent
 				throw Exception(ErrorCode::OprObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
@@ -5330,13 +5342,12 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 			//Raises an error if the parent table doesn't exists
 			if(!table)
 			{
-				str_aux=Exception::getErrorMessage(ErrorCode::RefObjectInexistsModel)
-						.arg(attribs[Attributes::Name])
-						.arg(BaseObject::getTypeName(ObjectType::Constraint))
-						.arg(attribs[Attributes::Table])
-						.arg(BaseObject::getTypeName(obj_type));
-
-				throw Exception(str_aux,ErrorCode::RefObjectInexistsModel,PGM_FUNC,PGM_FILE,PGM_LINE);
+				throw Exception(Exception::getErrorMessage(ErrorCode::RefObjectInexistsModel)
+												.arg(attribs[Attributes::Name],
+														 BaseObject::getTypeName(ObjectType::Constraint),
+														 attribs[Attributes::Table],
+														 BaseObject::getTypeName(obj_type)),
+												ErrorCode::RefObjectInexistsModel, PGM_FUNC, PGM_FILE, PGM_LINE);
 			}
 		}
 
@@ -5363,10 +5374,12 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 		setBasicAttributes(constr);
 
 		//Raises an error if the constraint is a primary key and no parent object is specified
-		if(!parent_obj && constr_type==ConstraintType::PrimaryKey)
+		if(!parent_obj && constr_type == ConstraintType::PrimaryKey)
+		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::InvPrimaryKeyAllocation)
-							.arg(constr->getName()),
-							ErrorCode::InvPrimaryKeyAllocation,PGM_FUNC,PGM_FILE,PGM_LINE);
+											.arg(constr->getName()),
+											ErrorCode::InvPrimaryKeyAllocation, PGM_FUNC, PGM_FILE, PGM_LINE);
+		}
 
 		deferrable=(attribs[Attributes::Deferrable]==Attributes::True);
 		constr->setDeferrable(deferrable);
@@ -5393,13 +5406,11 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 			//Raises an error if the referenced table doesn't exists
 			if(!ref_table)
 			{
-				str_aux=Exception::getErrorMessage(ErrorCode::RefObjectInexistsModel)
-						.arg(constr->getName())
-						.arg(constr->getTypeName())
-						.arg(attribs[Attributes::RefTable])
-						.arg(BaseObject::getTypeName(ObjectType::Table));
-
-				throw Exception(str_aux,ErrorCode::RefObjectInexistsModel,PGM_FUNC,PGM_FILE,PGM_LINE);
+				throw Exception(Exception::getErrorMessage(ErrorCode::RefObjectInexistsModel)
+												.arg(constr->getName(), constr->getTypeName(),
+														 attribs[Attributes::RefTable],
+														 BaseObject::getTypeName(ObjectType::Table)),
+												ErrorCode::RefObjectInexistsModel,PGM_FUNC,PGM_FILE,PGM_LINE);
 			}
 
 			constr->setReferencedTable(dynamic_cast<BaseTable *>(ref_table));
