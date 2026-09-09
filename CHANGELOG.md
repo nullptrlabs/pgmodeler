@@ -45,6 +45,7 @@ v2.0.0-beta1
 * [Change] `FileSelectorWidget` now overrides `changeEvent()` to refresh the warning label style when the widget is enabled or disabled.
 * [Change] `SyntaxHighlighter::clearConfiguration()` moved to public slots to allow external callers to reset the highlighter state.
 * [Change] Renamed `FileSelectorWidget` to `PathSelectorWidget` across the entire codebase to better reflect the widget's ability to select both files and directories.
+* [Change] PNG and SVG exports in `ModelExportWidget` now run synchronously instead of in a separate thread, due to a Qt Graphics API limitation that prevents a `QGraphicsScene` from being rendered outside of its own thread.
 * [Fix] Fixed a crash in model validation when a column was restored from the operation list via an undo operation.
 * [Fix] Fixed the generation of drop scripts when using standalone SQL file generation in the export tool.
 * [Fix] Fixed `TypeWidget` type configuration selector not responding to programmatic selection changes by replacing `QComboBox::activated` with `QComboBox::currentIndexChanged`.
@@ -57,6 +58,10 @@ v2.0.0-beta1
 * [Fix] Fixed `MenuButtonPopup` `QToolButton` dropdown arrow not being drawn in `CustomUiStyle`.
 * [Fix] Fixed `ModelObjectsWidget` wrongly clearing the selected objects when the widget lost focus.
 * [Fix] Fixed `RelationshipWidget` opening the constraint editor instead of the column editor when editing columns in the tab attributes.
+* [Fix] Fixed a memory leak in `DatabaseModel::updateTableFKRelationships` and `DatabaseModel::updateViewRelationships` where relationships removed during FK and table-view relationship updates were not tracked for proper destruction.
+* [Fix] Fixed a memory leak in `DatabaseModel::createConstraint` that was preventing primary key constraints from being added to their parent table, causing them to never be destroyed.
+* [Fix] Fixed memory leaks in `ModelWidget::pasteObjects` and `OperationList::removeLastOperation`: pasted table objects that could not be added to their parent table and operations discarded from the history were not being freed.
+* [Fix] Fixed a memory leak in `DatabaseModel::storeSpecialObjectsXML` where table objects invalidated and removed during special object handling were not destroyed.
 
 v2.0.0-beta
 ------
