@@ -3608,13 +3608,6 @@ void DatabaseModel::loadModel(const QString &filename)
 									 obj_type != ObjectType::Relationship &&
 									 obj_type != ObjectType::BaseRelationship)
 									addObject(object);
-								else
-								{
-									Constraint *constr = dynamic_cast<Constraint *>(object);
-
-									if(constr && constr->getConstraintType() == ConstraintType::Unique)
-										qDebug() << constr->getSignature();
-								}
 
 								emit s_objectLoaded((xmlparser.getCurrentBufferLine()/static_cast<double>(xmlparser.getBufferLineCount()))*100,
 																		tr("Loading: `%1' (%2)")
