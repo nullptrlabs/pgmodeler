@@ -3584,7 +3584,7 @@ void DatabaseModel::loadModel(const QString &filename)
 
 						xmlparser.restorePosition();
 					}
-					else if(obj_type==ObjectType::Database)
+					else if(obj_type == ObjectType::Database)
 					{
 						xmlparser.getElementAttributes(attribs);
 						configureDatabase(attribs);
@@ -3595,17 +3595,18 @@ void DatabaseModel::loadModel(const QString &filename)
 						{
 							//Saves the current position of the parser before create any object
 							xmlparser.savePosition();
-							object=createObject(obj_type);
+							object = createObject(obj_type);
 
 							if(object)
 							{
-								if(!dynamic_cast<TableObject *>(object) && obj_type!=ObjectType::Relationship && obj_type!=ObjectType::BaseRelationship)
+								if(!dynamic_cast<TableObject *>(object) &&
+									 obj_type != ObjectType::Relationship &&
+									 obj_type != ObjectType::BaseRelationship)
 									addObject(object);
 
 								emit s_objectLoaded((xmlparser.getCurrentBufferLine()/static_cast<double>(xmlparser.getBufferLineCount()))*100,
 																		tr("Loading: `%1' (%2)")
-																				.arg(object->getName())
-																				.arg(object->getTypeName()),
+																				.arg(object->getName(), object->getTypeName()),
 																		enum_t(obj_type));
 							}
 
@@ -5323,8 +5324,8 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 		{
 			obj_type = ObjectType::Table;
 			table = dynamic_cast<PhysicalTable *>(getObject(attribs[Attributes::Table], {ObjectType::Table, ObjectType::ForeignTable}));
-			parent_obj=table;
-			ins_constr_table=true;
+			parent_obj = table;
+			ins_constr_table = true;
 
 			//Raises an error if the parent table doesn't exists
 			if(!table)
@@ -5339,7 +5340,7 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 			}
 		}
 
-		constr=new Constraint;
+		constr = new Constraint;
 		constr->setParentTable(table);
 
 		//Configuring the constraint type
@@ -5483,13 +5484,10 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 
 		if(ins_constr_table)
 		{
-			if(constr->getConstraintType()!=ConstraintType::PrimaryKey)
-			{
-				table->addConstraint(constr);
+			table->addConstraint(constr);
 
-				if(this->getObjectIndex(table) >= 0)
-					table->setModified(!loading_model);
-			}
+			if(this->getObjectIndex(table) >= 0)
+				table->setModified(!loading_model);
 		}
 	}
 	catch(Exception &e)

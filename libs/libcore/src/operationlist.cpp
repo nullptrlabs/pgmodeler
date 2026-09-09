@@ -985,8 +985,15 @@ void OperationList::removeLastOperation()
 			next_op_chain=Operation::ChainStart;
 
 		//Erasing the excluded operations
+		std::vector<Operation *>::iterator aux_itr;
+
 		for(int i=operations.size()-1; i > oper_idx ; i--)
-			operations.erase(operations.begin() + i);
+		{
+			aux_itr = (operations.begin() + i);
+			oper = *aux_itr;
+			operations.erase(aux_itr);
+			delete oper;
+		}
 
 		//Validates the remaining operations
 		validateOperations();
