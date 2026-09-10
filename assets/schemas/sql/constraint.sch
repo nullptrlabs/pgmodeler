@@ -23,16 +23,25 @@
 
 %end
 
-%if {pk-constr} %then [ PRIMARY KEY ] ({src-columns}) %end
+%if {pk-constr} %then 
+	[ PRIMARY KEY ]
+%end
 
 %if {uq-constr} %then
 	[ UNIQUE ] 
+%end
 
-	%if ({pgsql-ver} >=f "15.0") %and {nulls-not-distinct} %then
-		[NULLS NOT DISTINCT ]
+%if {uq-constr}  %and ({pgsql-ver} >=f "15.0") %and {nulls-not-distinct} %then
+	[NULLS NOT DISTINCT ]
+%end
+
+%if {pk-constr} %or {uq-constr} %then
+	({src-columns}
+
+	%if ({pgsql-ver} >=f "18.0") %and {without-overlaps} %then
+		[ WITHOUT OVERLAPS]
 	%end
-
-	({src-columns}) 
+	) 
 %end
 
 %if {ex-constr} %then

@@ -814,6 +814,7 @@ extern __libparsers const QString
 	WithNoData,
 	WithTimezone,
 	WithoutOids,
+	WithoutOverlaps,
 	Word,
 	WordDelimiters,
 	WordSeparators,

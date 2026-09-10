@@ -5412,12 +5412,17 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 		{
 			constr->setNoInherit(attribs[Attributes::NoInherit]==Attributes::True);
 		}
-		else if(constr_type==ConstraintType::Exclude &&	!attribs[Attributes::IndexType].isEmpty())
+		else if(constr_type==ConstraintType::Exclude &&
+						!attribs[Attributes::IndexType].isEmpty())
 		{
 			constr->setIndexType(attribs[Attributes::IndexType]);
 		}
-		else if(constr_type==ConstraintType::Unique)
+		else if(constr_type == ConstraintType::Unique)
 			constr->setNullsNotDistinct(attribs[Attributes::NullsNotDistinct]==Attributes::True);
+
+		if(constr_type == ConstraintType::PrimaryKey ||
+			 constr_type == ConstraintType::Unique)
+			constr->setWithoutOverlaps(attribs[Attributes::WithoutOverlaps] == Attributes::True);
 
 		if(xmlparser.accessElement(XmlParser::ChildElement))
 		{

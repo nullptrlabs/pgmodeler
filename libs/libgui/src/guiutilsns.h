@@ -78,8 +78,8 @@ namespace GuiUtilsNs {
 		HugeFontFactor
 	};
 
-	__libgui void configureWidgetFont(QWidget *widget, FontFactorId factor_id, bool bold = false, bool italic = false);
-	__libgui void __configureWidgetFont(QWidget *widget, double factor, bool bold = false, bool italic = false);
+	__libgui void configureWidgetFont(QWidget *widget, FontFactorId factor_id, bool bold = false, bool italic = false, bool underline = false);
+	__libgui void __configureWidgetFont(QWidget *widget, double factor, bool bold = false, bool italic = false, bool underline = false);
 	__libgui void configureWidgetsFont(const QWidgetList &widgets, FontFactorId factor_id, bool bold = false, bool italic = false);
 
 	template<class WgtClass, std::enable_if_t<std::is_base_of_v<QWidget, WgtClass>, bool> = true>

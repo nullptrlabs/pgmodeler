@@ -9,6 +9,7 @@
 <!ATTLIST constraint deferrable (true | false) "false">
 <!ATTLIST constraint no-inherit (true | false) "false">
 <!ATTLIST constraint nulls-not-distinct (true | false) "false">
+<!ATTLIST constraint without-overlaps (true | false) "false">
 <!ATTLIST constraint defer-type CDATA #IMPLIED>
 <!ATTLIST constraint index-type CDATA #IMPLIED>
 <!ATTLIST constraint comparison-type CDATA #IMPLIED>

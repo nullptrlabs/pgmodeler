@@ -801,6 +801,7 @@ namespace Attributes {
 	WithNoData("with-no-data"),
 	WithTimezone("with-timezone"),
 	WithoutOids("without-oids"),
+	WithoutOverlaps("without-overlaps"),
 	Word("word"),
 	WordDelimiters("word-delimiters"),
 	WordSeparators("word-separators"),

@@ -26,7 +26,8 @@ Constraint::Constraint()
 {
 	ref_table=nullptr;
 	obj_type=ObjectType::Constraint;
-	deferrable=no_inherit=nulls_not_distinct = false;
+	deferrable=no_inherit=false;
+	without_overlaps = nulls_not_distinct = false;
 	fill_factor=0;
 	index_type=IndexingType::Null;
 
@@ -52,6 +53,7 @@ Constraint::Constraint()
 	attributes[Attributes::NoInherit]="";
 	attributes[Attributes::Elements]="";
 	attributes[Attributes::NullsNotDistinct]="";
+	attributes[Attributes::WithoutOverlaps]="";
 }
 
 Constraint::~Constraint()
@@ -577,6 +579,16 @@ bool Constraint::isNullsNotDistinct()
 	return nulls_not_distinct;
 }
 
+void Constraint::setWithoutOverlaps(bool value)
+{
+	without_overlaps = value;
+}
+
+bool Constraint::isWithoutOverlaps()
+{
+	return without_overlaps;
+}
+
 ExcludeElement Constraint::getExcludeElement(unsigned elem_idx)
 {
 	if(elem_idx >= excl_elements.size())
@@ -702,6 +714,7 @@ QString Constraint::getSourceCode(SchemaParser::CodeType def_type, bool inc_adde
 	attributes[Attributes::Deferrable]=(deferrable ? Attributes::True : "");
 	attributes[Attributes::NoInherit]=(no_inherit ? Attributes::True : "");
 	attributes[Attributes::NullsNotDistinct]=(nulls_not_distinct ? Attributes::True : "");
+	attributes[Attributes::WithoutOverlaps]=(without_overlaps ? Attributes::True : "");
 	attributes[Attributes::ComparisonType]=(~match_type);
 	attributes[Attributes::DeferType]=(~deferral_type);
 	attributes[Attributes::IndexType]=(~ index_type);

@@ -30,6 +30,10 @@
 	[ nulls-not-distinct="true"]
 %end
 
+%if {pk-constr} %or {uq-constr} %and {without-overlaps} %then
+	[ without-overlaps="true"]
+%end
+
 %if {ck-constr} %and {no-inherit} %then
 	[ no-inherit="true"]
 %end

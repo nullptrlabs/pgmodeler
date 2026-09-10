@@ -212,7 +212,7 @@ namespace GuiUtilsNs {
 		}
 	}
 
-	void configureWidgetFont(QWidget *widget, FontFactorId factor_id, bool bold, bool italic)
+	void configureWidgetFont(QWidget *widget, FontFactorId factor_id, bool bold, bool italic, bool underline)
 	{
 		double factor = 0;
 
@@ -235,10 +235,10 @@ namespace GuiUtilsNs {
 			break;
 		}
 
-		__configureWidgetFont(widget, factor, bold, italic);
+		__configureWidgetFont(widget, factor, bold, italic, underline);
 	}
 
-	void __configureWidgetFont(QWidget *widget, double factor, bool bold, bool italic)
+	void __configureWidgetFont(QWidget *widget, double factor, bool bold, bool italic, bool underline)
 	{
 		if(!widget)
 			return;
@@ -246,11 +246,12 @@ namespace GuiUtilsNs {
 		/* Ensure that the font configuration is pushed to the end of the Qt's event queue
 		 * via QTimer::singleShot(0). This will cause the widget to have its font
 		 * changed after all events (including visual ones) are processed */
-		QTimer::singleShot(0, widget, [widget, factor, bold, italic]() {
+		QTimer::singleShot(0, widget, [widget, factor, bold, italic, underline]() {
 			QFont font = qApp->font();
 			font.setPointSizeF(font.pointSizeF() * factor);
 			font.setBold(bold);
 			font.setItalic(italic);
+			font.setUnderline(underline);
 			widget->setFont(font);
 		});
 	}
