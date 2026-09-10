@@ -476,27 +476,29 @@ QString View::getDropCode(bool cascade)
 	return BaseObject::getDropCode(cascade);
 }
 
-int View::getObjectIndex(BaseObject *obj)
+int View::getObjectIndex(BaseObject *obj, bool)
 {
-	TableObject *tab_obj=dynamic_cast<TableObject *>(obj);
+	TableObject *tab_obj = dynamic_cast<TableObject *>(obj);
 
-	if(!obj || (tab_obj && tab_obj->getParentTable()!=this))
+	if(!obj || (tab_obj && tab_obj->getParentTable() != this))
 		return -1;
 
 	std::vector<TableObject *>::iterator itr, itr_end;
-	std::vector<TableObject *> *obj_list=getObjectList(obj->getObjectType());
-	bool found=false;
+	std::vector<TableObject *> *obj_list = getObjectList(obj->getObjectType());
+	bool found = false;
 
 	if(!obj_list)
 		return -1;
 
-	itr=obj_list->begin();
-	itr_end=obj_list->end();
+	itr = obj_list->begin();
+	itr_end = obj_list->end();
 
-	while(itr!=itr_end && !found)
+	while(itr != itr_end && !found)
 	{
-		found=((*itr)==tab_obj);
-		if(!found) itr++;
+		found = ((*itr) == tab_obj);
+
+		if(!found)
+			itr++;
 	}
 
 	if(found)

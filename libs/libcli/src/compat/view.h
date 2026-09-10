@@ -125,7 +125,7 @@ namespace CompatNs {
 			void removeObject(const QString &, ObjectType) override {}
 
 			//! \brief Returns the object index searching by its reference
-			int getObjectIndex(BaseObject *) override
+			int getObjectIndex(BaseObject *, bool) override
 			{
 				return -1;
 			}

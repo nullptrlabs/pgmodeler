@@ -869,25 +869,28 @@ int PhysicalTable::getObjectIndex(const QString &name, ObjectType obj_type)
 	return idx;
 }
 
-int PhysicalTable::getObjectIndex(BaseObject *obj)
+int PhysicalTable::getObjectIndex(BaseObject *obj, bool strict)
 {
-	TableObject *tab_obj=dynamic_cast<TableObject *>(obj);
+	TableObject *tab_obj = dynamic_cast<TableObject *>(obj);
 	std::vector<TableObject *> *obj_list = nullptr;
 	std::vector<TableObject *>::iterator itr, itr_end;
-	bool found=false;
+	bool found = false;
 
-	if(!obj) return -1;
+	if(!obj)
+		return -1;
 
 	obj_list = getObjectList(obj->getObjectType());
-	if(!obj_list) return -1;
 
-	itr=obj_list->begin();
-	itr_end=obj_list->end();
+	if(!obj_list)
+		return -1;
 
-	while(itr!=itr_end && !found)
+	itr = obj_list->begin();
+	itr_end = obj_list->end();
+
+	while(itr != itr_end && !found)
 	{
-		found=((tab_obj->getParentTable()==this && (*itr)==tab_obj) ||
-					 (tab_obj->getName()==(*itr)->getName()));
+		found=((tab_obj->getParentTable() == this && (*itr) == tab_obj) ||
+					 (!strict && tab_obj->getName() == (*itr)->getName()));
 
 		if(!found)
 			itr++;
