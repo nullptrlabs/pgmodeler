@@ -5421,8 +5421,9 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 			constr->setNullsNotDistinct(attribs[Attributes::NullsNotDistinct]==Attributes::True);
 
 		if(constr_type == ConstraintType::PrimaryKey ||
-			 constr_type == ConstraintType::Unique)
-			constr->setWithoutOverlaps(attribs[Attributes::WithoutOverlaps] == Attributes::True);
+			 constr_type == ConstraintType::Unique ||
+			 constr_type == ConstraintType::ForeignKey)
+			constr->setTemporalKey(attribs[Attributes::TemporalKey] == Attributes::True);
 
 		if(xmlparser.accessElement(XmlParser::ChildElement))
 		{

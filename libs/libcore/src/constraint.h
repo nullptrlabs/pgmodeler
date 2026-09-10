@@ -67,7 +67,9 @@ class __libcore Constraint: public TableObject{
 		//! \brief Indicates if null values must be distinct from each other (default is true, only for unique constraints)
 		nulls_not_distinct,
 
-		without_overlaps;
+		is_temporal_key,
+
+		period_fk;
 
 		//! \brief Deferral type for the constraint (except for check contraints)
 		DeferralType deferral_type;
@@ -283,9 +285,9 @@ class __libcore Constraint: public TableObject{
 
 		bool isNullsNotDistinct();
 
-		void setWithoutOverlaps(bool value);
+		void setTemporalKey(bool value);
 
-		bool isWithoutOverlaps();
+		bool isTemporalKey();
 
 		QString getDataDictionary(bool md_format, const attribs_map &extra_attribs);
 

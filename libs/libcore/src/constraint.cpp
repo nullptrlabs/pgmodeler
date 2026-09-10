@@ -26,8 +26,8 @@ Constraint::Constraint()
 {
 	ref_table=nullptr;
 	obj_type=ObjectType::Constraint;
-	deferrable=no_inherit=false;
-	without_overlaps = nulls_not_distinct = false;
+	deferrable = no_inherit = period_fk = false;
+	is_temporal_key = nulls_not_distinct = false;
 	fill_factor=0;
 	index_type=IndexingType::Null;
 
@@ -53,7 +53,7 @@ Constraint::Constraint()
 	attributes[Attributes::NoInherit]="";
 	attributes[Attributes::Elements]="";
 	attributes[Attributes::NullsNotDistinct]="";
-	attributes[Attributes::WithoutOverlaps]="";
+	attributes[Attributes::TemporalKey]="";
 }
 
 Constraint::~Constraint()
@@ -579,14 +579,14 @@ bool Constraint::isNullsNotDistinct()
 	return nulls_not_distinct;
 }
 
-void Constraint::setWithoutOverlaps(bool value)
+void Constraint::setTemporalKey(bool value)
 {
-	without_overlaps = value;
+	is_temporal_key = value;
 }
 
-bool Constraint::isWithoutOverlaps()
+bool Constraint::isTemporalKey()
 {
-	return without_overlaps;
+	return is_temporal_key;
 }
 
 ExcludeElement Constraint::getExcludeElement(unsigned elem_idx)
@@ -714,7 +714,7 @@ QString Constraint::getSourceCode(SchemaParser::CodeType def_type, bool inc_adde
 	attributes[Attributes::Deferrable]=(deferrable ? Attributes::True : "");
 	attributes[Attributes::NoInherit]=(no_inherit ? Attributes::True : "");
 	attributes[Attributes::NullsNotDistinct]=(nulls_not_distinct ? Attributes::True : "");
-	attributes[Attributes::WithoutOverlaps]=(without_overlaps ? Attributes::True : "");
+	attributes[Attributes::TemporalKey]=(is_temporal_key ? Attributes::True : "");
 	attributes[Attributes::ComparisonType]=(~match_type);
 	attributes[Attributes::DeferType]=(~deferral_type);
 	attributes[Attributes::IndexType]=(~ index_type);
@@ -724,7 +724,8 @@ QString Constraint::getSourceCode(SchemaParser::CodeType def_type, bool inc_adde
 
 	setDeclInTableAttribute();
 
-	if(fill_factor!=0 && (constr_type==ConstraintType::PrimaryKey || constr_type==ConstraintType::Unique))
+	if(fill_factor!=0 &&
+		 (constr_type == ConstraintType::PrimaryKey || constr_type==ConstraintType::Unique))
 		attributes[Attributes::Factor]=QString("%1").arg(fill_factor);
 	else
 		attributes[Attributes::Factor]="";

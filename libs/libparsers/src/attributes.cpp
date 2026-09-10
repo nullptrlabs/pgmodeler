@@ -720,6 +720,7 @@ namespace Attributes {
 	Tag("tag"),
 	TemplateDb("template"),
 	TemporaryPriv("temporary"),
+	TemporalKey("temporal-key"),
 	Text("text"),
 	ToolTipBase("tool-tip-base"),
 	ToolTipText("tool-tip-text"),

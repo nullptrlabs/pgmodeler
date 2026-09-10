@@ -30,8 +30,8 @@
 	[ nulls-not-distinct="true"]
 %end
 
-%if {pk-constr} %or {uq-constr} %and {without-overlaps} %then
-	[ without-overlaps="true"]
+%if {pk-constr} %or {uq-constr} %or {fk-constr} %and {temporal-key} %then
+	[ temporal-key="true"]
 %end
 
 %if {ck-constr} %and {no-inherit} %then

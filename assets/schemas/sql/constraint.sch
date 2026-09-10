@@ -38,7 +38,7 @@
 %if {pk-constr} %or {uq-constr} %then
 	({src-columns}
 
-	%if ({pgsql-ver} >=f "18.0") %and {without-overlaps} %then
+	%if ({pgsql-ver} >=f "18.0") %and {temporal-key} %then
 		[ WITHOUT OVERLAPS]
 	%end
 	) 
@@ -73,10 +73,23 @@
 %end
 
 %if {fk-constr} %then
-	[ FOREIGN KEY ] ({src-columns}) $br
+	[ FOREIGN KEY ] (
+
+	%if ({pgsql-ver} >=f "18.0") %and {temporal-key} %then
+		[PERIOD ]
+	%end
+
+	{src-columns}) $br
 
 	%if {decl-in-table} %then $tb %end
-	[REFERENCES ] {ref-table} $sp ({dst-columns})
+	[REFERENCES ] {ref-table} $sp (
+
+	%if ({pgsql-ver} >=f "18.0") %and {temporal-key} %then
+		[PERIOD ]
+	%end
+
+	{dst-columns})
+
 	$sp {comparison-type} $br
 
 	%if {decl-in-table} %then $tb %end
