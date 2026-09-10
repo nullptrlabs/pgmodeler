@@ -76,19 +76,22 @@
 	[ FOREIGN KEY ] (
 
 	%if ({pgsql-ver} >=f "18.0") %and {temporal-key} %then
-		[PERIOD ]
+		!replace({src-columns} $ds [PERIOD ])
+	%else
+		{src-columns}
 	%end
 
-	{src-columns}) $br
+	) $br
 
 	%if {decl-in-table} %then $tb %end
 	[REFERENCES ] {ref-table} $sp (
 
 	%if ({pgsql-ver} >=f "18.0") %and {temporal-key} %then
-		[PERIOD ]
+		!replace({dst-columns} $ds [PERIOD ])
+	%else
+		{dst-columns}
 	%end
-
-	{dst-columns})
+	)
 
 	$sp {comparison-type} $br
 

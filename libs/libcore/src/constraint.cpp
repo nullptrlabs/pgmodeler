@@ -230,27 +230,25 @@ void Constraint::setTablespace(BaseObject *tabspc)
 void Constraint::setColumnsAttribute(ColumnsId cols_id, unsigned def_type, bool inc_addedbyrel)
 {
 	std::vector<Column *> *col_vector=nullptr;
-	Column *col=nullptr;
+	Column *col = nullptr;
 	QString str_cols, attrib;
+	QStringList col_names;
 	unsigned i, count;
-	bool format=(def_type==SchemaParser::SqlCode);
+	bool format = (def_type==SchemaParser::SqlCode);
 
-	if(cols_id==ReferencedCols)
+	if(cols_id == ReferencedCols)
 	{
-		col_vector=&ref_columns;
-		attrib=Attributes::DstColumns;
+		col_vector = &ref_columns;
+		attrib = Attributes::DstColumns;
 	}
 	else
 	{
-		col_vector=&columns;
-		attrib=Attributes::SrcColumns;
+		col_vector = &columns;
+		attrib = Attributes::SrcColumns;
 	}
 
-	count=col_vector->size();
-	for(i=0; i < count; i++)
+	for(auto &col : *col_vector)
 	{
-		col=col_vector->at(i);
-
 		/* For XML definition the columns added to the constraint
 		 through relationship can not be included because they are inserted
 		 to the restriction on the time of creation of the relationship from its XML
@@ -258,16 +256,19 @@ void Constraint::setColumnsAttribute(ColumnsId cols_id, unsigned def_type, bool 
 		if((def_type==SchemaParser::SqlCode) ||
 				((def_type==SchemaParser::XmlCode) &&
 				 ((inc_addedbyrel && col->isAddedByRelationship()) ||
-				  (inc_addedbyrel && !col->isAddedByRelationship()) ||
-				  (!inc_addedbyrel && !col->isAddedByRelationship()))))
+					(inc_addedbyrel && !col->isAddedByRelationship()) ||
+					(!inc_addedbyrel && !col->isAddedByRelationship()))))
 		{
-			str_cols+=col->getName(format);
-			str_cols+=',';
+			col_names.append(col->getName(format));
 		}
 	}
 
-	str_cols.remove(str_cols.size()-1,1);
-	attributes[attrib]=str_cols;
+	if(def_type == SchemaParser::SqlCode &&
+		 constr_type == ConstraintType::ForeignKey &&
+		 is_temporal_key)
+		col_names.last().prepend(UtilsNs::DataSeparator);
+
+	attributes[attrib] = col_names.join(", ");
 }
 
 void Constraint::setReferencedTable(BaseTable *ref_tab)
