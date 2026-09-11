@@ -382,6 +382,8 @@ namespace Attributes {
 	JoinFunc("join"),
 	KeepClusterObjs("keep-cluster-objs"),
 	KeepObjsPerms("keep-objs-perms"),
+	LastSrcColumn("last-src-column"),
+	LastDstColumn("last-dst-column"),
 	Label("label"),
 	Labels("labels"),
 	LabelsPos("labels-pos"),
