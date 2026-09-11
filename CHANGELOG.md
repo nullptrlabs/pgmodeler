@@ -24,6 +24,7 @@ v2.0.0-beta1
 * [New] Added an option in `LayersConfigWidget` to select all objects belonging to the currently selected layers, via the new `ObjectsScene::selectObjectsInLayers()` and `ModelWidget::selectObjectsInLayers()` methods.
 * [New] Added support for the `--no-escape-comments` option in `pgmodeler-cli`, disabling automatic escaping of comment content during SQL generation.
 * [New] Added the sample model rentacar.dbm.
+* [New] Added support for temporal keys (PostgreSQL 18+): `WITHOUT OVERLAPS` can now be used in primary key and unique constraints, and `PERIOD` in foreign keys that reference them, following the SQL standard for temporal tables. A new "Temporal key" option is available in the constraint editing form. (issue #2073)
 * [Change] Adjusted the minimum required Qt version to 6.6.
 * [Change] BREAKING: Default FK column name patterns in relationships.conf changed to table-first convention: `src-col-pattern` changed from `{sc}_{st}` to `{st}_{sc}` and `dst-col-pattern` for n:n relationships from `{sc}_{dt}` to `{dt}_{sc}`.
 * [Change] `validateBeforeOperation()` in `MainWindow` now guards against re-entry and defers execution of the pending export or diff operation by 1 second after validation finishes to ensure the UI has fully settled.
@@ -62,6 +63,9 @@ v2.0.0-beta1
 * [Fix] Fixed a memory leak in `DatabaseModel::createConstraint` that was preventing primary key constraints from being added to their parent table, causing them to never be destroyed.
 * [Fix] Fixed memory leaks in `ModelWidget::pasteObjects` and `OperationList::removeLastOperation`: pasted table objects that could not be added to their parent table and operations discarded from the history were not being freed.
 * [Fix] Fixed a memory leak in `DatabaseModel::storeSpecialObjectsXML` where table objects invalidated and removed during special object handling were not destroyed.
+* [Fix] Fixed a memory leak in `CustomUiStyle::drawCEProgressBar` where the timer allocated for the busy progress bar animation was not released when the progress bar was destroyed.
+* [Fix] Fixed a leak and a double-free in `OperationList::removeOperations`: detached copies of table objects (columns, constraints, indexes, rules, triggers, policies) kept for modification/move operations were mistaken for a live namesake still owned by the table, causing them to never be deallocated. `BaseTable::getObjectIndex()` and its overrides now accept a `strict` parameter to force pointer-identity matching in this case.
+* [Fix] Fixed a memory leak related to model closing and replacement in `MainWindow::addModel()`/`MainWindow::closeModel()`.
 
 v2.0.0-beta
 ------
