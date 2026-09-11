@@ -75,8 +75,16 @@
 %if {fk-constr} %then
 	[ FOREIGN KEY ] (
 
-	%if ({pgsql-ver} >=f "18.0") %and {temporal-key} %then
-		!replace({src-columns} $ds [PERIOD ])
+	%if {temporal-key} %then
+		%if {src-columns} %then 
+			{src-columns} [, ] 
+		%end
+			
+		%if ({pgsql-ver} >=f "18.0") %then
+			[PERIOD ] 
+		%end
+
+		{last-src-column}
 	%else
 		{src-columns}
 	%end
@@ -84,16 +92,24 @@
 	) $br
 
 	%if {decl-in-table} %then $tb %end
+
 	[REFERENCES ] {ref-table} $sp (
 
-	%if ({pgsql-ver} >=f "18.0") %and {temporal-key} %then
-		!replace({dst-columns} $ds [PERIOD ])
+	%if {temporal-key} %then
+		%if {dst-columns} %then 
+			{dst-columns} [, ] 
+		%end
+			
+		%if ({pgsql-ver} >=f "18.0") %then
+			[PERIOD ] 
+		%end
+
+		{last-dst-column}
 	%else
 		{dst-columns}
 	%end
-	)
 
-	$sp {comparison-type} $br
+	) $sp {comparison-type} $br
 
 	%if {decl-in-table} %then $tb %end
 	[ON DELETE ] {del-action} [ ON UPDATE ] {upd-action}

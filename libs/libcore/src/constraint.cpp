@@ -39,6 +39,8 @@ Constraint::Constraint()
 	attributes[Attributes::RefTable]="";
 	attributes[Attributes::SrcColumns]="";
 	attributes[Attributes::DstColumns]="";
+	attributes[Attributes::LastSrcColumn]="";
+	attributes[Attributes::LastDstColumn]="";
 	attributes[Attributes::DelAction]="";
 	attributes[Attributes::UpdAction]="";
 	attributes[Attributes::Expression]="";
@@ -233,7 +235,6 @@ void Constraint::setColumnsAttribute(ColumnsId cols_id, unsigned def_type, bool 
 	Column *col = nullptr;
 	QString str_cols, attrib;
 	QStringList col_names;
-	unsigned i, count;
 	bool format = (def_type==SchemaParser::SqlCode);
 
 	if(cols_id == ReferencedCols)
@@ -266,9 +267,15 @@ void Constraint::setColumnsAttribute(ColumnsId cols_id, unsigned def_type, bool 
 	if(def_type == SchemaParser::SqlCode &&
 		 constr_type == ConstraintType::ForeignKey &&
 		 is_temporal_key)
-		col_names.last().prepend(UtilsNs::DataSeparator);
+	{
+		attributes[cols_id == SourceCols ?
+							 Attributes::LastSrcColumn :
+							 Attributes::LastDstColumn ] = col_names.last();
+		col_names.removeLast();
+	}
 
-	attributes[attrib] = col_names.join(", ");
+	attributes[attrib] = col_names.join(def_type == SchemaParser::XmlCode ?
+																			"," : ", ");
 }
 
 void Constraint::setReferencedTable(BaseTable *ref_tab)

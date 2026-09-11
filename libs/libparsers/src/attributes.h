@@ -400,6 +400,8 @@ extern __libparsers const QString
 	LabelsPos,
 	Landscape,
 	Language,
+	LastSrcColumn,
+	LastDstColumn,
 	LastAnalyze,
 	LastAutovacuum,
 	LastPosition,
