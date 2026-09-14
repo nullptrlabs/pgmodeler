@@ -204,6 +204,7 @@ void View::generateColumns()
 	ObjectType ref_obj_type;
 	BaseObject *ref_obj = nullptr;
 	Column *col = nullptr;
+	QString col_name;
 
 	gen_columns.clear();
 
@@ -218,9 +219,10 @@ void View::generateColumns()
 		if(ref_obj_type == ObjectType::Column)
 		{
 			col = dynamic_cast<Column *>(ref_obj);
-
-			gen_columns.push_back(SimpleColumn(getUniqueColumnName(col->getName()),
-																		 *col->getType(), ref.getRefName()));
+			col_name = (!ref.getRefAlias().isEmpty() ?
+									 ref.getRefAlias() : col->getName());
+			gen_columns.push_back(SimpleColumn(getUniqueColumnName(col_name),
+																				 *col->getType(), ref.getRefAlias()));
 		}
 		else if(ref_obj_type == ObjectType::View)
 		{
@@ -229,7 +231,7 @@ void View::generateColumns()
 			for(auto &col : view->getColumns())
 			{
 				gen_columns.push_back(SimpleColumn(getUniqueColumnName(col.getName()),
-																						 col.getType(), col.getAlias()));
+																					 col.getType(), col.getAlias()));
 			}
 		}
 		else if(PhysicalTable::isPhysicalTable(ref_obj_type))
@@ -240,7 +242,7 @@ void View::generateColumns()
 			{
 				col = dynamic_cast<Column *>(obj);
 				gen_columns.push_back(SimpleColumn(getUniqueColumnName(col->getName()),
-																			 *col->getType(), ""));
+																					 *col->getType(), ""));
 			}
 		}
 	}
@@ -474,27 +476,29 @@ QString View::getDropCode(bool cascade)
 	return BaseObject::getDropCode(cascade);
 }
 
-int View::getObjectIndex(BaseObject *obj)
+int View::getObjectIndex(BaseObject *obj, bool)
 {
-	TableObject *tab_obj=dynamic_cast<TableObject *>(obj);
+	TableObject *tab_obj = dynamic_cast<TableObject *>(obj);
 
-	if(!obj || (tab_obj && tab_obj->getParentTable()!=this))
+	if(!obj || (tab_obj && tab_obj->getParentTable() != this))
 		return -1;
 
 	std::vector<TableObject *>::iterator itr, itr_end;
-	std::vector<TableObject *> *obj_list=getObjectList(obj->getObjectType());
-	bool found=false;
+	std::vector<TableObject *> *obj_list = getObjectList(obj->getObjectType());
+	bool found = false;
 
 	if(!obj_list)
 		return -1;
 
-	itr=obj_list->begin();
-	itr_end=obj_list->end();
+	itr = obj_list->begin();
+	itr_end = obj_list->end();
 
-	while(itr!=itr_end && !found)
+	while(itr != itr_end && !found)
 	{
-		found=((*itr)==tab_obj);
-		if(!found) itr++;
+		found = ((*itr) == tab_obj);
+
+		if(!found)
+			itr++;
 	}
 
 	if(found)

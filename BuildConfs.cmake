@@ -15,13 +15,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Importing Qt6 components
-# Forcing a version >= 6.4.0. If no suitable version is found the script aborts
-find_package(Qt6 6.4.0 REQUIRED COMPONENTS Core Gui Network PrintSupport Svg Widgets)
+# Forcing a version >= 6.6.0. If no suitable version is found the script aborts
+find_package(Qt6 6.6.0 REQUIRED COMPONENTS Core Gui Network PrintSupport Svg Widgets)
 
 qt_standard_project_setup()
 
-# Disabling deprecated Qt code of version below 6.4
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060400)
+# Disabling deprecated Qt code of version below 6.6
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060600)
 
 link_libraries(
     Qt::Core

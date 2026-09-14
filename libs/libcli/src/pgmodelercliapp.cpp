@@ -122,6 +122,7 @@ const QString PgModelerCliApp::CreateConfigs {"--create-configs"};
 const QString PgModelerCliApp::MissingOnly {"--missing-only"};
 const QString PgModelerCliApp::IgnoreFaultyPlugins {"--ignore-faulty"};
 const QString PgModelerCliApp::ListPlugins {"--list-plugins"};
+const QString PgModelerCliApp::NoEscapeComments {"--no-escape-comments"};
 
 const QString PgModelerCliApp::ConnOptions {"connopts"};
 const QString PgModelerCliApp::TagExpr {"<%1"};
@@ -163,7 +164,8 @@ std::map<QString, bool> PgModelerCliApp::long_opts {
 	{ CreateConfigs, false }, { Force, false }, { MissingOnly, false },
 	{ DependenciesSql, false }, { ChildrenSql, false }, { GenDropScript, false },
 	{ GroupByType, false }, { CommentsAsAliases, false }, { IgnoreFaultyPlugins, false },
-	{ ListPlugins, false }, { Markdown, false }, { NonTransactional, false }
+	{ ListPlugins, false }, { Markdown, false }, { NonTransactional, false },
+	{ NoEscapeComments, false }
 };
 
 attribs_map PgModelerCliApp::short_opts {
@@ -192,12 +194,12 @@ attribs_map PgModelerCliApp::short_opts {
 	{ MissingOnly, "-mo" }, { DependenciesSql, "-ds" }, { ChildrenSql, "-cs" },
 	{ GroupByType, "-gt" },	{ GenDropScript, "-gd" }, { CommentsAsAliases, "-cl" },
 	{ IgnoreFaultyPlugins, "-ip" }, { ListPlugins, "-lp" }, { Markdown, "-md" },
-	{ NonTransactional, "-nt" }
+	{ NonTransactional, "-nt" }, { NoEscapeComments, "-ne" }
 };
 
 std::map<QString, QStringList> PgModelerCliApp::accepted_opts {
 	{{ ConnOptions }, { ConnAlias, Host, Port, User, Passwd, InitialDb }},
-	{{ ExportToFile }, { Input, Output, PgSqlVer, Split, DependenciesSql, ChildrenSql, GroupByType, GenDropScript }},
+	{{ ExportToFile }, { Input, Output, PgSqlVer, Split, DependenciesSql, ChildrenSql, GroupByType, GenDropScript, NoEscapeComments }},
 	{{ ExportToPng },  { Input, Output, ShowGrid, ShowDelimiters, PageByPage, ZoomFactor, OverrideBgColor }},
 	{{ ExportToSvg },  { Input, Output, ShowGrid, ShowDelimiters }},
 	{{ ExportToDict }, { Input, Output, Split, NoIndex, Markdown }},
@@ -215,7 +217,7 @@ std::map<QString, QStringList> PgModelerCliApp::accepted_opts {
 								 PartialDiff, Force, StartDate, EndDate, SaveDiff, ApplyDiff, NoDiffPreview,
 								 DropClusterObjs, RevokePermissions, DropMissingObjs, ForceDropColsConstrs,
 								 RenameDb, NoCascadeDrop, NoSequenceReuse, RecreateUnmod, ReplaceModified,
-								 ForceReCreateObjs, NonTransactional }},
+								 ForceReCreateObjs, NonTransactional, NoEscapeComments }},
 	#endif
 
 	{{ DbmMimeType }, { SystemWide, Force }},
@@ -654,13 +656,13 @@ void PgModelerCliApp::showMenu()
 	menu_items.append(MenuItem(ExportToSvg, "", tr("Exports the input model to an SVG file.")));
 	menu_items.append(MenuItem(ExportToDict, "", tr("Exports the input model to a data dictionary in HTML format.")));
 	menu_items.append(MenuItem(ExportToDbms, "", tr("Exports the input model directly to a PostgreSQL server.")));
-	menu_items.append(MenuItem(ListConns, "", tr("Lists the available connections. File location: %1.").arg(GlobalAttributes::ConnectionsConf + GlobalAttributes::ConfigurationExt)));
 
 	#ifdef PRIV_CODE_SYMBOLS
 		menu_items.append(MenuItem(ImportDb, "", tr("Imports a database to an output file.")));
 		menu_items.append(MenuItem(Diff, "", tr("Compares a model and a database or two databases. Generates an SQL script to synchronize the latter with the former.")));
 	#endif
 
+	menu_items.append(MenuItem(ListConns, "", tr("Lists the available connections. File location: %1.").arg(GlobalAttributes::ConnectionsConf + GlobalAttributes::ConfigurationExt)));
 	menu_items.append(MenuItem(FixModel, "", tr("Tries to fix the structure of the input model file to make it loadable again.")));
 	menu_items.append(MenuItem(CreateConfigs, "", tr("Creates pgModeler's configuration folder and files. Stored in the user's local storage.")));
 	
@@ -678,6 +680,7 @@ void PgModelerCliApp::showMenu()
 	menu_items.append(MenuItem(InputDb, "[DBNAME]", tr("Input database name. Required for import operation.")));
 	menu_items.append(MenuItem(Output, "[FILE|DIRECTORY]", tr("Output file or directory. Required for model fix or export to SQL, HTML, PNG, SVG.")));
 	menu_items.append(MenuItem(PgSqlVer, "", tr("Forces PostgreSQL syntax to the specified version when generating SQL code. Version format: [major].[minor], e.g., %1.").arg(PgSqlVersions::DefaulVersion)));
+	menu_items.append(MenuItem(NoEscapeComments, "", tr("Disables E'' escape-string syntax on COMMENT ON statements during export. All comments are written in the common string syntax.")));
 	menu_items.append(MenuItem(Silent, "", tr("Silent execution. Only critical messages and errors are displayed.")));
 	menu_items.append(MenuItem());
 	
@@ -707,7 +710,7 @@ void PgModelerCliApp::showMenu()
 	menu_items.append(MenuItem());
 	
 	// DBMS export options
-	menu_items.append(MenuItem(tr("DBMS export options"), "", ""));
+	menu_items.append(MenuItem(tr("DBMS export options")));
 	menu_items.append(MenuItem(IgnoreDuplicates, "", tr("Ignores errors related to duplicate objects that may exist on the server.")));
 	menu_items.append(MenuItem(IgnoreErrorCodes, "[LIST]", tr("Ignores additional errors by their error codes. Provide comma-separated alphanumeric codes.")));
 	menu_items.append(MenuItem(DropDatabase, "", tr("Drops the database before executing the export process.")));
@@ -962,6 +965,8 @@ void PgModelerCliApp::parseOptions(attribs_map &opts)
 
 		export_hlp = new ModelExportHelper;
 	}
+
+	BaseObject::setEscapeComments(opts.count(NoEscapeComments) ? false : true);
 
 	QString curr_op_mode;
 	int exp_mode_cnt = 0, other_modes_cnt = 0, plugin_modes_cnt = 0;

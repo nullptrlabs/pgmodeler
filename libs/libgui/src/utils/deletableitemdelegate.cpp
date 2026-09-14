@@ -29,7 +29,7 @@ DeletableItemDelegate::DeletableItemDelegate(QComboBox *parent, const QString &t
 	del_btn = new QToolButton(combo->view());
 	del_btn->setVisible(false);
 	del_btn->setIcon(GuiUtilsNs::getIcon("delete"));
-	del_btn->setIconSize(QSize(parent->iconSize().width() * 0.80, parent->iconSize().height() * 0.80));
+	del_btn->setIconSize(parent->iconSize());
 	del_btn->setAutoRaise(true);
 	del_btn->setShortcut(shortcut);
 	del_btn->setToolTip(tooltip + QString(" (%1)").arg(del_btn->shortcut().toString()));
@@ -58,4 +58,11 @@ void DeletableItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem 
 	}
 	else if(option.state == (QStyle::State_Active | QStyle::State_Enabled))
 		del_btn->setVisible(false);
+}
+
+QSize DeletableItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &) const
+{
+	return { option.decorationSize.width(),
+					 option.decorationSize.height() +
+					 qApp->style()->pixelMetric(QStyle::PM_LineEditIconMargin) };
 }

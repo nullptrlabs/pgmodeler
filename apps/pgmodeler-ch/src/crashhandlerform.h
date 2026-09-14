@@ -43,7 +43,7 @@ class CrashHandlerForm: public BugReportForm {
 
 		QLabel *input_lbl;
 
-		FileSelectorWidget *input_sel;
+		PathSelectorWidget *input_sel;
 
 		//! \brief Triggers the model saving to filesystem
 		QToolButton *save_tb;

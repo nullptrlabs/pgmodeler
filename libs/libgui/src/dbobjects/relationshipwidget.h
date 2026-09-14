@@ -98,7 +98,7 @@ class __libgui RelationshipWidget: public BaseObjectWidget, public Ui::Relations
 		QSize getIdealSize();
 
 	private slots:
-		void addObject();
+		void addObject(ObjectType obj_type);
 		void editObject(int row);
 		void removeObject(int row);
 		void removeObjects();

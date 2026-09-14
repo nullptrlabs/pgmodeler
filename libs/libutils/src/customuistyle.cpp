@@ -119,6 +119,16 @@ void CustomUiStyle::addEdgeWithCorner(QPainterPath &path, const QRectF &rect, Op
 	}
 }
 
+CustomUiStyle::CornerFlag CustomUiStyle::menuButtonSubCorners(const QStyleOption *option, const QWidget *widget) const
+{
+	const QToolButton *tb = qobject_cast<const QToolButton *>(widget);
+
+	if(!tb || tb->popupMode() != QToolButton::MenuButtonPopup || option->rect == widget->rect())
+		return AllCorners;
+
+	return (option->rect.left() == widget->rect().left()) ? LeftCorners : RightCorners;
+}
+
 QPainterPath CustomUiStyle::createControlShape(const QRect &rect, int radius, CustomUiStyle::CornerFlag corners,
 																							 qreal dx, qreal dy, qreal dw, qreal dh, OpenEdge open_edge) const
 {
@@ -777,6 +787,16 @@ void CustomUiStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *
 		 (qobject_cast<const QToolButton *>(widget) ||
 			qobject_cast<const QPushButton *>(widget)))
 	{
+		const QToolButton *tb = qobject_cast<const QToolButton *>(widget);
+
+		/* For MenuButtonPopup the platform style owns the CC_ToolButton layout and
+		 * passes here the already-clipped dropdown sub-area rect, so draw directly. */
+		if(tb && tb->popupMode() == QToolButton::MenuButtonPopup)
+		{
+			drawControlArrow(option, painter, widget, DownArrow, true);
+			return;
+		}
+
 		drawButtonMenuArrow(option, painter, widget);
 		return;
 	}
@@ -1203,7 +1223,7 @@ void CustomUiStyle::drawPEButtonPanel(PrimitiveElement element, const QStyleOpti
 	painter->setRenderHint(QPainter::Antialiasing, true);
 	painter->setBrush(bg_color);
 	painter->setPen(Qt::NoPen);
-	painter->drawRoundedRect(option->rect, ButtonRadius, ButtonRadius);
+	painter->drawPath(createControlShape(option->rect, ButtonRadius, menuButtonSubCorners(option, widget)));
 	painter->restore();
 }
 
@@ -1329,8 +1349,20 @@ void CustomUiStyle::drawPEHintFramePanel(PrimitiveElement element, const QStyleO
 	bg_color;
 
 	if(!wgt_st.is_enabled)
-		bg_color = getStateColor(QPalette::Dark, option);
-	else 
+	{
+		// Colored hints preserve the hint identity when disabled, just darkened
+		if(hint == DefaultFrmHint || hint == GroupBoxFrmHint || hint == MenuBoxFrmHint || hint == TabBarFrmHint)
+			bg_color = getStateColor(QPalette::Dark, option);
+		else
+		{
+			QColor hint_color = frame->property(StyleHintColor).value<QColor>();
+			bg_color.setRedF((hint_color.redF() * 0.25) + (base_color.redF() * 0.75));
+			bg_color.setGreenF((hint_color.greenF() * 0.25) + (base_color.greenF() * 0.75));
+			bg_color.setBlueF((hint_color.blueF() * 0.25) + (base_color.blueF() * 0.75));
+			bg_color = getAdjustedColor(bg_color, -MidFactor, -MidFactor);
+		}
+	}
+	else
 	{	
 		// For DefaultFrmHint we use the midlight color as background
 		if(hint == DefaultFrmHint)
@@ -1403,6 +1435,9 @@ void CustomUiStyle::drawPEGenericElemFrame(PrimitiveElement element, const QStyl
 				// For other hints, use the custom color with slight adjustments
 				border_color = getAdjustedColor(widget->property(StyleHintColor).value<QColor>(), XMinFactor, -XMinFactor);
 		}
+		else if(!isWidgetHint(hint) && !qobject_cast<const QAbstractButton *>(widget))
+			// Frames with colored hints: darken the hint color to signal disabled state
+			border_color = getAdjustedColor(widget->property(StyleHintColor).value<QColor>(), -MaxFactor, -MaxFactor);
 
 		border_radius = (hint == MenuBoxFrmHint ? 0 : HintFrameRadius);
 	}
@@ -1445,8 +1480,10 @@ void CustomUiStyle::drawPEGenericElemFrame(PrimitiveElement element, const QStyl
 
 	if(border_radius > 0)
 	{
+		CornerFlag frm_corners = menuButtonSubCorners(option, widget);
+		OpenEdge open_edge = (frm_corners == LeftCorners) ? OpenRight : NotOpen;
 		shape = createControlShape(option->rect, border_radius,
-						CustomUiStyle::AllCorners, 0.5, 0.5, -0.5, -0.5);
+						frm_corners, 0.5, 0.5, -0.5, -0.5, open_edge);
 	}
 	else
 	{
@@ -1665,6 +1702,7 @@ void CustomUiStyle::drawCEProgressBar(ControlElement element, const QStyleOption
 				QElapsedTimer *elapsed_timer = new QElapsedTimer();
 				elapsed_timer->start();
 				pb->setProperty(BusyElapsedTimerProp, QVariant::fromValue(static_cast<void*>(elapsed_timer)));
+				QObject::connect(pb, &QObject::destroyed, [elapsed_timer]() { delete elapsed_timer; });
 				anim_timer->start();
 			}
 
@@ -2346,7 +2384,7 @@ QColor CustomUiStyle::getStateColor(const QPalette &pal, QPalette::ColorRole rol
 
 QColor CustomUiStyle::getStateColor(QPalette::ColorRole role, const QStyleOption *option)
 {
-	return getStateColor(qApp->palette(), role, option);
+	return getStateColor(option->palette, role, option);
 }
 
 QColor CustomUiStyle::getAdjustedColor(const QColor &color, int dark_ui_factor, int light_ui_factor)
@@ -2462,15 +2500,12 @@ void CustomUiStyle::drawPEHeaderArrow(const QStyleOption *option, QPainter *pain
 	drawControlArrow(&arrow_opt, painter, widget, arrow_type);
 }
 
-void CustomUiStyle::setStyleHint(StyleHint hint, const QList<QFrame *> &frames)
+void CustomUiStyle::setStyleHint(StyleHint hint, QWidget *wgt)
 {
-	for(auto &frm : frames)
-		setStyleHint(hint, frm);
-}
+	QAbstractButton *btn = qobject_cast<QAbstractButton *>(wgt);
+	QFrame *frm = qobject_cast<QFrame *>(wgt);
 
-void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
-{
-	if(!frame || hint == NoHint)
+	if(hint == NoHint || (!btn && !frm))
 		return;
 
 	static const std::map<StyleHint, QColor> frm_colors = {
@@ -2481,37 +2516,71 @@ void CustomUiStyle::setStyleHint(StyleHint hint, QFrame *frame)
 		{ SuccessFrmHint, "#4aeb5c" }
 	};
 
-	frame->setProperty(StyleHintProp, static_cast<int>(hint));
+	wgt->setProperty(StyleHintProp, static_cast<int>(hint));
 
+	QPalette pal = wgt->palette();
 	QColor hint_color;
-	bool is_def_hint = (hint == DefaultFrmHint ||
-											hint == GroupBoxFrmHint ||
-											hint == MenuBoxFrmHint ||
-											hint == TabBarFrmHint);
+	bool is_def_hint = isWidgetHint(hint);
 
 	if(!is_def_hint)
-		hint_color = frm_colors.at(hint);
-
-	frame->setProperty(StyleHintColor, hint_color);
-
-	// Extract the frame shape using Shape_Mask to ignore shadow
-	QFrame::Shape shape = static_cast<QFrame::Shape>(frame->frameShape() & QFrame::Shape_Mask);
-
-	// For HLine/VLine frames, apply border color via stylesheet
-	if(shape == QFrame::HLine || shape == QFrame::VLine)
 	{
-		QString color_role;
-
-		if(is_def_hint)
-			color_role = (hint != TabBarFrmHint ? "light" : "mid");
-		else
-			color_role = "midlight";
-
-		frame->setStyleSheet(QString("QFrame { border: %1px solid palette(%2); }")
-												 .arg(PenWidth)
-												 .arg(color_role));
+		hint_color = (hint == AccentFrmHint ?
+										pal.color(QPalette::Accent) :
+										frm_colors.at(hint));
 	}
-	// For other frames we force the shape to StyledPanel
-	else
-		frame->setFrameShape(QFrame::StyledPanel);
+
+	wgt->setProperty(StyleHintColor, hint_color);
+
+	if(frm)
+	{
+		// Extract the frame shape using Shape_Mask to ignore shadow
+		QFrame::Shape shape = static_cast<QFrame::Shape>(frm->frameShape() & QFrame::Shape_Mask);
+
+		// For HLine/VLine frames, apply border color via stylesheet
+		if(shape == QFrame::HLine || shape == QFrame::VLine)
+		{
+			QString color_role;
+
+			if(is_def_hint)
+				color_role = (hint != TabBarFrmHint ? "light" : "mid");
+			else
+				color_role = "midlight";
+
+			frm->setStyleSheet(QString("QFrame { border: %1px solid palette(%2); }")
+												 .arg(PenWidth).arg(color_role));
+		}
+		// For other frames we force the shape to StyledPanel
+		else
+			frm->setFrameShape(QFrame::StyledPanel);
+	}
+	else if(btn)
+	{
+		hint_color = getAdjustedColor(hint_color, -MidFactor, -MidFactor);
+		pal.setColor(QPalette::Button, hint_color);
+		pal.setColor(QPalette::Dark, getAdjustedColor(hint_color, -MinFactor, -MinFactor));
+		pal.setColor(QPalette::Light, getAdjustedColor(hint_color, MinFactor, MinFactor));
+		pal.setColor(QPalette::Highlight, getAdjustedColor(hint_color, MidFactor, MidFactor));
+
+		/* Pin the Disabled group to the application defaults so Qt does not derive
+		 * it from the hint color, keeping disabled buttons visually neutral. */
+		const QPalette app_pal = qApp->palette();
+
+		for(auto role : { QPalette::Button, QPalette::Dark, QPalette::Light,
+											QPalette::Midlight, QPalette::Mid, QPalette::ButtonText })
+			pal.setColor(QPalette::Disabled, role, app_pal.color(QPalette::Disabled, role));
+
+		btn->setPalette(pal);
+	}
+}
+
+void CustomUiStyle::setStyleHint(StyleHint hint, const QList<QWidget *> &wgts)
+{
+	for(auto &wgt : wgts)
+		setStyleHint(hint, wgt);
+}
+
+bool CustomUiStyle::isWidgetHint(StyleHint hint)
+{
+	return (hint == DefaultFrmHint || hint == GroupBoxFrmHint ||
+					hint == MenuBoxFrmHint ||	hint == TabBarFrmHint);
 }

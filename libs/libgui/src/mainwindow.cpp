@@ -175,6 +175,13 @@ void MainWindow::addNewLayer(const QString &layer_name)
 	current_model->layers_wgt->setAttributes(current_model);
 }
 
+void MainWindow::updateModelSelectors()
+{
+	QList<ModelWidget *> models = model_nav_wgt->getModelWidgets();
+	model_export_wgt->updateModels(models);
+	fix_tools_wgt->updateModels(models);
+}
+
 void MainWindow::dropEvent(QDropEvent *event)
 {
 	loadModelsFromMimeData(event->mimeData());
@@ -348,8 +355,6 @@ void MainWindow::configureMenusActionsWidgets()
 		if(!act->shortcut().toString().isEmpty())
 			act->setToolTip(act->toolTip() + QString(" (%1)").arg(act->shortcut().toString()));
 	}
-
-	resizeGeneralToolbarButtons();
 }
 
 void MainWindow::handleInitializationFailure(Exception &e)
@@ -583,22 +588,20 @@ void MainWindow::connectSignalsToSlots()
 	view_actions.insert({
 		{ WelcomeView, action_welcome },
 		{ DesignView , action_design },
-		/*{ ManageView, action_manage },*/ /* action_import, */
-		{ ExportView, action_export }, /* action_diff, */
+		{ ExportView, action_export },
 		{ FixView, action_fix},
 		{ ConfigureView, action_configure }
 	});
 
-	//int vw_id = 0;
-	//for(auto &act : view_actions)
 	for(auto [vw_id, act] : view_actions.asKeyValueRange())
 	{
 		act->setData(vw_id);
 		connect(act, &QAction::toggled, this, qOverload<bool>(&MainWindow::changeCurrentView));
 	}
 
-	//connect(action_export, &QAction::toggled, this, &MainWindow::validateBeforeOperation);
-	//connect(action_diff, &QAction::toggled, this, &MainWindow::validateBeforeOperation);
+	connect(this, &MainWindow::s_modelAdded, this, &MainWindow::updateModelSelectors);
+	connect(this, &MainWindow::s_modelClosed, this, &MainWindow::updateModelSelectors);
+	connect(this, &MainWindow::s_modelSaved, this, &MainWindow::updateModelSelectors);
 
 	connect(action_bug_report, &QAction::triggered, this, &MainWindow::reportBug);
 	connect(action_compact_view, &QAction::triggered, this, &MainWindow::toggleCompactView);
@@ -645,7 +648,11 @@ void MainWindow::connectSignalsToSlots()
 		pending_op = NoPendingOp;
 	});
 
-	connect(model_valid_wgt, &ModelValidationWidget::s_validationFinished, this, &MainWindow::executePendingOperation);
+	connect(model_valid_wgt, &ModelValidationWidget::s_validationFinished, this, [this](bool val_err) {
+		QTimer::singleShot(1000, this, [val_err, this](){
+			executePendingOperation(val_err);
+		});
+	});
 	connect(model_valid_wgt, &ModelValidationWidget::s_fixApplied, this, &MainWindow::removeOperations, Qt::QueuedConnection);
 	connect(model_valid_wgt, &ModelValidationWidget::s_graphicalObjectsUpdated, model_objs_wgt, &ModelObjectsWidget::updateObjectsView, Qt::QueuedConnection);
 
@@ -756,24 +763,6 @@ bool MainWindow::isToolButtonsChecked(QHBoxLayout *layout, const QWidgetList &ig
 	return false;
 }
 
-void MainWindow::resizeGeneralToolbarButtons()
-{
-	QToolButton *btn = nullptr;
-
-	if(tools_acts_tb->minimumWidth() == 0)
-		tools_acts_tb->setMinimumWidth(tools_acts_tb->width() *
-																(BaseObjectView::getScreenDpiFactor() < BaseObjectView::MaxDpiFactor ? 0.60 : 0.90));
-
-	for(auto &act : tools_acts_tb->actions())
-	{
-		btn = qobject_cast<QToolButton *>(tools_acts_tb->widgetForAction(act));
-		if(!btn) continue;
-
-		btn->setStyleSheet(QString("QToolButton { min-width: %1px; margin-top: 2px; }")
-											 .arg(models_tbw->count() == 0 ? tools_acts_tb->minimumWidth() : tools_acts_tb->minimumWidth() * 1.10));
-	}
-}
-
 void MainWindow::showRightWidgetsBar()
 {
 	right_wgt_bar->setVisible(isToolButtonsChecked(vert_wgts_btns_layout));
@@ -796,12 +785,18 @@ void MainWindow::restoreLastSession()
 		{
 			qApp->setOverrideCursor(Qt::WaitCursor);
 
-			while(!prev_session_files.isEmpty())
+			for(auto &file : prev_session_files)
 			{
-				this->addModel(prev_session_files.front());
-				prev_session_files.pop_front();
+				if(!file.endsWith(GlobalAttributes::DbModelExt))
+				{
+					emit s_modelLoadRequested(file);
+					continue;
+				}
+
+				this->addModel(file);
 			}
 
+			prev_session_files.clear();
 			action_restore_session->setEnabled(false);
 			welcome_wgt->last_session_tb->setEnabled(false);
 			qApp->restoreOverrideCursor();
@@ -963,18 +958,23 @@ void MainWindow::closeEvent(QCloseEvent *event)
 		conf_wgt->removeConfigurationSection(QRegularExpression(QString("(%1)([0-9])+").arg(Attributes::File)));
 
 		//Saving the session
+		QString filename;
+
 		for(auto i = 0; i < models_tbw->count(); i++)
 		{
 			model = dynamic_cast<ModelWidget *>(models_tbw->widget(i));
+			filename = model->getFilename();
 
-			if(!model->getFilename().isEmpty() &&
-				 /* Models loaded from temporary dir are not included in the session
-					* since they are removed once pgModeler is closed */
-				 !model->getFilename().contains(GlobalAttributes::getTemporaryPath()))
+			/* Models loaded from temporary dir are not included in the session
+			 * since they are removed once pgModeler is closed */
+			if(filename.isEmpty() || filename.contains(GlobalAttributes::getTemporaryPath()))
+				filename = model->property(ModelWidget::AltFilename).toString();
+
+			if(!filename.isEmpty())
 			{
 				param_id = QString("%1%2").arg(Attributes::File).arg(i);
 				attribs[Attributes::Id] = param_id;
-				attribs[Attributes::Path] = model->getFilename();
+				attribs[Attributes::Path] = filename;
 				conf_wgt->setConfigurationSection(param_id, attribs);
 				attribs.clear();
 			}
@@ -1183,7 +1183,7 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 {
 	try
 	{
-		ModelWidget *model_wgt=nullptr;
+		ModelWidget *model_wgt = nullptr;
 		QString obj_name, tab_name, str_aux;
 		Schema *public_sch = nullptr;
 		bool start_timers = (models_tbw->count() == 0);
@@ -1203,7 +1203,7 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 		models_tbw->blockSignals(true);
 		models_tbw->setUpdatesEnabled(false);
 
-		if(model_idx < 0)
+		if(model_idx < 0 || model_idx >= models_tbw->count())
 			model_idx = models_tbw->addTab(model_wgt, obj_name);
 		else
 		{
@@ -1246,12 +1246,12 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 
 				models_tbw->removeTab(models_tbw->indexOf(model_wgt));
 				model_wgt->setParent(nullptr);
-				model_wgt->deleteLater();
 
 				//Destroy the temp file generated by allocating a new model widget
 				restoration_form->removeTemporaryModel(model_wgt->getTempFilename());
 				updateToolsState(true);
 
+				delete model_wgt;
 				throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 			}
 		}
@@ -1282,6 +1282,9 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 	}
 	catch(Exception &e)
 	{
+		if(model_idx >= 0)
+			closeModel(model_idx, false, false);
+
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
@@ -1340,8 +1343,18 @@ void MainWindow::showMainMenu()
 		file_menu->addAction(action_hide_main_menu);
 }
 
-void MainWindow::setCurrentModel()
+void MainWindow::setCurrentModel(int idx)
 {
+	ModelWidget *prev_model = current_model;
+
+	if(idx < 0 || idx >= models_tbw->count())
+		current_model = dynamic_cast<ModelWidget *>(models_tbw->currentWidget());
+	else
+		current_model = dynamic_cast<ModelWidget *>(models_tbw->widget(idx));
+
+	if(prev_model && (prev_model == current_model))
+		return;
+
 	layers_cfg_wgt->setVisible(false);
 	models_tbw->setVisible(models_tbw->count() > 0);
 
@@ -1363,12 +1376,13 @@ void MainWindow::setCurrentModel()
 	//Avoids the tree state saving in order to restore the current model tree state
 	model_objs_wgt->saveTreeState(false);
 
-	//Restore the tree state
-	if(current_model)
-		model_objs_wgt->saveTreeState(model_tree_states[current_model], model_tree_v_pos[current_model]);
+	if(prev_model)
+	{
+		model_objs_wgt->saveTreeState(model_tree_states[prev_model],
+																	model_tree_v_pos[prev_model]);
+	}
 
 	models_tbw->setCurrentIndex(model_nav_wgt->getCurrentIndex());
-	current_model=dynamic_cast<ModelWidget *>(models_tbw->currentWidget());
 	arrange_menu.menuAction()->setEnabled(current_model != nullptr);
 
 	QFile::remove(GlobalAttributes::getTemporaryFilePath(GlobalAttributes::LastModelFile));
@@ -1505,11 +1519,12 @@ void MainWindow::setCurrentModel()
 	changelog_wgt->setModel(current_model);
 
 	if(current_model)
+	{
 		model_objs_wgt->restoreTreeState(model_tree_states[current_model],
 																		 model_tree_v_pos[current_model]);
+	}
 
 	model_objs_wgt->saveTreeState(true);
-	resizeGeneralToolbarButtons();
 
 	emit s_currentModelChanged(current_model);
 }
@@ -1618,7 +1633,9 @@ bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
 		model_nav_wgt->removeModel(model_id);
 		model_tree_states.remove(model);
 		model_tree_v_pos.remove(model);
-		model->deleteLater();
+
+		model->blockSignals(true);
+		model->setModified(false);
 
 		//Remove the temporary file related to the closed model
 		QDir arq_tmp;
@@ -1650,26 +1667,30 @@ bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
 			tmpmodel_save_timer.stop();
 			models_tbw->setVisible(false);
 		}
+
+		delete model;
+		emit s_modelClosed();
 	}
 
 	return model_closed;
 }
 
-void MainWindow::reloadModel(int model_id, const QString &filename)
+void MainWindow::reloadModel(const QString &filename, int model_idx)
 {
 	try
 	{
-		if(model_id < 0 || !closeModel(model_id, true))
+		if(model_idx < 0)
 			return;
 
-		/* Check if the filename exists before trying to load
-		 * if not exists, remove the empty tab and display a message */
-		addModel(filename, model_id);
+		if(!closeModel(model_idx, true))
+			return;
+
+		emit s_modelLoadRequested(filename, model_idx);
 	}
 	catch(Exception &e)
 	{
-		models_tbw->removeTab(model_id);
-		model_nav_wgt->removeModel(model_id);
+		models_tbw->removeTab(model_idx);
+		model_nav_wgt->removeModel(model_idx);
 		setCurrentModel();
 		throw Exception(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
@@ -1759,12 +1780,6 @@ void MainWindow::saveModel(ModelWidget *model)
 
 		if(model)
 		{
-			if(model->property(ModelWidget::SaveDisabled).toBool())
-			{
-				Messagebox::alert(tr("The save feature is disabled for this model."));
-				return;
-			}
-
 			Messagebox msg_box;
 			DatabaseModel *db_model=model->getDatabaseModel();
 
@@ -1813,7 +1828,9 @@ void MainWindow::saveModel(ModelWidget *model)
 					{
 						model->saveModel(sel_files.at(0));
 						registerRecentModel(sel_files.at(0));
-						model_nav_wgt->updateModelText(models_tbw->indexOf(model), model->getDatabaseModel()->getName(), sel_files.at(0));
+						model_nav_wgt->updateModelText(models_tbw->indexOf(model),
+																					 model->getDatabaseModel()->getName(), sel_files.at(0));
+						emit s_modelSaved(model);
 					}
 				}
 				else
@@ -1839,12 +1856,14 @@ void MainWindow::saveModel(ModelWidget *model)
 					}
 
 					if(save_model)
+					{
 						model->saveModel();
+						emit s_modelSaved(model);
+					}
 				}
 
 				updateWindowTitle();
 				model_valid_wgt->clearOutput();
-				emit s_modelSaved(model);
 			}
 
 			stopSaveTimers(false);
@@ -1861,12 +1880,13 @@ void MainWindow::saveModel(ModelWidget *model)
 void MainWindow::validateBeforeOperation()
 {
 	if(!current_model ||
-		 (curr_view != ExportView && curr_view != DiffView))
+		 (curr_view != ExportView && curr_view != DiffView) ||
+		 pending_op != NoPendingOp)
 		return;
 
 	DatabaseModel *db_model = current_model->getDatabaseModel();
 
-	if(confirm_validation && current_model->getDatabaseModel()->isInvalidated())
+	if(confirm_validation && db_model->isInvalidated())
 	{
 		Messagebox msgbox;
 		bool is_export = (curr_view == ExportView);
@@ -1879,12 +1899,10 @@ void MainWindow::validateBeforeOperation()
 
 		if(msgbox.isAccepted())
 		{
-			action_design->toggle();
-			QTimer::singleShot(1000, this, [this, is_export]{
-				validation_btn->setChecked(true);
-				pending_op = is_export ? PendingExportOp : PendingDiffOp;
-				model_valid_wgt->validateModel();
-			});
+			pending_op = is_export ? PendingExportOp : PendingDiffOp;
+			changeCurrentView(DesignView);
+			validation_btn->setChecked(true);
+			model_valid_wgt->validateModel();
 		}
 	}
 }
@@ -2241,6 +2259,7 @@ void MainWindow::storeDockWidgetsSettings()
 
 	params[Attributes::LayersConfig] = Attributes::True;
 	params[Attributes::RelsFollowTabsVisibility] = layers_cfg_wgt->rels_tabs_visibility_chk->isChecked() ? Attributes::True : "";
+	params[Attributes::SelObjsInLayers] = layers_cfg_wgt->sel_objects_chk->isChecked() ? Attributes::True : "";
 	conf_wgt->setConfigurationSection(Attributes::LayersConfig, params);
 	params.clear();
 }
@@ -2269,6 +2288,7 @@ void MainWindow::restoreDockWidgetsSettings()
 	if(confs.count(Attributes::LayersConfig))
 	{
 		layers_cfg_wgt->rels_tabs_visibility_chk->setChecked(confs[Attributes::LayersConfig][Attributes::RelsFollowTabsVisibility]==Attributes::True);
+		layers_cfg_wgt->sel_objects_chk->setChecked(confs[Attributes::LayersConfig][Attributes::SelObjsInLayers]==Attributes::True);
 	}
 }
 
@@ -2299,6 +2319,9 @@ void MainWindow::executePendingOperation(bool valid_error)
 
 void MainWindow::changeCurrentView(MWViewsId view_id)
 {
+	if(view_id == curr_view)
+		return;
+
 	layers_cfg_wgt->setVisible(false);
 	changelog_wgt->setVisible(false);
 
@@ -2344,16 +2367,6 @@ void MainWindow::changeCurrentView(MWViewsId view_id)
 	action_save_as->setEnabled(enable);
 	about_wgt->hide();
 	donate_wgt->hide();
-
-	QList<ModelWidget *> models = model_nav_wgt->getModelWidgets();
-
-	if(view_id == ExportView)
-		model_export_wgt->updateModels(models);
-
-	if(view_id == FixView)
-		fix_tools_wgt->updateModels(models);
-
-	validateBeforeOperation();
 }
 
 void MainWindow::changeCurrentView(bool checked)
@@ -2375,7 +2388,12 @@ void MainWindow::changeCurrentView(bool checked)
 	changelog_wgt->setVisible(false);
 
 	if(checked)
+	{
 		changeCurrentView(view_id);
+
+		if(view_id == ExportView || view_id == DiffView)
+			validateBeforeOperation();
+	}
 	else
 	{
 		curr_act->blockSignals(true);

@@ -42,36 +42,36 @@ ModelFixWidget::ModelFixWidget(QWidget *parent) : QWidget(parent)
 																		 output_file_lbl, fix_tries_lbl },
 																	 GuiUtilsNs::SmallFontFactor, true);
 
-	input_file_sel = new FileSelectorWidget(this);
+	input_file_sel = new PathSelectorWidget(this);
 	input_file_sel->setObjectName("input_file_sel");
-	input_file_sel->setFileMustExist(true);
+	input_file_sel->setPathMustExist(true);
 	input_file_sel->setNameFilters({ tr("Database model (*%1)").arg(GlobalAttributes::DbModelExt) });
 	input_file_sel->setAcceptMode(QFileDialog::AcceptOpen);
-	input_file_sel->setAllowFilenameInput(true);
-	input_file_sel->setFileIsMandatory(true);
+	input_file_sel->setAllowPathInput(true);
+	input_file_sel->setPathIsMandatory(true);
 	input_file_sel->setWindowTitle(tr("Select input file"));
 	model_fix_grid->addWidget(input_file_sel, 1, 2);
 
-	output_file_sel = new FileSelectorWidget(this);
+	output_file_sel = new PathSelectorWidget(this);
 	output_file_sel->setObjectName("output_file_sel");
 	output_file_sel->setNameFilters({ tr("Database model (*%1)").arg(GlobalAttributes::DbModelExt) });
 	output_file_sel->setDefaultSuffix(GlobalAttributes::DbModelExt);
 	output_file_sel->setAcceptMode(QFileDialog::AcceptSave);
-	output_file_sel->setAllowFilenameInput(true);
-	output_file_sel->setFileIsMandatory(true);
+	output_file_sel->setAllowPathInput(true);
+	output_file_sel->setPathIsMandatory(true);
 	output_file_sel->setWindowTitle(tr("Select output file"));
 	output_sel_lt->insertWidget(0, output_file_sel);
 
-	pgmodeler_cli_sel = new FileSelectorWidget(this);
+	pgmodeler_cli_sel = new PathSelectorWidget(this);
 	pgmodeler_cli_sel->setObjectName("pgmodeler_cli_sel");
-	pgmodeler_cli_sel->setFileMustExist(true);
+	pgmodeler_cli_sel->setPathMustExist(true);
 	pgmodeler_cli_sel->setNameFilters({tr("pgModeler command line tool (%1)").arg(PgModelerCli)});
 	pgmodeler_cli_sel->setAcceptMode(QFileDialog::AcceptOpen);
-	pgmodeler_cli_sel->setAllowFilenameInput(true);
+	pgmodeler_cli_sel->setAllowPathInput(true);
 	pgmodeler_cli_sel->setWindowTitle(tr("Select pgmodeler-cli executable"));
 	pgmodeler_cli_sel->setVisible(false);
 	pgmodeler_cli_sel->setCheckExecutionFlag(true);
-	pgmodeler_cli_sel->setFileIsMandatory(true);
+	pgmodeler_cli_sel->setPathIsMandatory(true);
 	pgmodeler_cli_sel->setNamePattern(QString("(.)+(%1)$").arg(PgModelerCli));
 	model_fix_grid->addWidget(pgmodeler_cli_sel, 0, 2);
 
@@ -82,11 +82,11 @@ ModelFixWidget::ModelFixWidget(QWidget *parent) : QWidget(parent)
 	connect(&pgmodeler_cli_proc, &QProcess::readyReadStandardError, this, &ModelFixWidget::updateOutput);
 	connect(&pgmodeler_cli_proc, &QProcess::finished, this, &ModelFixWidget::handleProcessFinish);
 
-	connect(input_file_sel, &FileSelectorWidget::s_selectorChanged, this, &ModelFixWidget::enableFix);
-	connect(output_file_sel, &FileSelectorWidget::s_selectorChanged, this, &ModelFixWidget::enableFix);
-	connect(pgmodeler_cli_sel, &FileSelectorWidget::s_selectorChanged, this, &ModelFixWidget::enableFix);
+	connect(input_file_sel, &PathSelectorWidget::s_selectorChanged, this, &ModelFixWidget::enableFix);
+	connect(output_file_sel, &PathSelectorWidget::s_selectorChanged, this, &ModelFixWidget::enableFix);
+	connect(pgmodeler_cli_sel, &PathSelectorWidget::s_selectorChanged, this, &ModelFixWidget::enableFix);
 
-	connect(input_file_sel, &FileSelectorWidget::s_selectorChanged, gen_filename_tb, &QToolButton::setEnabled);
+	connect(input_file_sel, &PathSelectorWidget::s_selectorChanged, gen_filename_tb, &QToolButton::setEnabled);
 	connect(gen_filename_tb, &QToolButton::clicked, this, &ModelFixWidget::generateOutputFilename);
 
 	resetFixForm();
@@ -99,7 +99,7 @@ void ModelFixWidget::setExtraCliArgs(const QStringList &extra_args)
 
 void ModelFixWidget::setInputModel(const QString &filename, bool gen_out_filename)
 {
-	input_file_sel->setSelectedFile(filename);
+	input_file_sel->setSelectedPath(filename);
 
 	if(gen_out_filename)
 		generateOutputFilename();
@@ -107,9 +107,9 @@ void ModelFixWidget::setInputModel(const QString &filename, bool gen_out_filenam
 
 void ModelFixWidget::generateOutputFilename()
 {
-	QFileInfo fi(input_file_sel->getSelectedFile());
+	QFileInfo fi(input_file_sel->getSelectedPath());
 
-	output_file_sel->setSelectedFile(fi.absolutePath() +
+	output_file_sel->setSelectedPath(fi.absolutePath() +
 																	 GlobalAttributes::DirSeparator +
 																	 fi.completeBaseName() +
 																	 "_fixed" +
@@ -149,7 +149,7 @@ void ModelFixWidget::enableFixOptions(bool enable)
 
 void ModelFixWidget::showEvent(QShowEvent *)
 {
-	pgmodeler_cli_sel->setSelectedFile(GlobalAttributes::getPgModelerCLIPath());
+	pgmodeler_cli_sel->setSelectedPath(GlobalAttributes::getPgModelerCLIPath());
 }
 
 void ModelFixWidget::enableFix()
@@ -162,9 +162,9 @@ void ModelFixWidget::enableFix()
 
 bool ModelFixWidget::isFixEnabled()
 {
-	return !input_file_sel->hasWarning() && !input_file_sel->getSelectedFile().isEmpty() &&
-				 !output_file_sel->hasWarning() && !output_file_sel->getSelectedFile().isEmpty() &&
-				 !pgmodeler_cli_sel->hasWarning() && !pgmodeler_cli_sel->getSelectedFile().isEmpty();
+	return !input_file_sel->hasWarning() && !input_file_sel->getSelectedPath().isEmpty() &&
+				 !output_file_sel->hasWarning() && !output_file_sel->getSelectedPath().isEmpty() &&
+				 !pgmodeler_cli_sel->hasWarning() && !pgmodeler_cli_sel->getSelectedPath().isEmpty();
 }
 
 void ModelFixWidget::fixModel()
@@ -184,9 +184,9 @@ void ModelFixWidget::fixModel()
 	args.append("--fix-tries");
 	args.append(QString::number(fix_tries_sb->value()));
 	args.append("--input");
-	args.append(input_file_sel->getSelectedFile());
+	args.append(input_file_sel->getSelectedPath());
 	args.append("--output");
-	args.append(output_file_sel->getSelectedFile());
+	args.append(output_file_sel->getSelectedPath());
 
 	progress_pb->setValue(0);
 	progress_pb->setVisible(true);
@@ -196,7 +196,7 @@ void ModelFixWidget::fixModel()
 
 	pgmodeler_cli_proc.blockSignals(false);
 	pgmodeler_cli_proc.setArguments(args);
-	pgmodeler_cli_proc.setProgram(pgmodeler_cli_sel->getSelectedFile());
+	pgmodeler_cli_proc.setProgram(pgmodeler_cli_sel->getSelectedPath());
 	pgmodeler_cli_proc.start();
 
 	emit s_modelFixStarted();
@@ -265,7 +265,7 @@ void ModelFixWidget::handleProcessFinish(int res)
 		if(load_model_chk->isChecked())
 		{
 			//Emitting a signal indicating the file to be loaded
-			emit s_modelLoadRequested(output_file_sel->getSelectedFile());
+			emit s_modelLoadRequested(output_file_sel->getSelectedPath());
 			resetFixForm();
 		}
 	}

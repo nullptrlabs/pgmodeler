@@ -26,7 +26,8 @@ Constraint::Constraint()
 {
 	ref_table=nullptr;
 	obj_type=ObjectType::Constraint;
-	deferrable=no_inherit=nulls_not_distinct = false;
+	deferrable = no_inherit = period_fk = false;
+	is_temporal_key = nulls_not_distinct = false;
 	fill_factor=0;
 	index_type=IndexingType::Null;
 
@@ -38,6 +39,8 @@ Constraint::Constraint()
 	attributes[Attributes::RefTable]="";
 	attributes[Attributes::SrcColumns]="";
 	attributes[Attributes::DstColumns]="";
+	attributes[Attributes::LastSrcColumn]="";
+	attributes[Attributes::LastDstColumn]="";
 	attributes[Attributes::DelAction]="";
 	attributes[Attributes::UpdAction]="";
 	attributes[Attributes::Expression]="";
@@ -52,6 +55,7 @@ Constraint::Constraint()
 	attributes[Attributes::NoInherit]="";
 	attributes[Attributes::Elements]="";
 	attributes[Attributes::NullsNotDistinct]="";
+	attributes[Attributes::TemporalKey]="";
 }
 
 Constraint::~Constraint()
@@ -228,27 +232,24 @@ void Constraint::setTablespace(BaseObject *tabspc)
 void Constraint::setColumnsAttribute(ColumnsId cols_id, unsigned def_type, bool inc_addedbyrel)
 {
 	std::vector<Column *> *col_vector=nullptr;
-	Column *col=nullptr;
+	Column *col = nullptr;
 	QString str_cols, attrib;
-	unsigned i, count;
-	bool format=(def_type==SchemaParser::SqlCode);
+	QStringList col_names;
+	bool format = (def_type==SchemaParser::SqlCode);
 
-	if(cols_id==ReferencedCols)
+	if(cols_id == ReferencedCols)
 	{
-		col_vector=&ref_columns;
-		attrib=Attributes::DstColumns;
+		col_vector = &ref_columns;
+		attrib = Attributes::DstColumns;
 	}
 	else
 	{
-		col_vector=&columns;
-		attrib=Attributes::SrcColumns;
+		col_vector = &columns;
+		attrib = Attributes::SrcColumns;
 	}
 
-	count=col_vector->size();
-	for(i=0; i < count; i++)
+	for(auto &col : *col_vector)
 	{
-		col=col_vector->at(i);
-
 		/* For XML definition the columns added to the constraint
 		 through relationship can not be included because they are inserted
 		 to the restriction on the time of creation of the relationship from its XML
@@ -256,16 +257,25 @@ void Constraint::setColumnsAttribute(ColumnsId cols_id, unsigned def_type, bool 
 		if((def_type==SchemaParser::SqlCode) ||
 				((def_type==SchemaParser::XmlCode) &&
 				 ((inc_addedbyrel && col->isAddedByRelationship()) ||
-				  (inc_addedbyrel && !col->isAddedByRelationship()) ||
-				  (!inc_addedbyrel && !col->isAddedByRelationship()))))
+					(inc_addedbyrel && !col->isAddedByRelationship()) ||
+					(!inc_addedbyrel && !col->isAddedByRelationship()))))
 		{
-			str_cols+=col->getName(format);
-			str_cols+=',';
+			col_names.append(col->getName(format));
 		}
 	}
 
-	str_cols.remove(str_cols.size()-1,1);
-	attributes[attrib]=str_cols;
+	if(def_type == SchemaParser::SqlCode &&
+		 constr_type == ConstraintType::ForeignKey &&
+		 is_temporal_key)
+	{
+		attributes[cols_id == SourceCols ?
+							 Attributes::LastSrcColumn :
+							 Attributes::LastDstColumn ] = col_names.last();
+		col_names.removeLast();
+	}
+
+	attributes[attrib] = col_names.join(def_type == SchemaParser::XmlCode ?
+																			"," : ", ");
 }
 
 void Constraint::setReferencedTable(BaseTable *ref_tab)
@@ -577,6 +587,16 @@ bool Constraint::isNullsNotDistinct()
 	return nulls_not_distinct;
 }
 
+void Constraint::setTemporalKey(bool value)
+{
+	is_temporal_key = value;
+}
+
+bool Constraint::isTemporalKey()
+{
+	return is_temporal_key;
+}
+
 ExcludeElement Constraint::getExcludeElement(unsigned elem_idx)
 {
 	if(elem_idx >= excl_elements.size())
@@ -702,6 +722,7 @@ QString Constraint::getSourceCode(SchemaParser::CodeType def_type, bool inc_adde
 	attributes[Attributes::Deferrable]=(deferrable ? Attributes::True : "");
 	attributes[Attributes::NoInherit]=(no_inherit ? Attributes::True : "");
 	attributes[Attributes::NullsNotDistinct]=(nulls_not_distinct ? Attributes::True : "");
+	attributes[Attributes::TemporalKey]=(is_temporal_key ? Attributes::True : "");
 	attributes[Attributes::ComparisonType]=(~match_type);
 	attributes[Attributes::DeferType]=(~deferral_type);
 	attributes[Attributes::IndexType]=(~ index_type);
@@ -711,7 +732,8 @@ QString Constraint::getSourceCode(SchemaParser::CodeType def_type, bool inc_adde
 
 	setDeclInTableAttribute();
 
-	if(fill_factor!=0 && (constr_type==ConstraintType::PrimaryKey || constr_type==ConstraintType::Unique))
+	if(fill_factor!=0 &&
+		 (constr_type == ConstraintType::PrimaryKey || constr_type==ConstraintType::Unique))
 		attributes[Attributes::Factor]=QString("%1").arg(fill_factor);
 	else
 		attributes[Attributes::Factor]="";

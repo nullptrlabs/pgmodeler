@@ -49,16 +49,16 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 
 	Ui_GeneralConfigWidget::setupUi(this);
 
-	confs_dir_sel = new FileSelectorWidget(this);
+	confs_dir_sel = new PathSelectorWidget(this);
 	confs_dir_sel->setToolTip(tr("pgModeler configurations directory for the current user"));
 	confs_dir_sel->setReadOnly(true);
 	confs_dir_sel->setDirectoryMode(true);
-	confs_dir_sel->setSelectedFile(GlobalAttributes::getConfigurationsPath());
+	confs_dir_sel->setSelectedPath(GlobalAttributes::getConfigurationsPath());
 	confs_dir_lt->addWidget(confs_dir_sel);
 
-	source_editor_sel = new FileSelectorWidget(this);
-	source_editor_sel->setAllowFilenameInput(true);
-	source_editor_sel->setFileMustExist(true);
+	source_editor_sel = new PathSelectorWidget(this);
+	source_editor_sel->setAllowPathInput(true);
+	source_editor_sel->setPathMustExist(true);
 	source_editor_sel->setAcceptMode(QFileDialog::AcceptOpen);
 	source_editor_sel->setWindowTitle(tr("Select application"));
 	source_editor_sel->setToolTip(tr("External source code editor application"));
@@ -189,7 +189,7 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 		connect(radio, &QRadioButton::toggled, this, &GeneralConfigWidget::setConfigurationChanged);
 	}
 
-	connect(source_editor_sel, &FileSelectorWidget::s_selectorChanged, this, &GeneralConfigWidget::setConfigurationChanged);
+	connect(source_editor_sel, &PathSelectorWidget::s_selectorChanged, this, &GeneralConfigWidget::setConfigurationChanged);
 
 	#ifdef PRIV_CODE_SYMBOLS
 		connect(clear_sql_history_btn, &QPushButton::clicked, this, [](){
@@ -314,7 +314,7 @@ void GeneralConfigWidget::loadConfiguration()
 		hide_sch_name_usr_types_chk->setChecked(config_params[Attributes::Configuration][Attributes::HideSchNameUserTypes]==Attributes::True);
 		hide_obj_shadows_chk->setChecked(config_params[Attributes::Configuration][Attributes::HideObjShadows]==Attributes::True);
 
-		source_editor_sel->setSelectedFile(config_params[Attributes::Configuration][Attributes::SourceEditorApp]);
+		source_editor_sel->setSelectedPath(config_params[Attributes::Configuration][Attributes::SourceEditorApp]);
 		source_editor_args_edt->setText(config_params[Attributes::Configuration][Attributes::SourceEditorArgs]);
 
 		save_restore_geometry_chk->setChecked(config_params[Attributes::Configuration][Attributes::SaveRestoreGeometry]==Attributes::True);
@@ -531,7 +531,7 @@ void GeneralConfigWidget::saveConfiguration()
 		config_params[Attributes::Configuration][Attributes::HideSchNameUserTypes]=(hide_sch_name_usr_types_chk->isChecked() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::HideObjShadows]=(hide_obj_shadows_chk->isChecked() ? Attributes::True : "");
 
-		config_params[Attributes::Configuration][Attributes::SourceEditorApp]=source_editor_sel->getSelectedFile();
+		config_params[Attributes::Configuration][Attributes::SourceEditorApp]=source_editor_sel->getSelectedPath();
 		config_params[Attributes::Configuration][Attributes::SourceEditorArgs]=source_editor_args_edt->text();
 		config_params[Attributes::Configuration][Attributes::UiLanguage]=ui_language_cmb->currentData().toString();
 
@@ -665,7 +665,7 @@ void GeneralConfigWidget::applyConfiguration()
 	BaseTableView::setHideExtAttributes(hide_ext_attribs_chk->isChecked());
 	BaseTableView::setHideTags(hide_table_tags_chk->isChecked());
 
-	NumberedTextEditor::setSourceEditorApp(source_editor_sel->getSelectedFile());
+	NumberedTextEditor::setSourceEditorApp(source_editor_sel->getSelectedPath());
 	NumberedTextEditor::setSourceEditorAppArgs(source_editor_args_edt->text());
 
 	RelationshipView::setHideNameLabel(hide_rel_name_chk->isChecked());

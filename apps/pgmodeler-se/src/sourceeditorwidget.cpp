@@ -34,7 +34,7 @@ SourceEditorWidget::SourceEditorWidget(QWidget *parent) : QWidget(parent)
 	code_compl_wgt = new CodeCompletionWidget(editor_txt);
 	code_compl_wgt->configureCompletion(nullptr, editor_hl);
 
-	source_file_sel = new FileSelectorWidget(source_file_parent);
+	source_file_sel = new PathSelectorWidget(source_file_parent);
 	source_file_sel->setReadOnly(true);
 	source_file_parent->setVisible(false);
 
@@ -84,7 +84,7 @@ void SourceEditorWidget::saveFile(const QString &filename)
 	validate_tb->setEnabled(filename.endsWith(GlobalAttributes::SchemaExt));
 	indent_tb->setEnabled(filename.endsWith(GlobalAttributes::SchemaExt));
 	this->filename = filename;
-	source_file_sel->setSelectedFile(filename);
+	source_file_sel->setSelectedPath(filename);
 	source_file_parent->setVisible(true);
 }
 
@@ -208,7 +208,7 @@ void SourceEditorWidget::loadFile(const QString &filename)
 	indent_tb->setEnabled(enable);
 	code_compl_wgt->setEnabled(enable);
 	this->filename = filename;
-	source_file_sel->setSelectedFile(filename);
+	source_file_sel->setSelectedPath(filename);
 	source_file_parent->setVisible(true);
 
 	QString ext = "." + QFileInfo(filename).suffix();

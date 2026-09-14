@@ -34,8 +34,9 @@ ReferencesWidget::ReferencesWidget(const std::vector<ObjectType> &types, bool co
 	Ui_ReferencesWidget::setupUi(this);
 
 	CustomUiStyle::setStyleHint(CustomUiStyle::GroupBoxFrmHint, options_frm);
+	GuiUtilsNs::configureWidgetsFont({ object_lbl, ref_name_lbl, ref_alias_lbl }, GuiUtilsNs::SmallFontFactor, true);
 
-	object_sel = new ObjectSelectorWidget(types, this);
+	object_sel = GuiUtilsNs::createWidgetInParent<ObjectSelectorWidget>(0, types, ref_obj_parent);
 	references_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
 																				 CustomTableWidget::DuplicateButton, true, this);
 
@@ -43,9 +44,9 @@ ReferencesWidget::ReferencesWidget(const std::vector<ObjectType> &types, bool co
 	ref_name_edt->setMaximumHeight(object_sel->height());
 
 	this->conf_view_refs = conf_view_refs;
-
-	object_lt->addWidget(object_sel);
-	references_lt->addWidget(references_tab);
+	references_grid->addWidget(references_tab,
+														 references_grid->rowCount(),
+														 0, 1, references_grid->columnCount());
 
 	references_tab->setColumnCount(conf_view_refs ? 7 : 6);
 
@@ -147,9 +148,11 @@ void ReferencesWidget::clearReferenceForm()
 	ref_name_edt->clear();
 	ref_alias_edt->clear();
 	use_signature_chk->setChecked(false);
-	format_name_chk->setChecked(false);
+	format_name_chk->setChecked(true);
 	references_tab->clearSelection();
 	references_tab->setButtonsEnabled(CustomTableWidget::AddButton, false);
+
+	emit s_referencesChanged();
 }
 
 void ReferencesWidget::showReferenceData(int row, BaseObject *object, const QString &ref_name, const QString &ref_alias,

@@ -33,7 +33,7 @@
 #include "widgets/modelwidget.h"
 #include "modelexporthelper.h"
 #include "utils/htmlitemdelegate.h"
-#include "widgets/fileselectorwidget.h"
+#include "widgets/pathselectorwidget.h"
 #include "modelselectorwidget.h"
 
 class __libgui ModelExportWidget: public QWidget, public Ui::ModelExportWidget {
@@ -59,12 +59,9 @@ class __libgui ModelExportWidget: public QWidget, public Ui::ModelExportWidget {
 		//! \brief Thread used to manage the export helper when dealing with dbms export
 		QThread *export_thread;
 
-		//! \brief Auxiliary viewport passed to export helper when dealing with PNG export
-		QGraphicsView *viewp;
-
 		ModelSelectorWidget *model_sel_wgt;
 
-		FileSelectorWidget *sql_file_sel,
+		PathSelectorWidget *sql_file_sel,
 		*img_file_sel,
 		*dict_file_sel;
 

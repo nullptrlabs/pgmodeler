@@ -373,7 +373,9 @@ class __libgui ModelWidget: public QWidget {
 		MaximumZoom = ObjectsScene::MaxScaleFactor,
 		ZoomIncrement = 0.050000;
 
-		static constexpr char SaveDisabled[] { "SaveDisabled" };
+		static constexpr char SaveDisabled[] { "save-disabled" },
+		ModelImported[] { "model-imported" },
+		AltFilename[] { "alt-filename" };
 
 		ModelWidget(QWidget *parent = nullptr);
 		~ModelWidget() override;
@@ -634,6 +636,8 @@ class __libgui ModelWidget: public QWidget {
 		 *  This method first call QGraphicsItem::setSelected and then QGraphicsView::centerOn
 		 *  to simulate a highlight in the new object */
 		void setBlinkAddedObjects(bool value);
+
+		void selectObjectsInLayers(const QList<unsigned int> &layer_ids);
 
 	public slots:
 		void loadModel(const QString &filename);

@@ -143,7 +143,7 @@ class __libcore View: public BaseTable {
 		unsigned getObjectCount() override;
 
 		//! \brief Returns the object index searching by its reference
-		int getObjectIndex(BaseObject *obj) override;
+		int getObjectIndex(BaseObject *obj, bool = false) override;
 
 		//! \brief Returns the object index searching by its index and type
 		int getObjectIndex(const QString &name, ObjectType obj_type) override;

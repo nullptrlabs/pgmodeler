@@ -34,7 +34,7 @@
 #include "utils/syntaxhighlighter.h"
 #include "widgets/searchreplacewidget.h"
 #include "widgets/codecompletionwidget.h"
-#include "widgets/fileselectorwidget.h"
+#include "widgets/pathselectorwidget.h"
 
 class SourceEditorWidget: public QWidget, public Ui::SourceEditorWidget {
 	Q_OBJECT
@@ -46,7 +46,7 @@ class SourceEditorWidget: public QWidget, public Ui::SourceEditorWidget {
 
 		CodeCompletionWidget *code_compl_wgt;
 
-		FileSelectorWidget *source_file_sel;
+		PathSelectorWidget *source_file_sel;
 
 		NumberedTextEditor *editor_txt;
 

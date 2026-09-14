@@ -103,8 +103,13 @@ class __libcore BaseTable: public BaseGraphicObject {
 		//! \brief Gets the object index using its name and type
 		virtual int getObjectIndex(const QString &name, ObjectType obj_type)=0;
 
-		//! \brief Returns the index for the specified table object
-		virtual int getObjectIndex(BaseObject *obj)=0;
+		/*! \brief Returns the index for the specified table object.
+		 *  The parameter strict, when true, causes the comparison to be made
+		 *  strictly by matching the object's parent table address and its own address.
+		 *
+		 *  When strict is false, the comparison ocurrs ALSO by matching object's name
+		 *  against others of the same type in the parent table. */
+		virtual int getObjectIndex(BaseObject *obj, bool strict = false) = 0;
 
 		//! \brief Returns all children objects of the table but excluding the ones of the provided type
 		virtual std::vector<BaseObject *> getObjects(const std::vector<ObjectType> &excl_types = {})=0;

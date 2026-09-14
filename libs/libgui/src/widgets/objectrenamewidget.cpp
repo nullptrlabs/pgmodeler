@@ -238,15 +238,15 @@ void ObjectRenameWidget::applyRenaming()
 							obj_map[obj_type] = *model->getObjectList(obj_type);
 						else if(obj_map.count(ObjectType::BaseTable) == 0)
 						{
-								obj_map[ObjectType::BaseTable] = *model->getObjectList(ObjectType::Table);
+							obj_map[ObjectType::BaseTable] = *model->getObjectList(ObjectType::Table);
 
-								obj_map[ObjectType::BaseTable].insert(obj_map[ObjectType::BaseTable].end(),
-																model->getObjectList(ObjectType::View)->begin(),
-																model->getObjectList(ObjectType::View)->end());
+							obj_map[ObjectType::BaseTable].insert(obj_map[ObjectType::BaseTable].end(),
+															model->getObjectList(ObjectType::View)->begin(),
+															model->getObjectList(ObjectType::View)->end());
 
-								obj_map[ObjectType::BaseTable].insert(obj_map[ObjectType::BaseTable].end(),
-																model->getObjectList(ObjectType::ForeignTable)->begin(),
-																model->getObjectList(ObjectType::ForeignTable)->end());
+							obj_map[ObjectType::BaseTable].insert(obj_map[ObjectType::BaseTable].end(),
+															model->getObjectList(ObjectType::ForeignTable)->begin(),
+															model->getObjectList(ObjectType::ForeignTable)->end());
 						}
 
 						new_name = CoreUtilsNs::generateUniqueName<BaseObject>(object,
@@ -273,12 +273,17 @@ void ObjectRenameWidget::applyRenaming()
 				{
 					BaseTable *base_tab = tab_obj->getParentTable();
 					PhysicalTable *tab = dynamic_cast<PhysicalTable *>(base_tab);
-					Column *col=dynamic_cast<Column *>(tab_obj);
+					Column *col = dynamic_cast<Column *>(tab_obj);
 
 					/* If the object is a column and some primary key on table is referencing it
 					 * the relationships will be revalidated */
 					if(col && tab)
+					{
 						revalidate_rels = true;
+
+						// Forcing the update of views that eventually references the renamed column
+						model->updateViewsReferencingTable(tab);
+					}
 
 					base_tab->setModified(true);
 					dynamic_cast<Schema *>(base_tab->getSchema())->setModified(true);

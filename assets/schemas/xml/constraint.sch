@@ -30,6 +30,10 @@
 	[ nulls-not-distinct="true"]
 %end
 
+%if {pk-constr} %or {uq-constr} %or {fk-constr} %and {temporal-key} %then
+	[ temporal-key="true"]
+%end
+
 %if {ck-constr} %and {no-inherit} %then
 	[ no-inherit="true"]
 %end

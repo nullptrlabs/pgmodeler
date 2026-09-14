@@ -141,6 +141,9 @@ class __libgui CustomTableWidget: public QWidget, public Ui::CustomTableWidget {
 		//! \brief Sets an individual foreground/background configuration for the specified cell
 		void setCellColors(int row_idx, int col_idx, const QColor &fg_color, const QColor &bg_color = Qt::transparent);
 
+		//! \brief Sets a individual font configuration for the specified cell
+		void setCellFont(int row_idx, int col_idx, const QFont &font);
+
 		//! \brief Sets the data which the specified row stores
 		void setRowData(const QVariant &data, unsigned row_idx);
 
@@ -195,6 +198,8 @@ class __libgui CustomTableWidget: public QWidget, public Ui::CustomTableWidget {
 		//! \brief Returns the row index currently selected
 		int getSelectedRow();
 
+		QList<int> getSelectedRows();
+
 		/*! \brief Returns the row index search it through the specified row data. If
 		no row is found returns -1 */
 		int getRowIndex(const QVariant &data);
@@ -224,9 +229,14 @@ class __libgui CustomTableWidget: public QWidget, public Ui::CustomTableWidget {
 		 * The button is returned for extra personalization and
 		 * signal/slot connections */
 		QToolButton *addCustomButton(const QIcon &icon = {}, const QKeySequence &shortcut = {},
-																 const QString &tooltip = {}, const QString &btn_name = {});
+																 const QString &tooltip = {}, const QString &btn_name = {},
+																 Qt::Alignment btn_align = Qt::AlignRight);
 
 		void setItemContextMenu(QMenu *menu);
+
+		bool hasSelection();
+
+		QScrollBar *getScrollBar(Qt::Orientation orientation);
 
 		static void setTableItemColor(TableItemColor color_idx, const QColor color);
 
@@ -323,11 +333,14 @@ class __libgui CustomTableWidget: public QWidget, public Ui::CustomTableWidget {
 		//! \brief Signal emitted when a specific cell is clicked. The column and rows indexes are sent together with the signal
 		void s_cellClicked(int, int);
 
+		//! \brief Signal emitted when a specific cell is double-clicked. The column and rows indexes are sent together with the signal
+		void s_cellDoubleClicked(int, int);
+
 		//! \brief Signal emitted when a specific cell has its text or other attribute changed. The column and rows indexes are sent together with the signal
 		void s_cellChanged(int, int);
 
-		//! \brief Signal emitted when the table selection is cleared
-		void s_selectionCleared();
+		//! \brief Signal emitted when the table selection changes
+		void s_selectionChanged(bool has_selection);
 
 		//! \brief Signal emitted when the table row count changes by adding, deleting, duplicating rows
 		void s_rowCountChanged(int);

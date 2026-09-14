@@ -70,15 +70,14 @@ class __libgui ViewWidget: public BaseObjectWidget, public Ui::ViewWidget {
 		template<class Class, class ClassWidget>
 		int openEditingForm(TableObject *object);
 
-	protected:
-		QString getSQLCodePreview() override;
-
 	public:
 		ViewWidget(QWidget * parent = nullptr);
 
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, View *view, double px, double py);
 
 	private slots:
+		void updateCodePreview();
+
 		//! \brief Adds or edit a object on the object table that calls the slot
 		void handleObject();
 

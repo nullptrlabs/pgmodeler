@@ -61,6 +61,7 @@ class __libgui Messagebox: public QDialog, public Ui::Messagebox {
 		enum ButtonsId {
 			YesNoButtons,
 			OkCancelButtons,
+			OkCloseButtons,
 			OkButton,
 			CloseButton,
 			AllButtons

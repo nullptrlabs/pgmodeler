@@ -23,7 +23,7 @@
    <string>Dialog</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../../priv-plugins/res/logoicons.qrc">
+   <iconset resource="../../../priv-core/res/logoicons.qrc">
     <normaloff>:/icons/icons/pgmodeler_logo.png</normaloff>:/icons/icons/pgmodeler_logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -147,7 +147,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="apply_ok_btn">
+         <widget class="QPushButton" name="accept_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -188,7 +188,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="cancel_btn">
+         <widget class="QPushButton" name="reject_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -237,7 +237,7 @@
  </widget>
  <resources>
   <include location="../res/resources.qrc"/>
-  <include location="../../../priv-plugins/res/logoicons.qrc"/>
+  <include location="../../../priv-core/res/logoicons.qrc"/>
  </resources>
  <connections/>
 </ui>

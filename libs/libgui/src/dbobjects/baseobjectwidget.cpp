@@ -772,14 +772,15 @@ void BaseObjectWidget::highlightVersionSpecificFields(std::map<QString, std::vec
 {
 	QString field_name;
 
-	for(auto itr : fields)
+	for(auto &itr : fields)
 	{
 		for(auto wgt : itr.second)
 		{
 			if(values && values->count(wgt) > 0)
 			{
 				field_name+="<br/>" + tr("Value(s)") + ": (";
-				for(auto value : values->at(wgt))
+
+				for(auto &value : values->at(wgt))
 				{
 					field_name += value;
 					field_name+=", ";
@@ -789,7 +790,7 @@ void BaseObjectWidget::highlightVersionSpecificFields(std::map<QString, std::vec
 				field_name+=")";
 			}
 
-			wgt->setStyleSheet("QWidget {	font-weight: bold; font-style: italic; text-decoration: underline; }");
+			GuiUtilsNs::configureWidgetFont(wgt, GuiUtilsNs::DefaultFontFactor, true, false, true);
 			wgt->setToolTip("<p>PostgreSQL" + itr.first + QString(" %1</p>").arg(field_name));
 		}
 	}

@@ -644,7 +644,7 @@ bool ConnectionsConfigWidget::openConnectionsConfiguration(bool one_time_edit,
 	ConnectionsConfigWidget conn_cfg_wgt;
 	bool conns_changed = false;
 
-	connect(parent_form.cancel_btn, &QPushButton::clicked, &parent_form, [&conn_cfg_wgt, &conns_changed]() {
+	connect(parent_form.reject_btn, &QPushButton::clicked, &parent_form, [&conn_cfg_wgt, &conns_changed]() {
 		__trycatch(
 			if(conn_cfg_wgt.isConfigurationChanged())
 			{
@@ -655,7 +655,7 @@ bool ConnectionsConfigWidget::openConnectionsConfiguration(bool one_time_edit,
 		)
 	});
 
-	connect(parent_form.apply_ok_btn, &QPushButton::clicked, &parent_form, [&conn_cfg_wgt, &parent_form, &conns_changed](){
+	connect(parent_form.accept_btn, &QPushButton::clicked, &parent_form, [&conn_cfg_wgt, &parent_form, &conns_changed](){
 		__trycatch(
 			conn_cfg_wgt.saveConfiguration();
 			parent_form.accept();

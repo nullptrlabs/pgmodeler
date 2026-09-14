@@ -64,11 +64,7 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 
 	if(act_btns_enabled)
 	{
-		QFont font = this->font();
-
 		show_act_btns = true;
-		font.setPointSizeF(font.pointSizeF() * 0.90);
-
 		top_widget = new QWidget(this);
 		top_widget->setObjectName("top_widget");
 		top_widget->setAutoFillBackground(true);
@@ -84,6 +80,7 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		search_wgt->setObjectName("search_wgt");
 		search_wgt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		search_wgt->setVisible(false);
+		search_wgt->setAutoFillBackground(true);
 		search_wgt->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
 
 		QHBoxLayout *buttons_lt = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing);
@@ -97,7 +94,6 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		ico->setScaledContents(true);
 
 		editor_alert_wgt = new QWidget(top_widget);
-		editor_alert_wgt->setFont(font);
 
 		QHBoxLayout *alert_lt = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing, editor_alert_wgt);
 		alert_lt->addWidget(ico);
@@ -114,7 +110,6 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		load_file_btn->setShortcut(QKeySequence("Ctrl+L"));
 		load_file_btn->setToolTip(tr("Load text from an external file (%1)")
 															.arg(load_file_btn->shortcut().toString()));
-		load_file_btn->setFont(font);
 		load_file_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		buttons_lt->addWidget(load_file_btn);
 
@@ -125,7 +120,6 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		save_file_btn->setShortcut(QKeySequence("Ctrl+S"));
 		save_file_btn->setToolTip(tr("Save the text to a file (%1)")
 															.arg(load_file_btn->shortcut().toString()));
-		save_file_btn->setFont(font);
 		save_file_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		buttons_lt->addWidget(save_file_btn);
 
@@ -137,7 +131,6 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		copy_btn->setShortcut(QKeySequence("Ctrl+C"));
 		copy_btn->setToolTip(tr("Copy a text to the clipboard (%1)")
 												 .arg(copy_btn->shortcut().toString()));
-		copy_btn->setFont(font);
 		copy_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		buttons_lt->addWidget(copy_btn);
 
@@ -148,7 +141,6 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		edit_src_btn->setShortcut(QKeySequence("Ctrl+E"));
 		edit_src_btn->setToolTip(tr("Edit the text in the defined external editor (%1)")
 														 .arg(edit_src_btn->shortcut().toString()));
-		edit_src_btn->setFont(font);
 		edit_src_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		buttons_lt->addWidget(edit_src_btn);
 
@@ -160,7 +152,6 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		search_btn->setShortcut(QKeySequence("Ctrl+F"));
 		search_btn->setToolTip(tr("Search in the text field (%1)")
 													 .arg(search_btn->shortcut().toString()));
-		search_btn->setFont(font);
 		search_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		buttons_lt->addWidget(search_btn);
 
@@ -172,7 +163,6 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		word_wrap_btn->setShortcut(QKeySequence("Ctrl+W"));
 		word_wrap_btn->setToolTip(tr("Toggles the word wrap (%1)")
 															.arg(word_wrap_btn->shortcut().toString()));
-		word_wrap_btn->setFont(font);
 		word_wrap_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		word_wrap_btn->setDisabled(true);
 		buttons_lt->addWidget(word_wrap_btn);
@@ -182,12 +172,23 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		clear_btn->setAutoRaise(true);
 		clear_btn->setText(tr("Clear"));
 		clear_btn->setToolTip(tr("Clears the entire text"));
-		clear_btn->setFont(font);
 		clear_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		clear_btn->setDisabled(true);
 
 		buttons_lt->addWidget(clear_btn);
-		ico->setMaximumSize(edit_src_btn->iconSize());
+
+		for(auto &btn : top_widget->findChildren<QToolButton *>())
+		{
+			GuiUtilsNs::configureWidgetFont(btn, GuiUtilsNs::MediumFontFactor);
+			btn->setStyleSheet(QString("QToolButton { qproperty-iconSize: %1px %1px; }")
+												 .arg(qApp->style()->pixelMetric(QStyle::PM_SmallIconSize)));
+		}
+
+		ico->setMaximumSize(qApp->style()->pixelMetric(QStyle::PM_SmallIconSize),
+												qApp->style()->pixelMetric(QStyle::PM_SmallIconSize));
+
+		GuiUtilsNs::configureWidgetsFont({ top_widget, msg_lbl }, GuiUtilsNs::MediumFontFactor);
+		top_widget->setMaximumHeight(35);
 		top_widget->adjustSize();
 
 		connect(load_file_btn, &QToolButton::clicked, this, &NumberedTextEditor::loadFile);
@@ -272,7 +273,12 @@ void NumberedTextEditor::setFilenameFilters(const QStringList &list, const QStri
 
 void NumberedTextEditor::setDefaultFont(const QFont &font)
 {
-	default_font=font;
+	default_font = font;
+}
+
+QFont NumberedTextEditor::getDefaultFont()
+{
+	return default_font;
 }
 
 void NumberedTextEditor::setLineNumbersVisible(bool value)
@@ -767,9 +773,11 @@ void NumberedTextEditor::resizeWidgets()
 
 	if(top_widget && show_act_btns)
 	{
-		top_widget->setStyleSheet(QString("QWidget#%1 { background-color: %2; }")
-															.arg(top_widget->objectName(), line_numbers_wgt->getBackgroundColor().name()));
-		
+		QPalette tw_pal = top_widget->palette();
+		tw_pal.setColor(QPalette::Window, line_numbers_wgt->getBackgroundColor());
+
+		search_wgt->setPalette(tw_pal);
+		top_widget->setPalette(tw_pal);
 		top_widget->setGeometry(lt_margin, rect.top(),
 														width, top_widget->height());
 
@@ -803,8 +811,8 @@ void NumberedTextEditor::resizeWidgets()
 
 	viewport()->setStyleSheet(vp_style);
 
-	setStyleSheet(QString("NumberedTextEditor { background-color: palette(window); border: 1px solid palette(%1); }")
-								.arg(CustomUiStyle::isDarkPalette() ? "dark" : "mid"));
+	/* setStyleSheet(QString("NumberedTextEditor { background-color: palette(window); border: 1px solid palette(%1); }")
+								.arg(CustomUiStyle::isDarkPalette() ? "dark" : "mid")); */
 }
 
 int NumberedTextEditor::getLineNumbersWidth()

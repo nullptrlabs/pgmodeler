@@ -98,7 +98,6 @@ ModelObjectsWidget::ModelObjectsWidget(bool simplified_view, QWidget *parent) : 
 		connect(hide_tb, &QToolButton::clicked, this, &ModelObjectsWidget::hide);
 
 		setAllObjectsVisible(true);	
-		objectstree_tw->installEventFilter(this);
 		objectstree_tw->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	}
 	else
@@ -117,17 +116,14 @@ ModelObjectsWidget::ModelObjectsWidget(bool simplified_view, QWidget *parent) : 
 
 bool ModelObjectsWidget::eventFilter(QObject *object, QEvent *event)
 {
-	if(event->type() == QEvent::FocusOut && object == objectstree_tw)
+	if(event->type() == QEvent::FocusIn &&
+		 model_wgt && (object == model_wgt->viewport))
 	{
 		QFocusEvent *evnt = dynamic_cast<QFocusEvent *>(event);
 
 		if(evnt->reason() == Qt::MouseFocusReason)
 		{
-			clearSelectedObject();
-
-			if(model_wgt)
-				model_wgt->configurePopupMenu(nullptr);
-
+			clearSelectedObjects();
 			return true;
 		}
 	}
@@ -181,7 +177,7 @@ void ModelObjectsWidget::editObject()
 		else
 			model_wgt->editObject();
 
-		clearSelectedObject();
+		clearSelectedObjects();
 	}
 }
 
@@ -793,7 +789,10 @@ void ModelObjectsWidget::setModel(ModelWidget *model_wgt)
 	this->model_wgt=model_wgt;
 
 	if(model_wgt)
+	{
 		setModel(model_wgt->db_model);
+		model_wgt->viewport->installEventFilter(this);
+	}
 	else
 		setModel(static_cast<DatabaseModel *>(nullptr));
 }
@@ -901,14 +900,18 @@ void ModelObjectsWidget::saveTreeState(bool value)
 	save_tree_state=(!simplified_view && value);
 }
 
-void ModelObjectsWidget::clearSelectedObject()
+void ModelObjectsWidget::clearSelectedObjects()
 {
 	objectstree_tw->blockSignals(true);
 	objectstree_tw->clearSelection();
 	objectstree_tw->blockSignals(false);
 	selected_objs.clear();
-	model_wgt->configurePopupMenu(nullptr);
-	model_wgt->emitSceneInteracted();
+
+	//if(model_wgt)
+	//{
+		//model_wgt->configurePopupMenu(nullptr);
+		//model_wgt->emitSceneInteracted();
+	//}
 }
 
 void ModelObjectsWidget::saveTreeState(QStringList &exp_items_ids, int &v_scroll_pos)

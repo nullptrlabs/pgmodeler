@@ -154,14 +154,20 @@ RelationshipWidget::RelationshipWidget(QWidget *parent): BaseObjectWidget(parent
 																dynamic_cast<BaseRelationship *>(this->object)->getRelationshipType() != BaseRelationship::Relationship1n);
 	});
 
+	connect(attributes_tab, &CustomTableWidget::s_rowAdded, this, [this]() {
+		__trycatch( addObject(ObjectType::Column); )
+	});
+
 	connect(attributes_tab, &CustomTableWidget::s_rowsRemoved, this, __slot(this, RelationshipWidget::removeObjects));
-	connect(attributes_tab, &CustomTableWidget::s_rowAdded, this, __slot(this, RelationshipWidget::addObject));
 	connect(attributes_tab, &CustomTableWidget::s_rowEdited, this, __slot_n(this, RelationshipWidget::editObject));
 	connect(attributes_tab, &CustomTableWidget::s_rowRemoved, this, __slot_n(this, RelationshipWidget::removeObject));
 	connect(attributes_tab, &CustomTableWidget::s_rowDuplicated, this, __slot_n(this, RelationshipWidget::duplicateObject));
 
+	connect(constraints_tab, &CustomTableWidget::s_rowAdded, this, [this]() {
+		__trycatch( addObject(ObjectType::Constraint); )
+	});
+
 	connect(constraints_tab, &CustomTableWidget::s_rowsRemoved, this, __slot(this, RelationshipWidget::removeObjects));
-	connect(constraints_tab, &CustomTableWidget::s_rowAdded, this, __slot(this, RelationshipWidget::addObject));
 	connect(constraints_tab, &CustomTableWidget::s_rowEdited, this, __slot_n(this, RelationshipWidget::editObject));
 	connect(constraints_tab, &CustomTableWidget::s_rowRemoved, this, __slot_n(this, RelationshipWidget::removeObject));
 	connect(constraints_tab, &CustomTableWidget::s_rowDuplicated, this, __slot_n(this, RelationshipWidget::duplicateObject));
@@ -781,10 +787,8 @@ int RelationshipWidget::openEditingForm(TableObject *object, BaseObject *parent)
 	return res;
 }
 
-void RelationshipWidget::addObject()
+void RelationshipWidget::addObject(ObjectType obj_type)
 {
-	ObjectType obj_type = ObjectType::BaseObject;
-
 	try
 	{
 		if(obj_type == ObjectType::Column)

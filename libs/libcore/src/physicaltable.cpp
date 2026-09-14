@@ -726,33 +726,34 @@ void PhysicalTable::removeObject(unsigned obj_idx, ObjectType obj_type)
 		}
 		else
 		{
-			std::vector<TableObject *> refs;
-			Column *column=nullptr;
-
-			itr=obj_list->begin() + obj_idx;
-			column=dynamic_cast<Column *>(*itr);
-
-			//Gets the references to the column before the exclusion
-			refs = getColumnReferences(column);
+			Column *column = nullptr;
+			itr = obj_list->begin() + obj_idx;
+			column = dynamic_cast<Column *>(*itr);
+			std::vector<BaseObject *> refs = column->getReferences();
 
 			//Case some trigger, constraint, index is referencing the column raises an error
 			if(!refs.empty())
 			{
-				throw Exception(Exception::getErrorMessage(ErrorCode::RemInderectReference)
-								.arg(column->getSignature())
-								.arg(column->getTypeName())
-								.arg(refs[0]->getSignature())
-						.arg(refs[0]->getTypeName())
-						.arg(this->getSignature())
-						.arg(this->getTypeName()),
-						ErrorCode::RemInderectReference,PGM_FUNC,PGM_FILE,PGM_LINE);
+				if(TableObject::isTableObject(refs[0]->getObjectType()))
+				{
+					throw Exception(Exception::getErrorMessage(ErrorCode::RemInderectReference)
+													.arg(column->getSignature(), column->getTypeName(),
+															 refs[0]->getSignature(), refs[0]->getTypeName(),
+															 this->getSignature(), this->getTypeName()),
+													ErrorCode::RemInderectReference,PGM_FUNC,PGM_FILE,PGM_LINE);
+				}
+
+				throw Exception(Exception::getErrorMessage(ErrorCode::RemDirectReference)
+												.arg(column->getSignature(), column->getTypeName(),
+														 refs[0]->getSignature(), refs[0]->getTypeName()),
+												ErrorCode::RemDirectReference,PGM_FUNC,PGM_FILE,PGM_LINE);
 			}
 
 			//Raises an error if the column is being referenced by any partition key
 			if(isPartitionKeyRefColumn(column))
 			{
 				throw Exception(Exception::getErrorMessage(ErrorCode::RemColumnRefByPartitionKey)
-								.arg(column->getSignature()).arg(this->getSignature()),
+								.arg(column->getSignature(), this->getSignature()),
 								ErrorCode::RemColumnRefByPartitionKey,PGM_FUNC,PGM_FILE,PGM_LINE);
 			}
 
@@ -868,25 +869,28 @@ int PhysicalTable::getObjectIndex(const QString &name, ObjectType obj_type)
 	return idx;
 }
 
-int PhysicalTable::getObjectIndex(BaseObject *obj)
+int PhysicalTable::getObjectIndex(BaseObject *obj, bool strict)
 {
-	TableObject *tab_obj=dynamic_cast<TableObject *>(obj);
+	TableObject *tab_obj = dynamic_cast<TableObject *>(obj);
 	std::vector<TableObject *> *obj_list = nullptr;
 	std::vector<TableObject *>::iterator itr, itr_end;
-	bool found=false;
+	bool found = false;
 
-	if(!obj) return -1;
+	if(!obj)
+		return -1;
 
 	obj_list = getObjectList(obj->getObjectType());
-	if(!obj_list) return -1;
 
-	itr=obj_list->begin();
-	itr_end=obj_list->end();
+	if(!obj_list)
+		return -1;
 
-	while(itr!=itr_end && !found)
+	itr = obj_list->begin();
+	itr_end = obj_list->end();
+
+	while(itr != itr_end && !found)
 	{
-		found=((tab_obj->getParentTable()==this && (*itr)==tab_obj) ||
-					 (tab_obj->getName()==(*itr)->getName()));
+		found=((tab_obj->getParentTable() == this && (*itr) == tab_obj) ||
+					 (!strict && tab_obj->getName() == (*itr)->getName()));
 
 		if(!found)
 			itr++;
@@ -1546,24 +1550,6 @@ void PhysicalTable::swapObjectsIndexes(ObjectType obj_type, unsigned idx1, unsig
 	{
 		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
-}
-
-std::vector<TableObject *> PhysicalTable::getColumnReferences(Column *column)
-{
-	if(!column || column->isAddedByRelationship())
-		return {};
-
-	std::vector<BaseObject *> refs = column->getReferences();
-	std::vector<TableObject *> col_refs;
-
-	std::for_each(refs.begin(), refs.end(),
-								[&col_refs](auto &obj)
-								{
-									if(TableObject::isTableObject(obj->getObjectType()))
-										col_refs.push_back(dynamic_cast<TableObject *>(obj));
-								});
-
-	return col_refs;
 }
 
 std::vector<BaseObject *> PhysicalTable::getObjects(const std::vector<ObjectType> &excl_types)

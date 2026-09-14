@@ -60,6 +60,8 @@ class __libutils CustomUiStyle : public QProxyStyle {
 			TopRight = 2,
 			BottomLeft = 4,
 			BottomRight = 8,
+			LeftCorners = TopLeft | BottomLeft,
+			RightCorners = TopRight | BottomRight,
 			AllCorners = TopLeft | TopRight | BottomLeft | BottomRight
 		};
 
@@ -110,6 +112,9 @@ class __libutils CustomUiStyle : public QProxyStyle {
 
 		// Helper method to add edge with optional rounded corner to QPainterPath
 		void addEdgeWithCorner(QPainterPath &path, const QRectF &rect, OpenEdge side, int radius) const;
+
+		// Returns which corners to round for each half of a MenuButtonPopup QToolButton
+		CornerFlag menuButtonSubCorners(const QStyleOption *option, const QWidget *widget) const;
 
 		// Generic method to create QPainterPath with configurable corner radius and open sides
 		QPainterPath createControlShape(const QRect &rect, int radius, CornerFlag corners = AllCorners,
@@ -257,7 +262,8 @@ class __libutils CustomUiStyle : public QProxyStyle {
 			ConfirmFrmHint, // Green border (confirmation)
 			AlertFrmHint, // Yellow border (alert)
 			ErrorFrmHint, // Red border (error)
-			SuccessFrmHint // Greenish border (success)
+			SuccessFrmHint, // Greenish border (success)
+			AccentFrmHint // Accent border (according to QPalette::Accent [varies by theme])
 		};
 
 		CustomUiStyle() = default;
@@ -296,8 +302,10 @@ class __libutils CustomUiStyle : public QProxyStyle {
 	/*! \brief Sets a style hint on a QFrame to customize its border color and radius
 	 * So it can be rendered as a inlined alert/info/error frames.
 	 * This method forces the frames shape to StyledPanel. */
-		static void setStyleHint(StyleHint hint, QFrame *frames);
-		static void setStyleHint(StyleHint hint, const QList<QFrame *> &frames);
+		static void setStyleHint(StyleHint hint, QWidget *wgt);
+		static void setStyleHint(StyleHint hint, const QList<QWidget *> &wgts);
+
+		static bool isWidgetHint(StyleHint hint);
 
 		//! \brief Checks if the current application palette is dark (dark theme)
 		static bool isDarkPalette();

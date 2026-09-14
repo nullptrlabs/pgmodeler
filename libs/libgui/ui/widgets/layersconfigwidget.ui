@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>511</width>
+    <width>500</width>
     <height>250</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>450</width>
+    <width>500</width>
     <height>250</height>
    </size>
   </property>
@@ -279,55 +279,94 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="spacing">
-         <number>5</number>
+       <widget class="QFrame" name="options_frm">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
         </property>
-        <item>
-         <widget class="QCheckBox" name="toggle_layers_rects_chk">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Display layer rectangles</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="toggle_layers_names_chk">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Display layer names</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="rels_tabs_visibility_chk">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+        <property name="frameShape">
+         <enum>QFrame::Shape::StyledPanel</enum>
         </property>
-        <property name="toolTip">
-         <string>&lt;p&gt;Relationships are hidden/shown according to their tables' visibility. When checked, this option ignores the layers' visibility of the affected relationships'.&lt;/p&gt;</string>
+        <property name="frameShadow">
+         <enum>QFrame::Shadow::Raised</enum>
         </property>
-        <property name="text">
-         <string>Relationships follow tables' visibility</string>
-        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <property name="leftMargin">
+          <number>5</number>
+         </property>
+         <property name="topMargin">
+          <number>5</number>
+         </property>
+         <property name="rightMargin">
+          <number>5</number>
+         </property>
+         <property name="bottomMargin">
+          <number>5</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="toggle_layers_rects_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Display layer rectangles</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="rels_tabs_visibility_chk">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>&lt;p&gt;Relationships are hidden/shown according to their tables' visibility. When checked, this option ignores the layers' visibility of the affected relationships'.&lt;/p&gt;</string>
+           </property>
+           <property name="text">
+            <string>Relationships follow tables' visibility</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="toggle_layers_names_chk">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Display layer names</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QCheckBox" name="sel_objects_chk">
+           <property name="toolTip">
+            <string>&lt;p&gt;Selects all objects belonging to the layers selected in the grid below&lt;/p&gt;</string>
+           </property>
+           <property name="text">
+            <string>Select objects on selected layers</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
@@ -345,7 +384,7 @@
          <bool>true</bool>
         </property>
         <property name="selectionMode">
-         <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+         <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
         </property>
         <property name="selectionBehavior">
          <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
@@ -363,7 +402,7 @@
          <bool>true</bool>
         </attribute>
         <attribute name="verticalHeaderVisible">
-         <bool>false</bool>
+         <bool>true</bool>
         </attribute>
         <attribute name="verticalHeaderCascadingSectionResizes">
          <bool>false</bool>
@@ -389,7 +428,7 @@
         </column>
         <column>
          <property name="text">
-          <string>Rectangle color</string>
+          <string>Rect. color</string>
          </property>
         </column>
        </widget>
@@ -404,8 +443,6 @@
   <tabstop>remove_btn</tabstop>
   <tabstop>remove_all_btn</tabstop>
   <tabstop>visibility_btn</tabstop>
-  <tabstop>toggle_layers_rects_chk</tabstop>
-  <tabstop>toggle_layers_names_chk</tabstop>
   <tabstop>layers_tab</tabstop>
  </tabstops>
  <resources>

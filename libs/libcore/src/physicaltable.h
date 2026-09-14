@@ -283,9 +283,12 @@ class __libcore PhysicalTable: public BaseTable {
 		int getObjectIndex(const QString &name, ObjectType obj_type) override;
 
 		/*! \brief Returns the index for the specified table object.
-		If the object specified on the parameter owns to another table other than 'this'
-		then the name of the objects are compared instead of the memory address */
-		int getObjectIndex(BaseObject *obj) override;
+		 *  The parameter strict, when true, causes the comparison to be made
+		 *  strictly by matching the object's parent table address and its own address.
+		 *
+		 *  When strict is false, the comparison ocurrs ALSO by matching object's name
+		 *  against others of the same type in the parent table. */
+		int getObjectIndex(BaseObject *obj, bool strict = false) override;
 
 		//! \brief Returns the children objects of the table excluding the provided children types
 		std::vector<BaseObject *> getObjects(const std::vector<ObjectType> &excl_types = {}) override;
@@ -328,9 +331,6 @@ class __libcore PhysicalTable: public BaseTable {
 
 		//! \brief Returns the specified object type list. Returns null if an invalid object type is provided
 		virtual std::vector<TableObject *> *getObjectList(ObjectType obj_type);
-
-		//! \brief Returns a list of objects that references the providede column.
-		std::vector<TableObject *> getColumnReferences(Column *column);
 
 		//! \brief Reset the current index of the objects created by relationship
 		void resetRelObjectsIndexes();

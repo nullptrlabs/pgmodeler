@@ -25,7 +25,7 @@
 
 BaseForm::BaseForm(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f)
 {
-	track_changes = has_changes = false;
+	track_changes = has_changes = prevent_close = false;
 	main_wgt = nullptr;
 	tab_order_mng = nullptr;
 	setupUi(this);
@@ -36,26 +36,38 @@ void BaseForm::setButtonConfiguration(Messagebox::ButtonsId button_conf)
 {
 	if(button_conf==Messagebox::OkCancelButtons)
 	{
-		apply_ok_btn->setText(tr("&Apply"));
-		cancel_btn->setVisible(true);
+		accept_btn->setText(tr("&Apply"));
+		reject_btn->setVisible(true);
+	}
+	else if(button_conf==Messagebox::OkCloseButtons)
+	{
+		accept_btn->setText(tr("&Ok"));
+		reject_btn->setText(tr("&Close"));
+		reject_btn->setIcon(GuiUtilsNs::getIcon("close1"));
+		reject_btn->setVisible(true);
 	}
 	else
 	{
 		if(button_conf==Messagebox::CloseButton)
 		{
-			apply_ok_btn->setText(tr("&Close"));
-			apply_ok_btn->setIcon(GuiUtilsNs::getIcon("close1"));
+			accept_btn->setText(tr("&Close"));
+			accept_btn->setIcon(GuiUtilsNs::getIcon("close1"));
 		}
 		else
 		{
-			apply_ok_btn->setText(tr("&Ok"));
-			apply_ok_btn->setIcon(GuiUtilsNs::getIcon("confirm"));
+			accept_btn->setText(tr("&Ok"));
+			accept_btn->setIcon(GuiUtilsNs::getIcon("confirm"));
 		}
 
-		cancel_btn->setVisible(false);
+		reject_btn->setVisible(false);
 	}
 
-	apply_ok_btn->setDefault(button_conf != Messagebox::CloseButton);
+	accept_btn->setDefault(button_conf != Messagebox::CloseButton);
+}
+
+void BaseForm::setPreventClose(bool value)
+{
+	prevent_close = value;
 }
 
 void BaseForm::adjustMinimumSize()
@@ -173,6 +185,9 @@ void BaseForm::resizeForm(QWidget *widget)
 
 void BaseForm::reject()
 {
+	if(prevent_close)
+		return;
+
 	if(track_changes && has_changes)
 	{
 		int res = Messagebox::confirm(tr("Some fields in the form were modified! Do you really want to close and discard changes?"));
@@ -189,6 +204,12 @@ void BaseForm::reject()
 
 void BaseForm::closeEvent(QCloseEvent *event)
 {
+	if(prevent_close)
+	{
+		event->ignore();
+		return;
+	}
+
 	this->reject();
 
 	if(result() < 0)
@@ -274,6 +295,6 @@ void BaseForm::setMainWidget(QWidget *widget)
 	resizeForm(widget);
 
 	setButtonConfiguration(Messagebox::OkButton);
-	connect(cancel_btn, &QPushButton::clicked, this, &BaseForm::reject);
-	connect(apply_ok_btn, &QPushButton::clicked, this, &BaseForm::accept);
+	connect(reject_btn, &QPushButton::clicked, this, &BaseForm::reject);
+	connect(accept_btn, &QPushButton::clicked, this, &BaseForm::accept);
 }

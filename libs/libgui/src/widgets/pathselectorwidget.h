@@ -21,20 +21,20 @@
 
 /**
 \ingroup libgui
-\class FileSelectorWidget
+\class PathSelectorWidget
 \brief Implements a simple file/directory picker with customizable behavior.
 */
 
-#ifndef FILE_SELECTOR_WIDGET_H
-#define FILE_SELECTOR_WIDGET_H
+#ifndef PATH_SELECTOR_WIDGET_H
+#define PATH_SELECTOR_WIDGET_H
 
 #include "guiglobal.h"
 #include <QFileDialog>
 #include <QLabel>
 #include <QRegularExpression>
-#include "ui_fileselectorwidget.h"
+#include "ui_pathselectorwidget.h"
 
-class __libgui FileSelectorWidget: public QWidget, public Ui::FileSelectorWidget {
+class __libgui PathSelectorWidget: public QWidget, public Ui::PathSelectorWidget {
 	Q_OBJECT
 
 	private:
@@ -57,12 +57,13 @@ class __libgui FileSelectorWidget: public QWidget, public Ui::FileSelectorWidget
 		bool eventFilter(QObject *obj, QEvent *evnt) override;
 		void resizeEvent(QResizeEvent *event) override;
 		void showEvent(QShowEvent *event) override;
+		void changeEvent(QEvent *event) override;
 
 	public:
-		FileSelectorWidget(QWidget * parent = nullptr);
+		PathSelectorWidget(QWidget * parent = nullptr);
 
 		//! \brief Indicate if the selector allows manual filename input
-		void setAllowFilenameInput(bool allow_fl_input);
+		void setAllowPathInput(bool allow_fl_input);
 
 		//! \brief Toggles the directory selection mode. The default is to always select a single file.
 		void setDirectoryMode(bool dir_mode);
@@ -81,16 +82,16 @@ class __libgui FileSelectorWidget: public QWidget, public Ui::FileSelectorWidget
 		void setCheckExecutionFlag(bool value);
 
 		//! \brief If true, the selected file must be provided otherwise an warning is displayed
-		void setFileIsMandatory(bool value);
+		void setPathIsMandatory(bool value);
 
 		//! \brief If true, the selected file must exist in the file system
-		void setFileMustExist(bool value);
+		void setPathMustExist(bool value);
 
 		//! \brief Configures the window title of the file dialog instance
 		void setFileDialogTitle(const QString &title);
 
-		//! \brief Configures the currently selected file in the selector
-		void setSelectedFile(const QString &file);
+		//! \brief Configures the currently selected file or directory in the selector
+		void setSelectedPath(const QString &file);
 
 		//! \brief Configures the mime filters of the internal QFileDialog (see QFileDialog::setMimeTypeFilters)
 		void setMimeTypeFilters(const QStringList &filters);
@@ -106,7 +107,7 @@ class __libgui FileSelectorWidget: public QWidget, public Ui::FileSelectorWidget
 		bool hasWarning();
 
 		//! \brief Returns the selected file/directory
-		QString getSelectedFile();
+		QString getSelectedPath();
 
 		//! \brief Sets a custom warning message to the selector
 		void setCustomWarning(const QString &warn_msg);
@@ -131,7 +132,7 @@ class __libgui FileSelectorWidget: public QWidget, public Ui::FileSelectorWidget
 
 	signals:
 		//! \brief Signal emitted when the user selects an file/directory
-		void s_fileSelected(QString);
+		void s_pathSelected(QString);
 
 		//! \brief Signal emitted when the user clears the selector
 		void s_selectorCleared();

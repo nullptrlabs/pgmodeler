@@ -196,12 +196,13 @@ class __libgui SyntaxHighlighter: public QSyntaxHighlighter {
 		//! \brief Sets the default font for all instances of this class
 		static void setDefaultFont(const QFont &fnt);
 
+	public slots:
+		//! \brief Clears the loaded configuration
+		void clearConfiguration();
+
 	private slots:
 		//! \brief Highlight a line of the text
 		void highlightBlock(const QString &text) override;
-
-		//! \brief Clears the loaded configuration
-		void clearConfiguration();
 };
 
 #endif

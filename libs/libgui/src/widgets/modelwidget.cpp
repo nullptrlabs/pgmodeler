@@ -740,10 +740,6 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 
 ModelWidget::~ModelWidget()
 {
-	/* Forcing the deletion of db_model only after everything else was destroyed
-	 * to avoid memory leaks */
-	db_model->deleteLater();
-
 	/* If there are copied/cutted objects that belongs to the database model
 	 being destroyed, then the cut/copy operation are cancelled by emptying
 	 the lists, avoiding crashes when trying to paste them */
@@ -1370,10 +1366,19 @@ void ModelWidget::setBlinkAddedObjects(bool value)
 	blink_new_objs = value;
 }
 
+void ModelWidget::selectObjectsInLayers(const QList<unsigned int> &layer_ids)
+{
+	scene->blockSignals(true);
+	scene->selectObjectsInLayers(layer_ids);
+	scene->blockSignals(false);
+	configureObjectSelection();
+	emitSceneInteracted();
+}
+
 void ModelWidget::configureObjectSelection()
 {
-	QList<QGraphicsItem *> items=scene->selectedItems();
-	BaseObjectView *item=nullptr;
+	QList<QGraphicsItem *> items = scene->selectedItems();
+	BaseObjectView *item = nullptr;
 	std::map<unsigned, QGraphicsItem *> objs_map;
 	std::map<unsigned, QGraphicsItem *>::iterator itr;
 
@@ -2801,8 +2806,13 @@ void ModelWidget::selectTaggedTables()
 	for(auto &object : tag->getReferences())
 	{
 		obj_view = dynamic_cast<BaseObjectView *>(dynamic_cast<BaseGraphicObject *>(object)->getOverlyingObject());
+		obj_view->blockSignals(true);
 		obj_view->setSelected(true);
+		obj_view->blockSignals(false);
 	}
+
+	configureObjectSelection();
+	emit emitSceneInteracted();
 }
 
 void ModelWidget::protectObject()
@@ -3201,8 +3211,8 @@ void ModelWidget::pasteObjects(bool duplicate_mode)
 			 * view's only accepts this two types) */
 			if(sel_table ||
 					(sel_view && (tab_obj->getObjectType()==ObjectType::Trigger ||
-									tab_obj->getObjectType()==ObjectType::Rule ||
-									tab_obj->getObjectType()==ObjectType::Index)))
+												tab_obj->getObjectType()==ObjectType::Rule ||
+												tab_obj->getObjectType()==ObjectType::Index)))
 			{
 				//Backups the original parent table
 				orig_parent_tab = tab_obj->getParentTable();
@@ -3302,10 +3312,13 @@ void ModelWidget::pasteObjects(bool duplicate_mode)
 				//Special case for table objects
 				if(tab_obj)
 				{
+					bool obj_added = false;
+
 					if(sel_table && tab_obj->getObjectType() == ObjectType::Column)
 					{
 						sel_table->addObject(tab_obj);
 						sel_table->setModified(true);
+						obj_added = true;
 					}
 					else if(constr && duplicate_mode &&
 							constr->getConstraintType() == ConstraintType::PrimaryKey &&
@@ -3313,13 +3326,21 @@ void ModelWidget::pasteObjects(bool duplicate_mode)
 					{
 						constr->getParentTable()->addObject(constr);
 						constr->getParentTable()->setModified(true);
+						obj_added = true;
 					}
 
 					//Updates the fk relationships if the constraint is a foreign-key
 					if(constr && constr->getConstraintType() == ConstraintType::ForeignKey)
 						db_model->updateTableFKRelationships(dynamic_cast<Table *>(tab_obj->getParentTable()));
 
-					op_list->registerObject(tab_obj, Operation::ObjCreated, -1, tab_obj->getParentTable());
+					if(obj_added)
+						op_list->registerObject(tab_obj, Operation::ObjCreated, -1, tab_obj->getParentTable());
+					else
+						/* In some cases the object may not be added to the parent table
+						 * either by any error from xml parsing or other that prevented the
+						 * table object to be inserted in the table, so, to avoid leak, we
+						 * delete the object that was created from xml */
+						delete tab_obj;
 				}
 				else
 					op_list->registerObject(object, Operation::ObjCreated);
@@ -5330,12 +5351,12 @@ void ModelWidget::swapObjectsIds()
 	parent_form.setMainWidget(swap_ids_wgt, &SwapObjectsIdsWidget::swapObjectsIds);
 	parent_form.setButtonConfiguration(Messagebox::OkCancelButtons);
 
-	parent_form.apply_ok_btn->setEnabled(false);
-	parent_form.apply_ok_btn->setIcon(GuiUtilsNs::getIcon("swapobjs"));
-	parent_form.apply_ok_btn->setText(tr("&Swap ids"));
+	parent_form.accept_btn->setEnabled(false);
+	parent_form.accept_btn->setIcon(GuiUtilsNs::getIcon("swapobjs"));
+	parent_form.accept_btn->setText(tr("&Swap ids"));
 
-	parent_form.cancel_btn->setIcon(GuiUtilsNs::getIcon("close1"));
-	parent_form.cancel_btn->setText(tr("&Close"));
+	parent_form.reject_btn->setIcon(GuiUtilsNs::getIcon("close1"));
+	parent_form.reject_btn->setText(tr("&Close"));
 
 	connect(swap_ids_wgt, &SwapObjectsIdsWidget::s_objectsIdsSwapped, this, [this](){
 		op_list->removeOperations();
@@ -5343,7 +5364,8 @@ void ModelWidget::swapObjectsIds()
 		emit s_objectManipulated();
 	});
 
-	connect(swap_ids_wgt, &SwapObjectsIdsWidget::s_objectsIdsSwapReady, parent_form.apply_ok_btn, &QPushButton::setEnabled);
+	connect(swap_ids_wgt, &SwapObjectsIdsWidget::s_objectsIdsSwapReady,
+					parent_form.accept_btn, &QPushButton::setEnabled);
 
 	GeneralConfigWidget::restoreWidgetGeometry(&parent_form, swap_ids_wgt->metaObject()->className());
 	parent_form.exec();

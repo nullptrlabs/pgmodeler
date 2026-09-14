@@ -86,7 +86,7 @@ TypeWidget::TypeWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Ty
 	range_subtype = new PgSQLTypeWidget(this, tr("Subtype"));
 	range_attribs_lt->addWidget(range_subtype);
 
-	connect(configuration_cmb, &QComboBox::activated, this, &TypeWidget::selectTypeConfiguration);
+	connect(configuration_cmb, &QComboBox::currentIndexChanged, this, &TypeWidget::selectTypeConfiguration);
 	connect(attributes_tab, &CustomTableWidget::s_rowEdited, this, &TypeWidget::editAttribute);
 
 	connect(attributes_tab, &CustomTableWidget::s_rowAdded, this, __slot_n(this, TypeWidget::handleAttribute));
@@ -104,10 +104,6 @@ TypeWidget::TypeWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Ty
 	layout()->removeItem(configuration_lt);
 	extra_wgts_lt->addLayout(configuration_lt);
 	configureTabbedLayout(type_attribs_twg);
-
-	/* configureTabOrder({ attrib_name_edt, attrib_collation_sel, attrib_type_wgt,
-										 opclass_sel, functions_sel[Type::CanonicalFunc], functions_sel[Type::SubtypeDiffFunc],
-										 type_attribs_twg}); */
 
 	setMinimumSize(600, 480);
 }
@@ -183,7 +179,7 @@ void TypeWidget::handleAttribute(int row)
 void TypeWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, Type *type)
 {
 	PgSqlType like_tp, elem_tp;
-	unsigned i, count;
+	unsigned i = 0, count = 0;
 	Type::TypeConfig type_conf;
 
 	BaseObjectWidget::setAttributes(model, op_list, type, schema);

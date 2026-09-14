@@ -30,7 +30,7 @@
 
 #include "ui_generalconfigwidget.h"
 #include "baseconfigwidget.h"
-#include "widgets/fileselectorwidget.h"
+#include "widgets/pathselectorwidget.h"
 
 class __libgui GeneralConfigWidget: public BaseConfigWidget, public Ui::GeneralConfigWidget {
 	Q_OBJECT
@@ -48,7 +48,7 @@ class __libgui GeneralConfigWidget: public BaseConfigWidget, public Ui::GeneralC
 
 		QWidgetList child_wgts;
 
-		FileSelectorWidget *confs_dir_sel,
+		PathSelectorWidget *confs_dir_sel,
 		*source_editor_sel;
 
 		static std::map<QString, WidgetState> widgets_geom;

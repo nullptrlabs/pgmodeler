@@ -220,52 +220,64 @@ void OperationList::removeOperations()
 	//Case there is not removed object
 	while(!not_removed_objs.empty())
 	{
-		object=not_removed_objs.back();
+		object = not_removed_objs.back();
 
 		//If the object is not an invalid one, proceed with its deallocation
-		if(std::find(invalid_objs.begin(), invalid_objs.end(), object)==invalid_objs.end())
+		if(std::find(invalid_objs.begin(), invalid_objs.end(), object) == invalid_objs.end())
 		{
-			if(unallocated_objs.count(object)==0)
-				tab_obj=dynamic_cast<TableObject *>(object);
+			if(unallocated_objs.count(object) == 0)
+				tab_obj = dynamic_cast<TableObject *>(object);
 
 			//Deletes the object if its not unallocated already or referenced on the model
-			if(unallocated_objs.count(object)==0 &&
+			if(unallocated_objs.count(object) == 0 &&
 					(!tab_obj && model->getObjectIndex(object) < 0))
 			{
-				if(object->getObjectType()==ObjectType::Table)
-				{
-					std::vector<BaseObject *> list=dynamic_cast<Table *>(object)->getObjects();
+				BaseTable *base_tab = dynamic_cast<BaseTable *>(object);
 
-					while(!list.empty())
+				/* If the object is a table/view/foreign table
+				 * we force the destruction of all its children as
+				 * well as flag them as unallocated too, so, they are not
+				 * unallocated again (double-free) in case we are destroying
+				 * an operation registered for that child object too */
+				if(base_tab)
+				{
+					for(auto &tb_obj : base_tab->getObjects())
 					{
-						unallocated_objs[list.back()]=true;
-						list.pop_back();
+						/* We destroy the child object only if it was
+						 * not destroyed before */
+						if(unallocated_objs.count(tb_obj) == 0)
+							unallocated_objs[tb_obj] = true;
 					}
 				}
 
-				unallocated_objs[object]=true;
+				unallocated_objs[object] = true;
 				delete object;
 			}
-			else if(tab_obj && unallocated_objs.count(tab_obj)==0)
+			/* If the object is a table child object and was not destroyed yet.
+			 * This can happen when only a table child object (column, constraint, index, etc)
+			 * is registered in a operation but the parent table itself was not touched
+			 * by any operation. So we have to destroy that child object only */
+			else if(tab_obj && unallocated_objs.count(tab_obj) == 0)
 			{
 				tab = tab_obj->getParentTable();
 
 				//Deletes the object if its not unallocated already or referenced by some table
 				if(!tab ||
-						(unallocated_objs.count(tab)==1) ||
-						(tab && unallocated_objs.count(tab)==0 && tab->getObjectIndex(tab_obj) < 0))
+						(unallocated_objs.count(tab) == 1) ||
+						(tab && unallocated_objs.count(tab) == 0 &&
+						 tab->getObjectIndex(tab_obj, true) < 0))
 				{
-					unallocated_objs[tab_obj]=true;
+					unallocated_objs[tab_obj] = true;
 					delete tab_obj;
 				}
 			}
 		}
 
 		not_removed_objs.pop_back();
-		tab_obj=nullptr;
+		tab_obj = nullptr;
 	}
 
-	current_index=0;
+	current_index = 0;
 	unallocated_objs.clear();
 }
 
@@ -769,7 +781,17 @@ void OperationList::executeOperation(Operation *oper, bool redo)
 				orig_obj->updateDependencies();
 
 			if(aux_obj)
+			{
 				CoreUtilsNs::copyObject(&object, aux_obj, obj_type);
+				Column *aux_col = dynamic_cast<Column *>(object);
+
+				/* When restoring modified columns, in some cases, the parent table
+				 * is null (when the column is created from xml), in that case
+				 * we need to force the assignment of parent table to the
+				 * restored object */
+				if(aux_col && !aux_col->getParentTable() && parent_tab)
+					aux_col->setParentTable(parent_tab);
+			}
 
 			//For pk constraint, after restore the previous configuration, check the not-null flag of the new source columns
 			if(obj_type==ObjectType::Constraint)
@@ -975,8 +997,15 @@ void OperationList::removeLastOperation()
 			next_op_chain=Operation::ChainStart;
 
 		//Erasing the excluded operations
+		std::vector<Operation *>::iterator aux_itr;
+
 		for(int i=operations.size()-1; i > oper_idx ; i--)
-			operations.erase(operations.begin() + i);
+		{
+			aux_itr = (operations.begin() + i);
+			oper = *aux_itr;
+			operations.erase(aux_itr);
+			delete oper;
+		}
 
 		//Validates the remaining operations
 		validateOperations();

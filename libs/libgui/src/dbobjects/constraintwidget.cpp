@@ -25,8 +25,6 @@
 
 ConstraintWidget::ConstraintWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Constraint)
 {
-	std::map<QString, std::vector<QWidget *> > fields_map;
-	std::map<QWidget *, std::vector<QString> > values_map;
 	QGridLayout *grid = nullptr;
 
 	Ui_ConstraintWidget::setupUi(this);
@@ -52,6 +50,11 @@ ConstraintWidget::ConstraintWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	on_delete_cmb->addItems(ActionType::getTypes());
 	on_update_cmb->addItems(ActionType::getTypes());
 
+	std::map<QString, std::vector<QWidget *> > fields_map;
+	fields_map[generateVersionsInterval(AfterVersion, PgSqlVersions::PgSqlVersion150)].push_back(nulls_not_distinct_chk);
+	fields_map[generateVersionsInterval(AfterVersion, PgSqlVersions::PgSqlVersion180)].push_back(temporal_key_chk);
+	highlightVersionSpecificFields(fields_map);
+
 	connect(constr_type_cmb, &QComboBox::currentIndexChanged, this, &ConstraintWidget::selectConstraintType);
 	connect(deferrable_chk, &QCheckBox::toggled, deferral_cmb, &QComboBox::setEnabled);
 	connect(indexing_chk, &QCheckBox::toggled, indexing_cmb, &QComboBox::setEnabled);
@@ -66,7 +69,6 @@ ConstraintWidget::ConstraintWidget(QWidget *parent): BaseObjectWidget(parent, Ob
 	extra_wgts_lt->addLayout(constr_attribs_grid);
 	configureTabbedLayout(constr_attribs_tbw);
 
-	//configureTabOrder();
 	setMinimumSize(600, 450);
 }
 
@@ -90,13 +92,14 @@ void ConstraintWidget::selectConstraintType()
 	if(!tablespace_sel->isVisible())
 		tablespace_sel->clearSelector();
 
-	options_frm->setVisible(is_uq || is_ck);
+	options_frm->setVisible(!is_ex);
 
-	if(is_uq || is_ck)
+	if(!is_ex)
 		v_spacer->changeSize(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored);
 	else
 		v_spacer->changeSize(5, 5, QSizePolicy::Ignored, QSizePolicy::Expanding);
 
+	temporal_key_chk->setVisible(is_pk || is_uq || is_fk);
 	no_inherit_chk->setVisible(is_ck);
 	nulls_not_distinct_chk->setVisible(is_uq);
 
@@ -157,6 +160,7 @@ void ConstraintWidget::setAttributes(DatabaseModel *model, OperationList *op_lis
 		no_inherit_chk->setChecked(constr->isNoInherit());
 		deferrable_chk->setChecked(constr->isDeferrable());
 		nulls_not_distinct_chk->setChecked(constr->isNullsNotDistinct());
+		temporal_key_chk->setChecked(constr->isTemporalKey());
 		deferral_cmb->setCurrentIndex(deferral_cmb->findText(~constr->getDeferralType()));
 		match_cmb->setCurrentIndex(match_cmb->findText(~constr->getMatchType()));
 		on_delete_cmb->setCurrentIndex(on_delete_cmb->findText(~constr->getActionType(Constraint::DeleteAction)));
@@ -200,6 +204,7 @@ void ConstraintWidget::applyConfiguration()
 		constr->setActionType(ActionType(on_update_cmb->currentText()), Constraint::UpdateAction);
 		constr->setNoInherit(no_inherit_chk->isChecked());
 		constr->setNullsNotDistinct(nulls_not_distinct_chk->isChecked());
+		constr->setTemporalKey(temporal_key_chk->isChecked());
 
 		if(indexing_chk->isChecked())
 			constr->setIndexType(IndexingType(indexing_cmb->currentText()));

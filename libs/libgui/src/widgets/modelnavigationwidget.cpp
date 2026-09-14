@@ -27,19 +27,19 @@ ModelNavigationWidget::ModelNavigationWidget(QWidget *parent): QWidget(parent)
 {
 	setupUi(this);
 
-	connect(models_cmb, &QComboBox::currentIndexChanged, this, &ModelNavigationWidget::setCurrentModel);
-
 	connect(close_tb, &QToolButton::clicked, this, [this](){
 		emit s_modelCloseRequested(models_cmb->currentIndex());
 	});
 
 	connect(next_tb, &QToolButton::clicked, this, [this](){
-		models_cmb->setCurrentIndex(models_cmb->currentIndex()+1);
+		models_cmb->setCurrentIndex(models_cmb->currentIndex() + 1);
 	});
 
 	connect(previous_tb, &QToolButton::clicked, this, [this](){
-		models_cmb->setCurrentIndex(models_cmb->currentIndex()-1);
+		models_cmb->setCurrentIndex(models_cmb->currentIndex() - 1);
 	});
+
+	connect(models_cmb, &QComboBox::currentIndexChanged, this, &ModelNavigationWidget::setCurrentModel);
 
 	connect(models_cmb, &QComboBox::highlighted, this, &ModelNavigationWidget::showTooltip);
 

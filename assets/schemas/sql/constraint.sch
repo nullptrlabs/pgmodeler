@@ -23,16 +23,25 @@
 
 %end
 
-%if {pk-constr} %then [ PRIMARY KEY ] ({src-columns}) %end
+%if {pk-constr} %then 
+	[ PRIMARY KEY ]
+%end
 
 %if {uq-constr} %then
 	[ UNIQUE ] 
+%end
 
-	%if ({pgsql-ver} >=f "15.0") %and {nulls-not-distinct} %then
-		[NULLS NOT DISTINCT ]
+%if {uq-constr}  %and ({pgsql-ver} >=f "15.0") %and {nulls-not-distinct} %then
+	[NULLS NOT DISTINCT ]
+%end
+
+%if {pk-constr} %or {uq-constr} %then
+	({src-columns}
+
+	%if ({pgsql-ver} >=f "18.0") %and {temporal-key} %then
+		[ WITHOUT OVERLAPS]
 	%end
-
-	({src-columns}) 
+	) 
 %end
 
 %if {ex-constr} %then
@@ -64,11 +73,43 @@
 %end
 
 %if {fk-constr} %then
-	[ FOREIGN KEY ] ({src-columns}) $br
+	[ FOREIGN KEY ] (
+
+	%if {temporal-key} %then
+		%if {src-columns} %then 
+			{src-columns} [, ] 
+		%end
+			
+		%if ({pgsql-ver} >=f "18.0") %then
+			[PERIOD ] 
+		%end
+
+		{last-src-column}
+	%else
+		{src-columns}
+	%end
+
+	) $br
 
 	%if {decl-in-table} %then $tb %end
-	[REFERENCES ] {ref-table} $sp ({dst-columns})
-	$sp {comparison-type} $br
+
+	[REFERENCES ] {ref-table} $sp (
+
+	%if {temporal-key} %then
+		%if {dst-columns} %then 
+			{dst-columns} [, ] 
+		%end
+			
+		%if ({pgsql-ver} >=f "18.0") %then
+			[PERIOD ] 
+		%end
+
+		{last-dst-column}
+	%else
+		{dst-columns}
+	%end
+
+	) $sp {comparison-type} $br
 
 	%if {decl-in-table} %then $tb %end
 	[ON DELETE ] {del-action} [ ON UPDATE ] {upd-action}

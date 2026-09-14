@@ -40,8 +40,8 @@ CodeCompletionWidget::CodeCompletionWidget(QPlainTextEdit *code_field_txt, bool 
 	completion_wgt=new QWidget(this);
 	completion_wgt->setWindowFlags(Qt::Popup);
 	completion_wgt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-	completion_wgt->setMaximumHeight(350);
-	completion_wgt->setMinimumHeight(50);
+	completion_wgt->setMaximumHeight(400);
+	completion_wgt->setMinimumHeight(80);
 
 	always_on_top_chk=new QCheckBox(completion_wgt);
 	always_on_top_chk->setText(tr("&Always on top"));
@@ -460,7 +460,9 @@ void CodeCompletionWidget::updateList()
 
 	pattern.replace("*", "\\*");
 
-	if(db_model)
+	if(!db_model)
+		name_list->clear();
+	else
 	{
 		//Negative qualifying level means that user called the completion before a space (empty word)
 		if(qualifying_level < 0)
@@ -516,7 +518,6 @@ void CodeCompletionWidget::updateList()
 
 	// Retrieving object names from a external source (e.g. live database)
 	bool objs_retrieved = updateObjectsList();
-	//name_list->clear();
 
 	/* List the keywords if no object was retrived from databas or
 	 * the qualifying level is negative or the completion wasn't triggered
@@ -670,6 +671,9 @@ void CodeCompletionWidget::adjustNameListSize()
 			list_w = 0, item_w = 0, vis_item_cnt = 0,
 			margin = 2 * GuiUtilsNs::LtMargin;
 
+	static const int wgt_min_h = 50,
+			wgt_max_h = 350;
+
 	QFontMetrics fm(name_list->font());
 
 	if(first_row >= 0 && last_row < 0)
@@ -677,7 +681,7 @@ void CodeCompletionWidget::adjustNameListSize()
 	// In case the list is empty
 	else if(first_row < 0 && last_row < 0)
 	{
-		name_list->setFixedHeight(completion_wgt->minimumHeight() + margin);
+		name_list->setFixedHeight(wgt_min_h + margin);
 		completion_wgt->adjustSize();
 		adjustSize();
 		return;
@@ -708,22 +712,21 @@ void CodeCompletionWidget::adjustNameListSize()
 													 always_on_top_chk->width() : list_w);
 
 	int item_h = 0,
-			base_h = name_list->iconSize().height() + GuiUtilsNs::LtMargin;
+			base_h = name_list->iconSize().height() + GuiUtilsNs::LtMargin,
+			x_margin = 2 * margin;
 
 	item_h = base_h * item_cnt;
-	item_h += margin;
+	item_h += x_margin;
 
-	if(item_h < completion_wgt->minimumHeight())
-		item_h = completion_wgt->minimumHeight() + margin;
-	else if(item_h > completion_wgt->maximumHeight())
+	if(item_h < wgt_min_h)
+		item_h = wgt_min_h + x_margin;
+	else if(item_h > wgt_max_h)
 	{
-		item_h = completion_wgt->maximumHeight() -
-						 always_on_top_chk->height() - (2 * margin);
+		item_h = wgt_max_h -
+						 (always_on_top_chk->height() + x_margin);
 	}
 
-	if(vis_item_cnt <= 10)
-		name_list->setFixedHeight(item_h);
-
+	name_list->setFixedHeight(item_h);
 	completion_wgt->adjustSize();
 	adjustSize();
 }

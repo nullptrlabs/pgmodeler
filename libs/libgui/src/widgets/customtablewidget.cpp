@@ -63,6 +63,7 @@ CustomTableWidget::CustomTableWidget(ButtonConf button_conf, bool conf_exclusion
 
 	connect(table_tbw, &QTableWidget::cellClicked, this, &CustomTableWidget::s_cellClicked);
 	connect(table_tbw, &QTableWidget::cellChanged, this, &CustomTableWidget::s_cellChanged);
+	connect(table_tbw, &QTableWidget::cellDoubleClicked, this, &CustomTableWidget::s_cellDoubleClicked);
 
 	connect(table_tbw, &QTableWidget::customContextMenuRequested, this, [this](const QPoint &pnt){
 		emit s_contextMenuRequested(table_tbw->mapToGlobal(pnt),
@@ -70,8 +71,7 @@ CustomTableWidget::CustomTableWidget(ButtonConf button_conf, bool conf_exclusion
 	});
 
 	connect(table_tbw, &QTableWidget::itemSelectionChanged, this, [this](){
-		if(table_tbw->selectedRanges().isEmpty())
-			emit s_selectionCleared();
+		emit s_selectionChanged(hasSelection());
 	});
 
 	connect(resize_cols_tb, &QToolButton::clicked, this, &CustomTableWidget::resizeContents);
@@ -209,11 +209,16 @@ void CustomTableWidget::setAddRowOnTabPress(bool value)
 }
 
 QToolButton *CustomTableWidget::addCustomButton(const QIcon &icon, const QKeySequence &shortcut,
-																								const QString &tooltip, const QString &btn_name)
+																								const QString &tooltip, const QString &btn_name,
+																								Qt::Alignment btn_align)
 {
 	QToolButton *btn = new QToolButton(this);
 
-	buttons_lt->addWidget(btn);
+	if(btn_align == Qt::AlignRight)
+		buttons_lt->addWidget(btn);
+	else
+		buttons_lt->insertWidget(0, btn);
+
 	btn->setObjectName(btn_name);
 	btn->setToolTip(tooltip +
 									(!shortcut.isEmpty() ?
@@ -226,6 +231,19 @@ QToolButton *CustomTableWidget::addCustomButton(const QIcon &icon, const QKeySeq
 	btn->setMaximumSize(add_tb->maximumSize());
 
 	return btn;
+}
+
+bool CustomTableWidget::hasSelection()
+{
+	return !table_tbw->selectedRanges().isEmpty();
+}
+
+QScrollBar *CustomTableWidget::getScrollBar(Qt::Orientation orientation)
+{
+	if(orientation == Qt::Horizontal)
+		return table_tbw->horizontalScrollBar();
+
+	return table_tbw->verticalScrollBar();
 }
 
 void CustomTableWidget::setColumnCount(unsigned col_count)
@@ -249,12 +267,12 @@ void CustomTableWidget::setColumnCount(unsigned col_count)
 
 void CustomTableWidget::setHeaderLabel(const QString &label, unsigned col_idx)
 {
-	QTableWidgetItem *item=nullptr;
+	QTableWidgetItem *item = nullptr;
 
 	if(col_idx >= static_cast<unsigned>(table_tbw->columnCount()))
-		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
+		throw Exception(ErrorCode::RefColObjectTabInvalidIndex, PGM_FUNC, PGM_FILE, PGM_LINE);
 
-	item=table_tbw->horizontalHeaderItem(col_idx);
+	item = table_tbw->horizontalHeaderItem(col_idx);
 	item->setText(label);
 }
 
@@ -303,6 +321,13 @@ void CustomTableWidget::setCellColors(int row_idx, int col_idx, const QColor &fg
 
 	item->setForeground(fg_color);
 	item->setBackground(bg_color);
+}
+
+void CustomTableWidget::setCellFont(int row_idx, int col_idx, const QFont &font)
+{
+	QTableWidgetItem *item = getItem(row_idx, col_idx);
+
+	item->setFont(font);
 }
 
 void CustomTableWidget::clearCellText(unsigned row_idx, unsigned col_idx)
@@ -449,6 +474,19 @@ int CustomTableWidget::getSelectedRow()
 	return table_tbw->currentRow();
 }
 
+QList<int> CustomTableWidget::getSelectedRows()
+{
+	QList<int> sel_rows;
+
+	for(auto &range : table_tbw->selectedRanges())
+	{
+		for(int row = range.topRow(); row <= range.bottomRow(); row++)
+			sel_rows.append(row);
+	}
+
+	return sel_rows;
+}
+
 int CustomTableWidget::getRowIndex(const QVariant &data)
 {
 	QTableWidgetItem *item = nullptr;
@@ -508,7 +546,7 @@ void CustomTableWidget::addRow(unsigned lin_idx)
 
 	for(col_idx=0; col_idx < col_cont; col_idx++)
 	{
-		item=new QTableWidgetItem;		
+		item = new QTableWidgetItem;
 		table_tbw->setItem(lin_idx,col_idx,item);
 	}
 
@@ -812,9 +850,16 @@ void CustomTableWidget::setCellsEditable(bool value)
 
 void CustomTableWidget::resizeContents()
 {
-	table_tbw->resizeColumnsToContents();
+	int col_cnt = getColumnCount();
+
+	if(col_cnt == 0)
+		return;
+
+	for(int col = 0; col < col_cnt; col++)
+		table_tbw->resizeColumnToContents(col);
+
 	table_tbw->resizeRowsToContents();
-	table_tbw->horizontalHeader()->setSectionResizeMode(table_tbw->horizontalHeader()->count() - 1, QHeaderView::Stretch);
+	table_tbw->horizontalHeader()->setSectionResizeMode(col_cnt - 1, QHeaderView::Stretch);
 }
 
 void CustomTableWidget::setButtonsEnabled()

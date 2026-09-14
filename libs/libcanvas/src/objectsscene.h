@@ -182,6 +182,8 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		void clearTablesChildrenSelection();
 
+		void selectObjectsInLayers(const QList<unsigned int> &layers_idxs);
+
 	protected:
 		void drawBackground(QPainter *painter, const QRectF &rect) override;
 

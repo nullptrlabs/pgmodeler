@@ -1733,6 +1733,10 @@ void Relationship::addForeignKey(PhysicalTable *ref_tab, PhysicalTable *recv_tab
 		qty=gen_columns.size();
 		i=i1=0;
 
+		/* Matching the PK WITHOUT OVERLAPS option
+		 * with the PERIOD option for the foreign key */
+		fk->setTemporalKey(pk->isTemporalKey());
+
 		/* Special condition for n-n relationships.
 		 Because the columns copied from participants tables
 		 are stored in a single list, its needed to make a shift
@@ -2723,6 +2727,11 @@ bool Relationship::isInvalidated()
 
 			if(pk)
 			{
+				/* If the relationship fk PERIOD flag doesn't match the table's
+				 * pk WITHOUT OVERLAPS flag we consider the relationship invalidated */
+				if(fk_rel1n && fk_rel1n->isTemporalKey() != pk->isTemporalKey())
+					return true;
+
 				//Gets the amount of columns from the primary key
 				tab_cols_count = pk->getColumnCount(Constraint::SourceCols);
 
@@ -2845,6 +2854,7 @@ bool Relationship::isInvalidated()
 			if(table->getPrimaryKey() && table1->getPrimaryKey())
 			{
 				count = table_relnn->getConstraintCount();
+
 				for(i = 0; i < count; i++)
 				{
 					constr = table_relnn->getConstraint(i);
@@ -2857,13 +2867,19 @@ bool Relationship::isInvalidated()
 					}
 				}
 
+				/* If the primary key WITHOUT OVERLAPS flag doesn't match
+				 * the foreign key PERIOD flag, the relatioship is invalidated */
+				if((fk->isTemporalKey() != table->getPrimaryKey()->isTemporalKey()) ||
+					 (fk1->isTemporalKey() != table1->getPrimaryKey()->isTemporalKey()))
+					return true;
+
 				/* The number of columns of relationship is calculated by summing
-			 quantities of foreign key columns obtained */
+				 * quantities of foreign key columns obtained */
 				rel_cols_count = fk->getColumnCount(Constraint::ReferencedCols) +
 												 fk1->getColumnCount(Constraint::ReferencedCols);
 
 				/* The number of columns in the table is obtained by summing the amount
-				of primary keys columns involved in the relationship */
+				 * of primary keys columns involved in the relationship */
 				tab_cols_count = table->getPrimaryKey()->getColumnCount(Constraint::SourceCols) +
 								 table1->getPrimaryKey()->getColumnCount(Constraint::SourceCols);
 

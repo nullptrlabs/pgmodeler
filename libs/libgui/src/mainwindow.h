@@ -213,12 +213,6 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		 * the current button toggle state. */
 		bool isToolButtonsChecked(QHBoxLayout *layout, const QWidgetList &ignored_wgts = QWidgetList());
 
-		/*! \brief Resizes the buttons of the general toolbar (the one positioned at the left portion of main window)
-		 * The resizing is performed through stylesheet and is related to the minimum width of the tools_acts_tb plus
-		 * a size factor that is applied if there are models opened (which expands/enlarges the toolbar a little
-		 * more due to the labels of the actions added during model loading ) */
-		void resizeGeneralToolbarButtons();
-
 		void loadConfigurations();
 
 		virtual void connectSignalsToSlots();
@@ -292,7 +286,7 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		/*! \brief Closes/destroys the model in the specified index 'model_id',
 		 *  load a new one and assign it to the parent tab of the closed model */
-		void reloadModel(int model_id, const QString &filename);
+		void reloadModel(const QString &filename, int model_idx);
 
 		//! \brief Returns the currently loaded model count.
 		int getModelCount();
@@ -324,6 +318,10 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		//! \brief Set the postion of a floating widget based upon an action at a tool bar
 		void setFloatingWidgetPos(QWidget *widget, QAction *act, QToolBar *toolbar, bool map_to_window);
 
+		/*! \brief Stop the saving timers. This is used when validating the model
+		in order to avoid the saving while the validation is working */
+		void stopSaveTimers(bool value);
+
 	protected slots:
 		void showMainMenu();
 
@@ -339,13 +337,13 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		void updateDockWidgets();
 
 		//! \brief Updates the reference to the current model when changing the tab focus
-		void setCurrentModel();
+		void setCurrentModel(int idx = -1);
 
 		//! \brief Loads a model from a file via file dialog
 		void loadModel();
 
 		//! \brief Saves the currently focused model. If the parameter 'model' is set, saves the passed model
-		void saveModel(ModelWidget *model=nullptr);
+		virtual void saveModel(ModelWidget *model = nullptr);
 
 		//! \brief Save all loaded models
 		void saveAllModels();
@@ -385,10 +383,6 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		//! \brief Opens the pgModeler Wiki in a web browser window
 		void openSupport();
 
-		/*! \brief Stop the saving timers. This is used when validating the model
-		in order to avoid the saving while the validation is working */
-		void stopSaveTimers(bool value);
-
 		//! \brief Executes one of the pending operations (save, export, diff) after validate the model
 		void executePendingOperation(bool valid_error);
 
@@ -416,15 +410,21 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		void loadModelsFromMimeData(const QMimeData *mime_data);
 		void addNewLayer(const QString &layer_name);
 
+		virtual void updateModelSelectors();
+
 	signals:
 		void s_currentModelChanged(ModelWidget *model_wgt);
 		void s_modelSaved(ModelWidget *model_wgt);
 		void s_modelAdded(ModelWidget *model_wgt);
+		void s_modelClosed();
 
 		/*! \brief This signal is emitted when an extraneous file (not .dbm) is among
 		 * the list of models to be loaded in loadModels(). The intention of this signal
-		 * is to notify any plugin that may handle the file type to be loaded */
-		void s_modelLoadRequested(const QString &filename);
+		 * is to notify any plugin that may handle the file type to be loaded.
+		 * The optional parameter model_idx indicates the index on the tab widget
+		 * at main window where the loaded model must be inserted. A negative
+		 * model_idx inserts the model on a new tab. (see MainWindow::addModel(QString, int) */
+		void s_modelLoadRequested(const QString &filename, int model_idx = -1);
 };
 
 template<class WgtClass>

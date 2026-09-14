@@ -896,7 +896,7 @@ void DatabaseModel::destroyObjects()
 		delete object;
 	}
 
-	PgSqlType::removeUserTypes(this);
+	PgSqlType::invalidateUserTypes(this);
 
 	for(auto &perm : 	permissions)
 		delete perm;
@@ -957,7 +957,7 @@ void DatabaseModel::removeTable(Table *table, int obj_idx)
 	try
 	{
 		__removeObject(table, obj_idx);
-		PgSqlType::removeUserType(table->getName(true), table);
+		PgSqlType::invalidateUserType(table->getName(true), table);
 		updateTableFKRelationships(table);
 	}
 	catch(Exception &e)
@@ -1537,7 +1537,7 @@ void DatabaseModel::removeForeignTable(ForeignTable *table, int obj_idx)
 	try
 	{
 		__removeObject(table, obj_idx);
-		PgSqlType::removeUserType(table->getName(true), table);
+		PgSqlType::invalidateUserType(table->getName(true), table);
 	}
 	catch(Exception &e)
 	{
@@ -1566,7 +1566,6 @@ void DatabaseModel::addView(View *view, int obj_idx)
 	try
 	{
 		__addObject(view, obj_idx);
-		//PgSqlType::addUserType(view->getName(true), view, this, UserTypeConfig::ViewType);
 		PgSqlType::addUserType(view->getName(true), view, UserTypeConfig::ViewType);
 
 		updateViewRelationships(view);
@@ -1596,7 +1595,7 @@ void DatabaseModel::removeView(View *view, int obj_idx)
 		updateViewRelationships(view, true);
 
 		__removeObject(view, obj_idx);
-		PgSqlType::removeUserType(view->getName(true), view);
+		PgSqlType::invalidateUserType(view->getName(true), view);
 	}
 	catch(Exception &e)
 	{
@@ -1647,6 +1646,7 @@ void DatabaseModel::updateTableFKRelationships(Table *table)
 				 (table->getObjectIndex(fk) < 0 && fk->getReferencedTable() == ref_tab))
 			{
 				removeRelationship(rel);
+				invalid_special_objs.push_back(rel);
 				itr = base_relationships.begin() + idx;
 				itr_end = base_relationships.end();
 			}
@@ -1757,6 +1757,7 @@ void DatabaseModel::updateViewRelationships(View *view, bool force_rel_removal)
 				 rel->getTable(BaseRelationship::DstTable)==view)
 			{
 				removeRelationship(rel);
+				invalid_special_objs.push_back(rel);
 				itr=base_relationships.begin() + idx;
 				itr_end=base_relationships.end();
 			}
@@ -1789,6 +1790,7 @@ void DatabaseModel::updateViewRelationships(View *view, bool force_rel_removal)
 				if(!view->isReferencingTable(table))
 				{
 					removeRelationship(rel);
+					invalid_special_objs.push_back(rel);
 					itr = base_relationships.begin() + idx;
 					itr_end =base_relationships.end();
 				}
@@ -2191,7 +2193,6 @@ void DatabaseModel::storeSpecialObjectsXML()
 				for(i = 0; i < count; i++)
 				{
 					tab_obj = dynamic_cast<TableObject *>(table->getObject(i, tp_id));
-					//found = false;
 
 					if(tp_id == ObjectType::Constraint)
 					{
@@ -2242,6 +2243,12 @@ void DatabaseModel::storeSpecialObjectsXML()
 
 						i--; count--;
 					}
+
+					/* To avoid leaks, we store the removed special object
+					 * in the list of invalidated special object that
+					 * are destroyed when the model is also destroyed */
+					if(found)
+						invalid_special_objs.push_back(tab_obj);
 				}
 			}
 		}
@@ -3130,7 +3137,7 @@ void DatabaseModel::removeUserType(BaseObject *object, int obj_idx)
 		__removeObject(object, obj_idx);
 
 		//Removes the user type from the list of base types of pgsql
-		PgSqlType::removeUserType(object->getName(true), object);
+		PgSqlType::invalidateUserType(object->getName(true), object);
 	}
 	catch(Exception &e)
 	{
@@ -3582,7 +3589,7 @@ void DatabaseModel::loadModel(const QString &filename)
 
 						xmlparser.restorePosition();
 					}
-					else if(obj_type==ObjectType::Database)
+					else if(obj_type == ObjectType::Database)
 					{
 						xmlparser.getElementAttributes(attribs);
 						configureDatabase(attribs);
@@ -3593,17 +3600,18 @@ void DatabaseModel::loadModel(const QString &filename)
 						{
 							//Saves the current position of the parser before create any object
 							xmlparser.savePosition();
-							object=createObject(obj_type);
+							object = createObject(obj_type);
 
 							if(object)
 							{
-								if(!dynamic_cast<TableObject *>(object) && obj_type!=ObjectType::Relationship && obj_type!=ObjectType::BaseRelationship)
+								if(!dynamic_cast<TableObject *>(object) &&
+									 obj_type != ObjectType::Relationship &&
+									 obj_type != ObjectType::BaseRelationship)
 									addObject(object);
 
 								emit s_objectLoaded((xmlparser.getCurrentBufferLine()/static_cast<double>(xmlparser.getBufferLineCount()))*100,
 																		tr("Loading: `%1' (%2)")
-																				.arg(object->getName())
-																				.arg(object->getTypeName()),
+																				.arg(object->getName(), object->getTypeName()),
 																		enum_t(obj_type));
 							}
 
@@ -3630,12 +3638,12 @@ void DatabaseModel::loadModel(const QString &filename)
 				object=this->getObject(itr.second, itr.first);
 
 				if(!object)
+				{
 					throw Exception(Exception::getErrorMessage(ErrorCode::RefObjectInexistsModel)
-															.arg(this->getName())
-															.arg(this->getTypeName())
-															.arg(itr.second)
-															.arg(BaseObject::getTypeName(itr.first)),
-													ErrorCode::AsgDuplicatedPermission,PGM_FUNC,PGM_FILE,PGM_LINE);
+													.arg(this->getName(), this->getTypeName(),
+															 itr.second, BaseObject::getTypeName(itr.first)),
+													ErrorCode::AsgDuplicatedPermission, PGM_FUNC, PGM_FILE, PGM_LINE);
+				}
 
 				this->setDefaultObject(object);
 			}
@@ -5310,9 +5318,9 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 
 			//Identifies the correct parent type
 			if(PhysicalTable::isPhysicalTable(obj_type))
-				table=dynamic_cast<PhysicalTable *>(parent_obj);
-			else if(obj_type==ObjectType::Relationship)
-				rel=dynamic_cast<Relationship *>(parent_obj);
+				table = dynamic_cast<PhysicalTable *>(parent_obj);
+			else if(obj_type == ObjectType::Relationship)
+				rel = dynamic_cast<Relationship *>(parent_obj);
 			else
 				//Raises an error if the user tries to create a constraint in a invalid parent
 				throw Exception(ErrorCode::OprObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
@@ -5321,23 +5329,22 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 		{
 			obj_type = ObjectType::Table;
 			table = dynamic_cast<PhysicalTable *>(getObject(attribs[Attributes::Table], {ObjectType::Table, ObjectType::ForeignTable}));
-			parent_obj=table;
-			ins_constr_table=true;
+			parent_obj = table;
+			ins_constr_table = true;
 
 			//Raises an error if the parent table doesn't exists
 			if(!table)
 			{
-				str_aux=Exception::getErrorMessage(ErrorCode::RefObjectInexistsModel)
-						.arg(attribs[Attributes::Name])
-						.arg(BaseObject::getTypeName(ObjectType::Constraint))
-						.arg(attribs[Attributes::Table])
-						.arg(BaseObject::getTypeName(obj_type));
-
-				throw Exception(str_aux,ErrorCode::RefObjectInexistsModel,PGM_FUNC,PGM_FILE,PGM_LINE);
+				throw Exception(Exception::getErrorMessage(ErrorCode::RefObjectInexistsModel)
+												.arg(attribs[Attributes::Name],
+														 BaseObject::getTypeName(ObjectType::Constraint),
+														 attribs[Attributes::Table],
+														 BaseObject::getTypeName(obj_type)),
+												ErrorCode::RefObjectInexistsModel, PGM_FUNC, PGM_FILE, PGM_LINE);
 			}
 		}
 
-		constr=new Constraint;
+		constr = new Constraint;
 		constr->setParentTable(table);
 
 		//Configuring the constraint type
@@ -5360,10 +5367,12 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 		setBasicAttributes(constr);
 
 		//Raises an error if the constraint is a primary key and no parent object is specified
-		if(!parent_obj && constr_type==ConstraintType::PrimaryKey)
+		if(!parent_obj && constr_type == ConstraintType::PrimaryKey)
+		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::InvPrimaryKeyAllocation)
-							.arg(constr->getName()),
-							ErrorCode::InvPrimaryKeyAllocation,PGM_FUNC,PGM_FILE,PGM_LINE);
+											.arg(constr->getName()),
+											ErrorCode::InvPrimaryKeyAllocation, PGM_FUNC, PGM_FILE, PGM_LINE);
+		}
 
 		deferrable=(attribs[Attributes::Deferrable]==Attributes::True);
 		constr->setDeferrable(deferrable);
@@ -5390,13 +5399,11 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 			//Raises an error if the referenced table doesn't exists
 			if(!ref_table)
 			{
-				str_aux=Exception::getErrorMessage(ErrorCode::RefObjectInexistsModel)
-						.arg(constr->getName())
-						.arg(constr->getTypeName())
-						.arg(attribs[Attributes::RefTable])
-						.arg(BaseObject::getTypeName(ObjectType::Table));
-
-				throw Exception(str_aux,ErrorCode::RefObjectInexistsModel,PGM_FUNC,PGM_FILE,PGM_LINE);
+				throw Exception(Exception::getErrorMessage(ErrorCode::RefObjectInexistsModel)
+												.arg(constr->getName(), constr->getTypeName(),
+														 attribs[Attributes::RefTable],
+														 BaseObject::getTypeName(ObjectType::Table)),
+												ErrorCode::RefObjectInexistsModel,PGM_FUNC,PGM_FILE,PGM_LINE);
 			}
 
 			constr->setReferencedTable(dynamic_cast<BaseTable *>(ref_table));
@@ -5405,12 +5412,18 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 		{
 			constr->setNoInherit(attribs[Attributes::NoInherit]==Attributes::True);
 		}
-		else if(constr_type==ConstraintType::Exclude &&	!attribs[Attributes::IndexType].isEmpty())
+		else if(constr_type==ConstraintType::Exclude &&
+						!attribs[Attributes::IndexType].isEmpty())
 		{
 			constr->setIndexType(attribs[Attributes::IndexType]);
 		}
-		else if(constr_type==ConstraintType::Unique)
+		else if(constr_type == ConstraintType::Unique)
 			constr->setNullsNotDistinct(attribs[Attributes::NullsNotDistinct]==Attributes::True);
+
+		if(constr_type == ConstraintType::PrimaryKey ||
+			 constr_type == ConstraintType::Unique ||
+			 constr_type == ConstraintType::ForeignKey)
+			constr->setTemporalKey(attribs[Attributes::TemporalKey] == Attributes::True);
 
 		if(xmlparser.accessElement(XmlParser::ChildElement))
 		{
@@ -5481,13 +5494,10 @@ Constraint *DatabaseModel::createConstraint(BaseObject *parent_obj)
 
 		if(ins_constr_table)
 		{
-			if(constr->getConstraintType()!=ConstraintType::PrimaryKey)
-			{
-				table->addConstraint(constr);
+			table->addConstraint(constr);
 
-				if(this->getObjectIndex(table) >= 0)
-					table->setModified(!loading_model);
-			}
+			if(this->getObjectIndex(table) >= 0)
+				table->setModified(!loading_model);
 		}
 	}
 	catch(Exception &e)
@@ -7156,12 +7166,14 @@ BaseRelationship *DatabaseModel::createRelationship()
 				base_rel->setName(attribs[Attributes::Name]);
 
 			if(!base_rel)
+			{
 				throw Exception(Exception::getErrorMessage(ErrorCode::RefObjectInexistsModel)
 								.arg(this->getName())
 								.arg(this->getTypeName())
 								.arg(attribs[Attributes::Name])
 					.arg(BaseObject::getTypeName(ObjectType::BaseRelationship)),
 					ErrorCode::RefObjectInexistsModel,PGM_FUNC,PGM_FILE,PGM_LINE);
+			}
 
 			base_rel->blockSignals(loading_model);
 			base_rel->disconnectRelationship();
@@ -8287,12 +8299,22 @@ std::vector<BaseObject *> DatabaseModel::getCreationOrder(BaseObject *object, bo
 	return created_objs;
 }
 
-void DatabaseModel::saveModel(const QString &filename, SchemaParser::CodeType def_type)
+void DatabaseModel::saveModel(const QString &filename, SchemaParser::CodeType def_type, bool gen_drop_file)
 {
 	try
 	{
 		if(!cancel_saving)
+		{
 			UtilsNs::saveFile(filename, this->getSourceCode(def_type).toUtf8());
+
+			if(gen_drop_file && def_type == SchemaParser::SqlCode)
+			{
+				std::map<unsigned, BaseObject *> objects =
+						getCreationOrder(SchemaParser::SqlCode, true, true, true);
+
+				saveDropScript(QFileInfo(filename).absoluteFilePath(), objects, OriginalSql, false);
+			}
+		}
 	}
 	catch(Exception &e)
 	{
@@ -8461,7 +8483,7 @@ void DatabaseModel::saveSplitSQLDefinition(const QString &path, CodeGenMode code
 									enum_t(ObjectType::Type));
 
 				buffer.append(shell_types.toUtf8());
-				UtilsNs::saveFile(path + GlobalAttributes::DirSeparator + filename, buffer);
+				UtilsNs::saveFile(GlobalAttributes::getPath(path, filename), buffer);
 				buffer.clear();
 				shell_types.clear();
 			}
@@ -8531,7 +8553,7 @@ void DatabaseModel::saveSplitSQLDefinition(const QString &path, CodeGenMode code
 									.arg(filename),
 									enum_t(obj_type));
 
-				UtilsNs::saveFile(path + GlobalAttributes::DirSeparator + filename, buffer);
+				UtilsNs::saveFile(GlobalAttributes::getPath(path, filename), buffer);
 			}
 
 			buffer.clear();
@@ -8552,7 +8574,7 @@ void DatabaseModel::saveSplitSQLDefinition(const QString &path, CodeGenMode code
 														enum_t(ObjectType::Database));
 
 				buffer.append(schparser.getSourceCode(Attributes::SessionOpts, attribs, SchemaParser::SqlCode).toUtf8());
-				UtilsNs::saveFile( path + GlobalAttributes::DirSeparator + filename, buffer);
+				UtilsNs::saveFile(GlobalAttributes::getPath(path, filename), buffer);
 				buffer.clear();
 			}
 		}
@@ -8568,86 +8590,12 @@ void DatabaseModel::saveSplitSQLDefinition(const QString &path, CodeGenMode code
 
 			emit s_objectLoaded(100, tr("Saving SQL file `%1' .").arg(filename), enum_t(ObjectType::Database));
 
-			UtilsNs::saveFile(path + GlobalAttributes::DirSeparator + filename, itr.second);
+			UtilsNs::saveFile(GlobalAttributes::getPath(path, filename), itr.second);
 		}
 
 		// Generating the file containing all DROP commands
 		if(gen_drop_file)
-		{
-			std::map<unsigned, BaseObject *>::reverse_iterator ritr = objects.rbegin();
-			QString drop_cmd;
-
-			/* We iterate over the object in reverse order because they need to be destroyed
-			 * from the last to the first */
-			while(ritr != objects.rend())
-			{
-				obj = ritr->second;
-				ritr++;
-
-				if(obj->isSystemObject())
-					continue;
-
-				drop_cmd = obj->getDropCode(true);
-
-				// Disabling the drop command if the object is also with SQL disabled
-				if(obj->isSQLDisabled())
-					drop_cmd.prepend("-- ");
-
-				if(group_by_type)
-				{
-					obj_type_name = obj->getSchemaName();
-
-					if(obj->getObjectType() == ObjectType::Constraint)
-					{
-						constr = dynamic_cast<Constraint *>(obj);
-						obj_type_name = constr_filename[constr->getConstraintType().getTypeId()];
-					}
-
-					grouped_drops[obj_type_name] += drop_cmd.toUtf8();
-				}
-				else
-					buffer.append(drop_cmd.toUtf8());
-			}
-
-			// Restoring the decl_in_table flag in constraints
-			for(auto &constr : contraints)
-				constr->setDeclaredInTable(true);
-
-			/* If we are not generating grouped definitions
-			 * we reuse the groped_drops having a key = Attributes::DropCmds
-			 * and value = buffer with the whole drop commands just to
-			 * make a single iteration in the for below to
-			 * simplify the logic */
-			if(!group_by_type)
-				grouped_drops[Attributes::DropCmds] = buffer;
-
-			// Generating the file(s) containing the drop commands
-			for(auto &itr : grouped_drops)
-			{
-				if(itr.first == BaseObject::getSchemaName(ObjectType::BaseRelationship) ||
-					 itr.first == BaseObject::getSchemaName(ObjectType::Relationship))
-					continue;
-
-				// If we are generating a single file with all DROP commands
-				if(itr.first == Attributes::DropCmds)
-				{
-					filename = QString("%1_%2.sql")
-										 .arg(QString::number(0).rightJustified(pad_size, '0'), Attributes::Drop);
-				}
-				// If we are generating a DROP file per object type
-				else
-				{
-					filename = QString("%1_%2.sql")
-										 .arg(itr.first,
-													itr.first == BaseObject::getSchemaName(ObjectType::Permission) ?
-													Attributes::Revoke : Attributes::Drop);
-				}
-
-				emit s_objectLoaded(100, tr("Saving drop commands file `%1'.").arg(filename),	enum_t(ObjectType::Database));
-
-				UtilsNs::saveFile(path + GlobalAttributes::DirSeparator + filename, itr.second);
-			}
-		}
+			saveDropScript(path, objects, code_gen_mode, true);
 
 		// Saving the prepended sql file
 		saveSplitCustomSQL(true, path, QString::number(idx).rightJustified(pad_size, '0'));
@@ -8657,6 +8605,117 @@ void DatabaseModel::saveSplitSQLDefinition(const QString &path, CodeGenMode code
 	{
 		configureShellTypes(true);
 		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+	}
+}
+
+void DatabaseModel::saveDropScript(const QString &path, std::map<unsigned, BaseObject *> &objects,
+																	 CodeGenMode code_gen_mode, bool is_split)
+{
+	std::map<unsigned, BaseObject *>::reverse_iterator ritr = objects.rbegin();
+	QString drop_cmd, obj_type_name, filename;
+	BaseObject *obj = nullptr;
+	QByteArray buffer;
+	std::map<QString, QByteArray> grouped_drops;
+	Constraint *constr = nullptr;
+	std::vector<Constraint *> contraints;
+	int pad_size = QString::number(objects.size()).size(), idx = 1;
+	bool group_by_type = (code_gen_mode == GroupByType);
+
+	static std::map<unsigned, QString> constr_filename = {
+		{ ConstraintType::PrimaryKey, "constraint_pk" },
+		{ ConstraintType::ForeignKey, "constraint_fk" },
+		{ ConstraintType::Unique, "constraint_uq" },
+		{ ConstraintType::Exclude, "constraint_ex" },
+		{ ConstraintType::Check, "constraint_ck" },
+	};
+
+	/* We iterate over the object in reverse order because they need to be destroyed
+	 * from the last to the first */
+	while(ritr != objects.rend())
+	{
+		obj = ritr->second;
+		ritr++;
+
+		if(obj->isSystemObject())
+			continue;
+
+		drop_cmd = obj->getDropCode(true);
+
+		// Disabling the drop command if the object is also with SQL disabled
+		if(obj->isSQLDisabled())
+			drop_cmd.prepend("-- ");
+
+		if(group_by_type)
+		{
+			obj_type_name = obj->getSchemaName();
+
+			if(obj->getObjectType() == ObjectType::Constraint)
+			{
+				constr = dynamic_cast<Constraint *>(obj);
+				obj_type_name = constr_filename[constr->getConstraintType().getTypeId()];
+			}
+
+			grouped_drops[obj_type_name] += drop_cmd.toUtf8();
+		}
+		else
+			buffer.append(drop_cmd.toUtf8());
+	}
+
+	// Restoring the decl_in_table flag in constraints
+	for(auto &constr : contraints)
+		constr->setDeclaredInTable(true);
+
+	/* If we are not generating grouped definitions
+	 * we reuse the groped_drops having a key = Attributes::DropCmds
+	 * and value = buffer with the whole drop commands just to
+	 * make a single iteration in the for below to
+	 * simplify the logic */
+	if(!group_by_type)
+		grouped_drops[Attributes::DropCmds] = buffer;
+
+	// Generating the file(s) containing the drop commands
+	for(auto &itr : grouped_drops)
+	{
+		if(itr.first == BaseObject::getSchemaName(ObjectType::BaseRelationship) ||
+			 itr.first == BaseObject::getSchemaName(ObjectType::Relationship))
+			continue;
+
+		// If we are generating a single file with all DROP commands
+		if(itr.first == Attributes::DropCmds)
+		{
+			if(!is_split && code_gen_mode == OriginalSql)
+			{
+				filename = QString("%1_%2.sql")
+									 .arg(QFileInfo(path).baseName(), Attributes::Drop);
+			}
+			else
+			{
+				filename = QString("%1_%2.sql")
+									 .arg(QString::number(0).rightJustified(pad_size, '0'), Attributes::Drop);
+			}
+		}
+		// If we are generating a DROP file per object type
+		else
+		{
+			filename = QString("%1_%2.sql")
+								 .arg(itr.first,
+											itr.first == BaseObject::getSchemaName(ObjectType::Permission) ?
+											Attributes::Revoke : Attributes::Drop);
+		}
+
+		emit s_objectLoaded(100, tr("Saving drop commands file `%1'.").arg(filename),	enum_t(ObjectType::Database));
+
+		try
+		{
+			UtilsNs::saveFile(GlobalAttributes::getPath(
+												is_split ? path : QFileInfo(path).absolutePath(),
+												filename), itr.second);
+		}
+		catch(Exception &e)
+		{
+			throw Exception(e.getErrorMessage(), e.getErrorCode(),
+											PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+		}
 	}
 }
 
