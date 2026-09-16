@@ -38,6 +38,8 @@ View::View()
 	attributes[Attributes::Recursive]="";
 	attributes[Attributes::WithNoData]="";
 	attributes[Attributes::Columns]="";
+	attributes[Attributes::Options]="";
+	attributes[Attributes::CheckOption]="";
 }
 
 void View::setMaterialized(bool value)
