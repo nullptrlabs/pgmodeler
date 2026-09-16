@@ -1907,6 +1907,7 @@ void ModelWidget::convertRelationship1N()
 void ModelWidget::loadModel(const QString &filename)
 {
 	TaskProgressWidget task_prog_wgt(this);
+	bool curr_blink_objs = blink_new_objs;
 
 	try
 	{
@@ -1919,7 +1920,11 @@ void ModelWidget::loadModel(const QString &filename)
 		task_prog_wgt.setWindowTitle(tr("Loading database model"));
 		task_prog_wgt.show();
 
+		// Disable objects blinking during model loading
+		blink_new_objs = false;
 		db_model->loadModel(filename);
+		blink_new_objs = curr_blink_objs;
+
 		this->filename = filename;
 		updateObjectsOpacity();
 		updateSceneLayers();
@@ -1946,6 +1951,7 @@ void ModelWidget::loadModel(const QString &filename)
 	}
 	catch(Exception &e)
 	{
+		blink_new_objs = curr_blink_objs;
 		task_prog_wgt.close();
 		setModified(false);
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
