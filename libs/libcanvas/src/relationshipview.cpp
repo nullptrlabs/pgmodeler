@@ -1224,6 +1224,39 @@ void RelationshipView::configureLine()
 			i1--;
 		}
 	}
+	/* Self-relationships keep their straight horizontal/vertical segments (the loop shape),
+	 * but round off the corners where they meet instead of drawing sharp right angles: a single
+	 * curve item traces the whole loop, with a quadratic curve (control point at the corner
+	 * itself) taking over from the straight segments near each turn. */
+	else if(use_curved_lines && base_rel->isSelfRelationship())
+	{
+		BezierCurveItem *curve = nullptr;
+
+		if(curves.empty())
+		{
+			curve = new BezierCurveItem;
+			this->addToGroup(curve);
+			curves.push_back(curve);
+		}
+		else
+			curve = curves[0];
+
+		curve->setZValue(lines[0]->zValue());
+		curve->setPen(lines[0]->pen());
+		curve->setPoints(points, SelfRelCornerRadius * BaseObjectView::getScreenDpiFactor());
+
+		for(auto &line : lines)
+			line->setVisible(false);
+
+		//Removing any extra unused curves
+		while(curves.size() > 1)
+		{
+			curve = curves.back();
+			curves.pop_back();
+			this->removeFromGroup(curve);
+			delete curve;
+		}
+	}
 	else if(!use_curved_lines && !lines.empty() && !curves.empty())
 	{
 		BezierCurveItem *curve = nullptr;
@@ -2077,7 +2110,7 @@ void RelationshipView::configureBoundingRect()
 	QPainterPathStroker ps;
 	ps.setWidth(LineSelStrokeWidth);
 
-	if(!use_curved_lines || this->getUnderlyingObject()->isSelfRelationship())
+	if(!use_curved_lines)
 	{
 		QPainterPath ln_path;
 
