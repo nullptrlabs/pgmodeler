@@ -2077,7 +2077,7 @@ void RelationshipView::configureBoundingRect()
 	QPainterPathStroker ps;
 	ps.setWidth(LineSelStrokeWidth);
 
-	if(!use_curved_lines)
+	if(!use_curved_lines || this->getUnderlyingObject()->isSelfRelationship())
 	{
 		QPainterPath ln_path;
 
