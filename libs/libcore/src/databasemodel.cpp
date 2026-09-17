@@ -484,6 +484,7 @@ void DatabaseModel::__addObject(BaseObject *object, int obj_idx)
 	}
 
 	object->setDatabase(this);
+	indexObject(object);
 	emit s_objectAdded(object);
 	this->setInvalidated(true);
 }
@@ -547,6 +548,7 @@ void DatabaseModel::__removeObject(BaseObject *object, int obj_idx, bool check_r
 			removePermissions(object);
 
 		obj_list->erase(obj_list->begin() + obj_idx);
+		unindexObject(object);
 	}
 
 	object->clearAllDepsRefs();
@@ -602,42 +604,110 @@ std::vector<BaseObject *> DatabaseModel::getObjects(BaseObject *schema)
 	return sel_list;
 }
 
+/* name_idx/sig_idx keys are normalized to lower-case whenever object name quoting is disabled,
+ * mirroring the Qt::CaseInsensitive comparison that getObject() used to do via a linear scan */
+QString DatabaseModel::getNameIndexKey(BaseObject *object)
+{
+	QString key = object->getName(false);
+
+	if(BaseObject::isQuotingDisabled())
+		key = key.toLower();
+
+	return key;
+}
+
+QString DatabaseModel::getSignatureIndexKey(BaseObject *object)
+{
+	QString key = object->getSignature();
+	key.remove('"');
+
+	if(BaseObject::isQuotingDisabled())
+		key = key.toLower();
+
+	return key;
+}
+
+void DatabaseModel::indexObject(BaseObject *object)
+{
+	if(!object || obj_lists.count(object->getObjectType()) == 0)
+		return;
+
+	ObjectType obj_type = object->getObjectType();
+	name_idx[obj_type][getNameIndexKey(object)] = object;
+	sig_idx[obj_type][getSignatureIndexKey(object)] = object;
+}
+
+void DatabaseModel::unindexObject(BaseObject *object)
+{
+	if(!object || obj_lists.count(object->getObjectType()) == 0)
+		return;
+
+	ObjectType obj_type = object->getObjectType();
+	name_idx[obj_type].remove(getNameIndexKey(object));
+	sig_idx[obj_type].remove(getSignatureIndexKey(object));
+}
+
+void DatabaseModel::updateObjectIndex(BaseObject *object, const QString &prev_name, const QString &prev_signature)
+{
+	if(!object || obj_lists.count(object->getObjectType()) == 0)
+		return;
+
+	ObjectType obj_type = object->getObjectType();
+	QString prev_name_key = prev_name, prev_sig_key = prev_signature;
+	prev_sig_key.remove('"');
+
+	if(BaseObject::isQuotingDisabled())
+	{
+		prev_name_key = prev_name_key.toLower();
+		prev_sig_key = prev_sig_key.toLower();
+	}
+
+	name_idx[obj_type].remove(prev_name_key);
+	sig_idx[obj_type].remove(prev_sig_key);
+
+	name_idx[obj_type][getNameIndexKey(object)] = object;
+	sig_idx[obj_type][getSignatureIndexKey(object)] = object;
+}
+
+void DatabaseModel::rebuildSignatureIndex()
+{
+	for(auto &itr : obj_lists)
+	{
+		QHash<QString, BaseObject *> rebuilt;
+
+		for(auto &obj : *itr.second)
+			rebuilt[getSignatureIndexKey(obj)] = obj;
+
+		sig_idx[itr.first] = rebuilt;
+	}
+}
+
 BaseObject *DatabaseModel::getObject(const QString &name, ObjectType obj_type, int &obj_idx)
 {
-	BaseObject *object = nullptr;
-	std::vector<BaseObject *> *obj_list=nullptr;
-	std::vector<BaseObject *>::iterator itr, itr_end;
-	bool found = false;
-	QString aux_name1;
-	Qt::CaseSensitivity case_mode = BaseObject::isQuotingDisabled() ?
-																	Qt::CaseInsensitive : Qt::CaseSensitive;
-
-	obj_list = getObjectList(obj_type);
+	std::vector<BaseObject *> *obj_list = getObjectList(obj_type);
 
 	if(!obj_list)
 		throw Exception(ErrorCode::ObtObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
-	
-	itr = obj_list->begin();
-	itr_end = obj_list->end();
+
 	obj_idx = -1;
-	aux_name1 = QString(name).remove('"');
 
-	while(itr!=itr_end && !found)
+	QString aux_name1 = QString(name).remove('"');
+
+	if(BaseObject::isQuotingDisabled())
+		aux_name1 = aux_name1.toLower();
+
+	BaseObject *object = sig_idx[obj_type].value(aux_name1, nullptr);
+
+	if(!object)
+		object = name_idx[obj_type].value(aux_name1, nullptr);
+
+	/* obj_idx (the object's current position in obj_list) is only computed when an object is
+	 * actually found, so a miss -- the common case while checking for duplicates during model
+	 * loading -- stays O(1) instead of paying for a scan */
+	if(object)
 	{
-		if((*itr)->getSignature().remove("\"").compare(aux_name1, case_mode) == 0 ||
-			 (*itr)->getName(false).compare(aux_name1, case_mode) == 0)
-		{
-			found = true;
-			break;
-		}
-
-		itr++;
-	}
-
-	if(found)
-	{
-		object = (*itr);
-		obj_idx = (itr - obj_list->begin());
+		auto pos = std::find(obj_list->begin(), obj_list->end(), object);
+		obj_idx = static_cast<int>(pos - obj_list->begin());
 	}
 
 	return object;
