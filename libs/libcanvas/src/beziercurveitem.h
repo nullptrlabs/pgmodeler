@@ -34,8 +34,13 @@
 class __libcanvas BezierCurveItem: public QGraphicsPathItem {
 	private:
 		/*! \brief Stores the stroke of the curve itself.
-		 * This object is used to do a better colision detection */
-		QPainterPath stroke;
+		 * This object is used to do a better colision detection.
+		 * Computed lazily by updateStroke() -- see stroke_dirty below -- since it's only
+		 * ever read from contains()/collidesWithPath(), not from paint(). */
+		mutable QPainterPath stroke;
+
+		//! \brief Indicates that stroke no longer matches path() and must be recomputed before its next use
+		mutable bool stroke_dirty;
 
 		bool invert_cpoints;
 
@@ -51,6 +56,9 @@ class __libcanvas BezierCurveItem: public QGraphicsPathItem {
 
 	protected:
 		void setPath(const QPainterPath &path);
+
+		//! \brief Recomputes stroke from the current path() if stroke_dirty is set
+		void updateStroke() const;
 
 	public:
 		BezierCurveItem(QGraphicsItem *parent = 0);

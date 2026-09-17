@@ -20,20 +20,35 @@
 */
 
 #include "beziercurveitem.h"
-#include "baserelationship.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
 BezierCurveItem::BezierCurveItem(QGraphicsItem *parent) :  QGraphicsPathItem(parent)
 {
 	invert_cpoints = simple_curve = straight_line = false;
+	stroke_dirty = true;
 }
 
 void BezierCurveItem::setPath(const QPainterPath &path)
 {
-	QPainterPathStroker ps;
 	QGraphicsPathItem::setPath(path);
-	stroke = ps.createStroke(path);
+
+	/* stroke is only used for click/collision detection (contains()/collidesWithPath()), never
+	 * for paint(), so recomputing it here on every reconfiguration of the line -- which can
+	 * happen very often across many relationships during loading or while dragging tables --
+	 * is wasted work whenever nothing actually needs to hit-test this curve in between. Defer
+	 * it to the first call that does. */
+	stroke_dirty = true;
+}
+
+void BezierCurveItem::updateStroke() const
+{
+	if(!stroke_dirty)
+		return;
+
+	QPainterPathStroker ps;
+	stroke = ps.createStroke(path());
+	stroke_dirty = false;
 }
 
 void BezierCurveItem::setLine(const QLineF &line, bool simple_curve, bool invert_cpoints)
@@ -115,6 +130,7 @@ bool BezierCurveItem::isStraightLine()
 
 bool BezierCurveItem::contains(const QPointF &pnt) const
 {
+	updateStroke();
 	return stroke.contains(pnt);
 }
 
@@ -141,5 +157,6 @@ void BezierCurveItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
 
 bool BezierCurveItem::collidesWithPath(const QPainterPath &path, Qt::ItemSelectionMode) const
 {
+	updateStroke();
 	return stroke.intersects(path);
 }
