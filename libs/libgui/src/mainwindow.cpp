@@ -2467,6 +2467,7 @@ void MainWindow::toggleCompactView()
 		model_wgt->getDatabaseModel()->setObjectsModified({ ObjectType::Table, ObjectType::ForeignTable,
 																												ObjectType::View, ObjectType::Relationship,
 																												ObjectType::BaseRelationship, ObjectType::Schema});
+		model_wgt->updateSceneLayers();
 	}
 
 	if(current_model)

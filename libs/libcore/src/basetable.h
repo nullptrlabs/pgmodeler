@@ -33,6 +33,9 @@
 #include "tag.h"
 
 class __libcore BaseTable: public BaseGraphicObject {
+	private:
+		static bool geom_changes_ignored;
+
 	public:
 		//! \brief This enum is used to control the collapsing of the tables
 		enum CollapseMode: unsigned {
@@ -69,6 +72,10 @@ class __libcore BaseTable: public BaseGraphicObject {
 		virtual void setTag(Tag *tag);
 
 		virtual Tag *getTag();
+
+		static void setGeomChangesIgnored(bool value);
+
+		static bool isGeomChangesIgnored();
 
 		//! \brief Returns true if the provided table is considered a base table (Table, ForeignTable, View)
 		static bool isBaseTable(ObjectType obj_tp);

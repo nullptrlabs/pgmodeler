@@ -130,6 +130,8 @@ class __libcore BaseRelationship: public BaseGraphicObject  {
 		//! \brief Sets the name of the relationship
 		void setName(const QString &name) override;
 
+		void setModified(bool value) override;
+
 		//! \brief Sets the mandatory participation for the specified table (Via constants SRC_TABLE | DST_TABLE)
 		void setMandatoryTable(TableId table_id, bool value);
 

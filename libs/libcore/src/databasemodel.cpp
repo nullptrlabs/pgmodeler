@@ -8729,55 +8729,71 @@ void DatabaseModel::setObjectsModified(std::vector<BaseObject *> &objects)
 	}
 }
 
-void DatabaseModel::setObjectsModified(std::vector<ObjectType> types)
+void DatabaseModel::setObjectsModified(const std::vector<ObjectType> &types)
 {
-	ObjectType obj_types[]={
-							ObjectType::Table, ObjectType::View, ObjectType::ForeignTable,
-							ObjectType::Relationship, ObjectType::BaseRelationship,
-							ObjectType::Textbox, ObjectType::Schema };
-	std::vector<BaseObject *>::iterator itr, itr_end;
-	std::vector<BaseObject *> *obj_list = nullptr;
-	Textbox *label = nullptr;
-	BaseRelationship *rel = nullptr;
+	static const std::vector<ObjectType> all_types {
+		ObjectType::Table, ObjectType::View, ObjectType::ForeignTable,
+		ObjectType::Schema, ObjectType::Textbox,
+		ObjectType::Relationship, ObjectType::BaseRelationship
+	};
+
 	BaseGraphicObject *graph_obj = nullptr;
-	unsigned i1 = 0;
+	bool upd_rels = false;
+	ObjectType obj_tp;
+	std::vector<ObjectType>::const_iterator itr, itr_end;
 
-	for(auto &obj_type : obj_types)
+	if(!types.empty())
 	{
-		if(types.empty() || std::find(types.begin(), types.end(), obj_type) != types.end())
+		itr = types.begin();
+		itr_end = types.end();
+	}
+	else
+	{
+		itr = all_types.begin();
+		itr_end = all_types.end();
+	}
+
+	BaseTable::setGeomChangesIgnored(true);
+
+	while(itr != itr_end)
+	{
+		obj_tp = *itr;
+		itr++;
+
+		if(!BaseGraphicObject::isGraphicObject(obj_tp))
+			continue;
+
+		if(!upd_rels)
 		{
-			obj_list = getObjectList(obj_type);
-			itr = obj_list->begin();
-			itr_end = obj_list->end();
-
-			while(itr != itr_end)
-			{
-				graph_obj = dynamic_cast<BaseGraphicObject *>(*itr);
-
-				if(BaseTable::isBaseTable(obj_type))
-				{
-					/* We call the BaseTable::resetHashCode version to force
-					 * to force table to be redrawn by overriding the
-					 * hash validation in TableView::configureObject */
-					dynamic_cast<BaseTable *>(graph_obj)->resetHashCode();
-				}
-
-				graph_obj->setModified(true);
-
-				//For relationships is needed to set the labels as modified too
-				if(obj_type == ObjectType::Relationship || obj_type == ObjectType::BaseRelationship)
-				{
-					rel=dynamic_cast<BaseRelationship *>(*itr);
-					for(i1 = BaseRelationship::SrcCardLabel; i1 <= BaseRelationship::RelNameLabel; i1++)
-					{
-						label = rel->getLabel(static_cast<BaseRelationship::LabelId>(i1));
-						if(label) label->setModified(true);
-					}
-				}
-
-				itr++;
-			}
+			upd_rels = (obj_tp == ObjectType::BaseRelationship ||
+									obj_tp == ObjectType::Relationship);
 		}
+
+		for(auto &obj : *getObjectList(obj_tp))
+		{
+			graph_obj = dynamic_cast<BaseGraphicObject *>(obj);
+
+			if(BaseTable::isBaseTable(obj_tp))
+			{
+				/* We call the BaseTable::resetHashCode version to force
+				 * to force table to be redrawn by overriding the
+				 * hash validation in TableView::configureObject */
+				dynamic_cast<BaseTable *>(graph_obj)->resetHashCode();
+			}
+
+			graph_obj->setModified(true);
+		}
+	}
+
+	BaseTable::setGeomChangesIgnored(false);
+
+	if(upd_rels)
+	{
+		for(auto &rel : relationships)
+			dynamic_cast<Relationship *>(rel)->setModified(true);
+
+		for(auto &base_rel : base_relationships)
+			dynamic_cast<BaseRelationship *>(base_rel)->setModified(true);
 	}
 }
 

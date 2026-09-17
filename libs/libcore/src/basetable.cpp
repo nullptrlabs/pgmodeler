@@ -24,6 +24,8 @@
 #include "coreutilsns.h"
 #include "tableobject.h"
 
+bool BaseTable::geom_changes_ignored { false };
+
 BaseTable::BaseTable()
 {
 	tag=nullptr;
@@ -61,6 +63,16 @@ void BaseTable::setTag(Tag *tag)
 Tag *BaseTable::getTag()
 {
 	return tag;
+}
+
+void BaseTable::setGeomChangesIgnored(bool value)
+{
+	geom_changes_ignored = value;
+}
+
+bool BaseTable::isGeomChangesIgnored()
+{
+	return geom_changes_ignored;
 }
 
 bool BaseTable::isBaseTable(ObjectType obj_tp)

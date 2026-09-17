@@ -612,6 +612,8 @@ void RelationshipView::configureLine()
 	 * hash codes of both tables are unchanged since the last call to this method */
 	if(configuring_line ||
 
+			BaseTable::isGeomChangesIgnored() ||
+
 			!BaseGraphicObject::isUpdatesEnabled() ||
 
 			!tables[src_tab]->boundingRect().isValid() ||
@@ -623,7 +625,7 @@ void RelationshipView::configureLine()
 
 			 (!tab_hashes[dst_tab].isEmpty() &&
 					tab_hashes[dst_tab] == base_rel->getTable(dst_tab)->getHashCode())))
-		return;
+	return;
 
 	tab_hashes[src_tab] = base_rel->getTable(src_tab)->getHashCode();
 	tab_hashes[dst_tab] = base_rel->getTable(dst_tab)->getHashCode();
