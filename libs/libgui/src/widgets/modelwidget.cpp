@@ -1499,7 +1499,11 @@ void ModelWidget::selectAllObjects()
 		std::vector<BaseObject *> objs = *db_model->getObjectList(obj_type);
 
 		if(obj_type == ObjectType::Relationship)
-			objs.insert(objs.end(), db_model->getObjectList(ObjectType::BaseRelationship)->begin(),  db_model->getObjectList(ObjectType::BaseRelationship)->end());
+		{
+			objs.insert(objs.end(),
+									db_model->getObjectList(ObjectType::BaseRelationship)->begin(),
+									db_model->getObjectList(ObjectType::BaseRelationship)->end());
+		}
 
 		for(auto &obj : objs)
 		{
