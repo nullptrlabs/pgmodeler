@@ -34,6 +34,7 @@ Additionally, this class, saves, loads and generates the XML/SQL definition of a
 #include <QObject>
 #include <QStringList>
 #include <QDateTime>
+#include <QHash>
 #include "baseobject.h"
 #include "table.h"
 #include "function.h"
@@ -104,6 +105,26 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		/*! \brief Stores the references to all object lists of each type. This map is used by getObjectList() in order
 		 * to return the list according to the provided type */
 		std::map<ObjectType, std::vector<BaseObject *> *> obj_lists;
+
+		/*! \brief Per-type lookup indexes that mirror obj_lists, keyed by the raw name and by the
+		 * formatted signature of each object, so getObject() can resolve by either key in O(1)
+		 * instead of scanning obj_lists linearly.
+		 * Kept in sync by indexObject()/unindexObject() (called from __addObject()/__removeObject())
+		 * and by updateObjectIndex() (called from BaseObject::setName()/setSchema()). */
+		std::map<ObjectType, QHash<QString, BaseObject *>> name_idx,
+		sig_idx;
+
+		//! \brief Builds the lookup key for an object's raw name, honoring the current quoting/case mode
+		static QString getNameIndexKey(BaseObject *object);
+
+		//! \brief Builds the lookup key for an object's signature, honoring the current quoting/case mode
+		static QString getSignatureIndexKey(BaseObject *object);
+
+		//! \brief Inserts the object into name_idx/sig_idx. Called once the object is actually part of obj_lists
+		void indexObject(BaseObject *object);
+
+		//! \brief Removes the object from name_idx/sig_idx using its current (in-sync) keys
+		void unindexObject(BaseObject *object);
 
 		/*! \brief Stores the references to the methods that create objects from XML code. This map is used by createObject() in order
 		 * to return the created object */
@@ -732,6 +753,18 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		 *  If the signature does not match the provided name then the method
 		 *  tries to match the name parameter against the object's name */
 		BaseObject *getObject(const QString &name, ObjectType obj_type);
+
+		/*! \brief Called by BaseObject::setName()/setSchema() right after an already-indexed object
+		 * has its name or schema changed, so name_idx/sig_idx keep matching the object's current
+		 * name/signature. prev_name/prev_signature are the values captured by the caller *before*
+		 * the change was applied. */
+		void updateObjectIndex(BaseObject *object, const QString &prev_name, const QString &prev_signature);
+
+		/*! \brief Rebuilds sig_idx from scratch for every indexed type. Used as a safety net for
+		 * changes that affect more than one object's signature at once (e.g. a schema rename, which
+		 * changes the signature of every object it contains) instead of trying to patch every
+		 * affected entry individually. */
+		void rebuildSignatureIndex();
 
 		void configureDatabase(attribs_map &attribs);
 		PgSqlType createPgSQLType();

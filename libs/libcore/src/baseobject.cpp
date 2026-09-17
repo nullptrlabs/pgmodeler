@@ -24,6 +24,10 @@
 #include "exception.h"
 #include <QApplication>
 
+// Needed so setName()/setSchema() can keep DatabaseModel's name/signature lookup index
+// in sync after the object is renamed/reparented
+#include "databasemodel.h"
+
 QString BaseObject::pgsql_ver { PgSqlVersions::DefaulVersion };
 
 bool BaseObject::escape_comments {true};
@@ -430,9 +434,18 @@ void BaseObject::setName(const QString &name)
 		throw Exception(ErrorCode::AsgInvalidNameObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
+	QString prev_name = this->obj_name;
+	QString prev_signature = this->getSignature();
+
 	aux_name.remove('"');
 	setCodeInvalidated(this->obj_name!=aux_name);
 	this->obj_name=aux_name;
+
+	// Keep the owning model's lookup index in sync
+	DatabaseModel *dbmodel = dynamic_cast<DatabaseModel *>(this->database);
+
+	if(dbmodel)
+		dbmodel->updateObjectIndex(this, prev_name, prev_signature);
 }
 
 void BaseObject::setAlias(const QString &alias)
@@ -625,8 +638,18 @@ void BaseObject::setSchema(BaseObject *schema)
 	if(!acceptsSchema())
 		throw Exception(ErrorCode::AsgInvalidSchemaObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
+	QString prev_name = this->obj_name;
+	QString prev_signature = this->getSignature();
+
 	setCodeInvalidated(this->schema != schema);
 	this->schema = schema;
+
+	// The signature is schema-qualified, so reparenting the object changes it
+	// even though its own name didn't change
+	DatabaseModel *dbmodel = dynamic_cast<DatabaseModel *>(this->database);
+
+	if(dbmodel)
+		dbmodel->updateObjectIndex(this, prev_name, prev_signature);
 }
 
 void BaseObject::setOwner(BaseObject *owner)
