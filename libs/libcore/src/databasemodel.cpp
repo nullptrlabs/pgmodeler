@@ -3671,6 +3671,7 @@ void DatabaseModel::loadModel(const QString &filename)
 
 		BaseGraphicObject::setUpdatesEnabled(true);
 		setObjectsModified();
+
 		emit s_objectLoaded(100, tr("Rendering database model..."), enum_t(ObjectType::BaseObject));
 	}
 	catch(Exception &e)
