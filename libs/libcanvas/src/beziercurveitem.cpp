@@ -21,6 +21,8 @@
 
 #include "beziercurveitem.h"
 #include "baserelationship.h"
+#include <QPainter>
+#include <QStyleOptionGraphicsItem>
 
 BezierCurveItem::BezierCurveItem(QGraphicsItem *parent) :  QGraphicsPathItem(parent)
 {
@@ -114,6 +116,27 @@ bool BezierCurveItem::isStraightLine()
 bool BezierCurveItem::contains(const QPointF &pnt) const
 {
 	return stroke.contains(pnt);
+}
+
+void BezierCurveItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+	/* The curve's path is never altered here -- only whether it's stroked with antialiasing.
+	 * At low zoom levels the jagged edges of a non-antialiased curve aren't perceptible, and
+	 * antialiasing is one of the more expensive parts of painting it. Keeping the path itself
+	 * untouched means the visible line and the stroke used for click detection never diverge. */
+	bool low_lod = option->levelOfDetailFromTransform(painter->worldTransform()) < MinLodForAntialiasing;
+
+	if(!low_lod)
+	{
+		QGraphicsPathItem::paint(painter, option, widget);
+		return;
+	}
+
+	// The painter is shared across items painted in the same pass, so save/restore around the hint change
+	painter->save();
+	painter->setRenderHint(QPainter::Antialiasing, false);
+	QGraphicsPathItem::paint(painter, option, widget);
+	painter->restore();
 }
 
 bool BezierCurveItem::collidesWithPath(const QPainterPath &path, Qt::ItemSelectionMode) const
