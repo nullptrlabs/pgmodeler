@@ -116,15 +116,13 @@ void BezierCurveItem::setLine(const QLineF &line, bool simple_curve, bool invert
 
 void BezierCurveItem::setPoints(const std::vector<QPointF> &points, double corner_radius)
 {
-	QPainterPath path;
-
 	if(points.empty())
 	{
-		this->setPath(path);
+		this->setPath(QPainterPath());
 		return;
 	}
 
-	path = QPainterPath(points.front());
+	QPainterPath path { points.front() };
 
 	if(points.size() > 1)
 	{
