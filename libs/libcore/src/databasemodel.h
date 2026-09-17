@@ -126,6 +126,12 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Removes the object from name_idx/sig_idx using its current (in-sync) keys
 		void unindexObject(BaseObject *object);
 
+		/*! \brief Resolves an object by name/signature through name_idx/sig_idx, without determining
+		 * its position in obj_lists. Used by getObject(name, type) -- the most commonly called
+		 * overload -- so that a caller who doesn't need the object's index isn't charged for the
+		 * linear scan that computing it requires (see getObject(name, type, obj_idx)). */
+		BaseObject *findIndexedObject(const QString &name, ObjectType obj_type);
+
 		/*! \brief Stores the references to the methods that create objects from XML code. This map is used by createObject() in order
 		 * to return the created object */
 		std::map<ObjectType, std::function<BaseObject*(void)>> create_methods;
