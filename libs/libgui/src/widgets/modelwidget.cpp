@@ -160,23 +160,23 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	scene->installEventFilter(this);
 
 	viewport = new QGraphicsView(scene, this);
-	updateRenderHints();
-	viewport->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	/* Since we constantly work with objects (re)configuration which leads to bounding
 	 * rectangle changes, the viewport area update is done by using bounding rects
 	 * as reference in order to perform updates on the areas covered by the modified
 	 * objects bounding rects. */
 	viewport->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	viewport->setCacheMode(QGraphicsView::CacheBackground);
+
+	updateRenderHints();
 
 	//Force the scene to be drawn from the left to right and from top to bottom
 	viewport->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-
-	viewport->setCacheMode(QGraphicsView::CacheBackground);
 	viewport->centerOn(0,0);
 	viewport->setMouseTracking(true);
 	viewport->installEventFilter(this);
 	viewport->setAcceptDrops(true);
+	viewport->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(20, GuiUtilsNs::LtSpacing, this);
 	vbox->addWidget(protected_model_frm);
@@ -1078,7 +1078,7 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 		{
 			scene->addItem(item, blink_new_objs);
 
-			if(!db_model->loading_model)
+			if(!db_model->isModelLoading())
 				setModified(true);
 
 			emit s_objectAdded(graph_obj);
@@ -1926,8 +1926,8 @@ void ModelWidget::loadModel(const QString &filename)
 		blink_new_objs = curr_blink_objs;
 
 		this->filename = filename;
-		updateObjectsOpacity();
 		updateSceneLayers();
+		updateObjectsOpacity();
 		adjustSceneRect(true);
 
 		task_prog_wgt.close();
@@ -1961,25 +1961,20 @@ void ModelWidget::loadModel(const QString &filename)
 void ModelWidget::updateSceneLayers()
 {
 	scene->blockSignals(true);
-
 	scene->addLayers(db_model->getLayers(), false);
-	scene->setActiveLayers(db_model->getActiveLayers());
 	scene->setLayerColors(ObjectsScene::LayerNameColor, db_model->getLayerNameColors());
 	scene->setLayerColors(ObjectsScene::LayerRectColor, db_model->getLayerRectColors());
 	scene->setLayerNamesVisible(db_model->isLayerNamesVisible());
 	scene->setLayerRectsVisible(db_model->isLayerRectsVisible());
-	db_model->setObjectsModified({ ObjectType::Schema });
-
+	scene->setActiveLayers(db_model->getActiveLayers());
 	scene->blockSignals(false);
+	db_model->setObjectsModified({ ObjectType::Schema });
 }
 
 void ModelWidget::adjustSceneRect(bool use_model_rect, bool expand_only)
 {
 	if(ObjectsScene::isAlignObjectsToGrid())
-	{
 		scene->alignObjectsToGrid();
-		db_model->setObjectsModified();
-	}
 
 	QRectF rect = db_model->getSceneRect();
 
@@ -1989,7 +1984,6 @@ void ModelWidget::adjustSceneRect(bool use_model_rect, bool expand_only)
 		rect = scene->adjustSceneRect(expand_only);
 
 	setModified(true);
-
 	emit s_sceneInteracted(rect.size());
 }
 

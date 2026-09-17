@@ -997,7 +997,8 @@ void ObjectsScene::handleChildrenSelectionChanged()
 
 void ObjectsScene::addItem(QGraphicsItem *item, bool blink_new)
 {
-	if(!item)	return;
+	if(!item)
+		return;
 
 	RelationshipView *rel=dynamic_cast<RelationshipView *>(item);
 	BaseTableView *tab=dynamic_cast<BaseTableView *>(item);
