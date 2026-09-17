@@ -1217,6 +1217,10 @@ void ModelWidget::handleObjectsMovement(bool end_moviment)
 	itr=selected_objects.begin();
 	itr_end=selected_objects.end();
 
+	// See the comment in startSceneMove() about dropping antialiasing while the view is actively changing
+	viewport->setRenderHint(QPainter::Antialiasing, end_moviment ? !disable_render_smooth : false);
+	viewport->setRenderHint(QPainter::TextAntialiasing, end_moviment ? !disable_render_smooth : false);
+
 	if(!end_moviment)
 	{
 		op_list->startOperationChain();
@@ -1347,6 +1351,16 @@ void ModelWidget::startSceneMove()
 	curr_show_delim = ObjectsScene::isShowPageDelimiters();
 	ObjectsScene::setShowGrid(false);
 	ObjectsScene::setShowPageDelimiters(false);
+
+	/* Antialiasing is one of the most expensive parts of painting relationship
+	 * lines/curves, which tend to have large bounding rects and thus get
+	 * repainted as a side effect of any nearby change during panning/zooming.
+	 * Dropping it for the duration of the move trades a bit of visual quality
+	 * for a much cheaper repaint while the view is actively moving; the real
+	 * preference is restored once the move settles (see finishSceneMove()). */
+	viewport->setRenderHint(QPainter::Antialiasing, false);
+	viewport->setRenderHint(QPainter::TextAntialiasing, false);
+
 	viewport->resetCachedContent();
 	scene->setShowSceneLimits(false);
 }
@@ -1356,6 +1370,7 @@ void ModelWidget::finishSceneMove()
 	scene_moving = false;
 	ObjectsScene::setShowGrid(curr_show_grid);
 	ObjectsScene::setShowPageDelimiters(curr_show_delim);
+	updateRenderHints();
 	viewport->resetCachedContent();
 	scene->setShowSceneLimits(true);
 	scene->invalidate(viewport->sceneRect());
