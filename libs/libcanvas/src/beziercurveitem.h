@@ -43,11 +43,19 @@ class __libcanvas BezierCurveItem: public QGraphicsPathItem {
 
 		bool straight_line;
 
+		/*! \brief Below this level of detail (see QStyleOptionGraphicsItem::levelOfDetailFromTransform())
+		 * paint() skips antialiasing: at that scale the jagged edges aren't perceptible, and stroking
+		 * the curve with antialiasing on is one of the more expensive parts of painting it. The curve's
+		 * shape/path is never altered, so it stays consistent with the stroke used for click detection. */
+		static constexpr double MinLodForAntialiasing = 0.4;
+
 	protected:
 		void setPath(const QPainterPath &path);
 
 	public:
 		BezierCurveItem(QGraphicsItem *parent = 0);
+
+		void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 		/*! \brief Configures the curve based upon a straight line.
 		 *
