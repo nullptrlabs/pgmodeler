@@ -682,14 +682,10 @@ void DatabaseModel::rebuildSignatureIndex()
 	}
 }
 
-BaseObject *DatabaseModel::getObject(const QString &name, ObjectType obj_type, int &obj_idx)
+BaseObject *DatabaseModel::findIndexedObject(const QString &name, ObjectType obj_type)
 {
-	std::vector<BaseObject *> *obj_list = getObjectList(obj_type);
-
-	if(!obj_list)
+	if(!getObjectList(obj_type))
 		throw Exception(ErrorCode::ObtObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
-
-	obj_idx = -1;
 
 	QString aux_name1 = QString(name).remove('"');
 
@@ -701,11 +697,21 @@ BaseObject *DatabaseModel::getObject(const QString &name, ObjectType obj_type, i
 	if(!object)
 		object = name_idx[obj_type].value(aux_name1, nullptr);
 
+	return object;
+}
+
+BaseObject *DatabaseModel::getObject(const QString &name, ObjectType obj_type, int &obj_idx)
+{
+	obj_idx = -1;
+
+	BaseObject *object = findIndexedObject(name, obj_type);
+
 	/* obj_idx (the object's current position in obj_list) is only computed when an object is
 	 * actually found, so a miss -- the common case while checking for duplicates during model
 	 * loading -- stays O(1) instead of paying for a scan */
 	if(object)
 	{
+		std::vector<BaseObject *> *obj_list = getObjectList(obj_type);
 		auto pos = std::find(obj_list->begin(), obj_list->end(), object);
 		obj_idx = static_cast<int>(pos - obj_list->begin());
 	}
@@ -3429,8 +3435,7 @@ int DatabaseModel::getPermissionIndex(Permission *perm, bool exact_match)
 
 BaseObject *DatabaseModel::getObject(const QString &name, ObjectType obj_type)
 {
-	int idx;
-	return getObject(name, obj_type, idx);
+	return findIndexedObject(name, obj_type);
 }
 
 int DatabaseModel::getObjectIndex(const QString &name, ObjectType obj_type)
