@@ -55,7 +55,7 @@ void BaseGraphicObject::setSystemObject(bool value)
 
 void BaseGraphicObject::setModified(bool value)
 {
-	is_modified=value;
+	is_modified = value;
 
 	if(is_modified && updates_enabled)
 		emit s_objectModified();

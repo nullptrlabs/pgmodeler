@@ -799,7 +799,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 
 		/*! \brief Marks the graphical objects of the provided types as modified forcing their redraw. User can specify only a set of
 	 graphical objects to be marked */
-		void setObjectsModified(std::vector<ObjectType> types={});
+		void setObjectsModified(const std::vector<ObjectType> &types={});
 
 		//! \brief Marks the graphical objects in the list as modified forcing their redraw.
 		void setObjectsModified(std::vector<BaseObject *> &objects);

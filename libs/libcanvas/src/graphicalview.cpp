@@ -321,21 +321,19 @@ void GraphicalView::configureObject()
 	pen.setStyle(Qt::DashLine);
 	attribs_toggler->setPen(pen);
 
-	//if(!view->getAlias().isEmpty())
-	//	table_tooltip += QString("\n%1 Alias: %2").arg(UtilsNs::DataSeparator, view->getAlias());
-
-	//if(!view->getComment().isEmpty())
-	//	table_tooltip += QString("\n\n%1").arg(view->getComment());
-
 	BaseObjectView::__configureObject();
 	BaseTableView::configureObjectShadow();
 	BaseObjectView::configureObjectSelection();
 	configureTag();
 	configureSQLDisabledInfo();
-	requestRelationshipsUpdate();
 
-	if((old_width != 0 && this->bounding_rect.width() != old_width) ||
-		 (old_height != 0 && this->bounding_rect.height()!= old_height))
-		emit s_objectDimensionChanged();
+	if(!BaseTable::isGeomChangesIgnored())
+	{
+		requestRelationshipsUpdate();
+
+		if((old_width != 0 && this->bounding_rect.width() != old_width) ||
+			 (old_height != 0 && this->bounding_rect.height()!= old_height))
+			emit s_objectDimensionChanged();
+	}
 }
 
