@@ -30,6 +30,7 @@
 
 #include "canvasglobal.h"
 #include <QGraphicsPathItem>
+#include <vector>
 
 class __libcanvas BezierCurveItem: public QGraphicsPathItem {
 	private:
@@ -74,6 +75,14 @@ class __libcanvas BezierCurveItem: public QGraphicsPathItem {
 		 * The invert_cpoints param causes the control points of the curve to be inverted
 		 * making the curve to be drawn inverted. */
 		void setLine(const QLineF &line, bool simple_curve, bool invert_cpoints);
+
+		/*! \brief Configures the item to draw a polyline through the given points, with each
+		 * interior corner rounded off by a quadratic curve (using the corner itself as the
+		 * control point) instead of a sharp angle. corner_radius is the ideal distance, along
+		 * each of the two segments meeting at a corner, at which the straight segment gives way
+		 * to the curve; it's automatically clamped down for corners whose adjacent segments are
+		 * too short to fit it without overlapping the neighboring corner. */
+		void setPoints(const std::vector<QPointF> &points, double corner_radius);
 
 		//! \brief Returns if the curve has the control points inverted
 		bool isControlPointsInverted();

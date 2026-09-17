@@ -54,6 +54,10 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		//! \brief Length of the lines linked to fk/pk columns
 		static constexpr double ConnLineLength=20.0;
 
+		/*! \brief Ideal radius, along each segment, used to round off the corners of a
+		 * self-relationship's loop when curved lines are enabled */
+		static constexpr double SelfRelCornerRadius=10.0;
+
 		//! \brief Indicates that the relationship labels must be hidden
 		static bool hide_name_label,
 

@@ -22,6 +22,7 @@
 #include "beziercurveitem.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <algorithm>
 
 BezierCurveItem::BezierCurveItem(QGraphicsItem *parent) :  QGraphicsPathItem(parent)
 {
@@ -108,6 +109,52 @@ void BezierCurveItem::setLine(const QLineF &line, bool simple_curve, bool invert
 
 			}
 		}
+	}
+
+	this->setPath(path);
+}
+
+void BezierCurveItem::setPoints(const std::vector<QPointF> &points, double corner_radius)
+{
+	QPainterPath path;
+
+	if(points.empty())
+	{
+		this->setPath(path);
+		return;
+	}
+
+	path = QPainterPath(points.front());
+
+	if(points.size() > 1)
+	{
+		std::size_t count = points.size();
+
+		for(std::size_t i = 1; i < count - 1; i++)
+		{
+			QLineF seg_in(points[i - 1], points[i]), seg_out(points[i], points[i + 1]);
+			double len_in = seg_in.length(), len_out = seg_out.length();
+
+			// Degenerate segment (coincident points): no room to round this corner, just go straight through it
+			if(len_in < 0.001 || len_out < 0.001)
+			{
+				path.lineTo(points[i]);
+				continue;
+			}
+
+			/* Clamp the radius so the rounding on this corner never eats into more than half of
+			 * either adjacent segment, which would otherwise overlap the rounding of the next/
+			 * previous corner or overshoot the segment entirely on short loops. */
+			double radius = std::min({ corner_radius, len_in / 2.0, len_out / 2.0 });
+
+			QPointF pre = points[i] - ((seg_in.p2() - seg_in.p1()) / len_in) * radius,
+					post = points[i] + ((seg_out.p2() - seg_out.p1()) / len_out) * radius;
+
+			path.lineTo(pre);
+			path.quadTo(points[i], post);
+		}
+
+		path.lineTo(points.back());
 	}
 
 	this->setPath(path);
