@@ -27,6 +27,7 @@ ModelOverviewWidget::ModelOverviewWidget(QWidget *parent) : QWidget(parent, Qt::
 {
 	setupUi(this);
 	model = nullptr;
+	connected_scene = nullptr;
 	zoom_factor = 1;
 	curr_resize_factor = ResizeFactor;
 	moving_frame = false;
@@ -40,7 +41,6 @@ void ModelOverviewWidget::show(ModelWidget *model)
 	{
 		disconnect(this->model, nullptr, this, nullptr);
 		disconnect(this->model->viewport, nullptr,  this, nullptr);
-		disconnect(this->model->scene, nullptr,  this, nullptr);
 	}
 
 	this->model=model;
@@ -55,17 +55,15 @@ void ModelOverviewWidget::show(ModelWidget *model)
 		connect(this->model, &ModelWidget::s_modelResized, this, &ModelOverviewWidget::resizeOverview);
 		connect(this->model, &ModelWidget::s_modelResized, this, &ModelOverviewWidget::resizeViewportFrame);
 		connect(this->model, &ModelWidget::s_modelResized, this, qOverload<>(&ModelOverviewWidget::updateOverview));
+		connect(this->model, &ModelWidget::s_activeSceneChanged, this, &ModelOverviewWidget::connectToActiveScene);
 
 		connect(this->model->viewport->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ModelOverviewWidget::resizeViewportFrame);
 		connect(this->model->viewport->verticalScrollBar(), &QScrollBar::valueChanged, this, &ModelOverviewWidget::resizeViewportFrame);
 
-		connect(this->model->scene, &ObjectsScene::selectionChanged, this, qOverload<>(&ModelOverviewWidget::updateOverview));
-		connect(this->model->scene, &ObjectsScene::sceneRectChanged,this, &ModelOverviewWidget::resizeOverview);
-		connect(this->model->scene, &ObjectsScene::sceneRectChanged,this, qOverload<>(&ModelOverviewWidget::updateOverview));
-
 		this->resizeOverview();
 		this->updateZoomFactor(this->model->getCurrentZoom());
-		this->updateOverview(true);
+
+		connectToActiveScene();
 
 		this->move(this->model->geometry().right() - this->width(),
 							 this->model->geometry().bottom() - this->height());
@@ -75,6 +73,23 @@ void ModelOverviewWidget::show(ModelWidget *model)
 
 	this->raise();
 	QWidget::show();
+}
+
+void ModelOverviewWidget::connectToActiveScene()
+{
+	if(!model)
+		return;
+
+	if(connected_scene)
+		disconnect(connected_scene, nullptr, this, nullptr);
+
+	connected_scene = model->scene;
+
+	connect(connected_scene, &ObjectsScene::selectionChanged, this, qOverload<>(&ModelOverviewWidget::updateOverview));
+	connect(connected_scene, &ObjectsScene::sceneRectChanged, this, &ModelOverviewWidget::resizeOverview);
+	connect(connected_scene, &ObjectsScene::sceneRectChanged, this, qOverload<>(&ModelOverviewWidget::updateOverview));
+
+	updateOverview(true);
 }
 
 void ModelOverviewWidget::closeEvent(QCloseEvent *event)
