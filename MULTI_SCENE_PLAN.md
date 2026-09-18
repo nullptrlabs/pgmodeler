@@ -132,6 +132,12 @@ Estas decisões foram tomadas em conversa e **não devem ser reabertas** sem jus
 5. **Remoção de schema (inclusive em cascata) deve destruir a `ObjectsScene` correspondente**,
    apenas no modo por schema. Ver detalhamento na Fase 1 ("Remoção de schema e destruição de
    cena") e riscos associados na seção 6.
+6. **Containers Qt, não std** (adicionado em 2026-09-18): todo código novo desta feature usa
+   containers Qt (`QList`, `QHash`, `QMap`, `QStringList`, etc.) em vez de `std::vector`/`std::map`/
+   etc., para não misturar as duas famílias de container na implementação nova. Só recorrer a um
+   container std quando houver razão técnica concreta que o Qt não cubra (raro) — e nesse caso,
+   registrar o motivo inline no código. Não é retroativo: código pré-existente que já usa std
+   (ex. `ModelWidget::selected_objects`) não precisa ser convertido como parte deste trabalho.
 
 ## 4. Fases de implementação
 
@@ -215,12 +221,16 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
 #### Subtarefas da Fase 0 (uma por commit)
 
 0.1. **Infra da coleção de cenas** — trocar o membro único `ObjectsScene *scene` em `ModelWidget`
-     por `std::vector<ObjectsScene *> scenes` + índice da cena ativa. `scene` continua existindo
-     como ponteiro de conveniência para a cena ativa (mantido em sincronia internamente), então
-     nenhum dos 82 call sites que hoje usam `scene->...` em `modelwidget.cpp` precisa mudar neste
-     commit. Adicionar a API nova: `getObjectsScene(int idx)`, `getObjectsScenes()`,
-     `getSceneCount()`, `getSceneForObject(BaseObject *)`. Sem mudança de comportamento observável
-     — só 1 cena existe em runtime ainda. Depende de: nenhuma.
+     por `QList<ObjectsScene *> scenes` + índice da cena ativa (containers Qt, não std — ver
+     seção 3). `scene` continua existindo como ponteiro de conveniência para a cena ativa (mantido
+     em sincronia internamente), então nenhum dos 82 call sites que hoje usam `scene->...` em
+     `modelwidget.cpp` precisa mudar neste commit. Adicionar a API nova: `getObjectsScene(int idx)`,
+     `getObjectsScenes()`, `getSceneCount()`, `getSceneForObject(BaseObject *)`. A criação da cena
+     em si fica isolada num método privado `ModelWidget::addScene()` (cria a `ObjectsScene`,
+     instala o event filter, adiciona a `scenes`, e só ativa/atribui a `scene` se for a primeira —
+     para que chamadas futuras da Fase 1, ao criar uma cena por schema, não roubem o foco da cena
+     em que o usuário já está trabalhando), reutilizado pelo construtor. Sem mudança de
+     comportamento observável — só 1 cena existe em runtime ainda. Depende de: nenhuma.
 
 0.2. **`setActiveScene()` + `s_activeSceneChanged`** — implementar
      `ModelWidget::setActiveScene(int idx)` (troca `viewport->setScene(...)`, reaplica
