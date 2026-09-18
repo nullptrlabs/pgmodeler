@@ -156,11 +156,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	xmlparser = db_model->getXMLParser();
 	op_list = new OperationList(db_model, this);
 
-	scene = new ObjectsScene(this);
-	scene->installEventFilter(this);
-	scenes.append(scene);
-	active_scene_idx = 0;
-
+	scene = addScene();
 	viewport = new QGraphicsView(scene, this);
 
 	/* Since we constantly work with objects (re)configuration which leads to bounding
@@ -1040,6 +1036,22 @@ void ModelWidget::applyZoom(double zoom)
 double ModelWidget::getCurrentZoom()
 {
 	return current_zoom;
+}
+
+ObjectsScene *ModelWidget::addScene()
+{
+	ObjectsScene *new_scene = new ObjectsScene(this);
+	new_scene->installEventFilter(this);
+
+	scenes.append(new_scene);
+
+	if(scenes.size() == 1)
+	{
+		active_scene_idx = 0;
+		scene = new_scene;
+	}
+
+	return new_scene;
 }
 
 void ModelWidget::setActiveScene(int idx)

@@ -277,6 +277,9 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Applies the layer settings from the internal database model to the scene object
 		void updateSceneLayers();
 
+		//! \brief Creates a new scene, appends it to scenes and returns it; activates it if it's the first one
+		ObjectsScene *addScene();
+
 	protected:
 		QAction *action_source_code,
 		*action_edit,
