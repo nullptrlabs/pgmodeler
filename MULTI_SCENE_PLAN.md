@@ -242,11 +242,21 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
      ([modelwidget.cpp:825](libs/libgui/src/widgets/modelwidget.cpp#L825)) por uma checagem de
      pertencimento à coleção de cenas. Isolado, baixo risco. Depende de: 0.1.
 
-0.4. **`ModelOverviewWidget` reage a `s_activeSceneChanged`** — desconectar/reconectar os sinais
-     `selectionChanged`/`sceneRectChanged` na cena nova e chamar `updateOverview()` quando a cena
-     ativa muda ([modeloverviewwidget.cpp:43,62-64](libs/libgui/src/widgets/modeloverviewwidget.cpp#L43)).
-     Com 1 cena só o slot nunca dispara de verdade ainda, mas fecha o contrato antes da Fase 1
-     popular múltiplas cenas. Depende de: 0.2.
+0.4. **`ModelOverviewWidget` reage a `s_activeSceneChanged`** — novo método privado
+     `connectToActiveScene()` ([modeloverviewwidget.cpp](libs/libgui/src/widgets/modeloverviewwidget.cpp)),
+     único ponto responsável por desconectar da cena anterior (rastreada no novo membro
+     `connected_scene`, já que por `s_activeSceneChanged` disparar depois que
+     `ModelWidget::scene` já foi reatribuído, não dá para descobrir a cena antiga a partir do
+     model) e reconectar `selectionChanged`/`sceneRectChanged` na cena ativa atual, chamando
+     `updateOverview(true)` ao final. Chamado tanto em `show()` (conexão inicial) quanto via
+     `connect(model, &ModelWidget::s_activeSceneChanged, this, &ModelOverviewWidget::connectToActiveScene)`.
+     **Pegadinha encontrada em teste manual (F10 logo após abrir um modelo)**: `connectToActiveScene()`
+     precisa ser chamado **depois** de `resizeOverview()` em `show()`, nunca antes — é
+     `resizeOverview()` quem calcula `pixmap_size`, e chamar `updateOverview(true)` (dentro de
+     `connectToActiveScene()`) antes disso pinta num `QPixmap` de tamanho inválido (overview vazio
+     + warning `QPainter::begin: Paint device returned engine == 0`). Com 1 cena só o sinal nunca
+     dispara de verdade ainda, mas fecha o contrato antes da Fase 1 popular múltiplas cenas.
+     Depende de: 0.2.
 
 0.5. **Agregação de seleção e bounding rect entre cenas** — `ModelWidget::selectAllObjects()`
      ("select all" via `scene->setSelectionArea(scene->sceneRect())`), `itemsBoundingRect()` (usado
