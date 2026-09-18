@@ -122,7 +122,13 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Frame that indicates if the model is protected
 		QFrame *protected_model_frm;
 
-		//! \brief Graphical objects scene
+		//! \brief Scenes managed by this widget, one per segmentation bucket
+		QList<ObjectsScene *> scenes;
+
+		//! \brief Index of the currently active scene within scenes (the one attached to viewport)
+		int active_scene_idx;
+
+		//! \brief Convenience pointer to the currently active scene (always equal to scenes[active_scene_idx])
 		ObjectsScene *scene;
 
 		//! \brief Manages the objects scene
@@ -420,8 +426,20 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Returns the reference database model
 		DatabaseModel *getDatabaseModel();
 
-		//! \brief Returns the object scene used by the model
+		//! \brief Returns the currently active object scene used by the model
 		ObjectsScene *getObjectsScene();
+
+		//! \brief Returns the scene at the given index in the scenes collection (nullptr if idx is out of bounds)
+		ObjectsScene *getObjectsScene(int idx);
+
+		//! \brief Returns the full collection of scenes currently managed by this widget
+		QList<ObjectsScene *> getObjectsScenes();
+
+		//! \brief Returns the number of scenes currently managed by this widget
+		int getSceneCount();
+
+		//! \brief Returns the scene that currently holds the graphical representation of the given object, or nullptr if the object has none
+		ObjectsScene *getSceneForObject(BaseObject *object);
 
 		//! \brief Returns the scene view used by the model
 		QGraphicsView *getViewport();

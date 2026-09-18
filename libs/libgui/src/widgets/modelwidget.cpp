@@ -158,6 +158,8 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 
 	scene = new ObjectsScene(this);
 	scene->installEventFilter(this);
+	scenes.append(scene);
+	active_scene_idx = 0;
 
 	viewport = new QGraphicsView(scene, this);
 
@@ -4940,6 +4942,39 @@ DatabaseModel *ModelWidget::getDatabaseModel()
 ObjectsScene *ModelWidget::getObjectsScene()
 {
 	return scene;
+}
+
+ObjectsScene *ModelWidget::getObjectsScene(int idx)
+{
+	if(idx < 0 || idx >= scenes.size())
+		return nullptr;
+
+	return scenes.at(idx);
+}
+
+QList<ObjectsScene *> ModelWidget::getObjectsScenes()
+{
+	return scenes;
+}
+
+int ModelWidget::getSceneCount()
+{
+	return static_cast<int>(scenes.size());
+}
+
+ObjectsScene *ModelWidget::getSceneForObject(BaseObject *object)
+{
+	BaseGraphicObject *graph_obj = dynamic_cast<BaseGraphicObject *>(object);
+
+	if(!graph_obj)
+		return nullptr;
+
+	BaseObjectView *obj_view = dynamic_cast<BaseObjectView *>(graph_obj->getOverlyingObject());
+
+	if(!obj_view)
+		return nullptr;
+
+	return dynamic_cast<ObjectsScene *>(obj_view->scene());
 }
 
 QGraphicsView *ModelWidget::getViewport()
