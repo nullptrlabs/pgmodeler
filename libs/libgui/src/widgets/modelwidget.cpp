@@ -779,10 +779,13 @@ void ModelWidget::resizeEvent(QResizeEvent *)
 
 bool ModelWidget::eventFilter(QObject *object, QEvent *event)
 {
+	ObjectsScene *evt_scene = qobject_cast<ObjectsScene *>(object);
+	bool is_scene_event = evt_scene && scenes.contains(evt_scene);
+
 	/* Emitting a signal when the scene successfully made a drag & drop event
 	 * This signal is handled in main window so the mime data containing the url
 	 * to dbm files can be correctly loaded */
-	if(object == scene && (event->type() == QEvent::GraphicsSceneDragEnter ||
+	if(is_scene_event && (event->type() == QEvent::GraphicsSceneDragEnter ||
 												 event->type() == QEvent::GraphicsSceneDragMove ||
 												 event->type() == QEvent::GraphicsSceneDrop))
 	{
@@ -849,7 +852,7 @@ bool ModelWidget::eventFilter(QObject *object, QEvent *event)
 		updateMagnifierArea();
 		return true;
 	}
-	else if(object == scene)
+	else if(is_scene_event)
 	{
 		QGraphicsSceneMouseEvent *m_event = dynamic_cast<QGraphicsSceneMouseEvent *>(event);
 
