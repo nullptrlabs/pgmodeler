@@ -40,8 +40,12 @@ BaseGraphicObject::BaseGraphicObject()
 
 void BaseGraphicObject::setProtected(bool value)
 {
+	bool changed = this->isProtected() != value;
+
 	BaseObject::setProtected(value);
-	emit s_objectProtected(this->isProtected());
+
+	if(changed)
+		emit s_objectProtected(this->isProtected());
 }
 
 void BaseGraphicObject::setSystemObject(bool value)
@@ -51,7 +55,7 @@ void BaseGraphicObject::setSystemObject(bool value)
 
 void BaseGraphicObject::setModified(bool value)
 {
-	is_modified=value;
+	is_modified = value;
 
 	if(is_modified && updates_enabled)
 		emit s_objectModified();

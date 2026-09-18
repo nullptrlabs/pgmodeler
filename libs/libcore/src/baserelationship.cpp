@@ -190,6 +190,17 @@ void BaseRelationship::setName(const QString &name)
 	}
 }
 
+void BaseRelationship::setModified(bool value)
+{
+	BaseGraphicObject::setModified(value);
+
+	for(unsigned lbl_id = SrcCardLabel; lbl_id <= RelNameLabel; lbl_id++)
+	{
+		if(lables[lbl_id])
+			lables[lbl_id]->setModified(value);
+	}
+}
+
 void BaseRelationship::setMandatoryTable(TableId table_id, bool value)
 {
 	QString cmin, aux;

@@ -261,8 +261,18 @@ void LayersConfigWidget::toggleLayersRects()
 	if(!model)
 		return;
 
-	model->getObjectsScene()->setLayerRectsVisible(toggle_layers_rects_chk->isChecked());
-	model->getObjectsScene()->setLayerNamesVisible(toggle_layers_names_chk->isChecked());
+	bool updated = false;
+	ObjectsScene *scene = model->getObjectsScene();
+
+	if(scene->isLayerRectsVisible() != toggle_layers_rects_chk->isChecked())
+	{
+		scene->setLayerRectsVisible(toggle_layers_rects_chk->isChecked());
+		updated = true;
+	}
+
+	if(!updated && scene->isLayerNamesVisible() != toggle_layers_names_chk->isChecked())
+		model->getObjectsScene()->setLayerNamesVisible(toggle_layers_names_chk->isChecked());
+
 	model->updateModelLayersInfo();
 	model->getDatabaseModel()->setObjectsModified({ ObjectType::Schema });
 

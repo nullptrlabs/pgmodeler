@@ -484,6 +484,7 @@ void DatabaseModel::__addObject(BaseObject *object, int obj_idx)
 	}
 
 	object->setDatabase(this);
+	indexObject(object);
 	emit s_objectAdded(object);
 	this->setInvalidated(true);
 }
@@ -547,6 +548,7 @@ void DatabaseModel::__removeObject(BaseObject *object, int obj_idx, bool check_r
 			removePermissions(object);
 
 		obj_list->erase(obj_list->begin() + obj_idx);
+		unindexObject(object);
 	}
 
 	object->clearAllDepsRefs();
@@ -602,42 +604,116 @@ std::vector<BaseObject *> DatabaseModel::getObjects(BaseObject *schema)
 	return sel_list;
 }
 
-BaseObject *DatabaseModel::getObject(const QString &name, ObjectType obj_type, int &obj_idx)
+/* name_idx/sig_idx keys are normalized to lower-case whenever object name quoting is disabled,
+ * mirroring the Qt::CaseInsensitive comparison that getObject() used to do via a linear scan */
+QString DatabaseModel::getNameIndexKey(BaseObject *object)
 {
-	BaseObject *object = nullptr;
-	std::vector<BaseObject *> *obj_list=nullptr;
-	std::vector<BaseObject *>::iterator itr, itr_end;
-	bool found = false;
-	QString aux_name1;
-	Qt::CaseSensitivity case_mode = BaseObject::isQuotingDisabled() ?
-																	Qt::CaseInsensitive : Qt::CaseSensitive;
+	QString key = object->getName(false);
 
-	obj_list = getObjectList(obj_type);
+	if(BaseObject::isQuotingDisabled())
+		key = key.toLower();
 
-	if(!obj_list)
-		throw Exception(ErrorCode::ObtObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
-	
-	itr = obj_list->begin();
-	itr_end = obj_list->end();
-	obj_idx = -1;
-	aux_name1 = QString(name).remove('"');
+	return key;
+}
 
-	while(itr!=itr_end && !found)
+QString DatabaseModel::getSignatureIndexKey(BaseObject *object)
+{
+	QString key = object->getSignature();
+	key.remove('"');
+
+	if(BaseObject::isQuotingDisabled())
+		key = key.toLower();
+
+	return key;
+}
+
+void DatabaseModel::indexObject(BaseObject *object)
+{
+	if(!object || obj_lists.count(object->getObjectType()) == 0)
+		return;
+
+	ObjectType obj_type = object->getObjectType();
+	name_idx[obj_type][getNameIndexKey(object)] = object;
+	sig_idx[obj_type][getSignatureIndexKey(object)] = object;
+}
+
+void DatabaseModel::unindexObject(BaseObject *object)
+{
+	if(!object || obj_lists.count(object->getObjectType()) == 0)
+		return;
+
+	ObjectType obj_type = object->getObjectType();
+	name_idx[obj_type].remove(getNameIndexKey(object));
+	sig_idx[obj_type].remove(getSignatureIndexKey(object));
+}
+
+void DatabaseModel::updateObjectIndex(BaseObject *object, const QString &prev_name, const QString &prev_signature)
+{
+	if(!object || obj_lists.count(object->getObjectType()) == 0)
+		return;
+
+	ObjectType obj_type = object->getObjectType();
+	QString prev_name_key = prev_name, prev_sig_key = prev_signature;
+	prev_sig_key.remove('"');
+
+	if(BaseObject::isQuotingDisabled())
 	{
-		if((*itr)->getSignature().remove("\"").compare(aux_name1, case_mode) == 0 ||
-			 (*itr)->getName(false).compare(aux_name1, case_mode) == 0)
-		{
-			found = true;
-			break;
-		}
-
-		itr++;
+		prev_name_key = prev_name_key.toLower();
+		prev_sig_key = prev_sig_key.toLower();
 	}
 
-	if(found)
+	name_idx[obj_type].remove(prev_name_key);
+	sig_idx[obj_type].remove(prev_sig_key);
+
+	name_idx[obj_type][getNameIndexKey(object)] = object;
+	sig_idx[obj_type][getSignatureIndexKey(object)] = object;
+}
+
+void DatabaseModel::rebuildSignatureIndex()
+{
+	for(auto &itr : obj_lists)
 	{
-		object = (*itr);
-		obj_idx = (itr - obj_list->begin());
+		QHash<QString, BaseObject *> rebuilt;
+
+		for(auto &obj : *itr.second)
+			rebuilt[getSignatureIndexKey(obj)] = obj;
+
+		sig_idx[itr.first] = rebuilt;
+	}
+}
+
+BaseObject *DatabaseModel::findIndexedObject(const QString &name, ObjectType obj_type)
+{
+	if(!getObjectList(obj_type))
+		throw Exception(ErrorCode::ObtObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
+
+	QString aux_name1 = QString(name).remove('"');
+
+	if(BaseObject::isQuotingDisabled())
+		aux_name1 = aux_name1.toLower();
+
+	BaseObject *object = sig_idx[obj_type].value(aux_name1, nullptr);
+
+	if(!object)
+		object = name_idx[obj_type].value(aux_name1, nullptr);
+
+	return object;
+}
+
+BaseObject *DatabaseModel::getObject(const QString &name, ObjectType obj_type, int &obj_idx)
+{
+	obj_idx = -1;
+
+	BaseObject *object = findIndexedObject(name, obj_type);
+
+	/* obj_idx (the object's current position in obj_list) is only computed when an object is
+	 * actually found, so a miss -- the common case while checking for duplicates during model
+	 * loading -- stays O(1) instead of paying for a scan */
+	if(object)
+	{
+		std::vector<BaseObject *> *obj_list = getObjectList(obj_type);
+		auto pos = std::find(obj_list->begin(), obj_list->end(), object);
+		obj_idx = static_cast<int>(pos - obj_list->begin());
 	}
 
 	return object;
@@ -3359,8 +3435,7 @@ int DatabaseModel::getPermissionIndex(Permission *perm, bool exact_match)
 
 BaseObject *DatabaseModel::getObject(const QString &name, ObjectType obj_type)
 {
-	int idx;
-	return getObject(name, obj_type, idx);
+	return findIndexedObject(name, obj_type);
 }
 
 int DatabaseModel::getObjectIndex(const QString &name, ObjectType obj_type)
@@ -3671,6 +3746,7 @@ void DatabaseModel::loadModel(const QString &filename)
 
 		BaseGraphicObject::setUpdatesEnabled(true);
 		setObjectsModified();
+
 		emit s_objectLoaded(100, tr("Rendering database model..."), enum_t(ObjectType::BaseObject));
 	}
 	catch(Exception &e)
@@ -8728,55 +8804,71 @@ void DatabaseModel::setObjectsModified(std::vector<BaseObject *> &objects)
 	}
 }
 
-void DatabaseModel::setObjectsModified(std::vector<ObjectType> types)
+void DatabaseModel::setObjectsModified(const std::vector<ObjectType> &types)
 {
-	ObjectType obj_types[]={
-							ObjectType::Table, ObjectType::View, ObjectType::ForeignTable,
-							ObjectType::Relationship, ObjectType::BaseRelationship,
-							ObjectType::Textbox, ObjectType::Schema };
-	std::vector<BaseObject *>::iterator itr, itr_end;
-	std::vector<BaseObject *> *obj_list = nullptr;
-	Textbox *label = nullptr;
-	BaseRelationship *rel = nullptr;
+	static const std::vector<ObjectType> all_types {
+		ObjectType::Table, ObjectType::View, ObjectType::ForeignTable,
+		ObjectType::Schema, ObjectType::Textbox,
+		ObjectType::Relationship, ObjectType::BaseRelationship
+	};
+
 	BaseGraphicObject *graph_obj = nullptr;
-	unsigned i1 = 0;
+	bool upd_rels = false;
+	ObjectType obj_tp;
+	std::vector<ObjectType>::const_iterator itr, itr_end;
 
-	for(auto &obj_type : obj_types)
+	if(!types.empty())
 	{
-		if(types.empty() || std::find(types.begin(), types.end(), obj_type) != types.end())
+		itr = types.begin();
+		itr_end = types.end();
+	}
+	else
+	{
+		itr = all_types.begin();
+		itr_end = all_types.end();
+	}
+
+	BaseTable::setGeomChangesIgnored(true);
+
+	while(itr != itr_end)
+	{
+		obj_tp = *itr;
+		itr++;
+
+		if(!BaseGraphicObject::isGraphicObject(obj_tp))
+			continue;
+
+		if(!upd_rels)
 		{
-			obj_list = getObjectList(obj_type);
-			itr = obj_list->begin();
-			itr_end = obj_list->end();
-
-			while(itr != itr_end)
-			{
-				graph_obj = dynamic_cast<BaseGraphicObject *>(*itr);
-
-				if(BaseTable::isBaseTable(obj_type))
-				{
-					/* We call the BaseTable::resetHashCode version to force
-					 * to force table to be redrawn by overriding the
-					 * hash validation in TableView::configureObject */
-					dynamic_cast<BaseTable *>(graph_obj)->resetHashCode();
-				}
-
-				graph_obj->setModified(true);
-
-				//For relationships is needed to set the labels as modified too
-				if(obj_type == ObjectType::Relationship || obj_type == ObjectType::BaseRelationship)
-				{
-					rel=dynamic_cast<BaseRelationship *>(*itr);
-					for(i1 = BaseRelationship::SrcCardLabel; i1 <= BaseRelationship::RelNameLabel; i1++)
-					{
-						label = rel->getLabel(static_cast<BaseRelationship::LabelId>(i1));
-						if(label) label->setModified(true);
-					}
-				}
-
-				itr++;
-			}
+			upd_rels = (obj_tp == ObjectType::BaseRelationship ||
+									obj_tp == ObjectType::Relationship);
 		}
+
+		for(auto &obj : *getObjectList(obj_tp))
+		{
+			graph_obj = dynamic_cast<BaseGraphicObject *>(obj);
+
+			if(BaseTable::isBaseTable(obj_tp))
+			{
+				/* We call the BaseTable::resetHashCode version to force
+				 * to force table to be redrawn by overriding the
+				 * hash validation in TableView::configureObject */
+				dynamic_cast<BaseTable *>(graph_obj)->resetHashCode();
+			}
+
+			graph_obj->setModified(true);
+		}
+	}
+
+	BaseTable::setGeomChangesIgnored(false);
+
+	if(upd_rels)
+	{
+		for(auto &rel : relationships)
+			dynamic_cast<Relationship *>(rel)->setModified(true);
+
+		for(auto &base_rel : base_relationships)
+			dynamic_cast<BaseRelationship *>(base_rel)->setModified(true);
 	}
 }
 

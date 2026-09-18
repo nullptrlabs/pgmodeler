@@ -21,6 +21,9 @@
 
 #include "schema.h"
 
+// Needed to rebuild the signature index after a rename
+#include "databasemodel.h"
+
 unsigned Schema::schema_id {3000};
 
 Schema::Schema()
@@ -45,6 +48,14 @@ void Schema::setName(const QString &name)
 						ErrorCode::AsgReservedName,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	BaseObject::setName(name);
+
+	/* Renaming a schema silently changes the signature of every object it contains
+	 * (they're schema-qualified), so patching each affected entry individually isn't
+	 * worth it here -- just rebuild the signature index once. */
+	DatabaseModel *dbmodel = dynamic_cast<DatabaseModel *>(getDatabase());
+
+	if(dbmodel)
+		dbmodel->rebuildSignatureIndex();
 }
 
 void Schema::setNameColor(const QColor &color)

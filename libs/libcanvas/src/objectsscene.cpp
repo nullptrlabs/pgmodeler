@@ -742,7 +742,14 @@ void ObjectsScene::drawBackground(QPainter *painter, const QRectF &rect)
 			pen_width = BaseObjectView::ObjectBorderWidth *
 									BaseObjectView::getScreenDpiFactor();
 	QSizeF aux_size;
-	QRectF scn_rect = sceneRect();
+	QRectF scn_rect = sceneRect(),
+			/* The grid/page delimiters are only meaningful within the area that
+			 * Qt is actually asking to be redrawn (rect). This avoids iterating up to the
+			 * full scene rect below, which is costly as it scales with the total scene area 
+			 * instead of the exposed area, which gets very expensive on large 
+			 * scenes where objects are spread far apart 
+			 * (a huge scene rect with comparatively few objects). */
+			visible_rect = rect.intersected(scn_rect);
 	QPen pen = QPen(QColor(), pen_width);
 	int start_x = 0, start_y = 0,
 			end_x = 0, end_y = 0;
@@ -762,10 +769,10 @@ void ObjectsScene::drawBackground(QPainter *painter, const QRectF &rect)
 
 	painter->fillRect(rect, canvas_color);
 
-	start_x = round(scn_rect.left()/grid_size) * grid_size;
-	start_y = round(scn_rect.top()/grid_size) * grid_size;
-	end_x = scn_rect.right();
-	end_y = scn_rect.bottom();
+	start_x = floor(visible_rect.left()/grid_size) * grid_size;
+	start_y = floor(visible_rect.top()/grid_size) * grid_size;
+	end_x = ceil(visible_rect.right()/grid_size) * grid_size;
+	end_y = ceil(visible_rect.bottom()/grid_size) * grid_size;
 
 	if(show_grid && !move_scene)
 	{
@@ -818,25 +825,20 @@ void ObjectsScene::drawBackground(QPainter *painter, const QRectF &rect)
 		pen.setDashPattern({3, 5});
 		painter->setPen(pen);
 
-		double st_x = start_x, st_y = start_y;
+		/* The page delimiters must stay phase-locked to the absolute origin
+		 * (0,0) no matter where start_x/start_y (now based on the exposed
+		 * area, see above) happen to fall, otherwise the delimiter lines
+		 * would appear to drift/shift while panning around a large scene.
+		 * So we always snap to the nearest page boundary at or before
+		 * start_x/start_y, regardless of their sign, instead of only doing
+		 * so for the negative-coordinates (infinite canvas) case. */
+		double st_x = round(start_x/page_w) * page_w,
+				st_y = round(start_y/page_h) * page_h;
 
-		/* If the current origin point of the canvas is not at the positive origin (0,0)
-		 * we need to calculate the number of page delimiter to be drawn before the (0,0).
-		 * This avoid the delimiters to be shifted every time the canvas origin moves
-		 * far to a negative point. */
-		if(start_x < 0 || start_y < 0)
-		{
-			/* Due to the infinite canvas feature, we need to calculate
-			 * the number of pages before origin (0,0) so the iteration
-			 * can start in the right position of rendering */
-			st_x = round(start_x/page_w) * page_w,
-			st_y = round(start_y/page_h) * page_h;
-
-			/* We decremente in one page the start rendering position
-			 * so the round operation above doesn't cut any start page */
-			st_x -= page_w;
-			st_y -= page_h;
-		}
+		/* We decremente in one page the start rendering position
+		 * so the round operation above doesn't cut any start page */
+		st_x -= page_w;
+		st_y -= page_h;
 
 		for(int px = st_x; px < end_x; px += page_w)
 		{
@@ -862,8 +864,13 @@ void ObjectsScene::drawBackground(QPainter *painter, const QRectF &rect)
 		pen.setStyle(Qt::SolidLine);
 		painter->setPen(pen);
 
-		painter->drawLine(start_x, end_y, end_x, end_y);
-		painter->drawLine(end_x, start_y, end_x, end_y);
+		/* Using the actual scene rect here (not start_x/start_y/end_x/end_y,
+		 * which now refer to the exposed area) so the boundary is drawn at the
+		 * real edges of the scene. The painter's clip rect (set above) takes
+		 * care of only rendering the portion of these lines that falls within
+		 * the currently exposed area. */
+		painter->drawLine(scn_rect.left(), scn_rect.bottom(), scn_rect.right(), scn_rect.bottom());
+		painter->drawLine(scn_rect.right(), scn_rect.top(), scn_rect.right(), scn_rect.bottom());
 	}
 
 	painter->restore();
@@ -997,7 +1004,8 @@ void ObjectsScene::handleChildrenSelectionChanged()
 
 void ObjectsScene::addItem(QGraphicsItem *item, bool blink_new)
 {
-	if(!item)	return;
+	if(!item)
+		return;
 
 	RelationshipView *rel=dynamic_cast<RelationshipView *>(item);
 	BaseTableView *tab=dynamic_cast<BaseTableView *>(item);

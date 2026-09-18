@@ -612,6 +612,8 @@ void RelationshipView::configureLine()
 	 * hash codes of both tables are unchanged since the last call to this method */
 	if(configuring_line ||
 
+			BaseTable::isGeomChangesIgnored() ||
+
 			!BaseGraphicObject::isUpdatesEnabled() ||
 
 			!tables[src_tab]->boundingRect().isValid() ||
@@ -623,7 +625,7 @@ void RelationshipView::configureLine()
 
 			 (!tab_hashes[dst_tab].isEmpty() &&
 					tab_hashes[dst_tab] == base_rel->getTable(dst_tab)->getHashCode())))
-		return;
+	return;
 
 	tab_hashes[src_tab] = base_rel->getTable(src_tab)->getHashCode();
 	tab_hashes[dst_tab] = base_rel->getTable(dst_tab)->getHashCode();
@@ -1220,6 +1222,39 @@ void RelationshipView::configureLine()
 			this->removeFromGroup(curve);
 			delete curve;
 			i1--;
+		}
+	}
+	/* Self-relationships keep their straight horizontal/vertical segments (the loop shape),
+	 * but round off the corners where they meet instead of drawing sharp right angles: a single
+	 * curve item traces the whole loop, with a quadratic curve (control point at the corner
+	 * itself) taking over from the straight segments near each turn. */
+	else if(use_curved_lines && base_rel->isSelfRelationship())
+	{
+		BezierCurveItem *curve = nullptr;
+
+		if(curves.empty())
+		{
+			curve = new BezierCurveItem;
+			this->addToGroup(curve);
+			curves.push_back(curve);
+		}
+		else
+			curve = curves[0];
+
+		curve->setZValue(lines[0]->zValue());
+		curve->setPen(lines[0]->pen());
+		curve->setPoints(points, SelfRelCornerRadius * BaseObjectView::getScreenDpiFactor());
+
+		for(auto &line : lines)
+			line->setVisible(false);
+
+		//Removing any extra unused curves
+		while(curves.size() > 1)
+		{
+			curve = curves.back();
+			curves.pop_back();
+			this->removeFromGroup(curve);
+			delete curve;
 		}
 	}
 	else if(!use_curved_lines && !lines.empty() && !curves.empty())

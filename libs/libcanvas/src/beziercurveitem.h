@@ -30,12 +30,18 @@
 
 #include "canvasglobal.h"
 #include <QGraphicsPathItem>
+#include <vector>
 
 class __libcanvas BezierCurveItem: public QGraphicsPathItem {
 	private:
 		/*! \brief Stores the stroke of the curve itself.
-		 * This object is used to do a better colision detection */
-		QPainterPath stroke;
+		 * This object is used to do a better colision detection.
+		 * Computed lazily by updateStroke() -- see stroke_dirty below -- since it's only
+		 * ever read from contains()/collidesWithPath(), not from paint(). */
+		mutable QPainterPath stroke;
+
+		//! \brief Indicates that stroke no longer matches path() and must be recomputed before its next use
+		mutable bool stroke_dirty;
 
 		bool invert_cpoints;
 
@@ -43,11 +49,22 @@ class __libcanvas BezierCurveItem: public QGraphicsPathItem {
 
 		bool straight_line;
 
+		/*! \brief Below this level of detail (see QStyleOptionGraphicsItem::levelOfDetailFromTransform())
+		 * paint() skips antialiasing: at that scale the jagged edges aren't perceptible, and stroking
+		 * the curve with antialiasing on is one of the more expensive parts of painting it. The curve's
+		 * shape/path is never altered, so it stays consistent with the stroke used for click detection. */
+		static constexpr double MinLodForAntialiasing = 0.4;
+
 	protected:
 		void setPath(const QPainterPath &path);
 
+		//! \brief Recomputes stroke from the current path() if stroke_dirty is set
+		void updateStroke() const;
+
 	public:
 		BezierCurveItem(QGraphicsItem *parent = 0);
+
+		void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 		/*! \brief Configures the curve based upon a straight line.
 		 *
@@ -58,6 +75,14 @@ class __libcanvas BezierCurveItem: public QGraphicsPathItem {
 		 * The invert_cpoints param causes the control points of the curve to be inverted
 		 * making the curve to be drawn inverted. */
 		void setLine(const QLineF &line, bool simple_curve, bool invert_cpoints);
+
+		/*! \brief Configures the item to draw a polyline through the given points, with each
+		 * interior corner rounded off by a quadratic curve (using the corner itself as the
+		 * control point) instead of a sharp angle. corner_radius is the ideal distance, along
+		 * each of the two segments meeting at a corner, at which the straight segment gives way
+		 * to the curve; it's automatically clamped down for corners whose adjacent segments are
+		 * too short to fit it without overlapping the neighboring corner. */
+		void setPoints(const std::vector<QPointF> &points, double corner_radius);
 
 		//! \brief Returns if the curve has the control points inverted
 		bool isControlPointsInverted();

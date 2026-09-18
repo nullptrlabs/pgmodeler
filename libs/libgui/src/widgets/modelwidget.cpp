@@ -160,23 +160,23 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	scene->installEventFilter(this);
 
 	viewport = new QGraphicsView(scene, this);
-	updateRenderHints();
-	viewport->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	/* Since we constantly work with objects (re)configuration which leads to bounding
 	 * rectangle changes, the viewport area update is done by using bounding rects
 	 * as reference in order to perform updates on the areas covered by the modified
 	 * objects bounding rects. */
 	viewport->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	viewport->setCacheMode(QGraphicsView::CacheBackground);
+
+	updateRenderHints();
 
 	//Force the scene to be drawn from the left to right and from top to bottom
 	viewport->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-
-	viewport->setCacheMode(QGraphicsView::CacheBackground);
 	viewport->centerOn(0,0);
 	viewport->setMouseTracking(true);
 	viewport->installEventFilter(this);
 	viewport->setAcceptDrops(true);
+	viewport->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(20, GuiUtilsNs::LtSpacing, this);
 	vbox->addWidget(protected_model_frm);
@@ -1078,7 +1078,7 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 		{
 			scene->addItem(item, blink_new_objs);
 
-			if(!db_model->loading_model)
+			if(!db_model->isModelLoading())
 				setModified(true);
 
 			emit s_objectAdded(graph_obj);
@@ -1217,6 +1217,10 @@ void ModelWidget::handleObjectsMovement(bool end_moviment)
 	itr=selected_objects.begin();
 	itr_end=selected_objects.end();
 
+	// See the comment in startSceneMove() about dropping antialiasing while the view is actively changing
+	viewport->setRenderHint(QPainter::Antialiasing, end_moviment ? !disable_render_smooth : false);
+	viewport->setRenderHint(QPainter::TextAntialiasing, end_moviment ? !disable_render_smooth : false);
+
 	if(!end_moviment)
 	{
 		op_list->startOperationChain();
@@ -1347,6 +1351,16 @@ void ModelWidget::startSceneMove()
 	curr_show_delim = ObjectsScene::isShowPageDelimiters();
 	ObjectsScene::setShowGrid(false);
 	ObjectsScene::setShowPageDelimiters(false);
+
+	/* Antialiasing is one of the most expensive parts of painting relationship
+	 * lines/curves, which tend to have large bounding rects and thus get
+	 * repainted as a side effect of any nearby change during panning/zooming.
+	 * Dropping it for the duration of the move trades a bit of visual quality
+	 * for a much cheaper repaint while the view is actively moving; the real
+	 * preference is restored once the move settles (see finishSceneMove()). */
+	viewport->setRenderHint(QPainter::Antialiasing, false);
+	viewport->setRenderHint(QPainter::TextAntialiasing, false);
+
 	viewport->resetCachedContent();
 	scene->setShowSceneLimits(false);
 }
@@ -1356,6 +1370,7 @@ void ModelWidget::finishSceneMove()
 	scene_moving = false;
 	ObjectsScene::setShowGrid(curr_show_grid);
 	ObjectsScene::setShowPageDelimiters(curr_show_delim);
+	updateRenderHints();
 	viewport->resetCachedContent();
 	scene->setShowSceneLimits(true);
 	scene->invalidate(viewport->sceneRect());
@@ -1484,7 +1499,11 @@ void ModelWidget::selectAllObjects()
 		std::vector<BaseObject *> objs = *db_model->getObjectList(obj_type);
 
 		if(obj_type == ObjectType::Relationship)
-			objs.insert(objs.end(), db_model->getObjectList(ObjectType::BaseRelationship)->begin(),  db_model->getObjectList(ObjectType::BaseRelationship)->end());
+		{
+			objs.insert(objs.end(),
+									db_model->getObjectList(ObjectType::BaseRelationship)->begin(),
+									db_model->getObjectList(ObjectType::BaseRelationship)->end());
+		}
 
 		for(auto &obj : objs)
 		{
@@ -1907,6 +1926,7 @@ void ModelWidget::convertRelationship1N()
 void ModelWidget::loadModel(const QString &filename)
 {
 	TaskProgressWidget task_prog_wgt(this);
+	bool curr_blink_objs = blink_new_objs;
 
 	try
 	{
@@ -1919,10 +1939,14 @@ void ModelWidget::loadModel(const QString &filename)
 		task_prog_wgt.setWindowTitle(tr("Loading database model"));
 		task_prog_wgt.show();
 
+		// Disable objects blinking during model loading
+		blink_new_objs = false;
 		db_model->loadModel(filename);
+		blink_new_objs = curr_blink_objs;
+
 		this->filename = filename;
-		updateObjectsOpacity();
 		updateSceneLayers();
+		updateObjectsOpacity();
 		adjustSceneRect(true);
 
 		task_prog_wgt.close();
@@ -1946,6 +1970,7 @@ void ModelWidget::loadModel(const QString &filename)
 	}
 	catch(Exception &e)
 	{
+		blink_new_objs = curr_blink_objs;
 		task_prog_wgt.close();
 		setModified(false);
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
@@ -1955,25 +1980,20 @@ void ModelWidget::loadModel(const QString &filename)
 void ModelWidget::updateSceneLayers()
 {
 	scene->blockSignals(true);
-
 	scene->addLayers(db_model->getLayers(), false);
-	scene->setActiveLayers(db_model->getActiveLayers());
 	scene->setLayerColors(ObjectsScene::LayerNameColor, db_model->getLayerNameColors());
 	scene->setLayerColors(ObjectsScene::LayerRectColor, db_model->getLayerRectColors());
 	scene->setLayerNamesVisible(db_model->isLayerNamesVisible());
 	scene->setLayerRectsVisible(db_model->isLayerRectsVisible());
-	db_model->setObjectsModified({ ObjectType::Schema });
-
+	scene->setActiveLayers(db_model->getActiveLayers());
 	scene->blockSignals(false);
+	db_model->setObjectsModified({ ObjectType::Schema });
 }
 
 void ModelWidget::adjustSceneRect(bool use_model_rect, bool expand_only)
 {
 	if(ObjectsScene::isAlignObjectsToGrid())
-	{
 		scene->alignObjectsToGrid();
-		db_model->setObjectsModified();
-	}
 
 	QRectF rect = db_model->getSceneRect();
 
@@ -1983,7 +2003,6 @@ void ModelWidget::adjustSceneRect(bool use_model_rect, bool expand_only)
 		rect = scene->adjustSceneRect(expand_only);
 
 	setModified(true);
-
 	emit s_sceneInteracted(rect.size());
 }
 

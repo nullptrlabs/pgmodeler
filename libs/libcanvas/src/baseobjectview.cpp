@@ -395,13 +395,14 @@ QRectF BaseObjectView::boundingRect() const
 
 void BaseObjectView::toggleProtectionIcon(bool value)
 {
-	BaseGraphicObject *obj_graf=dynamic_cast<BaseGraphicObject *>(this->getUnderlyingObject());
+	BaseGraphicObject *graph_obj = dynamic_cast<BaseGraphicObject *>(this->getUnderlyingObject());
+	bool changed = protected_icon->isVisible() != value;
 
 	protected_icon->setVisible(value);
 	this->setFlag(QGraphicsItem::ItemIsMovable, !value);
 
-	if(obj_graf)
-		obj_graf->setModified(true);
+	if(graph_obj && changed)
+		graph_obj->setModified(true);
 }
 
 void BaseObjectView::configureObjectShadow()
