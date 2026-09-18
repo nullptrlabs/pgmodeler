@@ -658,6 +658,9 @@ class __libgui ModelWidget: public QWidget {
 		void selectObjectsInLayers(const QList<unsigned int> &layer_ids);
 
 	public slots:
+		//! \brief Activates the scene at the given index, reattaching it to the viewport
+		void setActiveScene(int idx);
+
 		void loadModel(const QString &filename);
 		void saveModel(const QString &filename);
 		void saveModel();
@@ -676,6 +679,9 @@ class __libgui ModelWidget: public QWidget {
 		void s_zoomModified(double);
 		void s_maginifierAreaVisible(bool);
 		void s_modelResized();
+
+		//! \brief Emitted after setActiveScene() switches the scene attached to the viewport
+		void s_activeSceneChanged(int new_idx);
 
 		//! \brief Signal emitted whenever the interaction status is changes (see setInteractive)
 		void s_interactiveChanged(bool);

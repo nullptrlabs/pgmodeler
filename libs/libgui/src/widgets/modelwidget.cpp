@@ -1042,6 +1042,20 @@ double ModelWidget::getCurrentZoom()
 	return current_zoom;
 }
 
+void ModelWidget::setActiveScene(int idx)
+{
+	if(idx < 0 || idx >= scenes.size() || idx == active_scene_idx)
+		return;
+
+	active_scene_idx = idx;
+	scene = scenes.at(active_scene_idx);
+
+	viewport->setScene(scene);
+	applyZoom(current_zoom);
+
+	emit s_activeSceneChanged(active_scene_idx);
+}
+
 void ModelWidget::handleObjectAddition(BaseObject *object)
 {
 	BaseGraphicObject *graph_obj=dynamic_cast<BaseGraphicObject *>(object);
