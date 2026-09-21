@@ -1282,6 +1282,16 @@ mapeado):
   `ModelOverviewWidget` (minimap) passa a exibir sempre a cena atualmente ativa (foco), e se
   atualiza automaticamente quando a cena ativa muda — nenhuma visão combinada de múltiplas cenas
   é necessária. Ver detalhamento na Fase 0.
+- **Sugestão automática de modo de segmentação** (achado do usuário, 2026-09-21, confirmado
+  testando `big_model.dbm`): esse modelo tem 4 schemas (`pg_catalog`, `public`, `dv4`, `dvaudit`),
+  mas só `dv4` tem objetos — a lentidão original persiste mesmo com a Fase 1 (por schema) já
+  implementada, porque toda a densidade cai numa única cena. Confirma que os dois modos base são
+  complementares, não substitutos: por schema ajuda quando os objetos já estão distribuídos entre
+  vários schemas; `big_model.dbm` é justamente o caso oposto, candidato natural a threshold (Fase
+  3). Ideia registrada para depois de threshold estar pronto: o pgModeler poderia detectar esse
+  padrão (poucos schemas populados concentrando a maior parte dos objetos) e sugerir ativamente ao
+  usuário o modo de segmentação mais adequado, em vez de deixar a escolha inteiramente manual. Não
+  é escopo das Fases 1-3 (que só fecham os dois modos base) — é uma camada de UX por cima deles.
 - **Terceiro modo de segmentação: threshold com agrupamento ciente de conectividade** (BFS/
   union-find sobre o grafo de relacionamentos, para minimizar cross-scene mantendo clusters
   fortemente conectados no mesmo bucket). Não descartado — é um modo candidato genuíno, só fica
