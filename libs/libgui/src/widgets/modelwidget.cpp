@@ -2023,7 +2023,7 @@ void ModelWidget::updateSceneLayers()
 
 void ModelWidget::alignObjectsToGrid()
 {
-	for(auto *scn : scenes)
+	for(auto &scn : scenes)
 		scn->alignObjectsToGrid();
 }
 
