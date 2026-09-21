@@ -8,12 +8,20 @@
 
 - Branch: `multi-scene-support-2.1.x`.
 - Fase 0 em andamento. Subtarefas **0.1 a 0.7 concluídas e commitadas**.
-- **Próxima subtarefa: 0.8** — escopo revisado nesta sessão (reservar só o modo de segmentação;
-  o retângulo por cena saiu daqui e virou a subtarefa 2.2, design completo já fechado, ver abaixo).
+- **Próxima subtarefa: 0.8** — escopo revisado numa sessão anterior (reservar só o modo de
+  segmentação; o retângulo por cena saiu daqui e virou a subtarefa 2.2, design completo já fechado,
+  ver abaixo).
+- **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
+  (arquitetura, decisões, descrição/dependência das subtarefas) — nunca marca subtarefa como
+  feita/commitada. Todo status de execução (o quê foi feito, hash do commit, achados específicos
+  de sessão) vive só aqui neste arquivo, atualizado junto de cada commit de subtarefa.
 
 ## Commits desta branch (mais recente primeiro)
 
 ```
+3616afa2e Remove stale [FEITO, commitar] tags from the plan
+9ee0eee19 Fase 3: SchemaView needs the same cross-scene suppression as relationships
+548e773ad Close per-scene SceneRect persistence design; revert Workspace naming
 c8236e1ae Update plan: Fase 0.7 done, pgmodeler-cli parity promoted to Fase 4
 24e233aef Fase 0.7: print and image export iterate every scene, no spatial composition
 191c51888 Fase 0.6: generalize Layers mutations across every scene
@@ -148,6 +156,12 @@ Regras de trabalho combinadas nesta sessão — valem pro resto do plano, não s
    modelo inteiro (alinhar à grade, layers) precisa ser replicada em cada cena, sem combinar
    resultado. Classificar antes de "corrigir" — o padrão errado (agregar por reflexo) foi cometido
    uma vez na redação original da 0.5 e corrigido só depois do usuário revisar.
+6. **Separação entre os dois documentos** (2026-09-21): `MULTI_SCENE_PLAN.md` é só o plano —
+   arquitetura, decisões, descrição/dependência de subtarefas. Nunca marcar ali se uma subtarefa
+   foi feita/commitada. Todo log de execução (o quê foi feito, hash de commit, achados de sessão,
+   bugs encontrados) vive só neste arquivo, atualizado junto de cada commit. Motivo: três
+   subtarefas ficaram marcadas "[FEITO, commitar]" no plano numa sessão anterior e a tag nunca foi
+   limpa depois do commit — status e plano acabam divergindo se dividirem o mesmo texto.
 
 ## Bug encontrado e corrigido durante teste manual
 
