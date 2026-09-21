@@ -177,6 +177,26 @@ Estas decisões foram tomadas em conversa e **não devem ser reabertas** sem jus
    remetem diretamente ao código (`ObjectsScene`) — não foi feito um find-replace retroativo no
    texto do plano por esta decisão, só é preciso lembrar, na hora de nomear o atributo XML/string
    de UI de verdade, de usar "Workspace".
+9. **Cena-local vs. modelo-inteiro-replicado-por-cena: dois tipos diferentes de "corrigir uma
+   suposição de cena única"** (adicionado em 2026-09-21, na revisão da subtarefa 0.5). Nem toda
+   suposição de "só existe uma cena" no código atual é um bug a corrigir agregando entre cenas —
+   existem dois tipos bem diferentes:
+   - **Cena-local** (correto usar só a cena ativa, `scene`, sem tocar as demais): qualquer coisa
+     ligada a **interação/visualização** — seleção (`selectAllObjects()`,
+     `scene->selectedItems()`, `scene->clearSelection()`), bounding rect de itens selecionados,
+     gates de menu que dependem da cena atualmente visível (ex. `scene->items().count() > 1` para
+     habilitar "Select all"). Não faz sentido selecionar ou contar objetos que não estão visíveis
+     em outra cena — isso é interação com o que está na tela, não uma operação sobre o modelo.
+   - **Modelo-inteiro, mas replicado por cena** (correto iterar `getObjectsScenes()`, chamando a
+     mesma operação em cada uma, **sem combinar o resultado em um valor só**): normalização/
+     configuração que vale para o modelo inteiro independente do que está visível — o exemplo
+     concreto já corrigido é `alignObjectsToGrid()` (subtarefa 0.5): quando a opção "alinhar à
+     grade" está ativa, alinhar só a cena ativa deixaria objetos de outras cenas desalinhados sem
+     motivo. Layers (subtarefa 0.6) é outro exemplo desta categoria: uma mutação de layer (criar,
+     renomear, mudar cor) precisa valer para todas as cenas, não só a ativa.
+   Ao encontrar uma nova suposição de cena única durante a implementação, classificar antes de
+   "corrigir" — errar para o lado de agregar/replicar por reflexo (como a redação original da
+   subtarefa 0.5 fez) introduz comportamento que ninguém pediu.
 
 ## 4. Fases de implementação
 
@@ -297,12 +317,32 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
      dispara de verdade ainda, mas fecha o contrato antes da Fase 1 popular múltiplas cenas.
      Depende de: 0.2.
 
-0.5. **Agregação de seleção e bounding rect entre cenas** — `ModelWidget::selectAllObjects()`
-     ("select all" via `scene->setSelectionArea(scene->sceneRect())`), `itemsBoundingRect()` (usado
-     em `emitSceneInteracted()`/`s_sceneInteracted`) e o gate `scene->items().count() > 1`
-     ([modelwidget.cpp:4713](libs/libgui/src/widgets/modelwidget.cpp#L4713)) passam a iterar
-     `getObjectsScenes()` e agregar o resultado. Com 1 cena, resultado idêntico ao atual. Depende
-     de: 0.1.
+0.5. **`ModelWidget::alignObjectsToGrid()` iterando todas as cenas** [FEITO, commitar] — revisão
+     de escopo em relação à redação original desta subtarefa (ver nota abaixo). Novo método público
+     `ModelWidget::alignObjectsToGrid()` ([modelwidget.h](libs/libgui/src/widgets/modelwidget.h),
+     [modelwidget.cpp](libs/libgui/src/widgets/modelwidget.cpp)) itera `scenes` chamando
+     `ObjectsScene::alignObjectsToGrid()` em cada uma. Substituídos os 4 call sites que antes
+     acessavam `scene->alignObjectsToGrid()` (a cena única/ativa) diretamente:
+     `MainWindow` (3 pontos — carga de modelo com a opção "alinhar à grade" ativa,
+     [mainwindow.cpp:1279,1312](libs/libgui/src/mainwindow.cpp#L1279), e o toggle da opção nas
+     configurações com um modelo já aberto, [mainwindow.cpp:1548](libs/libgui/src/mainwindow.cpp#L1548))
+     e `ModelWidget::adjustSceneRect()` ([modelwidget.cpp:2024-2027](libs/libgui/src/widgets/modelwidget.cpp#L2024)).
+     Motivo: alinhar à grade é uma normalização de posição do objeto, não uma operação ligada ao
+     que está visível no momento — não faz sentido alinhar só a cena ativa e deixar objetos de
+     outras cenas desalinhados. `MainWindow` passou a chamar `current_model->alignObjectsToGrid()`
+     em vez de alcançar `current_model->scene` diretamente (também simplifica: não precisa mais de
+     acesso de `friend` a um membro privado para isso). Depende de: 0.1.
+
+     **Nota sobre a redação original desta subtarefa**: a versão anterior descrevia agregar
+     `ModelWidget::selectAllObjects()`, os `itemsBoundingRect()` usados em
+     `emitSceneInteracted()`/`eventFilter()` e o gate `scene->items().count() > 1`
+     ([modelwidget.cpp:4780](libs/libgui/src/widgets/modelwidget.cpp#L4780), controla se o item de
+     menu "Select all" aparece) entre todas as cenas. **Revisado em 2026-09-21, a pedido do
+     usuário**: esses três já operam corretamente sobre `scene` (o ponteiro de conveniência da
+     cena ativa) e devem **continuar assim** — selecionar/contar objetos que não estão visíveis em
+     outra cena não faz sentido; seleção é uma operação de interação com o que está na tela, ao
+     contrário do alinhamento à grade. **Nenhuma mudança de código foi feita para esses três** —
+     ficam verificados como corretos como estão, não como pendência.
 
 0.6. **Generalização de Layers** — `LayersConfigWidget` (12 call sites) e
      `ModelWidget::updateSceneLayers()`/`updateModelLayersInfo()` passam a aplicar mutações a
