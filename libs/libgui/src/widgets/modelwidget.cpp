@@ -1093,12 +1093,10 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 			case ObjectType::ForeignTable:
 			case ObjectType::Table:
 				item = new TableView(dynamic_cast<PhysicalTable *>(graph_obj));
-				target_scene = getSchemaScene(dynamic_cast<Schema *>(graph_obj->getSchema()));
 			break;
 
 			case ObjectType::View:
 				item = new GraphicalView(dynamic_cast<View *>(graph_obj));
-				target_scene = getSchemaScene(dynamic_cast<Schema *>(graph_obj->getSchema()));
 			break;
 
 			case ObjectType::Relationship:
@@ -1138,6 +1136,9 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 				item = new StyledTextboxView(dynamic_cast<Textbox *>(graph_obj));
 			break;
 		}
+
+		if(graph_obj->getSchema())
+			target_scene = getSchemaScene(dynamic_cast<Schema *>(graph_obj->getSchema()));
 
 		//Safety net for the rare case an object arrives before any scene exists yet (e.g. no schema created so far)
 		if(!target_scene)
