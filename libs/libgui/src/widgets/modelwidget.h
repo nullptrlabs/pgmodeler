@@ -131,6 +131,9 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Convenience pointer to the currently active scene (always equal to scenes[active_scene_idx])
 		ObjectsScene *scene;
 
+		//! \brief Maps each schema to the scene that holds it and its children, in schema-segmentation mode
+		QHash<Schema *, ObjectsScene *> schema_scenes;
+
 		//! \brief Manages the objects scene
 		QGraphicsView *viewport;
 
@@ -282,6 +285,9 @@ class __libgui ModelWidget: public QWidget {
 
 		//! \brief Creates a new scene, appends it to scenes and returns it; activates it if it's the first one
 		ObjectsScene *addScene();
+
+		//! \brief Returns the scene that holds the given schema and its children, or nullptr if none is assigned yet
+		ObjectsScene *getSchemaScene(Schema *schema);
 
 	protected:
 		QAction *action_source_code,

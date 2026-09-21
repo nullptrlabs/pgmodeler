@@ -998,6 +998,11 @@ double ModelWidget::getCurrentZoom()
 	return current_zoom;
 }
 
+ObjectsScene *ModelWidget::getSchemaScene(Schema *schema)
+{
+	return schema_scenes.value(schema, nullptr);
+}
+
 ObjectsScene *ModelWidget::addScene()
 {
 	ObjectsScene *new_scene = new ObjectsScene(this);
@@ -1100,7 +1105,20 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 			break;
 
 			case ObjectType::Schema:
-				item = new SchemaView(dynamic_cast<Schema *>(graph_obj));
+			{
+				Schema *schema = dynamic_cast<Schema *>(graph_obj);
+
+				target_scene = getSchemaScene(schema);
+
+				if(!target_scene)
+				{
+					target_scene = addScene();
+					schema_scenes[schema] = target_scene;
+					applySceneLayers(target_scene);
+				}
+
+				item = new SchemaView(schema);
+			}
 			break;
 
 			default:
