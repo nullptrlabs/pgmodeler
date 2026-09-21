@@ -20,6 +20,10 @@
 > cena persistido (achado de revisão de código expandido na seção 2): sem retângulo global
 > compartilhado, formato XML mirror de `changelog`/`entry` (tag `<scenes>`/`<scene>`), com
 > retrocompatibilidade explícita para arquivos de versões anteriores — ver Fase 2, subtarefa 2.2.
+> Também registrado (achado do usuário): `SchemaView` tem o mesmo problema que `RelationshipView`
+> tinha antes da decisão #1, mas só no modo threshold — schema deixa de ser 1:1 com cena, então um
+> schema com filhos em cenas diferentes precisa suprimir seu retângulo em vez de tentar renderizar
+> algo cross-scene. Ver subseção dedicada e subtarefa 3.5 na Fase 3.
 
 ## 1. Objetivo
 
@@ -791,6 +795,9 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
      ([schemaview.cpp:79-99, 175-230](libs/libcanvas/src/schemaview.cpp#L79)) sempre retorna itens
      da mesma cena do próprio `SchemaView` no modo por schema. Commit pequeno/de teste, separado
      para não esconder essa verificação dentro do commit de feature 1.2. Depende de: 1.2.
+     **Nota**: essa garantia vale só para o modo por schema (schema e cena são 1:1 por construção);
+     no modo threshold (Fase 3) ela não vale mais — ver subseção "`SchemaView` cross-scene:
+     supressão dinâmica" na Fase 3, achado à parte, não é bug desta subtarefa.
 
 1.5. **Estrutura de dados de "conexões externas" em `BaseTableView`** — nova lista (adicional a
      `connected_rels`, que — conforme achado de revisão de código na seção 2 — já fica
@@ -976,6 +983,40 @@ threshold for de fato detalhado).
   parte do mesmo mecanismo de atributo de segmentação da Fase 2) ou se é recalculado a partir da
   contagem de objetos já atribuídos a cada cena na carga do arquivo.
 
+#### `SchemaView` cross-scene: supressão dinâmica (achado do usuário, 2026-09-21)
+
+Problema exclusivo do modo threshold — **não afeta a Fase 1** (lá, schema e cena são 1:1 por
+construção, já coberto pela subtarefa 1.4). No modo threshold, os buckets são por ordem de
+inserção, sem noção de schema: duas tabelas do mesmo schema podem perfeitamente cair em cenas
+diferentes.
+
+- **O problema**: `SchemaView::fetchChildren()`/`configureObject()`
+  ([schemaview.cpp:79-99, 175-230](libs/libcanvas/src/schemaview.cpp#L79)) calcula o retângulo do
+  schema varrendo **todas** as tabelas daquele schema via `DatabaseModel::getObjects(type, schema)`,
+  sem olhar em qual cena cada uma está. Um `SchemaView` é um `QGraphicsItem` — só existe em **uma**
+  cena. Se os filhos do schema estão espalhados em cenas diferentes, um retângulo desenhado numa
+  cena só ficaria geometricamente errado (delimitando uma área onde parte do conteúdo real nem está
+  presente) — o mesmo problema de fundo que tornou o `RelationshipView` inviável entre cenas
+  (decisão #1, seção 3).
+- **Solução (mesma filosofia da decisão #1)**: em vez de tentar renderizar um retângulo
+  parcial/composto entre cenas, **suprimir completamente** o `SchemaView` de um schema sempre que
+  seus filhos vivem em mais de uma cena — nenhum item "meio existente" escondido em alguma cena
+  arbitrária. Custo baixo: o nome qualificado por schema continua aparecendo no cabeçalho de cada
+  tabela, só a moldura visual de agrupamento some.
+  - **Promoção** (schema tinha filhos em >1 cena, todos convergiram pra uma só — ex. depois de uma
+    futura movimentação manual entre cenas): cria/reativa o `SchemaView` normalmente naquela cena,
+    igual ao comportamento de hoje.
+  - **Rebaixamento** (schema tinha todos os filhos numa cena, um deles foi pra outra): destrói/
+    remove o `SchemaView` daquele schema.
+  - Reavaliado no mesmo choke point de mudança de cena de um objeto que já dispara a lógica
+    equivalente pra relacionamentos (promoção/rebaixamento, subseção da Fase 1) — não precisa de
+    mecanismo de detecção novo, só estender o que já existe pra também considerar o schema da
+    tabela movida, não só seus relacionamentos.
+  - **Não otimizado ainda**: a verificação "todos os filhos deste schema estão na mesma cena?" pode
+    começar como um re-scan completo dos filhos do schema afetado (não do modelo inteiro) a cada
+    mudança — aceitável para começar; otimizar (ex. contador incremental por schema) só se motivado
+    por medição real de performance.
+
 #### Subtarefas da Fase 3 (a refinar quando a fase for retomada, mas algoritmo já fechado)
 
 3.1. Contador ingênuo (Table + View + ForeignTable) + criação de nova cena ao cruzar o threshold —
@@ -993,6 +1034,11 @@ threshold for de fato detalhado).
 3.4. Documentar e validar com teste a política de não-rebalanceamento (cenas esvaziadas por
      remoção não são mescladas/destruídas automaticamente no modo threshold) — verificação, não
      feature nova. Depende de: 3.1.
+
+3.5. Supressão dinâmica de `SchemaView` cross-scene — estender o choke point de promoção/
+     rebaixamento (já usado pra relacionamentos) para também reavaliar, ao mover uma tabela de
+     cena, se o schema dela ainda tem todos os filhos numa única cena; criar/destruir o
+     `SchemaView` conforme a subseção acima. Depende de: 3.1.
 
 ### Fase 4 — Paridade do `pgmodeler-cli` com a segmentação multi-cena
 
