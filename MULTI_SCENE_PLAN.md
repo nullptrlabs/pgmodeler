@@ -584,6 +584,20 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
     momento da inserção** (`ModelWidget::scene`), nos dois modos de segmentação — casa com a
     expectativa de quem desenha um textbox olhando pra uma cena específica, e durante carga de
     arquivo cai naturalmente na cena inicial (nada troca a cena ativa durante o load).
+    **Consideração futura registrada pelo usuário (2026-09-22)**: essa regra funciona sem
+    persistência nova por ser, hoje, determinística na carga (a cena ativa durante o load é sempre
+    a mesma, graças ao tratamento `pg_catalog`/`public` da 1.1) — mas isso só cobre o caso
+    "recarregar sem editar". Dois casos que essa regra **não** cobre ainda, e que apontam pra um
+    mecanismo comum: (a) **modo threshold** (Fase 3) já vai precisar de um atributo `Scene`
+    persistido por objeto (subtarefa 3.2) — hoje redigido só pra Table/View/ForeignTable, mas
+    `Textbox` provavelmente precisa do mesmo tratamento lá, já que não participa do contador; (b)
+    **movimentação manual de um objeto entre cenas** (ainda sem UI/mecanismo desenhado em lugar
+    nenhum do plano — diferente de `moveToSchema()`, que já existe pra tabelas com schema) também
+    precisaria gravar explicitamente "esse objeto pertence à cena X" pra sobreviver a um
+    save/reload, em vez de recair na regra implícita "cena ativa no momento". Ou seja, o mesmo
+    atributo `Scene` por objeto que a Fase 3 vai introduzir é candidato natural a também resolver
+    (a) e (b) — não é escopo da Fase 1 fechar isso agora, mas vale desenhar o atributo (3.2) já
+    pensando em cobrir `Textbox` e reatribuição manual, não só o contador de threshold.
 
 #### Relacionamentos cross-scene: promoção/rebaixamento dinâmico
 
@@ -1132,7 +1146,13 @@ diferentes.
 
 3.2. Persistência do atributo `Scene` por objeto (novo atributo por tabela/view/ftable, análogo ao
      atributo de layer já persistido por objeto) + resolução do "ponto ainda em aberto" acima (como
-     o contador sobrevive entre sessões). Depende de: 3.1.
+     o contador sobrevive entre sessões). **Escopo a revisitar** (achado do usuário na Fase 1,
+     2026-09-22): avaliar se esse mesmo atributo deve cobrir também `Textbox` (que não entra no
+     contador de threshold, hoje roteado só pela cena ativa no momento da inserção — ver nota na
+     intro da Fase 1) e reatribuição manual de qualquer objeto entre cenas (mecanismo ainda não
+     desenhado em nenhum modo) — os três casos (threshold, `Textbox`, reatribuição manual)
+     precisam da mesma pergunta de fundo respondida: "essa cena persistida sobrevive a um
+     save/reload independente da ordem de carga?" Depende de: 3.1.
 
 3.3. Reaproveitamento do marcador cut-off da Fase 1 (1.8) para os cross-scene resultantes no modo
      threshold — deve ser praticamente gratuito se 1.8 foi bem desenhado; se não for, é sinal de
