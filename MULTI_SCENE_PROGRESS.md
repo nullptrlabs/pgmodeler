@@ -7,9 +7,8 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1 a 1.5 concluídas e commitadas**
-  (1.2 recebeu um refinamento pequeno de deduplicação logo depois). **1.6 implementada, build e
-  teste automatizado validados, aguardando teste manual/commit.**
+- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1 a 1.6 concluídas e commitadas**
+  (1.2 recebeu um refinamento pequeno de deduplicação logo depois).
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
@@ -24,7 +23,7 @@
   diferente de `connected_rels` (só `RelationshipView` mexe), quem popula essa lista em 1.6 é
   `ModelWidget::handleObjectAddition()` — não existe `RelationshipView` pra relacionamento
   cross-scene. Só estrutura + API nesta subtarefa, sem desenho visual (isso é 1.8).
-- **1.6 implementada** (não commitada ainda): case `Relationship`/`BaseRelationship` em
+- **1.6 concluída e commitada** (`ad284cc4c`): case `Relationship`/`BaseRelationship` em
   `handleObjectAddition()` ([modelwidget.cpp:1130](libs/libgui/src/widgets/modelwidget.cpp#L1130))
   agora resolve a `ObjectsScene` de cada uma das duas tabelas via `getOverlyingObject()` +
   `scene()`. Mesma cena → cria `RelationshipView` normalmente (comportamento inalterado,
@@ -52,6 +51,41 @@
   a threshold (Fase 3), não por schema. Ideia nova do usuário registrada na seção 5 do plano:
   pgModeler poderia detectar esse padrão e sugerir o modo de segmentação mais adequado — fica para
   depois de threshold existir, fora do escopo das Fases 1-3.
+- **Bug encontrado e corrigido na mesma pausa (2026-09-21)**: usuário reportou que "Select all" (menu
+  de contexto) selecionava objetos em todas as cenas, enquanto limpar seleção afeta só a cena ativa —
+  comportamento assimétrico, quebrando a invariante "seleção é local à cena ativa" (decisão #9, seção
+  3, que já classifica `selectAllObjects()` como cena-local). Causa raiz:
+  `ModelWidget::selectAllObjects()` ([modelwidget.cpp:1600](libs/libgui/src/widgets/modelwidget.cpp#L1600))
+  tem dois caminhos — o genérico "All objects" (`ObjectType::BaseObject`) já usava
+  `scene->setSelectionArea()` (cena ativa, correto); mas os itens específicos do submenu (Schemas,
+  Tables, Views, Foreign Tables, Relationships, Textboxes) iteravam
+  `db_model->getObjectList(obj_type)` — **todo o modelo**, sem filtrar por cena — e chamavam
+  `obj_view->setSelected(true)` direto em cada um. Achado na subtarefa 0.5 (ver nota acima): o plano
+  original desta função **nunca foi corrigido**, só deixado como estava (assumia 1 cena só) enquanto
+  a decisão #9 dizia que deveria ser cena-local. `scene->clearSelection()` (usado em ~20 pontos do
+  arquivo) já estava correto — só afeta a cena ativa nativamente via Qt, por isso a assimetria.
+  **Correção**: adicionado filtro `obj_view->scene() == scene` antes de selecionar
+  ([modelwidget.cpp:1634](libs/libgui/src/widgets/modelwidget.cpp#L1634)) — objetos de outras cenas
+  ficam intocados, igual ao caminho "All objects". Não é a mesma coisa que a subtarefa 1.13 (tensão
+  em `selectTableRelationships()`/`selectTaggedTables()`, que **propositalmente** podem cruzar cenas
+  seguindo relacionamento/tag) — este é só o caso mecânico "selecionar todos os objetos de um tipo",
+  que já devia ser cena-local desde a Fase 0. Build de `gui`/`pgmodeler` limpo, `modelwidgettest`
+  (1.4) sem regressão.
+- **Segundo bug relacionado, mesmo teste manual (2026-09-21)**: o filtro por cena acima resolveu o
+  caso de uma cena isolada, mas o usuário então reportou o segundo sintoma: trocar de cena e repetir
+  "Select all > Tables" seleciona corretamente a nova cena, mas **não limpa** a seleção da cena
+  anterior — objetos ficam selecionados em duas cenas simultaneamente. Causa raiz:
+  `ModelWidget::setActiveScene(int idx)` ([modelwidget.cpp:1095](libs/libgui/src/widgets/modelwidget.cpp#L1095))
+  nunca limpava a seleção da cena de saída antes de trocar `viewport->setScene()` — exatamente o
+  cenário descrito na subseção "Seleção é sempre local à cena ativa" (plano, ver `setActiveScene()`),
+  que já recomendava isso como a correção-base (a parte "decisão recomendada", não a parte em aberto
+  da subtarefa 1.13 — a tensão com `selectTableRelationships()`/`selectTaggedTables()`/Object Search
+  Widget segue sem decisão, essas sim propositalmente cross-scene). **Correção**: adicionado
+  `if(scene) scene->clearSelection();` logo no início de `setActiveScene()`, antes de reatribuir
+  `active_scene_idx`/`scene` — dispara `selectionChanged`/`s_objectSelected` pros itens que estavam
+  selecionados, mesmo mecanismo já usado nos ~20 outros call sites de `clearSelection()`. Build de
+  `gui`/`pgmodeler` limpo, `modelwidgettest` sem regressão. Nenhum dos dois fixes desta pausa foi
+  commitado ainda — aguardando teste manual do usuário.
 - **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
   (arquitetura, decisões, descrição/dependência das subtarefas) — nunca marca subtarefa como
   feita/commitada. Todo status de execução (o quê foi feito, hash do commit, achados específicos
