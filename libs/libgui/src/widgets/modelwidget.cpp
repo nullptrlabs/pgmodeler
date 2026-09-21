@@ -1003,7 +1003,7 @@ ObjectsScene *ModelWidget::getSchemaScene(Schema *schema)
 	return schema_scenes.value(schema, nullptr);
 }
 
-ObjectsScene *ModelWidget::addScene()
+ObjectsScene *ModelWidget::addScene(bool auto_activate)
 {
 	ObjectsScene *new_scene = new ObjectsScene(this);
 	new_scene->installEventFilter(this);
@@ -1054,9 +1054,9 @@ ObjectsScene *ModelWidget::addScene()
 
 	scenes.append(new_scene);
 
-	if(scenes.size() == 1)
+	if(auto_activate && !scene)
 	{
-		active_scene_idx = 0;
+		active_scene_idx = scenes.size() - 1;
 		scene = new_scene;
 		viewport->setScene(new_scene);
 	}
@@ -1107,14 +1107,25 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 			case ObjectType::Schema:
 			{
 				Schema *schema = dynamic_cast<Schema *>(graph_obj);
-
 				target_scene = getSchemaScene(schema);
 
 				if(!target_scene)
 				{
-					target_scene = addScene();
+					/* pg_catalog is a system schema rarely touched directly by the user (usually
+					populated via reverse engineering) -- never let it claim the default active scene,
+					even when it's the first schema processed (createSystemObjects() always creates it
+					before the file's own schemas are parsed on load) */
+					bool is_pg_catalog = (schema->getName() == "pg_catalog");
+
+					target_scene = addScene(!is_pg_catalog);
 					schema_scenes[schema] = target_scene;
 					applySceneLayers(target_scene);
+
+					/* public is the conventional default schema -- while the model is being built/loaded,
+					make sure its scene ends up active even if pg_catalog (or some other schema) was
+					processed first */
+					if(db_model->isModelLoading() && schema->getName() == "public")
+						setActiveScene(scenes.indexOf(target_scene));
 				}
 
 				item = new SchemaView(schema);

@@ -283,8 +283,9 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Applies the layer settings from the internal database model to a single scene
 		void applySceneLayers(ObjectsScene *scn);
 
-		//! \brief Creates a new scene, appends it to scenes and returns it; activates it if it's the first one
-		ObjectsScene *addScene();
+		/*! \brief Creates a new scene, appends it to scenes and returns it. When auto_activate is true (the
+		default) it activates the new scene if none is active yet */
+		ObjectsScene *addScene(bool auto_activate = true);
 
 		//! \brief Returns the scene that holds the given schema and its children, or nullptr if none is assigned yet
 		ObjectsScene *getSchemaScene(Schema *schema);
