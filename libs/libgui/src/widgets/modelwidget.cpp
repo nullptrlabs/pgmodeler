@@ -1093,10 +1093,12 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 			case ObjectType::ForeignTable:
 			case ObjectType::Table:
 				item = new TableView(dynamic_cast<PhysicalTable *>(graph_obj));
+				target_scene = getSchemaScene(dynamic_cast<Schema *>(graph_obj->getSchema()));
 			break;
 
 			case ObjectType::View:
 				item = new GraphicalView(dynamic_cast<View *>(graph_obj));
+				target_scene = getSchemaScene(dynamic_cast<Schema *>(graph_obj->getSchema()));
 			break;
 
 			case ObjectType::Relationship:
