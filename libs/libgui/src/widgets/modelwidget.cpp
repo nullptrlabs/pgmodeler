@@ -1097,6 +1097,10 @@ void ModelWidget::setActiveScene(int idx)
 	if(idx < 0 || idx >= scenes.size() || idx == active_scene_idx)
 		return;
 
+	//Selection is local to the active scene -- clear it on the outgoing scene before switching
+	if(scene)
+		scene->clearSelection();
+
 	active_scene_idx = idx;
 	scene = scenes.at(active_scene_idx);
 
@@ -1631,7 +1635,8 @@ void ModelWidget::selectAllObjects()
 		{
 			obj_view = dynamic_cast<BaseObjectView *>(dynamic_cast<BaseGraphicObject *>(obj)->getOverlyingObject());
 
-			if(obj_view)
+			//Selection is local to the active scene -- objects living in other scenes are left untouched
+			if(obj_view && obj_view->scene() == scene)
 			{
 				obj_view->blockSignals(true);
 				obj_view->setSelected(true);
