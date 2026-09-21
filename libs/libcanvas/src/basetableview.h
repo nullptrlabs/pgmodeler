@@ -51,6 +51,11 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		/*! \brief Stores the references to the relationships connected to this table. */
 		std::vector<BaseRelationship *> connected_rels;
 
+		/*! \brief Stores the references to the relationships that connect this table to a table
+		 * placed in a different scene. These relationships have no RelationshipView of their own,
+		 * being represented instead by a cut-off marker on each side. */
+		QList<BaseRelationship *> external_rels;
+
 	protected:		
 		//! \brief Stores the selected child objects in order to retrieve them in ObjectScene/ModelWidget
 		QList<TableObjectView *> sel_child_objs;
@@ -103,6 +108,10 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		/*! \brief Returns the index of the relationship in the list of the connected relationships
 		 * If 'only_self_rels' is true then only self relationship are searched */
 		int getConnectedRelationshipIndex(BaseRelationship *base_rel, bool only_self_rels = false);
+
+		void addExternalRelationship(BaseRelationship *base_rel);
+
+		void removeExternalRelationship(BaseRelationship *base_rel);
 
 		//! \brief Configures the tag object when the source object has one.
 		void configureTag();
@@ -162,6 +171,12 @@ class __libcanvas BaseTableView: public BaseObjectView {
 
 		//! \brief Returns the current count of connected relationships
 		int getConnectRelsCount();
+
+		//! \brief Returns the current count of external (cross-scene) relationships
+		int getExternalRelsCount();
+
+		//! \brief Returns the list of relationships that connect this table to a table placed in a different scene
+		QList<BaseRelationship *> getExternalRelationships();
 
 		//! \brief This method just emits the signal to indicate that the relationships attached must be updated
 		void requestRelationshipsUpdate();
@@ -224,6 +239,7 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		void s_sceneClearRequested();
 
 		friend class RelationshipView;
+		friend class ModelWidget;
 };
 
 #endif
