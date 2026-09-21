@@ -106,6 +106,8 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 
 	plugins_actions = PgModelerGuiPlugin::getPluginsActions(PgModelerGuiPlugin::ModelAction);
 	current_zoom = 1;
+	scene = nullptr;
+	active_scene_idx = -1;
 	modified = panning_mode = wheel_move = false;
 	scene_moving = blink_new_objs = false;
 	curr_show_grid = curr_show_delim = true;
@@ -156,8 +158,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	xmlparser = db_model->getXMLParser();
 	op_list = new OperationList(db_model, this);
 
-	scene = addScene();
-	viewport = new QGraphicsView(scene, this);
+	viewport = new QGraphicsView(this);
 
 	/* Since we constantly work with objects (re)configuration which leads to bounding
 	 * rectangle changes, the viewport area update is done by using bounding rects
@@ -679,50 +680,6 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	connect(db_model, &DatabaseModel::s_objectAdded, this, &ModelWidget::handleObjectAddition);
 	connect(db_model, &DatabaseModel::s_objectRemoved, this, &ModelWidget::handleObjectRemoval);
 
-	connect(scene, &ObjectsScene::s_objectsMoved, this, &ModelWidget::handleObjectsMovement);
-	connect(scene, &ObjectsScene::s_objectModified, this,  &ModelWidget::handleObjectModification);
-	connect(scene, &ObjectsScene::s_objectDoubleClicked, this,  &ModelWidget::handleObjectDoubleClick);
-
-	connect(scene, &ObjectsScene::s_objectSelected, this,  &ModelWidget::configureObjectSelection, Qt::QueuedConnection);
-	connect(scene, qOverload<BaseObject *>(&ObjectsScene::s_popupMenuRequested), this, qOverload<BaseObject *>(&ModelWidget::configurePopupMenu), Qt::QueuedConnection);
-	connect(scene, qOverload<>(&ObjectsScene::s_popupMenuRequested), this,  &ModelWidget::showObjectMenu, Qt::QueuedConnection);
-	connect(scene, &ObjectsScene::s_childrenSelectionChanged, this, &ModelWidget::configureObjectSelection);
-	connect(scene, &ObjectsScene::s_objectsSelectedInRange, this, &ModelWidget::configureObjectSelection);
-
-	connect(scene, &ObjectsScene::s_collapseModeChanged, this, [this](){
-		setModified(true);
-	});
-
-	connect(scene, &ObjectsScene::s_paginationToggled, this, [this](){
-		setModified(true);
-	});
-
-	connect(scene, &ObjectsScene::s_currentPageChanged, this, [this](){
-		setModified(true);
-	});
-
-	connect(scene, &ObjectsScene::s_objectsMovedLayer, this, [this](){
-		setModified(true);
-	});
-
-	connect(scene, &ObjectsScene::s_ensureVisibleRequested, this, [this](const QRectF &rect){
-		viewport->ensureVisible(rect);
-	});
-
-	connect(scene, &ObjectsScene::s_sceneRectChanged, this, [this](const QRectF &rect){
-		db_model->setSceneRect(rect);
-		viewport->resetCachedContent();
-		setModified(true);
-	});
-
-	connect(scene, &ObjectsScene::s_layersChanged, this, &ModelWidget::updateModelLayersInfo);
-	connect(scene, &ObjectsScene::s_activeLayersChanged, this, &ModelWidget::updateModelLayersInfo);
-	connect(scene, qOverload<BaseObject *>(&ObjectsScene::s_popupMenuRequested), new_obj_overlay_wgt, &NewObjectOverlayWidget::hide);
-	connect(scene, qOverload<>(&ObjectsScene::s_popupMenuRequested), new_obj_overlay_wgt, &NewObjectOverlayWidget::hide);
-	connect(scene, &ObjectsScene::s_objectSelected, new_obj_overlay_wgt, &NewObjectOverlayWidget::hide);
-	connect(scene, &ObjectsScene::s_childrenSelectionChanged, new_obj_overlay_wgt, &NewObjectOverlayWidget::hide);
-	connect(scene, &ObjectsScene::s_scenePressed, new_obj_overlay_wgt, &NewObjectOverlayWidget::hide);
-
 	wheel_timer.setInterval(300);
 
 	connect(&wheel_timer, &QTimer::timeout, this, [this](){
@@ -1046,12 +1003,57 @@ ObjectsScene *ModelWidget::addScene()
 	ObjectsScene *new_scene = new ObjectsScene(this);
 	new_scene->installEventFilter(this);
 
+	connect(new_scene, &ObjectsScene::s_objectsMoved, this, &ModelWidget::handleObjectsMovement);
+	connect(new_scene, &ObjectsScene::s_objectModified, this,  &ModelWidget::handleObjectModification);
+	connect(new_scene, &ObjectsScene::s_objectDoubleClicked, this,  &ModelWidget::handleObjectDoubleClick);
+
+	connect(new_scene, &ObjectsScene::s_objectSelected, this,  &ModelWidget::configureObjectSelection, Qt::QueuedConnection);
+	connect(new_scene, qOverload<BaseObject *>(&ObjectsScene::s_popupMenuRequested), this, qOverload<BaseObject *>(&ModelWidget::configurePopupMenu), Qt::QueuedConnection);
+	connect(new_scene, qOverload<>(&ObjectsScene::s_popupMenuRequested), this,  &ModelWidget::showObjectMenu, Qt::QueuedConnection);
+	connect(new_scene, &ObjectsScene::s_childrenSelectionChanged, this, &ModelWidget::configureObjectSelection);
+	connect(new_scene, &ObjectsScene::s_objectsSelectedInRange, this, &ModelWidget::configureObjectSelection);
+
+	connect(new_scene, &ObjectsScene::s_collapseModeChanged, this, [this](){
+		setModified(true);
+	});
+
+	connect(new_scene, &ObjectsScene::s_paginationToggled, this, [this](){
+		setModified(true);
+	});
+
+	connect(new_scene, &ObjectsScene::s_currentPageChanged, this, [this](){
+		setModified(true);
+	});
+
+	connect(new_scene, &ObjectsScene::s_objectsMovedLayer, this, [this](){
+		setModified(true);
+	});
+
+	connect(new_scene, &ObjectsScene::s_ensureVisibleRequested, this, [this](const QRectF &rect){
+		viewport->ensureVisible(rect);
+	});
+
+	connect(new_scene, &ObjectsScene::s_sceneRectChanged, this, [this](const QRectF &rect){
+		db_model->setSceneRect(rect);
+		viewport->resetCachedContent();
+		setModified(true);
+	});
+
+	connect(new_scene, &ObjectsScene::s_layersChanged, this, &ModelWidget::updateModelLayersInfo);
+	connect(new_scene, &ObjectsScene::s_activeLayersChanged, this, &ModelWidget::updateModelLayersInfo);
+	connect(new_scene, qOverload<BaseObject *>(&ObjectsScene::s_popupMenuRequested), new_obj_overlay_wgt, &NewObjectOverlayWidget::hide);
+	connect(new_scene, qOverload<>(&ObjectsScene::s_popupMenuRequested), new_obj_overlay_wgt, &NewObjectOverlayWidget::hide);
+	connect(new_scene, &ObjectsScene::s_objectSelected, new_obj_overlay_wgt, &NewObjectOverlayWidget::hide);
+	connect(new_scene, &ObjectsScene::s_childrenSelectionChanged, new_obj_overlay_wgt, &NewObjectOverlayWidget::hide);
+	connect(new_scene, &ObjectsScene::s_scenePressed, new_obj_overlay_wgt, &NewObjectOverlayWidget::hide);
+
 	scenes.append(new_scene);
 
 	if(scenes.size() == 1)
 	{
 		active_scene_idx = 0;
 		scene = new_scene;
+		viewport->setScene(new_scene);
 	}
 
 	return new_scene;
@@ -1079,6 +1081,7 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 	{
 		ObjectType obj_type = graph_obj->getObjectType();
 		QGraphicsItem *item = nullptr;
+		ObjectsScene *target_scene = scene;
 
 		switch(obj_type)
 		{
@@ -1105,9 +1108,16 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 			break;
 		}
 
+		//Safety net for the rare case an object arrives before any scene exists yet (e.g. no schema created so far)
+		if(!target_scene)
+		{
+			target_scene = addScene();
+			applySceneLayers(target_scene);
+		}
+
 		if(item)
 		{
-			scene->addItem(item, blink_new_objs);
+			target_scene->addItem(item, blink_new_objs);
 
 			if(!db_model->isModelLoading())
 				setModified(true);
