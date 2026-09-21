@@ -417,6 +417,19 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
      para que chamadas futuras da Fase 1, ao criar uma cena por schema, não roubem o foco da cena
      em que o usuário já está trabalhando), reutilizado pelo construtor. Sem mudança de
      comportamento observável — só 1 cena existe em runtime ainda. Depende de: nenhuma.
+     **Correção arquitetural (achada ao implementar a 1.1, 2026-09-22)**: o construtor de
+     `ModelWidget` conectava ~19 sinais de `ObjectsScene` (movimento/modificação/duplo-clique/
+     seleção de objeto, popup menu, modo de colapso, paginação, mudança de layer, `sceneRectChanged`
+     etc. — [modelwidget.cpp:682-724](libs/libgui/src/widgets/modelwidget.cpp#L682) na revisão
+     original) **só uma vez, só para a cena única criada ali**. `addScene()` precisa fazer todo esse
+     wiring pra **cada** cena que cria, não só a primeira — senão cenas criadas depois (por schema,
+     a partir da 1.1) ficam sem reagir a movimento/edição/seleção/etc. Consequência: o construtor
+     **não cria mais nenhuma cena eagerly** (`viewport` nasce sem cena, `new QGraphicsView(this)`) —
+     do contrário essa cena "fantasma" criada antes de qualquer schema existir venceria a regra
+     "ativa se for a primeira" de `addScene()` e ficaria permanentemente presa ao `viewport` em vez
+     da cena do primeiro schema real. `handleObjectAddition()` ganhou uma rede de segurança: se
+     nenhuma cena existir ainda quando um objeto precisar ser inserido, cria uma sob demanda (caso
+     patológico: um objeto sem schema, como `Textbox`, chegando antes de qualquer schema existir).
 
 0.2. **`setActiveScene()` + `s_activeSceneChanged`** — implementar
      `ModelWidget::setActiveScene(int idx)` (troca `viewport->setScene(...)`, reaplica
