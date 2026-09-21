@@ -383,7 +383,7 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
      dispara de verdade ainda, mas fecha o contrato antes da Fase 1 popular múltiplas cenas.
      Depende de: 0.2.
 
-0.5. **`ModelWidget::alignObjectsToGrid()` iterando todas as cenas** [FEITO, commitar] — revisão
+0.5. **`ModelWidget::alignObjectsToGrid()` iterando todas as cenas** — revisão
      de escopo em relação à redação original desta subtarefa (ver nota abaixo). Novo método público
      `ModelWidget::alignObjectsToGrid()` ([modelwidget.h](libs/libgui/src/widgets/modelwidget.h),
      [modelwidget.cpp](libs/libgui/src/widgets/modelwidget.cpp)) itera `scenes` chamando
@@ -410,7 +410,7 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
      contrário do alinhamento à grade. **Nenhuma mudança de código foi feita para esses três** —
      ficam verificados como corretos como estão, não como pendência.
 
-0.6. **Generalização de Layers** [FEITO, commitar] — `LayersConfigWidget` e
+0.6. **Generalização de Layers** — `LayersConfigWidget` e
      `ModelWidget::updateSceneLayers()` passam a aplicar mutações a **todas** as cenas da coleção
      (decisão #2, seção 3); leituras continuam vindo só da cena ativa (`updateLayersList()`,
      `updateModelLayersInfo()` — sem mudança, confiam no invariante de que todas as cenas têm
@@ -440,7 +440,7 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
        call site novo ainda — só a infraestrutura, já que a criação de cena por schema é escopo da
        Fase 1). Depende de: 0.1.
 
-0.7. **Exportação/impressão por cena** [FEITO, commitar] — decisão do usuário (2026-09-21): **sem
+0.7. **Exportação/impressão por cena** — decisão do usuário (2026-09-21): **sem
      composição espacial**. PNG/SVG geram **um arquivo por cena**; impressão continua **um único
      job/diálogo**, concatenando as páginas de todas as cenas em sequência (sem sobrepor
      espacialmente).
