@@ -7,17 +7,16 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1, 1.2 e 1.3 concluídas e commitadas**
-  (1.2 recebeu um refinamento pequeno de deduplicação logo depois).
+- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1, 1.2, 1.3 e 1.4 concluídas e
+  commitadas** (1.2 recebeu um refinamento pequeno de deduplicação logo depois).
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
   subtarefa 2.0/2.2 e seção 6 (riscos). Design ampliado no mesmo dia (ver abaixo) — usuário
   reabriu a discussão da decisão "sem retângulo global" e fechamos um híbrido. Ainda não
   implementada (nem 2.0 nem esse híbrido).
-- **Próxima subtarefa: 1.4** — confirmação de `SchemaView::fetchChildren()` (commit de teste,
-  depende de 1.2, pronta) — ou 1.5 (estrutura de conexões externas em `BaseTableView`) se o
-  usuário preferir pular a confirmação. A confirmar com ele.
+- **Próxima subtarefa: 1.5** — estrutura de dados de "conexões externas" em `BaseTableView`
+  (depende de 1.2, pronta).
 - **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
   (arquitetura, decisões, descrição/dependência das subtarefas) — nunca marca subtarefa como
   feita/commitada. Todo status de execução (o quê foi feito, hash do commit, achados específicos
@@ -29,6 +28,8 @@
 ## Commits desta branch (mais recente primeiro)
 
 ```
+31c486d7f Plan: document subtask 1.4's GUI test infra and pre-existing test bit-rot
+c9f60ada2 Fase 1.4: add modelwidgettest confirming SchemaView's same-scene invariant
 1189e0701 Plan: reaffirm no-shared-rect decision, add general-rect-at-save design
 960b1b13b Plan: add subtask 2.0, moving the scene-rect mechanical fix first in Fase 2
 2854325ff Fase 1.3: floating QComboBox to switch the active scene
@@ -203,6 +204,22 @@ subtarefa 1.1.
   usuário pediu pra registrar como etapa extra pendente (Fase 1 ou mais adiante), não corrigir
   agora. Sugestão registrada no plano: separar um fix mecânico barato (iterar todas as cenas,
   mesmo padrão da 0.5) da persistência de fato (já é a 2.2).
+- **1.4** — nenhuma mudança de código em `SchemaView` foi necessária; confirmado por leitura de
+  código que o cálculo do retângulo usa posição absoluta (sem `mapFromItem`/`mapToItem`) e que
+  1.1/1.2 resolvem schema e filhos pelo mesmo `getSchemaScene()`, então não há caminho pra
+  divergirem no modo por schema. A verificação virou teste automatizado de verdade: novo target
+  `tests/src/modelwidgettest` (**primeiro teste deste projeto a instanciar um widget GUI**
+  — `ModelWidget`/`QGraphicsView`), usando a API pública `getSceneForObject()` já existente desde
+  a Fase 0. Duas asserções: schema + 2 tabelas na mesma cena; schemas diferentes em cenas
+  diferentes. `View`/`ForeignTable` foram tentados como filhos também, mas exigem setup extra não
+  relacionado (query válida / referência a `ForeignServer`) pra passar da validação do
+  `DatabaseModel::addView()`/`addForeignTable()` — descartados, `Table` já prova o mecanismo
+  (mesmo `getSchemaScene()` pros três tipos). Precisou reconfigurar a árvore de build com
+  `-DBUILD_TESTS=ON` (estava desligado). **Achado colateral**: rodando a suíte inteira pela
+  primeira vez, vários outros targets de teste (não relacionados ao multi-scene) estão quebrados —
+  dois nem compilam, vários têm asserções falhando, um crasha. Confirmado via `git log` que não são
+  desta sessão nem desta feature — registrado no plano (seção 6) como bit-rot pré-existente, fora
+  de escopo, não corrigido. Build completo (`gui` + `pgmodeler`) e o teste novo (4/4) passando.
 
 ## Design de persistência por-cena (sem código ainda — vira 2.1/2.2 quando a Fase 2 chegar)
 
@@ -338,3 +355,8 @@ do plano.
   não confundir os dois.)
 - Comandos usados pra validar cada subtarefa: `make -j$(nproc) gui` (rápido, só a lib que muda na
   Fase 0) e, quando queria confirmar o link final, `make -j$(nproc) pgmodeler`.
+- **Testes automatizados (a partir da 1.4)**: a árvore precisou ser reconfigurada uma vez com
+  `cmake -DBUILD_TESTS=ON .` (rodado de dentro de `cmake-build`) — sem isso `tests/` nem entra na
+  build (guardado atrás de `CMAKE_BUILD_TYPE STREQUAL Debug AND BUILD_TESTS` no CMakeLists raiz).
+  Depois disso, `make -j$(nproc) modelwidgettest` builda só o teste novo; os executáveis ficam em
+  `cmake-build/tests/src/<nome>/<nome>`, cada um roda direto (não precisa de `ctest`).
