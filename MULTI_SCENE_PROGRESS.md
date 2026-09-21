@@ -92,11 +92,12 @@ c29b147ce Add multi-scene support implementation plan
   plano, seção 4). `AppearanceConfigWidget` (preview de estilo) conferido, não precisa de mudança.
   Build limpo (`gui` + `pgmodeler`), sem teste manual de UI nesta sessão.
 
-## Design fechado nesta sessão (sem código ainda — vira 2.2 quando a Fase 2 chegar)
+## Design de persistência por-cena (sem código ainda — vira 2.1/2.2 quando a Fase 2 chegar)
 
 Discussão longa sobre como persistir o retângulo de cada cena (`SceneRect` hoje é um único
-`QRectF` pro modelo inteiro). Nada disso foi codado ainda — é puro fechamento de design, registrado
-no plano (seção 2, "Achado de revisão de código, expandido em 2026-09-21", e subtarefas 0.8/2.2):
+`QRectF` pro modelo inteiro) e como identificar cada `<scene>`. Nada disso foi codado ainda — é
+puro fechamento de design, registrado no plano (seção 2, "Achado de revisão de código, expandido em
+2026-09-21", decisão #3 na seção 3, e subtarefas 0.8/2.1/2.2):
 
 - **Verificado**: `ObjectsScene::setSceneRect()` não move item nenhum — só ajusta o retângulo de
   rolagem/indexação. Aplicar um retângulo por-cena calculado a partir só dos itens daquela cena é
@@ -108,10 +109,24 @@ no plano (seção 2, "Achado de revisão de código, expandido em 2026-09-21", e
 - **Decisão**: sem retângulo global compartilhado entre cenas (foi cogitado, descartado — reintroduz
   o problema de performance que a segmentação resolve). Cada cena persiste só o seu próprio
   retângulo.
-- **Formato escolhido**: tag `<scenes><scene name="" left="" top="" right="" bottom="" /></scenes>`,
-  mirror exato do mecanismo já existente de `changelog`/`<entry>` (mesmo padrão de escrita/leitura,
-  mesmo estilo de DTD/`.sch`) — ideia do usuário, confirmada como o padrão mais idiomático do
-  formato depois de eu achar o precedente no código.
+- **Formato escolhido**: tag `<scenes><scene idx="" name="" left="" top="" right="" bottom=""
+  /></scenes>`, mirror exato do mecanismo já existente de `changelog`/`<entry>` (mesmo padrão de
+  escrita/leitura, mesmo estilo de DTD/`.sch`) — ideia do usuário, confirmada como o padrão mais
+  idiomático do formato depois de eu achar o precedente no código.
+- **Chave de identidade revisada pra `idx` numérico** (2026-09-21, sessão seguinte): a versão
+  original chaveava por `name` (nome do schema). Motivação do usuário pra trocar: evitar custo de
+  manter a cena "sincronizada" quando um schema é renomeado. Na investigação, esse custo não
+  existiria de qualquer forma (tudo é recalculado do zero a cada save, nunca sincronizado
+  incrementalmente) — mas o índice ganha por outro motivo válido: uniformiza os três modos de
+  segmentação, já que threshold/clustering não têm nome natural. Verifiquei por leitura de código
+  que a ordem de carga de `Schema` é determinística (`DatabaseModel::loadModel()` cria na ordem do
+  XML; `getCreationOrder()` ordena por `object_id`, atribuído em ordem de criação) — então o índice
+  sobrevive a um ciclo salvar→recarregar no caso comum. Único jeito de quebrar isso é
+  `swapObjectsIds()`/"Edit creation order", que só afeta o **próximo** reload (não a sessão atual,
+  não cumulativo) — usuário optou por aceitar como limitação documentada em vez de gastar código
+  numa checagem cruzada `idx`↔`name`. `name` continua no XML, mas só como auxiliar de depuração,
+  sem papel de chave. `LastScene` também passou a ser numérico pelo mesmo motivo. Detalhamento
+  completo no plano (seção 2, subseção da chave de identidade) — não duplicado aqui.
 - **Retrocompatibilidade** (requisito explícito do usuário): o atributo legado `scene-rect` continua
   sendo escrito como hoje quando há só 1 cena — formato de arquivo inalterado no caso comum. Arquivo
   antigo carregado num modelo que a Fase 1 segmenta cai no fallback já existente por cena, sem

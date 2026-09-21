@@ -24,6 +24,15 @@
 > tinha antes da decisão #1, mas só no modo threshold — schema deixa de ser 1:1 com cena, então um
 > schema com filhos em cenas diferentes precisa suprimir seu retângulo em vez de tentar renderizar
 > algo cross-scene. Ver subseção dedicada e subtarefa 3.5 na Fase 3.
+> Atualização 2026-09-21 (2): chave de identidade de `<scene>`/`LastScene` revisada de nome do
+> schema para **índice numérico `idx`** — uniformiza os três modos de segmentação (threshold e o
+> futuro modo com clustering não têm nome natural) e é seguro por verificação de código (ordem de
+> carga de `Schema` é determinística, ver seção 2). `name` continua no XML, mas só como
+> auxiliar/depuração. Limitação aceita: `swapObjectsIds()`/"Edit creation order" pode desalinhar
+> índices no save/reload seguinte — documentado como conhecido, sem código de mitigação (decisão do
+> usuário). Ver seção 2, decisões #3 e #7 (seção 3), e subtarefas 2.1/2.2.
+> **A partir desta atualização, este documento não registra mais status de execução** ("[FEITO]",
+> commits, etc.) — isso passou a viver só em `MULTI_SCENE_PROGRESS.md`.
 
 ## 1. Objetivo
 
@@ -130,12 +139,14 @@ Estas decisões foram tomadas em conversa e **não devem ser reabertas** sem jus
    ([modelwidget.cpp:5420-5431](libs/libgui/src/widgets/modelwidget.cpp#L5420)) — ambos precisam da
    mesma generalização "iterar por todas as cenas".
 3. **Zoom/posição e cena focada**: o arquivo do modelo passa a persistir qual foi a **última cena
-   focada** (novo atributo, análogo a `LastPosition`/`LastZoomFactor`, ver
+   focada** (novo atributo `LastScene`, análogo a `LastPosition`/`LastZoomFactor`, ver
    [databasemodel.cpp:3991-3996, 8000, 9458, 9760](libs/libcore/src/databasemodel.cpp#L3991)).
    Ao restaurar (`ModelWidget::restoreLastCanvasPosition()`,
    [modelwidget.cpp:1000](libs/libgui/src/widgets/modelwidget.cpp#L1000)), primeiro ativa-se essa
    cena, depois aplica-se zoom/scroll salvos — a restauração é sempre relativa à cena focada, não
-   a "a cena" genérica.
+   a "a cena" genérica. **Atualização 2026-09-21**: `LastScene` é numérico (índice `idx`, mesma
+   chave usada em `<scenes>`/`<scene>`), não o nome do schema — ver detalhamento e motivação na
+   subseção de persistência de `SceneRect`, seção 2.
 4. **Sem UI final por enquanto, mas um controle mínimo de teste entra na Fase 1**: este plano
    cobre somente o core (DatabaseModel, ObjectsScene, ModelWidget internamente). Não construir a
    UI definitiva de troca de cena (dropdown estilizado/sidebar/abas) — isso continua a cargo do
@@ -299,17 +310,57 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
     tags filhas simples, uma por cena:
     ```xml
     <scenes>
-    	<scene name="public" left="0" top="0" right="1000" bottom="1000" />
-    	<scene name="sales" left="1001" top="0" right="2000" bottom="1200" />
+    	<scene idx="0" name="public" left="0" top="0" right="1000" bottom="1000" />
+    	<scene idx="1" name="sales" left="1001" top="0" right="2000" bottom="1200" />
     </scenes>
     ```
-    `name` é a mesma chave usada por `LastScene` (nome do schema, no modo por schema). Escrita e
-    leitura seguem o padrão do changelog: um `schparser.getSourceCode(Attributes::Scene, attribs,
-    XmlCode)` por cena concatenado num buffer, envolvido pelo template do container
+  - **Chave de identidade: `idx` (índice numérico), não nome** (revisado em 2026-09-21, a pedido
+    do usuário). Motivação original era evitar o "custo de renomear a cena junto com o schema" —
+    na prática esse custo não existiria mesmo com chave por nome, já que todo o bloco `<scenes>` é
+    recalculado do zero a cada save (igual ao `changelog`), nunca sincronizado incrementalmente;
+    tanto faz nome quanto índice nesse quesito. O motivo real e válido pra usar índice é outro:
+    **uniformidade entre os três modos de segmentação**. Por schema tem nome natural (o schema);
+    threshold e o futuro modo com clustering não têm nenhum nome natural — teriam que inventar um
+    rótulo artificial, o que é pior que só usar a posição na lista. `idx` é um atributo **explícito**
+    (não a posição implícita do elemento no XML) — depender só da ordem dos elementos seria frágil
+    contra edição manual/reformatação do arquivo. `name` continua presente, mas vira **auxiliar/
+    depuração apenas** (não é mais chave de nada) — ajuda quem inspecionar o `.dbm` à mão a saber
+    qual schema é qual cena; populado no modo por schema, pode ficar vazio no modo threshold.
+    `LastScene` (decisão #3, seção 3) passa a ser numérico pelo mesmo motivo — sem problema de
+    retrocompatibilidade, é um atributo novo, não existe em arquivo salvo por versão anterior a
+    esta feature.
+  - **Determinismo verificado por revisão de código (2026-09-21)**: para o índice sobreviver a um
+    ciclo salvar→recarregar, a ordem de criação dos `Schema` na carga precisa ser estável.
+    Confirmado: `DatabaseModel::loadModel()` cria os `Schema` na ordem exata em que os `<schema>`
+    aparecem no XML (sem reordenar), e a gravação (`getCreationOrder()`,
+    [databasemodel.cpp:8022](libs/libcore/src/databasemodel.cpp#L8022)) ordena por `object_id`
+    ascendente — atribuído em ordem crescente de criação
+    ([baseobject.cpp:109-112](libs/libcore/src/baseobject.cpp#L109)). Como a carga cria objetos na
+    ordem do arquivo, isso é um ponto fixo estável: carregar → salvar → recarregar preserva a ordem
+    relativa dos schemas indefinidamente no caso comum.
+  - **Limitação conhecida e aceita (decisão do usuário, 2026-09-21): "Edit creation order"
+    (`BaseObject::swapObjectsIds()`, [baseobject.cpp:1081-1121](libs/libcore/src/baseobject.cpp#L1081))
+    pode desalinhar os índices no ciclo de save/reload seguinte.** Trocar manualmente a ordem de
+    criação de dois schemas (ação explícita do usuário, ou reparo automático de referência quebrada
+    da validação de modelo) não afeta a sessão atual — a `QList<ObjectsScene *> scenes` em memória
+    não é tocada por essa ação, só o `object_id` dos objetos. O efeito só aparece no **próximo**
+    save→reload: `<schema>` passa a ser serializado na nova ordem (por `object_id`), mas `<scenes>`
+    é escrito na ordem atual da lista em memória (que não mudou) — na recarga seguinte, os `Schema`
+    são recriados na ordem nova, e um retângulo persistido pode acabar aplicado à cena errada.
+    **Não é cumulativo**: nessa mesma recarga o `<scenes>` já é reescrito refletindo a ordem nova,
+    então é um hiccup visual único (uma cena "herda" o retângulo salvo de outra numa única reabertura),
+    autocorrigido no save seguinte — e como já existe fallback para "sem retângulo persistido"
+    (`itemsBoundingRect()` recalculado), o pior caso é uma cena com canvas em posição/tamanho
+    estranho, não perda de dado. **Decisão: aceitar como limitação documentada, sem código de
+    mitigação** (opção mais simples, escolhida sobre usar `name` como cross-check de validação na
+    carga — o custo de complexidade extra não se justifica pra uma ação rara e deliberada do
+    usuário).
+    Escrita e leitura seguem o padrão do changelog: um `schparser.getSourceCode(Attributes::Scene,
+    attribs, XmlCode)` por cena concatenado num buffer, envolvido pelo template do container
     (`Attributes::Scenes`); leitura via `xmlparser.accessElement(ChildElement)`/`NextElement`
-    reconstruindo um `QMap<QString, QRectF>` em `DatabaseModel`. `Attributes::Scenes`/`Scene` são
-    constantes novas em [attributes.h](libs/libparsers/src/attributes.h); `Left`/`Top`/`Right`/
-    `Bottom`/`Name` já existem, reaproveitados.
+    reconstruindo um `QMap<int, QRectF>` (chave `idx`) em `DatabaseModel`. `Attributes::Scenes`/
+    `Scene`/`Idx` são constantes novas em [attributes.h](libs/libparsers/src/attributes.h);
+    `Left`/`Top`/`Right`/`Bottom`/`Name` já existem, reaproveitados.
   - **Retrocompatibilidade com modelos salvos por versões antigas (requisito explícito do
     usuário)**: o atributo legado `scene-rect` (único, plano, em `<dbmodel>`) **continua existindo e
     sendo escrito exatamente como hoje quando o modo de segmentação está desligado** (situação de
@@ -323,8 +374,9 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
   - **DTD e template (.sch) precisam ser atualizados junto com o código C++**, não é só
     `DatabaseModel`: [assets/schemas/xml/dtd/dbmodel.dtd](assets/schemas/xml/dtd/dbmodel.dtd)
     (mantém `<!ATTLIST dbmodel scene-rect CDATA #IMPLIED>` como está, adiciona
-    `<!ELEMENT scenes (scene*)>`/`<!ELEMENT scene EMPTY>` com `name`/`left`/`top`/`right`/`bottom`,
-    mirror de [changelog.dtd](assets/schemas/xml/dtd/changelog.dtd));
+    `<!ELEMENT scenes (scene*)>`/`<!ELEMENT scene EMPTY>` com `idx`/`name`/`left`/`top`/`right`/
+    `bottom` (`idx` é a chave; `name` é auxiliar/depuração), mirror de
+    [changelog.dtd](assets/schemas/xml/dtd/changelog.dtd));
     [assets/schemas/xml/dbmodel.sch](assets/schemas/xml/dbmodel.sch) ganha um
     `%if {scenes} %then {scenes} %end` (mirror do `%if {changelog} %then {changelog} %end` já
     existente); novos `assets/schemas/xml/scenes.sch` (container) e `assets/schemas/xml/scene.sch`
@@ -478,11 +530,12 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
 0.8. **Scaffolding de persistência** — reservar (sem popular/usar ainda) o modo de segmentação
      (nenhum/schema/threshold) no enum/atributo de `DatabaseModel`. O `SceneRect` por cena **não**
      entra aqui: virou seu próprio design fechado (ver "Achado de revisão de código, expandido em
-     2026-09-21" na seção 2) — tag `<scenes><scene name="" left="" top="" right="" bottom="" />
-     </scenes>`, mirror de `changelog`/`<entry>`, DTD e `.sch` inclusos — e fica inteiramente na
-     Fase 2 (subtarefas 2.2), já que só faz sentido calcular/persistir de verdade quando as cenas da
-     Fase 1 existirem. `LastScene` também fica para a Fase 2 (subtarefa 2.1). Depende de: nenhuma
-     (independente do resto da fase).
+     2026-09-21" na seção 2) — tag `<scenes><scene idx="" name="" left="" top="" right="" bottom=""
+     /></scenes>` (`idx` numérico é a chave, `name` só auxiliar/depuração), mirror de
+     `changelog`/`<entry>`, DTD e `.sch` inclusos — e fica inteiramente na Fase 2 (subtarefas 2.2),
+     já que só faz sentido calcular/persistir de verdade quando as cenas da Fase 1 existirem.
+     `LastScene` (também numérico, mesma chave `idx`) também fica para a Fase 2 (subtarefa 2.1).
+     Depende de: nenhuma (independente do resto da fase).
 
 > **Gate de aceite da fase (não é commit de código)**: depois de 0.1-0.8, rodar a suíte de
 > regressão e abrir os `.dbm` de exemplo do repo — nada deve mudar visual ou funcionalmente, já
@@ -893,43 +946,51 @@ threshold for de fato detalhado).
 #### Subtarefas da Fase 2 (uma por commit)
 
 2.1. **Persistência de modo de segmentação + `LastScene`** — popular de fato (leitura/escrita XML)
-     o scaffolding preparado em 0.8: modo de segmentação do modelo e `LastScene` (identificador da
-     cena focada, nome do schema). Ainda sem uso em runtime neste commit — só grava/lê. Depende
-     de: 0.8.
+     o scaffolding preparado em 0.8: modo de segmentação do modelo e `LastScene` (índice numérico
+     `idx` da cena focada — não o nome do schema, ver decisão revisada na seção 2). Ainda sem uso
+     em runtime neste commit — só grava/lê. Depende de: 0.8.
 
 2.2. **Persistência de retângulo por cena** — implementação completa do design fechado na seção 2:
      - DTD ([assets/schemas/xml/dtd/dbmodel.dtd](assets/schemas/xml/dtd/dbmodel.dtd)): adicionar
-       `<!ELEMENT scenes (scene*)>`/`<!ELEMENT scene EMPTY>` (`name`/`left`/`top`/`right`/`bottom`),
-       mirror de [changelog.dtd](assets/schemas/xml/dtd/changelog.dtd); manter `scene-rect` como
-       está.
+       `<!ELEMENT scenes (scene*)>`/`<!ELEMENT scene EMPTY>` (`idx`/`name`/`left`/`top`/`right`/
+       `bottom`), mirror de [changelog.dtd](assets/schemas/xml/dtd/changelog.dtd); manter
+       `scene-rect` como está.
      - Templates novos [assets/schemas/xml/scenes.sch](assets/schemas/xml/scenes.sch) (container) e
        [assets/schemas/xml/scene.sch](assets/schemas/xml/scene.sch) (entrada), mirror de
        `changelog.sch`/`entry.sch`; adicionar `%if {scenes} %then {scenes} %end` em
        [dbmodel.sch](assets/schemas/xml/dbmodel.sch), mirror do `%if {changelog}...` já existente.
-     - `Attributes::Scenes`/`Attributes::Scene` novos em
+     - `Attributes::Scenes`/`Attributes::Scene`/`Attributes::Idx` novos em
        [attributes.h](libs/libparsers/src/attributes.h) (`Left`/`Top`/`Right`/`Bottom`/`Name` já
        existem).
-     - `DatabaseModel`: `QMap<QString, QRectF>` indexado pela mesma chave de `LastScene`; escrita
+     - `DatabaseModel`: `QMap<int, QRectF>` indexado por `idx` (mesma chave de `LastScene`); escrita
        mirror de `getChangelogDefinition()` ([databasemodel.cpp:10520-10555](libs/libcore/src/databasemodel.cpp#L10520)),
        leitura mirror do parse de `<changelog>` ([databasemodel.cpp:3647-3664](libs/libcore/src/databasemodel.cpp#L3647)).
-       Quando há só 1 cena (segmentação desligada), continua escrevendo só o `scene-rect` legado, sem
-       `<scenes>` — formato de arquivo inalterado nesse caso.
+       `idx` escrito é a posição da cena na `QList<ObjectsScene *> scenes` em memória no momento do
+       save; `name` escrito junto é só o nome atual do schema associado, resolvido na hora (sem
+       cache/sincronização à parte). Quando há só 1 cena (segmentação desligada), continua
+       escrevendo só o `scene-rect` legado, sem `<scenes>` — formato de arquivo inalterado nesse
+       caso.
      - Carga de arquivo antigo (sem `<scenes>`) num modelo que a Fase 1 segmenta em N cenas: cada
        cena cai no fallback já existente (`itemsBoundingRect()` a partir dos seus próprios itens) —
        não tentar redistribuir o `scene-rect` legado entre as cenas novas.
+     - **Não implementar** nenhuma checagem cruzada `idx`↔`name` na carga (ex. detectar
+       desalinhamento pós "Edit creation order" e cair pro fallback) — decisão do usuário: aceitar
+       esse desalinhamento como limitação documentada (ver seção 2), não como algo a mitigar em
+       código.
      Depende de: 0.8, 1.1 (precisa que cenas por schema já existam de verdade para ter o que
      persistir por cena).
 
 2.3. **Wiring runtime de `LastScene`** — estender
      `ModelWidget::saveLastCanvasPosition()`/`restoreLastCanvasPosition()`
-     ([modelwidget.cpp:972-1023](libs/libgui/src/widgets/modelwidget.cpp#L972)) para gravar a cena
-     ativa ao salvar e, ao restaurar, ativar aquela cena (via `setActiveScene()`, 0.2) **antes** de
-     aplicar zoom/scroll salvos. Depende de: 2.1, 0.2.
+     ([modelwidget.cpp:972-1023](libs/libgui/src/widgets/modelwidget.cpp#L972)) para gravar o
+     índice da cena ativa ao salvar e, ao restaurar, ativar aquela cena por índice (via
+     `setActiveScene()`, 0.2) **antes** de aplicar zoom/scroll salvos. Depende de: 2.1, 0.2.
 
-2.4. **Fallback de `LastScene` inválido** — se o schema referenciado por `LastScene` não existir
-     mais na carga do arquivo (ex. schema removido em edição posterior ao save), cair para a
-     primeira cena disponível em vez de falhar. Depende de: 2.3, 1.10 (cenário de schema removido já
-     precisa existir para este fallback fazer sentido).
+2.4. **Fallback de `LastScene` inválido** — se o índice referenciado por `LastScene` estiver fora
+     dos limites da coleção de cenas na carga do arquivo (ex. cena removida em edição posterior ao
+     save, deixando `LastScene` apontando além do fim da lista), cair para a primeira cena
+     disponível em vez de falhar. Depende de: 2.3, 1.10 (cenário de schema removido já precisa
+     existir para este fallback fazer sentido).
 
 2.5. **Teste de regressão fim-a-fim da Fase 2** — fechar, salvar, reabrir um modelo segmentado por
      schema preserva cena focada + zoom/posição daquela cena, e a segmentação por schema se
