@@ -12,7 +12,9 @@
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
-  subtarefa 2.0/2.2 e seção 6 (riscos). Ainda não implementada.
+  subtarefa 2.0/2.2 e seção 6 (riscos). Design ampliado no mesmo dia (ver abaixo) — usuário
+  reabriu a discussão da decisão "sem retângulo global" e fechamos um híbrido. Ainda não
+  implementada (nem 2.0 nem esse híbrido).
 - **Próxima subtarefa: 1.4** — confirmação de `SchemaView::fetchChildren()` (commit de teste,
   depende de 1.2, pronta) — ou 1.5 (estrutura de conexões externas em `BaseTableView`) se o
   usuário preferir pular a confirmação. A confirmar com ele.
@@ -27,6 +29,7 @@
 ## Commits desta branch (mais recente primeiro)
 
 ```
+1189e0701 Plan: reaffirm no-shared-rect decision, add general-rect-at-save design
 960b1b13b Plan: add subtask 2.0, moving the scene-rect mechanical fix first in Fase 2
 2854325ff Fase 1.3: floating QComboBox to switch the active scene
 8e223b660 Plan: confirm scene-rect bug by manual test, register as pending
@@ -261,6 +264,21 @@ puro fechamento de design, registrado no plano (seção 2, "Achado de revisão d
   schema (não tentar renderizar um retângulo parcial/composto) sempre que seus filhos vivem em mais
   de uma cena, com promoção/rebaixamento dinâmico reaproveitando o mesmo choke point já usado pra
   relacionamentos. Registrado na Fase 3 (subseção dedicada + subtarefa 3.5).
+- **Decisão "sem retângulo global" revisitada e reafirmada (2026-09-22)**: usuário voltou nessa
+  decisão fechada motivado por flexibilidade de troca de modo de segmentação, propondo (leitura B)
+  todas as cenas compartilharem as mesmas dimensões em runtime. Levantei o custo real — não é bem
+  a BSP tree (escala por número de itens, não área; a justificativa original nesse ponto tava
+  imprecisa), é `getPagesForPrinting()` gerando páginas em branco em excesso pra cena pequena
+  forçada a compartilhar dimensões de cena grande (desfaz o ganho da 0.7). Propus um híbrido:
+  cada cena mantém retângulo próprio em runtime (decisão original mantida), mas o atributo legado
+  `scene-rect` vira um valor "geral" (união de todas as cenas), recalculado só no save, servindo
+  de fallback se a segmentação for desligada depois. Usuário aprovou. Ao perguntar sobre
+  expandir/encolher cena, revisitei o handler de `s_sceneRectChanged` já commitado (subtarefa "0.1
+  correção") e achei um bug real: ele sobrescreve `db_model`'s scene-rect com o retângulo de uma
+  única cena reativamente, a cada mudança — incompatível com o híbrido, precisa ser removido em
+  favor de um `updateModelSceneRectInfo()` novo (só no save). Usuário confirmou e pediu pra manter
+  esse hábito de revisitar código já commitado ao longo do resto do plano. Tudo registrado na
+  subtarefa 2.0 e na seção 2 do plano — nada implementado ainda.
 
 ## Decisões/ajustes tomados durante a implementação (além do que já estava no plano)
 
@@ -295,6 +313,12 @@ Regras de trabalho combinadas nesta sessão — valem pro resto do plano, não s
    bugs encontrados) vive só neste arquivo, atualizado junto de cada commit. Motivo: três
    subtarefas ficaram marcadas "[FEITO, commitar]" no plano numa sessão anterior e a tag nunca foi
    limpa depois do commit — status e plano acabam divergindo se dividirem o mesmo texto.
+7. **Revisitar código já commitado quando uma nova discussão de design o afeta**, em vez de só
+   raciocinar sobre a mudança nova isolada (2026-09-22). Antes de fechar um novo trecho do plano ou
+   escrever código novo, checar se algo já implementado antes fica incoerente com a decisão nova —
+   não deixar código velho ficar contradizendo design novo silenciosamente. Confirmado pelo usuário
+   depois que isso pegou um bug real no handler de `s_sceneRectChanged` (ver seção de design do
+   retângulo de cena acima) que ele mesmo tinha esquecido que existia.
 
 ## Bug encontrado e corrigido durante teste manual
 
