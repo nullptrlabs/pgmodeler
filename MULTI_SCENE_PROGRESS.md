@@ -113,6 +113,13 @@ no plano (seção 2, "Achado de revisão de código, expandido em 2026-09-21", e
   distinção usuário/interno, já que o formato já tinha atributos "Scene" (`SceneRect`, `LastScene`)
   e criar um segundo nome só pra UI não trazia benefício real. Fiz uma varredura no plano corrigindo
   as menções a "Workspace" adicionadas nas últimas sessões.
+- **Achado do usuário, mesma sessão**: `SchemaView` tem o mesmo problema que motivou a decisão #1
+  pra relacionamentos, mas só no **modo threshold** — lá schema deixa de ser 1:1 com cena (só é
+  garantido no modo por schema, subtarefa 1.4), então os filhos de um schema podem cair em cenas
+  diferentes. Solução, mesma filosofia da decisão #1: suprimir completamente o `SchemaView` daquele
+  schema (não tentar renderizar um retângulo parcial/composto) sempre que seus filhos vivem em mais
+  de uma cena, com promoção/rebaixamento dinâmico reaproveitando o mesmo choke point já usado pra
+  relacionamentos. Registrado na Fase 3 (subseção dedicada + subtarefa 3.5).
 
 ## Decisões/ajustes tomados durante a implementação (além do que já estava no plano)
 
