@@ -11,12 +11,15 @@
 > arquivos citados nas próprias notas). Uma delas corrige uma afirmação da versão anterior deste
 > documento sobre `connected_rels` (ver subseção "Relacionamentos cross-scene: promoção/
 > rebaixamento dinâmico" na Fase 1).
-> Atualização 2026-09-21: decisões #7 e #8 (seção 3) fecham o algoritmo da Fase 3 (contador
-> ingênuo, sem clustering ciente de conectividade dentro do modo threshold) e a terminologia
-> "Workspace" (usuário/persistência) vs. "cena" (interno/técnico). Clustering ciente de
-> conectividade **não foi descartado** — vira candidato a um terceiro modo de segmentação futuro,
-> separado do threshold ingênuo (ver seção 5). Fase 3 reescrita para refletir isso; ver também a
-> nota de terminologia na subtarefa 1.3.
+> Atualização 2026-09-21: decisão #7 (seção 3) fecha o algoritmo da Fase 3 (contador ingênuo, sem
+> clustering ciente de conectividade dentro do modo threshold). Clustering ciente de conectividade
+> **não foi descartado** — vira candidato a um terceiro modo de segmentação futuro, separado do
+> threshold ingênuo (ver seção 5). Fase 3 reescrita para refletir isso. A decisão #8 (terminologia
+> "Workspace") foi cogitada e depois **revertida no mesmo dia** — o nome final é "cena"/"Scene" em
+> tudo, ver decisão #8 atualizada na seção 3. Fechado também o design completo de retângulo por
+> cena persistido (achado de revisão de código expandido na seção 2): sem retângulo global
+> compartilhado, formato XML mirror de `changelog`/`entry` (tag `<scenes>`/`<scene>`), com
+> retrocompatibilidade explícita para arquivos de versões anteriores — ver Fase 2, subtarefa 2.2.
 
 ## 1. Objetivo
 
@@ -152,12 +155,12 @@ Estas decisões foram tomadas em conversa e **não devem ser reabertas** sem jus
 7. **Segmentação por threshold (Fase 3): estritamente ingênua, sem clustering — clustering vira
    candidato a um TERCEIRO modo futuro, separado** (adicionado em 2026-09-21, refinado depois da
    revisão do usuário no mesmo dia). O algoritmo da Fase 3 é só um contador incremental de objetos
-   inseridos — ao cruzar o threshold, abre-se uma nova cena/workspace e as inserções seguintes vão
-   para ela, sem nenhum agrupamento ciente de conectividade. Motivo: sofisticar o critério de
-   particionamento **dentro do modo threshold** arriscaria reordenar objetos entre workspaces de um
-   jeito que o usuário não pediu e não consegue prever — o valor de uma regra estritamente ingênua é
-   que "o que cai em qual workspace" continua sendo consequência direta e previsível da ordem de
-   inserção, sem heurística escondida por trás. Consequência aceita nesta fase: relacionamentos
+   inseridos — ao cruzar o threshold, abre-se uma nova cena e as inserções seguintes vão para ela,
+   sem nenhum agrupamento ciente de conectividade. Motivo: sofisticar o critério de particionamento
+   **dentro do modo threshold** arriscaria reordenar objetos entre cenas de um jeito que o usuário
+   não pediu e não consegue prever — o valor de uma regra estritamente ingênua é que "o que cai em
+   qual cena" continua sendo consequência direta e previsível da ordem de inserção, sem heurística
+   escondida por trás. Consequência aceita nesta fase: relacionamentos
    cross-scene podem ser numerosos (ao contrário do modo por schema, que tem fronteiras naturais) —
    a única mitigação é o mecanismo de marcador cut-off já construído na Fase 1, reaproveitado sem
    modificação.
@@ -166,18 +169,14 @@ Estas decisões foram tomadas em conversa e **não devem ser reabertas** sem jus
    variação/flag do modo threshold ingênuo, e sim como um **modo de segmentação novo e independente**
    a considerar no futuro (candidato a "Fase 4", fora do escopo atual). Ver seção 5 ("Fora de
    escopo") e a nota correspondente na Fase 3.
-8. **Terminologia: "Workspace" para o usuário, "cena" internamente** (adicionado em 2026-09-21).
-   `ObjectsScene`/`scene`/"cena" continuam sendo o nome **técnico interno** — classes, métodos,
-   variáveis C++ não são renomeados por causa desta decisão. Mas qualquer coisa **visível para o
-   usuário** — rótulos de UI (incluindo o `QComboBox` de teste da subtarefa 1.3) e nomes de
-   atributo no arquivo `.dbm` — usa **"Workspace"**, não "cena"/"scene". Isso já afeta a Fase 2 (o
-   atributo persistido referido neste plano como `LastScene` deve ser escrito no arquivo como
-   `LastWorkspace`) e a Fase 3 (o novo atributo por objeto de atribuição de bucket se chama
-   `Workspace`, não algo como `SceneId`/`BucketIdx`). **Nota de leitura**: o restante deste
-   documento continua usando "cena"/`LastScene`/`SceneRect` em prosa, por serem os nomes que já
-   remetem diretamente ao código (`ObjectsScene`) — não foi feito um find-replace retroativo no
-   texto do plano por esta decisão, só é preciso lembrar, na hora de nomear o atributo XML/string
-   de UI de verdade, de usar "Workspace".
+8. ~~**Terminologia: "Workspace" para o usuário, "cena" internamente**~~ **REVERTIDA em
+   2026-09-21** — decisão final do usuário: usar **"cena"/"Scene"** em tudo (UI futura, atributos
+   no arquivo `.dbm`, código), sem distinção usuário/interno. Motivo dado: praticidade, e o formato
+   já tem atributos nomeados com "Scene" (`SceneRect`, `LastScene`) — introduzir "Workspace" só pro
+   lado do usuário criaria uma inconsistência de nomenclatura sem necessidade real. Onde quer que
+   este documento mencione "Workspace"/"workspace" (decisão #7, Fase 3, subtarefa 1.3, etc.), leia
+   como "cena"/"Scene" — foi feita uma varredura corrigindo essas menções nesta mesma atualização,
+   mas se algo escapou, esta é a decisão que vale.
 9. **Cena-local vs. modelo-inteiro-replicado-por-cena: dois tipos diferentes de "corrigir uma
    suposição de cena única"** (adicionado em 2026-09-21, na revisão da subtarefa 0.5). Nem toda
    suposição de "só existe uma cena" no código atual é um bug a corrigir agregando entre cenas —
@@ -256,14 +255,76 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
     **bootstrapar** a cena recém-criada (na Fase 1, ao criar a cena de um schema novo) com o
     conjunto atual de layers (nomes, ativas, cores, visibilidade) das cenas já existentes, senão
     ela diverge silenciosamente das demais.
-- **Achado de revisão de código**: `DatabaseModel::getSceneRect()`/`setSceneRect()`
-  ([databasemodel.h:898-899](libs/libcore/src/databasemodel.h#L898)) persistem um **único**
-  `QRectF` para o modelo inteiro, consumido por
+- **Achado de revisão de código, expandido em 2026-09-21**: `DatabaseModel::getSceneRect()`/
+  `setSceneRect()` ([databasemodel.h:898-899](libs/libcore/src/databasemodel.h#L898)) persistem um
+  **único** `QRectF` para o modelo inteiro, consumido por
   `ModelWidget::adjustSceneRect(use_model_rect=true)` na carga do arquivo
   ([modelwidget.cpp:1946-1951](libs/libgui/src/widgets/modelwidget.cpp#L1946)). Com N cenas por
-  schema esse único retângulo persistido fica ambíguo — precisa virar por-cena (provavelmente
-  indexado pela mesma chave que `LastScene`, Fase 2). Não estava coberto pela Fase 2 original;
-  adicionar ao escopo de persistência daquela fase.
+  schema esse único retângulo persistido fica ambíguo — vira por-cena, indexado pela mesma chave
+  que `LastScene` (Fase 2).
+  - **`ObjectsScene::setSceneRect(rect)` não move nem reposiciona item nenhum**
+    ([objectsscene.cpp:676-693](libs/libcanvas/src/objectsscene.cpp#L676)) — só ajusta o retângulo
+    de rolagem/indexação espacial da `QGraphicsScene`. Um objeto persistido com posição absoluta
+    `(1001, 0)` continua exatamente ali não importa qual seja o `sceneRect()` da cena. Ou seja,
+    aplicar um retângulo por-cena calculado corretamente (a partir só dos itens daquela cena) **não
+    desloca objeto nenhum pra origem** — carregar cada cena com seu próprio retângulo, começando
+    onde quer que seus objetos realmente estejam, é seguro.
+  - **Cuidado real encontrado**: `ObjectsScene::adjustSceneRect(bool expand_only)`
+    ([objectsscene.cpp:1680-1709](libs/libcanvas/src/objectsscene.cpp#L1680)) — o método que
+    *recalcula* o retângulo a partir da posição atual dos itens (usado em edição interativa, não no
+    carregamento de arquivo) — quando `expand_only == false`, **puxa a borda esquerda/superior do
+    retângulo pra perto de zero incondicionalmente** (`lp = -rect.left()` quando `rect.left() > 0`,
+    depois `rect.adjust(lp, tp, grid_size, grid_size)`). Isso não move os objetos, mas faz o
+    retângulo da cena "esticar" de volta até a origem mesmo quando os objetos daquela cena estão
+    todos longe dali — se aplicado por-cena sem cuidado na Fase 1, cada cena acabaria com um
+    retângulo desnecessariamente grande cobrindo espaço vazio. **Ao computar o retângulo inicial de
+    uma cena nova/recém-dividida, usar `itemsBoundingRect()` direto sobre os itens daquela cena,
+    nunca `adjustSceneRect(false)`.**
+  - **Decisão (2026-09-21): sem retângulo global compartilhado entre cenas.** Foi cogitado (e
+    descartado) persistir um único retângulo "soma de todas as cenas" aplicado a todas elas —
+    reintroduziria exatamente o problema de performance que a segmentação existe pra resolver (o
+    índice espacial/BSP tree de cada `QGraphicsScene` é dimensionado pelo `sceneRect()`; um
+    retângulo global faria toda cena carregar o "peso" das demais). Cada cena persiste **só o seu
+    próprio** retângulo, calculado só a partir dos seus próprios itens — nada agregado, nada
+    compartilhado.
+  - **Formato de persistência escolhido**: mirror do mecanismo já existente e testado de
+    `changelog`/`<entry>` ([databasemodel.cpp:10520-10555](libs/libcore/src/databasemodel.cpp#L10520)
+    escrita, [databasemodel.cpp:3647-3664](libs/libcore/src/databasemodel.cpp#L3647) leitura;
+    schemas em [assets/schemas/xml/changelog.sch](assets/schemas/xml/changelog.sch) e
+    [assets/schemas/xml/entry.sch](assets/schemas/xml/entry.sch)) — uma tag contêiner envolvendo N
+    tags filhas simples, uma por cena:
+    ```xml
+    <scenes>
+    	<scene name="public" left="0" top="0" right="1000" bottom="1000" />
+    	<scene name="sales" left="1001" top="0" right="2000" bottom="1200" />
+    </scenes>
+    ```
+    `name` é a mesma chave usada por `LastScene` (nome do schema, no modo por schema). Escrita e
+    leitura seguem o padrão do changelog: um `schparser.getSourceCode(Attributes::Scene, attribs,
+    XmlCode)` por cena concatenado num buffer, envolvido pelo template do container
+    (`Attributes::Scenes`); leitura via `xmlparser.accessElement(ChildElement)`/`NextElement`
+    reconstruindo um `QMap<QString, QRectF>` em `DatabaseModel`. `Attributes::Scenes`/`Scene` são
+    constantes novas em [attributes.h](libs/libparsers/src/attributes.h); `Left`/`Top`/`Right`/
+    `Bottom`/`Name` já existem, reaproveitados.
+  - **Retrocompatibilidade com modelos salvos por versões antigas (requisito explícito do
+    usuário)**: o atributo legado `scene-rect` (único, plano, em `<dbmodel>`) **continua existindo e
+    sendo escrito exatamente como hoje quando o modo de segmentação está desligado** (situação de
+    todo modelo salvo por uma versão anterior a esta feature, e de todo modelo que não ativou
+    segmentação) — formato de arquivo **inalterado** no caso comum. O novo bloco `<scenes>` só passa
+    a ser escrito quando a segmentação está de fato ativa (N>1 cenas). Ao carregar um arquivo antigo
+    (sem `<scenes>`, só o `scene-rect` legado) num modelo que a Fase 1 vai segmentar em N cenas: **não
+    tentar redistribuir o valor legado entre as cenas novas** — cada cena simplesmente cai no
+    fallback já existente (`adjustSceneRect(false)`/`itemsBoundingRect()` recalculado a partir dos
+    seus próprios itens), do jeito que já acontece hoje quando `getSceneRect()` retorna inválido.
+  - **DTD e template (.sch) precisam ser atualizados junto com o código C++**, não é só
+    `DatabaseModel`: [assets/schemas/xml/dtd/dbmodel.dtd](assets/schemas/xml/dtd/dbmodel.dtd)
+    (mantém `<!ATTLIST dbmodel scene-rect CDATA #IMPLIED>` como está, adiciona
+    `<!ELEMENT scenes (scene*)>`/`<!ELEMENT scene EMPTY>` com `name`/`left`/`top`/`right`/`bottom`,
+    mirror de [changelog.dtd](assets/schemas/xml/dtd/changelog.dtd));
+    [assets/schemas/xml/dbmodel.sch](assets/schemas/xml/dbmodel.sch) ganha um
+    `%if {scenes} %then {scenes} %end` (mirror do `%if {changelog} %then {changelog} %end` já
+    existente); novos `assets/schemas/xml/scenes.sch` (container) e `assets/schemas/xml/scene.sch`
+    (entrada), mirror exato de `changelog.sch`/`entry.sch`.
 - **Achado de revisão de código**: `ModelWidget::eventFilter()` identifica eventos de mouse da
   cena comparando `object == scene` ([modelwidget.cpp:825](libs/libgui/src/widgets/modelwidget.cpp#L825)),
   usado para panning, magnifier e emissão de `s_sceneInteracted`. Com múltiplas cenas registradas
@@ -410,11 +471,14 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
      - Caso N>1 cenas só é testável de verdade depois da Fase 1 popular a coleção — revisitar com
        `/home/raphael/dbm_models/big_model.dbm` quando a Fase 1 estiver pronta. Depende de: 0.1.
 
-0.8. **Scaffolding de persistência** — reservar (sem popular/usar ainda) no formato XML e no enum
-     de `DatabaseModel`: modo de segmentação (nenhum/schema/threshold) e o campo `SceneRect` por
-     cena (troca do único `QRectF` hoje retornado por `getSceneRect()`/`setSceneRect()`,
-     [databasemodel.h:898-899](libs/libcore/src/databasemodel.h#L898)). `LastScene` fica para a
-     Fase 2 (subtarefa 2.1). Depende de: nenhuma (independente do resto da fase).
+0.8. **Scaffolding de persistência** — reservar (sem popular/usar ainda) o modo de segmentação
+     (nenhum/schema/threshold) no enum/atributo de `DatabaseModel`. O `SceneRect` por cena **não**
+     entra aqui: virou seu próprio design fechado (ver "Achado de revisão de código, expandido em
+     2026-09-21" na seção 2) — tag `<scenes><scene name="" left="" top="" right="" bottom="" />
+     </scenes>`, mirror de `changelog`/`<entry>`, DTD e `.sch` inclusos — e fica inteiramente na
+     Fase 2 (subtarefas 2.2), já que só faz sentido calcular/persistir de verdade quando as cenas da
+     Fase 1 existirem. `LastScene` também fica para a Fase 2 (subtarefa 2.1). Depende de: nenhuma
+     (independente do resto da fase).
 
 > **Gate de aceite da fase (não é commit de código)**: depois de 0.1-0.8, rodar a suíte de
 > regressão e abrir os `.dbm` de exemplo do repo — nada deve mudar visual ou funcionalmente, já
@@ -720,10 +784,7 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
      testar manualmente 1.5/1.6 (roteamento e auditoria de relacionamento cross-scene), 1.7
      (marcador cut-off), 1.8 (promoção/rebaixamento ao mover tabela de schema) e as subtarefas de
      decisão 1.12/1.13/1.14 — sem ele, testar troca de cena exigiria código de teste descartável
-     em cada uma dessas subtarefas. **Nota de terminologia (decisão #8, seção 3)**: mesmo sendo um
-     controle propositalmente descartável, o rótulo visível deve dizer "Workspace", não
-     "Cena"/"Scene" — custa zero e evita reforçar o nome errado durante os testes manuais das
-     subtarefas seguintes. Depende de: 0.1, 0.2, 1.2.
+     em cada uma dessas subtarefas. Depende de: 0.1, 0.2, 1.2.
 
 1.4. **Confirmação de `SchemaView::fetchChildren()`** — validar com teste (não necessariamente
      mudança de código) que `getObjects(type, schema)`
@@ -807,12 +868,13 @@ threshold for de fato detalhado).
     "por threshold" no enum/atributo, mas sem implementar nada em cima disso ainda).
   - `LastScene`: identificador da cena focada (nome do schema, já que no modo por schema a chave
     natural é o próprio schema).
-  - **Adicionado após revisão de código**: `getSceneRect()`/`setSceneRect()`
-    ([databasemodel.h:898-899](libs/libcore/src/databasemodel.h#L898)) hoje persistem um único
-    `QRectF` para o modelo inteiro. Precisa virar um valor por cena (indexado pela mesma chave de
-    `LastScene`, isto é, por schema) para que `ModelWidget::adjustSceneRect(use_model_rect=true)`
-    ([modelwidget.cpp:1946-1951](libs/libgui/src/widgets/modelwidget.cpp#L1946)) continue
-    restaurando o tamanho de canvas correto de cada cena na carga do arquivo.
+  - `getSceneRect()`/`setSceneRect()` ([databasemodel.h:898-899](libs/libcore/src/databasemodel.h#L898))
+    hoje persistem um único `QRectF` no atributo legado `scene-rect`. Passa a existir também uma
+    versão por-chave (mesma chave de `LastScene`), persistida numa tag `<scenes>` nova — design
+    completo, incluindo o motivo de não usar um retângulo global e o formato XML exato (mirror de
+    `changelog`/`entry`), na seção 2 ("Achado de revisão de código, expandido em 2026-09-21"). O
+    atributo `scene-rect` legado continua sendo escrito como hoje sempre que há só 1 cena
+    (segmentação desligada) — formato de arquivo inalterado nesse caso.
 - Estender `ModelWidget::saveLastCanvasPosition()`/`restoreLastCanvasPosition()`
   ([modelwidget.cpp:972-1023](libs/libgui/src/widgets/modelwidget.cpp#L972)) para gravar/ler
   `LastScene` e, na restauração, ativar aquela cena **antes** de aplicar scroll/zoom salvos.
@@ -828,11 +890,28 @@ threshold for de fato detalhado).
      cena focada, nome do schema). Ainda sem uso em runtime neste commit — só grava/lê. Depende
      de: 0.8.
 
-2.2. **Persistência de `SceneRect` por cena** — estende o scaffolding de 0.8 para popular de fato
-     um `QRectF` por cena (indexado pela mesma chave de `LastScene`), usado depois por
-     `ModelWidget::adjustSceneRect(use_model_rect=true)`
-     ([modelwidget.cpp:1946-1951](libs/libgui/src/widgets/modelwidget.cpp#L1946)). Depende de: 0.8,
-     1.1 (precisa que cenas por schema já existam de verdade para ter o que persistir por cena).
+2.2. **Persistência de retângulo por cena** — implementação completa do design fechado na seção 2:
+     - DTD ([assets/schemas/xml/dtd/dbmodel.dtd](assets/schemas/xml/dtd/dbmodel.dtd)): adicionar
+       `<!ELEMENT scenes (scene*)>`/`<!ELEMENT scene EMPTY>` (`name`/`left`/`top`/`right`/`bottom`),
+       mirror de [changelog.dtd](assets/schemas/xml/dtd/changelog.dtd); manter `scene-rect` como
+       está.
+     - Templates novos [assets/schemas/xml/scenes.sch](assets/schemas/xml/scenes.sch) (container) e
+       [assets/schemas/xml/scene.sch](assets/schemas/xml/scene.sch) (entrada), mirror de
+       `changelog.sch`/`entry.sch`; adicionar `%if {scenes} %then {scenes} %end` em
+       [dbmodel.sch](assets/schemas/xml/dbmodel.sch), mirror do `%if {changelog}...` já existente.
+     - `Attributes::Scenes`/`Attributes::Scene` novos em
+       [attributes.h](libs/libparsers/src/attributes.h) (`Left`/`Top`/`Right`/`Bottom`/`Name` já
+       existem).
+     - `DatabaseModel`: `QMap<QString, QRectF>` indexado pela mesma chave de `LastScene`; escrita
+       mirror de `getChangelogDefinition()` ([databasemodel.cpp:10520-10555](libs/libcore/src/databasemodel.cpp#L10520)),
+       leitura mirror do parse de `<changelog>` ([databasemodel.cpp:3647-3664](libs/libcore/src/databasemodel.cpp#L3647)).
+       Quando há só 1 cena (segmentação desligada), continua escrevendo só o `scene-rect` legado, sem
+       `<scenes>` — formato de arquivo inalterado nesse caso.
+     - Carga de arquivo antigo (sem `<scenes>`) num modelo que a Fase 1 segmenta em N cenas: cada
+       cena cai no fallback já existente (`itemsBoundingRect()` a partir dos seus próprios itens) —
+       não tentar redistribuir o `scene-rect` legado entre as cenas novas.
+     Depende de: 0.8, 1.1 (precisa que cenas por schema já existam de verdade para ter o que
+     persistir por cena).
 
 2.3. **Wiring runtime de `LastScene`** — estender
      `ModelWidget::saveLastCanvasPosition()`/`restoreLastCanvasPosition()`
@@ -847,24 +926,27 @@ threshold for de fato detalhado).
 
 2.5. **Teste de regressão fim-a-fim da Fase 2** — fechar, salvar, reabrir um modelo segmentado por
      schema preserva cena focada + zoom/posição daquela cena, e a segmentação por schema se
-     reconstrói corretamente na carga. Depende de: 2.2, 2.3.
+     reconstrói corretamente na carga. **Inclui retrocompatibilidade** (requisito explícito do
+     usuário): abrir um `.dbm` salvo por uma versão anterior a esta feature (só `scene-rect` legado,
+     sem `<scenes>`) precisa continuar funcionando — cada cena calcula seu retângulo pelo fallback
+     existente, sem erro nem tentativa de redistribuir o valor legado. Depende de: 2.2, 2.3.
 
 ### Fase 3 — Segmentação por Threshold (algoritmo fechado, detalhes de UX/borda a refinar)
 
 > Deliberadamente deixada por último. O modo por schema (Fases 1-2) precisa estar "redondo" —
 > implementado, testado, com os pontos de estudo dedicado (ferramenta de relacionamento, seleção,
 > Object Search Widget) resolvidos — antes de investir tempo em detalhar o modo threshold.
-> **Atualização 2026-09-21**: o algoritmo central (decisões #7 e #8, seção 3) já está fechado —
-> contador ingênuo, sem clustering, com persistência por objeto obrigatória desde o início. O que
-> ainda falta detalhar são os pontos de borda (fallback de contador entre sessões de edição,
-> formato exato do atributo `Workspace`) — bem menos em aberto do que a versão anterior desta
-> seção, mas ainda assim revisitar antes de codar 3.1 em diante.
+> **Atualização 2026-09-21**: o algoritmo central (decisão #7, seção 3) já está fechado — contador
+> ingênuo, sem clustering, com persistência por objeto obrigatória desde o início. O que ainda
+> falta detalhar são os pontos de borda (fallback de contador entre sessões de edição, formato
+> exato do atributo de cena por objeto) — bem menos em aberto do que a versão anterior desta seção,
+> mas ainda assim revisitar antes de codar 3.1 em diante.
 
 - Contador de objetos inseridos (Table + View + ForeignTable, sem distinção de tipo, cf.
-  especificação original). Ao cruzar um múltiplo do threshold, abre-se uma nova
-  `ObjectsScene`/workspace e as inserções seguintes vão para ela. Mesmo algoritmo serve tanto para
-  criação interativa quanto para carga de arquivo — não há mais um caminho especial de "carga em
-  lote com visão do grafo completo", porque não há clustering (decisão #7, seção 3).
+  especificação original). Ao cruzar um múltiplo do threshold, abre-se uma nova `ObjectsScene` e as
+  inserções seguintes vão para ela. Mesmo algoritmo serve tanto para criação interativa quanto para
+  carga de arquivo — não há mais um caminho especial de "carga em lote com visão do grafo
+  completo", porque não há clustering (decisão #7, seção 3).
 - Relacionamentos cross-scene podem ser numerosos neste modo (trade-off aceito pela decisão #7) —
   a única mitigação **dentro desta fase** é reutilizar o mecanismo de marcador cut-off da Fase 1
   sem modificação. Reduzir a quantidade de cross-scene algoritmicamente (clustering) não é escopo
@@ -875,35 +957,34 @@ threshold for de fato detalhado).
   atrelada ao ciclo de vida de um `Schema`), no modo threshold a cena não tem nenhum objeto-dono
   cujo removal sirva de gatilho, então ela simplesmente permanece vazia até (se algum dia)
   receber novas inserções. Simplificação deliberada.
-- **Persistência por objeto é obrigatória desde o primeiro commit desta fase** (decisão #8, seção
-  3) — não é mais uma consequência condicional de "se houver clustering", já que não há clustering
-  nenhum; a razão agora é outra e mais direta: o contador é um processo com estado que precisa
-  ficar "travado" ao salvar. Cada `Table`/`View`/`ForeignTable` ganha um atributo persistido
-  `Workspace` (nome de arquivo, decisão #8) indicando a qual workspace pertence, análogo ao
-  atributo de layer já persistido por objeto hoje. Dois motivos práticos para persistir em vez de
-  recalcular relendo o arquivo:
+- **Persistência por objeto é obrigatória desde o primeiro commit desta fase** — não é mais uma
+  consequência condicional de "se houver clustering", já que não há clustering nenhum; a razão
+  agora é outra e mais direta: o contador é um processo com estado que precisa ficar "travado" ao
+  salvar. Cada `Table`/`View`/`ForeignTable` ganha um atributo persistido `Scene` (nome de
+  arquivo) indicando a qual cena pertence, análogo ao atributo de layer já persistido por objeto
+  hoje. Dois motivos práticos para persistir em vez de recalcular relendo o arquivo:
   1. Se objetos forem removidos entre uma sessão de edição e outra, re-derivar a atribuição do zero
      exigiria reconstituir a ordem histórica de inserção original — frágil comparado a só ler o
      resultado já gravado.
   2. Deixa o caminho livre, sem nenhum desenho extra, para o caso futuro de mover manualmente um
-     objeto de um workspace para outro — o atributo persistido já é a fonte de verdade a
-     ler/escrever, exatamente como o atributo de layer por objeto já funciona hoje.
+     objeto de uma cena para outra — o atributo persistido já é a fonte de verdade a ler/escrever,
+     exatamente como o atributo de layer por objeto já funciona hoje.
 - **Ponto ainda em aberto**: como o contador em si (não só a atribuição já feita) sobrevive entre
-  sessões de edição — ex. usuário abre o arquivo, o workspace mais recente ainda tem espaço sobrando
-  no threshold, cria mais 3 tabelas manualmente: elas devem continuar enchendo aquele workspace ou
-  sempre abrir um novo? Precisa decidir se o contador persiste seu valor corrente (provavelmente
-  como parte do mesmo mecanismo de atributo de segmentação da Fase 2) ou se é recalculado a partir
-  da contagem de objetos já atribuídos a cada workspace na carga do arquivo.
+  sessões de edição — ex. usuário abre o arquivo, a cena mais recente ainda tem espaço sobrando no
+  threshold, cria mais 3 tabelas manualmente: elas devem continuar enchendo aquela cena ou sempre
+  abrir uma nova? Precisa decidir se o contador persiste seu valor corrente (provavelmente como
+  parte do mesmo mecanismo de atributo de segmentação da Fase 2) ou se é recalculado a partir da
+  contagem de objetos já atribuídos a cada cena na carga do arquivo.
 
 #### Subtarefas da Fase 3 (a refinar quando a fase for retomada, mas algoritmo já fechado)
 
-3.1. Contador ingênuo (Table + View + ForeignTable) + criação de novo workspace ao cruzar o
-     threshold — mesmo algoritmo para criação interativa e carga de arquivo. Depende de: 1.1, 1.2,
-     1.5, 1.6 (reaproveita o choke point de criação de cena e de roteamento).
+3.1. Contador ingênuo (Table + View + ForeignTable) + criação de nova cena ao cruzar o threshold —
+     mesmo algoritmo para criação interativa e carga de arquivo. Depende de: 1.1, 1.2, 1.5, 1.6
+     (reaproveita o choke point de criação de cena e de roteamento).
 
-3.2. Persistência do atributo `Workspace` por objeto (novo atributo por tabela/view/ftable,
-     análogo ao atributo de layer já persistido por objeto) + resolução do "ponto ainda em aberto"
-     acima (como o contador sobrevive entre sessões). Depende de: 3.1.
+3.2. Persistência do atributo `Scene` por objeto (novo atributo por tabela/view/ftable, análogo ao
+     atributo de layer já persistido por objeto) + resolução do "ponto ainda em aberto" acima (como
+     o contador sobrevive entre sessões). Depende de: 3.1.
 
 3.3. Reaproveitamento do marcador cut-off da Fase 1 (1.8) para os cross-scene resultantes no modo
      threshold — deve ser praticamente gratuito se 1.8 foi bem desenhado; se não for, é sinal de
@@ -930,7 +1011,7 @@ promoção/rebaixamento de relacionamento cross-scene, marcador cut-off) vive em
 então nunca vai ganhar segmentação nenhuma só por causa do trabalho feito nas Fases 0-3. Impacto
 concreto hoje: `pgmodeler-cli --export-to-file` para PNG/SVG ([pgmodelercliapp.cpp:2274,2285](libs/libcli/src/pgmodelercliapp.cpp#L2274))
 sempre produz uma única imagem do modelo inteiro, mesmo depois da GUI já segmentar em múltiplas
-cenas/workspaces.
+cenas.
 
 **O que precisa ser decidido/feito quando esta fase for retomada** (não detalhado agora, só
 mapeado):
@@ -941,7 +1022,7 @@ mapeado):
   ou
 - Reimplementar a segmentação de forma independente dentro de `PgModelerCliApp`, aceitando alguma
   duplicação de lógica em troca de não mexer no caminho da GUI.
-- Decidir se `--export-to-file` para imagem passa a gerar um arquivo por cena/workspace (mesmo
+- Decidir se `--export-to-file` para imagem passa a gerar um arquivo por cena (mesmo
   padrão da subtarefa 0.7 na GUI) ou se o CLI ganha uma flag explícita pra optar por isso.
 - Cobre os dois modos (por schema e por threshold) ou só o que estiver pronto no momento em que
   isso for retomado.
@@ -965,7 +1046,7 @@ mapeado):
   flag/variação do threshold ingênuo da Fase 3, que precisa continuar existindo e previsível como
   está — ver decisão #7, seção 3), já que muda a proposta de valor: o ingênuo prioriza ordem
   previsível dos objetos, o com clustering prioriza minimizar cross-scene à custa de reordenar
-  objetos entre workspaces de um jeito não literal à ordem de inserção.
+  objetos entre cenas de um jeito não literal à ordem de inserção.
 
 ## 6. Riscos conhecidos / pontos de atenção para quem retomar
 

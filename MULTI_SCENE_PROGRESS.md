@@ -7,14 +7,18 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- Fase 0 em andamento. Subtarefas **0.1 a 0.7 concluídas** (0.7 ainda não commitada nesta sessão —
-  ver abaixo).
-- **Próxima subtarefa: 0.8** (scaffolding de persistência — reservar modo de segmentação e
-  `SceneRect` por cena no formato XML/enum de `DatabaseModel`, sem popular/usar ainda).
+- Fase 0 em andamento. Subtarefas **0.1 a 0.7 concluídas e commitadas**.
+- **Próxima subtarefa: 0.8** — escopo revisado nesta sessão (reservar só o modo de segmentação;
+  o retângulo por cena saiu daqui e virou a subtarefa 2.2, design completo já fechado, ver abaixo).
 
 ## Commits desta branch (mais recente primeiro)
 
 ```
+c8236e1ae Update plan: Fase 0.7 done, pgmodeler-cli parity promoted to Fase 4
+24e233aef Fase 0.7: print and image export iterate every scene, no spatial composition
+191c51888 Fase 0.6: generalize Layers mutations across every scene
+7f055ea44 Update MULTI_SCENE_PROGRESS.md: Fase 0.5 done, next is 0.6
+9ad7c9073 Fase 0.5: use auto& for scene iteration, matching codebase style
 f670ccbcd Update plan: correct 0.5's scope after user review
 41874cdce Fase 0.5: ModelWidget::alignObjectsToGrid() applies to every scene
 2136562a9 Update plan: threshold segmentation stays naive, clustering deferred as a third mode
@@ -79,6 +83,36 @@ c29b147ce Add multi-scene support implementation plan
   virou **Fase 4** no plano (tarefa própria, dona: usuário, só depois das Fases 0-3 prontas — ver
   plano, seção 4). `AppearanceConfigWidget` (preview de estilo) conferido, não precisa de mudança.
   Build limpo (`gui` + `pgmodeler`), sem teste manual de UI nesta sessão.
+
+## Design fechado nesta sessão (sem código ainda — vira 2.2 quando a Fase 2 chegar)
+
+Discussão longa sobre como persistir o retângulo de cada cena (`SceneRect` hoje é um único
+`QRectF` pro modelo inteiro). Nada disso foi codado ainda — é puro fechamento de design, registrado
+no plano (seção 2, "Achado de revisão de código, expandido em 2026-09-21", e subtarefas 0.8/2.2):
+
+- **Verificado**: `ObjectsScene::setSceneRect()` não move item nenhum — só ajusta o retângulo de
+  rolagem/indexação. Aplicar um retângulo por-cena calculado a partir só dos itens daquela cena é
+  seguro, não desloca nada pra origem.
+- **Bug real encontrado** (diferente do que se temia): `ObjectsScene::adjustSceneRect(false)` (o
+  método que *recalcula* a partir da posição dos itens, não o que carrega um valor persistido) puxa
+  a borda esquerda/superior pra perto de zero incondicionalmente. Não usar esse método pra calcular
+  o retângulo inicial de uma cena nova/recém-dividida na Fase 1 — usar `itemsBoundingRect()` direto.
+- **Decisão**: sem retângulo global compartilhado entre cenas (foi cogitado, descartado — reintroduz
+  o problema de performance que a segmentação resolve). Cada cena persiste só o seu próprio
+  retângulo.
+- **Formato escolhido**: tag `<scenes><scene name="" left="" top="" right="" bottom="" /></scenes>`,
+  mirror exato do mecanismo já existente de `changelog`/`<entry>` (mesmo padrão de escrita/leitura,
+  mesmo estilo de DTD/`.sch`) — ideia do usuário, confirmada como o padrão mais idiomático do
+  formato depois de eu achar o precedente no código.
+- **Retrocompatibilidade** (requisito explícito do usuário): o atributo legado `scene-rect` continua
+  sendo escrito como hoje quando há só 1 cena — formato de arquivo inalterado no caso comum. Arquivo
+  antigo carregado num modelo que a Fase 1 segmenta cai no fallback já existente por cena, sem
+  redistribuir o valor legado.
+- **Terminologia revertida**: a decisão #8 do plano (usar "Workspace" pro usuário/persistência)
+  foi **revertida nesta sessão** — decisão final do usuário é usar "cena"/"Scene" em tudo, sem
+  distinção usuário/interno, já que o formato já tinha atributos "Scene" (`SceneRect`, `LastScene`)
+  e criar um segundo nome só pra UI não trazia benefício real. Fiz uma varredura no plano corrigindo
+  as menções a "Workspace" adicionadas nas últimas sessões.
 
 ## Decisões/ajustes tomados durante a implementação (além do que já estava no plano)
 
