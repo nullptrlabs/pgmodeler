@@ -1129,7 +1129,30 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 
 			case ObjectType::Relationship:
 			case ObjectType::BaseRelationship:
-				item = new RelationshipView(dynamic_cast<BaseRelationship *>(graph_obj));
+			{
+				BaseRelationship *rel = dynamic_cast<BaseRelationship *>(graph_obj);
+				BaseTableView *src_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::SrcTable)->getOverlyingObject()),
+											 *dst_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::DstTable)->getOverlyingObject());
+				ObjectsScene *src_scene = src_view ? dynamic_cast<ObjectsScene *>(src_view->scene()) : nullptr,
+										 *dst_scene = dst_view ? dynamic_cast<ObjectsScene *>(dst_view->scene()) : nullptr;
+
+				/* Tables in the same scene get a regular RelationshipView. Tables in different scenes
+				get no RelationshipView at all -- the relationship is registered as an external
+				connection on each table instead, so BaseTableView can draw its own cut-off marker */
+				if(src_scene && src_scene == dst_scene)
+				{
+					item = new RelationshipView(rel);
+					target_scene = src_scene;
+				}
+				else
+				{
+					if(src_view)
+						src_view->addExternalRelationship(rel);
+
+					if(dst_view)
+						dst_view->addExternalRelationship(rel);
+				}
+			}
 			break;
 
 			case ObjectType::Schema:
@@ -1176,17 +1199,15 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 		}
 
 		if(item)
-		{
 			target_scene->addItem(item, blink_new_objs);
 
-			if(!db_model->isModelLoading())
-				setModified(true);
+		if(!db_model->isModelLoading())
+			setModified(true);
 
-			emit s_objectAdded(graph_obj);
+		emit s_objectAdded(graph_obj);
 
-			if(blink_new_objs)
-				viewport->centerOn(item);
-		}
+		if(item && blink_new_objs)
+			viewport->centerOn(item);
 	}
 }
 
