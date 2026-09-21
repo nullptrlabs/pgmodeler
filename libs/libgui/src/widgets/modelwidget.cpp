@@ -2060,8 +2060,8 @@ void ModelWidget::printModel(QPrinter *printer, bool print_grid, bool print_page
 	if(!printer)
 		return;
 
-	bool show_grid = false, show_delims = false;
-	unsigned page_cnt = 0, page = 0, h_page_cnt = 0, v_page_cnt = 0, h_pg_id = 0, v_pg_id = 0;
+	bool show_grid = false, show_delims = false, first_page = true;
+	unsigned page = 0, h_page_cnt = 0, v_page_cnt = 0, h_pg_id = 0, v_pg_id = 0, global_page = 0;
 	QList<QRectF> pages;
 	QMarginsF margins;
 	QFont font;
@@ -2079,13 +2079,12 @@ void ModelWidget::printModel(QPrinter *printer, bool print_grid, bool print_page
 	ObjectsScene::setShowGrid(print_grid);
 	ObjectsScene::setShowPageDelimiters(false);
 
-	scene->setShowSceneLimits(false);
-	scene->update();
-	scene->clearSelection();
-
-	//Get the pages rect for printing
-	pages = scene->getPagesForPrinting(printer->pageLayout(), h_page_cnt, v_page_cnt,
-																		 resize_delims && current_zoom < 1 ? current_zoom : 1);
+	for(auto &scn : scenes)
+	{
+		scn->setShowSceneLimits(false);
+		scn->update();
+		scn->clearSelection();
+	}
 
 	//Creates a painter to draw the model directly on the printer
 	QPainter painter(printer);
@@ -2095,49 +2094,62 @@ void ModelWidget::printModel(QPrinter *printer, bool print_grid, bool print_page
 	painter.setFont(font);
 
 	margins = printer->pageLayout().marginsPoints();
-	page_cnt = pages.size();
 
-	for(page = 0, h_pg_id = 1, v_pg_id = 1; page < page_cnt; page++)
+	//Print every scene's pages in sequence onto the same printer job, one page after another
+	for(auto &scn : scenes)
 	{
-		//Render the current page on the printer
-		scene->render(&painter, QRect(), pages[page]);
+		//Get the pages rect for printing
+		pages = scn->getPagesForPrinting(printer->pageLayout(), h_page_cnt, v_page_cnt,
+																			resize_delims && current_zoom < 1 ? current_zoom : 1);
 
-		//Print the current page number if this option is marked
-		if(print_page_nums)
+		for(page = 0, h_pg_id = 1, v_pg_id = 1; page < static_cast<unsigned>(pages.size()); page++, global_page++)
 		{
-			page_info = tr("Page #%1 / X:%2 Y:%3").arg(QString::number(page + 1)).arg(h_pg_id).arg(v_pg_id);
-			color = ObjectsScene::getGridColor().darker();
-			color.setAlpha(128);
-			painter.setBrush(color);
-			painter.setPen(ObjectsScene::getGridColor().lighter());
-			brect = painter.fontMetrics().boundingRect(page_info);
-			brect.adjust(-5, 0, 5, 0);
+			if(!first_page)
+				printer->newPage();
 
-			painter.save();
-			painter.translate(-margins.left() / 2, -margins.top() / 2);
-			painter.drawRect(brect);
-			painter.drawText(0, 0, page_info);
-			painter.restore();
+			first_page = false;
 
-			h_pg_id++;
+			//Render the current page on the printer
+			scn->render(&painter, QRect(), pages[page]);
 
-			if(h_pg_id > h_page_cnt)
+			//Print the current page number if this option is marked
+			if(print_page_nums)
 			{
-				h_pg_id = 1;
-				v_pg_id++;
+				page_info = tr("Page #%1 / X:%2 Y:%3").arg(QString::number(global_page + 1)).arg(h_pg_id).arg(v_pg_id);
+				color = ObjectsScene::getGridColor().darker();
+				color.setAlpha(128);
+				painter.setBrush(color);
+				painter.setPen(ObjectsScene::getGridColor().lighter());
+				brect = painter.fontMetrics().boundingRect(page_info);
+				brect.adjust(-5, 0, 5, 0);
+
+				painter.save();
+				painter.translate(-margins.left() / 2, -margins.top() / 2);
+				painter.drawRect(brect);
+				painter.drawText(0, 0, page_info);
+				painter.restore();
+
+				h_pg_id++;
+
+				if(h_pg_id > h_page_cnt)
+				{
+					h_pg_id = 1;
+					v_pg_id++;
+				}
 			}
 		}
-
-		if(page < page_cnt-1)
-			printer->newPage();
 	}
 
 	//Restore the grid option backup
 	ObjectsScene::setCanvasColor(bg_color);
 	ObjectsScene::setShowGrid(show_grid);
 	ObjectsScene::setShowPageDelimiters(show_delims);
-	scene->setShowSceneLimits(true);
-	scene->update();
+
+	for(auto &scn : scenes)
+	{
+		scn->setShowSceneLimits(true);
+		scn->update();
+	}
 }
 
 void ModelWidget::updateRenderHints()
