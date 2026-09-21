@@ -27,6 +27,7 @@
 #include "pgsqlversions.h"
 #include <QThread>
 #include <QButtonGroup>
+#include <QFileInfo>
 #include "tabordermanager.h"
 
 bool ModelExportWidget::low_verbosity {false};
@@ -291,7 +292,9 @@ void ModelExportWidget::exportModel()
 		//Export to png
 		if(export_to_img_tb->isChecked())
 		{
-			QGraphicsView *viewp = new QGraphicsView(model_wgt->scene);
+			QList<ObjectsScene *> all_scenes = model_wgt->getObjectsScenes();
+			QString base_path = img_file_sel->getSelectedPath();
+			QFileInfo base_finfo(base_path);
 
 			emit s_exportStarted();
 			qApp->setOverrideCursor(Qt::WaitCursor);
@@ -302,23 +305,44 @@ void ModelExportWidget::exportModel()
 			 * Qt raises warnings in console. So to avoid this kind of problem the
 			 * export to image runs in a single shot, not giving the user a chance
 			 * to abort the operation */
-			if(img_fmt_cmb->currentIndex() == 0)
+			for(int idx = 0; idx < all_scenes.size(); idx++)
 			{
-				export_hlp.setExportToPNGParams(model_wgt->scene, viewp, img_file_sel->getSelectedPath(),
-																				zoom_cmb->itemData(zoom_cmb->currentIndex()).toDouble(),
-																				show_grid_chk->isChecked(), show_delim_chk->isChecked(),
-																				 page_by_page_chk->isChecked(), override_bg_color_chk->isChecked());
-				export_hlp.exportToPNG();
-			}
-			else
-			{
-				export_hlp.setExportToSVGParams(model_wgt->scene, img_file_sel->getSelectedPath(),
-																				show_grid_chk->isChecked(),
-																				show_delim_chk->isChecked());
-				export_hlp.exportToSVG();
+				ObjectsScene *scn = all_scenes.at(idx);
+
+				/* Each scene is exported to its own file. With a single scene the path is used
+				 * as-is; with more than one, a "_<index>" suffix is inserted before the extension */
+				QString out_path = base_path;
+
+				if(all_scenes.size() > 1)
+				{
+					out_path = base_finfo.absolutePath() + GlobalAttributes::DirSeparator +
+										 base_finfo.baseName() + QString("_%1").arg(idx + 1);
+
+					if(!base_finfo.completeSuffix().isEmpty())
+						out_path += "." + base_finfo.completeSuffix();
+				}
+
+				QGraphicsView *viewp = new QGraphicsView(scn);
+
+				if(img_fmt_cmb->currentIndex() == 0)
+				{
+					export_hlp.setExportToPNGParams(scn, viewp, out_path,
+																					zoom_cmb->itemData(zoom_cmb->currentIndex()).toDouble(),
+																					show_grid_chk->isChecked(), show_delim_chk->isChecked(),
+																					 page_by_page_chk->isChecked(), override_bg_color_chk->isChecked());
+					export_hlp.exportToPNG();
+				}
+				else
+				{
+					export_hlp.setExportToSVGParams(scn, out_path,
+																					show_grid_chk->isChecked(),
+																					show_delim_chk->isChecked());
+					export_hlp.exportToSVG();
+				}
+
+				delete viewp;
 			}
 
-			delete viewp;
 			qApp->restoreOverrideCursor();
 		}
 		else
