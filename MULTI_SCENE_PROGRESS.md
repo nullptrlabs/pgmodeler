@@ -7,16 +7,15 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1 e 1.2 concluídas, commitadas e
-  testadas** (1.2 recebeu um refinamento pequeno de deduplicação logo depois — ver abaixo). **1.3
-  implementada (combo flutuante de troca de cena), ainda sem commit** — aguardando confirmação de
-  teste do usuário.
+- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1, 1.2 e 1.3 concluídas e commitadas**
+  (1.2 recebeu um refinamento pequeno de deduplicação logo depois).
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa) — usuário
   pediu pra registrar como etapa extra pendente, não corrigir agora. Detalhado no plano, subtarefa
   2.2 e seção 6 (riscos).
-- **Próxima ação**: confirmar teste da 1.3, decidir se segue pra 1.4/1.5 ou se aborda o retângulo
-  de cena antes.
+- **Próxima subtarefa: 1.4** — confirmação de `SchemaView::fetchChildren()` (commit de teste,
+  depende de 1.2, pronta) — ou 1.5 (estrutura de conexões externas em `BaseTableView`) se o
+  usuário preferir pular a confirmação. A confirmar com ele.
 - **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
   (arquitetura, decisões, descrição/dependência das subtarefas) — nunca marca subtarefa como
   feita/commitada. Todo status de execução (o quê foi feito, hash do commit, achados específicos
@@ -28,6 +27,7 @@
 ## Commits desta branch (mais recente primeiro)
 
 ```
+2854325ff Fase 1.3: floating QComboBox to switch the active scene
 8e223b660 Plan: confirm scene-rect bug by manual test, register as pending
 a06df761d Fase 1.2 (refinamento): deduplicate getSchemaScene() call
 9ba476d00 Fase 1.2: route Table/View/ForeignTable to their schema's scene
@@ -189,7 +189,7 @@ subtarefa 1.1.
   fallback "Scene N"). `activated(int)` chama `setActiveScene()`; `s_activeSceneChanged` mantém o
   combo sincronizado quando a cena ativa muda por outro caminho. Repopulado a cada `addScene()`
   via novo método `updateSceneCombo()`. Marcado como temporário no header, aponta pro plano. Build
-  completo (`gui` + `pgmodeler`) sem erros. **Ainda sem confirmação de teste do usuário.**
+  completo (`gui` + `pgmodeler`) sem erros. Commitado.
 - **Achado do usuário, confirmado por teste manual**: com múltiplas cenas já criadas pela Fase 1,
   o retângulo de cada cena fica errado — só a cena ativa recebe o `scene-rect` legado (em
   `adjustSceneRect(use_model_rect=true)`, chamado ao final de `loadModel()`); as demais ficam com
