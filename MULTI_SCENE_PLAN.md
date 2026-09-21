@@ -853,6 +853,21 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
      `Schema` sendo inserido, criar a `ObjectsScene` correspondente (indexada por schema) se ainda
      não existir, e bootstrapar layers a partir de uma cena existente (helper da subtarefa 0.6).
      Depende de: 0.1, 0.6 (nenhuma dependência dentro da própria Fase 1).
+     **Tratamento especial pra `pg_catalog`/`public` (achado do usuário, 2026-09-22)**:
+     `DatabaseModel::createSystemObjects()` sempre cria `pg_catalog` **antes** dos schemas do
+     próprio arquivo serem parseados na carga (`public`, quando presente no arquivo, chega depois)
+     — então `pg_catalog` seria o primeiro schema processado por `handleObjectAddition()` na
+     imensa maioria dos casos (abrir um arquivo existente). Sem tratamento especial, a regra
+     "ativa se for a primeira cena" faria a cena do `pg_catalog` — um schema raramente tocado
+     diretamente pelo usuário, geralmente só populado via engenharia reversa — ficar presa ao
+     `viewport` por padrão, escondendo o conteúdo real do usuário. `addScene()` ganhou um parâmetro
+     `auto_activate` (default `true`); a condição de ativação virou "nenhuma cena ativa ainda"
+     (`!scene`) em vez de "essa é a primeira cena" (`scenes.size() == 1`), pra uma cena poder abrir
+     mão da ativação sem bloquear permanentemente a próxima de reivindicá-la. `pg_catalog` cria sua
+     cena com `auto_activate = false`; `public` (schema padrão convencional) força sua própria cena
+     a ficar ativa explicitamente enquanto o modelo está carregando
+     (`db_model->isModelLoading()`), mesmo que outro schema tenha reivindicado o padrão primeiro —
+     só dispara durante a carga, nunca rouba foco do usuário numa edição interativa depois.
 
 1.2. **Rotear Table/View/ForeignTable para a cena do schema; `Textbox` pra cena ativa** — resolver
      `getSchema()` do objeto inserido e chamar `addItem()` na `ObjectsScene` daquele schema em vez
