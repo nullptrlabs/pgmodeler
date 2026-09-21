@@ -88,6 +88,13 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 			GroupByType
 		};
 
+		//! \brief Constants used to determine how the model's ObjectsScene collection is segmented
+		enum SegmentationMode: unsigned {
+			NoSegmentation,
+			BySchema,
+			ByThreshold
+		};
+
 	private:
 		//! \brief Constants used to access the tuple columns in the internal changelog
 		enum LogFields: unsigned {
@@ -270,6 +277,9 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		QPoint last_pos;
 
 		double last_zoom;
+
+		//! \brief Stores how the model's ObjectsScene collection is segmented
+		SegmentationMode scene_seg_mode;
 
 		//! \brief Returns an object seaching it by its name and type. The third parameter stores the object index
 		BaseObject *getObject(const QString &name, ObjectType obj_type, int &obj_idx);
@@ -876,6 +886,9 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 
 		void setLastZoomFactor(double zoom);
 		double getLastZoomFactor();
+
+		void setSegmentationMode(SegmentationMode mode);
+		SegmentationMode getSegmentationMode();
 
 		/*! \brief This method exposes the XML parser for the outside world. In order to create objects from xml code inside the current
 		 database model you need first get the parser (through this method), populate the parser with the desired XML and then call

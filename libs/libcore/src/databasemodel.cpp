@@ -58,6 +58,7 @@ DatabaseModel::DatabaseModel()
 
 	conn_limit=-1;
 	last_zoom=1;
+	scene_seg_mode=NoSegmentation;
 	loading_model=invalidated=append_at_eod=prepend_at_bod=false;
 	attributes[Attributes::Encoding]="";
 	attributes[Attributes::TemplateDb]="";
@@ -4008,6 +4009,16 @@ void DatabaseModel::setLastZoomFactor(double zoom)
 double DatabaseModel::getLastZoomFactor()
 {
 	return last_zoom;
+}
+
+void DatabaseModel::setSegmentationMode(SegmentationMode mode)
+{
+	scene_seg_mode=mode;
+}
+
+DatabaseModel::SegmentationMode DatabaseModel::getSegmentationMode()
+{
+	return scene_seg_mode;
 }
 
 Role *DatabaseModel::createRole()
