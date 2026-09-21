@@ -301,12 +301,26 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
     uma cena nova/recém-dividida, usar `itemsBoundingRect()` direto sobre os itens daquela cena,
     nunca `adjustSceneRect(false)`.**
   - **Decisão (2026-09-21): sem retângulo global compartilhado entre cenas.** Foi cogitado (e
-    descartado) persistir um único retângulo "soma de todas as cenas" aplicado a todas elas —
-    reintroduziria exatamente o problema de performance que a segmentação existe pra resolver (o
-    índice espacial/BSP tree de cada `QGraphicsScene` é dimensionado pelo `sceneRect()`; um
-    retângulo global faria toda cena carregar o "peso" das demais). Cada cena persiste **só o seu
-    próprio** retângulo, calculado só a partir dos seus próprios itens — nada agregado, nada
-    compartilhado.
+    descartado) persistir um único retângulo "soma de todas as cenas" **aplicado a todas elas em
+    runtime** (cada `ObjectsScene` individual compartilhando as mesmas dimensões). Cada cena
+    mantém **só o seu próprio** `sceneRect()` em runtime, calculado a partir dos seus próprios
+    itens — nada sincronizado entre cenas ao vivo.
+    **Revisitada e reafirmada em 2026-09-22** (usuário levantou de novo, motivado por flexibilidade
+    de troca de modo de segmentação): o custo real de um retângulo compartilhado em runtime não é
+    tanto o índice espacial (a profundidade da BSP tree do Qt escala com número de itens, não com
+    área do retângulo — a justificativa original nesse ponto era imprecisa) — é
+    **`ObjectsScene::getPagesForPrinting()`** ([objectsscene.cpp](libs/libcanvas/src/objectsscene.cpp)),
+    usado pela exportação/impressão por-cena da subtarefa 0.7: uma cena pequena forçada a
+    compartilhar as dimensões de uma cena grande geraria uma quantidade enorme de páginas em
+    branco ao exportar/imprimir só ela. **Decisão final**: cada cena continua com seu retângulo
+    independente em runtime (decisão original mantida) — mas o atributo legado `scene-rect` (único,
+    em `<dbmodel>`) passa a guardar um valor **"geral"**, calculado como a **união**
+    (`QRectF::united()`) do retângulo atual de todas as cenas, **recalculado do zero só no momento
+    de salvar** (nunca sincronizado ao vivo a cada mudança de uma cena) — serve como valor de
+    fallback pra quando o usuário desliga a segmentação e volta pro modo de cena única, preservando
+    a área de trabalho "como se fosse uma cena só" sem pagar o custo de impressão/exportação
+    durante a operação segmentada normal. Ver detalhamento e o método novo proposto
+    (`updateModelSceneRectInfo()`) nas subtarefas 2.0/2.2.
   - **Formato de persistência escolhido**: mirror do mecanismo já existente e testado de
     `changelog`/`<entry>` ([databasemodel.cpp:10520-10555](libs/libcore/src/databasemodel.cpp#L10520)
     escrita, [databasemodel.cpp:3647-3664](libs/libcore/src/databasemodel.cpp#L3647) leitura;
@@ -1023,8 +1037,23 @@ por mexer numa base de métodos que 2.2 reaproveita depois.
      etc., [modelwidget.cpp:3505,5467,5744,6044](libs/libgui/src/widgets/modelwidget.cpp#L3505) e
      dois em `mainwindow.cpp`) continuam cena-local, tocando só a cena ativa — não é bug, é
      categoria "cena-local" da decisão #9 (seção 3): mover um objeto numa cena não deveria mexer no
-     retângulo de outra. Depende de: 1.1, 1.2 (precisa de múltiplas cenas de verdade pra ter o que
-     corrigir).
+     retângulo de outra. O mesmo vale pra `ModelWidget::expandSceneRect()`/as ações de menu
+     "expandir topo/esquerda/baixo/direita" — continuam tocando só a cena ativa, sem sincronizar as
+     demais (reafirmado explicitamente com o usuário em 2026-09-22, ver seção 2).
+     **Escopo adicional — retângulo "geral" pro atributo legado `scene-rect`** (adicionado
+     2026-09-22, junto da reafirmação da decisão "sem retângulo global"): novo método
+     `ModelWidget::updateModelSceneRectInfo()` (nome sugerido, mesmo padrão de
+     `updateModelLayersInfo()`), chamado só no momento de salvar, que calcula a **união**
+     (`QRectF::united()`) do `sceneRect()` atual de todas as cenas e grava em
+     `db_model->setSceneRect(...)` — populando o atributo legado `scene-rect` com "como se todas as
+     cenas fossem uma só", usado como fallback se o usuário desligar a segmentação depois. **Corrige
+     um bug real introduzido pela própria subtarefa 0.1 (correção)**: o handler de
+     `ObjectsScene::s_sceneRectChanged` já commitado dentro de `addScene()` hoje chama
+     `db_model->setSceneRect(rect)` **reativamente, com o retângulo de uma única cena** toda vez que
+     qualquer cena muda de tamanho — isso precisa ser removido dali (só sobra
+     `viewport->resetCachedContent()`/`setModified(true)` nesse handler); o `scene-rect` do modelo
+     só deve ser escrito pela nova lógica de união, e só no save, nunca reativamente por-cena.
+     Depende de: 1.1, 1.2 (precisa de múltiplas cenas de verdade pra ter o que corrigir).
 
 2.1. **Persistência de modo de segmentação + `LastScene`** — popular de fato (leitura/escrita XML)
      o scaffolding preparado em 0.8: modo de segmentação do modelo e `LastScene` (índice numérico
