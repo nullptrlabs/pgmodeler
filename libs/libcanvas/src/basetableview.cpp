@@ -319,6 +319,24 @@ void BaseTableView::removeConnectedRelationship(BaseRelationship *base_rel)
 	connected_rels.erase(std::find(connected_rels.begin(), connected_rels.end(), base_rel));
 }
 
+void BaseTableView::addExternalRelationship(BaseRelationship *base_rel)
+{
+	BaseTable *tab = dynamic_cast<BaseTable *>(getUnderlyingObject());
+
+	if(!base_rel ||
+		 (base_rel &&
+			base_rel->getTable(BaseRelationship::SrcTable) != tab &&
+			base_rel->getTable(BaseRelationship::DstTable) != tab))
+		return;
+
+	external_rels.append(base_rel);
+}
+
+void BaseTableView::removeExternalRelationship(BaseRelationship *base_rel)
+{
+	external_rels.removeOne(base_rel);
+}
+
 int BaseTableView::getConnectedRelationshipIndex(BaseRelationship *base_rel, bool only_self_rels)
 {
 	std::vector<BaseRelationship *>::iterator itr;
@@ -500,6 +518,16 @@ double BaseTableView::calculateWidth()
 int BaseTableView::getConnectRelsCount()
 {
 	return connected_rels.size();
+}
+
+int BaseTableView::getExternalRelsCount()
+{
+	return external_rels.size();
+}
+
+QList<BaseRelationship *> BaseTableView::getExternalRelationships()
+{
+	return external_rels;
 }
 
 void BaseTableView::requestRelationshipsUpdate()

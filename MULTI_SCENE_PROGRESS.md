@@ -8,15 +8,26 @@
 
 - Branch: `multi-scene-support-2.1.x`.
 - **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1, 1.2, 1.3 e 1.4 concluídas e
-  commitadas** (1.2 recebeu um refinamento pequeno de deduplicação logo depois).
+  commitadas** (1.2 recebeu um refinamento pequeno de deduplicação logo depois). **1.5
+  implementada, build validado, aguardando teste manual/commit.**
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
   subtarefa 2.0/2.2 e seção 6 (riscos). Design ampliado no mesmo dia (ver abaixo) — usuário
   reabriu a discussão da decisão "sem retângulo global" e fechamos um híbrido. Ainda não
   implementada (nem 2.0 nem esse híbrido).
-- **Próxima subtarefa: 1.5** — estrutura de dados de "conexões externas" em `BaseTableView`
-  (depende de 1.2, pronta).
+- **1.5 implementada** (não commitada ainda): `BaseTableView` ganhou `external_rels`
+  (`QList<BaseRelationship *>`, container Qt por ser código novo) e o par de mutators
+  `addExternalRelationship()`/`removeExternalRelationship()` (protected), espelhando a validação
+  de `addConnectedRelationship()`/`removeConnectedRelationship()`. Leitura pública via
+  `getExternalRelsCount()`/`getExternalRelationships()`. `ModelWidget` virou `friend class` porque,
+  diferente de `connected_rels` (só `RelationshipView` mexe), quem vai popular essa lista em 1.6 é
+  `ModelWidget::handleObjectAddition()` — não existe `RelationshipView` pra relacionamento
+  cross-scene. Só estrutura + API nesta subtarefa, sem desenho visual (isso é 1.8). Build de
+  `canvas`, `gui` e `pgmodeler` limpo.
+- **Próxima subtarefa: 1.6** — roteamento de Relationship/BaseRelationship em
+  `handleObjectAddition()` (mesma cena → RelationshipView normal; cenas diferentes → registra nas
+  listas de conexões externas de 1.5).
 - **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
   (arquitetura, decisões, descrição/dependência das subtarefas) — nunca marca subtarefa como
   feita/commitada. Todo status de execução (o quê foi feito, hash do commit, achados específicos
