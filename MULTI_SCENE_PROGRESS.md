@@ -7,10 +7,12 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- **Fase 0 concluída (0.1 a 0.8, todas commitadas).** Fase 1 iniciando agora.
-- **Próxima subtarefa: 1.1** — criar `ObjectsScene` ao inserir `Schema` em
-  `handleObjectAddition()`, indexada por schema, bootstrapando layers a partir de uma cena
-  existente (helper `applySceneLayers()` da 0.6). Depende de 0.1, 0.6 (ambas prontas).
+- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefa 1.1 concluída e commitada** (mais uma
+  correção retroativa na 0.1, ver abaixo). **Parado pra teste manual do usuário antes da 1.2**
+  (convenção de 2026-09-22, ver abaixo) — ele já confirmou visualmente que o retângulo do schema
+  some sozinho por enquanto (esperado, documentado na 1.1).
+- **Próxima subtarefa: 1.2** — rotear Table/View/ForeignTable pra cena do schema; `Textbox` pra
+  cena ativa (decisão do usuário, 2026-09-22, ver abaixo). Depende de 1.1 (pronta).
 - **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
   (arquitetura, decisões, descrição/dependência das subtarefas) — nunca marca subtarefa como
   feita/commitada. Todo status de execução (o quê foi feito, hash do commit, achados específicos
@@ -22,6 +24,11 @@
 ## Commits desta branch (mais recente primeiro)
 
 ```
+71f8edaac Plan: document the addScene() signal-wiring architectural fix
+f5c6eab4b Fase 1.1: create ObjectsScene per Schema on insertion
+9e0c02972 Fase 0.1 (correção): addScene() wires every scene's signals, not just the first
+7e4f314bc Plan: Textbox has no schema, routes to the active scene
+c27badb0b Close Fase 0 in progress log, start Fase 1
 e2521a6ab Fase 0.8: reserve DatabaseModel::SegmentationMode scaffolding
 7422b4ab6 Scene DTD becomes a dedicated file, mirroring changelog.dtd exactly
 50a6a59f3 Rename scene persistence key from idx to id, drop name attribute
@@ -108,6 +115,29 @@ c29b147ce Add multi-scene support implementation plan
 
 **Fase 0 encerrada.** Fase 1 (segmentação por schema + conector cross-scene) começa pela
 subtarefa 1.1.
+
+- **Achado antes de codar 1.1**: `Textbox` não pertence a nenhum schema — nem a chave "1 Schema =
+  1 cena" (Fase 1) nem o contador da Fase 3 cobrem esse tipo. **Decisão do usuário**: roteia sempre
+  pra cena ativa no momento da inserção, nos dois modos. Registrado no plano (intro da Fase 1,
+  subtarefa 1.2, contador da Fase 3).
+- **Correção retroativa na 0.1, achada ao testar a 1.1**: o construtor de `ModelWidget` conectava
+  ~19 sinais de `ObjectsScene` só uma vez, só pra cena única criada ali — toda cena nova (a partir
+  da 1.1, uma por schema) ficava sem reagir a movimento/edição/seleção/popup menu/etc. Usuário
+  também notou que `this->scene` (criado eagerly no construtor) não tinha vínculo nenhum com as
+  cenas de schema, e que o `QGraphicsView` deveria nascer sem cena em vez de receber uma cena
+  "fantasma" no construtor. Corrigido: todo o wiring de sinais moveu pra dentro de `addScene()`
+  (roda pra cada cena, não só a primeira); construtor não cria mais cena eagerly
+  (`viewport = new QGraphicsView(this)`); `handleObjectAddition()` ganhou uma rede de segurança
+  que cria uma cena sob demanda se nenhuma existir ainda. Commitado separado da 1.1 (é uma
+  correção da 0.1). Detalhado no plano, subtarefa 0.1.
+- **1.1** — `handleObjectAddition()` cria uma `ObjectsScene` por schema na primeira vez que o
+  encontra (mapa novo `QHash<Schema *, ObjectsScene *> schema_scenes`), bootstrapa layers via
+  `applySceneLayers()`, roteia o próprio `SchemaView` pra essa cena nova. Nada mais muda de rota
+  ainda (Table/View/ForeignTable/Relationship/Textbox continuam na cena ativa até 1.2/1.6). Build
+  completo (`gui` + `pgmodeler`) sem erros. **Testado manualmente pelo usuário**: confirmado que o
+  retângulo do schema some do canvas visível (esperado — ele foi pra uma cena que não está anexada
+  ao `viewport`; as tabelas continuam aparecendo normalmente, já que ainda não foram roteadas).
+  Resolve na 1.2.
 
 ## Design de persistência por-cena (sem código ainda — vira 2.1/2.2 quando a Fase 2 chegar)
 
