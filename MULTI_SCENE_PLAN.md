@@ -1,7 +1,8 @@
 # Plano de Implementação — Suporte a Múltiplas Cenas (Multi-Scene Support)
 
 > Branch: `multi-scene-support-2.1.x`. Este documento é o plano de trabalho de referência entre sessões/máquinas.
-> Estado: análise concluída, decisões de design fechadas, implementação ainda não iniciada.
+> Estado: implementação em andamento — ver `MULTI_SCENE_PROGRESS.md` para onde paramos exatamente
+> (log sessão a sessão, não duplicado aqui).
 > Prioridade: fechar segmentação por schema (Fases 0-2) primeiro, ponta a ponta, antes de detalhar
 > o modo por threshold (Fase 3) — ver seção 4.
 > Atualização 2026-09-18: seções marcadas "achado de revisão de código" / "verificado em revisão
@@ -9,6 +10,12 @@
 > arquivos citados nas próprias notas). Uma delas corrige uma afirmação da versão anterior deste
 > documento sobre `connected_rels` (ver subseção "Relacionamentos cross-scene: promoção/
 > rebaixamento dinâmico" na Fase 1).
+> Atualização 2026-09-21: decisões #7 e #8 (seção 3) fecham o algoritmo da Fase 3 (contador
+> ingênuo, sem clustering ciente de conectividade dentro do modo threshold) e a terminologia
+> "Workspace" (usuário/persistência) vs. "cena" (interno/técnico). Clustering ciente de
+> conectividade **não foi descartado** — vira candidato a um terceiro modo de segmentação futuro,
+> separado do threshold ingênuo (ver seção 5). Fase 3 reescrita para refletir isso; ver também a
+> nota de terminologia na subtarefa 1.3.
 
 ## 1. Objetivo
 
@@ -25,6 +32,9 @@ O objetivo é segmentar um modelo em **múltiplas `ObjectsScene`**, escolhidas p
   relacionamento pertencente ao schema é renderizado nela.
 - **Por threshold**: a cada N objetos inseridos (tabelas, views e ftables contam 1 cada,
   independente do tipo; ex. N=1000), cria-se uma nova cena e as inserções seguintes vão para ela.
+  Estritamente por ordem de inserção, sem nenhum agrupamento por conectividade (decisão #7,
+  seção 3) — um terceiro modo com agrupamento ciente de conectividade fica registrado como
+  candidato futuro fora do escopo atual (seção 5), não uma variação deste.
 
 Este documento cobre **apenas o suporte de core/model** a múltiplas cenas. A UI **definitiva** de
 troca entre cenas (dropdown estilizado, sidebar, abas, etc.) fica **fora de escopo** — será feita
@@ -138,6 +148,35 @@ Estas decisões foram tomadas em conversa e **não devem ser reabertas** sem jus
    container std quando houver razão técnica concreta que o Qt não cubra (raro) — e nesse caso,
    registrar o motivo inline no código. Não é retroativo: código pré-existente que já usa std
    (ex. `ModelWidget::selected_objects`) não precisa ser convertido como parte deste trabalho.
+7. **Segmentação por threshold (Fase 3): estritamente ingênua, sem clustering — clustering vira
+   candidato a um TERCEIRO modo futuro, separado** (adicionado em 2026-09-21, refinado depois da
+   revisão do usuário no mesmo dia). O algoritmo da Fase 3 é só um contador incremental de objetos
+   inseridos — ao cruzar o threshold, abre-se uma nova cena/workspace e as inserções seguintes vão
+   para ela, sem nenhum agrupamento ciente de conectividade. Motivo: sofisticar o critério de
+   particionamento **dentro do modo threshold** arriscaria reordenar objetos entre workspaces de um
+   jeito que o usuário não pediu e não consegue prever — o valor de uma regra estritamente ingênua é
+   que "o que cai em qual workspace" continua sendo consequência direta e previsível da ordem de
+   inserção, sem heurística escondida por trás. Consequência aceita nesta fase: relacionamentos
+   cross-scene podem ser numerosos (ao contrário do modo por schema, que tem fronteiras naturais) —
+   a única mitigação é o mecanismo de marcador cut-off já construído na Fase 1, reaproveitado sem
+   modificação.
+   **Importante — não é a mesma coisa que descartar a ideia**: agrupamento ciente de conectividade
+   (BFS/union-find sobre o grafo de relacionamentos) continua uma opção válida — só não como uma
+   variação/flag do modo threshold ingênuo, e sim como um **modo de segmentação novo e independente**
+   a considerar no futuro (candidato a "Fase 4", fora do escopo atual). Ver seção 5 ("Fora de
+   escopo") e a nota correspondente na Fase 3.
+8. **Terminologia: "Workspace" para o usuário, "cena" internamente** (adicionado em 2026-09-21).
+   `ObjectsScene`/`scene`/"cena" continuam sendo o nome **técnico interno** — classes, métodos,
+   variáveis C++ não são renomeados por causa desta decisão. Mas qualquer coisa **visível para o
+   usuário** — rótulos de UI (incluindo o `QComboBox` de teste da subtarefa 1.3) e nomes de
+   atributo no arquivo `.dbm` — usa **"Workspace"**, não "cena"/"scene". Isso já afeta a Fase 2 (o
+   atributo persistido referido neste plano como `LastScene` deve ser escrito no arquivo como
+   `LastWorkspace`) e a Fase 3 (o novo atributo por objeto de atribuição de bucket se chama
+   `Workspace`, não algo como `SceneId`/`BucketIdx`). **Nota de leitura**: o restante deste
+   documento continua usando "cena"/`LastScene`/`SceneRect` em prosa, por serem os nomes que já
+   remetem diretamente ao código (`ObjectsScene`) — não foi feito um find-replace retroativo no
+   texto do plano por esta decisão, só é preciso lembrar, na hora de nomear o atributo XML/string
+   de UI de verdade, de usar "Workspace".
 
 ## 4. Fases de implementação
 
@@ -592,7 +631,10 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
      testar manualmente 1.5/1.6 (roteamento e auditoria de relacionamento cross-scene), 1.7
      (marcador cut-off), 1.8 (promoção/rebaixamento ao mover tabela de schema) e as subtarefas de
      decisão 1.12/1.13/1.14 — sem ele, testar troca de cena exigiria código de teste descartável
-     em cada uma dessas subtarefas. Depende de: 0.1, 0.2, 1.2.
+     em cada uma dessas subtarefas. **Nota de terminologia (decisão #8, seção 3)**: mesmo sendo um
+     controle propositalmente descartável, o rótulo visível deve dizer "Workspace", não
+     "Cena"/"Scene" — custa zero e evita reforçar o nome errado durante os testes manuais das
+     subtarefas seguintes. Depende de: 0.1, 0.2, 1.2.
 
 1.4. **Confirmação de `SchemaView::fetchChildren()`** — validar com teste (não necessariamente
      mudança de código) que `getObjects(type, schema)`
@@ -718,63 +760,67 @@ threshold for de fato detalhado).
      schema preserva cena focada + zoom/posição daquela cena, e a segmentação por schema se
      reconstrói corretamente na carga. Depende de: 2.2, 2.3.
 
-### Fase 3 — Segmentação por Threshold (a detalhar — não iniciar ainda)
+### Fase 3 — Segmentação por Threshold (algoritmo fechado, detalhes de UX/borda a refinar)
 
-> Deliberadamente deixada por último e em aberto. O modo por schema (Fases 1-2) precisa estar
-> "redondo" — implementado, testado, com os pontos de estudo dedicado (ferramenta de
-> relacionamento, seleção, Object Search Widget) resolvidos — antes de investir tempo em detalhar
-> o modo threshold. As notas abaixo são só o entendimento inicial, não um plano fechado como o das
-> fases anteriores; espere revisar/reescrever esta seção quando chegar a hora.
+> Deliberadamente deixada por último. O modo por schema (Fases 1-2) precisa estar "redondo" —
+> implementado, testado, com os pontos de estudo dedicado (ferramenta de relacionamento, seleção,
+> Object Search Widget) resolvidos — antes de investir tempo em detalhar o modo threshold.
+> **Atualização 2026-09-21**: o algoritmo central (decisões #7 e #8, seção 3) já está fechado —
+> contador ingênuo, sem clustering, com persistência por objeto obrigatória desde o início. O que
+> ainda falta detalhar são os pontos de borda (fallback de contador entre sessões de edição,
+> formato exato do atributo `Workspace`) — bem menos em aberto do que a versão anterior desta
+> seção, mas ainda assim revisitar antes de codar 3.1 em diante.
 
 - Contador de objetos inseridos (Table + View + ForeignTable, sem distinção de tipo, cf.
-  especificação original). Ao cruzar um múltiplo do threshold, nova `ObjectsScene` passa a
-  receber as inserções seguintes.
-- Risco identificado: bucketing ingênuo por ordem de inserção pode gerar um número muito alto de
-  relacionamentos cross-scene (o modo por schema tem fronteiras naturais; threshold não tem).
-  Mitigação especulativa: ao carregar um arquivo existente (contexto em lote, grafo de FKs
-  disponível de antemão), usar um agrupamento ciente de conectividade (ex. BFS/union-find sobre o
-  grafo de relacionamentos) para manter clusters fortemente conectados no mesmo bucket, respeitando
-  o threshold como teto por bucket. Em criação manual/interativa (um objeto de cada vez, sem
-  visão do grafo completo ainda), cair para ordem de inserção simples. **Não validado, precisa de
-  desenho próprio quando esta fase for retomada.**
-- Reutilizar o mesmo mecanismo de marcador cut-off da Fase 1 para os cross-scene que restarem —
-  isso depende de a Fase 1 já ter esse mecanismo bem resolvido (é o motivo de deixar threshold por
-  último).
+  especificação original). Ao cruzar um múltiplo do threshold, abre-se uma nova
+  `ObjectsScene`/workspace e as inserções seguintes vão para ela. Mesmo algoritmo serve tanto para
+  criação interativa quanto para carga de arquivo — não há mais um caminho especial de "carga em
+  lote com visão do grafo completo", porque não há clustering (decisão #7, seção 3).
+- Relacionamentos cross-scene podem ser numerosos neste modo (trade-off aceito pela decisão #7) —
+  a única mitigação **dentro desta fase** é reutilizar o mecanismo de marcador cut-off da Fase 1
+  sem modificação. Reduzir a quantidade de cross-scene algoritmicamente (clustering) não é escopo
+  desta fase — fica reservado como um terceiro modo de segmentação separado e futuro (seção 5), não
+  uma evolução deste modo ingênuo.
 - Política de rebalanceamento: **não** mesclar/destruir cenas automaticamente quando uma fica
   esvaziada por remoções — diferente do modo por schema (onde a cena é destruída porque está
   atrelada ao ciclo de vida de um `Schema`), no modo threshold a cena não tem nenhum objeto-dono
   cujo removal sirva de gatilho, então ela simplesmente permanece vazia até (se algum dia)
-  receber novas inserções. Simplificação deliberada, mas ainda sujeita a revisão.
-- Persistência (retomando o que ficou de fora da Fase 2 de propósito): diferente do modo por
-  schema (cuja chave é auto-reconstrutível na carga), o modo threshold com clustering precisaria
-  persistir a atribuição de bucket por objeto (atributo por tabela/view/ftable, análogo ao
-  atributo de layer já persistido por objeto), para que reabrir o arquivo não dependa de re-rodar
-  o clustering e obter um resultado potencialmente diferente. Formato exato a definir junto com o
-  resto desta fase.
+  receber novas inserções. Simplificação deliberada.
+- **Persistência por objeto é obrigatória desde o primeiro commit desta fase** (decisão #8, seção
+  3) — não é mais uma consequência condicional de "se houver clustering", já que não há clustering
+  nenhum; a razão agora é outra e mais direta: o contador é um processo com estado que precisa
+  ficar "travado" ao salvar. Cada `Table`/`View`/`ForeignTable` ganha um atributo persistido
+  `Workspace` (nome de arquivo, decisão #8) indicando a qual workspace pertence, análogo ao
+  atributo de layer já persistido por objeto hoje. Dois motivos práticos para persistir em vez de
+  recalcular relendo o arquivo:
+  1. Se objetos forem removidos entre uma sessão de edição e outra, re-derivar a atribuição do zero
+     exigiria reconstituir a ordem histórica de inserção original — frágil comparado a só ler o
+     resultado já gravado.
+  2. Deixa o caminho livre, sem nenhum desenho extra, para o caso futuro de mover manualmente um
+     objeto de um workspace para outro — o atributo persistido já é a fonte de verdade a
+     ler/escrever, exatamente como o atributo de layer por objeto já funciona hoje.
+- **Ponto ainda em aberto**: como o contador em si (não só a atribuição já feita) sobrevive entre
+  sessões de edição — ex. usuário abre o arquivo, o workspace mais recente ainda tem espaço sobrando
+  no threshold, cria mais 3 tabelas manualmente: elas devem continuar enchendo aquele workspace ou
+  sempre abrir um novo? Precisa decidir se o contador persiste seu valor corrente (provavelmente
+  como parte do mesmo mecanismo de atributo de segmentação da Fase 2) ou se é recalculado a partir
+  da contagem de objetos já atribuídos a cada workspace na carga do arquivo.
 
-#### Subtarefas da Fase 3 (provisórias — a refinar quando a fase for retomada)
+#### Subtarefas da Fase 3 (a refinar quando a fase for retomada, mas algoritmo já fechado)
 
-> Ao contrário das Fases 0-2, esta fase ainda não teve o desenho fechado (ver nota no topo desta
-> seção), então a quebra abaixo é grossa e especulativa por natureza — serve de esqueleto para
-> reescrever quando a Fase 1 estiver "redonda", não como uma lista pronta para codar.
+3.1. Contador ingênuo (Table + View + ForeignTable) + criação de novo workspace ao cruzar o
+     threshold — mesmo algoritmo para criação interativa e carga de arquivo. Depende de: 1.1, 1.2,
+     1.5, 1.6 (reaproveita o choke point de criação de cena e de roteamento).
 
-3.1. Contador de objetos inseridos (Table + View + ForeignTable) + criação de nova cena ao cruzar
-     o threshold, usando ordem de inserção simples (caminho interativo, sem visão do grafo
-     completo). Depende de: 1.1, 1.2, 1.5, 1.6 (reaproveita o choke point de criação de cena e de
-     roteamento).
+3.2. Persistência do atributo `Workspace` por objeto (novo atributo por tabela/view/ftable,
+     análogo ao atributo de layer já persistido por objeto) + resolução do "ponto ainda em aberto"
+     acima (como o contador sobrevive entre sessões). Depende de: 3.1.
 
-3.2. Agrupamento ciente de conectividade (BFS/union-find sobre o grafo de relacionamentos) para
-     carga em lote de arquivo existente, respeitando o threshold como teto por bucket. Depende de:
-     3.1.
-
-3.3. Reaproveitamento do marcador cut-off da Fase 1 (1.8) para os cross-scene que restarem no modo
+3.3. Reaproveitamento do marcador cut-off da Fase 1 (1.8) para os cross-scene resultantes no modo
      threshold — deve ser praticamente gratuito se 1.8 foi bem desenhado; se não for, é sinal de
      que o desenho de 1.8 vazou detalhes específicos do modo por schema. Depende de: 3.1, 1.8.
 
-3.4. Persistência da atribuição de bucket por objeto (novo atributo por tabela/view/ftable,
-     análogo ao atributo de layer já persistido por objeto). Depende de: 3.2.
-
-3.5. Documentar e validar com teste a política de não-rebalanceamento (cenas esvaziadas por
+3.4. Documentar e validar com teste a política de não-rebalanceamento (cenas esvaziadas por
      remoção não são mescladas/destruídas automaticamente no modo threshold) — verificação, não
      feature nova. Depende de: 3.1.
 
@@ -789,6 +835,15 @@ threshold for de fato detalhado).
   `ModelOverviewWidget` (minimap) passa a exibir sempre a cena atualmente ativa (foco), e se
   atualiza automaticamente quando a cena ativa muda — nenhuma visão combinada de múltiplas cenas
   é necessária. Ver detalhamento na Fase 0.
+- **Terceiro modo de segmentação: threshold com agrupamento ciente de conectividade** (BFS/
+  union-find sobre o grafo de relacionamentos, para minimizar cross-scene mantendo clusters
+  fortemente conectados no mesmo bucket). Não descartado — é um modo candidato genuíno, só fica
+  para depois: primeiro por schema (Fases 1-2) e threshold ingênuo (Fase 3) precisam estar redondos
+  e em uso. Quando for retomado, tratar como um modo de segmentação novo e independente (não uma
+  flag/variação do threshold ingênuo da Fase 3, que precisa continuar existindo e previsível como
+  está — ver decisão #7, seção 3), já que muda a proposta de valor: o ingênuo prioriza ordem
+  previsível dos objetos, o com clustering prioriza minimizar cross-scene à custa de reordenar
+  objetos entre workspaces de um jeito não literal à ordem de inserção.
 
 ## 6. Riscos conhecidos / pontos de atenção para quem retomar
 
