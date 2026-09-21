@@ -565,6 +565,12 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
     nenhum `RelationshipView`** — `BaseGraphicObject::getOverlyingObject()` desse relacionamento
     fica `nullptr` — e em vez disso registrar o relacionamento na lista de "conexões externas" de
     cada uma das duas tabelas, para que cada `BaseTableView` desenhe seu próprio marcador cut-off.
+  - **`Textbox` não pertence a nenhum schema** (achado durante a implementação da subtarefa 1.1,
+    2026-09-22) — nem a chave "1 Schema = 1 cena" nem o contador da Fase 3 (que só conta Table/
+    View/ForeignTable) cobrem esse tipo. **Decisão do usuário**: roteia sempre pra **cena ativa no
+    momento da inserção** (`ModelWidget::scene`), nos dois modos de segmentação — casa com a
+    expectativa de quem desenha um textbox olhando pra uma cena específica, e durante carga de
+    arquivo cai naturalmente na cena inicial (nada troca a cena ativa durante o load).
 
 #### Relacionamentos cross-scene: promoção/rebaixamento dinâmico
 
@@ -835,9 +841,10 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
      não existir, e bootstrapar layers a partir de uma cena existente (helper da subtarefa 0.6).
      Depende de: 0.1, 0.6 (nenhuma dependência dentro da própria Fase 1).
 
-1.2. **Rotear Table/View/ForeignTable para a cena do schema** — resolver `getSchema()` do objeto
-     inserido e chamar `addItem()` na `ObjectsScene` daquele schema em vez da cena única. Depende
-     de: 1.1.
+1.2. **Rotear Table/View/ForeignTable para a cena do schema; `Textbox` pra cena ativa** — resolver
+     `getSchema()` do objeto inserido e chamar `addItem()` na `ObjectsScene` daquele schema em vez
+     da cena única. `Textbox` (sem schema) roteia pra `scene` (cena ativa no momento da inserção —
+     ver decisão na intro da Fase 1). Depende de: 1.1.
 
 1.3. **Controle simples de troca de cena (`QComboBox`)** — adicionado a pedido do usuário
      (2026-09-18) para viabilizar teste manual do resto da fase sem esperar a UI definitiva
@@ -1024,7 +1031,8 @@ threshold for de fato detalhado).
   especificação original). Ao cruzar um múltiplo do threshold, abre-se uma nova `ObjectsScene` e as
   inserções seguintes vão para ela. Mesmo algoritmo serve tanto para criação interativa quanto para
   carga de arquivo — não há mais um caminho especial de "carga em lote com visão do grafo
-  completo", porque não há clustering (decisão #7, seção 3).
+  completo", porque não há clustering (decisão #7, seção 3). `Textbox` não entra no contador
+  (mesma decisão da Fase 1) — roteia pra cena ativa, igual ao modo por schema.
 - Relacionamentos cross-scene podem ser numerosos neste modo (trade-off aceito pela decisão #7) —
   a única mitigação **dentro desta fase** é reutilizar o mecanismo de marcador cut-off da Fase 1
   sem modificação. Reduzir a quantidade de cross-scene algoritmicamente (clustering) não é escopo
