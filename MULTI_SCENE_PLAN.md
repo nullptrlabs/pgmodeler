@@ -33,6 +33,9 @@
 > `swapObjectsIds()`/"Edit creation order" pode desalinhar índices no save/reload seguinte —
 > documentado como conhecido, sem código de mitigação (decisão do
 > usuário). Ver seção 2, decisões #3 e #7 (seção 3), e subtarefas 2.1/2.2.
+> **Atualização 2026-09-21 (4)**: DTD de `<scenes>`/`<scene>` vira arquivo dedicado
+> `assets/schemas/xml/dtd/scene.dtd` (mirror fiel de `changelog.dtd`, incluído em `dbmodel.dtd` via
+> entidade, não declarações soltas nele) — a pedido do usuário.
 > **A partir desta atualização, este documento não registra mais status de execução** ("[FEITO]",
 > commits, etc.) — isso passou a viver só em `MULTI_SCENE_PROGRESS.md`.
 
@@ -374,10 +377,15 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
     fallback já existente (`adjustSceneRect(false)`/`itemsBoundingRect()` recalculado a partir dos
     seus próprios itens), do jeito que já acontece hoje quando `getSceneRect()` retorna inválido.
   - **DTD e template (.sch) precisam ser atualizados junto com o código C++**, não é só
-    `DatabaseModel`: [assets/schemas/xml/dtd/dbmodel.dtd](assets/schemas/xml/dtd/dbmodel.dtd)
-    (mantém `<!ATTLIST dbmodel scene-rect CDATA #IMPLIED>` como está, adiciona
-    `<!ELEMENT scenes (scene*)>`/`<!ELEMENT scene EMPTY>` com `id`/`left`/`top`/`right`/`bottom`
-    (`id` é a chave), mirror de [changelog.dtd](assets/schemas/xml/dtd/changelog.dtd));
+    `DatabaseModel`. **Atualização 2026-09-21 (4), a pedido do usuário**: mirror mais fiel de
+    `changelog.dtd` é um **arquivo DTD dedicado**, não declarações soltas dentro de `dbmodel.dtd` —
+    `changelog.dtd` já funciona assim (`<!ELEMENT changelog (entry*)>` + `<!ELEMENT entry EMPTY>`
+    num arquivo próprio, incluído via `<!ENTITY % changelog SYSTEM "changelog.dtd"> %changelog;`
+    em [dbmodel.dtd:89-90](assets/schemas/xml/dtd/dbmodel.dtd#L89)). Mesmo padrão pra cenas: novo
+    [assets/schemas/xml/dtd/scene.dtd](assets/schemas/xml/dtd/scene.dtd) contendo
+    `<!ELEMENT scenes (scene*)>` + `<!ELEMENT scene EMPTY>` com `id`/`left`/`top`/`right`/`bottom`
+    (`id` é a chave); `dbmodel.dtd` só ganha `<!ENTITY % scene SYSTEM "scene.dtd"> %scene;` (mirror
+    exato da linha do changelog) — mantém `<!ATTLIST dbmodel scene-rect CDATA #IMPLIED>` como está.
     [assets/schemas/xml/dbmodel.sch](assets/schemas/xml/dbmodel.sch) ganha um
     `%if {scenes} %then {scenes} %end` (mirror do `%if {changelog} %then {changelog} %end` já
     existente); novos `assets/schemas/xml/scenes.sch` (container) e `assets/schemas/xml/scene.sch`
@@ -952,10 +960,13 @@ threshold for de fato detalhado).
      runtime neste commit — só grava/lê. Depende de: 0.8.
 
 2.2. **Persistência de retângulo por cena** — implementação completa do design fechado na seção 2:
-     - DTD ([assets/schemas/xml/dtd/dbmodel.dtd](assets/schemas/xml/dtd/dbmodel.dtd)): adicionar
+     - DTD dedicado novo [assets/schemas/xml/dtd/scene.dtd](assets/schemas/xml/dtd/scene.dtd) com
        `<!ELEMENT scenes (scene*)>`/`<!ELEMENT scene EMPTY>` (`id`/`left`/`top`/`right`/`bottom`),
-       mirror de [changelog.dtd](assets/schemas/xml/dtd/changelog.dtd); manter `scene-rect` como
-       está.
+       mirror exato de [changelog.dtd](assets/schemas/xml/dtd/changelog.dtd) (arquivo próprio, não
+       declarações soltas em `dbmodel.dtd`);
+       [assets/schemas/xml/dtd/dbmodel.dtd](assets/schemas/xml/dtd/dbmodel.dtd) ganha só
+       `<!ENTITY % scene SYSTEM "scene.dtd"> %scene;` (mirror da linha do changelog,
+       [dbmodel.dtd:89-90](assets/schemas/xml/dtd/dbmodel.dtd#L89)); mantém `scene-rect` como está.
      - Templates novos [assets/schemas/xml/scenes.sch](assets/schemas/xml/scenes.sch) (container) e
        [assets/schemas/xml/scene.sch](assets/schemas/xml/scene.sch) (entrada), mirror de
        `changelog.sch`/`entry.sch`; adicionar `%if {scenes} %then {scenes} %end` em

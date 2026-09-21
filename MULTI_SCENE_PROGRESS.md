@@ -130,6 +130,12 @@ puro fechamento de design, registrado no plano (seção 2, "Achado de revisão d
   antes) — sem necessidade real comprovada; reintroduzir é barato se um motivo concreto aparecer no
   futuro. `LastScene` também é numérico pelo mesmo motivo. Detalhamento completo no plano (seção 2,
   subseção da chave de identidade) — não duplicado aqui.
+- **DTD vira arquivo dedicado** (2026-09-21, a pedido do usuário): mirror mais fiel de
+  `changelog.dtd` — que é um arquivo próprio incluído em `dbmodel.dtd` via entidade
+  (`<!ENTITY % changelog SYSTEM "changelog.dtd">`), não declarações soltas dentro dele. Mesmo
+  padrão pra cenas: novo `assets/schemas/xml/dtd/scene.dtd`; `dbmodel.dtd` só ganha a linha de
+  inclusão da entidade. Templates `.sch` (`scenes.sch`/`scene.sch`) já estavam corretos desde o
+  design original, sem mudança.
 - **Retrocompatibilidade** (requisito explícito do usuário): o atributo legado `scene-rect` continua
   sendo escrito como hoje quando há só 1 cena — formato de arquivo inalterado no caso comum. Arquivo
   antigo carregado num modelo que a Fase 1 segmenta cai no fallback já existente por cena, sem
