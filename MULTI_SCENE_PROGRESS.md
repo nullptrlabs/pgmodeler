@@ -44,6 +44,14 @@
 - **Próxima subtarefa: 1.7** — auditoria de `getOverlyingObject()` para relacionamentos (varrer
   usos existentes que assumem não-nulo e corrigir os que quebram com a exceção legítima introduzida
   em 1.6).
+- **Pausa para review (2026-09-21)**: usuário testou `big_model.dbm` (o modelo denso usado como
+  referência do problema original de lentidão) com a Fase 1 (por schema) até 1.6 aplicada. Resultado
+  esperado, não um bug: a lentidão persiste porque esse modelo tem 4 schemas
+  (`pg_catalog`/`public`/`dv4`/`dvaudit`) mas só `dv4` tem objetos — segmentação por schema não
+  distribui nada nesse caso, toda a densidade cai numa cena só. Confirma que este modelo é candidato
+  a threshold (Fase 3), não por schema. Ideia nova do usuário registrada na seção 5 do plano:
+  pgModeler poderia detectar esse padrão e sugerir o modo de segmentação mais adequado — fica para
+  depois de threshold existir, fora do escopo das Fases 1-3.
 - **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
   (arquitetura, decisões, descrição/dependência das subtarefas) — nunca marca subtarefa como
   feita/commitada. Todo status de execução (o quê foi feito, hash do commit, achados específicos
