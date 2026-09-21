@@ -7,10 +7,10 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefa 1.1 concluída e commitada** (mais uma
-  correção retroativa na 0.1, ver abaixo). **Parado pra teste manual do usuário antes da 1.2**
-  (convenção de 2026-09-22, ver abaixo) — ele já confirmou visualmente que o retângulo do schema
-  some sozinho por enquanto (esperado, documentado na 1.1).
+- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefa 1.1 concluída e commitada**, com uma
+  correção retroativa na 0.1 (wiring de sinais, testada e aprovada pelo usuário) e um refinamento
+  sobre `pg_catalog`/`public` logo em seguida (achado do usuário, **ainda sem teste manual dele**
+  — ver abaixo). Parado aqui pra ele testar essa parte antes de seguir.
 - **Próxima subtarefa: 1.2** — rotear Table/View/ForeignTable pra cena do schema; `Textbox` pra
   cena ativa (decisão do usuário, 2026-09-22, ver abaixo). Depende de 1.1 (pronta).
 - **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
@@ -24,6 +24,8 @@
 ## Commits desta branch (mais recente primeiro)
 
 ```
+68bc47c11 Plan: document pg_catalog/public scene-activation handling
+0300197fe Fase 1.1 (refinamento): pg_catalog never auto-activates, public forced default
 71f8edaac Plan: document the addScene() signal-wiring architectural fix
 f5c6eab4b Fase 1.1: create ObjectsScene per Schema on insertion
 9e0c02972 Fase 0.1 (correção): addScene() wires every scene's signals, not just the first
@@ -138,6 +140,17 @@ subtarefa 1.1.
   retângulo do schema some do canvas visível (esperado — ele foi pra uma cena que não está anexada
   ao `viewport`; as tabelas continuam aparecendo normalmente, já que ainda não foram roteadas).
   Resolve na 1.2.
+- **1.1 (refinamento) — achado do usuário**: `createSystemObjects()` sempre cria `pg_catalog`
+  antes dos schemas do arquivo serem parseados na carga, então `pg_catalog` seria o primeiro
+  schema processado por `handleObjectAddition()` ao abrir um arquivo — e a regra antiga "ativa se
+  for a primeira cena" deixaria a cena do `pg_catalog` (schema raramente tocado direto pelo
+  usuário, geralmente só via engenharia reversa) presa ao `viewport`, escondendo o conteúdo real.
+  `addScene()` ganhou parâmetro `auto_activate` (default `true`); condição de ativação virou
+  "nenhuma cena ativa ainda" (`!scene`) em vez de "é a primeira cena" (`scenes.size() == 1`), pra
+  uma cena poder recusar ativação sem bloquear a próxima. `pg_catalog` nunca ativa; `public` força
+  sua cena a ficar ativa enquanto `db_model->isModelLoading()` é verdadeiro, mesmo que outro
+  schema já tenha reivindicado o padrão antes. Build completo sem erros. **Ainda sem teste manual
+  do usuário** — parado aqui aguardando.
 
 ## Design de persistência por-cena (sem código ainda — vira 2.1/2.2 quando a Fase 2 chegar)
 
