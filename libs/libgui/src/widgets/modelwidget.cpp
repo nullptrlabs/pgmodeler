@@ -2010,15 +2010,22 @@ void ModelWidget::loadModel(const QString &filename)
 
 void ModelWidget::updateSceneLayers()
 {
-	scene->blockSignals(true);
-	scene->addLayers(db_model->getLayers(), false);
-	scene->setLayerColors(ObjectsScene::LayerNameColor, db_model->getLayerNameColors());
-	scene->setLayerColors(ObjectsScene::LayerRectColor, db_model->getLayerRectColors());
-	scene->setLayerNamesVisible(db_model->isLayerNamesVisible());
-	scene->setLayerRectsVisible(db_model->isLayerRectsVisible());
-	scene->setActiveLayers(db_model->getActiveLayers());
-	scene->blockSignals(false);
+	for(auto &scn : scenes)
+		applySceneLayers(scn);
+
 	db_model->setObjectsModified({ ObjectType::Schema });
+}
+
+void ModelWidget::applySceneLayers(ObjectsScene *scn)
+{
+	scn->blockSignals(true);
+	scn->addLayers(db_model->getLayers(), false);
+	scn->setLayerColors(ObjectsScene::LayerNameColor, db_model->getLayerNameColors());
+	scn->setLayerColors(ObjectsScene::LayerRectColor, db_model->getLayerRectColors());
+	scn->setLayerNamesVisible(db_model->isLayerNamesVisible());
+	scn->setLayerRectsVisible(db_model->isLayerRectsVisible());
+	scn->setActiveLayers(db_model->getActiveLayers());
+	scn->blockSignals(false);
 }
 
 void ModelWidget::alignObjectsToGrid()

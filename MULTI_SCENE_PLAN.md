@@ -344,14 +344,35 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
      contrário do alinhamento à grade. **Nenhuma mudança de código foi feita para esses três** —
      ficam verificados como corretos como estão, não como pendência.
 
-0.6. **Generalização de Layers** — `LayersConfigWidget` (12 call sites) e
-     `ModelWidget::updateSceneLayers()`/`updateModelLayersInfo()` passam a aplicar mutações a
-     **todas** as cenas da coleção (decisão #2, seção 3); leituras continuam vindo só da cena
-     ativa. Incluir também o helper de bootstrap (copiar layers — nomes, ativas, cores,
-     visibilidade — de uma cena existente para uma cena recém-criada) que a Fase 1 vai chamar ao
-     criar a `ObjectsScene` de um schema novo, já que `layers`/`active_layers`/`layers_paths` são
-     membros de **instância** de `ObjectsScene` (achado de revisão de código, seção 2). Depende
-     de: 0.1.
+0.6. **Generalização de Layers** [FEITO, commitar] — `LayersConfigWidget` e
+     `ModelWidget::updateSceneLayers()` passam a aplicar mutações a **todas** as cenas da coleção
+     (decisão #2, seção 3); leituras continuam vindo só da cena ativa (`updateLayersList()`,
+     `updateModelLayersInfo()` — sem mudança, confiam no invariante de que todas as cenas têm
+     estado de layer idêntico). Classificação por método (decisão #9), todos em
+     [layersconfigwidget.cpp](libs/libgui/src/widgets/layersconfigwidget.cpp):
+     - **Mutadores simples** (passam a iterar `model->getObjectsScenes()`): `updateActiveLayers()`
+       (`setActiveLayers`), `removeLayer()` (`removeLayers()`/`removeLayer()`), `updateLayerColors()`
+       (`setLayerColors`), `toggleLayersRects()` (`setLayerRectsVisible`/`setLayerNamesVisible` —
+       a leitura que decide `updated` continua contra a cena ativa, só a escrita passa a
+       propagar).
+     - **Mutadores com nome desambiguado** (`addLayer()`, `finishLayerRenaming()`): `addLayer()`/
+       `renameLayer()` retornam o nome já desambiguado; resolvido primeiro na cena ativa, depois
+       o **mesmo nome resultante** (não o texto bruto do usuário) é aplicado às demais cenas, para
+       não arriscar desambiguação divergente entre cenas.
+     - **`updateRelsVisibility()`**: passou a iterar `scn->items()` de todas as cenas (era só
+       `model->scene->items()`) — reage a uma mudança global de layers ativas, precisa recalcular
+       visibilidade de relacionamento em toda cena, não só na visível.
+     - **`updateLayersRects()`**: `clearSelection()` continua só na cena ativa (interação/seleção,
+       categoria cena-local da decisão #9); `updateLayerRects()` (geometria) passa a rodar em
+       todas as cenas — é chamado via `s_operationExecuted` após qualquer undo/redo, que pode
+       ter alterado objetos de qualquer cena, não só a ativa.
+     - `ModelWidget::updateSceneLayers()` ([modelwidget.cpp](libs/libgui/src/widgets/modelwidget.cpp))
+       teve seu corpo extraído para o novo método privado `ModelWidget::applySceneLayers(ObjectsScene *scn)`
+       (lê de `db_model`, escreve numa cena só); `updateSceneLayers()` virou um loop chamando
+       `applySceneLayers()` para cada cena. Esse método novo é o helper de bootstrap que a Fase 1
+       vai chamar para popular a `ObjectsScene` de um schema recém-criado (não foi ligado a nenhum
+       call site novo ainda — só a infraestrutura, já que a criação de cena por schema é escopo da
+       Fase 1). Depende de: 0.1.
 
 0.7. **Exportação/impressão por cena + composição** — `ModelWidget::printModel()` e
      `ModelExportHelper` (PNG/SVG) passam a iterar `getObjectsScenes()`, renderizando cada cena e

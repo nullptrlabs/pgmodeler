@@ -7,10 +7,10 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- Fase 0 em andamento. Subtarefas **0.1, 0.2, 0.3, 0.4, 0.5 concluídas e commitadas**.
-- **Próxima subtarefa: 0.6** (generalização de Layers — `LayersConfigWidget` e
-  `ModelWidget::updateSceneLayers()`/`updateModelLayersInfo()` passam a aplicar mutações a todas
-  as cenas; inclui o helper de bootstrap de layers para cena recém-criada).
+- Fase 0 em andamento. Subtarefas **0.1, 0.2, 0.3, 0.4, 0.5, 0.6 concluídas** (0.6 ainda não
+  commitada nesta sessão — ver abaixo).
+- **Próxima subtarefa: 0.7** (exportação/impressão por cena + composição, em
+  `ModelWidget::printModel()` e `ModelExportHelper`).
 
 ## Commits desta branch (mais recente primeiro)
 
@@ -58,6 +58,18 @@ c29b147ce Add multi-scene support implementation plan
   `selectAllObjects()`, os `itemsBoundingRect()` de `emitSceneInteracted()`/`eventFilter()` e o
   gate `items().count() > 1` **não foram alterados** — usuário identificou que a redação original
   (agregar esses três entre cenas) estava errada.
+- **0.6** — `LayersConfigWidget` (7 métodos) e `ModelWidget::updateSceneLayers()` generalizados
+  para todas as cenas, classificando cada call site pela decisão #9 (ver plano, subtarefa 0.6, para
+  a lista método a método). Dois padrões novos que vale lembrar: (a) `addLayer()`/`renameLayer()`
+  retornam nome desambiguado — resolve na cena ativa primeiro, propaga o **nome já resolvido**
+  (não o texto bruto) pras demais, pra não arriscar desambiguação divergente entre cenas; (b)
+  dentro de um mesmo método (`updateLayersRects()`) uma chamada pode ficar cena-local
+  (`clearSelection()`) e outra precisar propagar (`updateLayerRects()`) — a classificação é por
+  call site, não por método inteiro. `ModelWidget::updateSceneLayers()` teve o corpo extraído pro
+  novo `ModelWidget::applySceneLayers(ObjectsScene *scn)` (aplica numa cena só), que vira o loop de
+  `updateSceneLayers()` e também o helper de bootstrap que a Fase 1 vai usar pra popular uma cena
+  nova — sem call site novo ligado a isso ainda, só a infra. Build limpo (`gui` + `pgmodeler`), sem
+  teste manual de UI nesta sessão (ambiente sem display).
 
 ## Decisões/ajustes tomados durante a implementação (além do que já estava no plano)
 
