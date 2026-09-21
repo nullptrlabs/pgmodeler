@@ -8,9 +8,15 @@
 
 - Branch: `multi-scene-support-2.1.x`.
 - **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1 e 1.2 concluídas, commitadas e
-  testadas** (1.2 recebeu um refinamento pequeno de deduplicação logo depois — ver abaixo).
-- **Próxima subtarefa: 1.3** — `QComboBox` simples de troca de cena (Depende de 0.1, 0.2, 1.2 —
-  todas prontas), ou seguir pra 1.4/1.5 se o usuário preferir adiar o combo. A confirmar com ele.
+  testadas** (1.2 recebeu um refinamento pequeno de deduplicação logo depois — ver abaixo). **1.3
+  implementada (combo flutuante de troca de cena), ainda sem commit** — aguardando confirmação de
+  teste do usuário.
+- **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
+  errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa) — usuário
+  pediu pra registrar como etapa extra pendente, não corrigir agora. Detalhado no plano, subtarefa
+  2.2 e seção 6 (riscos).
+- **Próxima ação**: confirmar teste da 1.3, decidir se segue pra 1.4/1.5 ou se aborda o retângulo
+  de cena antes.
 - **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
   (arquitetura, decisões, descrição/dependência das subtarefas) — nunca marca subtarefa como
   feita/commitada. Todo status de execução (o quê foi feito, hash do commit, achados específicos
@@ -22,6 +28,7 @@
 ## Commits desta branch (mais recente primeiro)
 
 ```
+8e223b660 Plan: confirm scene-rect bug by manual test, register as pending
 a06df761d Fase 1.2 (refinamento): deduplicate getSchemaScene() call
 9ba476d00 Fase 1.2: route Table/View/ForeignTable to their schema's scene
 89ccc2057 Plan: register per-object Scene attribute as future work for Textbox + manual reassignment
@@ -177,6 +184,21 @@ subtarefa 1.1.
   o `switch`, condicionada a `graph_obj->getSchema()` não ser nulo — resolve certo pra Table/View/
   ForeignTable (têm schema) sem interferir em Textbox/Relationship/Schema (`getSchema()` retorna
   nulo pros três, confirmado por inspeção de código). Build completo sem erros.
+- **1.3** — `QComboBox` (`scene_combo`) criado como filho direto de `viewport`, posicionado fixo
+  no topo-esquerdo (8,8), listando cenas pelo nome do schema associado (`schema_scenes.key()`,
+  fallback "Scene N"). `activated(int)` chama `setActiveScene()`; `s_activeSceneChanged` mantém o
+  combo sincronizado quando a cena ativa muda por outro caminho. Repopulado a cada `addScene()`
+  via novo método `updateSceneCombo()`. Marcado como temporário no header, aponta pro plano. Build
+  completo (`gui` + `pgmodeler`) sem erros. **Ainda sem confirmação de teste do usuário.**
+- **Achado do usuário, confirmado por teste manual**: com múltiplas cenas já criadas pela Fase 1,
+  o retângulo de cada cena fica errado — só a cena ativa recebe o `scene-rect` legado (em
+  `adjustSceneRect(use_model_rect=true)`, chamado ao final de `loadModel()`); as demais ficam com
+  o retângulo minúsculo padrão do construtor de `ObjectsScene`. Nenhum call site de
+  `adjustSceneRect()` (nem os que recalculam a partir dos itens) itera todas as cenas hoje.
+  Elevado de "risco teórico" (já registrado no design da 2.2) pra "confirmado, precisa de fix" —
+  usuário pediu pra registrar como etapa extra pendente (Fase 1 ou mais adiante), não corrigir
+  agora. Sugestão registrada no plano: separar um fix mecânico barato (iterar todas as cenas,
+  mesmo padrão da 0.5) da persistência de fato (já é a 2.2).
 
 ## Design de persistência por-cena (sem código ainda — vira 2.1/2.2 quando a Fase 2 chegar)
 
