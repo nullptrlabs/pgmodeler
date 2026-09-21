@@ -923,6 +923,18 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
      **Nota**: essa garantia vale só para o modo por schema (schema e cena são 1:1 por construção);
      no modo threshold (Fase 3) ela não vale mais — ver subseção "`SchemaView` cross-scene:
      supressão dinâmica" na Fase 3, achado à parte, não é bug desta subtarefa.
+     **Implementação (2026-09-22)**: nenhuma mudança de código em `SchemaView` foi necessária —
+     confirmado que o cálculo do retângulo usa posição absoluta (`obj_view->pos()`, sem
+     `mapFromItem`/`mapToItem` entre cenas) e que 1.1/1.2 resolvem a cena de um schema e de seus
+     filhos pelo mesmo lookup (`getSchemaScene()`), então não há caminho de código pra divergirem
+     no modo por schema. A verificação virou um teste automatizado de verdade: novo target Qt Test
+     `tests/src/modelwidgettest` (primeiro teste deste projeto a instanciar um widget GUI —
+     `ModelWidget`/`QGraphicsView` — via a lib `gui` já linkada por todos os testes) usando a API
+     pública `getSceneForObject()` (já existente desde a Fase 0). Exigiu reconfigurar a árvore de
+     build com `-DBUILD_TESTS=ON` (estava desligado). Rodar a suíte inteira revelou falhas
+     pré-existentes e não relacionadas em vários outros targets de teste (algumas simplesmente não
+     compilam, uma até crasha) — confirmado via `git log` que não são desta sessão; fora de escopo,
+     não corrigidas.
 
 1.5. **Estrutura de dados de "conexões externas" em `BaseTableView`** — nova lista (adicional a
      `connected_rels`, que — conforme achado de revisão de código na seção 2 — já fica
@@ -1288,6 +1300,14 @@ mapeado):
   minúsculo padrão do construtor. Vira a subtarefa **2.0**, primeira da Fase 2 (a pedido do
   usuário, por mexer numa base de métodos que a 2.2 também usa) — não corrigir fora dessa
   subtarefa.
+- **Vários targets de `tests/` (fora do multi-scene) estão quebrados hoje** (achado ao rodar a
+  suíte inteira pela primeira vez pra validar a subtarefa 1.4, já que `BUILD_TESTS` estava
+  desligado até então) — `fileselectortest`/`linenumberstest` nem compilam (header ausente/
+  assinatura de função mudou), e vários outros (`basefunctiontest`, `foreigndatawrappertest`,
+  `proceduretest`, `schemaparsertest`, `servertest`, `transformtest`, `xmlparsertest`) têm
+  asserções falhando; `syntaxhighlightertest` chega a crashar. Confirmado via `git log` que nenhum
+  desses arquivos foi tocado nesta feature — bit-rot pré-existente, não relacionado ao multi-scene.
+  Fora de escopo deste plano; só registrado aqui pra não se perder.
 - **`pgmodeler-cli` não participa da segmentação multi-cena** (achado na subtarefa 0.7) — virou
   tarefa própria, **Fase 4**, dona: usuário, só depois das Fases 0-3 estarem prontas. Não
   implementar por conta própria antes disso ser pedido.
