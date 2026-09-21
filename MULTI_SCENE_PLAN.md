@@ -1036,6 +1036,28 @@ threshold for de fato detalhado).
        desalinhamento de `id` pós "Edit creation order" e cair pro fallback) — decisão do usuário:
        aceitar esse desalinhamento como limitação documentada (ver seção 2), não como algo a
        mitigar em código.
+     - **Confirmado por teste manual (2026-09-22, usuário)**: com múltiplas cenas já criadas pela
+       Fase 1, o retângulo de cada cena fica errado hoje — não é mais só um risco teórico do design
+       fechado na seção 2. Causa exata: `ModelWidget::adjustSceneRect(use_model_rect=true)`
+       ([modelwidget.cpp:2107-2121](libs/libgui/src/widgets/modelwidget.cpp#L2107)), chamado uma
+       única vez ao final de `loadModel()`
+       ([modelwidget.cpp:2051](libs/libgui/src/widgets/modelwidget.cpp#L2051)), aplica o único
+       `scene-rect` legado só à cena **ativa** (`scene`) — todas as outras cenas recém-criadas por
+       schema ficam com o retângulo padrão minúsculo do construtor de `ObjectsScene`
+       (`min_scene_width`/`min_scene_height`), nunca ajustado ao conteúdo real delas. **Nem os
+       outros call sites de `adjustSceneRect()`** (`use_model_rect=false`, que recalculam a partir
+       dos itens — [modelwidget.cpp:3505,5467,5744,6044](libs/libgui/src/widgets/modelwidget.cpp#L3505),
+       além de dois em `mainwindow.cpp`) **iteram todas as cenas** — hoje todos tocam só `scene`
+       (a ativa). Motivo do usuário pra registrar isso com ênfase: o objetivo da segmentação é ser
+       **flexível** (usuário pode trocar de modo/cena a qualquer momento), então o retângulo de
+       cada cena precisa estar sempre correto, não só da cena que por acaso está em foco no
+       momento. **Decisão do usuário: registrar como etapa extra a fazer dentro desta Fase 1 ou
+       mais adiante — não corrigir agora.** Quando for retomado, avaliar separar em duas partes: (a)
+       um fix mecânico mais barato e independente da persistência (generalizar
+       `adjustSceneRect()`/call sites pra iterar todas as cenas, categoria "modelo-inteiro-
+       replicado-por-cena" da decisão #9, seção 3 — foi o mesmo padrão já aplicado a
+       `alignObjectsToGrid()` na subtarefa 0.5) — resolveria o sintoma mesmo antes da persistência
+       por-cena existir; (b) a persistência de fato (o que esta subtarefa 2.2 já cobre).
      Depende de: 0.8, 1.1 (precisa que cenas por schema já existam de verdade para ter o que
      persistir por cena).
 
@@ -1223,6 +1245,12 @@ mapeado):
 
 ## 6. Riscos conhecidos / pontos de atenção para quem retomar
 
+- **Retângulo de cena errado pra toda cena que não está ativa** (confirmado por teste manual do
+  usuário, 2026-09-22, com a Fase 1 já criando cenas por schema) — `adjustSceneRect()` e seus call
+  sites só tocam a cena ativa hoje, nunca as demais; cenas recém-criadas ficam com o retângulo
+  minúsculo padrão do construtor. Detalhado na subtarefa 2.2 (seção "Confirmado por teste manual").
+  Registrado como etapa extra a resolver dentro da Fase 1 ou mais adiante — decisão do usuário,
+  não corrigir sem que ele peça.
 - **`pgmodeler-cli` não participa da segmentação multi-cena** (achado na subtarefa 0.7) — virou
   tarefa própria, **Fase 4**, dona: usuário, só depois das Fases 0-3 estarem prontas. Não
   implementar por conta própria antes disso ser pedido.
