@@ -10,9 +10,9 @@
 - **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1, 1.2 e 1.3 concluídas e commitadas**
   (1.2 recebeu um refinamento pequeno de deduplicação logo depois).
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
-  errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa) — usuário
-  pediu pra registrar como etapa extra pendente, não corrigir agora. Detalhado no plano, subtarefa
-  2.2 e seção 6 (riscos).
+  errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
+  **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
+  subtarefa 2.0/2.2 e seção 6 (riscos). Ainda não implementada.
 - **Próxima subtarefa: 1.4** — confirmação de `SchemaView::fetchChildren()` (commit de teste,
   depende de 1.2, pronta) — ou 1.5 (estrutura de conexões externas em `BaseTableView`) se o
   usuário preferir pular a confirmação. A confirmar com ele.
@@ -27,6 +27,7 @@
 ## Commits desta branch (mais recente primeiro)
 
 ```
+960b1b13b Plan: add subtask 2.0, moving the scene-rect mechanical fix first in Fase 2
 2854325ff Fase 1.3: floating QComboBox to switch the active scene
 8e223b660 Plan: confirm scene-rect bug by manual test, register as pending
 a06df761d Fase 1.2 (refinamento): deduplicate getSchemaScene() call
