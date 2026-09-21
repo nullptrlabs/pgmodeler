@@ -129,7 +129,8 @@ void LayersConfigWidget::updateActiveLayers()
 			active_layers.append(static_cast<unsigned>(row));
 	}
 
-	model->scene->setActiveLayers(active_layers);
+	for(auto &scn : model->getObjectsScenes())
+		scn->setActiveLayers(active_layers);
 
 	if(rels_tabs_visibility_chk->isChecked())
 		updateRelsVisibility();
@@ -153,7 +154,8 @@ void LayersConfigWidget::removeLayer(bool clear)
 
 	if(clear)
 	{
-		model->scene->removeLayers();
+		for(auto &scn : model->getObjectsScenes())
+			scn->removeLayers();
 
 		while(layers_tab->rowCount() > 1)
 		{
@@ -171,7 +173,9 @@ void LayersConfigWidget::removeLayer(bool clear)
 		int row = layers_tab->currentRow();
 
 		item = layers_tab->item(layers_tab->currentRow(), 0);
-		model->scene->removeLayer(item->text());
+
+		for(auto &scn : model->getObjectsScenes())
+			scn->removeLayer(item->text());
 
 		disconnect(rect_color_pickers.at(row), nullptr, this, nullptr);
 		rect_color_pickers.removeAt(row);
@@ -198,9 +202,11 @@ void LayersConfigWidget::updateLayerColors(int layer_idx)
 
 	if(layer_idx >= 0 && layer_idx < layers_tab->rowCount())
 	{
-		model->scene->setLayerColors(layer_idx,
-																 name_color_pickers[layer_idx]->getColor(0),
-																 rect_color_pickers[layer_idx]->getColor(0));
+		for(auto &scn : model->getObjectsScenes())
+			scn->setLayerColors(layer_idx,
+													name_color_pickers[layer_idx]->getColor(0),
+													rect_color_pickers[layer_idx]->getColor(0));
+
 		model->updateModelLayersInfo();
 	}
 }
@@ -253,7 +259,9 @@ void LayersConfigWidget::updateLayersRects()
 		return;
 
 	model->getObjectsScene()->clearSelection();
-	model->getObjectsScene()->updateLayerRects();
+
+	for(auto &scn : model->getObjectsScenes())
+		scn->updateLayerRects();
 }
 
 void LayersConfigWidget::toggleLayersRects()
@@ -266,12 +274,17 @@ void LayersConfigWidget::toggleLayersRects()
 
 	if(scene->isLayerRectsVisible() != toggle_layers_rects_chk->isChecked())
 	{
-		scene->setLayerRectsVisible(toggle_layers_rects_chk->isChecked());
+		for(auto &scn : model->getObjectsScenes())
+			scn->setLayerRectsVisible(toggle_layers_rects_chk->isChecked());
+
 		updated = true;
 	}
 
 	if(!updated && scene->isLayerNamesVisible() != toggle_layers_names_chk->isChecked())
-		model->getObjectsScene()->setLayerNamesVisible(toggle_layers_names_chk->isChecked());
+	{
+		for(auto &scn : model->getObjectsScenes())
+			scn->setLayerNamesVisible(toggle_layers_names_chk->isChecked());
+	}
 
 	model->updateModelLayersInfo();
 	model->getDatabaseModel()->setObjectsModified({ ObjectType::Schema });
@@ -405,14 +418,24 @@ QString LayersConfigWidget::addLayer(const QString &name, bool config_obj_sel)
 {
 	QString fmt_name = name.isEmpty() ? tr("New layer") : name;
 	QStringList act_layers = model->scene->getActiveLayers();
+	QList<ObjectsScene *> all_scenes = model->getObjectsScenes();
 
+	// Resolves the disambiguated name against the active scene, then applies it as-is to the rest
 	fmt_name = model->scene->addLayer(fmt_name);
+
+	for(auto &scn : all_scenes)
+	{
+		if(scn != model->scene)
+			scn->addLayer(fmt_name);
+	}
 
 	__addLayer(fmt_name);
 	act_layers.prepend(fmt_name);
 
 	updateLayerColors(layers_tab->rowCount() - 1);
-	model->scene->setActiveLayers(act_layers);
+
+	for(auto &scn : all_scenes)
+		scn->setActiveLayers(act_layers);
 
 	/* Reconfigure the model's menu if we have selected items so the new layer can
 	 * appear in the "Move to layer" quick action */
@@ -447,7 +470,18 @@ void LayersConfigWidget::finishLayerRenaming()
 		if(curr_item->text().isEmpty())
 			curr_item->setText(curr_text);
 		else
-			curr_item->setText(model->scene->renameLayer(curr_row, curr_item->text()));
+		{
+			// Resolves the disambiguated name against the active scene, then applies it as-is to the rest
+			QString fmt_name = model->scene->renameLayer(curr_row, curr_item->text());
+
+			for(auto &scn : model->getObjectsScenes())
+			{
+				if(scn != model->scene)
+					scn->renameLayer(curr_row, fmt_name);
+			}
+
+			curr_item->setText(fmt_name);
+		}
 
 		curr_item = nullptr;
 		curr_text.clear();
@@ -467,18 +501,21 @@ void LayersConfigWidget::updateRelsVisibility()
 
 	RelationshipView *rel_view = nullptr;
 
-	for(auto &item : model->scene->items())
+	for(auto &scn : model->getObjectsScenes())
 	{
-		rel_view = dynamic_cast<RelationshipView *>(item);
-
-		if(!rel_view)
-			continue;
-
-		if(rel_view->isVisible() &&
-				(!rel_view->isTableVisible(BaseRelationship::SrcTable) ||
-				 !rel_view->isTableVisible(BaseRelationship::DstTable)))
+		for(auto &item : scn->items())
 		{
-			rel_view->setVisible(false);
+			rel_view = dynamic_cast<RelationshipView *>(item);
+
+			if(!rel_view)
+				continue;
+
+			if(rel_view->isVisible() &&
+					(!rel_view->isTableVisible(BaseRelationship::SrcTable) ||
+					 !rel_view->isTableVisible(BaseRelationship::DstTable)))
+			{
+				rel_view->setVisible(false);
+			}
 		}
 	}
 }
