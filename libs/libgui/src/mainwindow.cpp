@@ -1276,7 +1276,7 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 		action_save_model->setEnabled(false);
 
 		if(action_align_grid->isChecked())
-			current_model->scene->alignObjectsToGrid();
+			current_model->alignObjectsToGrid();
 
 		emit s_modelAdded(model_wgt);
 	}
@@ -1309,7 +1309,7 @@ void MainWindow::addModel(ModelWidget *model_wgt)
 		models_tbw->currentWidget()->layout()->setContentsMargins(0,0,0,0);
 
 		if(action_align_grid->isChecked())
-			current_model->scene->alignObjectsToGrid();
+			current_model->alignObjectsToGrid();
 
 		emit s_modelAdded(model_wgt);
 	}
@@ -1545,7 +1545,7 @@ void MainWindow::setGridOptions()
 		//Align the object to grid is the option is checked
 		if(action_align_grid->isChecked())
 		{
-			current_model->scene->alignObjectsToGrid();
+			current_model->alignObjectsToGrid();
 
 			//Forcing the relationship updating to fit the new position of the tables
 			current_model->getDatabaseModel()->setObjectsModified({ ObjectType::Relationship, ObjectType::BaseRelationship });
