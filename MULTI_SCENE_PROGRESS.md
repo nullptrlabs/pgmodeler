@@ -7,8 +7,8 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1 e 1.2 concluídas e commitadas**. 1.1
-  testada e aprovada pelo usuário; **1.2 ainda sem teste manual dele** — parado aqui aguardando.
+- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1 e 1.2 concluídas, commitadas e
+  testadas** (1.2 recebeu um refinamento pequeno de deduplicação logo depois — ver abaixo).
 - **Próxima subtarefa: 1.3** — `QComboBox` simples de troca de cena (Depende de 0.1, 0.2, 1.2 —
   todas prontas), ou seguir pra 1.4/1.5 se o usuário preferir adiar o combo. A confirmar com ele.
 - **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
@@ -22,6 +22,7 @@
 ## Commits desta branch (mais recente primeiro)
 
 ```
+a06df761d Fase 1.2 (refinamento): deduplicate getSchemaScene() call
 9ba476d00 Fase 1.2: route Table/View/ForeignTable to their schema's scene
 89ccc2057 Plan: register per-object Scene attribute as future work for Textbox + manual reassignment
 5437ce0df Update progress log: pg_catalog/public fix confirmed by manual test
@@ -167,7 +168,15 @@ subtarefa 1.1.
   já caía no default de `target_scene` (a cena ativa) — nenhuma mudança de código necessária pra
   ele, só confirma que o comportamento já combinado está correto. Roteamento de
   `Relationship`/`BaseRelationship` continua intocado (isso é a 1.6). Build completo (`gui` +
-  `pgmodeler`) sem erros. **Ainda sem teste manual do usuário** — parado aqui aguardando.
+  `pgmodeler`) sem erros. Testado manualmente pelo usuário e aprovado.
+- **1.2 (refinamento) — achado do usuário**: a chamada a `getSchemaScene()` estava duplicada
+  (uma cópia idêntica nos cases `Table`/`ForeignTable` e `View`). Usuário propôs mover pra dentro
+  da rede de segurança (`if(!target_scene)`) — eu identifiquei que isso quebraria o roteamento da
+  1.2 de novo, já que `target_scene` parte de `scene` (quase nunca nulo) e a rede de segurança só
+  dispara quando nenhuma cena existe. Usuário ajustou sozinho pro gate certo: uma única linha após
+  o `switch`, condicionada a `graph_obj->getSchema()` não ser nulo — resolve certo pra Table/View/
+  ForeignTable (têm schema) sem interferir em Textbox/Relationship/Schema (`getSchema()` retorna
+  nulo pros três, confirmado por inspeção de código). Build completo sem erros.
 
 ## Design de persistência por-cena (sem código ainda — vira 2.1/2.2 quando a Fase 2 chegar)
 
