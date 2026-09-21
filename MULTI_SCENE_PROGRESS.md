@@ -7,11 +7,10 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefa 1.1 concluída, commitada e testada** —
-  correção retroativa na 0.1 (wiring de sinais) e refinamento `pg_catalog`/`public` (achados do
-  usuário), ambos testados manualmente e aprovados. Pronta pra seguir pra 1.2.
-- **Próxima subtarefa: 1.2** — rotear Table/View/ForeignTable pra cena do schema; `Textbox` pra
-  cena ativa (decisão do usuário, 2026-09-22, ver abaixo). Depende de 1.1 (pronta).
+- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1 e 1.2 concluídas e commitadas**. 1.1
+  testada e aprovada pelo usuário; **1.2 ainda sem teste manual dele** — parado aqui aguardando.
+- **Próxima subtarefa: 1.3** — `QComboBox` simples de troca de cena (Depende de 0.1, 0.2, 1.2 —
+  todas prontas), ou seguir pra 1.4/1.5 se o usuário preferir adiar o combo. A confirmar com ele.
 - **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
   (arquitetura, decisões, descrição/dependência das subtarefas) — nunca marca subtarefa como
   feita/commitada. Todo status de execução (o quê foi feito, hash do commit, achados específicos
@@ -23,6 +22,10 @@
 ## Commits desta branch (mais recente primeiro)
 
 ```
+9ba476d00 Fase 1.2: route Table/View/ForeignTable to their schema's scene
+89ccc2057 Plan: register per-object Scene attribute as future work for Textbox + manual reassignment
+5437ce0df Update progress log: pg_catalog/public fix confirmed by manual test
+dfa197b25 Update progress log: pg_catalog/public refinement, awaiting test
 68bc47c11 Plan: document pg_catalog/public scene-activation handling
 0300197fe Fase 1.1 (refinamento): pg_catalog never auto-activates, public forced default
 71f8edaac Plan: document the addScene() signal-wiring architectural fix
@@ -152,6 +155,19 @@ subtarefa 1.1.
   pelo usuário**: modelo com 4 schemas (`public`, `schema_a`, `schema_b`, `pg_catalog`) — ao fim
   da carga, a cena ativa é a do `public`, como esperado (tabelas ainda não roteadas corretamente
   entre cenas, isso é a 1.2, pendente).
+- **Achado do usuário antes de codar 1.2**: `Textbox` roteado só pela cena ativa (sem persistência)
+  funciona hoje porque a ativação durante a carga já é determinística (graças ao tratamento
+  `pg_catalog`/`public` da 1.1) — mas isso não cobre (a) o modo threshold, que vai precisar de um
+  atributo `Scene` persistido por objeto (3.2, hoje redigido só pra Table/View/ForeignTable — talvez
+  precise cobrir `Textbox` também) nem (b) reatribuição manual de um objeto entre cenas (mecanismo
+  ainda não desenhado em lugar nenhum). Registrado como escopo a revisitar quando a 3.2 for
+  implementada de fato — não bloqueia a 1.2, que segue como já estava escopada.
+- **1.2** — `handleObjectAddition()` resolve `getSchema()` do objeto e busca a cena via
+  `getSchemaScene()`, roteando `TableView`/`GraphicalView` pra lá em vez da cena ativa. `Textbox`
+  já caía no default de `target_scene` (a cena ativa) — nenhuma mudança de código necessária pra
+  ele, só confirma que o comportamento já combinado está correto. Roteamento de
+  `Relationship`/`BaseRelationship` continua intocado (isso é a 1.6). Build completo (`gui` +
+  `pgmodeler`) sem erros. **Ainda sem teste manual do usuário** — parado aqui aguardando.
 
 ## Design de persistência por-cena (sem código ainda — vira 2.1/2.2 quando a Fase 2 chegar)
 
