@@ -393,6 +393,9 @@ class __libgui ModelWidget: public QWidget {
 		template<class WidgetClass>
 		int openEditingForm(WidgetClass *widget, Messagebox::ButtonsId button_conf = Messagebox::OkCancelButtons);
 
+		//! \brief Aligns the objects of every scene of the model to the grid
+		void alignObjectsToGrid();
+
 		/*! \brief Configures the scene aligning the object to the grid and resizing the scene
 		 * rect when some object is out of bound. The parameter use_model_rect, when true, uses
 		 * the rect stored in the database model (retrieved from the dbm file loading) to resize

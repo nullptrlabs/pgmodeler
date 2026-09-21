@@ -2021,10 +2021,16 @@ void ModelWidget::updateSceneLayers()
 	db_model->setObjectsModified({ ObjectType::Schema });
 }
 
+void ModelWidget::alignObjectsToGrid()
+{
+	for(auto *scn : scenes)
+		scn->alignObjectsToGrid();
+}
+
 void ModelWidget::adjustSceneRect(bool use_model_rect, bool expand_only)
 {
 	if(ObjectsScene::isAlignObjectsToGrid())
-		scene->alignObjectsToGrid();
+		alignObjectsToGrid();
 
 	QRectF rect = db_model->getSceneRect();
 
