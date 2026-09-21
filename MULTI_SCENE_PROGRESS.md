@@ -7,10 +7,9 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefa 1.1 concluída e commitada**, com uma
-  correção retroativa na 0.1 (wiring de sinais, testada e aprovada pelo usuário) e um refinamento
-  sobre `pg_catalog`/`public` logo em seguida (achado do usuário, **ainda sem teste manual dele**
-  — ver abaixo). Parado aqui pra ele testar essa parte antes de seguir.
+- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefa 1.1 concluída, commitada e testada** —
+  correção retroativa na 0.1 (wiring de sinais) e refinamento `pg_catalog`/`public` (achados do
+  usuário), ambos testados manualmente e aprovados. Pronta pra seguir pra 1.2.
 - **Próxima subtarefa: 1.2** — rotear Table/View/ForeignTable pra cena do schema; `Textbox` pra
   cena ativa (decisão do usuário, 2026-09-22, ver abaixo). Depende de 1.1 (pronta).
 - **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
@@ -149,8 +148,10 @@ subtarefa 1.1.
   "nenhuma cena ativa ainda" (`!scene`) em vez de "é a primeira cena" (`scenes.size() == 1`), pra
   uma cena poder recusar ativação sem bloquear a próxima. `pg_catalog` nunca ativa; `public` força
   sua cena a ficar ativa enquanto `db_model->isModelLoading()` é verdadeiro, mesmo que outro
-  schema já tenha reivindicado o padrão antes. Build completo sem erros. **Ainda sem teste manual
-  do usuário** — parado aqui aguardando.
+  schema já tenha reivindicado o padrão antes. Build completo sem erros. **Testado manualmente
+  pelo usuário**: modelo com 4 schemas (`public`, `schema_a`, `schema_b`, `pg_catalog`) — ao fim
+  da carga, a cena ativa é a do `public`, como esperado (tabelas ainda não roteadas corretamente
+  entre cenas, isso é a 1.2, pendente).
 
 ## Design de persistência por-cena (sem código ainda — vira 2.1/2.2 quando a Fase 2 chegar)
 
