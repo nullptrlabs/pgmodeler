@@ -7,18 +7,26 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- Fase 0 em andamento. Subtarefas **0.1 a 0.7 concluídas e commitadas**.
-- **Próxima subtarefa: 0.8** — escopo revisado numa sessão anterior (reservar só o modo de
-  segmentação; o retângulo por cena saiu daqui e virou a subtarefa 2.2, design completo já fechado,
-  ver abaixo).
+- **Fase 0 concluída (0.1 a 0.8, todas commitadas).** Fase 1 iniciando agora.
+- **Próxima subtarefa: 1.1** — criar `ObjectsScene` ao inserir `Schema` em
+  `handleObjectAddition()`, indexada por schema, bootstrapando layers a partir de uma cena
+  existente (helper `applySceneLayers()` da 0.6). Depende de 0.1, 0.6 (ambas prontas).
 - **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
   (arquitetura, decisões, descrição/dependência das subtarefas) — nunca marca subtarefa como
   feita/commitada. Todo status de execução (o quê foi feito, hash do commit, achados específicos
   de sessão) vive só aqui neste arquivo, atualizado junto de cada commit de subtarefa.
+- **Convenção a partir de 2026-09-22**: ao terminar de implementar e validar (build) cada
+  subtarefa, parar e deixar o usuário testar manualmente antes de prosseguir pra próxima — não só
+  perguntar "commitar ou seguir", mas dar tempo/espaço pro teste manual entre elas.
 
 ## Commits desta branch (mais recente primeiro)
 
 ```
+e2521a6ab Fase 0.8: reserve DatabaseModel::SegmentationMode scaffolding
+7422b4ab6 Scene DTD becomes a dedicated file, mirroring changelog.dtd exactly
+50a6a59f3 Rename scene persistence key from idx to id, drop name attribute
+8130b5eba Revise scene identity key from schema name to numeric idx
+fbae3cb2c Update progress log: plan/progress separation, full commit list
 3616afa2e Remove stale [FEITO, commitar] tags from the plan
 9ee0eee19 Fase 3: SchemaView needs the same cross-scene suppression as relationships
 548e773ad Close per-scene SceneRect persistence design; revert Workspace naming
@@ -91,6 +99,15 @@ c29b147ce Add multi-scene support implementation plan
   virou **Fase 4** no plano (tarefa própria, dona: usuário, só depois das Fases 0-3 prontas — ver
   plano, seção 4). `AppearanceConfigWidget` (preview de estilo) conferido, não precisa de mudança.
   Build limpo (`gui` + `pgmodeler`), sem teste manual de UI nesta sessão.
+- **0.8** — novo enum público `DatabaseModel::SegmentationMode` (`NoSegmentation`/`BySchema`/
+  `ByThreshold`, renomeado de `SceneSegmentationMode` a pedido do usuário), membro privado
+  `scene_seg_mode` (default `NoSegmentation`), `setSegmentationMode()`/`getSegmentationMode()`
+  mirror do padrão já existente de `last_zoom`/`getLastZoomFactor()`. Só reserva o atributo —
+  nenhum DTD/`.sch`/leitura-escrita XML tocado (isso é a 2.1). Fecha a Fase 0. Build completo
+  (`core` + `pgmodeler`) sem erros.
+
+**Fase 0 encerrada.** Fase 1 (segmentação por schema + conector cross-scene) começa pela
+subtarefa 1.1.
 
 ## Design de persistência por-cena (sem código ainda — vira 2.1/2.2 quando a Fase 2 chegar)
 
