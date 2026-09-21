@@ -7,13 +7,18 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- Fase 0 em andamento. Subtarefas **0.1, 0.2, 0.3, 0.4 concluídas e commitadas**.
-- **Próxima subtarefa: 0.5** (agregação de seleção e bounding rect entre cenas —
-  `selectAllObjects()`, `itemsBoundingRect()`, gate `scene->items().count() > 1`).
+- Fase 0 em andamento. Subtarefas **0.1, 0.2, 0.3, 0.4, 0.5 concluídas e commitadas**.
+- **Próxima subtarefa: 0.6** (generalização de Layers — `LayersConfigWidget` e
+  `ModelWidget::updateSceneLayers()`/`updateModelLayersInfo()` passam a aplicar mutações a todas
+  as cenas; inclui o helper de bootstrap de layers para cena recém-criada).
 
 ## Commits desta branch (mais recente primeiro)
 
 ```
+f670ccbcd Update plan: correct 0.5's scope after user review
+41874cdce Fase 0.5: ModelWidget::alignObjectsToGrid() applies to every scene
+2136562a9 Update plan: threshold segmentation stays naive, clustering deferred as a third mode
+9f22275a1 Add MULTI_SCENE_PROGRESS.md session log
 eb94f5b0e Update plan: document connectToActiveScene() and the resize-order gotcha
 394e405f5 Fase 0.4: ModelOverviewWidget reacts to s_activeSceneChanged
 278612c26 Update plan: document addScene() and Qt-containers decision
@@ -46,6 +51,13 @@ c29b147ce Add multi-scene support implementation plan
   desconecta da cena anterior (rastreada no membro `connected_scene`) e reconecta
   `selectionChanged`/`sceneRectChanged` na cena ativa, chamando `updateOverview(true)`. Chamado em
   `show()` e via `s_activeSceneChanged`.
+- **0.5** — escopo revisado em relação à redação original do plano (ver decisão #9 abaixo). Único
+  código novo: `ModelWidget::alignObjectsToGrid()` (público), itera `scenes` chamando
+  `ObjectsScene::alignObjectsToGrid()` em cada uma; substituiu os 4 acessos diretos a
+  `scene->alignObjectsToGrid()` (3 em `MainWindow`, 1 dentro de `ModelWidget::adjustSceneRect()`).
+  `selectAllObjects()`, os `itemsBoundingRect()` de `emitSceneInteracted()`/`eventFilter()` e o
+  gate `items().count() > 1` **não foram alterados** — usuário identificou que a redação original
+  (agregar esses três entre cenas) estava errada.
 
 ## Decisões/ajustes tomados durante a implementação (além do que já estava no plano)
 
@@ -67,6 +79,13 @@ Regras de trabalho combinadas nesta sessão — valem pro resto do plano, não s
    varrer todas as cenas do modelo desconectando de cada uma "pra garantir". Também: preferir um
    método privado nomeado a uma lambda quando a lógica é usada em mais de um lugar (conexão
    inicial + reação a um sinal) — lambda extensa dificultou a leitura.
+5. **Cena-local vs. modelo-inteiro-replicado-por-cena** (decisão #9, seção 3 do plano; surgiu na
+   revisão da 0.5): nem toda suposição de "só existe uma cena" no código atual é um bug de
+   agregação. Interação/visualização (seleção, bounding rect do selecionado, gates de menu ligados
+   ao que está visível) fica cena-local, sem tocar as demais. Normalização/config que vale pro
+   modelo inteiro (alinhar à grade, layers) precisa ser replicada em cada cena, sem combinar
+   resultado. Classificar antes de "corrigir" — o padrão errado (agregar por reflexo) foi cometido
+   uma vez na redação original da 0.5 e corrigido só depois do usuário revisar.
 
 ## Bug encontrado e corrigido durante teste manual
 
