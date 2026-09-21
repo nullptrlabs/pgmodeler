@@ -4,7 +4,8 @@
 > Estado: implementação em andamento — ver `MULTI_SCENE_PROGRESS.md` para onde paramos exatamente
 > (log sessão a sessão, não duplicado aqui).
 > Prioridade: fechar segmentação por schema (Fases 0-2) primeiro, ponta a ponta, antes de detalhar
-> o modo por threshold (Fase 3) — ver seção 4.
+> o modo por threshold (Fase 3) — ver seção 4. **Fase 4** (paridade do `pgmodeler-cli`) é dona do
+> usuário e só começa depois das Fases 0-3 prontas — não iniciar por conta própria.
 > Atualização 2026-09-18: seções marcadas "achado de revisão de código" / "verificado em revisão
 > de código" foram adicionadas após uma leitura profunda do código real envolvido na Fase 0 (ver
 > arquivos citados nas próprias notas). Uma delas corrige uma afirmação da versão anterior deste
@@ -374,13 +375,40 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
        call site novo ainda — só a infraestrutura, já que a criação de cena por schema é escopo da
        Fase 1). Depende de: 0.1.
 
-0.7. **Exportação/impressão por cena + composição** — `ModelWidget::printModel()` e
-     `ModelExportHelper` (PNG/SVG) passam a iterar `getObjectsScenes()`, renderizando cada cena e
-     compondo o resultado, em vez de assumir uma única `scene->render(...)`. Com 1 cena, a saída
-     deve ser byte-idêntica à atual — este é o subtask de maior risco mecânico da fase; o caso de
-     N>1 cenas só é testável de verdade depois da Fase 1 popular a coleção, então revisitar este
-     commit com `/home/raphael/dbm_models/big_model.dbm` quando a Fase 1 estiver pronta. Depende
-     de: 0.1.
+0.7. **Exportação/impressão por cena** [FEITO, commitar] — decisão do usuário (2026-09-21): **sem
+     composição espacial**. PNG/SVG geram **um arquivo por cena**; impressão continua **um único
+     job/diálogo**, concatenando as páginas de todas as cenas em sequência (sem sobrepor
+     espacialmente).
+     - `ModelWidget::printModel()` ([modelwidget.cpp](libs/libgui/src/widgets/modelwidget.cpp)):
+       loop externo por `scenes`, loop interno pelas páginas de cada cena
+       (`scn->getPagesForPrinting(...)`). Numeração de página (`global_page`) é contínua através de
+       todas as cenas (como um documento só); `h_pg_id`/`v_pg_id` (posição X/Y da página dentro da
+       grade de páginas) reinicia a cada cena, já que é relativo ao layout de páginas daquela cena.
+       `printer->newPage()` decidido por um flag `first_page` (chama antes de toda página exceto a
+       primeira do job inteiro) em vez de "página < total-1", evitando pré-computar o total. Backup/
+       restauração de grid, `setShowSceneLimits()` e `clearSelection()` passam a rodar em todas as
+       cenas (não só a ativa) — aqui `clearSelection()` é modelo-inteiro-replicado (decisão #9), ao
+       contrário do uso interativo: está preparando o output pra impressão, uma seleção residual em
+       qualquer cena vazaria pro papel/PDF.
+     - `ModelExportWidget::exportModel()` ([modelexportwidget.cpp](libs/libgui/src/tools/modelexportwidget.cpp)):
+       branch de exportação de imagem (PNG/SVG) agora itera `model_wgt->getObjectsScenes()`, uma
+       `QGraphicsView` nova por cena (mesma necessidade de hoje, ligada ao workaround de thread-
+       affinity do Qt Graphics Scene). Nome do arquivo: com 1 cena só, usa o path exatamente como
+       digitado (saída idêntica a hoje); com N>1, insere um sufixo `_<índice 1-based>` antes da
+       extensão. **Limitação conhecida**: o sufixo é por índice posicional na coleção, não pelo
+       nome do schema — não há ainda (Fase 0) nenhuma API que amarre cena a schema; melhorar para
+       usar o nome do schema é candidato a ajuste quando a Fase 1 existir de fato.
+     - **Gap de escopo encontrado, fora desta subtarefa**: `pgmodeler-cli` (exportação via linha de
+       comando) tem seu próprio `ObjectsScene *scene`, construído direto do `DatabaseModel`
+       ([pgmodelercliapp.h:99](libs/libcli/src/pgmodelercliapp.h#L99)), sem nenhuma relação com a
+       coleção de cenas do `ModelWidget`. A segmentação por schema/threshold (Fase 1+) não vai
+       valer automaticamente pra exportação via CLI — replicar o roteamento de cena lá é trabalho
+       à parte, não coberto por este plano até agora. Registrado como risco (seção 6).
+     - `AppearanceConfigWidget` ([appearanceconfigwidget.cpp:585](libs/libgui/src/settings/appearanceconfigwidget.cpp#L585))
+       usa sua própria `ObjectsScene` de preview de estilo, sem relação com `ModelWidget` — conferido,
+       não precisa de nenhuma mudança.
+     - Caso N>1 cenas só é testável de verdade depois da Fase 1 popular a coleção — revisitar com
+       `/home/raphael/dbm_models/big_model.dbm` quando a Fase 1 estiver pronta. Depende de: 0.1.
 
 0.8. **Scaffolding de persistência** — reservar (sem popular/usar ainda) no formato XML e no enum
      de `DatabaseModel`: modo de segmentação (nenhum/schema/threshold) e o campo `SceneRect` por
@@ -885,6 +913,39 @@ threshold for de fato detalhado).
      remoção não são mescladas/destruídas automaticamente no modo threshold) — verificação, não
      feature nova. Depende de: 3.1.
 
+### Fase 4 — Paridade do `pgmodeler-cli` com a segmentação multi-cena
+
+> **Tarefa pendente, ainda não iniciada.** Encontrada na subtarefa 0.7, registrada aqui a pedido
+> do usuário. Ordem de trabalho definida por ele: só começar depois que as Fases 0-3 (o lado GUI,
+> via `ModelWidget`) estiverem inteiramente acertadas. Dono: usuário ("Eu farei a revisão da CLI
+> assim que tivermos tudo acertado na GUI", 2026-09-21) — não iniciar por conta própria antes
+> disso.
+
+**O problema**: `PgModelerCliApp` monta e usa seu próprio `ObjectsScene *scene`
+([pgmodelercliapp.h:99](libs/libcli/src/pgmodelercliapp.h#L99)), construído direto a partir do
+`DatabaseModel`, sem nenhuma relação com `ModelWidget` ou com a coleção `scenes` que as Fases 0-3
+constroem. Toda a lógica de segmentação (criar cena por schema, rotear objeto pra cena certa,
+promoção/rebaixamento de relacionamento cross-scene, marcador cut-off) vive em
+`ModelWidget::handleObjectAddition()`/métodos correlatos — o CLI nunca passa por esse choke point,
+então nunca vai ganhar segmentação nenhuma só por causa do trabalho feito nas Fases 0-3. Impacto
+concreto hoje: `pgmodeler-cli --export-to-file` para PNG/SVG ([pgmodelercliapp.cpp:2274,2285](libs/libcli/src/pgmodelercliapp.cpp#L2274))
+sempre produz uma única imagem do modelo inteiro, mesmo depois da GUI já segmentar em múltiplas
+cenas/workspaces.
+
+**O que precisa ser decidido/feito quando esta fase for retomada** (não detalhado agora, só
+mapeado):
+- Extrair a lógica de roteamento objeto→cena de `ModelWidget` para um lugar reutilizável por quem
+  não é `ModelWidget` (hoje ela está misturada com bastante código específico de GUI — criação de
+  `QGraphicsView`, sinais Qt de interação, etc. — precisa avaliar o que é genuinamente core vs. o
+  que é GUI-only antes de extrair).
+  ou
+- Reimplementar a segmentação de forma independente dentro de `PgModelerCliApp`, aceitando alguma
+  duplicação de lógica em troca de não mexer no caminho da GUI.
+- Decidir se `--export-to-file` para imagem passa a gerar um arquivo por cena/workspace (mesmo
+  padrão da subtarefa 0.7 na GUI) ou se o CLI ganha uma flag explícita pra optar por isso.
+- Cobre os dois modos (por schema e por threshold) ou só o que estiver pronto no momento em que
+  isso for retomado.
+
 ## 5. Fora de escopo (por enquanto)
 
 - UI **definitiva** de troca de cena (dropdown estilizado, sidebar, abas) — o usuário vai construir
@@ -908,6 +969,9 @@ threshold for de fato detalhado).
 
 ## 6. Riscos conhecidos / pontos de atenção para quem retomar
 
+- **`pgmodeler-cli` não participa da segmentação multi-cena** (achado na subtarefa 0.7) — virou
+  tarefa própria, **Fase 4**, dona: usuário, só depois das Fases 0-3 estarem prontas. Não
+  implementar por conta própria antes disso ser pedido.
 - `RelationshipView::configureLine()` é grande (~700 linhas) e **não deve ser tocado** para tentar
   fazer `mapFromItem`/`mapToItem` funcionar entre cenas — pelo refinamento da decisão #1, um
   relacionamento cross-scene simplesmente não tem `RelationshipView` nenhum (o marcador cut-off é

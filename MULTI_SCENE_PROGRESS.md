@@ -7,10 +7,10 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- Fase 0 em andamento. Subtarefas **0.1, 0.2, 0.3, 0.4, 0.5, 0.6 concluídas** (0.6 ainda não
-  commitada nesta sessão — ver abaixo).
-- **Próxima subtarefa: 0.7** (exportação/impressão por cena + composição, em
-  `ModelWidget::printModel()` e `ModelExportHelper`).
+- Fase 0 em andamento. Subtarefas **0.1 a 0.7 concluídas** (0.7 ainda não commitada nesta sessão —
+  ver abaixo).
+- **Próxima subtarefa: 0.8** (scaffolding de persistência — reservar modo de segmentação e
+  `SceneRect` por cena no formato XML/enum de `DatabaseModel`, sem popular/usar ainda).
 
 ## Commits desta branch (mais recente primeiro)
 
@@ -70,6 +70,15 @@ c29b147ce Add multi-scene support implementation plan
   `updateSceneLayers()` e também o helper de bootstrap que a Fase 1 vai usar pra popular uma cena
   nova — sem call site novo ligado a isso ainda, só a infra. Build limpo (`gui` + `pgmodeler`), sem
   teste manual de UI nesta sessão (ambiente sem display).
+- **0.7** — decisão do usuário: sem composição espacial. `ModelWidget::printModel()` virou loop
+  externo por cena + loop interno pelas páginas de cada cena, num único job/diálogo de impressão
+  (numeração de página contínua entre cenas). `ModelExportWidget::exportModel()` (branch de
+  imagem) virou loop por cena gerando um arquivo por cena (sufixo `_<índice>` só quando há mais de
+  1 cena — com 1 cena, path idêntico a hoje). Achado fora do escopo desta subtarefa: `pgmodeler-cli`
+  tem seu próprio `ObjectsScene` standalone, não participa da coleção de cenas do `ModelWidget` —
+  virou **Fase 4** no plano (tarefa própria, dona: usuário, só depois das Fases 0-3 prontas — ver
+  plano, seção 4). `AppearanceConfigWidget` (preview de estilo) conferido, não precisa de mudança.
+  Build limpo (`gui` + `pgmodeler`), sem teste manual de UI nesta sessão.
 
 ## Decisões/ajustes tomados durante a implementação (além do que já estava no plano)
 
