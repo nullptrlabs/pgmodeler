@@ -16,14 +16,114 @@
   visual própria, o que implica chave nova em `Attributes::`, entrada nova em
   `AppearanceConfigWidget::element_cmb`/`conf_ids`/`obj_conf_ids` e atualização do arquivo de
   configuração de aparência. Só registrada, sem código ainda. Depende de: 1.8 (já feita).
-- **Nova subtarefa registrada no plano (2026-09-22): 1.8.1 — movimentação livre do cutoff +
-  persistência de posição em XML.** Reabre a decisão de escopo reduzido tomada na própria 1.8
-  (posição fixa, sem persistência). Usuário decidiu: sem `BaseObject` novo pro cutoff — a posição
-  fica num atributo na tabela/view/foreign table pai, escrito via `CutoffItem::itemChange()`
-  sempre que o usuário arrasta o marcador. Dois pontos deixados em aberto no plano (ver 1.8.1):
-  posição relativa ao anchor vs. absoluta de cena, e formato XML (atributo simples na tag
-  existente, preferência do usuário, vs. elemento novo). Só registrada, sem código ainda. Depende
-  de: 1.8 (já feita).
+- **1.8.1 implementada (2026-09-22), aguardando teste manual do usuário.** Movimentação livre do
+  cutoff + persistência de posição em XML. Decisões fechadas pelo usuário antes de codar: posição
+  relativa ao anchor (não absoluta), e offset descartado (não restaurado) quando o cutoff é
+  destruído e um novo nasce depois na mesma tabela.
+  - `CutoffItem` ganhou a flag `ItemIsMovable`. Posição é sincronizada em duas direções:
+    `updatePosition()` (table→cutoff, dispara em qualquer movimento/resize da tabela) lê
+    `BaseTable::getCutoffPosition()` e aplica `anchor + offset`; `itemChange(ItemPositionHasChanged)`
+    (cutoff→table, dispara quando o usuário arrasta o marcador) grava
+    `this->pos() - anchor` de volta na tabela via `BaseTable::setCutoffPosition()`. Um member
+    booleano `repositioning` guarda o primeiro caminho pra não realimentar o segundo (sem isso,
+    todo `updatePosition()` reescreveria a mesma posição de volta no modelo, marcando-o modificado
+    à toa a cada vez que a tabela é movida).
+  - Persistência: nova `QPointF cutoff_pos` em `BaseTable` (core), sentinela `QPointF(DNaN, DNaN)`
+    pra "sem posição customizada" (mesma técnica já usada em `BaseRelationship::lables_dist`).
+    `setCutoffPosition()`/`getCutoffPosition()`/`resetCutoffPosition()` públicos;
+    `setCutoffPositionAttribute()` protegido, chamado de `PhysicalTable::setTableAttributes()`
+    (cobre Table+ForeignTable) e `View::getSourceCode()`, logo depois de `setPositionAttribute()`.
+  - `BaseTableView::removeExternalRelationship()` chama `resetCutoffPosition()` no momento em que
+    o `CutoffItem` é destruído (última relação cross-scene da tabela virou in-scene) — implementa
+    a decisão "descartar, não restaurar".
+  - **Formato XML — revisado após review do usuário**: primeira versão usou dois atributos simples
+    (`cutoff-x`/`cutoff-y`) direto na tag de table/view/foreigntable; usuário pediu troca por um
+    **segundo `<position>`** (a tabela já emite um pra si mesma), diferenciado por `id="cutoff"`
+    (a posição da própria tabela não leva `id`). Implementação: `position.sch` (compartilhado por
+    tabela, pontos de relacionamento, distância de rótulo etc.) ficou **intocado** — o motor do
+    `SchemaParser` exige que todo `{atributo}` referenciado num `.sch` esteja pré-declarado no mapa
+    de QUALQUER chamador, então um `%if {id}...%end` ali quebraria (`UnkownAttribute`) todo
+    chamador existente que nunca declarou `id` (confirmado na prática: carregar um `.dbm` com
+    textbox quebrou já na primeira tentativa). Solução: novo `.sch` dedicado
+    (`assets/schemas/xml/cutoff-pos.sch`) com `id="cutoff"` fixo no literal do template (não é
+    variável, não exige declaração no chamador). `baseelements.dtd` ganhou `<!ATTLIST position id
+    CDATA #IMPLIED>` (validação de DTD é por nome de elemento, não por qual `.sch` gerou); os DTDs
+    de table/view/foreigntable passaram a aceitar um segundo `position?` opcional. Leitura
+    centralizada no handler já existente de `<position>` em `DatabaseModel::setBasicAttributes()`
+    (mesmo lugar que já lia a posição da própria tabela) — agora checa `attribs[Attributes::Id]==
+    Attributes::Cutoff` pra decidir se é a posição do objeto ou a do cutoff.
+  - **Movimento livre não funcionava — dois bugs reais, corrigidos em duas rodadas**:
+    1. `QGraphicsItemGroup::boundingRect()` fica congelado no tamanho que os filhos tinham no
+       momento do `addToGroup()` (mesmo bug já achado antes pro `obj_selection` invisível e pro
+       retângulo artefato do `paint()` — nunca tinha sido corrigido na raiz, só contornado caso a
+       caso). Como só a `line` tinha geometria final antes de entrar no grupo, o bounding rect (e
+       portanto a área de hit-test do grupo, já que `shape()` deriva dele por padrão) ficava
+       restrito a uma fatia minúscula perto da linha — clicar no rótulo visível (a caixa
+       arredondada, alvo óbvio) não atingia o grupo. `CutoffItem` ganhou override de
+       `boundingRect()` computando a união de `line`+`label_bg` a cada chamada, com
+       `prepareGeometryChange()` em `updateLabel()` (o texto "Cross rels: N" muda de tamanho
+       conforme relações são adicionadas/removidas).
+    2. Mesmo com o hit-test corrigido, o arrasto continuava sem efeito visível persistente. Causa
+       raiz: `CutoffItem` nunca setava a flag `QGraphicsItem::ItemSendsGeometryChanges`. Sem ela,
+       `QGraphicsItem::setPos()` usa um atalho que aplica a posição direto e **nunca chama
+       `itemChange()`** — então o handler de `ItemPositionHasChanged` (que persiste o offset
+       arrastado na tabela) nunca rodava. O item provavelmente até se movia visualmente durante o
+       arrasto (o atalho ainda aplica a posição), mas como o offset nunca era salvo no modelo, a
+       próxima vez que qualquer sinal de movimento/redimensionamento da tabela disparasse
+       `updatePosition()` ele voltava pra posição antiga — lido pelo usuário como "não faz nada".
+       Confirmado por comparação: `BaseObjectView` (base de todo objeto arrastável do pgModeler)
+       seta essa flag explicitamente no construtor; `CutoffItem` era o único item que não herdava
+       isso (não deriva de `BaseObjectView`).
+    3. Usuário apontou (2026-09-22) que havia exclusões explícitas do `CutoffItem` em
+       `ObjectsScene`, sobra da 1.8 (quando o cutoff era propositalmente fixo/não-movível):
+       `finishObjectsMove()` pulava o item inteiro (sem alinhar à grade, sem entrar no `sel_rect`
+       de auto-scroll) e `alignObjectsToGrid()` (comando de menu) tinha um branch vazio só pra
+       excluí-lo do alinhamento em massa. As duas fazem sentido quando "mover independente da
+       tabela" era sempre um bug a evitar — agora que é o comportamento pretendido, são
+       inconsistências, não proteções. Ambas removidas; `CutoffItem` cai nos mesmos branches
+       genéricos que qualquer outro item (com `ItemSendsGeometryChanges` já setado, o `setPos()`
+       de alinhamento à grade dispara `itemChange()` e persiste a posição normalmente).
+       `#include "cutoffitem.h"` em `objectsscene.cpp` ficou temporariamente sem uso (readicionado
+       no fix nº4 abaixo). Essa limpeza sozinha não resolveu o problema relatado.
+    4. **Causa raiz real, achada só depois de um teste automatizado (headless, via `QTest::mousePress`/
+       `mouseMove`/`mouseRelease` num `QGraphicsView` de verdade) confirmar que o mecanismo de
+       seleção+arrasto funcionava perfeitamente quando o relacionamento cross-scene era criado
+       programaticamente (`db_model->addRelationship()` direto) — só falhava com um modelo real,
+       onde o usuário quase certamente já usou a ferramenta interativa de criar relacionamento em
+       algum momento.** `ObjectsScene::showRelationshipLine()` (chamada ao ligar/desligar essa
+       ferramenta) varre **todos os itens da cena** (`this->items()`, não filtrado) e chama
+       `setFlags()` (substitui o conjunto inteiro de flags, não só uma) incondicionalmente em cada
+       um. Para qualquer item que não seja `BaseObjectView`, cai no default definido no topo do
+       laço: `ItemIsSelectable | ItemSendsGeometryChanges` — **sem `ItemIsMovable`**. Como
+       `CutoffItem` não deriva de `BaseObjectView`, a primeira vez que qualquer relacionamento é
+       desenhado pela ferramenta interativa (em qualquer lugar da cena, não só perto do cutoff),
+       todo `CutoffItem` existente perde `ItemIsMovable` de forma permanente — sobrevivem só
+       `ItemIsSelectable` e `ItemSendsGeometryChanges`, batendo exatamente com o sintoma relatado
+       (seleciona, mas arrastar não faz nada). Fix: `CutoffItem` ganhou tratamento explícito nesse
+       laço, recebendo `ItemIsMovable` de volta quando `value=false` (ferramenta desligada), mesmo
+       padrão de restauração já usado pros objetos `BaseObjectView` elegíveis.
+  - **Achado de infra**: o binário roda com `SCHEMASDIR` apontando pra `build/schemas` (instalado
+    via `PGM_PREFIX=/home/raphael/pgmodeler/build`), não direto pra `assets/schemas` — editar os
+    `.sch`/`.dtd` em `assets/` não basta, é preciso rodar `cmake --build . --target install` (de
+    dentro de `cmake-build`) pra sincronizar. `install(DIRECTORY ...)` do `InstallAssets.cmake`
+    copia o conteúdo atual da pasta a cada `install` (não precisa reconfigurar o CMake pra um
+    arquivo `.sch` novo ser pego).
+  - **Verificado via programa standalone** (não é teste automatizado permanente, só validação
+    pontual — não commitado): linkado direto contra `libcore`/`libparsers`/`libutils` já buildados,
+    confirmando round-trip completo — `BaseTable::getSourceCode()` emite
+    `<position id="cutoff" x=".." y=".."/>` quando setado; `DatabaseModel::loadModel()` de um
+    `.dbm` com esse elemento restaura `getCutoffPosition()` corretamente; tabela sem o elemento
+    carrega com posição NaN (unset, retrocompatível); reserializar depois de carregar preserva o
+    valor.
+  - **Gap conhecido, não implementado nesta subtarefa**: arrastar o cutoff não entra no sistema de
+    undo/redo (`op_list`/operation chain) — `setCutoffPosition()` marca o modelo como modificado
+    (`setCodeInvalidated`), mas Ctrl+Z não desfaz o arrasto como desfaz mover uma tabela. Não foi
+    pedido explicitamente pelo usuário; registrado aqui pra decidir depois se vira subtarefa própria.
+  - Build limpo (`core`+`canvas`+`gui`+`pgmodeler`) e `modelwidgettest` 4/4 sem regressão.
+    **Testado manualmente pelo usuário (2026-09-22): "funcionou em partes"** — o arrasto em si
+    já funciona, mas o usuário tem melhorias e problemas adicionais a reportar antes de fechar a
+    subtarefa. Commit feito como WIP a pedido do usuário; próxima sessão/mensagem traz os
+    apontamentos específicos.
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
