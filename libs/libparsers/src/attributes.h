@@ -176,6 +176,8 @@ extern __libparsers const QString
 	CustomFilter,
 	CustomIdxs,
 	CustomScale,
+	Cutoff,
+	CutoffPos,
 	Cycle,
 	Dark,
 	DataDirectory,

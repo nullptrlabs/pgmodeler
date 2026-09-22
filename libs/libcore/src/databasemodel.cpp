@@ -3900,14 +3900,18 @@ void DatabaseModel::setBasicAttributes(BaseObject *object)
 				{
 					xmlparser.getElementAttributes(attribs);
 
-					if(elem_name==Attributes::Position &&
-							(obj_type_aux!=ObjectType::Relationship &&
-							 obj_type_aux!=ObjectType::BaseRelationship))
+					if(obj_type_aux!=ObjectType::Relationship && obj_type_aux!=ObjectType::BaseRelationship)
 					{
-						dynamic_cast<BaseGraphicObject *>(object)->setPosition(QPointF(attribs[Attributes::XPos].toDouble(),
-																				 attribs[Attributes::YPos].toDouble()));
+						QPointF pos(attribs[Attributes::XPos].toDouble(), attribs[Attributes::YPos].toDouble());
 
-
+						// A "cutoff" id marks this <position> as the cut-off marker's, not the object's own
+						if(attribs[Attributes::Id]==Attributes::Cutoff)
+						{
+							if(BaseTable::isBaseTable(obj_type_aux))
+								dynamic_cast<BaseTable *>(object)->setCutoffPosition(pos);
+						}
+						else
+							dynamic_cast<BaseGraphicObject *>(object)->setPosition(pos);
 					}
 				}
 			}

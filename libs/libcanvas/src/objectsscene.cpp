@@ -929,6 +929,15 @@ void ObjectsScene::showRelationshipLine(bool value, const QPointF &p_start)
 				flags=QGraphicsItem::ItemIsSelectable |
 					  QGraphicsItem::ItemSendsGeometryChanges;
 		}
+		/* Cut-off markers aren't BaseObjectView-derived so they fall through the check above
+		 * and would otherwise permanently lose ItemIsMovable (setFlags() below replaces the
+		 * whole flag set) the first time a relationship is drawn interactively anywhere in the
+		 * scene, since this loop touches every item, not just the ones involved in the new
+		 * relationship */
+		else if(dynamic_cast<CutoffItem *>(items.front()) && !value)
+			flags=QGraphicsItem::ItemIsMovable |
+				  QGraphicsItem::ItemIsSelectable |
+				  QGraphicsItem::ItemSendsGeometryChanges;
 
 		items.front()->setFlags(flags);
 		items.pop_front();
@@ -1596,9 +1605,8 @@ void ObjectsScene::finishObjectsMove(const QPointF &pnt_end)
 
 	for(auto &item : items)
 	{
-		// Ignoring table objects items and cut-off markers
-		if(dynamic_cast<TableObjectView *>(item) ||
-			 dynamic_cast<CutoffItem *>(item))
+		// Ignoring table objects items
+		if(dynamic_cast<TableObjectView *>(item))
 			continue;
 
 		rel=dynamic_cast<RelationshipView *>(item);
@@ -1776,11 +1784,6 @@ void ObjectsScene::alignObjectsToGrid()
 					if(lab)
 						lab->setPos(this->alignPointToGrid(lab->pos()));
 				}
-			}
-			else if(dynamic_cast<CutoffItem *>(item))
-			{
-				/* Cut-off markers are anchored to their table's title and reposition themselves
-				 * through it -- aligning them independently would break that anchor */
 			}
 			else if(!dynamic_cast<SchemaView *>(item))
 				item->setPos(this->alignPointToGrid(item->pos()));

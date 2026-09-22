@@ -2,7 +2,7 @@
   CAUTION: Do not modify this file directly on it's code unless you know what you are doing.
            Unexpected results may occur if the code is changed deliberately.
 -->
-<!ELEMENT view (schema,role?,tablespace?,comment?,tag?, appended-sql?,prepended-sql?,position,reference*,simplecol*,definition)>
+<!ELEMENT view (schema,role?,tablespace?,comment?,tag?, appended-sql?,prepended-sql?,position,position?,reference*,simplecol*,definition)>
 <!ATTLIST view name CDATA #REQUIRED>
 <!ATTLIST view layers CDATA #IMPLIED>
 <!ATTLIST view alias CDATA #IMPLIED>

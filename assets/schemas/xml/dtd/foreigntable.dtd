@@ -2,7 +2,7 @@
   CAUTION: Do not modify this file directly on it's code unless you know what you are doing.
            Unexpected results may occur if the code is changed deliberately.
 -->
-<!ELEMENT foreigntable (schema,role?,comment?,foreignserver?,tag?,appended-sql?,prepended-sql?,position,column*,constraint*,customidxs*,partitioning?,initial-data?)>
+<!ELEMENT foreigntable (schema,role?,comment?,foreignserver?,tag?,appended-sql?,prepended-sql?,position,position?,column*,constraint*,customidxs*,partitioning?,initial-data?)>
 <!ATTLIST foreigntable name CDATA #REQUIRED>
 <!ATTLIST foreigntable layers CDATA #IMPLIED>
 <!ATTLIST foreigntable alias CDATA #IMPLIED>

@@ -31,6 +31,7 @@
 %if {prepended-sql} %then {prepended-sql} %end
 
 {position}
+%if {cutoff-pos} %then {cutoff-pos} %end
 
 %if {references} %then {references} %end
 
