@@ -7,9 +7,10 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
-- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1 a 1.6 concluídas e commitadas**
-  (1.2 recebeu um refinamento pequeno de deduplicação logo depois); **1.7 implementada, aguardando
-  teste manual** (ver abaixo).
+- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1 a 1.8 concluídas, testadas
+  manualmente pelo usuário e prontas pra commit** (1.2 recebeu um refinamento pequeno de
+  deduplicação logo depois). Próxima: **1.9** (promoção/rebaixamento dinâmico de relacionamento
+  cross-scene, ver plano).
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
@@ -291,7 +292,84 @@ subtarefa 1.1.
   Build limpo (`canvas`+`gui`+`pgmodeler`), `modelwidgettest` 4/4 sem regressão. **Sem teste manual
   ainda** — os 4 fixes cobrem casos que só ficam alcançáveis de verdade com relacionamento
   cross-scene já criado (possível desde a 1.6, via o combo de 1.3), mas nenhum tinha reprodução
-  automatizada; aguardando validação manual do usuário antes de commitar.
+  automatizada. **Testado manualmente pelo usuário e aprovado.**
+- **1.8** — marcador visual ("cut-off marker") pra relacionamento cross-scene, nova classe
+  `CutoffItem` em libcanvas (`QObject` + `QGraphicsItemGroup`, não deriva de `BaseObjectView`).
+  Composição: `QGraphicsLineItem` (linha reta curta) + `RoundedRectItem` (fundo do rótulo) +
+  `TextPolygonItem` (texto "Cross rels: N", polígono transparente — só o `RoundedRectItem` desenha
+  o fundo visível) + um segundo `RoundedRectItem` (`obj_selection`) mostrado/escondido em
+  `itemChange(ItemSelectedHasChanged)`, espelhando o padrão de seleção já usado pelos outros
+  objetos gráficos de libcanvas. Guarda referência à tabela (`table`) e à lista de
+  `BaseRelationship *` (não só as tabelas do outro lado — usuário quer poder editar os
+  relacionamentos individualmente numa subtarefa futura). Decisões de escopo do usuário: âncora
+  fixa (canto direito/centro vertical do título da tabela, via novo
+  `BaseTableView::getCutoffAnchorPoint()`), não arrastável independente da tabela, sem elemento
+  XML novo nem persistência — item efêmero, existe só em memória. Interação via clique/menu
+  dedicado ficou explicitamente fora de escopo, é subtarefa futura ainda não numerada (usuário
+  ainda decidindo entre form dedicado ou menu de contexto). `BaseTableView::
+  addExternalRelationship()`/`removeExternalRelationship()` criam/destroem o `CutoffItem` sob
+  demanda (nasce na primeira relação cross-scene da tabela, morre quando a última é removida).
+  Zindex mais baixo possível (`-50`) pra ficar sempre atrás dos demais elementos da tabela.
+  `ModelWidget::handleObjectRemoval()` ganhou um branch novo: quando o objeto removido é o próprio
+  relacionamento cross-scene (sem `RelationshipView`, então não passa pelo caminho normal de
+  remoção de item de cena), chama `removeExternalRelationship()` nas duas `BaseTableView` — gap
+  real que existia antes (ponteiro de relacionamento ficaria pendurado em `external_rels`/
+  `CutoffItem`).
+  - Vários bugs encontrados e corrigidos ao longo da implementação, todos via teste manual do
+    usuário entre rodadas:
+    - `cutoffitem.cpp`/`.h` esquecidos da lista explícita de fontes do `CMakeLists.txt` do
+      libcanvas — build "passava" (biblioteca compartilhada no Linux tolera símbolo indefinido até
+      rodar), só o `.o` faltando denunciava.
+    - Marcador nascendo na origem da cena em vez do ponto certo: `updatePosition()` só escutava
+      `s_relUpdateRequest` (que só dispara ao **soltar** um arrasto), então tabela posicionada só
+      via carga de arquivo (posição real só aplicada quando `BaseGraphicObject::
+      isUpdatesEnabled()` volta a `true`, no fim da carga) e nunca arrastada manualmente depois
+      ficava presa na posição capturada na construção. Fix: conectar também a `s_objectMoved` e
+      `s_objectDimensionChanged` incondicionalmente — reposicionar é um `setPos()` barato, ao
+      contrário do recálculo de linha do `RelationshipView` (que por isso escolhe um sinal só,
+      condicionado a `isPlaceholderEnabled()`).
+    - Crash ao selecionar o item: `ObjectsScene::mouseMoveEvent()`
+      ([objectsscene.cpp:1458-1461](libs/libcanvas/src/objectsscene.cpp#L1458)) fazia
+      `dynamic_cast<BaseObjectView *>(item)` sem checar nulo antes de chamar
+      `togglePlaceholder(true)` — bug pré-existente, só exposto agora porque `CutoffItem` é o
+      primeiro item selecionável da cena que não deriva de `BaseObjectView`. Corrigido com guarda
+      de nulo, mesmo padrão já usado 15 linhas antes na mesma função.
+    - `ObjectsScene::alignObjectsToGrid()` (o comando de menu) reposicionava o `CutoffItem`
+      independente da tabela, quebrando a âncora — item excluído explicitamente do laço.
+    - Retângulo de seleção (`obj_selection`) não aparecia, só a linha parecia "destacada": causa
+      raiz é uma particularidade do Qt — `QGraphicsItemGroup::boundingRect()` fica congelado no
+      tamanho que os filhos tinham no momento do `addToGroup()`, sem atualizar depois; como
+      `label_bg`/`label` só recebem o tamanho real (`setRect()`/`setPolygon()`) **depois** de
+      entrarem no grupo, o bounding rect do grupo ficava essencialmente só o retângulo (vazio) da
+      linha. Fix inicial calculava a união manual de `line` + `label_bg`; usuário simplificou
+      depois pra usar só o retângulo do `RoundedRectItem` do rótulo (a linha já recebe destaque
+      próprio, união grande deixava a seleção "inorgânica").
+    - Substituída a decoração de seleção nativa do Qt na linha pela mesma técnica já usada em
+      `RelationshipView`: mistura por canal (R/G/B, alpha forçado a 255) entre a cor de borda de
+      `Attributes::ObjSelection` e a cor normal da linha (`Attributes::PositionInfo`), aplicada ao
+      `pen` da linha ao selecionar e revertida ao desselecionar (`CutoffItem::
+      configureLineSelection()`) — corrigido, sem reproduzir, um typo aparente na fórmula
+      original do `RelationshipView` (`cor2.greenF()` no lugar de `cor2.redF()` no canal
+      vermelho).
+    - Mesmo depois da troca de cor, ainda aparecia um retângulo nativo do Qt em volta da linha ao
+      selecionar. Causa raiz achada lendo o fonte do Qt diretamente (`qgraphicsitem.cpp`):
+      `QGraphicsItemGroup::paint()` desenha `painter->drawRect(itemsBoundingRect)` sempre que o
+      grupo está selecionado, usando o mesmo bounding rect congelado do bug anterior (que
+      coincide quase exatamente com a área da linha). É o mesmo problema que `RelationshipView::
+      paint()` já contorna há tempos (comentário existente no código fala em "artifact rectangle
+      ... drawn around the relationship"). Aplicado o mesmo contorno em `CutoffItem::paint()`:
+      força `Qt::NoPen` e recorte pro `exposedRect` antes de delegar pro `QGraphicsItemGroup::
+      paint()` base.
+    - `ObjectsScene::finishObjectsMove()` (disparado a cada soltar de mouse depois de uma
+      seleção, não só pelo comando de menu) tinha um laço incondicional que faz
+      `item->setPos(alignPointToGrid(item->pos()))` em qualquer item selecionado que não seja
+      `TableObjectView` nem `RelationshipView` — `CutoffItem` não estava excluído, então
+      selecionar o marcador e soltar o mouse (o arrasto em si não move nada, já que o grupo não
+      tem `ItemIsMovable`) já bastava pra ele ser encaixado na grade, longe da âncora. Excluído
+      explicitamente, mesmo padrão do fix já aplicado em `alignObjectsToGrid()`.
+  - Build limpo (`canvas`+`gui`+`pgmodeler`) e `modelwidgettest` 4/4 sem regressão em todas as
+    rodadas. Sem cobertura automatizada nova (feature visual/interativa, validada por teste manual
+    do usuário em várias rodadas sucessivas).
 
 ## Design de persistência por-cena (sem código ainda — vira 2.1/2.2 quando a Fase 2 chegar)
 
