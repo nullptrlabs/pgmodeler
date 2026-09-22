@@ -7,6 +7,7 @@ pgm_add_library(canvas
     src/basetableview.cpp src/basetableview.h
     src/beziercurveitem.cpp src/beziercurveitem.h
     src/canvasglobal.h
+    src/cutoffitem.cpp src/cutoffitem.h
     src/graphicalview.cpp src/graphicalview.h
     src/layeritem.cpp src/layeritem.h
     src/objectsscene.cpp src/objectsscene.h
