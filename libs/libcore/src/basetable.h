@@ -58,6 +58,13 @@ class __libcore BaseTable: public BaseGraphicObject {
 
 		QString hash_code;
 
+		/*! \brief Cut-off marker position offset, relative to its default anchor point.
+		 * A NaN point means no custom position was set -- the marker uses the default anchor */
+		QPointF cutoff_pos;
+
+		//! \brief Fills the cutoff-pos XML element (a second <position>, id="cutoff") when a custom position is set
+		void setCutoffPositionAttribute();
+
 	public:
 		enum TableSection: unsigned {
 			AttribsSection,
@@ -173,6 +180,15 @@ class __libcore BaseTable: public BaseGraphicObject {
 		void resetHashCode();
 
 		void setPosition(const QPointF &pos) override;
+
+		/*! \brief Defines the cut-off marker's position offset relative to its default anchor
+		 * point. Pass an invalid (NaN) point to clear a previously set custom position */
+		void setCutoffPosition(const QPointF &pos);
+
+		QPointF getCutoffPosition();
+
+		//! \brief Clears any custom cut-off marker position, reverting it to the default anchor
+		void resetCutoffPosition();
 
 		void updateDependencies() override = 0;
 

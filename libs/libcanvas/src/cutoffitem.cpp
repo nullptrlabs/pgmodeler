@@ -21,10 +21,12 @@
 
 #include "cutoffitem.h"
 #include "basetableview.h"
+#include <cmath>
 
 CutoffItem::CutoffItem(BaseTableView *table)
 {
 	this->table = table;
+	repositioning = false;
 
 	line = new QGraphicsLineItem;
 	line->setLine(QLineF(0, 0, LineLength, 0));
@@ -46,6 +48,13 @@ CutoffItem::CutoffItem(BaseTableView *table)
 	this->addToGroup(obj_selection);
 
 	this->setFlag(QGraphicsItem::ItemIsSelectable);
+	this->setFlag(QGraphicsItem::ItemIsMovable);
+
+	/* Without this flag, QGraphicsItem::setPos() takes a fast path that applies the position
+	 * directly and never calls itemChange() -- itemChange(ItemPositionHasChanged) below (which
+	 * persists a user drag into the table's cutoff position) would silently never run */
+	this->setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+
 	this->setZValue(-50);
 
 	/* Unlike RelationshipView, repositioning here is a cheap setPos() call, so there's no
@@ -87,6 +96,9 @@ QList<BaseRelationship *> CutoffItem::getRelationships()
 
 void CutoffItem::updateLabel()
 {
+	// The relationship count can change label_bg's size, which changes boundingRect()'s result
+	prepareGeometryChange();
+
 	QTextCharFormat char_fmt = BaseObjectView::getFontStyle(Attributes::PositionInfo);
 	char_fmt.setFontPointSize(char_fmt.font().pointSizeF() * 0.80);
 
@@ -152,13 +164,26 @@ QVariant CutoffItem::itemChange(GraphicsItemChange change, const QVariant &value
 		obj_selection->setVisible(value.toBool());
 		configureLineSelection(value.toBool());
 	}
+	else if(change == ItemPositionHasChanged && !repositioning)
+	{
+		BaseTable *base_tab = dynamic_cast<BaseTable *>(table->getUnderlyingObject());
+		base_tab->setCutoffPosition(this->pos() - table->getCutoffAnchorPoint());
+	}
 
 	return QGraphicsItemGroup::itemChange(change, value);
 }
 
 void CutoffItem::updatePosition()
 {
-	this->setPos(table->getCutoffAnchorPoint());
+	BaseTable *base_tab = dynamic_cast<BaseTable *>(table->getUnderlyingObject());
+	QPointF offset = base_tab->getCutoffPosition();
+
+	if(std::isnan(offset.x()))
+		offset = QPointF(0, 0);
+
+	repositioning = true;
+	this->setPos(table->getCutoffAnchorPoint() + offset);
+	repositioning = false;
 }
 
 void CutoffItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -171,4 +196,10 @@ void CutoffItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 	painter->setClipRect(option->exposedRect);
 	QGraphicsItemGroup::paint(painter, option, widget);
 	painter->restore();
+}
+
+QRectF CutoffItem::boundingRect() const
+{
+	return line->boundingRect().translated(line->pos()) |
+				 label_bg->boundingRect().translated(label_bg->pos());
 }

@@ -1434,6 +1434,7 @@ void PhysicalTable::setTableAttributes(SchemaParser::CodeType def_type, bool inc
 	{
 		setRelObjectsIndexesAttribute();
 		setPositionAttribute();
+		setCutoffPositionAttribute();
 		setFadedOutAttribute();
 		setLayersAttribute();
 		attributes[Attributes::InitialData]=initial_data;

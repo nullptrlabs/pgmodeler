@@ -163,6 +163,8 @@ namespace Attributes {
 	CustomFilter("custom-filter"),
 	CustomIdxs("customidxs"),
 	CustomScale("custom-scale"),
+	Cutoff("cutoff"),
+	CutoffPos("cutoff-pos"),
 	Cycle("cycle"),
 	Dark("dark"),
 	DataDirectory("data-directory"),

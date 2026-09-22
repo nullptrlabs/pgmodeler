@@ -62,6 +62,11 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 		//! \brief Shown/hidden as the item is (de)selected, mirroring BaseObjectView::obj_selection
 		RoundedRectItem *obj_selection;
 
+		/*! \brief Guards itemChange() against persisting the table's cutoff position attribute
+		 * when a position change comes from updatePosition() itself, not from the user dragging
+		 * the marker */
+		bool repositioning;
+
 		//! \brief Refreshes the label text/size to reflect the current relationship count
 		void updateLabel();
 
@@ -74,6 +79,12 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 		QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
 		void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
+		/*! \brief Computed fresh from line/label_bg's current geometry instead of relying on
+		 * QGraphicsItemGroup's own boundingRect(), which is cached at addToGroup() time and never
+		 * updated afterward -- without this override, hit-testing (selection, drag) only works
+		 * over the sliver the line occupied when it was first added to the group */
+		QRectF boundingRect() const override;
 
 	private slots:
 		//! \brief Repositions the marker relative to table's current title geometry

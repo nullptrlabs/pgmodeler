@@ -358,6 +358,10 @@ void BaseTableView::removeExternalRelationship(BaseRelationship *base_rel)
 		{
 			delete cutoff_item;
 			cutoff_item = nullptr;
+
+			/* Discarding any custom position: if a new cutoff marker is created later for
+			 * this table, it starts back at the default anchor instead of an old offset */
+			dynamic_cast<BaseTable *>(getUnderlyingObject())->resetCutoffPosition();
 		}
 	}
 }

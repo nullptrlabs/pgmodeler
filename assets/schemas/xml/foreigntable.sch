@@ -25,6 +25,7 @@
 %if {appended-sql} %then {appended-sql} %end
 %if {prepended-sql} %then {prepended-sql} %end
 {position}
+%if {cutoff-pos} %then {cutoff-pos} %end
 
 %if {columns} %then {columns} %end
 %if {constraints} %then {constraints} %end
