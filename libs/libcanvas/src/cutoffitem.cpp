@@ -114,15 +114,103 @@ void CutoffItem::updateLabel()
 
 	label_bg->setRect(box_rect);
 	label_bg->setBrush(BaseObjectView::getFillStyle(Attributes::PositionInfo));
-	label_bg->setPen(BaseObjectView::getBorderStyle(Attributes::PositionInfo));
 
-	QPointF box_pos(MaxOffsetDistance, -(box_size.height() / 2));
-	label->setPos(box_pos);
+	QPen pen = BaseObjectView::getBorderStyle(Attributes::PositionInfo);
+	pen.setWidthF(BaseObjectView::ObjectBorderWidth * BaseObjectView::getScreenDpiFactor());
+	label_bg->setPen(pen);
 	label->setTextPos(BaseObjectView::HorizSpacing * 0.75, BaseObjectView::VertSpacing * 0.75);
-	label_bg->setPos(box_pos);
 
-	configureObjectSelection();
+	updateLabelPosition();
 	updateLine();
+}
+
+void CutoffItem::updateLabelPosition()
+{
+	prepareGeometryChange();
+
+	QSizeF box_size = label_bg->boundingRect().size();
+	QPointF dir = getOutwardDirection(),
+					box_pos((dir.x() * ((box_size.width() / 2) + MaxOffsetDistance)) - (box_size.width() / 2),
+									(dir.y() * ((box_size.height() / 2) + MaxOffsetDistance)) - (box_size.height() / 2));
+
+	label->setPos(box_pos);
+	label_bg->setPos(box_pos);
+	configureObjectSelection();
+}
+
+QPointF CutoffItem::getClosestTablePoint(const QPointF &pos) const
+{
+	QRectF tab_rect = table->sceneBoundingRect();
+	return { qBound(tab_rect.left(), pos.x(), tab_rect.right()),
+					 qBound(tab_rect.top(), pos.y(), tab_rect.bottom()) };
+}
+
+QPointF CutoffItem::getNearestEdgeNormal(const QPointF &pos) const
+{
+	QRectF tab_rect = table->sceneBoundingRect();
+	double dist_left = pos.x() - tab_rect.left(),
+				 dist_right = tab_rect.right() - pos.x(),
+				 dist_top = pos.y() - tab_rect.top(),
+				 dist_bottom = tab_rect.bottom() - pos.y(),
+				 min_dist = std::min({ dist_left, dist_right, dist_top, dist_bottom });
+
+	if(min_dist == dist_left)
+		return { -1, 0 };
+
+	if(min_dist == dist_right)
+		return { 1, 0 };
+
+	if(min_dist == dist_top)
+		return { 0, -1 };
+
+	return { 0, 1 };
+}
+
+QPointF CutoffItem::getOutwardDirection() const
+{
+	QRectF tab_rect = table->sceneBoundingRect();
+	QPointF pos = this->pos();
+
+	// pos() inside or touching the rect: derive direction from whichever edge is nearest
+	if(tab_rect.left() <= pos.x() && pos.x() <= tab_rect.right() &&
+		 tab_rect.top() <= pos.y() && pos.y() <= tab_rect.bottom())
+		return getNearestEdgeNormal(pos);
+
+	QPointF closest = getClosestTablePoint(pos),
+					dir = pos - closest;
+	double len = std::hypot(dir.x(), dir.y());
+
+	return dir / len;
+}
+
+QPointF CutoffItem::clampToTableOrbit(const QPointF &new_pos) const
+{
+	QRectF tab_rect = table->sceneBoundingRect();
+
+	if(tab_rect.contains(new_pos))
+	{
+		QPointF normal = getNearestEdgeNormal(new_pos);
+
+		if(normal.x() < 0)
+			return { tab_rect.left(), new_pos.y() };
+
+		if(normal.x() > 0)
+			return { tab_rect.right(), new_pos.y() };
+
+		if(normal.y() < 0)
+			return { new_pos.x(), tab_rect.top() };
+
+		return { new_pos.x(), tab_rect.bottom() };
+	}
+
+	QPointF closest = getClosestTablePoint(new_pos),
+					delta = new_pos - closest;
+	double dist = std::hypot(delta.x(), delta.y());
+
+	if(dist > MaxOffsetDistance)
+		return closest + (delta * (MaxOffsetDistance / dist));
+
+	return new_pos;
 }
 
 void CutoffItem::updateLine()
@@ -132,6 +220,10 @@ void CutoffItem::updateLine()
 																									label_bg->boundingRect().height() / 2);
 
 	line->setLine(QLineF(table_center - this->pos(), box_center));
+
+	QPen pen = line->pen();
+	pen.setWidthF(getLinePenWidth());
+	line->setPen(pen);
 }
 
 void CutoffItem::configureObjectSelection()
@@ -163,6 +255,7 @@ void CutoffItem::configureLineSelection(bool selected)
 	else
 		pen.setColor(BaseObjectView::getBorderStyle(Attributes::PositionInfo).color());
 
+	pen.setWidthF(getLinePenWidth());
 	line->setPen(pen);
 }
 
@@ -175,24 +268,16 @@ QVariant CutoffItem::itemChange(GraphicsItemChange change, const QVariant &value
 	}
 	else if(change == ItemPositionChange)
 	{
-		/* Keeps the marker within MaxOffsetDistance of the table's own rect, not a single fixed
-		 * point -- lets it be dragged freely around any side/corner of the table, always measuring
-		 * the gap along the axis that's actually open (horizontal gap when beside the table,
-		 * vertical gap when above/below it, straight-line gap to the nearest corner in between) */
-		QRectF tab_rect = table->sceneBoundingRect();
-		QPointF new_pos = value.toPointF(),
-						closest(qBound(tab_rect.left(), new_pos.x(), tab_rect.right()),
-										qBound(tab_rect.top(), new_pos.y(), tab_rect.bottom())),
-						delta = new_pos - closest;
-		double dist = std::hypot(delta.x(), delta.y());
-
-		if(dist > MaxOffsetDistance)
-			return closest + (delta * (MaxOffsetDistance / dist));
-
-		return new_pos;
+		/* Keeps the marker orbiting the table's rect, at most MaxOffsetDistance away from it --
+		 * lets it be dragged freely around any side/corner, always measuring the gap along the axis
+		 * that's actually open (horizontal gap when beside the table, vertical gap when above/below
+		 * it, straight-line gap to the nearest corner in between), while never letting it land on
+		 * top of the table itself */
+		return clampToTableOrbit(value.toPointF());
 	}
 	else if(change == ItemPositionHasChanged)
 	{
+		updateLabelPosition();
 		updateLine();
 
 		if(!repositioning)
@@ -217,7 +302,10 @@ void CutoffItem::updatePosition()
 	this->setPos(table->getCutoffAnchorPoint() + offset);
 	repositioning = false;
 
-	// Covers a pure resize, where the table's center moves but the anchor (and this item's pos()) doesn't
+	/* Covers a pure resize, where the table's rect changes but this item's pos() doesn't --
+	 * itemChange() above only runs when setPos() actually moves the item, so a resize needs both
+	 * calls repeated here explicitly */
+	updateLabelPosition();
 	updateLine();
 }
 
@@ -237,4 +325,13 @@ QRectF CutoffItem::boundingRect() const
 {
 	return line->boundingRect().translated(line->pos()) |
 				 label_bg->boundingRect().translated(label_bg->pos());
+}
+
+double CutoffItem::getLinePenWidth()
+{
+	// Adjusting the line thickness according to the screen dpi
+	if(BaseObjectView::getScreenDpiFactor() > 1)
+		return  BaseObjectView::ObjectBorderWidth * BaseObjectView::getScreenDpiFactor() * 1.25;
+
+	return BaseObjectView::ObjectBorderWidth * 1.50;
 }

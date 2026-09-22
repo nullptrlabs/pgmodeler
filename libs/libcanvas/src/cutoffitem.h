@@ -71,8 +71,30 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 		//! \brief Refreshes the label text/size to reflect the current relationship count
 		void updateLabel();
 
+		/*! \brief Repositions the label box along the direction from the table's rect to this
+		 * item's current pos(), so the box always extends away from the table regardless of
+		 * which side/corner the marker was dragged to */
+		void updateLabelPosition();
+
 		//! \brief Redraws the line connecting the table's center point to the marker box's center point
 		void updateLine();
+
+		//! \brief Closest point on the table's scene rect to an arbitrary scene position
+		QPointF getClosestTablePoint(const QPointF &pos) const;
+
+		/*! \brief Outward unit normal of the table rect's edge closest to a point known to be inside
+		 * it or touching its boundary -- e.g. left edge -> (-1, 0). Shared by getOutwardDirection()
+		 * and clampToTableOrbit() so both agree on which edge "owns" a given point */
+		QPointF getNearestEdgeNormal(const QPointF &pos) const;
+
+		/*! \brief Unit vector from the table's rect to this item's current pos(), used to keep the
+		 * label box on the same side of the table as the point the user dragged the marker to */
+		QPointF getOutwardDirection() const;
+
+		/*! \brief Keeps a proposed position within MaxOffsetDistance of the table's rect, on the
+		 * outside -- pushes it out to the nearest edge if it falls inside the rect, so the marker can
+		 * only orbit the table, never sit on top of it */
+		QPointF clampToTableOrbit(const QPointF &new_pos) const;
 
 		//! \brief Resizes obj_selection to the item's current bounding rect
 		void configureObjectSelection();
@@ -80,7 +102,21 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 		//! \brief Applies (or reverts, when selected is false) the selection color blend to line's pen
 		void configureLineSelection(bool selected);
 
+		double getLinePenWidth();
+
+	protected:
 		QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+
+	public:
+		CutoffItem(BaseTableView *table);
+
+		void addRelationship(BaseRelationship *rel);
+
+		void removeRelationship(BaseRelationship *rel);
+
+		int getRelationshipsCount();
+
+		QList<BaseRelationship *> getRelationships();
 
 		void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
@@ -93,17 +129,6 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 	private slots:
 		//! \brief Repositions the marker relative to table's current title geometry
 		void updatePosition();
-
-	public:
-		CutoffItem(BaseTableView *table);
-
-		void addRelationship(BaseRelationship *rel);
-
-		void removeRelationship(BaseRelationship *rel);
-
-		int getRelationshipsCount();
-
-		QList<BaseRelationship *> getRelationships();
 };
 
 #endif
