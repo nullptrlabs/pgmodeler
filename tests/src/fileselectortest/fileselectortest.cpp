@@ -20,7 +20,7 @@
 */
 
 #include <QtTest/QtTest>
-#include "widgets/fileselectorwidget.h"
+#include "widgets/pathselectorwidget.h"
 
 class FileSelectorTest: public QObject {
 	Q_OBJECT
@@ -32,17 +32,16 @@ class FileSelectorTest: public QObject {
 void FileSelectorTest::testFileSelection()
 {
   QDialog *dlg = new QDialog;
-#warning Replace explict layout instantiation by GuiUtilsNs::createLayout()
   QHBoxLayout *layout = new QHBoxLayout(dlg);
-  FileSelectorWidget *selector = new FileSelectorWidget;
+	PathSelectorWidget *selector = new PathSelectorWidget;
 
 	//selector->setFileMode(QFileDialog::ExistingFile);
-	selector->setFileMustExist(true);
+	selector->setPathMustExist(true);
 	selector->setAcceptMode(QFileDialog::AcceptOpen);
 	//selector->setNameFilters({"Database model file (*.dbm)", "All files (*.*)"});
 	selector->setFileDialogTitle("Select *.dbm file...");
-	selector->setAllowFilenameInput(true);
-	selector->setSelectedFile("/home/raphael/pgmodeler");
+	selector->setAllowPathInput(true);
+	selector->setSelectedPath("/home/raphael/pgmodeler");
 	//selector->setReadOnly(true);
 
 	layout->addWidget(selector);
