@@ -16,6 +16,14 @@
   visual própria, o que implica chave nova em `Attributes::`, entrada nova em
   `AppearanceConfigWidget::element_cmb`/`conf_ids`/`obj_conf_ids` e atualização do arquivo de
   configuração de aparência. Só registrada, sem código ainda. Depende de: 1.8 (já feita).
+- **Nova subtarefa registrada no plano (2026-09-22): 1.8.1 — movimentação livre do cutoff +
+  persistência de posição em XML.** Reabre a decisão de escopo reduzido tomada na própria 1.8
+  (posição fixa, sem persistência). Usuário decidiu: sem `BaseObject` novo pro cutoff — a posição
+  fica num atributo na tabela/view/foreign table pai, escrito via `CutoffItem::itemChange()`
+  sempre que o usuário arrasta o marcador. Dois pontos deixados em aberto no plano (ver 1.8.1):
+  posição relativa ao anchor vs. absoluta de cena, e formato XML (atributo simples na tag
+  existente, preferência do usuário, vs. elemento novo). Só registrada, sem código ainda. Depende
+  de: 1.8 (já feita).
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,

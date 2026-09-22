@@ -959,6 +959,39 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
      pode chamar `setActiveScene()` diretamente para navegação mínima de teste, mesmo antes da UI
      definitiva. Depende de: 1.6.
 
+1.8.1. **Movimentação livre do cutoff + persistência de posição em XML** — complementa a 1.8:
+       revisita a decisão de escopo reduzido tomada durante a implementação da 1.8 (marcador com
+       posição fixa, ancorado ao título da tabela, sem persistência — "item efêmero", ver
+       `MULTI_SCENE_PROGRESS.md`). Decisão do usuário (2026-09-22): o cutoff passa a poder ser
+       movido livremente pelo usuário, e essa posição customizada deve sobreviver a salvar/reabrir
+       o modelo, sem exigir um `BaseObject` novo dedicado ao cutoff.
+       - **Onde persistir**: sem objeto de modelo novo. A posição fica num atributo na própria
+         tabela/view/foreign table (`BaseTable`-derivado), pré-preenchido antes de gerar o XML
+         daquele objeto — mesmo espírito de como `Position` (x/y da própria tabela) já é gravado
+         hoje (`BaseTable::getCodeDefinition()`/`setPosition()`,
+         [basetable.cpp:157-158](libs/libcore/src/basetable.cpp#L157)). Como existe **um só**
+         `CutoffItem` por tabela (agrega todos os relacionamentos cross-scene dela — decisão #1,
+         subtarefa 1.5), basta um atributo de posição por tabela, sem granularidade por
+         relacionamento.
+       - **Como sincronizar**: `CutoffItem::itemChange()` (`ItemPositionHasChanged`) escreve a
+         posição atual de volta no atributo da tabela pai sempre que o usuário arrasta o marcador.
+       - **[Requer fechamento de decisão com o usuário] Posição relativa vs. absoluta**: coordenada
+         absoluta de cena deixa a posição salva desatualizada quando a tabela é movida sem tocar no
+         cutoff (hoje ele se reancora automaticamente via `updatePosition()`/sinais de movimento da
+         tabela — ver 1.8); offset relativo ao ponto de ancoragem (`getCutoffAnchorPoint()`)
+         preserva esse comportamento por padrão e só persiste o desvio manual do usuário, mas exige
+         decidir a semântica quando tabela e cutoff se movem juntos (ex. seleção múltipla).
+         Recomendação preliminar: offset relativo ao anchor. Também em aberto: se o atributo deve
+         sobreviver na tabela quando o cutoff é destruído por promoção (1.9, última relação
+         cross-scene virou in-scene) e um novo cutoff nascer depois — restaurar o offset salvo ou
+         voltar à âncora padrão.
+       - **Formato XML**: preferência do usuário — atributo simples na tag existente de
+         table/view/foreign table (ex. `cutoff-pos="x,y"`), em vez de elemento XML novo dedicado —
+         mais simples e retrocompatível (arquivo sem o atributo não tem posição customizada, cutoff
+         nasce na âncora padrão como hoje). Precisa atualizar o(s) `.sch` de table/view/foreign
+         table e o parser de leitura correspondente.
+       Depende de: 1.8.
+
 1.9. **Promoção/rebaixamento dinâmico** — `moveToSchema()`
      ([modelwidget.cpp:2538](libs/libgui/src/widgets/modelwidget.cpp#L2538)) (e qualquer outro
      ponto que reatribua schema de uma tabela) passa a reavaliar, para cada relacionamento da
