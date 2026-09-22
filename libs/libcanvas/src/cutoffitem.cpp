@@ -29,7 +29,6 @@ CutoffItem::CutoffItem(BaseTableView *table)
 	repositioning = false;
 
 	line = new QGraphicsLineItem;
-	line->setLine(QLineF(0, 0, LineLength, 0));
 	line->setPen(BaseObjectView::getBorderStyle(Attributes::PositionInfo));
 	this->addToGroup(line);
 
@@ -117,12 +116,22 @@ void CutoffItem::updateLabel()
 	label_bg->setBrush(BaseObjectView::getFillStyle(Attributes::PositionInfo));
 	label_bg->setPen(BaseObjectView::getBorderStyle(Attributes::PositionInfo));
 
-	QPointF box_pos(LineLength, -(box_size.height() / 2));
+	QPointF box_pos(MaxOffsetDistance, -(box_size.height() / 2));
 	label->setPos(box_pos);
 	label->setTextPos(BaseObjectView::HorizSpacing * 0.75, BaseObjectView::VertSpacing * 0.75);
 	label_bg->setPos(box_pos);
 
 	configureObjectSelection();
+	updateLine();
+}
+
+void CutoffItem::updateLine()
+{
+	QPointF table_center = table->sceneBoundingRect().center(),
+					box_center = label_bg->pos() + QPointF(label_bg->boundingRect().width() / 2,
+																									label_bg->boundingRect().height() / 2);
+
+	line->setLine(QLineF(table_center - this->pos(), box_center));
 }
 
 void CutoffItem::configureObjectSelection()
@@ -164,10 +173,33 @@ QVariant CutoffItem::itemChange(GraphicsItemChange change, const QVariant &value
 		obj_selection->setVisible(value.toBool());
 		configureLineSelection(value.toBool());
 	}
-	else if(change == ItemPositionHasChanged && !repositioning)
+	else if(change == ItemPositionChange)
 	{
-		BaseTable *base_tab = dynamic_cast<BaseTable *>(table->getUnderlyingObject());
-		base_tab->setCutoffPosition(this->pos() - table->getCutoffAnchorPoint());
+		/* Keeps the marker within MaxOffsetDistance of the table's own rect, not a single fixed
+		 * point -- lets it be dragged freely around any side/corner of the table, always measuring
+		 * the gap along the axis that's actually open (horizontal gap when beside the table,
+		 * vertical gap when above/below it, straight-line gap to the nearest corner in between) */
+		QRectF tab_rect = table->sceneBoundingRect();
+		QPointF new_pos = value.toPointF(),
+						closest(qBound(tab_rect.left(), new_pos.x(), tab_rect.right()),
+										qBound(tab_rect.top(), new_pos.y(), tab_rect.bottom())),
+						delta = new_pos - closest;
+		double dist = std::hypot(delta.x(), delta.y());
+
+		if(dist > MaxOffsetDistance)
+			return closest + (delta * (MaxOffsetDistance / dist));
+
+		return new_pos;
+	}
+	else if(change == ItemPositionHasChanged)
+	{
+		updateLine();
+
+		if(!repositioning)
+		{
+			BaseTable *base_tab = dynamic_cast<BaseTable *>(table->getUnderlyingObject());
+			base_tab->setCutoffPosition(this->pos() - table->getCutoffAnchorPoint());
+		}
 	}
 
 	return QGraphicsItemGroup::itemChange(change, value);
@@ -184,6 +216,9 @@ void CutoffItem::updatePosition()
 	repositioning = true;
 	this->setPos(table->getCutoffAnchorPoint() + offset);
 	repositioning = false;
+
+	// Covers a pure resize, where the table's center moves but the anchor (and this item's pos()) doesn't
+	updateLine();
 }
 
 void CutoffItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)

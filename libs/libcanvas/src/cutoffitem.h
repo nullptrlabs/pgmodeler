@@ -42,8 +42,9 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 	Q_OBJECT
 
 	private:
-		//! \brief Length, in scene units, of the line connecting the table to the marker
-		static constexpr double LineLength = 20;
+		/*! \brief Default distance, in scene units, between the anchor point and the marker's box,
+		 * and also the maximum distance the user can drag the marker away from the table's rect */
+		static constexpr double MaxOffsetDistance = 20;
 
 		//! \brief Table this marker is attached to
 		BaseTableView *table;
@@ -69,6 +70,9 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 
 		//! \brief Refreshes the label text/size to reflect the current relationship count
 		void updateLabel();
+
+		//! \brief Redraws the line connecting the table's center point to the marker box's center point
+		void updateLine();
 
 		//! \brief Resizes obj_selection to the item's current bounding rect
 		void configureObjectSelection();

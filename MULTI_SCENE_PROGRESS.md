@@ -124,6 +124,53 @@
     já funciona, mas o usuário tem melhorias e problemas adicionais a reportar antes de fechar a
     subtarefa. Commit feito como WIP a pedido do usuário; próxima sessão/mensagem traz os
     apontamentos específicos.
+  - **Duas correções pedidas pelo usuário na sessão seguinte (2026-09-22)**:
+    1. **Linha deve ligar centro da tabela ao centro do retângulo do marcador** — antes a linha era
+       um segmento fixo `QLineF(0, 0, MaxOffsetDistance, 0)` (renomeado de `LineLength`) só dentro
+       do sistema de coordenadas local do grupo, sempre do mesmo tamanho, sem relação real com a
+       geometria da tabela. Novo método `CutoffItem::updateLine()` recalcula os dois pontos a cada
+       chamada: ponta da tabela = `table->sceneBoundingRect().center()` convertido pra coordenada
+       local do grupo (`- this->pos()`, válido por não haver rotação/escala); ponta do marcador =
+       centro de `label_bg` (já conhecido em coordenada local). Chamado em três pontos pra cobrir
+       todo caminho de mutação: fim de `updateLabel()` (tamanho do rótulo muda, ex. contagem de
+       relacionamentos), fim de `updatePosition()` (tabela pode redimensionar sem mover o `pos()`
+       do grupo — título intocado, mas o centro da tabela desce), e dentro de
+       `itemChange(ItemPositionHasChanged)` (arrasto do usuário). A posição por-relação do
+       `box_pos` dentro do grupo (`QPointF(MaxOffsetDistance, -altura/2)`) não mudou — só a linha
+       passou a ser desenhada dinamicamente em vez de fixa.
+    2. **Movimento livre, mas com margem** — usuário só queria o suficiente pra tirar o marcador de
+       cima dos conectores da tabela, não movimento irrestrito. Adicionado o branch
+       `ItemPositionChange` (hook do Qt chamado **antes** de aplicar a posição, valor de retorno vira
+       a posição de fato aplicada — mecanismo padrão pra restringir arrasto) em
+       `CutoffItem::itemChange()`. Sem guarda de `repositioning` — aplica também durante o
+       `setPos()` programático de `updatePosition()` (não deveria ter efeito prático, já que o
+       offset persistido já nasce validado por este mesmo clamp quando o usuário arrastou, mas
+       também funciona como rede de segurança pra um offset fora do limite salvo antes deste fix
+       existir).
+       - **Primeira versão (errada) — corrigida na mesma sessão**: clampava a distância euclidiana
+         entre a posição proposta e `getCutoffAnchorPoint()` (um ponto fixo) pra um círculo de raio
+         `MaxOffsetDistance` ao redor do anchor. Usuário apontou que a regra real é por eixo e
+         relativa ao **retângulo da tabela inteira**, não a um ponto fixo: se o marcador está à
+         esquerda/direita da tabela, só a distância **horizontal** até a tabela é limitada
+         (verticalmente pode deslizar livre ao longo da lateral); se está acima/abaixo, só a
+         distância **vertical** é limitada; nos cantos, os dois eixos entram em jogo ao mesmo tempo
+         (caso de borda que views precisa de tratamento próprio). Reescrito pra clamp geométrico
+         contra o retângulo, não contra um ponto: acha o ponto mais próximo em
+         `table->sceneBoundingRect()` da posição proposta (`qBound()` por eixo — equivale a "ponto
+         mais próximo num retângulo"), mede a distância euclidiana **desse ponto** até a posição
+         proposta, e só recorta se ultrapassar `MaxOffsetDistance`. Essa única fórmula cobre os três
+         casos pedidos automaticamente: quando o marcador está lateral à tabela (dentro da faixa
+         vertical do retângulo), o ponto mais próximo fica na mesma altura → a distância medida é
+         puramente horizontal; quando está acima/abaixo (dentro da faixa horizontal), o ponto mais
+         próximo fica na mesma coluna → distância puramente vertical; nos cantos, o ponto mais
+         próximo é o vértice do retângulo → distância euclidiana até o vértice, resultando num
+         quarto-de-círculo suave na transição entre lateral e topo/base (o "edge case" pedido). Na
+         prática, deixa o marcador "orbitar" a tabela inteira dentro de uma faixa de largura
+         constante `MaxOffsetDistance`, incluindo os cantos.
+    Build limpo (`canvas`+`gui`+`pgmodeler`), `modelwidgettest` 4/4 sem regressão, binário
+    reinstalado (`cmake --build . --target install`) pra refletir no `build/pgmodeler` que o usuário
+    roda. Nenhum arquivo `.sch`/`.dtd` tocado nesta rodada (só `cutoffitem.h`/`.cpp`). Não commitado
+    ainda — aguardando teste manual do usuário.
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
