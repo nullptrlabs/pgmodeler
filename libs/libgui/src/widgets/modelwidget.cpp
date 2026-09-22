@@ -5187,6 +5187,10 @@ void ModelWidget::highlightObject()
 		{
 			BaseObjectView *obj_view=dynamic_cast<BaseObjectView *>(graph_obj->getOverlyingObject());
 
+			// Cross-scene relationships have no graphical item to highlight
+			if(!obj_view)
+				return;
+
 			scene->clearSelection();
 			obj_view->setSelected(true);
 			viewport->centerOn(obj_view);
@@ -5344,6 +5348,10 @@ void ModelWidget::breakRelationshipLine(BaseRelationship *rel, RelBreakMode brea
 	try
 	{
 		RelationshipView *rel_view=dynamic_cast<RelationshipView *>(rel->getOverlyingObject());
+
+		// Cross-scene relationships have no line to break
+		if(!rel_view) return;
+
 		double dx, dy;
 		QPointF src_pnt, dst_pnt;
 
