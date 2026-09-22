@@ -1313,7 +1313,11 @@ void ModelWidget::handleObjectRemoval(BaseObject *object)
 
 	if(graph_obj)
 	{
-		scene->removeItem(dynamic_cast<QGraphicsItem *>(graph_obj->getOverlyingObject()));
+		QGraphicsItem *item = dynamic_cast<QGraphicsItem *>(graph_obj->getOverlyingObject());
+		ObjectsScene *item_scene = item ? dynamic_cast<ObjectsScene *>(item->scene()) : nullptr;
+
+		if(item_scene)
+			item_scene->removeItem(item);
 
 		//Updates the parent schema if the removed object were a table or view
 		if(graph_obj->getSchema() &&

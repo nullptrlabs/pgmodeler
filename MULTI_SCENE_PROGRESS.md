@@ -84,8 +84,30 @@
   `if(scene) scene->clearSelection();` logo no início de `setActiveScene()`, antes de reatribuir
   `active_scene_idx`/`scene` — dispara `selectionChanged`/`s_objectSelected` pros itens que estavam
   selecionados, mesmo mecanismo já usado nos ~20 outros call sites de `clearSelection()`. Build de
-  `gui`/`pgmodeler` limpo, `modelwidgettest` sem regressão. Nenhum dos dois fixes desta pausa foi
-  commitado ainda — aguardando teste manual do usuário.
+  `gui`/`pgmodeler` limpo, `modelwidgettest` sem regressão. Os dois fixes de seleção acima foram
+  commitados juntos (`2afc4023d`, "Fix: selection must stay local to the active scene").
+- **Terceiro bug reportado na mesma pausa (2026-09-21)**: usuário viu no console, ao só *carregar*
+  um modelo multi-cena sem nenhuma interação (`demo.dbm`), o aviso
+  `QGraphicsScene::removeItem: item 0x...'s scene (0x...) is different from this scene (0x...)`.
+  Causa raiz: `ModelWidget::handleObjectRemoval()`
+  ([modelwidget.cpp:1310](libs/libgui/src/widgets/modelwidget.cpp#L1310)) fazia
+  `scene->removeItem(...)` usando o ponteiro de conveniência da cena **ativa**, e não a cena real do
+  item sendo removido — mesma classe de bug do `selectAllObjects()`/`setActiveScene()` acima
+  (código pré-multi-cena que sobrou sem ser generalizado). Sempre que o objeto removido não estiver
+  na cena ativa no momento (ex. remoções que acontecem durante o parsing/carga do XML, antes do
+  usuário interagir), o Qt recusa o `removeItem` porque o item pertence a outra `QGraphicsScene` —
+  daí o aviso, mesmo sem nenhuma ação do usuário. Isso também é sério porque
+  `ObjectsScene::removeItem()` é overridden ([objectsscene.cpp:1054](libs/libcanvas/src/objectsscene.cpp#L1054))
+  e faz limpeza importante (`disconnectTables()` em relacionamentos, `updateLayerRects()`) que
+  **não roda** quando o `removeItem` é rejeitado silenciosamente pela cena errada — ou seja, não é só
+  um aviso cosmético, é limpeza de estado que estava sendo pulada. **Correção**: resolve a cena real
+  do item via `item->scene()` (dynamic_cast pra `ObjectsScene`) e chama `removeItem()` nela, não na
+  cena ativa. Build de `gui`/`pgmodeler` limpo, `modelwidgettest` sem regressão; smoke test
+  headless (`QT_QPA_PLATFORM=offscreen ./pgmodeler assets/samples/demo.dbm`) não reproduziu o aviso
+  depois do fix (não é confirmação definitiva — `PGMODELER_DEBUG` não estava ligado nesse build pra
+  confirmar que o carregamento completou antes do timeout, mas o aviso do Qt em si não é gated por
+  nenhuma flag de debug, então a ausência dele já é um sinal razoável). Não commitado ainda —
+  aguardando teste manual do usuário.
 - **Convenção a partir de 2026-09-21**: `MULTI_SCENE_PLAN.md` fica só com o plano em si
   (arquitetura, decisões, descrição/dependência das subtarefas) — nunca marca subtarefa como
   feita/commitada. Todo status de execução (o quê foi feito, hash do commit, achados específicos
