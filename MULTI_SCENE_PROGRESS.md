@@ -116,57 +116,10 @@
   subtarefa, parar e deixar o usuário testar manualmente antes de prosseguir pra próxima — não só
   perguntar "commitar ou seguir", mas dar tempo/espaço pro teste manual entre elas.
 
-## Commits desta branch (mais recente primeiro)
-
-```
-31c486d7f Plan: document subtask 1.4's GUI test infra and pre-existing test bit-rot
-c9f60ada2 Fase 1.4: add modelwidgettest confirming SchemaView's same-scene invariant
-1189e0701 Plan: reaffirm no-shared-rect decision, add general-rect-at-save design
-960b1b13b Plan: add subtask 2.0, moving the scene-rect mechanical fix first in Fase 2
-2854325ff Fase 1.3: floating QComboBox to switch the active scene
-8e223b660 Plan: confirm scene-rect bug by manual test, register as pending
-a06df761d Fase 1.2 (refinamento): deduplicate getSchemaScene() call
-9ba476d00 Fase 1.2: route Table/View/ForeignTable to their schema's scene
-89ccc2057 Plan: register per-object Scene attribute as future work for Textbox + manual reassignment
-5437ce0df Update progress log: pg_catalog/public fix confirmed by manual test
-dfa197b25 Update progress log: pg_catalog/public refinement, awaiting test
-68bc47c11 Plan: document pg_catalog/public scene-activation handling
-0300197fe Fase 1.1 (refinamento): pg_catalog never auto-activates, public forced default
-71f8edaac Plan: document the addScene() signal-wiring architectural fix
-f5c6eab4b Fase 1.1: create ObjectsScene per Schema on insertion
-9e0c02972 Fase 0.1 (correção): addScene() wires every scene's signals, not just the first
-7e4f314bc Plan: Textbox has no schema, routes to the active scene
-c27badb0b Close Fase 0 in progress log, start Fase 1
-e2521a6ab Fase 0.8: reserve DatabaseModel::SegmentationMode scaffolding
-7422b4ab6 Scene DTD becomes a dedicated file, mirroring changelog.dtd exactly
-50a6a59f3 Rename scene persistence key from idx to id, drop name attribute
-8130b5eba Revise scene identity key from schema name to numeric idx
-fbae3cb2c Update progress log: plan/progress separation, full commit list
-3616afa2e Remove stale [FEITO, commitar] tags from the plan
-9ee0eee19 Fase 3: SchemaView needs the same cross-scene suppression as relationships
-548e773ad Close per-scene SceneRect persistence design; revert Workspace naming
-c8236e1ae Update plan: Fase 0.7 done, pgmodeler-cli parity promoted to Fase 4
-24e233aef Fase 0.7: print and image export iterate every scene, no spatial composition
-191c51888 Fase 0.6: generalize Layers mutations across every scene
-7f055ea44 Update MULTI_SCENE_PROGRESS.md: Fase 0.5 done, next is 0.6
-9ad7c9073 Fase 0.5: use auto& for scene iteration, matching codebase style
-f670ccbcd Update plan: correct 0.5's scope after user review
-41874cdce Fase 0.5: ModelWidget::alignObjectsToGrid() applies to every scene
-2136562a9 Update plan: threshold segmentation stays naive, clustering deferred as a third mode
-9f22275a1 Add MULTI_SCENE_PROGRESS.md session log
-eb94f5b0e Update plan: document connectToActiveScene() and the resize-order gotcha
-394e405f5 Fase 0.4: ModelOverviewWidget reacts to s_activeSceneChanged
-278612c26 Update plan: document addScene() and Qt-containers decision
-5edaf29e0 Fase 0.3: fix eventFilter() scene identity check
-66e7602b6 Fase 0.1 (refinamento): extract addScene() private helper
-a66134e73 Fase 0.2: add setActiveScene() and s_activeSceneChanged
-21c79dfd9 Fase 0.1: introduce scenes collection in ModelWidget
-c29b147ce Add multi-scene support implementation plan
-```
-
 > A branch já foi recriada uma vez nesta iniciativa (histórico anterior perdido, plano
 > recommitado a partir da cópia em disco) — se o `git log` um dia parecer curto demais pro que
-> se espera, é por isso. O `MULTI_SCENE_PLAN.md` é a fonte de verdade, não o histórico de commits.
+> se espera, é por isso. Este arquivo (e o `MULTI_SCENE_PLAN.md`) são a fonte de verdade sobre
+> decisões e progresso; a lista de commits em si é o `git log` — não duplicada aqui.
 
 ## O que foi feito
 
