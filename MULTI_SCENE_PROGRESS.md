@@ -8,7 +8,8 @@
 
 - Branch: `multi-scene-support-2.1.x`.
 - **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1 a 1.6 concluídas e commitadas**
-  (1.2 recebeu um refinamento pequeno de deduplicação logo depois).
+  (1.2 recebeu um refinamento pequeno de deduplicação logo depois); **1.7 implementada, aguardando
+  teste manual** (ver abaixo).
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
@@ -40,9 +41,10 @@
   pode virar um teste próprio antes disso). Teste manual: com o combo de 1.3, criar tabelas em
   schemas/cenas diferentes e ligá-las por relacionamento — sem `RelationshipView` visível, sem
   crash; ligar duas tabelas do mesmo schema continua desenhando a linha normalmente.
-- **Próxima subtarefa: 1.7** — auditoria de `getOverlyingObject()` para relacionamentos (varrer
-  usos existentes que assumem não-nulo e corrigir os que quebram com a exceção legítima introduzida
-  em 1.6).
+- **1.7 implementada e buildada, aguardando teste manual do usuário antes de commitar** — 4 fixes
+  de null-check em call sites de `getOverlyingObject()` que crashavam com relacionamento
+  cross-scene. Ver detalhamento abaixo, em "O que foi feito". Depois de aprovada, próxima é a
+  **1.8** (marcador visual "cut-off").
 - **Pausa para review (2026-09-21)**: usuário testou `big_model.dbm` (o modelo denso usado como
   referência do problema original de lentidão) com a Fase 1 (por schema) até 1.6 aplicada. Resultado
   esperado, não um bug: a lentidão persiste porque esse modelo tem 4 schemas
@@ -264,6 +266,32 @@ subtarefa 1.1.
   dois nem compilam, vários têm asserções falhando, um crasha. Confirmado via `git log` que não são
   desta sessão nem desta feature — registrado no plano (seção 6) como bit-rot pré-existente, fora
   de escopo, não corrigido. Build completo (`gui` + `pgmodeler`) e o teste novo (4/4) passando.
+- **1.7** — auditados os 61 call sites de `getOverlyingObject()` do projeto; 4 crasham de verdade
+  com relacionamento cross-scene (nenhum tinha checagem de nulo), corrigidos com um `if(!x) return;`
+  logo após o cast:
+  - `ObjectsScene::finishObjectsMove()` ([objectsscene.cpp:1568-1577](libs/libcanvas/src/objectsscene.cpp#L1568)) —
+    arrastar um `SchemaView` varre `db_model->getObjects(Relationship/BaseRelationship, schema)` (não
+    filtrado por cena) e fazia `dynamic_cast<RelationshipView*>(...)->isSelected()` sem checar nulo.
+  - `ModelObjectsWidget` ([modelobjectswidget.cpp:264](libs/libgui/src/widgets/modelobjectswidget.cpp#L264)) —
+    Alt+clique num item da árvore chamava `scn_item->setSelected(true)` sem checar nulo.
+  - `ModelWidget::highlightObject()` ([modelwidget.cpp:5177](libs/libgui/src/widgets/modelwidget.cpp#L5177)) —
+    ação "Select" do menu de contexto (`action_select_object`, disponível pra qualquer
+    `BaseGraphicObject` quando acionada fora do canvas — confirmado em
+    [modelwidget.cpp:4837-4841](libs/libgui/src/widgets/modelwidget.cpp#L4837) que relacionamento
+    entra nessa condição) chamava `obj_view->setSelected(true)` sem checar nulo.
+  - `ModelWidget::breakRelationshipLine()` ([modelwidget.cpp:5344](libs/libgui/src/widgets/modelwidget.cpp#L5344)) —
+    chamava `rel_view->getConnectionPoint(...)` sem checar nulo.
+  **Confirmados seguros** (sem mudança): `selectAllObjects()`, `configureFadeMenu()`/`fadeObjects()`,
+  `updateObjectsOpacity()`, `getSceneForObject()` (já guardados); `BaseTableView::
+  selectRelationships()`/`selectTaggedTables()` (iteram listas que, por construção, nunca têm
+  relacionamento cross-scene — `connected_rels` só é populado por `RelationshipView`, e `Tag` não se
+  aplica a relacionamento); código interno de `RelationshipView` (só roda com as duas tabelas já
+  confirmadas na mesma cena); `handleObjectRemoval()` (já tratado desde o fix de remoção);
+  `pgmodeler-cli` (Fase 4, cena própria, fora de escopo); `copyObjects()` (não toca item gráfico).
+  Build limpo (`canvas`+`gui`+`pgmodeler`), `modelwidgettest` 4/4 sem regressão. **Sem teste manual
+  ainda** — os 4 fixes cobrem casos que só ficam alcançáveis de verdade com relacionamento
+  cross-scene já criado (possível desde a 1.6, via o combo de 1.3), mas nenhum tinha reprodução
+  automatizada; aguardando validação manual do usuário antes de commitar.
 
 ## Design de persistência por-cena (sem código ainda — vira 2.1/2.2 quando a Fase 2 chegar)
 
