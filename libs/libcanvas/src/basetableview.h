@@ -39,6 +39,8 @@
 #include "textpolygonitem.h"
 #include "attributestoggleritem.h"
 
+class CutoffItem;
+
 class __libcanvas BaseTableView: public BaseObjectView {
 	Q_OBJECT
 
@@ -55,6 +57,9 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		 * placed in a different scene. These relationships have no RelationshipView of their own,
 		 * being represented instead by a cut-off marker on each side. */
 		QList<BaseRelationship *> external_rels;
+
+		//! \brief Marker representing external_rels on the canvas. Null while external_rels is empty
+		CutoffItem *cutoff_item;
 
 	protected:		
 		//! \brief Stores the selected child objects in order to retrieve them in ObjectScene/ModelWidget
@@ -177,6 +182,10 @@ class __libcanvas BaseTableView: public BaseObjectView {
 
 		//! \brief Returns the list of relationships that connect this table to a table placed in a different scene
 		QList<BaseRelationship *> getExternalRelationships();
+
+		/*! \brief Returns, in scene coordinates, the point the cut-off marker's line attaches to
+		 * (title's right edge, vertically centered on the title) */
+		QPointF getCutoffAnchorPoint();
 
 		//! \brief This method just emits the signal to indicate that the relationships attached must be updated
 		void requestRelationshipsUpdate();

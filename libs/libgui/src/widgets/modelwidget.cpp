@@ -1318,6 +1318,20 @@ void ModelWidget::handleObjectRemoval(BaseObject *object)
 
 		if(item_scene)
 			item_scene->removeItem(item);
+		else if(graph_obj->getObjectType() == ObjectType::Relationship ||
+						graph_obj->getObjectType() == ObjectType::BaseRelationship)
+		{
+			// Cross-scene relationship: no RelationshipView, just clear the cut-off markers
+			BaseRelationship *rel = dynamic_cast<BaseRelationship *>(graph_obj);
+			BaseTableView *src_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::SrcTable)->getOverlyingObject()),
+										 *dst_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::DstTable)->getOverlyingObject());
+
+			if(src_view)
+				src_view->removeExternalRelationship(rel);
+
+			if(dst_view)
+				dst_view->removeExternalRelationship(rel);
+		}
 
 		//Updates the parent schema if the removed object were a table or view
 		if(graph_obj->getSchema() &&

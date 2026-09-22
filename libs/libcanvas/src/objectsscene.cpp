@@ -25,6 +25,7 @@
 #include "graphicalview.h"
 #include "tableview.h"
 #include "schemaview.h"
+#include "cutoffitem.h"
 #include "databasemodel.h"
 #include "customuistyle.h"
 #include <QScrollBar>
@@ -1455,7 +1456,9 @@ void ObjectsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 					for(QGraphicsItem *item : items)
 					{
 						obj_view=dynamic_cast<BaseObjectView *>(item);
-						obj_view->togglePlaceholder(true);
+
+						if(obj_view)
+							obj_view->togglePlaceholder(true);
 					}
 				}
 
@@ -1593,8 +1596,9 @@ void ObjectsScene::finishObjectsMove(const QPointF &pnt_end)
 
 	for(auto &item : items)
 	{
-		// Ignoring table objects items
-		if(dynamic_cast<TableObjectView *>(item))
+		// Ignoring table objects items and cut-off markers
+		if(dynamic_cast<TableObjectView *>(item) ||
+			 dynamic_cast<CutoffItem *>(item))
 			continue;
 
 		rel=dynamic_cast<RelationshipView *>(item);
@@ -1772,6 +1776,11 @@ void ObjectsScene::alignObjectsToGrid()
 					if(lab)
 						lab->setPos(this->alignPointToGrid(lab->pos()));
 				}
+			}
+			else if(dynamic_cast<CutoffItem *>(item))
+			{
+				/* Cut-off markers are anchored to their table's title and reposition themselves
+				 * through it -- aligning them independently would break that anchor */
 			}
 			else if(!dynamic_cast<SchemaView *>(item))
 				item->setPos(this->alignPointToGrid(item->pos()));
