@@ -975,21 +975,27 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
          relacionamento.
        - **Como sincronizar**: `CutoffItem::itemChange()` (`ItemPositionHasChanged`) escreve a
          posição atual de volta no atributo da tabela pai sempre que o usuário arrasta o marcador.
-       - **[Requer fechamento de decisão com o usuário] Posição relativa vs. absoluta**: coordenada
-         absoluta de cena deixa a posição salva desatualizada quando a tabela é movida sem tocar no
-         cutoff (hoje ele se reancora automaticamente via `updatePosition()`/sinais de movimento da
-         tabela — ver 1.8); offset relativo ao ponto de ancoragem (`getCutoffAnchorPoint()`)
-         preserva esse comportamento por padrão e só persiste o desvio manual do usuário, mas exige
-         decidir a semântica quando tabela e cutoff se movem juntos (ex. seleção múltipla).
-         Recomendação preliminar: offset relativo ao anchor. Também em aberto: se o atributo deve
-         sobreviver na tabela quando o cutoff é destruído por promoção (1.9, última relação
-         cross-scene virou in-scene) e um novo cutoff nascer depois — restaurar o offset salvo ou
-         voltar à âncora padrão.
-       - **Formato XML**: preferência do usuário — atributo simples na tag existente de
-         table/view/foreign table (ex. `cutoff-pos="x,y"`), em vez de elemento XML novo dedicado —
-         mais simples e retrocompatível (arquivo sem o atributo não tem posição customizada, cutoff
-         nasce na âncora padrão como hoje). Precisa atualizar o(s) `.sch` de table/view/foreign
-         table e o parser de leitura correspondente.
+       - **Posição relativa vs. absoluta (fechado, 2026-09-22)**: relativa ao ponto de ancoragem
+         (`getCutoffAnchorPoint()`), não absoluta de cena — preserva o comportamento de seguir a
+         tabela automaticamente (`updatePosition()`) por padrão, só o desvio manual do usuário fica
+         persistido. Quando o cutoff é destruído por promoção (1.9) e um novo nascer depois na
+         mesma tabela, o offset salvo é **descartado** (não restaurado) — o novo cutoff nasce na
+         âncora padrão.
+       - **Formato XML (fechado, 2026-09-22)**: não são atributos simples nem um elemento novo com
+         tag própria — é um **segundo `<position>`** dentro da tag de table/view/foreign table
+         (que já emite um `<position>` para a posição da própria tabela), diferenciado por um
+         atributo `id="cutoff"` (a posição da tabela não leva `id` — sua ausência já indica "é a
+         posição do próprio objeto"). Como `<position>` é reutilizado por muitos outros objetos
+         (pontos de relacionamento, distância de rótulo) e o motor de template do `SchemaParser`
+         exige que todo atributo referenciado num `.sch` esteja pré-declarado no mapa de atributos
+         de QUALQUER chamador (senão lança `UnkownAttribute`), adicionar `%if {id}...%end`
+         diretamente no `position.sch` compartilhado quebraria todo mundo que já usa esse template
+         sem declarar `id`. Solução: `position.sch` continua intocado; um `.sch` novo e dedicado
+         (`cutoff-pos.sch`) gera `<position id="cutoff" x=".." y=".."/>` com o `id` fixo no
+         literal do template (não é uma variável), então não herda essa exigência. O DTD
+         compartilhado de `<position>` (`baseelements.dtd`) ganhou `id CDATA #IMPLIED` (validação
+         é por nome de elemento, não por qual `.sch` gerou); os DTDs de table/view/foreigntable
+         passaram a aceitar um segundo `position?` opcional na sequência.
        Depende de: 1.8.
 
 1.9. **Promoção/rebaixamento dinâmico** — `moveToSchema()`
