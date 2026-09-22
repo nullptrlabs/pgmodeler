@@ -994,6 +994,16 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
       implementar a política escolhida entre as opções 1/2/3 da subseção dedicada (recomendação
       preliminar: opção 3). Depende de: 1.13.
 
+1.15. **Cor exclusiva para o marcador cut-off** — hoje `CutoffItem` reaproveita
+      `Attributes::PositionInfo` (fill/border/font) pra desenhar a linha e o rótulo, sem ter
+      identidade visual própria. Precisa de: (a) nova chave em `Attributes::` (libparsers) pra
+      identificar o elemento; (b) entrada nova em `AppearanceConfigWidget::element_cmb`
+      (`appearanceconfigwidget.cpp`, junto de `conf_ids`/`obj_conf_ids`) pra expor fill/border/font
+      configuráveis pelo usuário, do mesmo jeito que os demais elementos gráficos; (c) atualizar o
+      arquivo de configuração de aparência (tema padrão + persistência) com a chave nova; (d)
+      trocar `CutoffItem` (linha, fundo do rótulo, texto, `obj_selection`) de `PositionInfo` pra
+      essa chave nova. Depende de: 1.8.
+
 > **Gate de aceite da fase (não é commit de código)**: modelo grande
 > (`/home/raphael/dbm_models/big_model.dbm`) segmentado por schema deve navegar (usando o combo de
 > 1.3), editar, remover (com e sem cascade) e desfazer/refazer corretamente, com conectores
