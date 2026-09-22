@@ -16,8 +16,15 @@
   visual própria, o que implica chave nova em `Attributes::`, entrada nova em
   `AppearanceConfigWidget::element_cmb`/`conf_ids`/`obj_conf_ids` e atualização do arquivo de
   configuração de aparência. Só registrada, sem código ainda. Depende de: 1.8 (já feita).
-- **1.8.1 implementada (2026-09-22), aguardando teste manual do usuário.** Movimentação livre do
-  cutoff + persistência de posição em XML. Decisões fechadas pelo usuário antes de codar: posição
+- **1.8.1 implementada (2026-09-22), ainda em rodadas de teste manual/fix com o usuário — não
+  fechada.** Commits até agora: `3a4f4f4a9`/`02508f6ab` (movimentação livre + persistência XML),
+  `0281a1d85` (linha dinâmica tabela↔marcador + clamp geométrico contra o retângulo),
+  `95d09e331` (caixa do rótulo reposicionada por direção contínua em vez de offset fixo; guard de
+  órbita impedindo o marcador de invadir o retângulo da tabela). Pendente, ainda não commitado: fix
+  de uma regressão de precedência de operadores (`*`/`+`) introduzida por um refactor do próprio
+  usuário via clang-tidy, que tinha feito o deslocamento incorreto voltar — ver detalhamento abaixo.
+  Subtarefa cobre movimentação livre do cutoff + persistência de posição em XML. Decisões fechadas
+  pelo usuário antes de codar: posição
   relativa ao anchor (não absoluta), e offset descartado (não restaurado) quando o cutoff é
   destruído e um novo nasce depois na mesma tabela.
   - `CutoffItem` ganhou a flag `ItemIsMovable`. Posição é sincronizada em duas direções:
@@ -169,8 +176,66 @@
          constante `MaxOffsetDistance`, incluindo os cantos.
     Build limpo (`canvas`+`gui`+`pgmodeler`), `modelwidgettest` 4/4 sem regressão, binário
     reinstalado (`cmake --build . --target install`) pra refletir no `build/pgmodeler` que o usuário
-    roda. Nenhum arquivo `.sch`/`.dtd` tocado nesta rodada (só `cutoffitem.h`/`.cpp`). Não commitado
-    ainda — aguardando teste manual do usuário.
+    roda. Nenhum arquivo `.sch`/`.dtd` tocado nesta rodada (só `cutoffitem.h`/`.cpp`). Commitado
+    (`0281a1d85`).
+  - **Terceira rodada: caixa do rótulo desalinhada da linha, reportada com capturas de tela
+    (2026-09-22)** — usuário testou o resultado da rodada anterior e reportou, com screenshots, que
+    a distância entre a caixa "Cross rels: N" e a tabela não era uniforme conforme o marcador era
+    arrastado ao redor da tabela, e que no pior caso (cutoff arrastado pra esquerda da tabela) a
+    caixa sumia atrás dela. Causa raiz: `updateLabel()` posicionava `label`/`label_bg` num offset
+    local **fixo** em relação a `this->pos()` (`QPointF(MaxOffsetDistance, -altura/2)`) — sempre à
+    direita, herdado da 1.8 quando `pos()` era fixo no canto do título e a caixa só precisava
+    "flutuar" pra direita. Na 1.8.1, `pos()` virou o próprio ponto arrastável (já clampado a no
+    máximo `MaxOffsetDistance` de qualquer lado da tabela), mas a caixa continuava desenhada sempre
+    à direita dele — arrastando o marcador pra esquerda da tabela, o offset `+MaxOffsetDistance` em
+    x empurrava a caixa de volta em direção à tabela (podendo cair dentro dela); acima/abaixo, a
+    caixa sempre deslocava pra direita em vez de acompanhar o eixo certo, daí a distância não
+    uniforme. A linha (`updateLine()`) em si estava correta — ela só documentava fielmente a
+    posição errada da caixa, não causava o problema. Perguntado ao usuário se a orientação da caixa
+    devia ser por "snap cardinal" (lado dominante, sem rotação) ou "direção contínua" (vetor exato
+    tabela→`pos()`, girando suavemente) — escolhida a **direção contínua**. Implementação: novo
+    `CutoffItem::getOutwardDirection()` (vetor unitário de `table->sceneBoundingRect()` até
+    `this->pos()`, via `getClosestTablePoint()` novo, fatorado do clamp de arrasto já existente) e
+    `updateLabelPosition()` (recalcula `box_pos` a partir dessa direção, `dir.x()/dir.y() ∈ [-1,1]`
+    escalando `MaxOffsetDistance` por eixo — reduz exatamente à fórmula antiga quando `dir=(1,0)`).
+    Chamado não só de `updateLabel()` (texto/tamanho muda) como também de `itemChange
+    (ItemPositionHasChanged)` e `updatePosition()` (posição/geometria da tabela muda) — antes só a
+    linha era recalculada nesses pontos, a caixa nunca.
+  - **Guard de órbita: cutoff não pode mais invadir o retângulo da tabela (2026-09-22)** — pedido
+    explícito do usuário depois da rodada acima: o marcador deve só "orbitar" a tabela, nunca ficar
+    "em cima" dela. Causa raiz do gap: o clamp de `ItemPositionChange` (rodada anterior, ponto 2
+    acima) só limitava a distância **máxima** pra fora do retângulo — para um ponto proposto **já
+    dentro** do retângulo, `qBound()` por eixo é um no-op (devolve o próprio ponto), então a
+    distância medida dava 0 e nada impedia o arrasto pra dentro da tabela. Novo
+    `CutoffItem::clampToTableOrbit()` (substitui o corpo inline de `ItemPositionChange`): se o ponto
+    proposto cai dentro do retângulo, empurra pra borda mais próxima em vez de aceitá-lo; caso
+    contrário, mantém o comportamento já existente (recorta a no máximo `MaxOffsetDistance` pra
+    fora). A decisão de qual borda é mais próxima ficou num helper compartilhado,
+    `getNearestEdgeNormal()`, usado tanto pelo clamp quanto por `getOutwardDirection()` — esta
+    última precisava do mesmo ajuste, já que caía num fallback fixo "direita" sempre que `pos()`
+    estava exatamente sobre uma borda (distância 0 pro `getClosestTablePoint()`, vetor nulo); sem
+    o fallback certo, um cutoff encostado na borda esquerda/superior teria a caixa desenhada de
+    volta pra dentro da tabela. Commitado (`95d09e331`, sem coautoria a pedido do usuário).
+  - **Regressão introduzida por um refactor do usuário (clang-tidy), achada e corrigida na mesma
+    sessão** — depois do commit acima, o usuário fez refatorações próprias motivadas por warnings do
+    clang-tidy (largura de linha/borda escalada por DPI via novo `getLinePenWidth()`, reorganização
+    de `public`/`private` no header) e pediu pra eu só ajustar uma warning residual: falta de
+    parênteses explícitos em `updateLabelPosition()` entre os operadores `*` e os termos de soma,
+    em `dir.x() * (box_size.width() / 2 + MaxOffsetDistance) - box_size.width() / 2`. Corrigi
+    adicionando parênteses — mas o usuário reportou, no teste seguinte, que o deslocamento original
+    (rodada da caixa desalinhada, ver acima) tinha voltado. Investigação: a reescrita que eu apliquei
+    preservava a matemática original corretamente, mas notei que o arquivo no disco já continha uma
+    reescrita diferente, feita antes da minha (provavelmente por um auto-fix do clang-tidy que o
+    usuário aplicou) — `(dir.x() * (box_size.width() / 2)) + MaxOffsetDistance - (box_size.width() / 2)`
+    — que **redistribuiu errado**: tirou `MaxOffsetDistance` de dentro da multiplicação por
+    `dir.x()`/`dir.y()`, somando ele **inteiro e sem escala** em ambos os eixos sempre, em vez de só
+    proporcionalmente ao eixo em que o marcador de fato estava afastado (ex.: cutoff embaixo da
+    tabela, `dir=(0,1)`, deveria ter offset horizontal zero, mas a fórmula errada somava `+20` no x
+    de qualquer jeito). Fix: reescrita para `(dir.x() * ((box_size.width() / 2) + MaxOffsetDistance))
+    - (box_size.width() / 2)` — parênteses explícitos em todo subtermo (silencia o linter) sem mudar
+    o resultado numérico da fórmula original. Só a edição pontual feita, sem build completo desta
+    vez (novo hábito de trabalho combinado nesta sessão — ver item 8 na lista de convenções mais
+    abaixo). Ainda não commitado — aguardando o usuário buildar e testar.
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
@@ -646,6 +711,14 @@ Regras de trabalho combinadas nesta sessão — valem pro resto do plano, não s
    não deixar código velho ficar contradizendo design novo silenciosamente. Confirmado pelo usuário
    depois que isso pegou um bug real no handler de `s_sceneRectChanged` (ver seção de design do
    retângulo de cena acima) que ele mesmo tinha esquecido que existia.
+8. **Build sob demanda: parar de compilar/instalar a aplicação inteira (ou testes) a cada
+   subtarefa/edição** (2026-09-22). Antes disso, cada subtarefa fechava com um build completo
+   (`gui`+`pgmodeler`, às vezes `modelwidgettest`) e `cmake --build . --target install` pra
+   refletir no `build/pgmodeler` que o usuário roda. Usuário pediu pra isso parar: ele builda por
+   conta própria e avisa se houver erro de sintaxe/compilação. No máximo um build rápido e pontual
+   da lib/arquivo alterado (ex. `make canvas` depois de mexer em `libs/libcanvas/`) como checagem
+   de sintaxe é aceitável — nunca encadear pra `gui`/`pgmodeler`/alvos de teste/`install` por conta
+   própria a partir de agora.
 
 ## Bug encontrado e corrigido durante teste manual
 
