@@ -1569,11 +1569,16 @@ void ObjectsScene::finishObjectsMove(const QPointF &pnt_end)
 				{
 					base_rel=dynamic_cast<BaseRelationship *>(rel);
 
+					// Cross-scene relationships have no RelationshipView -- nothing to move
+					RelationshipView *base_rel_view = dynamic_cast<RelationshipView *>(base_rel->getOverlyingObject());
+
+					if(!base_rel_view)
+						continue;
+
 					/* If the relationship contains points and it is not selected then it will be included on the list
 						 in order to move their custom line points */
-					if(!dynamic_cast<RelationshipView *>(base_rel->getOverlyingObject())->isSelected() &&
-							!base_rel->getPoints().empty())
-						rel_list.push_back(dynamic_cast<QGraphicsItem *>(base_rel->getOverlyingObject()));
+					if(!base_rel_view->isSelected() && !base_rel->getPoints().empty())
+						rel_list.push_back(base_rel_view);
 				}
 
 				QList<BaseObjectView *> list = sch_view->getChildren();

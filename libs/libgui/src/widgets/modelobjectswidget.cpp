@@ -263,6 +263,10 @@ void ModelObjectsWidget::selectObject()
 
 			QGraphicsItem *scn_item = dynamic_cast<QGraphicsItem *>(graph_obj->getOverlyingObject());
 
+			// Cross-scene relationships have no graphical item to highlight
+			if(!scn_item)
+				return;
+
 			scn_item->setSelected(true);
 			model_wgt->scene->views().at(0)->centerOn(scn_item);
 		}
