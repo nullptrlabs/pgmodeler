@@ -8,9 +8,14 @@
 
 - Branch: `multi-scene-support-2.1.x`.
 - **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1 a 1.8 concluídas, testadas
-  manualmente pelo usuário e prontas pra commit** (1.2 recebeu um refinamento pequeno de
-  deduplicação logo depois). Próxima: **1.9** (promoção/rebaixamento dinâmico de relacionamento
-  cross-scene, ver plano).
+  manualmente pelo usuário e commitadas** (1.2 recebeu um refinamento pequeno de deduplicação logo
+  depois). Próxima: **1.9** (promoção/rebaixamento dinâmico de relacionamento cross-scene, ver
+  plano).
+- **Nova subtarefa registrada no plano (2026-09-22): 1.15 — cor exclusiva para o marcador
+  cut-off.** Hoje `CutoffItem` reaproveita `Attributes::PositionInfo`; usuário pediu identidade
+  visual própria, o que implica chave nova em `Attributes::`, entrada nova em
+  `AppearanceConfigWidget::element_cmb`/`conf_ids`/`obj_conf_ids` e atualização do arquivo de
+  configuração de aparência. Só registrada, sem código ainda. Depende de: 1.8 (já feita).
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
