@@ -16,15 +16,16 @@
   visual própria, o que implica chave nova em `Attributes::`, entrada nova em
   `AppearanceConfigWidget::element_cmb`/`conf_ids`/`obj_conf_ids` e atualização do arquivo de
   configuração de aparência. Só registrada, sem código ainda. Depende de: 1.8 (já feita).
-- **1.8.1 implementada (2026-09-22), ainda em rodadas de teste manual/fix com o usuário — não
-  fechada.** Commits até agora: `3a4f4f4a9`/`02508f6ab` (movimentação livre + persistência XML),
+- **1.8.1 implementada, ainda em rodadas de teste manual/fix com o usuário — não fechada.**
+  Commits até agora: `3a4f4f4a9`/`02508f6ab` (movimentação livre + persistência XML),
   `0281a1d85` (linha dinâmica tabela↔marcador + clamp geométrico contra o retângulo),
   `95d09e331` (caixa do rótulo reposicionada por direção contínua em vez de offset fixo; guard de
-  órbita impedindo o marcador de invadir o retângulo da tabela). Pendente, ainda não commitado: fix
-  de uma regressão de precedência de operadores (`*`/`+`) introduzida por um refactor do próprio
-  usuário via clang-tidy, que tinha feito o deslocamento incorreto voltar — ver detalhamento abaixo.
-  Subtarefa cobre movimentação livre do cutoff + persistência de posição em XML. Decisões fechadas
-  pelo usuário antes de codar: posição
+  órbita impedindo o marcador de invadir o retângulo da tabela), `699b3562b` (2026-09-23 — fix do
+  bug real de persistência: a posição do cutoff nunca chegava no XML da tabela, porque
+  `setPositionAttribute()` serializava a posição da própria tabela em vez da do marcador; guard
+  `repositioning` removido de propósito, não por engano — decisão do usuário, ver detalhamento
+  abaixo). Subtarefa cobre movimentação livre do cutoff + persistência de posição em XML. Decisões
+  fechadas pelo usuário antes de codar: posição
   relativa ao anchor (não absoluta), e offset descartado (não restaurado) quando o cutoff é
   destruído e um novo nasce depois na mesma tabela.
   - `CutoffItem` ganhou a flag `ItemIsMovable`. Posição é sincronizada em duas direções:
@@ -235,7 +236,45 @@
     - (box_size.width() / 2)` — parênteses explícitos em todo subtermo (silencia o linter) sem mudar
     o resultado numérico da fórmula original. Só a edição pontual feita, sem build completo desta
     vez (novo hábito de trabalho combinado nesta sessão — ver item 8 na lista de convenções mais
-    abaixo). Ainda não commitado — aguardando o usuário buildar e testar.
+    abaixo). Commitado junto com a correção de persistência XML abaixo (`699b3562b`), já que
+    nenhum dos dois tinha sido commitado individualmente até então.
+  - **Bug real: posição do cutoff nunca era persistida no XML da tabela (2026-09-23)** — usuário
+    começou um refactor próprio pra reaproveitar `BaseGraphicObject::setPositionAttribute()` (em
+    vez do `BaseTable::setCutoffPositionAttribute()`/`cutoff-pos.sch` dedicados da 1.8.1 original)
+    e, nesse caminho, notou que a posição do cutoff no XML não acompanhava o arrasto do marcador.
+    Primeira suspeita do usuário: o guard `repositioning` em `CutoffItem` (comentou ele, sem
+    resolver o problema, e me pediu pra investigar). Causa raiz real, achada por leitura de código:
+    `BaseGraphicObject::setPositionAttribute(pos_attr, id)` sempre serializava `this->position` — a
+    posição **da própria tabela** — não importa qual `pos_attr`/`id` fosse passado; os call sites do
+    cutoff (`physicaltable.cpp`/`view.cpp`, `setPositionAttribute(Attributes::CutoffPos,
+    Attributes::Cutoff)`) só trocavam o nome do atributo/`id` gravado, nunca a fonte dos números —
+    então o `cutoff-pos` no XML sempre espelhava o `<position>` normal da tabela, e só "mudava"
+    quando a própria tabela se movia (nunca quando só o marcador era arrastado). O `repositioning`
+    nunca teve relação com isso — ele só controlava se `BaseTable::setCutoffPosition()` (setter em
+    memória, não geração de XML) rodava durante o reposicionamento programático.
+    - **Fix, já implementado pelo usuário antes da minha resposta** (eu só confirmei por leitura de
+      código + `make core`): `setPositionAttribute()` virou duas sobrecargas — a antiga (sem
+      parâmetros, mantém o comportamento de sempre serializar `position`) e uma nova,
+      `setPositionAttribute(const QPointF &pos, const QString &pos_attr, const QString &id = "")`,
+      que serializa um ponto explícito. `PhysicalTable`/`View` passaram a chamar
+      `setPositionAttribute(cutoff_pos, Attributes::CutoffPos, Attributes::Cutoff)`.
+      `BaseTable::setCutoffPositionAttribute()` e o `.sch` dedicado (`cutoff-pos.sch`) foram
+      removidos — `position.sch` (compartilhado) ganhou `%if {id}...%end` de verdade. O risco que
+      motivou o `.sch` separado na primeira versão da 1.8.1 (`UnkownAttribute` se `id` não estiver
+      pré-declarado por TODO chamador do template) foi resolvido porque a sobrecarga nova sempre
+      atribui `attributes[Attributes::Id] = id` (vazio por padrão) antes de chamar o template —
+      todo caminho que passa por `position.sch` agora pré-declara `id`, não só o do cutoff. Detalhe
+      completo registrado no plano, subtarefa 1.8.1 (nota "Atualização 2026-09-23 (consolidação)").
+    - **Decisão do usuário sobre o `repositioning`: não restaurar, de propósito** — eu tinha
+      sugerido restaurar o guard já que ele não era a causa do bug. Usuário discordou: quer que
+      **todo** reposicionamento do cutoff (inclusive o eco programático de quando a própria tabela
+      se move) chame `BaseTable::setCutoffPosition()`, que sempre marca `setCodeInvalidated(true)`
+      — o objetivo é sinalizar "modelo modificado" ao usuário de forma consistente, mesmo quando o
+      offset recalculado é numericamente igual ao anterior. `repositioning` foi removido por
+      completo (membro, comentário de doc, os dois pontos de uso) — não é uma pendência, é
+      definitivo.
+    Build de conferência: `make core` (já estava com cache válido — usuário tinha buildado antes de
+    reportar). Commitado (`699b3562b`, sem coautoria a pedido do usuário).
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,

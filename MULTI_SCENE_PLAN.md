@@ -985,17 +985,29 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
          tag própria — é um **segundo `<position>`** dentro da tag de table/view/foreign table
          (que já emite um `<position>` para a posição da própria tabela), diferenciado por um
          atributo `id="cutoff"` (a posição da tabela não leva `id` — sua ausência já indica "é a
-         posição do próprio objeto"). Como `<position>` é reutilizado por muitos outros objetos
-         (pontos de relacionamento, distância de rótulo) e o motor de template do `SchemaParser`
-         exige que todo atributo referenciado num `.sch` esteja pré-declarado no mapa de atributos
-         de QUALQUER chamador (senão lança `UnkownAttribute`), adicionar `%if {id}...%end`
-         diretamente no `position.sch` compartilhado quebraria todo mundo que já usa esse template
-         sem declarar `id`. Solução: `position.sch` continua intocado; um `.sch` novo e dedicado
-         (`cutoff-pos.sch`) gera `<position id="cutoff" x=".." y=".."/>` com o `id` fixo no
-         literal do template (não é uma variável), então não herda essa exigência. O DTD
-         compartilhado de `<position>` (`baseelements.dtd`) ganhou `id CDATA #IMPLIED` (validação
-         é por nome de elemento, não por qual `.sch` gerou); os DTDs de table/view/foreigntable
-         passaram a aceitar um segundo `position?` opcional na sequência.
+         posição do próprio objeto"). O DTD compartilhado de `<position>` (`baseelements.dtd`)
+         ganhou `id CDATA #IMPLIED`; os DTDs de table/view/foreigntable passaram a aceitar um
+         segundo `position?` opcional na sequência.
+       - **Atualização 2026-09-23 (consolidação, achado de bug real)**: a primeira implementação
+         evitou tocar `position.sch` (motor do `SchemaParser` exige todo atributo referenciado num
+         `.sch` pré-declarado no mapa de QUALQUER chamador) criando um `.sch` dedicado
+         (`cutoff-pos.sch`) com `id="cutoff"` fixo no literal. Essa duplicação escondeu um bug real:
+         `BaseGraphicObject::setPositionAttribute()` (o método comum usado tanto pra posição própria
+         quanto, por engano, reaproveitado pro cutoff) sempre serializava `this->position` — o x/y
+         da própria tabela — não importa qual atributo/id fosse passado, então o `cutoff-pos`
+         gravado no XML era sempre uma cópia do `<position>` normal da tabela, nunca refletindo o
+         offset real do marcador arrastado. Corrigido consolidando pra um único caminho: `.sch`
+         dedicado removido; `position.sch` ganhou `%if {id}...%end` de verdade, e
+         `setPositionAttribute()` virou duas sobrecargas —
+         `setPositionAttribute()` (mantém o comportamento antigo, serializa `position`) e
+         `setPositionAttribute(const QPointF &pos, const QString &pos_attr, const QString &id = "")`
+         (serializa um ponto explícito). A sobrecarga nova sempre atribui `attributes[Attributes::Id]
+         = id` (vazio por padrão) antes de chamar o template — isso garante que `id` esteja
+         pré-declarado no mapa em **todo** caminho que passa por `position.sch` agora (não só o do
+         cutoff), eliminando o risco de `UnkownAttribute` que motivou o `.sch` separado na primeira
+         versão. `PhysicalTable`/`View` chamam
+         `setPositionAttribute(cutoff_pos, Attributes::CutoffPos, Attributes::Cutoff)` no lugar do
+         antigo `BaseTable::setCutoffPositionAttribute()` (removido, junto com `cutoff-pos.sch`).
        Depende de: 1.8.
 
 1.9. **Promoção/rebaixamento dinâmico** — `moveToSchema()`
