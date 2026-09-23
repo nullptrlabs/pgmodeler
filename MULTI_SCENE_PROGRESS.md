@@ -7,6 +7,14 @@
 ## Estado atual
 
 - Branch: `multi-scene-support-2.1.x`.
+- **Achado colateral, sem relação com multi-cena (2026-09-23, `dedf21c1e`)**: usuário testando com
+  ASan pegou um crash (`new-delete-type-mismatch`) ao abrir/fechar o formulário de edição de tabela
+  — `Element::~Element()` não era `virtual`, então `ElementsTableWidget::~ElementsTableWidget()`
+  (`delete handled_elem`, um `Element*` que na prática aponta pra `PartitionKey`/`IndexElement`/
+  `ExcludeElement`) era UB clássico de destrutor não-virtual. Bug pré-existente, reproduzível em
+  qualquer branch — `git log` confirma que nenhum commit desta feature tocou `element.h`/
+  `elementstablewidget.*`. Corrigido com uma linha (`virtual ~Element() = default;`), a pedido do
+  usuário, mesmo fora do escopo da 1.9. `make core` limpo.
 - **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1 a 1.8 concluídas, testadas
   manualmente pelo usuário e commitadas** (1.2 recebeu um refinamento pequeno de deduplicação logo
   depois). Próxima: **1.9** (promoção/rebaixamento dinâmico de relacionamento cross-scene, ver
