@@ -99,9 +99,21 @@ void BaseGraphicObject::setLayersAttribute()
 
 void BaseGraphicObject::setPositionAttribute()
 {
-	attributes[Attributes::XPos]=QString("%1").arg(position.x());
-	attributes[Attributes::YPos]=QString("%1").arg(position.y());
-	attributes[Attributes::Position]=schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
+	setPositionAttribute(position, Attributes::Position);
+}
+
+void BaseGraphicObject::setPositionAttribute(const QPointF &pos, const QString &pos_attr, const QString &id)
+{
+	if(pos_attr.isEmpty() ||
+		 std::isnan(pos.x()) ||
+		 std::isnan(pos.y()))
+		return;
+
+	attributes[Attributes::Id] = id;
+	attributes[Attributes::XPos] = QString("%1").arg(pos.x());
+	attributes[Attributes::YPos] = QString("%1").arg(pos.y());
+	attributes[pos_attr] =
+			schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
 }
 
 void  BaseGraphicObject::setPosition(const QPointF &pos)

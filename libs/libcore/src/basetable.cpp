@@ -214,17 +214,6 @@ void BaseTable::resetCutoffPosition()
 	setCutoffPosition(QPointF(DNaN, DNaN));
 }
 
-void BaseTable::setCutoffPositionAttribute()
-{
-	if(std::isnan(cutoff_pos.x()))
-		return;
-
-	attribs_map cutoff_attribs;
-	cutoff_attribs[Attributes::XPos] = QString("%1").arg(cutoff_pos.x());
-	cutoff_attribs[Attributes::YPos] = QString("%1").arg(cutoff_pos.y());
-	attributes[Attributes::CutoffPos] = schparser.getSourceCode(Attributes::CutoffPos, cutoff_attribs, SchemaParser::XmlCode);
-}
-
 std::vector<BaseObject *> BaseTable::getDependencies(bool inc_indirect_deps, const std::vector<ObjectType> &excl_types, bool rem_duplicates)
 {
 	if(inc_indirect_deps)

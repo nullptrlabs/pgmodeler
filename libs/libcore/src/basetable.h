@@ -62,9 +62,6 @@ class __libcore BaseTable: public BaseGraphicObject {
 		 * A NaN point means no custom position was set -- the marker uses the default anchor */
 		QPointF cutoff_pos;
 
-		//! \brief Fills the cutoff-pos XML element (a second <position>, id="cutoff") when a custom position is set
-		void setCutoffPositionAttribute();
-
 	public:
 		enum TableSection: unsigned {
 			AttribsSection,
