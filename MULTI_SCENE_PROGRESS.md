@@ -18,9 +18,10 @@
   configuração de aparência. Só registrada, sem código ainda. Depende de: 1.8 (já feita).
 - **1.8.1 fechada (2026-09-23, confirmada pelo usuário depois de uma auditoria de código
   ponta a ponta contra o texto da subtarefa no plano).**
-- **1.9 implementada em três subtarefas (2026-09-23, `2ef548b59`/`ab6823a8f`/`04aea9ef2`), mais um
-  commit de estilo (`7adc1c7a7`) — aguardando teste manual do usuário, não fechada.** Ver
-  detalhamento completo abaixo. Próxima, depois de
+- **1.9 implementada em quatro subtarefas (2026-09-23, `2ef548b59`/`ab6823a8f`/`04aea9ef2`/
+  `f4b104d04`), mais um commit de estilo (`7adc1c7a7`) — aguardando teste manual/confirmação por
+  ASan do usuário, não fechada.** A 1.9.4 corrige um crash real (heap-use-after-free) achado pelo
+  usuário via ASan. Ver detalhamento completo abaixo. Próxima, depois de
   aprovada: **1.10** (destruição de cena ao remover schema).
   Commits até agora: `3a4f4f4a9`/`02508f6ab` (movimentação livre + persistência XML),
   `0281a1d85` (linha dinâmica tabela↔marcador + clamp geométrico contra o retângulo),
@@ -341,6 +342,42 @@
     não precisou de tratamento especial "objeto novo vs. editado". Build de conferência: `make gui`
     (é um método template, instanciado em vários pontos de `showObjectForm()` — só um build da lib
     inteira confirma todas as instanciações), limpo. **Sem teste manual do usuário ainda**.
+  - **1.9.4 — crash real (heap-use-after-free), achado pelo usuário via ASan (2026-09-23,
+    `f4b104d04`)**: usuário reportou, com log do AddressSanitizer anexado, que mover todas as
+    tabelas de um schema pra outro e depois fechar o modelo completamente crashava a aplicação.
+    Reprodução: modelo com múltiplos schemas/cenas, mover todas as tabelas de um schema pra outro
+    deixando um auto-relacionamento (`SrcTable == DstTable`) na tabela movida — ao voltar pra cena
+    do schema de origem (agora sem tabelas), sobrava um `RelationshipView` órfão lá.
+    - **Leitura do log ASan**: heap-use-after-free em `BaseTableView::removeConnectedRelationship()`
+      (basetableview.cpp:323), chamado de `RelationshipView::disconnectTables()`, chamado de
+      `ObjectsScene::detachItem()`/`removeItem()`, chamado de dentro de `~ObjectsScene()`
+      (objectsscene.cpp:147 — a fase que varre `this->items()` chamando `removeItem()` por tipo,
+      relacionamentos primeiro). O ponteiro lido já tinha sido `delete`ado — rastreando a pilha de
+      "freed by": um `TableView::~TableView()` chamado de **outro** `~ObjectsScene()`
+      (objectsscene.cpp:158, o loop de dreno de `removed_objs`). Ou seja: duas cenas diferentes
+      sendo destruídas no fechamento do modelo, cada uma limpando só os próprios itens — a segunda
+      cena tinha uma `RelationshipView` cujo `tables[]` apontava pra uma `TableView` que já tinha
+      sido liberada pela primeira cena minutos antes (no mesmo teardown).
+    - **Causa raiz**: `getRelationshipPartner()` (1.9.2), pra um auto-relacionamento, resolve o
+      parceiro como a própria tabela (`SrcTable == tab` → retorna `DstTable`, que é a mesma tabela).
+      Depois que `tab_view` já foi relocado pra cena nova, `partner_view->scene() == tab_scene`
+      fica trivialmente verdadeiro — `reevaluateTableRelationships()` concluía "parceiro já está na
+      cena certa, nada a fazer" pra esse relacionamento. Mas **nada nunca relocava a
+      `RelationshipView` em si** — `moveToSchema()` (1.9.1) e `relocateEditedObject()` (1.9.3) só
+      chamam `ObjectsScene::relocateItem()` no item da própria tabela, nunca nos relacionamentos
+      conectados a ela. Resultado: a view do auto-relacionamento ficava fisicamente presa na cena
+      antiga, enquanto sua (única) tabela já vivia na cena nova — um ponteiro cruzado entre cenas
+      que só explode quando as duas cenas são destruídas, cada uma sem saber da outra.
+    - **Fix**: `reevaluateTableRelationships()` — quando o parceiro acaba na mesma cena da tabela
+      movida (sempre verdadeiro pra auto-relacionamento; também verdadeiro quando duas tabelas
+      diferentes de um mesmo relacionamento são movidas juntas no mesmo `moveToSchema()`), chama
+      `relocateRelationshipView()` novo em vez de não fazer nada — reaproveita
+      `ObjectsScene::relocateItem()` (1.9.1) pra mover a `RelationshipView` existente pra cena
+      certa. Efeito colateral positivo: o caso de duas tabelas movidas juntas, que antes se
+      autocorrigia via rebaixamento seguido de promoção imediata (funcional, mas descartava e
+      recriava a view à toa), agora também usa esse caminho mais barato.
+    - Build de conferência: `make gui`, limpo. **Sem teste manual/ASan de confirmação do usuário
+      ainda** — aguardando.
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
