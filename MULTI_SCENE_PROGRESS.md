@@ -19,10 +19,10 @@
 - **1.8.1 fechada (2026-09-23, confirmada pelo usuário depois de uma auditoria de código
   ponta a ponta contra o texto da subtarefa no plano).**
 - **1.9 implementada em quatro subtarefas (2026-09-23, `2ef548b59`/`ab6823a8f`/`04aea9ef2`/
-  `f4b104d04`), mais um commit de estilo (`7adc1c7a7`) — aguardando teste manual/confirmação por
-  ASan do usuário, não fechada.** A 1.9.4 corrige um crash real (heap-use-after-free) achado pelo
-  usuário via ASan. Ver detalhamento completo abaixo. Próxima, depois de
-  aprovada: **1.10** (destruição de cena ao remover schema).
+  `f4b104d04`), mais um commit de estilo (`7adc1c7a7`) — crash da 1.9.4 confirmado corrigido pelo
+  usuário via ASan, mas a subtarefa **ainda não está fechada**: usuário tem outras considerações a
+  trazer antes de dar por encerrada.** Ver detalhamento completo abaixo. Próxima, só depois da 1.9
+  ser efetivamente fechada: **1.10** (destruição de cena ao remover schema).
   Commits até agora: `3a4f4f4a9`/`02508f6ab` (movimentação livre + persistência XML),
   `0281a1d85` (linha dinâmica tabela↔marcador + clamp geométrico contra o retângulo),
   `95d09e331` (caixa do rótulo reposicionada por direção contínua em vez de offset fixo; guard de
@@ -376,8 +376,9 @@
       certa. Efeito colateral positivo: o caso de duas tabelas movidas juntas, que antes se
       autocorrigia via rebaixamento seguido de promoção imediata (funcional, mas descartava e
       recriava a view à toa), agora também usa esse caminho mais barato.
-    - Build de conferência: `make gui`, limpo. **Sem teste manual/ASan de confirmação do usuário
-      ainda** — aguardando.
+    - Build de conferência: `make gui`, limpo. **Confirmado pelo usuário (2026-09-23): crash
+      resolvido.** Reproduziu o mesmo cenário (mover todas as tabelas de um schema, voltar pro
+      schema de origem, fechar o modelo) sem o heap-use-after-free reportado no log ASan original.
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
