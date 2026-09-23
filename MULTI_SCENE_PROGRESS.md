@@ -6,7 +6,17 @@
 
 ## Estado atual
 
-- Branch: `multi-scene-support-2.1.x`.
+- Branch: `multi-scene-support-2.1.x`, sincronizada com `origin` (sem commits pendentes de push).
+- **Fase 0 (0.1-0.8), Fase 1 subtarefas 1.1-1.8, 1.8.1 e 1.9 (1.9.1-1.9.6) — todas concluídas,
+  testadas manualmente pelo usuário (1.9.4 e a rodada final também confirmadas por ele via ASan) e
+  commitadas.** (1.2 recebeu um refinamento pequeno de deduplicação logo depois de feita.)
+  **Próxima: 1.10** (destruição de cena ao remover schema, incluindo cascade delete — ver plano).
+- **Nova subtarefa registrada no plano (2026-09-22), ainda não iniciada: 1.15 — cor exclusiva
+  para o marcador cut-off.** Hoje `CutoffItem` reaproveita `Attributes::PositionInfo`; usuário
+  pediu identidade visual própria, o que implica chave nova em `Attributes::`, entrada nova em
+  `AppearanceConfigWidget::element_cmb`/`conf_ids`/`obj_conf_ids` e atualização do arquivo de
+  configuração de aparência. Depende de: 1.8 (já feita) — pode ser encaixada a qualquer momento,
+  não bloqueia nem depende da 1.10 em diante.
 - **Achado colateral, sem relação com multi-cena (2026-09-23, `dedf21c1e`)**: usuário testando com
   ASan pegou um crash (`new-delete-type-mismatch`) ao abrir/fechar o formulário de edição de tabela
   — `Element::~Element()` não era `virtual`, então `ElementsTableWidget::~ElementsTableWidget()`
@@ -14,25 +24,11 @@
   `ExcludeElement`) era UB clássico de destrutor não-virtual. Bug pré-existente, reproduzível em
   qualquer branch — `git log` confirma que nenhum commit desta feature tocou `element.h`/
   `elementstablewidget.*`. Corrigido com uma linha (`virtual ~Element() = default;`), a pedido do
-  usuário, mesmo fora do escopo da 1.9. `make core` limpo.
-- **Fase 0 concluída (0.1 a 0.8).** Fase 1: **subtarefas 1.1 a 1.8 concluídas, testadas
-  manualmente pelo usuário e commitadas** (1.2 recebeu um refinamento pequeno de deduplicação logo
-  depois). Próxima: **1.9** (promoção/rebaixamento dinâmico de relacionamento cross-scene, ver
-  plano).
-- **Nova subtarefa registrada no plano (2026-09-22): 1.15 — cor exclusiva para o marcador
-  cut-off.** Hoje `CutoffItem` reaproveita `Attributes::PositionInfo`; usuário pediu identidade
-  visual própria, o que implica chave nova em `Attributes::`, entrada nova em
-  `AppearanceConfigWidget::element_cmb`/`conf_ids`/`obj_conf_ids` e atualização do arquivo de
-  configuração de aparência. Só registrada, sem código ainda. Depende de: 1.8 (já feita).
+  usuário, mesmo fora do escopo da 1.9. `make core` limpo, sem teste de regressão adicional além
+  disso (fix isolado e mecânico).
 - **1.8.1 fechada (2026-09-23, confirmada pelo usuário depois de uma auditoria de código
   ponta a ponta contra o texto da subtarefa no plano).**
-- **1.9 implementada em seis subtarefas (2026-09-23, `2ef548b59`/`ab6823a8f`/`04aea9ef2`/
-  `f4b104d04`/`4f8a615e8`/`97146b4a7`), mais um commit de estilo (`7adc1c7a7`) — crash da 1.9.4
-  confirmado corrigido pelo usuário via ASan, mas a subtarefa **ainda não está fechada**: usuário
-  tem outras considerações a trazer antes de dar por encerrada.** Ver detalhamento completo abaixo.
-  Próxima, só depois da 1.9 ser efetivamente fechada: **1.10** (destruição de cena ao remover
-  schema).
-  Commits até agora: `3a4f4f4a9`/`02508f6ab` (movimentação livre + persistência XML),
+  Commits: `3a4f4f4a9`/`02508f6ab` (movimentação livre + persistência XML),
   `0281a1d85` (linha dinâmica tabela↔marcador + clamp geométrico contra o retângulo),
   `95d09e331` (caixa do rótulo reposicionada por direção contínua em vez de offset fixo; guard de
   órbita impedindo o marcador de invadir o retângulo da tabela), `699b3562b` (2026-09-23 — fix do
@@ -290,6 +286,10 @@
       definitivo.
     Build de conferência: `make core` (já estava com cache válido — usuário tinha buildado antes de
     reportar). Commitado (`699b3562b`, sem coautoria a pedido do usuário).
+- **1.9 implementada em seis subtarefas (2026-09-23, `2ef548b59`/`ab6823a8f`/`04aea9ef2`/
+  `f4b104d04`/`4f8a615e8`/`97146b4a7`), mais um commit de estilo (`7adc1c7a7`) — todas testadas e
+  aprovadas pelo usuário (inclui confirmação por ASan dos dois crashes achados, 1.9.4 e a checagem
+  geral em 2026-09-23).** Ver detalhamento subtarefa a subtarefa logo abaixo.
 - **1.9 iniciada (2026-09-23)**: antes de codar, revisão do texto da subtarefa contra o código
   atual de `moveToSchema()` achou uma lacuna real — ver nota "Achado ao implementar" na subtarefa
   1.9 do plano. Dividida em duas subtarefas, um commit cada (pedido do usuário).
