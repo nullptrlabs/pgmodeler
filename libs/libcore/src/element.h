@@ -73,7 +73,7 @@ class __libcore Element {
 		};
 
 		Element();
-		~Element() = default;
+		virtual ~Element() = default;
 
 		//! \brief Element configuration methods
 		virtual void setColumn(Column *column);
