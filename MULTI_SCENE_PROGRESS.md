@@ -26,11 +26,12 @@
   configuração de aparência. Só registrada, sem código ainda. Depende de: 1.8 (já feita).
 - **1.8.1 fechada (2026-09-23, confirmada pelo usuário depois de uma auditoria de código
   ponta a ponta contra o texto da subtarefa no plano).**
-- **1.9 implementada em cinco subtarefas (2026-09-23, `2ef548b59`/`ab6823a8f`/`04aea9ef2`/
-  `f4b104d04`/`4f8a615e8`), mais um commit de estilo (`7adc1c7a7`) — crash da 1.9.4 confirmado
-  corrigido pelo usuário via ASan, mas a subtarefa **ainda não está fechada**: usuário tem outras
-  considerações a trazer antes de dar por encerrada.** Ver detalhamento completo abaixo. Próxima,
-  só depois da 1.9 ser efetivamente fechada: **1.10** (destruição de cena ao remover schema).
+- **1.9 implementada em seis subtarefas (2026-09-23, `2ef548b59`/`ab6823a8f`/`04aea9ef2`/
+  `f4b104d04`/`4f8a615e8`/`97146b4a7`), mais um commit de estilo (`7adc1c7a7`) — crash da 1.9.4
+  confirmado corrigido pelo usuário via ASan, mas a subtarefa **ainda não está fechada**: usuário
+  tem outras considerações a trazer antes de dar por encerrada.** Ver detalhamento completo abaixo.
+  Próxima, só depois da 1.9 ser efetivamente fechada: **1.10** (destruição de cena ao remover
+  schema).
   Commits até agora: `3a4f4f4a9`/`02508f6ab` (movimentação livre + persistência XML),
   `0281a1d85` (linha dinâmica tabela↔marcador + clamp geométrico contra o retângulo),
   `95d09e331` (caixa do rótulo reposicionada por direção contínua em vez de offset fixo; guard de
@@ -397,6 +398,21 @@
     mantém seu `(x, y)` original através da relocação de cena, igual ao que `relocateEditedObject()`
     (1.9.3) já fazia (nunca reposicionava, só relocava). Build de conferência: `make gui`, limpo.
     **Sem teste manual do usuário ainda**.
+  - **1.9.6 — marcador cut-off órfão, mesma classe de bug da 1.9.4, achado pelo usuário (2026-09-23,
+    `97146b4a7`)**: no mesmo modelo em que achou o bug da 1.9.4 (auto-relacionamento órfão), usuário
+    reportou — dessa vez sem conseguir rastrear o ponto de falha sozinho — que repetir "mover todas
+    as tabelas de um schema pra outro" deixava marcadores cut-off (`CutoffItem`) órfãos na cena de
+    origem. Causa raiz: `BaseTableView::addExternalRelationship()`
+    ([basetableview.cpp:343](libs/libcanvas/src/basetableview.cpp#L343)) adiciona o `cutoff_item`
+    direto na cena em que a tabela estava no **momento da criação do marcador** — não é filho Qt do
+    item da tabela, e nada no caminho de relocação (`relocateItem()`, 1.9.1) o toca. Depois da
+    tabela relocada, o marcador ficava preso na cena antiga, ainda reagindo aos sinais da tabela
+    (conexões Qt independem de cena) mas desenhado num lugar sem relação mais com ela — mesma classe
+    de bug da 1.9.4 (algo "pendurado" na tabela que `relocateItem()` não sabe que precisa seguir
+    junto), só que pro cut-off em vez do auto-relacionamento. Fix: `reevaluateTableRelationships()`
+    relocaliza `tab_view->cutoff_item` (acesso direto, `ModelWidget` já é `friend` de
+    `BaseTableView`) pra cena atual da tabela, antes de reavaliar qualquer relacionamento. Build de
+    conferência: `make gui`, limpo. **Sem teste manual do usuário ainda**.
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,

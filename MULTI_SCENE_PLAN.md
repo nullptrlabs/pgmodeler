@@ -1105,6 +1105,19 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
          usuário tinha na cena de origem. Fix: removido o bloco de reposicionamento por completo —
          o item mantém seu `(x, y)` inalterado através da relocação de cena, igual ao que
          `relocateEditedObject()` (1.9.3) já fazia (nunca reposicionava, só relocava).
+       - **1.9.6 — marcador cut-off órfão, mesma classe de bug da 1.9.4, achado pelo usuário
+         (2026-09-23)**: mover todas as tabelas de um schema pra outro deixava marcadores cut-off
+         (`CutoffItem`) órfãos pra trás na cena de origem. Causa raiz idêntica em espírito à da
+         1.9.4 (auto-relacionamento órfão), mas pro `CutoffItem`: `BaseTableView::
+         addExternalRelationship()` adiciona o marcador direto na cena em que a tabela estava **no
+         momento em que o marcador foi criado** (`this->scene()->addItem(cutoff_item)`) — não é
+         filho Qt do item da própria tabela, e nada no caminho de relocação (`ObjectsScene::
+         relocateItem()`, 1.9.1) o toca. Depois de mover a tabela, o `cutoff_item` (se existia)
+         ficava fisicamente preso na cena antiga, continuando a reagir aos sinais da tabela (as
+         conexões Qt independem de cena) mas renderizado num lugar que não tem mais relação com
+         ela. Fix: `reevaluateTableRelationships()` agora relocaliza `tab_view->cutoff_item` pra
+         cena atual da tabela **antes** de reavaliar qualquer relacionamento, reaproveitando o
+         mesmo `relocateItem()` de sempre.
 
 1.10. **Destruição de cena ao remover schema** — em `handleObjectRemoval()`, destruir a
       `ObjectsScene` do schema removido (com asserção/log de aviso em debug se não estiver vazia);
