@@ -2888,25 +2888,20 @@ void ModelWidget::moveToSchema()
 
 				obj_graph=dynamic_cast<BaseGraphicObject *>(obj);
 
-				//If the object is a graphical one, move it to a position near to the new schema box
+				//If the object is a graphical one, relocate its item to the destination schema's scene
 				if(obj_graph)
 				{
-					SchemaView *dst_schema=dynamic_cast<SchemaView *>(schema->getOverlyingObject());
 					BaseObjectView *item_view=dynamic_cast<BaseObjectView *>(obj_graph->getOverlyingObject());
 					ObjectsScene *cur_scene=item_view ? dynamic_cast<ObjectsScene *>(item_view->scene()) : nullptr,
 												*dst_scene=getSchemaScene(schema);
-					QPointF p;
 
-					// Each schema owns its own scene -- the item follows its object to the destination schema's scene
+					/* Each schema owns its own scene -- the item follows its object to the destination
+					 * schema's scene, keeping its own (x, y): the destination scene is an independent
+					 * canvas, so there's no longer a reason to snap it near the new schema's box the
+					 * way single-scene mode used to -- doing that here would stack every object moved
+					 * into the same schema at the same spot, destroying whatever layout the user had */
 					if(cur_scene && dst_scene && cur_scene!=dst_scene)
 						cur_scene->relocateItem(item_view, dst_scene);
-
-					if(dst_schema && dst_schema->isVisible())
-					{
-						p.setX(dst_schema->pos().x());
-						p.setY(dst_schema->pos().y() + dst_schema->boundingRect().height() + BaseObjectView::VertSpacing);
-						item_view->setPos(p);
-					}
 
 					/* The table may have just left the scene shared with some of its relationship
 					 * partners (or entered one shared with a former cross-scene partner) -- re-check
