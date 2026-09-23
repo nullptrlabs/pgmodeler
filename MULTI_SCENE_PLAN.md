@@ -1075,6 +1075,25 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
          `getOverlyingObject()` nesse ponto, ou já inserido na cena certa por `handleObjectAddition()`
          antes de `openEditingForm()` retornar) — não precisou de um caso especial "objeto novo vs.
          editado".
+       - **1.9.4 — crash real (use-after-free), achado pelo usuário via ASan (2026-09-23)**: mover
+         todas as tabelas de um schema pra outro deixava pra trás um auto-relacionamento
+         (`RelationshipView` com `SrcTable == DstTable`) na cena antiga, mesmo com a tabela já
+         relocada — ao fechar o modelo, um dos dois `~ObjectsScene()` (cada cena destrói seus
+         próprios itens de forma independente) acabava chamando `disconnectTables()` numa
+         `RelationshipView` cujo `tables[]` apontava pra uma `TableView` já deletada por **outra**
+         cena no mesmo teardown (`BaseTableView::removeConnectedRelationship()` — heap-use-after-free
+         confirmado por ASan). Causa raiz: `getRelationshipPartner()` resolve o parceiro de um
+         auto-relacionamento como a própria tabela — depois da tabela relocada, `partner_view->
+         scene() == tab_scene` fica trivialmente verdadeiro, então `reevaluateTableRelationships()`
+         concluía "nada a fazer" pra esse relacionamento. Mas nada relocava a `RelationshipView`
+         em si — `moveToSchema()`/`relocateEditedObject()` só movem o item da própria tabela, nunca
+         os relacionamentos conectados a ela. Fix: quando o parceiro acaba na mesma cena da tabela
+         movida (sempre verdadeiro pra auto-relacionamento), `reevaluateTableRelationships()` agora
+         chama `relocateRelationshipView()` novo (reaproveita `ObjectsScene::relocateItem()` da
+         1.9.1) em vez de assumir que não há nada a fazer. Efeito colateral positivo: o caso de duas
+         tabelas diferentes movidas juntas no mesmo `moveToSchema()` (que antes se autocorrigia via
+         rebaixamento seguido de promoção imediata, funcional mas descartando e recriando a view à
+         toa) agora também usa esse caminho mais barato — relocação direta da mesma view.
 
 1.10. **Destruição de cena ao remover schema** — em `handleObjectRemoval()`, destruir a
       `ObjectsScene` do schema removido (com asserção/log de aviso em debug se não estiver vazia);
