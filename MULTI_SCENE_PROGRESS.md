@@ -18,11 +18,11 @@
   configuração de aparência. Só registrada, sem código ainda. Depende de: 1.8 (já feita).
 - **1.8.1 fechada (2026-09-23, confirmada pelo usuário depois de uma auditoria de código
   ponta a ponta contra o texto da subtarefa no plano).**
-- **1.9 implementada em quatro subtarefas (2026-09-23, `2ef548b59`/`ab6823a8f`/`04aea9ef2`/
-  `f4b104d04`), mais um commit de estilo (`7adc1c7a7`) — crash da 1.9.4 confirmado corrigido pelo
-  usuário via ASan, mas a subtarefa **ainda não está fechada**: usuário tem outras considerações a
-  trazer antes de dar por encerrada.** Ver detalhamento completo abaixo. Próxima, só depois da 1.9
-  ser efetivamente fechada: **1.10** (destruição de cena ao remover schema).
+- **1.9 implementada em cinco subtarefas (2026-09-23, `2ef548b59`/`ab6823a8f`/`04aea9ef2`/
+  `f4b104d04`/`4f8a615e8`), mais um commit de estilo (`7adc1c7a7`) — crash da 1.9.4 confirmado
+  corrigido pelo usuário via ASan, mas a subtarefa **ainda não está fechada**: usuário tem outras
+  considerações a trazer antes de dar por encerrada.** Ver detalhamento completo abaixo. Próxima,
+  só depois da 1.9 ser efetivamente fechada: **1.10** (destruição de cena ao remover schema).
   Commits até agora: `3a4f4f4a9`/`02508f6ab` (movimentação livre + persistência XML),
   `0281a1d85` (linha dinâmica tabela↔marcador + clamp geométrico contra o retângulo),
   `95d09e331` (caixa do rótulo reposicionada por direção contínua em vez de offset fixo; guard de
@@ -379,6 +379,16 @@
     - Build de conferência: `make gui`, limpo. **Confirmado pelo usuário (2026-09-23): crash
       resolvido.** Reproduziu o mesmo cenário (mover todas as tabelas de um schema, voltar pro
       schema de origem, fechar o modelo) sem o heap-use-after-free reportado no log ASan original.
+  - **1.9.5 — preservar posição original ao relocar entre cenas, achado pelo usuário (2026-09-23,
+    `4f8a615e8`)**: usuário reportou que, com segmentação por schema, os objetos movidos entre
+    schemas estavam sendo empilhados na origem do retângulo do schema de destino — perdendo a
+    posição original, indesejável pro usuário. Causa: `moveToSchema()` (comportamento herdado de
+    antes do multi-cena) sempre reposicionava o item logo abaixo da caixa do `SchemaView` de
+    destino depois de relocar (1.9.1), incondicionalmente — fazia sentido só quando todo schema
+    compartilhava a mesma tela. Fix: bloco de reposicionamento removido por completo — o item
+    mantém seu `(x, y)` original através da relocação de cena, igual ao que `relocateEditedObject()`
+    (1.9.3) já fazia (nunca reposicionava, só relocava). Build de conferência: `make gui`, limpo.
+    **Sem teste manual do usuário ainda**.
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
