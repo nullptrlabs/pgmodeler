@@ -39,6 +39,7 @@
 
 class PgModelerGuiPlugin;
 class CodePreviewWidget;
+class BaseObjectWidget;
 
 class __libgui ModelWidget: public QWidget {
 	Q_OBJECT
@@ -300,7 +301,8 @@ class __libgui ModelWidget: public QWidget {
 
 		/*! \brief Re-evaluates every relationship connected to tab_view against its current scene,
 		 * promoting/demoting each one that's no longer consistent with where its partner table lives.
-		 * Called after a table's item is relocated to a different scene (see moveToSchema()) */
+		 * Called whenever a table's item may have just been relocated to a different scene (see
+		 * moveToSchema() and relocateEditedObject()) */
 		void reevaluateTableRelationships(BaseTableView *tab_view);
 
 		//! \brief Destroys rel's RelationshipView and registers it as an external (cut-off) connection instead
@@ -308,6 +310,12 @@ class __libgui ModelWidget: public QWidget {
 
 		//! \brief Creates a RelationshipView for rel in shared_scene, clearing its cut-off markers
 		void promoteRelationship(BaseRelationship *rel, ObjectsScene *shared_scene);
+
+		/*! \brief Moves obj_wgt's edited object to its new schema's scene, if the schema selector in
+		 * the object's editing form actually changed it (see BaseObjectWidget::prev_schema) --
+		 * covers the same schema-change-implies-scene-change case as moveToSchema(), but for the
+		 * schema selector embedded in each object's own editing form instead of the popup menu */
+		void relocateEditedObject(BaseObjectWidget *obj_wgt);
 
 		//! \brief Rebuilds scene_combo's items from scenes and selects the currently active one
 		void updateSceneCombo();
