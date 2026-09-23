@@ -293,6 +293,11 @@ class __libgui ModelWidget: public QWidget {
 		default) it activates the new scene if none is active yet */
 		ObjectsScene *addScene(bool auto_activate = true);
 
+		/*! \brief Removes scn from scenes and destroys it. If scn is the active scene, activates
+		 * another one first (the first remaining scene, or none if scn was the last one), so
+		 * viewport never ends up pointing at a freed scene */
+		void removeScene(ObjectsScene *scn);
+
 		//! \brief Returns the scene that holds the given schema and its children, or nullptr if none is assigned yet
 		ObjectsScene *getSchemaScene(Schema *schema);
 
@@ -309,9 +314,11 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Destroys rel's RelationshipView and registers it as an external (cut-off) connection instead
 		void demoteRelationship(BaseRelationship *rel);
 
-		/*! \brief Moves rel's existing RelationshipView to dst_scene -- used when both of rel's tables
-		 * (trivially true for a self-relationship) already ended up sharing dst_scene, so the view
-		 * just needs to follow instead of being destroyed and recreated */
+		/*! \brief Discards rel's existing RelationshipView and builds a fresh one in dst_scene --
+		 * used when both of rel's tables (trivially true for a self-relationship) already ended up
+		 * sharing dst_scene. Moving the existing view across scenes via ObjectsScene::relocateItem()
+		 * instead of recreating it leaves some of its internal line items corrupted in a way that
+		 * only crashes later, when the view is finally destroyed */
 		void relocateRelationshipView(BaseRelationship *rel, ObjectsScene *dst_scene);
 
 		//! \brief Creates a RelationshipView for rel in shared_scene, clearing its cut-off markers

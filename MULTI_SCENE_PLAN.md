@@ -612,6 +612,15 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
     atributo `Scene` por objeto que a Fase 3 vai introduzir é candidato natural a também resolver
     (a) e (b) — não é escopo da Fase 1 fechar isso agora, mas vale desenhar o atributo (3.2) já
     pensando em cobrir `Textbox` e reatribuição manual, não só o contador de threshold.
+    **Reconfirmado pelo usuário (2026-09-23), testando a 1.9.6**: diferente de Table/View/
+    ForeignTable — que já ganharam um mecanismo de mover entre cenas na 1.9 (`moveToSchema()`/
+    `schema_sel` de `BaseObjectWidget`, ambos guiados por schema) — `Textbox` não tem schema
+    nenhum pra guiar uma troca de cena, então hoje não existe **nenhum** caminho, nem indireto,
+    pra realocar um textbox de cena depois de criado. Ainda não é bloqueio (a regra "cena ativa na
+    inserção" cobre o caso comum), mas qualquer modo de segmentação futuro que precise mover um
+    textbox de cena (reatribuição manual, ou um textbox "preso" numa cena que o modo threshold
+    decidiu esvaziar) vai precisar desse mecanismo do zero — não é só persistência (3.2), é também
+    a ação de mover em si, que Table/View/ForeignTable já têm e Textbox não. Não implementar agora.
 
 #### Relacionamentos cross-scene: promoção/rebaixamento dinâmico
 
