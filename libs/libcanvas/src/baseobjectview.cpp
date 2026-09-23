@@ -207,6 +207,14 @@ BaseObject *BaseObjectView::getUnderlyingObject()
 	return reinterpret_cast<BaseObject *>(this->data(0).value<void *>());
 }
 
+void BaseObjectView::detachFromObject()
+{
+	BaseGraphicObject *graph_obj = dynamic_cast<BaseGraphicObject *>(getUnderlyingObject());
+
+	if(graph_obj)
+		graph_obj->setReceiverObject(nullptr);
+}
+
 void BaseObjectView::setFontStyle(const QString &id, QTextCharFormat font_fmt)
 {
 	/* If the font style is not the global one we use the settings

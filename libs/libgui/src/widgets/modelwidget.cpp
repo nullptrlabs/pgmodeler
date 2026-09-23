@@ -2747,6 +2747,81 @@ void ModelWidget::renameObjects()
 	}
 }
 
+BaseTable *ModelWidget::getRelationshipPartner(BaseRelationship *rel, BaseTable *tab)
+{
+	BaseTable *src_tab = rel->getTable(BaseRelationship::SrcTable);
+	return src_tab == tab ? rel->getTable(BaseRelationship::DstTable) : src_tab;
+}
+
+void ModelWidget::demoteRelationship(BaseRelationship *rel)
+{
+	QGraphicsItem *item = dynamic_cast<QGraphicsItem *>(rel->getOverlyingObject());
+
+	if(!item)
+		return;
+
+	ObjectsScene *view_scene = dynamic_cast<ObjectsScene *>(item->scene());
+
+	if(view_scene)
+		view_scene->removeItem(item);
+
+	BaseTableView *src_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::SrcTable)->getOverlyingObject()),
+								 *dst_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::DstTable)->getOverlyingObject());
+
+	if(src_view)
+		src_view->addExternalRelationship(rel);
+
+	if(dst_view)
+		dst_view->addExternalRelationship(rel);
+}
+
+void ModelWidget::promoteRelationship(BaseRelationship *rel, ObjectsScene *shared_scene)
+{
+	BaseTableView *src_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::SrcTable)->getOverlyingObject()),
+								 *dst_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::DstTable)->getOverlyingObject());
+
+	if(src_view)
+		src_view->removeExternalRelationship(rel);
+
+	if(dst_view)
+		dst_view->removeExternalRelationship(rel);
+
+	shared_scene->addItem(new RelationshipView(rel));
+}
+
+void ModelWidget::reevaluateTableRelationships(BaseTableView *tab_view)
+{
+	if(!tab_view)
+		return;
+
+	ObjectsScene *tab_scene = dynamic_cast<ObjectsScene *>(tab_view->scene());
+	BaseTable *tab = dynamic_cast<BaseTable *>(tab_view->getUnderlyingObject());
+
+	if(!tab_scene || !tab)
+		return;
+
+	/* Snapshot both lists first -- demoteRelationship()/promoteRelationship() mutate
+	 * connected_rels/external_rels as they run, which would invalidate a live iteration */
+	std::vector<BaseRelationship *> in_scene_rels = tab_view->connected_rels;
+	QList<BaseRelationship *> ext_rels = tab_view->getExternalRelationships();
+
+	for(BaseRelationship *rel : in_scene_rels)
+	{
+		BaseTableView *partner_view = dynamic_cast<BaseTableView *>(getRelationshipPartner(rel, tab)->getOverlyingObject());
+
+		if(!partner_view || dynamic_cast<ObjectsScene *>(partner_view->scene()) != tab_scene)
+			demoteRelationship(rel);
+	}
+
+	for(BaseRelationship *rel : ext_rels)
+	{
+		BaseTableView *partner_view = dynamic_cast<BaseTableView *>(getRelationshipPartner(rel, tab)->getOverlyingObject());
+
+		if(partner_view && dynamic_cast<ObjectsScene *>(partner_view->scene()) == tab_scene)
+			promoteRelationship(rel, tab_scene);
+	}
+}
+
 void ModelWidget::moveToSchema()
 {
 	QAction *act=dynamic_cast<QAction *>(sender());
@@ -2793,6 +2868,11 @@ void ModelWidget::moveToSchema()
 						p.setY(dst_schema->pos().y() + dst_schema->boundingRect().height() + BaseObjectView::VertSpacing);
 						item_view->setPos(p);
 					}
+
+					/* The table may have just left the scene shared with some of its relationship
+					 * partners (or entered one shared with a former cross-scene partner) -- re-check
+					 * every connected/external relationship now that the scene actually changed */
+					reevaluateTableRelationships(dynamic_cast<BaseTableView *>(item_view));
 				}
 
 				//Invalidating the code of the object's references

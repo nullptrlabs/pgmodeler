@@ -202,6 +202,14 @@ class __libcanvas BaseObjectView: public QObject, public QGraphicsItemGroup {
 		//! \brief Defines the object that the view represents
 		void setSourceObject(BaseObject *object);
 
+		/*! \brief Clears the underlying object's back-reference to this view (getOverlyingObject()
+		 * starts returning nullptr immediately) without deleting or otherwise touching the view
+		 * itself. Used when a view is discarded but its model object is meant to survive -- e.g. a
+		 * RelationshipView destroyed by a cross-scene demotion, where scene->removeItem() only
+		 * queues the item for deletion once the scene itself is destroyed, which would otherwise
+		 * leave the relationship's getOverlyingObject() pointing at a soon-to-be-dangling view */
+		void detachFromObject();
+
 		//! \brief Pure virtual object (the derived classes must implement it)
 		virtual void configureObject(void)=0;
 
