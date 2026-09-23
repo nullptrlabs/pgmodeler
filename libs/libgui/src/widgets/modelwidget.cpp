@@ -2410,6 +2410,12 @@ int ModelWidget::openEditingForm(WidgetClass *widget, Messagebox::ButtonsId butt
 	res = editing_form.exec();
 	GeneralConfigWidget::saveWidgetGeometry(&editing_form, class_name);
 
+	if constexpr (std::is_base_of_v<BaseObjectWidget, WidgetClass>)
+	{
+		if(res == QDialog::Accepted)
+			relocateEditedObject(widget);
+	}
+
 	return res;
 }
 
@@ -2820,6 +2826,24 @@ void ModelWidget::reevaluateTableRelationships(BaseTableView *tab_view)
 		if(partner_view && dynamic_cast<ObjectsScene *>(partner_view->scene()) == tab_scene)
 			promoteRelationship(rel, tab_scene);
 	}
+}
+
+void ModelWidget::relocateEditedObject(BaseObjectWidget *obj_wgt)
+{
+	BaseGraphicObject *graph_obj = dynamic_cast<BaseGraphicObject *>(obj_wgt->object);
+
+	if(!graph_obj || !obj_wgt->prev_schema || graph_obj->getSchema() == obj_wgt->prev_schema)
+		return;
+
+	Schema *schema = dynamic_cast<Schema *>(graph_obj->getSchema());
+	BaseObjectView *item_view = dynamic_cast<BaseObjectView *>(graph_obj->getOverlyingObject());
+	ObjectsScene *cur_scene = item_view ? dynamic_cast<ObjectsScene *>(item_view->scene()) : nullptr,
+								*dst_scene = schema ? getSchemaScene(schema) : nullptr;
+
+	if(cur_scene && dst_scene && cur_scene != dst_scene)
+		cur_scene->relocateItem(item_view, dst_scene);
+
+	reevaluateTableRelationships(dynamic_cast<BaseTableView *>(item_view));
 }
 
 void ModelWidget::moveToSchema()
