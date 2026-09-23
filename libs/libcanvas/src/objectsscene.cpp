@@ -1061,34 +1061,52 @@ void ObjectsScene::addItem(QGraphicsItem *item, bool blink_new)
 		updateLayerRects();
 }
 
+BaseObjectView *ObjectsScene::detachItem(QGraphicsItem *item)
+{
+	if(!item)
+		return nullptr;
+
+	BaseObjectView *obj_view=dynamic_cast<BaseObjectView *>(item);
+	RelationshipView *rel=dynamic_cast<RelationshipView *>(item);
+
+	if(rel)
+		rel->disconnectTables();
+
+	item->setVisible(false);
+	item->setActive(false);
+	QGraphicsScene::removeItem(item);
+
+	if(obj_view)
+	{
+		BaseObject *obj = obj_view->getUnderlyingObject();
+
+		if(BaseTable::isBaseTable(obj->getObjectType()) ||
+			 obj->getObjectType() == ObjectType::Textbox)
+			updateLayerRects();
+
+		disconnect(obj_view, nullptr, this, nullptr);
+		disconnect(obj_view, nullptr, dynamic_cast<BaseGraphicObject*>(obj_view->getUnderlyingObject()), nullptr);
+		disconnect(dynamic_cast<BaseGraphicObject*>(obj_view->getUnderlyingObject()), nullptr, obj_view, nullptr);
+	}
+
+	return obj_view;
+}
+
 void ObjectsScene::removeItem(QGraphicsItem *item)
 {
-	if(item)
-	{
-		BaseObjectView *obj_view=dynamic_cast<BaseObjectView *>(item);
-		RelationshipView *rel=dynamic_cast<RelationshipView *>(item);
+	BaseObjectView *obj_view = detachItem(item);
 
-		if(rel)
-			rel->disconnectTables();
+	if(obj_view)
+		removed_objs.push_back(obj_view);
+}
 
-		item->setVisible(false);
-		item->setActive(false);
-		QGraphicsScene::removeItem(item);
+void ObjectsScene::relocateItem(QGraphicsItem *item, ObjectsScene *dst_scene)
+{
+	if(!item || !dst_scene || dst_scene == this)
+		return;
 
-		if(obj_view)
-		{
-			BaseObject *obj = obj_view->getUnderlyingObject();
-
-			if(BaseTable::isBaseTable(obj->getObjectType()) ||
-				 obj->getObjectType() == ObjectType::Textbox)
-				updateLayerRects();
-
-			disconnect(obj_view, nullptr, this, nullptr);
-			disconnect(obj_view, nullptr, dynamic_cast<BaseGraphicObject*>(obj_view->getUnderlyingObject()), nullptr);
-			disconnect(dynamic_cast<BaseGraphicObject*>(obj_view->getUnderlyingObject()), nullptr, obj_view, nullptr);
-			removed_objs.push_back(obj_view);
-		}
-	}
+	detachItem(item);
+	dst_scene->addItem(item);
 }
 
 void ObjectsScene::blockItemsSignals(bool block)

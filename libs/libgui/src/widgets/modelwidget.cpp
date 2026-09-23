@@ -2778,13 +2778,20 @@ void ModelWidget::moveToSchema()
 				if(obj_graph)
 				{
 					SchemaView *dst_schema=dynamic_cast<SchemaView *>(schema->getOverlyingObject());
+					BaseObjectView *item_view=dynamic_cast<BaseObjectView *>(obj_graph->getOverlyingObject());
+					ObjectsScene *cur_scene=item_view ? dynamic_cast<ObjectsScene *>(item_view->scene()) : nullptr,
+												*dst_scene=getSchemaScene(schema);
 					QPointF p;
+
+					// Each schema owns its own scene -- the item follows its object to the destination schema's scene
+					if(cur_scene && dst_scene && cur_scene!=dst_scene)
+						cur_scene->relocateItem(item_view, dst_scene);
 
 					if(dst_schema && dst_schema->isVisible())
 					{
 						p.setX(dst_schema->pos().x());
 						p.setY(dst_schema->pos().y() + dst_schema->boundingRect().height() + BaseObjectView::VertSpacing);
-						dynamic_cast<BaseObjectView *>(obj_graph->getOverlyingObject())->setPos(p);
+						item_view->setPos(p);
 					}
 				}
 
