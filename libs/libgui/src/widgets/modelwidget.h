@@ -308,6 +308,11 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Destroys rel's RelationshipView and registers it as an external (cut-off) connection instead
 		void demoteRelationship(BaseRelationship *rel);
 
+		/*! \brief Moves rel's existing RelationshipView to dst_scene -- used when both of rel's tables
+		 * (trivially true for a self-relationship) already ended up sharing dst_scene, so the view
+		 * just needs to follow instead of being destroyed and recreated */
+		void relocateRelationshipView(BaseRelationship *rel, ObjectsScene *dst_scene);
+
 		//! \brief Creates a RelationshipView for rel in shared_scene, clearing its cut-off markers
 		void promoteRelationship(BaseRelationship *rel, ObjectsScene *shared_scene);
 
