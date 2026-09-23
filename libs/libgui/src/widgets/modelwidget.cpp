@@ -2781,6 +2781,15 @@ void ModelWidget::demoteRelationship(BaseRelationship *rel)
 		dst_view->addExternalRelationship(rel);
 }
 
+void ModelWidget::relocateRelationshipView(BaseRelationship *rel, ObjectsScene *dst_scene)
+{
+	QGraphicsItem *item = dynamic_cast<QGraphicsItem *>(rel->getOverlyingObject());
+	ObjectsScene *cur_scene = item ? dynamic_cast<ObjectsScene *>(item->scene()) : nullptr;
+
+	if(cur_scene)
+		cur_scene->relocateItem(item, dst_scene);
+}
+
 void ModelWidget::promoteRelationship(BaseRelationship *rel, ObjectsScene *shared_scene)
 {
 	BaseTableView *src_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::SrcTable)->getOverlyingObject()),
@@ -2815,7 +2824,13 @@ void ModelWidget::reevaluateTableRelationships(BaseTableView *tab_view)
 	{
 		BaseTableView *partner_view = dynamic_cast<BaseTableView *>(getRelationshipPartner(rel, tab)->getOverlyingObject());
 
-		if(!partner_view || dynamic_cast<ObjectsScene *>(partner_view->scene()) != tab_scene)
+		/* Self-relationships resolve their own partner as tab itself, so this branch is always
+		 * taken for them once tab_view has already been relocated -- the RelationshipView still
+		 * needs to physically follow, moveToSchema()/relocateEditedObject() only relocate the
+		 * table's own item, never the relationships attached to it */
+		if(partner_view && dynamic_cast<ObjectsScene *>(partner_view->scene()) == tab_scene)
+			relocateRelationshipView(rel, tab_scene);
+		else
 			demoteRelationship(rel);
 	}
 
