@@ -1016,6 +1016,45 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
      tabela movida, se o parceiro está na mesma cena após a mudança; cria/destrói `RelationshipView`
      e atualiza marcadores cut-off conforme a subseção "Relacionamentos cross-scene: promoção/
      rebaixamento dinâmico". Depende de: 1.8.
+     - **Achado ao implementar, dividido em duas subtarefas (2026-09-23)**: o texto acima pressupõe
+       que a tabela **já está** na cena nova quando `moveToSchema()` reavalia seus relacionamentos —
+       mas `moveToSchema()`, antes desta subtarefa, só trocava o `Schema` do objeto e reposicionava
+       o item graficamente perto da caixa do schema novo; nunca chamava `scene()->removeItem()`/
+       `addItem()` pra migrar o item entre `ObjectsScene`s. `getSchemaScene()`/`schema_scenes` só
+       eram consultados em `handleObjectAddition()` (inserção), nunca numa mudança de schema de um
+       objeto já existente — ou seja, mover uma tabela de schema nunca movia seu item entre cenas.
+       Sem isso, a premissa de "reavaliar se o parceiro está na mesma cena" nunca teria efeito. Duas
+       subtarefas, um commit cada:
+       - **1.9.1 — relocação de cena em `moveToSchema()`**: nova
+         `ObjectsScene::relocateItem(item, dst_scene)` move o item pra outra cena preservando seu
+         estado (sinais reconectados do zero por `dst_scene->addItem()`). Não reaproveita
+         `removeItem()` puro porque este empilha o item em `removed_objs` pra deleção quando a cena
+         **atual** for destruída — errado pra relocação, onde o item continua vivo, só numa cena
+         diferente (deletaria um item ainda em uso quando a cena de origem fosse destruída depois).
+         `removeItem()` foi dividido num `detachItem()` privado compartilhado (desconecta sinais,
+         some da lista interna do Qt, sem tocar `removed_objs`) + o empilhamento em `removed_objs`,
+         que `relocateItem()` pula. `moveToSchema()` passou a chamar `getSchemaScene(schema)` (cena
+         destino) e `cur_scene->relocateItem(item, dst_scene)` quando a cena atual do item difere da
+         destino.
+       - **1.9.2 — promoção/rebaixamento de fato**: `ModelWidget::reevaluateTableRelationships()`
+         (chamado logo após a relocação de 1.9.1) reavalia `connected_rels` (candidatos a
+         rebaixamento, se o parceiro saiu da cena) e `external_rels` (candidatos a promoção, se o
+         parceiro entrou na cena) da tabela movida, delegando pra `demoteRelationship()`/
+         `promoteRelationship()`. **Bug real achado e corrigido nesta subtarefa**:
+         `ObjectsScene::removeItem()` nunca limpava a referência reversa do objeto de modelo pra sua
+         view (`BaseGraphicObject::receiver_object`) — ela só é limpa implicitamente quando a view é
+         de fato deletada em C++, o que pra um item removido só acontece quando a **cena** dele é
+         destruída (`removed_objs` é drenado em `~ObjectsScene()`). Isso nunca importou em nenhum
+         caminho existente porque o objeto de modelo sempre morria junto com sua view (remoção real
+         do modelo). Rebaixamento quebra essa suposição: o relacionamento sobrevive, só a
+         `RelationshipView` é descartada — sem o fix, `BaseRelationship::getOverlyingObject()`
+         continuaria apontando pra uma view prestes a ficar pendurada em vez de `nullptr`, violando
+         silenciosamente o invariante que todo o trabalho de 1.6/1.7 (relacionamento cross-scene sem
+         view formal) depende. Corrigido com `BaseObjectView::detachFromObject()` novo (limpa só a
+         referência reversa, sem tocar a view em si), chamado de `ObjectsScene::removeItem()` logo
+         depois de destacar o item — aplicado **incondicionalmente** ali (não só no caminho de
+         rebaixamento), já que é uma correção geral, consistente em qualquer remoção de item, não um
+         caso especial.
 
 1.10. **Destruição de cena ao remover schema** — em `handleObjectRemoval()`, destruir a
       `ObjectsScene` do schema removido (com asserção/log de aviso em debug se não estiver vazia);

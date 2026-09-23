@@ -16,7 +16,11 @@
   visual própria, o que implica chave nova em `Attributes::`, entrada nova em
   `AppearanceConfigWidget::element_cmb`/`conf_ids`/`obj_conf_ids` e atualização do arquivo de
   configuração de aparência. Só registrada, sem código ainda. Depende de: 1.8 (já feita).
-- **1.8.1 implementada, ainda em rodadas de teste manual/fix com o usuário — não fechada.**
+- **1.8.1 fechada (2026-09-23, confirmada pelo usuário depois de uma auditoria de código
+  ponta a ponta contra o texto da subtarefa no plano).**
+- **1.9 implementada em duas subtarefas (2026-09-23, `2ef548b59`/`ab6823a8f`), aguardando teste
+  manual do usuário — não fechada.** Ver detalhamento completo abaixo. Próxima, depois de
+  aprovada: **1.10** (destruição de cena ao remover schema).
   Commits até agora: `3a4f4f4a9`/`02508f6ab` (movimentação livre + persistência XML),
   `0281a1d85` (linha dinâmica tabela↔marcador + clamp geométrico contra o retângulo),
   `95d09e331` (caixa do rótulo reposicionada por direção contínua em vez de offset fixo; guard de
@@ -275,6 +279,40 @@
       definitivo.
     Build de conferência: `make core` (já estava com cache válido — usuário tinha buildado antes de
     reportar). Commitado (`699b3562b`, sem coautoria a pedido do usuário).
+- **1.9 iniciada (2026-09-23)**: antes de codar, revisão do texto da subtarefa contra o código
+  atual de `moveToSchema()` achou uma lacuna real — ver nota "Achado ao implementar" na subtarefa
+  1.9 do plano. Dividida em duas subtarefas, um commit cada (pedido do usuário).
+  - **1.9.1 — relocação de cena em `moveToSchema()`** (`2ef548b59`): `ObjectsScene::relocateItem
+    (item, dst_scene)` novo — reaproveita um `detachItem()` privado (extraído do corpo antigo de
+    `removeItem()`) que desconecta sinais e some da lista interna do Qt sem empilhar em
+    `removed_objs`; `removeItem()` (real remoção) continua empilhando normalmente, só que agora via
+    o helper compartilhado. `moveToSchema()` passou a resolver `cur_scene`/`dst_scene` via
+    `item_view->scene()`/`getSchemaScene(schema)` e chamar `cur_scene->relocateItem(item_view,
+    dst_scene)` quando diferem, antes do reposicionamento perto da caixa do schema novo (que já
+    existia). Build de conferência: `make canvas` + `make gui`, ambos limpos.
+  - **1.9.2 — promoção/rebaixamento de fato** (`ab6823a8f`): `ModelWidget::
+    reevaluateTableRelationships()` (chamado logo após a relocação de 1.9.1) tira um snapshot de
+    `connected_rels`/`getExternalRelationships()` da tabela movida (mutados durante a própria
+    iteração, por isso o snapshot) e, pra cada relacionamento, compara a cena do parceiro
+    (`getRelationshipPartner()` novo, resolve "a outra tabela" do relacionamento) com a cena atual
+    da tabela — chama `demoteRelationship()` (parceiro saiu da cena: destrói o `RelationshipView`,
+    registra como conexão externa nas duas tabelas) ou `promoteRelationship()` (parceiro entrou na
+    cena: remove das conexões externas, cria `RelationshipView` novo na cena compartilhada).
+    **Bug real achado e corrigido nesta subtarefa** (detalhe completo no plano, subtarefa 1.9):
+    `ObjectsScene::removeItem()` nunca limpava `BaseGraphicObject::receiver_object` (a referência
+    reversa objeto-de-modelo → view) — só era limpa implicitamente quando a view chegava a ser
+    deletada em C++, o que pra um item removido só acontece quando a cena dele é destruída
+    (`removed_objs` drenado em `~ObjectsScene()`). Nunca importou antes porque o objeto de modelo
+    sempre morria junto com a view em toda remoção existente; rebaixamento quebra essa suposição
+    (o relacionamento sobrevive, só a view é descartada). Sem o fix,
+    `BaseRelationship::getOverlyingObject()` continuaria retornando um ponteiro prestes a ficar
+    pendurado em vez de `nullptr` depois de um rebaixamento — violando silenciosamente o invariante
+    que todo o código de 1.6/1.7 (relacionamento cross-scene sem view formal) depende. Fix:
+    `BaseObjectView::detachFromObject()` novo (limpa só a referência reversa, sem tocar a view),
+    chamado de `ObjectsScene::removeItem()` logo depois de `detachItem()` — aplicado
+    incondicionalmente ali (correção geral, não um caso especial do caminho de rebaixamento). Build
+    de conferência: `make canvas` + `make gui`, ambos limpos. **Sem teste manual do usuário ainda**
+    — aguardando.
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
