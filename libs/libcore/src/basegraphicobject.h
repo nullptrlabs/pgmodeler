@@ -75,8 +75,9 @@ class __libcore BaseGraphicObject: public QObject, public BaseObject {
 		int z_value;
 
 		/*! \brief Method that defines the objects position attributes used in generation
-		 of XML code definition */
+		 *  of XML code definition */
 		void setPositionAttribute();
+		void setPositionAttribute(const QPointF &pos, const QString &pos_attr, const QString &id = "");
 
 		//! \brief Defines the receveir objects that represents the 'this' object on the QGraphicsScene
 		void setReceiverObject(QObject *obj);

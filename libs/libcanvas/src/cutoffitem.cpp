@@ -26,7 +26,6 @@
 CutoffItem::CutoffItem(BaseTableView *table)
 {
 	this->table = table;
-	repositioning = false;
 
 	line = new QGraphicsLineItem;
 	line->setPen(BaseObjectView::getBorderStyle(Attributes::PositionInfo));
@@ -280,11 +279,8 @@ QVariant CutoffItem::itemChange(GraphicsItemChange change, const QVariant &value
 		updateLabelPosition();
 		updateLine();
 
-		if(!repositioning)
-		{
-			BaseTable *base_tab = dynamic_cast<BaseTable *>(table->getUnderlyingObject());
-			base_tab->setCutoffPosition(this->pos() - table->getCutoffAnchorPoint());
-		}
+		BaseTable *base_tab = dynamic_cast<BaseTable *>(table->getUnderlyingObject());
+		base_tab->setCutoffPosition(this->pos() - table->getCutoffAnchorPoint());
 	}
 
 	return QGraphicsItemGroup::itemChange(change, value);
@@ -298,9 +294,7 @@ void CutoffItem::updatePosition()
 	if(std::isnan(offset.x()))
 		offset = QPointF(0, 0);
 
-	repositioning = true;
 	this->setPos(table->getCutoffAnchorPoint() + offset);
-	repositioning = false;
 
 	/* Covers a pure resize, where the table's rect changes but this item's pos() doesn't --
 	 * itemChange() above only runs when setPos() actually moves the item, so a resize needs both

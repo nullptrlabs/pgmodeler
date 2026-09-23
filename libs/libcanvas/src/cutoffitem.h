@@ -63,11 +63,6 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 		//! \brief Shown/hidden as the item is (de)selected, mirroring BaseObjectView::obj_selection
 		RoundedRectItem *obj_selection;
 
-		/*! \brief Guards itemChange() against persisting the table's cutoff position attribute
-		 * when a position change comes from updatePosition() itself, not from the user dragging
-		 * the marker */
-		bool repositioning;
-
 		//! \brief Refreshes the label text/size to reflect the current relationship count
 		void updateLabel();
 
