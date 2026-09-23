@@ -2815,6 +2815,19 @@ void ModelWidget::reevaluateTableRelationships(BaseTableView *tab_view)
 	if(!tab_scene || !tab)
 		return;
 
+	/* The cut-off marker is a standalone QGraphicsItem, tracked only by BaseTableView::cutoff_item
+	 * (not a Qt child of the table's own item), added directly to whichever scene the table was in
+	 * when the marker was first created -- relocating the table's item never touches it, so without
+	 * this it's left orphaned in the table's old scene, still reacting to the table's signals but
+	 * rendered nowhere near it */
+	if(tab_view->cutoff_item)
+	{
+		ObjectsScene *cutoff_scene = dynamic_cast<ObjectsScene *>(tab_view->cutoff_item->scene());
+
+		if(cutoff_scene && cutoff_scene != tab_scene)
+			cutoff_scene->relocateItem(tab_view->cutoff_item, tab_scene);
+	}
+
 	/* Snapshot both lists first -- demoteRelationship()/promoteRelationship() mutate
 	 * connected_rels/external_rels as they run, which would invalidate a live iteration */
 	std::vector<BaseRelationship *> in_scene_rels = tab_view->connected_rels;

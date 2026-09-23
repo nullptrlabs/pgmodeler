@@ -299,9 +299,10 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Returns whichever of rel's two tables isn't tab (the other side of the relationship)
 		BaseTable *getRelationshipPartner(BaseRelationship *rel, BaseTable *tab);
 
-		/*! \brief Re-evaluates every relationship connected to tab_view against its current scene,
-		 * promoting/demoting each one that's no longer consistent with where its partner table lives.
-		 * Called whenever a table's item may have just been relocated to a different scene (see
+		/*! \brief Relocates tab_view's cut-off marker to its current scene if needed, then
+		 * re-evaluates every relationship connected to tab_view against that scene, promoting/
+		 * demoting each one that's no longer consistent with where its partner table lives. Called
+		 * whenever a table's item may have just been relocated to a different scene (see
 		 * moveToSchema() and relocateEditedObject()) */
 		void reevaluateTableRelationships(BaseTableView *tab_view);
 
