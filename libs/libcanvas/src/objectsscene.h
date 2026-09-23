@@ -182,6 +182,12 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		void clearTablesChildrenSelection();
 
+		/*! \brief Detaches item from this scene (disconnects its signals, removes it from Qt's
+		 * internal item list) without marking it for deletion -- the shared step behind both
+		 * removeItem() (which discards the item afterward) and relocateItem() (which hands it to
+		 * another scene alive). Returns the item cast to BaseObjectView, or nullptr if it isn't one */
+		BaseObjectView *detachItem(QGraphicsItem *item);
+
 		void selectObjectsInLayers(const QList<unsigned int> &layers_idxs);
 
 	protected:
@@ -328,6 +334,11 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		void addItem(QGraphicsItem *item, bool blink_new = false);
 
 		void removeItem(QGraphicsItem *item);
+
+		/*! \brief Moves item from this scene to dst_scene, preserving its state (signals reconnected
+		 * fresh by dst_scene->addItem()) instead of discarding it -- unlike removeItem(), the item is
+		 * never pushed into removed_objs, so it's not deleted when this scene is destroyed later */
+		void relocateItem(QGraphicsItem *item, ObjectsScene *dst_scene);
 
 		/*! \brief Define the geometry of the scene. If the rectangle is invalid or
 		 *  the size is below the minimum specificed by min_scene_width/min_scene_height
