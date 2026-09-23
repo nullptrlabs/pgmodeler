@@ -2805,7 +2805,7 @@ void ModelWidget::reevaluateTableRelationships(BaseTableView *tab_view)
 	std::vector<BaseRelationship *> in_scene_rels = tab_view->connected_rels;
 	QList<BaseRelationship *> ext_rels = tab_view->getExternalRelationships();
 
-	for(BaseRelationship *rel : in_scene_rels)
+	for(auto &rel : in_scene_rels)
 	{
 		BaseTableView *partner_view = dynamic_cast<BaseTableView *>(getRelationshipPartner(rel, tab)->getOverlyingObject());
 
@@ -2813,7 +2813,7 @@ void ModelWidget::reevaluateTableRelationships(BaseTableView *tab_view)
 			demoteRelationship(rel);
 	}
 
-	for(BaseRelationship *rel : ext_rels)
+	for(auto &rel : ext_rels)
 	{
 		BaseTableView *partner_view = dynamic_cast<BaseTableView *>(getRelationshipPartner(rel, tab)->getOverlyingObject());
 
