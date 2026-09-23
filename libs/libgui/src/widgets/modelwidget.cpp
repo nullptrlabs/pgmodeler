@@ -1092,6 +1092,48 @@ ObjectsScene *ModelWidget::addScene(bool auto_activate)
 	return new_scene;
 }
 
+void ModelWidget::removeScene(ObjectsScene *scn)
+{
+	if(!scn || !scenes.contains(scn))
+		return;
+
+	#ifdef PGMODELER_DEBUG
+		/* A scene's items() always includes auxiliary/infrastructure items (the relationship
+		 * creation tool's rubber-band line, the selection rect, layer paths, etc.) that ~ObjectsScene()
+		 * already cleans up on its own -- only a leftover BaseObjectView (the common base of every
+		 * database object's graphical representation: table, view, schema, relationship, textbox)
+		 * indicates an object that should've been relocated/removed before the scene is destroyed */
+		for(auto &itm : scn->items())
+		{
+			if(dynamic_cast<BaseObjectView *>(itm) && !itm->parentItem())
+			{
+				qWarning("ModelWidget::removeScene: destroying a scene that still has database objects in it");
+				break;
+			}
+		}
+	#endif
+
+	bool was_active = (scn == scene);
+
+	scenes.removeOne(scn);
+
+	if(was_active)
+	{
+		active_scene_idx = -1;
+		scene = nullptr;
+
+		if(scenes.isEmpty())
+			viewport->setScene(nullptr);
+		else
+			setActiveScene(0);
+	}
+	else
+		active_scene_idx = scenes.indexOf(scene);
+
+	delete scn;
+	updateSceneCombo();
+}
+
 void ModelWidget::setActiveScene(int idx)
 {
 	if(idx < 0 || idx >= scenes.size() || idx == active_scene_idx)
@@ -1331,6 +1373,18 @@ void ModelWidget::handleObjectRemoval(BaseObject *object)
 
 			if(dst_view)
 				dst_view->removeExternalRelationship(rel);
+		}
+
+		if(graph_obj->getObjectType() == ObjectType::Schema)
+		{
+			Schema *schema = dynamic_cast<Schema *>(graph_obj);
+			ObjectsScene *schema_scene = getSchemaScene(schema);
+
+			if(schema_scene)
+			{
+				schema_scenes.remove(schema);
+				removeScene(schema_scene);
+			}
 		}
 
 		//Updates the parent schema if the removed object were a table or view
@@ -2786,8 +2840,18 @@ void ModelWidget::relocateRelationshipView(BaseRelationship *rel, ObjectsScene *
 	QGraphicsItem *item = dynamic_cast<QGraphicsItem *>(rel->getOverlyingObject());
 	ObjectsScene *cur_scene = item ? dynamic_cast<ObjectsScene *>(item->scene()) : nullptr;
 
-	if(cur_scene)
-		cur_scene->relocateItem(item, dst_scene);
+	if(!cur_scene)
+		return;
+
+	/* Moving the existing RelationshipView across scenes via ObjectsScene::relocateItem() leaves
+	 * some of its internal line items (lines/fk_lines/pk_lines/src_cf_lines/dst_cf_lines) with
+	 * corrupted state that only crashes later, when the view is finally destroyed -- confirmed by
+	 * a dedicated regression test and traced down to bad memory in the line item itself (its
+	 * vtable pointer no longer points into Qt's library), not a scene-registration mismatch.
+	 * Sidestepping the issue entirely: discard the old view and build a fresh one directly in the
+	 * destination scene, exactly like promoteRelationship() already does */
+	cur_scene->removeItem(item);
+	dst_scene->addItem(new RelationshipView(rel));
 }
 
 void ModelWidget::promoteRelationship(BaseRelationship *rel, ObjectsScene *shared_scene)

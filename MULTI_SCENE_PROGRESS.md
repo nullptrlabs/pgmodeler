@@ -6,11 +6,96 @@
 
 ## Estado atual
 
-- Branch: `multi-scene-support-2.1.x`, sincronizada com `origin` (sem commits pendentes de push).
+- Branch: `multi-scene-support-2.1.x`, com 1 commit à frente de `origin` (refactor próprio do
+  usuário, `0f7ac6f61`, não relacionado a esta sessão — adicionou `BaseTableView::getCutoffItem()`
+  como acesso público em vez de exigir `friend class ModelWidget`).
 - **Fase 0 (0.1-0.8), Fase 1 subtarefas 1.1-1.8, 1.8.1 e 1.9 (1.9.1-1.9.6) — todas concluídas,
   testadas manualmente pelo usuário (1.9.4 e a rodada final também confirmadas por ele via ASan) e
   commitadas.** (1.2 recebeu um refinamento pequeno de deduplicação logo depois de feita.)
-  **Próxima: 1.10** (destruição de cena ao remover schema, incluindo cascade delete — ver plano).
+- **1.10 implementada (2026-09-23), aguardando teste manual do usuário antes de commitar.** Ver
+  detalhamento abaixo. Próxima: **1.11** (teste de regressão dedicado: cascade delete + undo).
+- **Pausa da sessão (2026-09-23) — pendência explícita pra retomar**: escrever teste de stress pra
+  confirmar (ou descartar) se o bug de corrupção de memória do `relocateItem()` em relacionamentos
+  (ver bloco abaixo) também acontece com `TableView` — análise de código encontrou a mesma estrutura
+  de grupo aninhado com filhos dinâmicos (`columns`/`ext_attribs`), mas isso ainda não foi testado
+  na prática. Não investigar/codar antes da próxima sessão de testes, a pedido do usuário.
+- **Crash real achado testando a 1.10, causa raiz não era a 1.10 (2026-09-23)**: usuário reportou
+  SIGSEGV ao fechar o modelo depois de remover um schema, capturado pelo crash handler e depois
+  isolado só com ASan (sem crash handler) — mesmo stack trace nos dois: `RelationshipView::
+  ~RelationshipView()` (relationshipview.cpp:127, limpando `lines`/`fk_lines`/`pk_lines`/
+  `src_cf_lines`/`dst_cf_lines`) → `QGraphicsItemGroup::removeFromGroup()` → `QGraphicsItem::
+  sceneTransform()` → `QGraphicsItemPrivate::ensureSceneTransformRecursive()`, sempre durante
+  `ObjectsScene::~ObjectsScene()` dentro do teardown completo do `ModelWidget`. Isolado com um
+  teste dedicado (`ModelWidgetTest`) que reproduzia 100% das vezes **sem nunca chamar
+  `removeScene()`/1.10** — só chamando `ObjectsScene::relocateItem()` numa `RelationshipView` (o
+  mesmo método que `ModelWidget::relocateRelationshipView()`, da 1.9.4, já usa em produção) e
+  depois deixando o `ModelWidget` fechar normalmente. **Causa raiz real, não é a 1.10**: mover uma
+  `RelationshipView` entre cenas via `relocateItem()` deixa alguns dos seus itens internos de linha
+  com memória corrompida — confirmado com `gdb`, inspecionando o item que crasha: o ponteiro de
+  vtable dele não aponta mais pra dentro de nenhuma biblioteca do Qt (virou um valor pequeno tipo
+  `0x430e`), ou seja, não é só "esqueceu de avisar a cena nova", é corrupção de memória de verdade.
+  Três tentativas de corrigir dentro do próprio `relocateItem()`/`ObjectsScene` falharam de forma
+  **idêntica** (mesmo stack trace, mesmo padrão de endereço) — registradas aqui porque já foram
+  eliminadas, não valem a pena tentar de novo:
+  1. Forçar cada filho (recursivo) a se re-registrar na cena nova via `child->setParentItem(nullptr)`
+     seguido de `child->setParentItem(parent)` (truque comum pra invalidar cache de transform do Qt).
+  2. Versão mais agressiva do mesmo: `group->removeFromGroup(child)` seguido de
+     `group->addToGroup(child)` pra cada filho, recursivo em grupos aninhados (`cf_descriptors`) —
+     o mesmo caminho de código que o Qt usa pra adicionar um item a um grupo a primeira vez.
+  3. Pular o `detachItem()`/`QGraphicsScene::removeItem()` explícito e deixar só
+     `dst_scene->addItem(item)` (que segundo a documentação do Qt já detecta e remove da cena
+     antiga sozinho) fazer a transferência inteira.
+  **Correção adotada**: não tentar mover a `RelationshipView` existente entre cenas. Reescrito
+  `ModelWidget::relocateRelationshipView()` pra descartar a view antiga (`cur_scene->
+  removeItem(item)`, caminho já testado/seguro) e construir uma nova diretamente na cena de destino
+  (`dst_scene->addItem(new RelationshipView(rel))`) — exatamente o que `promoteRelationship()` já
+  fazia com sucesso. `ObjectsScene::relocateItem()` em si **não foi alterado** — continua sendo
+  usado sem problema pra tabelas/schemas (nunca mostrou esse bug nos testes extensivos da 1.9);
+  só deixou de ser chamado para relacionamentos.
+  - **Achado colateral durante a validação**: a primeira versão do teste de regressão (só
+    descartava a view do relacionamento, sem também relocar as tabelas antes) causou um
+    heap-use-after-free **diferente e genuíno**, pego limpo pelo ASan:
+    `RelationshipView::disconnectTables()` → `BaseTableView::removeConnectedRelationship()` lendo
+    uma `TableView` já destruída. Isso confirmou que a ordem importa de verdade: só é seguro
+    descartar/recriar a view do relacionamento **depois** que as tabelas já foram relocadas pra
+    cena de destino (exatamente a ordem que `reevaluateTableRelationships()` já usa em produção —
+    tabela primeiro, `relocateRelationshipView()` depois). Corrigido o teste pra seguir essa ordem
+    real, e aí sim passou limpo. Não é um bug de produção (a ordem real já está certa), mas reforça
+    por que a subtarefa 1.11 (teste de regressão dedicado) é importante.
+  - Novo teste `ModelWidgetTest::discardingAndRecreatingRelationshipViewSurvivesModelClose`
+    substitui o teste exploratório anterior — cobre exatamente esse cenário (tabelas relocadas,
+    relacionamento descartado+recriado na cena nova, modelo fechado) como regressão permanente.
+    Build limpo (`canvas`+`gui`+`pgmodeler`), suíte `modelwidgettest` 5/5 sem regressão. Binário
+    reinstalado. Não commitado ainda — aguardando teste manual do usuário (mover tabelas entre
+    schemas repetidamente, inclusive causando promoção/rebaixamento de relacionamento, depois
+    fechar o modelo).
+  - **Usuário confirmou a escolha de design** (descartar+recriar em vez de mover) — mais memória
+    (aloca uma `RelationshipView` nova em vez de reaproveitar), mas código bem mais simples e sem
+    depender de bookkeeping interno do Qt pra grupos aninhados. Trade-off aceito conscientemente.
+  - **Pendência levantada pelo usuário, registrada aqui pra não esquecer: o mesmo bug pode existir
+    pra tabelas** — `ObjectsScene::relocateItem()` também é usado pra `TableView`/`SchemaView` (via
+    `moveToSchema()`/`relocateEditedObject()`), e a análise de código confirma que `BaseTableView`
+    tem a mesma forma estrutural que causou o bug em `RelationshipView`: `columns`/`ext_attribs`
+    são `QGraphicsItemGroup`s aninhados dentro do `TableView`, e cada coluna/constraint vira um
+    `TableObjectView` criado dinamicamente e adicionado via `groups[obj_idx]->addToGroup(col_item)`
+    ([tableview.cpp:194](libs/libcanvas/src/tableview.cpp#L194)) — o mesmo padrão de "grupo dentro
+    de grupo com filhos dinâmicos" que quebrou pros `cf_descriptors` do relacionamento.
+    `BaseObjectView` (base de **todo** objeto gráfico, não só relacionamento) também adiciona/remove
+    `obj_shadow`/`protected_icon`/`pos_info_item`/`sql_disabled_item` do mesmo jeito. A favor de
+    tabelas serem seguras: `relocateItem()` em tabela é o mecanismo central de todo o teste extenso
+    da Fase 1.9 (mover tabelas entre schemas repetidamente, inclusive com colunas/constraints) e
+    nunca crashou — mas isso é ausência de falha observada, não prova de que não pode acontecer (a
+    causa raiz exata da corrupção no Qt nunca foi identificada, só contornada). **Ação pendente pra
+    próxima sessão**: escrever um teste de stress dedicado — tabela com várias colunas/constraints,
+    relocada entre cenas via `relocateItem()` (o mesmo caminho, sem o fix de descartar+recriar, já
+    que tabelas ainda usam relocação de verdade), modelo fechado sob ASan — pra confirmar se
+    tabelas são de fato seguras ou se precisam do mesmo tratamento de descartar+recriar. Usuário
+    pediu explicitamente pra registrar isso como pendência, não investigar agora — retomamos com
+    mais testes numa sessão futura.
+- **Achado do usuário durante teste da 1.9.6 (2026-09-23), registrado no plano (intro da Fase 1),
+  não implementado agora**: `Textbox` não tem schema, então não existe nenhum mecanismo (nem
+  indireto) pra movê-lo entre cenas depois de criado — diferente de Table/View/ForeignTable, que
+  ganharam isso na 1.9. Fica pendente pra quando threshold/reatribuição manual precisarem disso.
 - **Nova subtarefa registrada no plano (2026-09-22), ainda não iniciada: 1.15 — cor exclusiva
   para o marcador cut-off.** Hoje `CutoffItem` reaproveita `Attributes::PositionInfo`; usuário
   pediu identidade visual própria, o que implica chave nova em `Attributes::`, entrada nova em
@@ -413,6 +498,42 @@
     relocaliza `tab_view->cutoff_item` (acesso direto, `ModelWidget` já é `friend` de
     `BaseTableView`) pra cena atual da tabela, antes de reavaliar qualquer relacionamento. Build de
     conferência: `make gui`, limpo. **Sem teste manual do usuário ainda**.
+- **1.10 — destruição de cena ao remover schema (2026-09-23)**: `ModelWidget::removeScene(scn)`
+  novo (mirror de `addScene()`, ver [modelwidget.cpp](libs/libgui/src/widgets/modelwidget.cpp)) —
+  tira `scn` de `scenes`; se era a cena ativa, escolhe outra (a primeira restante, via
+  `setActiveScene(0)` depois de zerar `active_scene_idx`/`scene` pra passar pelo guard de no-op de
+  `setActiveScene()`) **antes** de destruir, ou desanexa o `viewport` (`setScene(nullptr)`) se não
+  sobrou nenhuma cena; senão só recalcula `active_scene_idx` (a posição de `scene` mudou na lista
+  depois do `removeOne()`); por fim `delete scn` e `updateSceneCombo()`. Log de aviso em build de
+  debug (`#ifdef PGMODELER_DEBUG`) se a cena ainda tiver itens no momento da destruição — sinal de
+  objeto órfão, não um caso esperado. `ModelWidget::handleObjectRemoval()` ganhou o gatilho: quando
+  o objeto removido é um `Schema`, resolve a cena via `getSchemaScene()`, tira a entrada de
+  `schema_scenes` e chama `removeScene()`. Não precisou de código novo pra limpar conexões externas
+  apontando pro schema removido — a ordem de remoção em cascata (filhos antes do schema, já
+  documentada na subseção "Remoção de schema e destruição de cena") garante que todo relacionamento
+  cross-scene já passou pelo branch existente de `removeExternalRelationship()`
+  (`handleObjectRemoval()`, adicionado na 1.8) antes do `Schema` em si chegar aqui — não há
+  marcador cut-off "fantasma" a limpar neste ponto. Build limpo (`gui`+`pgmodeler`) e
+  `modelwidgettest` 4/4 sem regressão (rodado com o binário ASan do usuário — os únicos leaks
+  reportados pelo LeakSanitizer vêm de `DatabaseModel`/`ModelWidget` nunca destruídos no fim do
+  teste, que nem chama `handleObjectRemoval()`; nenhum stack trace passa por `removeScene()` ou
+  qualquer código desta subtarefa). Binário reinstalado (`cmake --build . --target install`).
+  - **Correção do usuário, testado (2026-09-23)**: comportamento de roteamento/destruição
+    confirmado correto no teste manual, mas o log de aviso em si estava furado. `scn->items()`
+    inclui itens auxiliares que **toda** `ObjectsScene` sempre tem (`rel_line` — linha de borracha
+    da ferramenta de criação de relacionamento, `selection_rect`, `layers_paths`, o item do timer
+    de indicação de zoom, entre outros) — não só objetos de banco de dados. Como esses itens
+    convivem com a cena por toda a vida dela, `!scn->items().isEmpty()` seria **sempre** verdadeiro,
+    disparando o aviso mesmo numa cena legitimamente vazia de objetos de modelo. Usuário confirmou
+    (documentação do Qt) que `~QGraphicsScene()` já destrói sozinha qualquer item que sobrar nela —
+    esses auxiliares (e também um eventual `CutoffItem` remanescente) são limpos automaticamente,
+    não precisam de checagem manual. **Fix**: a checagem virou um laço filtrando por
+    `dynamic_cast<BaseObjectView *>` sem `parentItem()` — mesma classificação que
+    `~ObjectsScene()` já usa pra achar os 6 tipos de objeto de banco de dados (table/view/
+    foreigntable/schema/relationship/textbox, todos derivados de `BaseObjectView`); só dispara o
+    aviso se sobrar um destes, ignorando a infraestrutura da própria cena. Build de `gui`+
+    `pgmodeler` limpo, `modelwidgettest` 4/4 sem regressão, binário reinstalado. Não commitado
+    ainda — aguardando teste manual do usuário.
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
