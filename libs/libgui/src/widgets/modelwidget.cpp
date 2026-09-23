@@ -2820,12 +2820,12 @@ void ModelWidget::reevaluateTableRelationships(BaseTableView *tab_view)
 	 * when the marker was first created -- relocating the table's item never touches it, so without
 	 * this it's left orphaned in the table's old scene, still reacting to the table's signals but
 	 * rendered nowhere near it */
-	if(tab_view->cutoff_item)
+	if(tab_view->getCutoffItem())
 	{
-		ObjectsScene *cutoff_scene = dynamic_cast<ObjectsScene *>(tab_view->cutoff_item->scene());
+		ObjectsScene *cutoff_scene = dynamic_cast<ObjectsScene *>(tab_view->getCutoffItem()->scene());
 
 		if(cutoff_scene && cutoff_scene != tab_scene)
-			cutoff_scene->relocateItem(tab_view->cutoff_item, tab_scene);
+			cutoff_scene->relocateItem(tab_view->getCutoffItem(), tab_scene);
 	}
 
 	/* Snapshot both lists first -- demoteRelationship()/promoteRelationship() mutate
