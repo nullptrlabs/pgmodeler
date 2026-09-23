@@ -1094,6 +1094,17 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
          tabelas diferentes movidas juntas no mesmo `moveToSchema()` (que antes se autocorrigia via
          rebaixamento seguido de promoção imediata, funcional mas descartando e recriando a view à
          toa) agora também usa esse caminho mais barato — relocação direta da mesma view.
+       - **1.9.5 — preservar posição original ao relocar entre cenas, achado pelo usuário
+         (2026-09-23)**: `moveToSchema()` ainda carregava um comportamento herdado da era de cena
+         única — depois de relocar o item pra cena do schema destino (1.9.1), reposicionava o item
+         colado logo abaixo da caixa do `SchemaView` de destino, incondicionalmente. Fazia sentido
+         quando todo schema compartilhava a mesma tela (um objeto vindo de outro schema precisava
+         de algum lugar razoável perto dos novos vizinhos); com segmentação por schema, a cena
+         destino é uma tela própria e independente — encaixar todo objeto que chega no mesmo ponto
+         (logo abaixo da caixa do schema) empilha um em cima do outro, destruindo o layout que o
+         usuário tinha na cena de origem. Fix: removido o bloco de reposicionamento por completo —
+         o item mantém seu `(x, y)` inalterado através da relocação de cena, igual ao que
+         `relocateEditedObject()` (1.9.3) já fazia (nunca reposicionava, só relocava).
 
 1.10. **Destruição de cena ao remover schema** — em `handleObjectRemoval()`, destruir a
       `ObjectsScene` do schema removido (com asserção/log de aviso em debug se não estiver vazia);
