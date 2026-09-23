@@ -22,7 +22,6 @@
 #include "basetableview.h"
 #include "schema.h"
 #include "utilsns.h"
-#include "cutoffitem.h"
 #include <QGraphicsScene>
 
 bool BaseTableView::hide_ext_attribs {false};
@@ -692,6 +691,11 @@ void BaseTableView::configureCurrentPage(BaseTable::TableSection section_id, uns
 	dynamic_cast<BaseTable *>(this->getUnderlyingObject())->setCurrentPage(section_id, page);
 	finishGeometryUpdate();
 	emit s_currentPageChanged();
+}
+
+CutoffItem *BaseTableView::getCutoffItem()
+{
+	return cutoff_item;
 }
 
 void BaseTableView::selectRelationships()

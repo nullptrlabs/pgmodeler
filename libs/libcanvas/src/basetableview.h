@@ -38,8 +38,7 @@
 #include "baserelationship.h"
 #include "textpolygonitem.h"
 #include "attributestoggleritem.h"
-
-class CutoffItem;
+#include "cutoffitem.h"
 
 class __libcanvas BaseTableView: public BaseObjectView {
 	Q_OBJECT
@@ -143,6 +142,10 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		 * to be displayed in the current page. See configureObject() on TableView and GraphicalView */
 		bool configurePaginationParams(BaseTable::TableSection section_id, unsigned total_attrs, unsigned &start_attr, unsigned &end_attr);
 
+		void hoverLeaveEvent(QGraphicsSceneHoverEvent *) override;
+		void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
+		void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+
 	public:
 		enum ConnectionPoint: unsigned {
 			LeftConnPoint,
@@ -151,10 +154,6 @@ class __libcanvas BaseTableView: public BaseObjectView {
 
 		BaseTableView(BaseTable *base_tab);
 		~BaseTableView() override;
-
-		void hoverLeaveEvent(QGraphicsSceneHoverEvent *) override;
-		void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
-		void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 
 		//! brief Defines the amount of attributes per page to be displayed
 		static void setAttributesPerPage(BaseTable::TableSection section_id, unsigned value);
@@ -221,6 +220,8 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		/*! \brief This slot reconfigures the table when the attributes toggler emits the signal s_currentPageChanged
 		 * causing the the attributes of the current page to be displayed */
 		void configureCurrentPage(BaseTable::TableSection section_id, unsigned page);
+
+		CutoffItem *getCutoffItem();
 
 	signals:
 		//! \brief Signal emitted when a table is moved over the scene

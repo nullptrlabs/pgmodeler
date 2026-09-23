@@ -138,6 +138,9 @@ class __libcanvas BaseObjectView: public QObject, public QGraphicsItemGroup {
 		 *  The min_opacity is used in fade out operation to determine a minimum opacity value. */
 		void fade(bool fd_in, int duration, int loop_cnt = 1, qreal final_opacity = 1);
 
+		//! \brief Controls the changes during the object's selection and moving
+		QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+
 	public:
 		static constexpr double VertSpacing=2.0,
 		HorizSpacing=2.0,
@@ -155,9 +158,6 @@ class __libcanvas BaseObjectView: public QObject, public QGraphicsItemGroup {
 
 		//! \brief Returns the object selection order
 		unsigned getSelectionOrder();
-
-		//! \brief Controls the changes during the object's selection and moving
-		QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
 		//! \brief Returns the object that is representend by the graphical object
 		BaseObject *getUnderlyingObject();
