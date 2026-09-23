@@ -1055,6 +1055,26 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
          depois de destacar o item — aplicado **incondicionalmente** ali (não só no caminho de
          rebaixamento), já que é uma correção geral, consistente em qualquer remoção de item, não um
          caso especial.
+       - **1.9.3 — segundo caminho de troca de schema, achado pelo usuário (2026-09-23)**: o texto
+         original de 1.9 só cobria `moveToSchema()` (menu de contexto). `BaseObjectWidget` (base de
+         `TableWidget`/`ViewWidget`) tem seu próprio seletor de schema (`schema_sel`), aplicado em
+         `applyConfiguration()` — um segundo caminho, totalmente independente de `moveToSchema()`,
+         pelo qual o schema de uma tabela/view pode mudar. `applyConfiguration()` já capturava
+         `prev_schema` antes de trocar (comentário original do campo: "used to update the schemas
+         when moving tables/views from one to another"), mas `finishConfiguration()` só usava isso
+         pra marcar o schema antigo como modificado (`prev_schema->setModified(true)`) — nunca
+         relocava o item nem reavaliava relacionamentos, mesma lacuna da 1.9 original. Fix:
+         `ModelWidget::openEditingForm(WidgetClass *widget, ...)` — o choke point único por onde
+         todo formulário de edição de objeto passa depois de fechar o diálogo — ganhou
+         `relocateEditedObject(widget)`, chamado quando `res == QDialog::Accepted` e `WidgetClass`
+         deriva de `BaseObjectWidget` (mesmo `if constexpr` já usado ali). Reaproveita
+         `ObjectsScene::relocateItem()` (1.9.1) e `reevaluateTableRelationships()` (1.9.2) sem
+         duplicar lógica — só resolve `cur_scene`/`dst_scene` a partir de `obj_wgt->object`/
+         `obj_wgt->prev_schema` (acessíveis via `friend class ModelWidget` já existente em
+         `BaseObjectWidget`) e delega. Seguro por construção pra objeto novo (ainda sem
+         `getOverlyingObject()` nesse ponto, ou já inserido na cena certa por `handleObjectAddition()`
+         antes de `openEditingForm()` retornar) — não precisou de um caso especial "objeto novo vs.
+         editado".
 
 1.10. **Destruição de cena ao remover schema** — em `handleObjectRemoval()`, destruir a
       `ObjectsScene` do schema removido (com asserção/log de aviso em debug se não estiver vazia);

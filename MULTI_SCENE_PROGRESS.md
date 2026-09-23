@@ -18,8 +18,9 @@
   configuração de aparência. Só registrada, sem código ainda. Depende de: 1.8 (já feita).
 - **1.8.1 fechada (2026-09-23, confirmada pelo usuário depois de uma auditoria de código
   ponta a ponta contra o texto da subtarefa no plano).**
-- **1.9 implementada em duas subtarefas (2026-09-23, `2ef548b59`/`ab6823a8f`), aguardando teste
-  manual do usuário — não fechada.** Ver detalhamento completo abaixo. Próxima, depois de
+- **1.9 implementada em três subtarefas (2026-09-23, `2ef548b59`/`ab6823a8f`/`04aea9ef2`), mais um
+  commit de estilo (`7adc1c7a7`) — aguardando teste manual do usuário, não fechada.** Ver
+  detalhamento completo abaixo. Próxima, depois de
   aprovada: **1.10** (destruição de cena ao remover schema).
   Commits até agora: `3a4f4f4a9`/`02508f6ab` (movimentação livre + persistência XML),
   `0281a1d85` (linha dinâmica tabela↔marcador + clamp geométrico contra o retângulo),
@@ -313,6 +314,33 @@
     incondicionalmente ali (correção geral, não um caso especial do caminho de rebaixamento). Build
     de conferência: `make canvas` + `make gui`, ambos limpos. **Sem teste manual do usuário ainda**
     — aguardando.
+  - **Correção de estilo (`7adc1c7a7`)**: usuário pediu, como preferência geral de código (não
+    específica desta subtarefa), pra usar `auto &` em vez do tipo de ponteiro explícito
+    (`BaseRelationship *`) em laços `for` sobre containers de ponteiros — os dois laços novos de
+    `reevaluateTableRelationships()` (sobre `in_scene_rels`/`ext_rels`) foram os únicos casos no
+    código gerado pra 1.9 até então. Registrado em memória pra aplicar em código novo daqui pra
+    frente sem precisar ser lembrado de novo.
+  - **1.9.3 — segundo caminho de troca de schema, achado pelo usuário (2026-09-23, `04aea9ef2`)**:
+    usuário reportou que `BaseObjectWidget` (base de `TableWidget`/`ViewWidget`) tem seu próprio
+    seletor de schema (`schema_sel`), aplicado em `applyConfiguration()` — um caminho totalmente
+    independente do menu de contexto (`moveToSchema()`) pelo qual uma tabela/view pode trocar de
+    schema, com a mesma lacuna: nada movia o item entre cenas nem reavaliava relacionamentos.
+    `applyConfiguration()` já capturava `prev_schema` antes da troca (comentário original do campo:
+    "used to update the schemas when moving tables/views from one to another"), mas
+    `finishConfiguration()` só usava isso pra marcar o schema antigo como modificado — a intenção
+    documentada no campo nunca foi totalmente implementada pro caso multi-cena. Fix: novo
+    `ModelWidget::relocateEditedObject(BaseObjectWidget *obj_wgt)`, chamado de dentro do template
+    `ModelWidget::openEditingForm(WidgetClass *widget, ...)` (o choke point único por onde todo
+    formulário de edição de objeto passa) quando `res == QDialog::Accepted` e `WidgetClass` deriva
+    de `BaseObjectWidget` — reaproveita `ObjectsScene::relocateItem()` (1.9.1) e
+    `reevaluateTableRelationships()` (1.9.2) sem duplicar nada, só resolvendo `cur_scene`/
+    `dst_scene` a partir de `obj_wgt->object`/`obj_wgt->prev_schema` (acesso direto via
+    `friend class ModelWidget` já existente em `BaseObjectWidget`). Seguro por construção pra objeto
+    recém-criado no mesmo formulário (nesse ponto, ou ainda sem view — `getOverlyingObject()` nulo —
+    ou já inserido na cena certa por `handleObjectAddition()`, que roda antes do diálogo fechar) —
+    não precisou de tratamento especial "objeto novo vs. editado". Build de conferência: `make gui`
+    (é um método template, instanciado em vários pontos de `showObjectForm()` — só um build da lib
+    inteira confirma todas as instanciações), limpo. **Sem teste manual do usuário ainda**.
 - **Achado importante confirmado por teste manual (2026-09-22)**: retângulo de cada cena está
   errado hoje pra toda cena que não é a ativa (`adjustSceneRect()` só toca a cena ativa). Virou
   **subtarefa 2.0**, primeira da Fase 2 (a pedido do usuário) — plano reorganizado, ver seção 2,
