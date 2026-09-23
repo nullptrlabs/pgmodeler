@@ -295,6 +295,20 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Returns the scene that holds the given schema and its children, or nullptr if none is assigned yet
 		ObjectsScene *getSchemaScene(Schema *schema);
 
+		//! \brief Returns whichever of rel's two tables isn't tab (the other side of the relationship)
+		BaseTable *getRelationshipPartner(BaseRelationship *rel, BaseTable *tab);
+
+		/*! \brief Re-evaluates every relationship connected to tab_view against its current scene,
+		 * promoting/demoting each one that's no longer consistent with where its partner table lives.
+		 * Called after a table's item is relocated to a different scene (see moveToSchema()) */
+		void reevaluateTableRelationships(BaseTableView *tab_view);
+
+		//! \brief Destroys rel's RelationshipView and registers it as an external (cut-off) connection instead
+		void demoteRelationship(BaseRelationship *rel);
+
+		//! \brief Creates a RelationshipView for rel in shared_scene, clearing its cut-off markers
+		void promoteRelationship(BaseRelationship *rel, ObjectsScene *shared_scene);
+
 		//! \brief Rebuilds scene_combo's items from scenes and selects the currently active one
 		void updateSceneCombo();
 
