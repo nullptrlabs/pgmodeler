@@ -136,6 +136,10 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Maps each schema to the scene that holds it and its children, in schema-segmentation mode
 		QHash<Schema *, ObjectsScene *> schema_scenes;
 
+		/*! \brief Running count of Table/View/ForeignTable insertions in threshold-segmentation mode.
+		 * Not persisted yet (see MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.2) -- resets every session. */
+		unsigned threshold_obj_count;
+
 		//! \brief Manages the objects scene
 		QGraphicsView *viewport;
 
@@ -432,6 +436,9 @@ class __libgui ModelWidget: public QWidget {
 		static constexpr double MinimumZoom = ObjectsScene::MinScaleFactor,
 		MaximumZoom = ObjectsScene::MaxScaleFactor,
 		ZoomIncrement = 0.050000;
+
+		//! \brief Number of objects per scene in threshold-segmentation mode (see MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.1)
+		static constexpr unsigned SceneObjThreshold = 1000;
 
 		static constexpr char SaveDisabled[] { "save-disabled" },
 		ModelImported[] { "model-imported" },

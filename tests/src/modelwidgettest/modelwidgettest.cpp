@@ -53,6 +53,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void relocatingTableIntoPartnersSceneClearsBothCutoffMarkers();
 		void undoRedoOfTablesMovedTogetherKeepsExactlyOneRelationshipView();
 		void undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedView();
+		void thresholdModeOpensNewSceneAfterCrossingCount();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -61,6 +62,9 @@ void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
 	{
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		db_model->setSegmentationMode(DatabaseModel::BySchema);
 
 		db_model->createSystemObjects(true);
 
@@ -96,6 +100,9 @@ void ModelWidgetTest::differentSchemasGetDifferentScenes()
 	{
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		db_model->setSegmentationMode(DatabaseModel::BySchema);
 
 		db_model->createSystemObjects(true);
 
@@ -135,6 +142,9 @@ void ModelWidgetTest::discardingAndRecreatingRelationshipViewSurvivesModelClose(
 	{
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		db_model->setSegmentationMode(DatabaseModel::BySchema);
 
 		db_model->createSystemObjects(true);
 
@@ -227,6 +237,9 @@ void ModelWidgetTest::relocatingTablesTogetherPreservesTheirRelationship()
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
+		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		db_model->setSegmentationMode(DatabaseModel::BySchema);
+
 		db_model->createSystemObjects(true);
 
 		Schema *schema_a = new Schema;
@@ -311,6 +324,9 @@ void ModelWidgetTest::relocatingTableIntoPartnersSceneClearsBothCutoffMarkers()
 	{
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		db_model->setSegmentationMode(DatabaseModel::BySchema);
 
 		db_model->createSystemObjects(true);
 
@@ -409,6 +425,9 @@ void ModelWidgetTest::undoRedoOfTablesMovedTogetherKeepsExactlyOneRelationshipVi
 	{
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		db_model->setSegmentationMode(DatabaseModel::BySchema);
 		OperationList *op_list = model_wgt.getOperationList();
 
 		db_model->createSystemObjects(true);
@@ -524,6 +543,9 @@ void ModelWidgetTest::undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedV
 	{
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		db_model->setSegmentationMode(DatabaseModel::BySchema);
 		OperationList *op_list = model_wgt.getOperationList();
 
 		db_model->createSystemObjects(true);
@@ -637,6 +659,52 @@ void ModelWidgetTest::undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedV
 
 		QCOMPARE(rel_ab_count, 1);
 		QCOMPARE(rel_ac_count, 1);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Covers MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.1: in threshold-segmentation mode, the
+Table/View/ForeignTable insertion counter opens a new scene only once SceneObjThreshold insertions
+have landed in the current one -- the insertion that crosses the threshold still belongs to the
+old scene, and only the next one after it goes to the freshly-opened scene. */
+void ModelWidgetTest::thresholdModeOpensNewSceneAfterCrossingCount()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::ByThreshold);
+		db_model->createSystemObjects(true);
+
+		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(public_sch != nullptr);
+
+		ObjectsScene *first_scene = model_wgt.getSceneForObject(public_sch);
+		Table *last_table = nullptr;
+
+		for(unsigned i = 0; i < ModelWidget::SceneObjThreshold; i++)
+		{
+			Table *table = new Table;
+			table->setName(QString("table_%1").arg(i));
+			table->setSchema(public_sch);
+			db_model->addTable(table);
+			last_table = table;
+		}
+
+		QCOMPARE(model_wgt.getSceneForObject(last_table), first_scene);
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+
+		Table *overflow_table = new Table;
+		overflow_table->setName("table_overflow");
+		overflow_table->setSchema(public_sch);
+		db_model->addTable(overflow_table);
+
+		QVERIFY(model_wgt.getSceneForObject(overflow_table) != first_scene);
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
 	}
 	catch(Exception &e)
 	{

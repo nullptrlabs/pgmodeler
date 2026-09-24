@@ -108,6 +108,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	current_zoom = 1;
 	scene = nullptr;
 	active_scene_idx = -1;
+	threshold_obj_count = 0;
 	modified = panning_mode = wheel_move = false;
 	scene_moving = blink_new_objs = false;
 	curr_show_grid = curr_show_delim = true;
@@ -155,6 +156,10 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	protected_model_frm->adjustSize();
 
 	db_model = new DatabaseModel(this);
+
+#warning "Fase 2 test scaffolding: remove this forced ByThreshold segmentation mode once real mode selection exists (see MULTI_SCENE_PLAN.md subtarefa 2.1)"
+	db_model->setSegmentationMode(DatabaseModel::ByThreshold);
+
 	xmlparser = db_model->getXMLParser();
 	op_list = new OperationList(db_model, this);
 
@@ -1162,6 +1167,7 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 		ObjectType obj_type = graph_obj->getObjectType();
 		QGraphicsItem *item = nullptr;
 		ObjectsScene *target_scene = scene;
+		DatabaseModel::SegmentationMode seg_mode = db_model->getSegmentationMode();
 
 		switch(obj_type)
 		{
@@ -1205,25 +1211,30 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 			case ObjectType::Schema:
 			{
 				Schema *schema = dynamic_cast<Schema *>(graph_obj);
-				target_scene = getSchemaScene(schema);
 
-				if(!target_scene)
+				//Dedicated schema/scene 1:1 mapping only applies in schema-segmentation mode
+				if(seg_mode == DatabaseModel::BySchema)
 				{
-					/* pg_catalog is a system schema rarely touched directly by the user (usually
-					populated via reverse engineering) -- never let it claim the default active scene,
-					even when it's the first schema processed (createSystemObjects() always creates it
-					before the file's own schemas are parsed on load) */
-					bool is_pg_catalog = (schema->getName() == "pg_catalog");
+					target_scene = getSchemaScene(schema);
 
-					target_scene = addScene(!is_pg_catalog);
-					schema_scenes[schema] = target_scene;
-					applySceneLayers(target_scene);
+					if(!target_scene)
+					{
+						/* pg_catalog is a system schema rarely touched directly by the user (usually
+						populated via reverse engineering) -- never let it claim the default active scene,
+						even when it's the first schema processed (createSystemObjects() always creates it
+						before the file's own schemas are parsed on load) */
+						bool is_pg_catalog = (schema->getName() == "pg_catalog");
 
-					/* public is the conventional default schema -- while the model is being built/loaded,
-					make sure its scene ends up active even if pg_catalog (or some other schema) was
-					processed first */
-					if(db_model->isModelLoading() && schema->getName() == "public")
-						setActiveScene(scenes.indexOf(target_scene));
+						target_scene = addScene(!is_pg_catalog);
+						schema_scenes[schema] = target_scene;
+						applySceneLayers(target_scene);
+
+						/* public is the conventional default schema -- while the model is being built/loaded,
+						make sure its scene ends up active even if pg_catalog (or some other schema) was
+						processed first */
+						if(db_model->isModelLoading() && schema->getName() == "public")
+							setActiveScene(scenes.indexOf(target_scene));
+					}
 				}
 
 				item = new SchemaView(schema);
@@ -1235,8 +1246,29 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 			break;
 		}
 
-		if(graph_obj->getSchema())
+		if(seg_mode == DatabaseModel::BySchema && graph_obj->getSchema())
 			target_scene = getSchemaScene(dynamic_cast<Schema *>(graph_obj->getSchema()));
+		else if(seg_mode == DatabaseModel::ByThreshold &&
+						(obj_type == ObjectType::Table || obj_type == ObjectType::ForeignTable || obj_type == ObjectType::View))
+		{
+			/* Naive counter (MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.1): every SceneObjThreshold
+			 * Table/View/ForeignTable insertions opens a new scene, and every insertion after that
+			 * goes to it -- same rule for interactive creation and file loading, no clustering by
+			 * connectivity (decisão #7, seção 3) */
+			if(scenes.isEmpty())
+			{
+				target_scene = addScene();
+				applySceneLayers(target_scene);
+			}
+			else
+				target_scene = scenes.last();
+
+			if(++threshold_obj_count % SceneObjThreshold == 0)
+			{
+				ObjectsScene *new_scene = addScene(false);
+				applySceneLayers(new_scene);
+			}
+		}
 
 		//Safety net for the rare case an object arrives before any scene exists yet (e.g. no schema created so far)
 		if(!target_scene)
