@@ -250,12 +250,12 @@ Estas decisões foram tomadas em conversa e **não devem ser reabertas** sem jus
     correção de um gap pré-existente (não introduzido pelas mudanças desta sessão): antes desta
     mudança, desfazer um `moveToSchema()` restaurava o schema no modelo mas nunca devolvia a view
     gráfica à cena original.
-    **Estado em 2026-09-23 (fim de sessão): há um leak de `RelationshipView` confirmado por ASan em
-    teste manual do usuário (undo+redo de uma tabela com 2 relacionamentos cut-off, ver
-    MULTI_SCENE_PROGRESS.md), ainda não reproduzido em teste automatizado apesar de várias
-    tentativas fiéis à sequência relatada — investigação retoma com o modelo `.dbm` real do
-    usuário.** Até isso ser resolvido, esta decisão/mecanismo deve ser tratada como **instável**,
-    não como fechada.
+    **Atualização (2026-09-24): o leak de `RelationshipView` observado nesse mecanismo foi
+    reproduzido (com o `.dbm` real do usuário) e corrigido — ver detalhamento em
+    MULTI_SCENE_PROGRESS.md. Causa raiz não tinha relação com o sinal/mecanismo em si**: era um bug
+    pré-existente em `~RelationshipView()` (`round_cf_descriptors` não limpo quando o lado da
+    relação é obrigatório), só exposto com mais frequência pelo padrão de descartar+recriar. Com o
+    fix aplicado, esta decisão/mecanismo pode ser tratada como fechada.
 
 ## 4. Fases de implementação
 
