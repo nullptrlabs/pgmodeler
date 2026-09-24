@@ -313,6 +313,15 @@ class __libgui ModelWidget: public QWidget {
 		 * it's called. Used to re-route a relationship after one of its tables was relocated */
 		void routeRelationship(BaseRelationship *rel);
 
+		/*! \brief Reacts to OperationList::s_operationExecuted, connected once in the constructor --
+		 * covers undo/redo of Operation::ObjModified/ObjMoved, which restores the schema attribute in
+		 * place (see OperationList::executeOperation()) without ever calling moveToSchema()/
+		 * relocateEditedObject(), so nothing else notices the object may now belong in a different
+		 * scene. Ignores anything that isn't a Table/ForeignTable/View restored by one of those two
+		 * operation types, and relocates the view only when its scene actually disagrees with the
+		 * object's current schema -- a no-op for every other kind of undo/redo */
+		void handleObjectSchemaChanged(BaseObject *object, Operation::OperType op_type);
+
 		/*! \brief Moves obj_wgt's edited object to its new schema's scene, if the schema selector in
 		 * the object's editing form actually changed it (see BaseObjectWidget::prev_schema) --
 		 * covers the same schema-change-implies-scene-change case as moveToSchema(), but for the

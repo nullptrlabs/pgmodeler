@@ -1203,3 +1203,96 @@ do plano.
   build (guardado atrás de `CMAKE_BUILD_TYPE STREQUAL Debug AND BUILD_TESTS` no CMakeLists raiz).
   Depois disso, `make -j$(nproc) modelwidgettest` builda só o teste novo; os executáveis ficam em
   `cmake-build/tests/src/<nome>/<nome>`, cada um roda direto (não precisa de `ctest`).
+
+## Undo/redo de relocação de cena + leak não resolvido (2026-09-23) — **WIP/instável, não commitar como fechado**
+
+Retomando a pendência da entrada anterior ("Bug reportado pelo usuário... Ctrl+Z não devolvia uma
+tabela relocada"): os dois fixes registrados lá (#1 supressão condicional de `registerObject()` em
+`moveToSchema()`, #2 leak de `bkp_obj`/`aux_obj`) foram revisados nesta sessão. O #2 (leak de
+`bkp_obj`/`aux_obj` em `OperationList::executeOperation()`) permanece corrigido e válido, sem
+mudança. O #1 foi **revertido e substituído** por um mecanismo diferente, a pedido do usuário:
+
+- **Correção do #1 rejeitada pelo usuário**: suprimir o registro no histórico de undo (deixando a
+  ação simplesmente não-desfazível) foi a solução errada — undo/redo de `moveToSchema()` **já
+  funcionava** antes desta rodada de refactors (confirmado pelo usuário, inclusive com a primeira
+  versão baseada nos métodos `relocate*` antigos), então o gap era resolvível, não algo pra
+  contornar suprimindo. `ModelWidget` deveria ser "inteligente o suficiente" pra rotear a tabela de
+  volta pra cena certa a partir do schema já restaurado pelo undo, sem `OperationList`/`libcore`
+  precisar saber nada sobre cena.
+- **Mecanismo novo**: `OperationList` ganhou o sinal `s_operationExecuted(BaseObject *object,
+  Operation::OperType op_type)` ([operationlist.h](libs/libcore/src/operationlist.h)), emitido ao
+  final de `executeOperation()` ([operationlist.cpp:965](libs/libcore/src/operationlist.cpp#L965))
+  pra toda operação restaurada (undo ou redo). `ModelWidget` conecta esse sinal **uma única vez**,
+  no construtor, a `handleObjectSchemaChanged(BaseObject*, Operation::OperType)` — que filtra por
+  `BaseTable::isBaseTable()` + `op_type` em `{ObjModified, ObjMoved}` antes de sequer olhar pra
+  cena, e só chama `relocateObjectView()` quando a cena atual da view diverge da cena do schema já
+  restaurado. `moveToSchema()` voltou a registrar `Operation::ObjModified` incondicionalmente,
+  exatamente como antes desta sessão.
+  - **Tentativa anterior, descartada**: a primeira versão conectava `BaseGraphicObject::
+    s_objectModified` (sinal por instância, já usado por cada `TableView`/`GraphicalView` pra
+    refresh de geometria) diretamente em `handleObjectAddition()`, uma conexão por objeto. Usuário
+    encontrou em teste real que isso reagia **excessivamente** — qualquer edição de atributo
+    (nome, coluna, comentário...) dispara esse sinal, não só mudança de schema, então o handler
+    rodava a cada edição comum, mesmo que na prática fizesse nada (checagem de cena já seria
+    no-op). Rejeitado por ruído/design, mesmo funcionando; substituído pelo sinal dedicado do
+    `OperationList`, que só dispara em undo/redo de verdade.
+  - Ver decisão #11 na seção 3 do plano pra motivação arquitetural completa.
+- **Dois novos testes de regressão** em `modelwidgettest.cpp`:
+  - `undoRedoOfTablesMovedTogetherKeepsExactlyOneRelationshipView`: duas tabelas relacionadas
+    (relacionamento real, mesma cena) movidas juntas via a sequência exata de `moveToSchema()`
+    (`registerObject`+`setSchema`+`relocateObjectView`, encadeadas com `startOperationChain()`/
+    `finishOperationChain()`), depois um ciclo de undo+redo via `op_list` direto. Confirma que o
+    relacionamento sobrevive como `RelationshipView` real e que existe exatamente uma view (não
+    duplicada/órfã) depois do ciclo.
+  - `undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedView`: uma tabela só, com dois
+    relacionamentos cross-scene (cut-off) pra duas parceiras já co-localizadas no schema destino —
+    o cenário relatado pelo usuário (ver abaixo). Move, undo, `setActiveScene()` pro destino (pra
+    bater com os passos confirmados do usuário), redo. Mesma asserção de "exatamente uma view por
+    relacionamento".
+  - **Suíte `modelwidgettest` 9/9 passando**, sem regressão. Build só de `core`+`canvas`+`gui`+
+    `modelwidgettest` — nenhum `install`/binário completo gerado nesta sessão.
+- **Leak real, confirmado por ASan em teste manual do usuário, NÃO reproduzido em teste
+  automatizado apesar de várias tentativas — investigação incompleta, retomando amanhã com o
+  `.dbm` real do usuário**:
+  - Relatório do usuário: `ERROR: LeakSanitizer: detected memory leaks`, duas alocações de
+    `RelationshipView` (928B/2 objetos cada, via `QGraphicsEllipseItem` em `configureLine()`, mais
+    32B/2 objetos cada via `configureCrowsFootDescriptors()`) nunca liberadas. Stack de ambas:
+    `ModelWidget::routeRelationship()` ([modelwidget.cpp:2846](libs/libgui/src/widgets/modelwidget.cpp#L2846))
+    ← `relocateObjectView()` (uma via o loop de `rels`, linha ~2911; outra via o loop de
+    `ext_rels`, linha ~2914) ← `handleObjectSchemaChanged()` ← `OperationList::executeOperation()`
+    ← `OperationList::redoOperation()` ← `OperationListWidget::redoOperation()` — confirmadamente
+    um clique em "Refazer", não um artefato de undo.
+  - **Passos confirmados com o usuário** (repro original + duas rodadas de perguntas): (1) tabela
+    no schema `public` com marcador cut-off representando 2 relacionamentos cruzados, ambas as
+    parceiras já no mesmo schema destino; (2) `moveToSchema()` pra esse schema destino (os dois
+    relacionamentos viram `RelationshipView` reais); (3) undo (tabela volta pro `public`, os dois
+    relacionamentos voltam a cut-off); (4) navega pra cena destino (`setActiveScene()`); (5) **redo**
+    (confirmado explicitamente pelo usuário, não estava na narração original); (6) fecha a
+    aplicação, ASan reporta o leak no `atexit`.
+  - **Reprodução tentada, sem sucesso**: escrevi
+    `undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedView` replicando exatamente essa
+    sequência (1 tabela, 2 relacionamentos cut-off pra parceiras já co-localizadas, move, undo,
+    `setActiveScene()`, redo) — passa limpo, sem leak, mesmo sob ASan/LSan direto (não só a suíte
+    completa). Instrumentei temporariamente `relocateObjectView()`/`routeRelationship()` com
+    `qDebug()` (removido depois) pra confirmar que o fluxo realmente segue o esperado: forward cria
+    2 `RelationshipView`s (via o loop de `ext_rels`), undo detacha as 2 corretamente
+    (`ObjectsScene::removeItem()`, que enfileira em `removed_objs` até a cena ser destruída — não é
+    leak) e rebaixa pra cut-off, redo cria 2 `RelationshipView`s novas — tudo tracked, nada
+    unreachable. Também tentei uma variação com 3 tabelas (uma parceira real + uma externa, testando
+    os dois loops de `relocateObjectView()` disparando na mesma chamada) e um ciclo duplo de
+    undo+redo — nenhuma reproduziu.
+  - **Não é regressão desta sessão isoladamente identificável**: `operationlist.cpp`/`.h` só
+    ganharam o sinal novo (aditivo); a lógica de `relocateObjectView()`/`routeRelationship()` é a
+    mesma do commit anterior (`71fb13b09`). Não descartada a hipótese de que o bug é mais sutil e
+    depende de alguma característica do modelo real do usuário (tipo de relacionamento,
+    generalização, self-relationship, volume de objetos, ou alguma interação não capturada na
+    narração dos passos) que a reconstrução sintética minimalista não está capturando.
+  - **Decisão explícita do usuário**: parar por hoje, commitar tudo **inclusive o código com o leak
+    não resolvido**, marcado como WIP/instável (não como subtarefa fechada). Usuário vai fornecer o
+    `.dbm` real amanhã pra reprodução direta contra os dados reais, em vez de continuar
+    reconstrução sintética por tentativa e erro.
+- **Pendência para a próxima sessão**: carregar o `.dbm` do usuário (provavelmente via
+  `DatabaseModel::loadModel()`/`SchemaParser` direto num teste, ou reproduzindo os passos na UI
+  real) e repetir exatamente os 6 passos confirmados acima até o leak aparecer sob ASan — só então
+  diagnosticar a causa raiz e propor fix. Não reabrir a hipótese de suprimir o registro de undo
+  (#1 antigo) — já rejeitada explicitamente pelo usuário nesta sessão.

@@ -961,6 +961,8 @@ void OperationList::executeOperation(Operation *oper, bool redo)
 					dynamic_cast<Column *>(obj)->getParentTable()->setModified(true);
 			}
 		}
+
+		emit s_operationExecuted(object, op_type);
 	}
 }
 
