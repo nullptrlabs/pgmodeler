@@ -2203,7 +2203,7 @@ void ModelWidget::loadModel(const QString &filename)
 		if(db_model->getSegmentationMode() == DatabaseModel::ByThreshold && !scenes.isEmpty())
 		{
 			int last_idx = scenes.size() - 1;
-			std::vector<ObjectType> types = { ObjectType::Table, ObjectType::View, ObjectType::ForeignTable };
+			std::vector<ObjectType> types { ObjectType::Table, ObjectType::View, ObjectType::ForeignTable };
 
 			threshold_obj_count = 0;
 

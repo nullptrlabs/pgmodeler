@@ -62,8 +62,8 @@ class __libcore BaseTable: public BaseGraphicObject {
 		 * A NaN point means no custom position was set -- the marker uses the default anchor */
 		QPointF cutoff_pos;
 
-		/*! \brief Index of the ObjectsScene bucket this object belongs to, in threshold-segmentation
-		 * mode. -1 means unset */
+		/*! \brief Index of the ObjectsScene bucket this object belongs to, in 
+		 * threshold-segmentation mode. -1 means unset */
 		int scene_idx;
 
 		void setSceneIndexAttribute();
