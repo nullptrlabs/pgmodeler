@@ -5,6 +5,7 @@
 <!ELEMENT view (schema,role?,tablespace?,comment?,tag?, appended-sql?,prepended-sql?,position,position?,reference*,simplecol*,definition)>
 <!ATTLIST view name CDATA #REQUIRED>
 <!ATTLIST view layers CDATA #IMPLIED>
+<!ATTLIST view scene CDATA #IMPLIED>
 <!ATTLIST view alias CDATA #IMPLIED>
 <!ATTLIST view protected (false|true) "false">
 <!ATTLIST view materialized (false|true) "false">

@@ -50,6 +50,27 @@
   `#warning` explícito marcando que é scaffolding temporário desta fase, a ser removido depois (ver
   MULTI_SCENE_PLAN.md subtarefa 2.1). Teste novo (`thresholdModeOpensNewSceneAfterCrossingCount`)
   cobre a travessia do threshold; suíte inteira + o teste novo isolado rodaram limpos sob ASan.
+- **2.2 implementada (2026-09-24): persistência do atributo `scene` por objeto + contador
+  sobrevivendo entre sessões.** `BaseTable` (mesma classe-mãe de Table/View/ForeignTable, já usada
+  pra `cutoff_pos` na 1.8.1) ganhou `scene_idx` (int, -1 = não atribuído) +
+  `setSceneIndex()`/`getSceneIndex()`/`resetSceneIndex()` + `setSceneIndexAttribute()` protegido.
+  Novo atributo XML `scene` (plain attribute na própria tag, mesmo padrão de `layers`, não um
+  sub-elemento como `cutoff-pos`) em table.sch/view.sch/foreigntable.sch + DTDs correspondentes;
+  novo `Attributes::Scene` ("scene") em libparsers. Leitura em `createPhysicalTable()`/
+  `createView()`. **Decisão sobre o "ponto em aberto"** (como o contador sobrevive entre sessões):
+  optei por recalcular em vez de persistir o valor do contador — `handleObjectAddition()` agora
+  checa `getSceneIndex()` primeiro (se >= 0, já tem cena atribuída — veio de um arquivo carregado ou
+  de um undo restaurando um objeto removido — roteia direto pra `scenes[idx]`, alargando a coleção
+  se preciso, sem tocar no contador); só cai no contador ingênuo quando `getSceneIndex()==-1` (objeto
+  genuinamente novo). `ModelWidget::loadModel()` faz um passo final recontando quantos objetos
+  ficaram na última cena e reseeda `threshold_obj_count` com isso — sem essa reseed, a primeira
+  inserção interativa depois de reabrir um arquivo reiniciaria a contagem do zero e abriria uma cena
+  extra prematuramente, mesmo com a última cena do arquivo quase cheia. **Escopo deliberadamente
+  restrito a Table/View/ForeignTable** — a pergunta "esse mesmo atributo deve cobrir `Textbox` e
+  reatribuição manual entre cenas?" (achado da Fase 1, 2026-09-22) continua em aberto, não decidida
+  nesta subtarefa. Teste novo `thresholdModeSceneAssignmentSurvivesSaveAndReload` cobre o round-trip
+  save→reload (atribuição de cena preservada + contador retomado sem abrir cena extra); suíte inteira
+  (11 testes) + o teste novo isolado rodaram limpos sob ASan.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

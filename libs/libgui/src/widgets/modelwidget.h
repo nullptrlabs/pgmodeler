@@ -437,7 +437,7 @@ class __libgui ModelWidget: public QWidget {
 		MaximumZoom = ObjectsScene::MaxScaleFactor,
 		ZoomIncrement = 0.050000;
 
-		//! \brief Number of objects per scene in threshold-segmentation mode (see MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.1)
+		//! \brief Number of objects per scene in threshold-segmentation mode
 		static constexpr unsigned SceneObjThreshold = 1000;
 
 		static constexpr char SaveDisabled[] { "save-disabled" },
