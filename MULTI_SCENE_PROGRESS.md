@@ -12,8 +12,8 @@
 - **Fase 0 (0.1-0.8), Fase 1 subtarefas 1.1-1.8, 1.8.1 e 1.9 (1.9.1-1.9.6) — todas concluídas,
   testadas manualmente pelo usuário (1.9.4 e a rodada final também confirmadas por ele via ASan) e
   commitadas.** (1.2 recebeu um refinamento pequeno de deduplicação logo depois de feita.)
-- **1.10 implementada (2026-09-23), aguardando teste manual do usuário antes de commitar.** Ver
-  detalhamento abaixo. Próxima: **1.11** (teste de regressão dedicado: cascade delete + undo).
+- **1.10 implementada, testada e commitada.** Ver detalhamento abaixo. Subtarefas 1.11-1.15 ficam em
+  standby (ver bullet de reorganização de prioridade abaixo) — não são a próxima frente de trabalho.
 - **Leak de `RelationshipView` do undo/redo (decisão #11) reproduzido e corrigido (2026-09-24)**
   — bug pré-existente em `~RelationshipView()` (`round_cf_descriptors` não limpo em lados de
   relação obrigatórios), não específico da feature multi-cena. Ver seção própria mais abaixo.
@@ -26,7 +26,7 @@
   virou a nova **Fase 2**, a antiga Fase 2 (Persistência) virou a nova **Fase 3** — mesmo conteúdo,
   só trocaram de posição/número (subtarefas renumeradas para bater com a fase nova; Fase 4, CLI,
   não foi afetada). Subtarefas 1.11-1.15 da Fase 1 ficam em **standby** (não descartadas) até a
-  nova Fase 2 estar pronta. Próximo passo de trabalho: iniciar a nova Fase 2 (threshold).
+  nova Fase 2 estar pronta.
 - **Achado de revisão de código na Fase 2 (2026-09-24)**: a subseção "`SchemaView` cross-scene:
   supressão dinâmica" e a subtarefa 2.5 assumiam reaproveitar "o mesmo choke point de promoção/
   rebaixamento já usado pelos relacionamentos" — essa suposição não corresponde mais ao código
@@ -71,6 +71,19 @@
   nesta subtarefa. Teste novo `thresholdModeSceneAssignmentSurvivesSaveAndReload` cobre o round-trip
   save→reload (atribuição de cena preservada + contador retomado sem abrir cena extra); suíte inteira
   (11 testes) + o teste novo isolado rodaram limpos sob ASan.
+- **Ajuste de convenção de comentários (2026-09-24)**: usuário pediu para parar de referenciar
+  `MULTI_SCENE_PLAN.md`/`MULTI_SCENE_PROGRESS.md`, números de Fase/subtarefa ou decisão/seção dentro
+  de comentários de código — um comentário deve se explicar sozinho, sem depender de uma numeração
+  que pode ser reorganizada independente do código (como já aconteceu na troca Fase 2/3). Todos os
+  comentários já escritos nesta sessão (`modelwidget.h/.cpp`, `basetable.h`, `modelwidgettest.cpp`)
+  foram reescritos removendo essas referências. Também ficou combinado que, ao fim de cada subtarefa,
+  a lista de métodos alterados/criados deve ser apresentada como links clicáveis `arquivo (Lxx-yy)`
+  pra facilitar a revisão — sem substituir o resumo em prosa. `MULTI_SCENE_PLAN.md` em si continua
+  livre pra usar essa numeração normalmente (a regra é só sobre comentários no código-fonte).
+  Também fechada no plano a decisão do contador de threshold sobreviver entre sessões via
+  recálculo (ver subseção correspondente na Fase 2), que estava registrada como pergunta em aberto
+  antes da 2.2 resolvê-la na prática. **Próxima frente de trabalho: subtarefa 2.3** (reaproveitamento
+  do marcador cut-off da Fase 1 para os cross-scene do modo threshold).
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

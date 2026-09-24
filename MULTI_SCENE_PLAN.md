@@ -1275,12 +1275,17 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
   2. Deixa o caminho livre, sem nenhum desenho extra, para o caso futuro de mover manualmente um
      objeto de uma cena para outra — o atributo persistido já é a fonte de verdade a ler/escrever,
      exatamente como o atributo de layer por objeto já funciona hoje.
-- **Ponto ainda em aberto**: como o contador em si (não só a atribuição já feita) sobrevive entre
-  sessões de edição — ex. usuário abre o arquivo, a cena mais recente ainda tem espaço sobrando no
-  threshold, cria mais 3 tabelas manualmente: elas devem continuar enchendo aquela cena ou sempre
-  abrir uma nova? Precisa decidir se o contador persiste seu valor corrente (provavelmente como
-  parte do mesmo mecanismo de atributo de segmentação da Fase 3) ou se é recalculado a partir da
-  contagem de objetos já atribuídos a cada cena na carga do arquivo.
+- **Decisão fechada (2026-09-24, subtarefa 2.2)**: como o contador em si (não só a atribuição já
+  feita) sobrevive entre sessões de edição — ex. usuário abre o arquivo, a cena mais recente ainda
+  tem espaço sobrando no threshold, cria mais 3 tabelas manualmente: elas devem continuar enchendo
+  aquela cena ou sempre abrir uma nova? **Recalculado, não persistido**: o contador em si não é
+  gravado no arquivo — na carga, é reconstruído contando quantos objetos já persistidos apontam pra
+  última cena da coleção. Cada objeto novo checa seu próprio índice de cena persistido primeiro
+  (se já tiver um, veio de um arquivo carregado ou de um undo restaurando remoção — rotea direto
+  pra lá sem tocar no contador); só objetos genuinamente novos avançam o contador ingênuo. Motivo
+  da escolha: não exige nenhum atributo extra além do já persistido por objeto, e se auto-corrige
+  se objetos forem removidos/editados manualmente entre sessões — só a posição modular dentro do
+  ciclo do threshold importa, não o total histórico de inserções.
 
 #### `SchemaView` cross-scene: supressão dinâmica (achado do usuário, 2026-09-21)
 
@@ -1358,13 +1363,12 @@ diferentes.
 
 2.2. Persistência do atributo `Scene` por objeto (novo atributo por tabela/view/ftable, análogo ao
      atributo de layer já persistido por objeto) + resolução do "ponto ainda em aberto" acima (como
-     o contador sobrevive entre sessões). **Escopo a revisitar** (achado do usuário na Fase 1,
-     2026-09-22): avaliar se esse mesmo atributo deve cobrir também `Textbox` (que não entra no
-     contador de threshold, hoje roteado só pela cena ativa no momento da inserção — ver nota na
-     intro da Fase 1) e reatribuição manual de qualquer objeto entre cenas (mecanismo ainda não
-     desenhado em nenhum modo) — os três casos (threshold, `Textbox`, reatribuição manual)
-     precisam da mesma pergunta de fundo respondida: "essa cena persistida sobrevive a um
-     save/reload independente da ordem de carga?" Depende de: 2.1.
+     o contador sobrevive entre sessões — ver decisão fechada na intro da fase). **Escopo restrito
+     a Table/View/ForeignTable** — a pergunta em aberto (achado da Fase 1, 2026-09-22) sobre se esse
+     mesmo atributo deve cobrir também `Textbox` (que não entra no contador de threshold, hoje
+     roteado só pela cena ativa no momento da inserção — ver nota na intro da Fase 1) e reatribuição
+     manual de qualquer objeto entre cenas (mecanismo ainda não desenhado em nenhum modo) continua
+     não decidida — fora de escopo desta subtarefa. Depende de: 2.1.
 
 2.3. Reaproveitamento do marcador cut-off da Fase 1 (1.8) para os cross-scene resultantes no modo
      threshold — deve ser praticamente gratuito se 1.8 foi bem desenhado; se não for, é sinal de
