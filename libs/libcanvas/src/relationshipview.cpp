@@ -88,21 +88,19 @@ RelationshipView::~RelationshipView()
 	QGraphicsItem *item=nullptr;
 	std::vector<std::vector<QGraphicsLineItem *> *> rel_lines = { &lines, &fk_lines, &pk_lines, &src_cf_lines, &dst_cf_lines };
 
-	while(!curves.empty())
+	for(auto &curve : curves)
 	{
-		this->removeFromGroup(curves.back());
-		item = curves.back();
-		curves.pop_back();
-		delete item;
+		this->removeFromGroup(curve);
+		delete curve;
 	}
 
-	for(auto & line_circle : line_circles)
+	for(auto &line_circle : line_circles)
 	{
 		this->removeFromGroup(line_circle);
 		delete line_circle;
 	}
 
-	for(auto & label : labels)
+	for(auto &label : labels)
 	{
 		if(label)
 		{
@@ -111,12 +109,10 @@ RelationshipView::~RelationshipView()
 		}
 	}
 
-	while(!attributes.empty())
+	for(auto &attr : attributes)
 	{
-		item=attributes.back();
-		this->removeFromGroup(item);
-		attributes.pop_back();
-		delete item;
+		this->removeFromGroup(attr);
+		delete attr;
 	}
 
 	for(auto &lines : rel_lines)
@@ -133,11 +129,15 @@ RelationshipView::~RelationshipView()
 	this->removeFromGroup(descriptor);
 	delete descriptor;
 
+	//round_cf_descriptors aren't always parented under cf_descriptors, so they need their own cleanup
+	for(auto &round_cf_descriptor : round_cf_descriptors)
+		delete round_cf_descriptor;
+
 	for(auto & cf_descriptor : cf_descriptors)
 	{
 		if(!cf_descriptor)
 			continue;
-		
+
 		for(auto &item : cf_descriptor->childItems())
 		{
 			cf_descriptor->removeFromGroup(item);

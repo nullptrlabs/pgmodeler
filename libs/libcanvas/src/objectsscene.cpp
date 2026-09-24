@@ -1477,7 +1477,7 @@ void ObjectsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 					QList<QGraphicsItem *> items=this->selectedItems();
 					BaseObjectView *obj_view=nullptr;
 
-					for(QGraphicsItem *item : items)
+					for(auto &item : items)
 					{
 						obj_view=dynamic_cast<BaseObjectView *>(item);
 

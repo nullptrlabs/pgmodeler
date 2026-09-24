@@ -14,6 +14,10 @@
   commitadas.** (1.2 recebeu um refinamento pequeno de deduplicação logo depois de feita.)
 - **1.10 implementada (2026-09-23), aguardando teste manual do usuário antes de commitar.** Ver
   detalhamento abaixo. Próxima: **1.11** (teste de regressão dedicado: cascade delete + undo).
+- **Leak de `RelationshipView` do undo/redo (decisão #11) reproduzido e corrigido (2026-09-24)**
+  — bug pré-existente em `~RelationshipView()` (`round_cf_descriptors` não limpo em lados de
+  relação obrigatórios), não específico da feature multi-cena. Ver seção própria mais abaixo.
+  Fix ainda não commitado.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
@@ -1296,3 +1300,74 @@ mudança. O #1 foi **revertido e substituído** por um mecanismo diferente, a pe
   real) e repetir exatamente os 6 passos confirmados acima até o leak aparecer sob ASan — só então
   diagnosticar a causa raiz e propor fix. Não reabrir a hipótese de suprimir o registro de undo
   (#1 antigo) — já rejeitada explicitamente pelo usuário nesta sessão.
+
+## Leak de RelationshipView — reproduzido e corrigido (2026-09-24)
+
+Retomando a pendência acima. Usuário testou em **outra máquina** com o código recompilado do zero
+e **não conseguiu mais reproduzir o leak** mesmo repetindo a sequência várias vezes — ficou em
+dúvida se ainda existia. Anexou o `.dbm` real usado no relato original (renomeado aqui pra
+`demo.txt`) pra eu tentar reproduzir.
+
+- **Reprodução bem-sucedida com o modelo real**: escrevi um teste temporário (`QTest`, não
+  commitado — instrumentação e teste removidos ao final da investigação) carregando o `.dbm` do
+  usuário via `DatabaseModel::loadModel()`. Precisou de `db_model->createSystemObjects(false)`
+  **antes** do `loadModel()` — replica exatamente `MainWindow::openModel()`
+  ([mainwindow.cpp:1220](libs/libgui/src/mainwindow.cpp#L1220)), que cria os objetos de sistema
+  (role `postgres` incluído) antes de carregar um arquivo existente; sem isso o load falha porque o
+  arquivo referencia `postgres` sem nunca declará-lo (é um papel de sistema, não serializado).
+  - **Cenário identificado no modelo real**: `table_b` (schema `public`) tem exatamente 2
+    relacionamentos cross-scene — `table_b_has_many_table_d` (`rel1n`, `src-required="true"`, →
+    `schema_a.table_d`) e `rel_view_b_table_b` (`reltv`, → `schema_a.view_a`) — batendo
+    exatamente com "tabela com 2 relacionamentos cut-off, ambas as parceiras já no schema destino"
+    do relato original. Sequência: mover `table_b` pra `schema_a` (mesma chamada que
+    `moveToSchema()` usa), undo, `setActiveScene(schema_a)`, redo, destruir o `ModelWidget`.
+  - **Leak confirmado sob ASan** logo na primeira tentativa com o modelo real: 3 alocações/624
+    bytes (`QGraphicsEllipseItem` 464B + `QTransform` 144B + um ponteiro pequeno 16B), todas
+    alocadas dentro de `RelationshipView::configureCrowsFootDescriptors()`/`configureLine()`
+    durante a construção de uma `RelationshipView` no passo de redo — usuário depois confirmou o
+    **mesmo relatório, com a mesma contagem exata (624 bytes, 3 alocações)**, reproduzindo a
+    sequência na GUI de verdade (não só no teste).
+  - **Diagnóstico inicial descartado com evidência concreta**: instrumentei temporariamente
+    (`qDebug()`, removido depois) `ObjectsScene::removeItem()`/`~ObjectsScene()` e os pontos de
+    roteamento em `ModelWidget`, rastreando ponteiro por ponteiro. Confirmei que as 4 instâncias de
+    `RelationshipView` criadas ao longo da sequência (2 no movimento inicial, 2 no redo) são todas
+    corretamente detectadas e enfileiradas em `removed_objs` pra deleção — descartando "objeto
+    órfão nunca chega em `removeItem()`" como mecanismo.
+  - **Causa raiz real, achada lendo `RelationshipView::configureCrowsFootDescriptors()`
+    ([relationshipview.cpp:1555-1690](libs/libcanvas/src/relationshipview.cpp#L1555)) e
+    `~RelationshipView()` lado a lado**: `round_cf_descriptors[tab_id]` (o círculo que desenha
+    cardinalidade opcional na notação pé-de-galinha) é alocado uma vez, lazy, e a cada chamada de
+    `configureLine()` (construção e qualquer refresh de geometria posterior) é **desanexado
+    incondicionalmente** de `cf_descriptors[tab_id]` e de `this` (linhas 1657-1658), e só
+    **reanexado** quando aquele lado da relação é opcional (`!mandatory[tab_id]`, linha 1680).
+    Quando o lado é **obrigatório** (`mandatory[tab_id]` true — `src-required="true"` no caso de
+    `table_b_has_many_table_d`), o círculo fica permanentemente desanexado — não é filho de nada,
+    só um ponteiro vivo no member array. O destrutor (`~RelationshipView()`,
+    [relationshipview.cpp:136-150](libs/libcanvas/src/relationshipview.cpp#L136)) **nunca
+    referencia `round_cf_descriptors` diretamente** — só varre `cf_descriptor->childItems()` pra
+    achar e deletar itens do pé-de-galinha. Pra um lado obrigatório, o círculo não é mais filho de
+    nada, então essa varredura nunca o encontra — vaza, junto com seu `QTransform` interno (a
+    rotação/posição que recebeu antes de ser desanexado) e um pequeno ponteiro incidental,
+    batendo exatamente com as 3 alocações/624 bytes do relatório.
+  - **Bug pré-existente, não introduzido pela feature multi-cena**: o mecanismo é usado por
+    qualquer `RelationshipView` com pelo menos um lado obrigatório e notação pé-de-galinha
+    habilitada — sempre existiu. Só nunca tinha aparecido como leak notado porque, no uso normal,
+    relacionamentos raramente são destruídos e recriados (criados uma vez, vivem o resto da sessão)
+    — o padrão de descartar+recriar introduzido por esta sessão pra relocação entre cenas passou a
+    construir/destruir `RelationshipView`s com muito mais frequência, expondo o bug.
+  - **Fix**: `~RelationshipView()` ganhou um laço explícito deletando `round_cf_descriptors[0]`/
+    `[1]` incondicionalmente (sem depender de estarem anexados a `cf_descriptors`), rodando **antes**
+    da varredura de `cf_descriptor->childItems()` — `delete` num item que já é filho de um grupo
+    também o desanexa automaticamente (comportamento padrão do Qt), então a ordem evita
+    double-free independente de qual dos dois estados (anexado/desanexado) o item estava.
+  - **Verificado**: reconstruí o teste temporário com o fix aplicado — **zero leaks** reportados
+    (antes: 3 alocações/624 bytes de leak; depois: nenhum). Suíte `modelwidgettest` completa
+    (9/9) sem regressão sob `ASAN_OPTIONS=detect_leaks=0` (convenção já estabelecida pra rodar a
+    suíte inteira — ruído pré-existente de libxml2/alocador std não relacionado à mudança, mesmo
+    padrão já documentado em sessões anteriores). Teste temporário e toda a instrumentação de
+    debug foram removidos ao final — não commitados.
+  - **Decisão #11 do plano (seção 3) atualizada**: o mecanismo de undo/redo via
+    `OperationList::s_operationExecuted` pode ser considerado fechado agora — o leak não tinha
+    relação com esse sinal/mecanismo em si, era um bug independente em `~RelationshipView()`.
+  - Build limpo (`core`+`canvas`+`gui`+`pgmodeler`+`modelwidgettest`). **Aguardando decisão do
+    usuário sobre commit** (fix + esta atualização de plano/progresso ainda não commitados).
