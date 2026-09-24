@@ -27,6 +27,29 @@
   só trocaram de posição/número (subtarefas renumeradas para bater com a fase nova; Fase 4, CLI,
   não foi afetada). Subtarefas 1.11-1.15 da Fase 1 ficam em **standby** (não descartadas) até a
   nova Fase 2 estar pronta. Próximo passo de trabalho: iniciar a nova Fase 2 (threshold).
+- **Achado de revisão de código na Fase 2 (2026-09-24)**: a subseção "`SchemaView` cross-scene:
+  supressão dinâmica" e a subtarefa 2.5 assumiam reaproveitar "o mesmo choke point de promoção/
+  rebaixamento já usado pelos relacionamentos" — essa suposição não corresponde mais ao código
+  depois da simplificação das decisões #10/#11 (descartar+recriar, sinal do `OperationList`):
+  `relocateObjectView()` só dispara via `getSchemaScene()`, que nunca resolve nada no modo
+  threshold (não existe hoje nenhum evento de "tabela mudou de cena" nesse modo). Plano corrigido:
+  2.5 precisa de três pontos de disparo próprios (inserção, remoção, reatribuição de schema sem
+  troca de cena). Ver a subseção atualizada no plano para o detalhamento completo.
+- **2.1 implementada (2026-09-24): contador ingênuo por threshold + criação de nova cena.**
+  `ModelWidget::handleObjectAddition()` deixou de rotear por schema incondicionalmente — passou a
+  ler `DatabaseModel::getSegmentationMode()` (scaffolding da 0.8, existia mas nunca era lido por
+  ninguém) e ramificar: `BySchema` mantém o comportamento da Fase 1 inalterado; `ByThreshold` roteia
+  por um contador (`ModelWidget::threshold_obj_count`, em memória, não persistido ainda — isso é a
+  2.2) que conta só Table/View/ForeignTable e abre uma nova cena a cada `SceneObjThreshold` (1000)
+  inserções, sempre que o contador cruza um múltiplo. **Decisão do usuário sobre o modo default**:
+  `NoSegmentation` continua sendo o default real de `DatabaseModel` (não foi alterado) — os testes
+  de regressão da Fase 1 (7 testes) precisaram ser atualizados para chamar
+  `setSegmentationMode(BySchema)` explicitamente, já que antes dependiam do roteamento por schema
+  incondicional que não existe mais. Para viabilizar teste manual da Fase 2 na GUI antes de existir
+  qualquer seleção de modo de verdade, `ModelWidget` força `ByThreshold` no construtor, atrás de um
+  `#warning` explícito marcando que é scaffolding temporário desta fase, a ser removido depois (ver
+  MULTI_SCENE_PLAN.md subtarefa 2.1). Teste novo (`thresholdModeOpensNewSceneAfterCrossingCount`)
+  cobre a travessia do threshold; suíte inteira + o teste novo isolado rodaram limpos sob ASan.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
