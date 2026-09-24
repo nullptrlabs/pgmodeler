@@ -65,7 +65,7 @@ void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
 		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
-		db_model->setSegmentationMode(DatabaseModel::BySchema);
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
 
 		db_model->createSystemObjects(true);
 
@@ -103,7 +103,7 @@ void ModelWidgetTest::differentSchemasGetDifferentScenes()
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
 		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
-		db_model->setSegmentationMode(DatabaseModel::BySchema);
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
 
 		db_model->createSystemObjects(true);
 
@@ -145,7 +145,7 @@ void ModelWidgetTest::discardingAndRecreatingRelationshipViewSurvivesModelClose(
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
 		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
-		db_model->setSegmentationMode(DatabaseModel::BySchema);
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
 
 		db_model->createSystemObjects(true);
 
@@ -239,7 +239,7 @@ void ModelWidgetTest::relocatingTablesTogetherPreservesTheirRelationship()
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
 		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
-		db_model->setSegmentationMode(DatabaseModel::BySchema);
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
 
 		db_model->createSystemObjects(true);
 
@@ -327,7 +327,7 @@ void ModelWidgetTest::relocatingTableIntoPartnersSceneClearsBothCutoffMarkers()
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
 		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
-		db_model->setSegmentationMode(DatabaseModel::BySchema);
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
 
 		db_model->createSystemObjects(true);
 
@@ -428,7 +428,7 @@ void ModelWidgetTest::undoRedoOfTablesMovedTogetherKeepsExactlyOneRelationshipVi
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
 		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
-		db_model->setSegmentationMode(DatabaseModel::BySchema);
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
 		OperationList *op_list = model_wgt.getOperationList();
 
 		db_model->createSystemObjects(true);
@@ -546,7 +546,7 @@ void ModelWidgetTest::undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedV
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
 		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
-		db_model->setSegmentationMode(DatabaseModel::BySchema);
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
 		OperationList *op_list = model_wgt.getOperationList();
 
 		db_model->createSystemObjects(true);
@@ -678,7 +678,7 @@ void ModelWidgetTest::thresholdModeOpensNewSceneAfterCrossingCount()
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
-		db_model->setSegmentationMode(DatabaseModel::ByThreshold);
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
 		db_model->createSystemObjects(true);
 
 		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
@@ -728,7 +728,7 @@ void ModelWidgetTest::thresholdModeSceneAssignmentSurvivesSaveAndReload()
 			ModelWidget model_wgt;
 			DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
-			db_model->setSegmentationMode(DatabaseModel::ByThreshold);
+			db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
 			db_model->createSystemObjects(true);
 
 			Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
@@ -750,7 +750,7 @@ void ModelWidgetTest::thresholdModeSceneAssignmentSurvivesSaveAndReload()
 			ModelWidget model_wgt;
 			DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
-			db_model->setSegmentationMode(DatabaseModel::ByThreshold);
+			db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
 			db_model->createSystemObjects(false);
 			model_wgt.loadModel(tmp_file);
 

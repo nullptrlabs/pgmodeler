@@ -91,8 +91,8 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Constants used to determine how the model's ObjectsScene collection is segmented
 		enum SegmentationMode: unsigned {
 			NoSegmentation,
-			BySchema,
-			ByThreshold
+			SegBySchema,
+			SegByThreshold
 		};
 
 	private:

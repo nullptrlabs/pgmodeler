@@ -438,7 +438,7 @@ class __libgui ModelWidget: public QWidget {
 		ZoomIncrement = 0.050000;
 
 		//! \brief Number of objects per scene in threshold-segmentation mode
-		static constexpr unsigned SceneObjThreshold = 1000;
+		static constexpr unsigned SceneObjThreshold = 500;
 
 		static constexpr char SaveDisabled[] { "save-disabled" },
 		ModelImported[] { "model-imported" },

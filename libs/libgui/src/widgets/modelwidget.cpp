@@ -158,7 +158,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	db_model = new DatabaseModel(this);
 
 #warning "test scaffolding: remove this forced ByThreshold segmentation mode once real mode selection exists"
-	db_model->setSegmentationMode(DatabaseModel::ByThreshold);
+	db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
 
 	xmlparser = db_model->getXMLParser();
 	op_list = new OperationList(db_model, this);
@@ -1213,7 +1213,7 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 				Schema *schema = dynamic_cast<Schema *>(graph_obj);
 
 				//Dedicated schema/scene 1:1 mapping only applies in schema-segmentation mode
-				if(seg_mode == DatabaseModel::BySchema)
+				if(seg_mode == DatabaseModel::SegBySchema)
 				{
 					target_scene = getSchemaScene(schema);
 
@@ -1246,26 +1246,28 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 			break;
 		}
 
-		if(seg_mode == DatabaseModel::BySchema && graph_obj->getSchema())
+		if(seg_mode == DatabaseModel::SegBySchema && graph_obj->getSchema())
 			target_scene = getSchemaScene(dynamic_cast<Schema *>(graph_obj->getSchema()));
-		else if(seg_mode == DatabaseModel::ByThreshold &&
-						(obj_type == ObjectType::Table || obj_type == ObjectType::ForeignTable || obj_type == ObjectType::View))
+		else if(seg_mode == DatabaseModel::SegByThreshold && BaseTable::isBaseTable(obj_type))
 		{
 			BaseTable *base_tab = dynamic_cast<BaseTable *>(graph_obj);
-			int persisted_idx = base_tab->getSceneIndex();
+			int scn_idx = base_tab->getSceneIndex();
 
-			if(persisted_idx >= 0)
+			if(scn_idx >= 0)
 			{
 				/* Object already carries a scene index -- from a file being loaded, or an undo
 				 * restoring a previously-removed object. Widen the scenes collection as needed and
 				 * route it there directly, bypassing the live counter entirely */
-				while(scenes.size() <= persisted_idx)
+				while(scenes.size() <= scn_idx)
 				{
 					ObjectsScene *new_scene = addScene(scenes.isEmpty());
 					applySceneLayers(new_scene);
 				}
 
-				target_scene = scenes.at(persisted_idx);
+				target_scene = scenes.at(scn_idx);
+
+				#warning "Testing segmentation by threshold"
+				qDebug() << object->getSignature() << " routed to scene: " << scn_idx;
 			}
 			else
 			{
@@ -1286,7 +1288,15 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 				{
 					ObjectsScene *new_scene = addScene(false);
 					applySceneLayers(new_scene);
+
+					#warning "Testing segmentation by threshold"
+					qDebug() << "** ";
+					qDebug() << "** Threshold reached, adding new scene **";
+					qDebug() << "** ";
 				}
+
+				#warning "Testing segmentation by threshold"
+				qDebug() << object->getSignature() << " routed to scene: " << base_tab->getSceneIndex();
 			}
 		}
 
@@ -2200,7 +2210,7 @@ void ModelWidget::loadModel(const QString &filename)
 		 * via its own persisted scene index (see handleObjectAddition()), without touching
 		 * threshold_obj_count -- reseed it now from how many of them landed in the last scene, so
 		 * further interactive insertions resume filling it instead of restarting the count at zero */
-		if(db_model->getSegmentationMode() == DatabaseModel::ByThreshold && !scenes.isEmpty())
+		if(db_model->getSegmentationMode() == DatabaseModel::SegByThreshold && !scenes.isEmpty())
 		{
 			int last_idx = scenes.size() - 1;
 			std::vector<ObjectType> types { ObjectType::Table, ObjectType::View, ObjectType::ForeignTable };
