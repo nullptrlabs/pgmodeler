@@ -62,6 +62,12 @@ class __libcore BaseTable: public BaseGraphicObject {
 		 * A NaN point means no custom position was set -- the marker uses the default anchor */
 		QPointF cutoff_pos;
 
+		/*! \brief Index of the ObjectsScene bucket this object belongs to, in threshold-segmentation
+		 * mode (see MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.2). -1 means unset */
+		int scene_idx;
+
+		void setSceneIndexAttribute();
+
 	public:
 		enum TableSection: unsigned {
 			AttribsSection,
@@ -186,6 +192,15 @@ class __libcore BaseTable: public BaseGraphicObject {
 
 		//! \brief Clears any custom cut-off marker position, reverting it to the default anchor
 		void resetCutoffPosition();
+
+		//! \brief Defines the ObjectsScene bucket index this object belongs to (threshold-segmentation mode)
+		void setSceneIndex(int idx);
+
+		//! \brief Returns the ObjectsScene bucket index this object belongs to, or -1 if unset
+		int getSceneIndex();
+
+		//! \brief Clears the scene bucket index, reverting it to unset (-1)
+		void resetSceneIndex();
 
 		void updateDependencies() override = 0;
 

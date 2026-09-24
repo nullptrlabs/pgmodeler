@@ -638,6 +638,7 @@ extern __libparsers const QString
 	RunInTransaction,
 	SaveLastPosition,
 	SaveRestoreGeometry,
+	Scene,
 	SceneRect,
 	Schema,
 	SchemaOid,

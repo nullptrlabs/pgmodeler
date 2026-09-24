@@ -54,6 +54,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void undoRedoOfTablesMovedTogetherKeepsExactlyOneRelationshipView();
 		void undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedView();
 		void thresholdModeOpensNewSceneAfterCrossingCount();
+		void thresholdModeSceneAssignmentSurvivesSaveAndReload();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -710,6 +711,82 @@ void ModelWidgetTest::thresholdModeOpensNewSceneAfterCrossingCount()
 	{
 		QFAIL(e.getExceptionsText().toStdString().c_str());
 	}
+}
+
+/*! \brief Covers MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.2: each Table's persisted `scene` attribute
+must survive a save/reload round-trip and route it back to the same scene bucket, and
+threshold_obj_count must be reseeded from the reloaded data instead of restarting at zero -- otherwise
+a single insertion right after reload would open a spurious extra scene instead of resuming the one
+already left partially filled by the file. */
+void ModelWidgetTest::thresholdModeSceneAssignmentSurvivesSaveAndReload()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_threshold_reload.dbm");
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->setSegmentationMode(DatabaseModel::ByThreshold);
+			db_model->createSystemObjects(true);
+
+			Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+			QVERIFY(public_sch != nullptr);
+
+			for(unsigned i = 0; i < ModelWidget::SceneObjThreshold + 5; i++)
+			{
+				Table *table = new Table;
+				table->setName(QString("table_%1").arg(i));
+				table->setSchema(public_sch);
+				db_model->addTable(table);
+			}
+
+			QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+			db_model->saveModel(tmp_file, SchemaParser::XmlCode);
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->setSegmentationMode(DatabaseModel::ByThreshold);
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_file);
+
+			QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+
+			ObjectsScene *last_scene = model_wgt.getObjectsScenes().last();
+
+			//The very first table crosses the threshold count much later -- it stays in the first scene
+			Table *table_0 = dynamic_cast<Table *>(db_model->getObject("table_0", ObjectType::Table));
+			QVERIFY(table_0 != nullptr);
+			QCOMPARE(model_wgt.getSceneForObject(table_0), model_wgt.getObjectsScenes().first());
+
+			//The last table (SceneObjThreshold + 4) was the overflow that landed in the second scene
+			Table *overflow_table = dynamic_cast<Table *>(db_model->getObject(
+					QString("table_%1").arg(ModelWidget::SceneObjThreshold + 4), ObjectType::Table));
+			QVERIFY(overflow_table != nullptr);
+			QCOMPARE(model_wgt.getSceneForObject(overflow_table), last_scene);
+
+			Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+			Table *new_table = new Table;
+			new_table->setName("table_after_reload");
+			new_table->setSchema(public_sch);
+			db_model->addTable(new_table);
+
+			//The threshold counter must resume from the reloaded occupancy, not restart at zero
+			QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+			QCOMPARE(model_wgt.getSceneForObject(new_table), last_scene);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
 }
 
 QTEST_MAIN(ModelWidgetTest)

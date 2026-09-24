@@ -6850,6 +6850,7 @@ View *DatabaseModel::createView()
 		view->setCurrentPage(BaseTable::ExtAttribsSection, attribs[Attributes::ExtAttribsPage].toUInt());
 		view->setFadedOut(attribs[Attributes::FadedOut]==Attributes::True);
 		view->setLayers(attribs[Attributes::Layers].split(','));
+		view->setSceneIndex(attribs[Attributes::Scene].isEmpty() ? -1 : attribs[Attributes::Scene].toInt());
 
 		if(xmlparser.accessElement(XmlParser::ChildElement))
 		{
@@ -10223,6 +10224,7 @@ TableClass *DatabaseModel::createPhysicalTable()
 		table->setCurrentPage(BaseTable::ExtAttribsSection, attribs[Attributes::ExtAttribsPage].toUInt());
 		table->setFadedOut(attribs[Attributes::FadedOut]==Attributes::True);
 		table->setLayers(attribs[Attributes::Layers].split(','));
+		table->setSceneIndex(attribs[Attributes::Scene].isEmpty() ? -1 : attribs[Attributes::Scene].toInt());
 
 		if(xmlparser.accessElement(XmlParser::ChildElement))
 		{

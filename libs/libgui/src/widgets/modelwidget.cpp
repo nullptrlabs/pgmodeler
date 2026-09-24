@@ -1251,22 +1251,43 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 		else if(seg_mode == DatabaseModel::ByThreshold &&
 						(obj_type == ObjectType::Table || obj_type == ObjectType::ForeignTable || obj_type == ObjectType::View))
 		{
-			/* Naive counter (MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.1): every SceneObjThreshold
-			 * Table/View/ForeignTable insertions opens a new scene, and every insertion after that
-			 * goes to it -- same rule for interactive creation and file loading, no clustering by
-			 * connectivity (decisão #7, seção 3) */
-			if(scenes.isEmpty())
+			BaseTable *base_tab = dynamic_cast<BaseTable *>(graph_obj);
+			int persisted_idx = base_tab->getSceneIndex();
+
+			if(persisted_idx >= 0)
 			{
-				target_scene = addScene();
-				applySceneLayers(target_scene);
+				/* Object already carries a scene index (Fase 2, subtarefa 2.2) -- from a file being
+				 * loaded, or an undo restoring a previously-removed object. Widen the scenes collection
+				 * as needed and route it there directly, bypassing the live counter entirely */
+				while(scenes.size() <= persisted_idx)
+				{
+					ObjectsScene *new_scene = addScene(scenes.isEmpty());
+					applySceneLayers(new_scene);
+				}
+
+				target_scene = scenes.at(persisted_idx);
 			}
 			else
-				target_scene = scenes.last();
-
-			if(++threshold_obj_count % SceneObjThreshold == 0)
 			{
-				ObjectsScene *new_scene = addScene(false);
-				applySceneLayers(new_scene);
+				/* Naive counter (MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.1): every SceneObjThreshold
+				 * Table/View/ForeignTable insertions opens a new scene, and every insertion after that
+				 * goes to it -- same rule for interactive creation and file loading, no clustering by
+				 * connectivity (decisão #7, seção 3) */
+				if(scenes.isEmpty())
+				{
+					target_scene = addScene();
+					applySceneLayers(target_scene);
+				}
+				else
+					target_scene = scenes.last();
+
+				base_tab->setSceneIndex(scenes.indexOf(target_scene));
+
+				if(++threshold_obj_count % SceneObjThreshold == 0)
+				{
+					ObjectsScene *new_scene = addScene(false);
+					applySceneLayers(new_scene);
+				}
 			}
 		}
 
@@ -2175,6 +2196,28 @@ void ModelWidget::loadModel(const QString &filename)
 		blink_new_objs = false;
 		db_model->loadModel(filename);
 		blink_new_objs = curr_blink_objs;
+
+		/* Threshold-segmentation mode (MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.2): every loaded
+		 * Table/View/ForeignTable already routed itself via its own persisted scene index (see
+		 * handleObjectAddition()), without touching threshold_obj_count -- reseed it now from how many
+		 * of them landed in the last scene, so further interactive insertions resume filling it
+		 * correctly instead of restarting the threshold count from zero */
+		if(db_model->getSegmentationMode() == DatabaseModel::ByThreshold && !scenes.isEmpty())
+		{
+			int last_idx = scenes.size() - 1;
+			std::vector<ObjectType> types = { ObjectType::Table, ObjectType::View, ObjectType::ForeignTable };
+
+			threshold_obj_count = 0;
+
+			for(auto &type : types)
+			{
+				for(auto &obj : db_model->getObjects(type))
+				{
+					if(dynamic_cast<BaseTable *>(obj)->getSceneIndex() == last_idx)
+						threshold_obj_count++;
+				}
+			}
+		}
 
 		this->filename = filename;
 		updateSceneLayers();

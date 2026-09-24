@@ -1437,6 +1437,7 @@ void PhysicalTable::setTableAttributes(SchemaParser::CodeType def_type, bool inc
 		setPositionAttribute(cutoff_pos, Attributes::CutoffPos, Attributes::Cutoff);
 		setFadedOutAttribute();
 		setLayersAttribute();
+		setSceneIndexAttribute();
 		attributes[Attributes::InitialData]=initial_data;
 		attributes[Attributes::MaxObjCount]=QString::number(static_cast<unsigned>(getMaxObjectCount() * 1.20));
 		attributes[Attributes::ZValue]=QString::number(z_value);

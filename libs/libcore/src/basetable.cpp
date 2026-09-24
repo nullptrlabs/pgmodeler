@@ -40,9 +40,11 @@ BaseTable::BaseTable()
 	attributes[Attributes::ExtAttribsPage]="";
 	attributes[Attributes::ZValue]="";
 	attributes[Attributes::CutoffPos]="";
+	attributes[Attributes::Scene]="";
 	pagination_enabled = false;
 	collapse_mode = CollapseMode::NotCollapsed;
 	cutoff_pos = QPointF(DNaN, DNaN);
+	scene_idx = -1;
 	resetCurrentPages();
 }
 
@@ -212,6 +214,27 @@ QPointF BaseTable::getCutoffPosition()
 void BaseTable::resetCutoffPosition()
 {
 	setCutoffPosition(QPointF(DNaN, DNaN));
+}
+
+void BaseTable::setSceneIndex(int idx)
+{
+	scene_idx = idx;
+	setCodeInvalidated(true);
+}
+
+int BaseTable::getSceneIndex()
+{
+	return scene_idx;
+}
+
+void BaseTable::resetSceneIndex()
+{
+	setSceneIndex(-1);
+}
+
+void BaseTable::setSceneIndexAttribute()
+{
+	attributes[Attributes::Scene] = scene_idx >= 0 ? QString::number(scene_idx) : "";
 }
 
 std::vector<BaseObject *> BaseTable::getDependencies(bool inc_indirect_deps, const std::vector<ObjectType> &excl_types, bool rem_duplicates)

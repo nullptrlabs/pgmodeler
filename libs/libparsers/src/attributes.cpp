@@ -625,6 +625,7 @@ namespace Attributes {
 	RunInTransaction("run-in-transaction"),
 	SaveLastPosition("save-last-position"),
 	SaveRestoreGeometry("save-restore-geometry"),
+	Scene("scene"),
 	SceneRect("scene-rect"),
 	Schema("schema"),
 	SchemaOid("schema-oid"),
