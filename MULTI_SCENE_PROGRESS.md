@@ -14,11 +14,13 @@
   commitadas.** (1.2 recebeu um refinamento pequeno de deduplicação logo depois de feita.)
 - **1.10 implementada (2026-09-23), aguardando teste manual do usuário antes de commitar.** Ver
   detalhamento abaixo. Próxima: **1.11** (teste de regressão dedicado: cascade delete + undo).
-- **Pausa da sessão (2026-09-23) — pendência explícita pra retomar**: escrever teste de stress pra
-  confirmar (ou descartar) se o bug de corrupção de memória do `relocateItem()` em relacionamentos
-  (ver bloco abaixo) também acontece com `TableView` — análise de código encontrou a mesma estrutura
-  de grupo aninhado com filhos dinâmicos (`columns`/`ext_attribs`), mas isso ainda não foi testado
-  na prática. Não investigar/codar antes da próxima sessão de testes, a pedido do usuário.
+- **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
+  a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
+  (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
+  em `RelationshipView`) não foi investigada — usuário decidiu, por precaução, generalizar o padrão
+  descartar+recriar pra **toda** relocação de item entre cenas, eliminando a pergunta pela raiz em
+  vez de testar se o bug se manifesta. `ObjectsScene::relocateItem()` foi **removido por completo**
+  (não sobrou nenhum call site). Ver detalhamento completo abaixo.
 - **Crash real achado testando a 1.10, causa raiz não era a 1.10 (2026-09-23)**: usuário reportou
   SIGSEGV ao fechar o modelo depois de remover um schema, capturado pelo crash handler e depois
   isolado só com ASan (sem crash handler) — mesmo stack trace nos dois: `RelationshipView::
@@ -92,6 +94,166 @@
     tabelas são de fato seguras ou se precisam do mesmo tratamento de descartar+recriar. Usuário
     pediu explicitamente pra registrar isso como pendência, não investigar agora — retomamos com
     mais testes numa sessão futura.
+  - **Atualização (2026-09-23, retomada da sessão): usuário decidiu generalizar o fix em vez de
+    investigar a pendência acima.** Por precaução, dado o quanto os internals do Qt envolvidos são
+    obscuros (achados só via `gdb` na rodada anterior, sem entender o mecanismo exato da corrupção),
+    o padrão de relocação de qualquer item entre cenas virou: (1) remover o item por completo da
+    cena de origem; (2) recriar do zero na cena de destino. Trade-off consciente: mais memória (uma
+    alocação nova em vez de reaproveitar a existente) em troca de nunca depender de bookkeeping
+    interno do Qt pra grupos aninhados com filhos dinâmicos — eliminando essa classe inteira de bug
+    pela raiz, sem precisar provar caso a caso quais tipos de item são "seguros" o suficiente pra
+    relocar de verdade.
+    - `ObjectsScene::relocateItem()` **removido por completo** (declaração + implementação) — não
+      sobrou nenhum call site depois da migração abaixo.
+    - **Tabelas/views** (`moveToSchema()`, `relocateEditedObject()`): novo par de métodos privados
+      em `ModelWidget` — `createGraphicItem(BaseGraphicObject *graph_obj)` (fábrica pequena, só
+      Table/ForeignTable/View, espelhando os mesmos dois casos já existentes em
+      `handleObjectAddition()`, sem duplicar a função inteira) e `relocateObjectView(graph_obj,
+      dst_scene)` (`cur_scene->removeItem(cur_view)` + `dst_scene->addItem(createGraphicItem(...))`).
+      Os dois call sites antigos (que resolviam `item_view`/`cur_scene`/`dst_scene` na mão e
+      chamavam `relocateItem()`) ficaram bem mais enxutos; `reevaluateTableRelationships()` passou a
+      buscar `getOverlyingObject()` de novo depois da relocação, já que o ponteiro da view mudou.
+    - **Marcador cut-off**: novo `BaseTableView::relocateCutoffItem()` — captura a lista de
+      relacionamentos do `cutoff_item` atual, `delete`, cria um `CutoffItem` novo, readiciona cada
+      relacionamento, e só então `this->scene()->addItem(cutoff_item)` (usa a cena atual da própria
+      tabela, que já foi relocada antes deste ponto — não precisa receber a cena de destino como
+      parâmetro). Chamado de `reevaluateTableRelationships()` no lugar do `relocateItem()` antigo.
+    - **Relacionamento**: já estava feito (`relocateRelationshipView()`, ver bloco acima) — não
+      mudou nesta rodada, só deixou de ser a exceção isolada e virou o padrão geral.
+    - Build limpo (`canvas`+`gui`+`pgmodeler`+`modelwidgettest`), suíte `modelwidgettest` 5/5 sem
+      regressão (o teste de regressão da subseção acima foi ajustado pra também descartar+recriar as
+      duas `TableView`s manualmente, já que `relocateItem()` não existe mais pra chamar). Binário
+      reinstalado.
+  - **Bug real introduzido por essa generalização, achado pelo usuário no teste manual (2026-09-23):
+    "mover tabelas para um novo esquema não está movendo as tabelas juntas se estas já existiam no
+    esquema anterior"** — ou seja, o relacionamento entre duas tabelas movidas juntas simplesmente
+    desaparecia. Causa raiz: `connected_rels`/`external_rels` (quais relacionamentos uma tabela
+    rastreia) vivem na **instância da view**, não no modelo — `relocateObjectView()` descartava a
+    `TableView` antiga e criava uma nova (zerada), e só **depois** `reevaluateTableRelationships()`
+    lia essas listas — já vazias — da view nova, então nunca descobria que o relacionamento existia.
+    A `RelationshipView` antiga ficava presa, referenciando a `TableView` antiga (órfã).
+  - **Redesenho completo, proposto pelo usuário**: em vez de métodos de relocação dedicados em
+    `ObjectsScene`/`libcanvas`, reaproveitar a mesma lógica de roteamento que `handleObjectAddition()`
+    já usa (que resolve a cena de um relacionamento lendo a cena *atual* de cada tabela via
+    `getOverlyingObject()->scene()` — já é independente de "cena ativa"). Sequência nova, pensada com
+    cuidado extra a pedido do usuário pra não deixar ponteiros soltos em `RelationshipView` (que
+    guarda `tables[0]`/`tables[1]`, ponteiros crus pras duas `BaseTableView`):
+    1. Antes de tocar a `TableView` antiga, capturar `connected_rels`/`external_rels` dela (só aqui
+       essas listas ainda têm os dados certos).
+    2. Pra cada relacionamento capturado: se tem uma `RelationshipView` (mesma cena), remover **agora**
+       via `scene->removeItem()` — isso chama `disconnectTables()`, que lê `tables[0]`/`tables[1]`;
+       precisa rodar **enquanto as duas `BaseTableView` (incluindo a que está prestes a ser
+       descartada) ainda existem**, senão vira ponteiro pendurado no instante em que a view for
+       tocada de novo. Se é externo (sem view), só limpar do lado do parceiro
+       (`partner_view->removeExternalRelationship()`) — o lado da tabela sendo relocada nem precisa
+       de limpeza, morre junto com a `TableView`/`cutoff_item` antigos logo abaixo.
+    3. Só então descartar a `TableView` antiga e criar a nova na cena de destino.
+    4. Re-rotear cada relacionamento capturado (`ModelWidget::routeRelationship()`, nova função —
+       mesma regra do case `Relationship` de `handleObjectAddition()`: mesma cena agora → cria
+       `RelationshipView` nova; cenas diferentes → registra externo nas duas tabelas, o que recria o
+       `cutoff_item` sob demanda). Isso também autocorrige o caso de duas tabelas relacionadas sendo
+       movidas juntas na mesma operação: a primeira table processada rerroteia o relacionamento como
+       externo (parceira ainda não moveu), e quando a segunda tabela é processada e o relacionamento
+       é rerroteado de novo, as duas já estão na cena nova → vira `RelationshipView` de verdade.
+    - `demoteRelationship()`/`promoteRelationship()`/`relocateRelationshipView()`/
+      `reevaluateTableRelationships()`/`BaseTableView::relocateCutoffItem()` — todos **removidos**,
+      substituídos por essa sequência única dentro de `relocateObjectView()` + `routeRelationship()`.
+      `getRelationshipPartner()` sobrevive (ainda usado pra achar a view parceira na etapa 2).
+    - **Decisão deliberada de não generalizar `handleObjectAddition()` em si** — cheguei a considerar
+      extrair o switch inteiro pra um método compartilhado parametrizado por cena, mas
+      `handleObjectAddition()` carrega efeitos colaterais que não fazem sentido pra um re-roteamento
+      (`blink_new_objs`, `setModified()`, `emit s_objectAdded()`) — `routeRelationship()` duplica só
+      as ~15 linhas do case `Relationship`/`BaseRelationship`, isolado, sem tocar nesse choke point
+      já bem testado.
+    - **Teste de regressão novo**: `ModelWidgetTest::relocatingTablesTogetherPreservesTheirRelationship`
+      — primeira versão tornou `ModelWidgetTest` `friend class` de `ModelWidget` pra poder chamar
+      `relocateObjectView()` (privado); usuário achou desnecessário e pediu pra deixar o método
+      público em vez disso — mais simples, sem sujar `ModelWidget` com uma amizade só pra teste, e
+      `relocateObjectView()` já é útil como API pública de qualquer forma. `routeRelationship()`
+      continua privado (só é chamado internamente por `relocateObjectView()`, o teste não precisa
+      dele diretamente). Duas tabelas com relacionamento (`RelationshipView` real) relocadas juntas,
+      na mesma ordem que `moveToSchema()` usaria; verifica que o relacionamento sobrevive como
+      `RelationshipView` de verdade na cena nova, e que `connected_rels`/`external_rels` das duas
+      tabelas ficam corretos (1 conectado, 0 externo cada). Build limpo (`canvas`+`gui`+`pgmodeler`),
+      suíte `modelwidgettest` **6/6** sem regressão. Binário reinstalado.
+    - **Não testado ainda nesta sessão**: auto-relacionamento (`SrcTable == DstTable`) durante
+      relocação — a lógica de `disconnectTables()` já tem uma guarda pra não remover duas vezes do
+      mesmo `connected_rels` nesse caso (pré-existente, não tocada), e o redesenho não deveria mudar
+      esse comportamento, mas vale confirmar manualmente.
+  - **`relocateObjectView()` virou público, sem `friend class` (2026-09-23)** — pedido do usuário: a
+    primeira versão do teste tornava `ModelWidgetTest` `friend class` de `ModelWidget` só pra poder
+    chamar `relocateObjectView()` (privado); achou desnecessário, preferiu deixar o método público
+    de vez (é útil como API de qualquer forma). `routeRelationship()` continua privado (só é chamado
+    internamente). `friend class ModelWidgetTest;` removido.
+  - **Bug real achado pelo usuário no teste manual (2026-09-23): "cutoff itens ficando nas cenas
+    antigas quando suas tabelas são movidas e passam a fazer parte de um RelationshipView de
+    verdade"** — causa raiz: o passo de "detach" em `relocateObjectView()` só limpava
+    `external_rels` do lado da tabela **parceira** (`partner_view->removeExternalRelationship()`);
+    do lado da própria tabela sendo relocada (`old_view`), o comentário original assumia que "o
+    marcador cut-off é descartado por completo junto com `old_view`" — **suposição errada**.
+    `CutoffItem` é um `QGraphicsItem` de topo, adicionado direto na cena
+    (`this->scene()->addItem(cutoff_item)`, [basetableview.cpp:341](libs/libcanvas/src/basetableview.cpp#L341)),
+    **não é filho Qt de `old_view`** — então `old_scene->removeItem(old_view)` nunca o toca. Ele só
+    seria destruído quando `old_view` fosse de fato `delete`ado (dentro de `~BaseTableView()`), o
+    que só acontece quando `old_scene` inteira é destruída — ou seja, o marcador ficava órfão,
+    **visualmente renderizado na cena antiga**, pelo resto da vida daquela cena (até o modelo
+    fechar). **Fix**: chamar `old_view->removeExternalRelationship(rel)` também, simétrico ao que já
+    era feito pro parceiro — reaproveita a lógica já existente e testada (`delete cutoff_item;
+    cutoff_item = nullptr;` quando a última relação externa sai), sem precisar de nenhum código novo
+    de limpeza manual.
+  - **Novo teste de regressão**: `ModelWidgetTest::relocatingTableIntoPartnersSceneClearsBothCutoffMarkers`
+    — duas tabelas em schemas/cenas diferentes com relacionamento cross-scene (marcador cut-off dos
+    dois lados), relocar uma pra cena da outra, confirmar que o relacionamento vira `RelationshipView`
+    de verdade **e** que os dois marcadores cut-off desapareceram (`getCutoffItem() == nullptr` nos
+    dois lados). Precisou tornar `BaseTableView::getCutoffItem()` público também (estava em
+    `private slots:` desde o commit `0f7ac6f61` do próprio usuário — não é slot de verdade, só ficou
+    naquela seção; movido pro `public:` junto dos outros getters de relacionamento). Primeira versão
+    do teste tinha uma asserção forte demais (`scene_a->items().isEmpty()`) que falhou por motivo
+    errado — a cena antiga ainda tem legitimamente o `SchemaView` do próprio schema (teste não
+    reatribui o schema do modelo, só realoca a view) mais a infraestrutura padrão de toda cena
+    (`rel_line`/`selection_rect`); corrigido pra checar especificamente a ausência de um `CutoffItem`
+    entre os itens da cena, não a cena inteira vazia. Build limpo (`canvas`+`gui`+`pgmodeler`), suíte
+    `modelwidgettest` **7/7** sem regressão. Binário reinstalado.
+- **Bug reportado pelo usuário (2026-09-23) testando a rodada anterior de código: Ctrl+Z não
+  devolvia uma tabela relocada pra sua cena original, e fechar o modelo em seguida disparava um
+  relatório ASan** — investigação encontrou **dois bugs distintos, independentes e pré-existentes**
+  em `libcore/operationlist.cpp` (arquivo não tocado por nenhuma mudança desta sessão):
+  - **#1 — undo não sabe desfazer relocação de cena.** `OperationList::executeOperation()`
+    ([operationlist.cpp:920-926](libs/libcore/src/operationlist.cpp#L920-L926)) já detecta a
+    restauração de schema no undo (`graph_obj->getSchema()!=bkp_obj->getSchema()`), mas só marca os
+    dois schemas com `setModified(true)` (repintura). Cadeia até a GUI conferida por completo
+    (`OperationListWidget::undoOperation()` → `s_operationExecuted()` → handlers em
+    `mainwindow.cpp:549-573`) — nenhum ponto resincroniza a view da tabela com a cena do schema
+    restaurado. Gap estrutural: `libcore` não conhece `ObjectsScene` (é `libcanvas`), então o gancho
+    teria que existir na GUI, e hoje não existe. **Fix aplicado, escopo mínimo**: em
+    `ModelWidget::moveToSchema()`, a chamada `op_list->registerObject(obj, Operation::ObjModified, -1)`
+    passou a rodar só para objetos que aceitam schema mas **não** são `BaseGraphicObject` — para
+    Table/View/ForeignTable a mudança de schema continua acontecendo (`setSchema()` +
+    `relocateObjectView()`), só que fica de fora do histórico de undo por ora, deixando a ação
+    simplesmente não-desfazível em vez de meio-desfeita. **Não mexido**: o caminho de edição via
+    diálogo (`relocateEditedObject()`, disparado por `openEditingForm()` em
+    `modelwidget.cpp:2467-2471`) registra undo via `BaseObjectWidget::startConfiguration()`
+    ([baseobjectwidget.h:288-317](libs/libgui/src/dbobjects/baseobjectwidget.h#L288-L317)), uma
+    gravação genérica que cobre a edição inteira do objeto (não é específica de schema) — desativar
+    ali quebraria undo de qualquer edição feita por esse diálogo. Se o usuário trocar o schema de uma
+    tabela por esse caminho o mesmo sintoma pode aparecer; registrado como pendência, ainda por
+    resolver de verdade (precisa de um mecanismo de re-roteamento pós-undo, não só suprimir o
+    registro).
+  - **#2 — leak confirmado, corrigido.** `bkp_obj` (alocado sob demanda por
+    `CoreUtilsNs::copyObject()` em [operationlist.cpp:774](libs/libcore/src/operationlist.cpp#L774),
+    ver "allocates if not allocated" em [coreutilsns.cpp:68-86](libs/libcore/src/coreutilsns.cpp#L68-L86))
+    é uma variável local de `executeOperation()`, nunca `delete`ada — cada undo/redo de
+    `ObjModified`/`ObjMoved` vazava uma instância nova do tipo do objeto, batendo com o relatório
+    ASan (`CoreUtilsNs::copyObject<Table>`). Durante a investigação achei um segundo vazamento
+    idêntico não reportado: `aux_obj` ([operationlist.cpp:719-732](libs/libcore/src/operationlist.cpp#L719-L732),
+    alocado via `model->createTrigger()`/`createColumn()`/etc. pra objetos especiais referenciados
+    por relacionamento) tem o mesmo padrão — só não apareceu no relatório porque o teste do usuário
+    não mexeu com esse tipo de objeto. **Fix**: `delete bkp_obj; delete aux_obj;` logo após o último
+    uso de ambos, antes do bloco final da função ([operationlist.cpp:946-948](libs/libcore/src/operationlist.cpp#L946-L948));
+    `delete` em ponteiro nulo é no-op, cobre os casos em que um ou outro não foi alocado.
+  - Build limpo (`core`+`gui`, `cmake --build cmake-build --target core gui`). Suíte
+    `modelwidgettest` ainda não rerrodada pra essas duas mudanças especificamente. Nenhum binário
+    completo/`install` gerado nesta rodada (build só das libs tocadas, a pedido do usuário).
 - **Achado do usuário durante teste da 1.9.6 (2026-09-23), registrado no plano (intro da Fase 1),
   não implementado agora**: `Textbox` não tem schema, então não existe nenhum mecanismo (nem
   indireto) pra movê-lo entre cenas depois de criado — diferente de Table/View/ForeignTable, que

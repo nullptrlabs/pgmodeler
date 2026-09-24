@@ -942,6 +942,13 @@ void OperationList::executeOperation(Operation *oper, bool redo)
 			}
 		}
 
+		/* bkp_obj/aux_obj are temporary snapshots allocated above purely for this function's own
+		 * restore dance -- CoreUtilsNs::copyObject() allocates them on demand (see its "allocates if
+		 * not allocated" branch) and neither is ever attached to the model or the operation pool, so
+		 * they leak if not freed here */
+		delete bkp_obj;
+		delete aux_obj;
+
 		//Case the object is a type update the tables that are referencing it
 		if(op_type==Operation::ObjModified &&
 				(object->getObjectType()==ObjectType::Type || object->getObjectType()==ObjectType::Domain ||

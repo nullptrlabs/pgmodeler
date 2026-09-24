@@ -186,6 +186,9 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		 * (title's right edge, vertically centered on the title) */
 		QPointF getCutoffAnchorPoint();
 
+		//! \brief Returns the cut-off marker currently attached to this table, or nullptr if it has none
+		CutoffItem *getCutoffItem();
+
 		//! \brief This method just emits the signal to indicate that the relationships attached must be updated
 		void requestRelationshipsUpdate();
 
@@ -220,8 +223,6 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		/*! \brief This slot reconfigures the table when the attributes toggler emits the signal s_currentPageChanged
 		 * causing the the attributes of the current page to be displayed */
 		void configureCurrentPage(BaseTable::TableSection section_id, unsigned page);
-
-		CutoffItem *getCutoffItem();
 
 	signals:
 		//! \brief Signal emitted when a table is moved over the scene

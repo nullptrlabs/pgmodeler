@@ -1098,22 +1098,12 @@ void ObjectsScene::removeItem(QGraphicsItem *item)
 
 	if(obj_view)
 	{
-		/* Unlike relocateItem(), this item is genuinely being discarded (queued in removed_objs,
-		 * only actually deleted once this scene itself is destroyed) -- its model object may well
-		 * outlive that, so its back-reference must be cleared now, not whenever the view eventually
-		 * gets deleted */
+		/* This item is genuinely being discarded (queued in removed_objs, only actually deleted
+		 * once this scene itself is destroyed) -- its model object may well outlive that, so its
+		 * back-reference must be cleared now, not whenever the view eventually gets deleted */
 		obj_view->detachFromObject();
 		removed_objs.push_back(obj_view);
 	}
-}
-
-void ObjectsScene::relocateItem(QGraphicsItem *item, ObjectsScene *dst_scene)
-{
-	if(!item || !dst_scene || dst_scene == this)
-		return;
-
-	detachItem(item);
-	dst_scene->addItem(item);
 }
 
 void ObjectsScene::blockItemsSignals(bool block)

@@ -304,25 +304,14 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Returns whichever of rel's two tables isn't tab (the other side of the relationship)
 		BaseTable *getRelationshipPartner(BaseRelationship *rel, BaseTable *tab);
 
-		/*! \brief Relocates tab_view's cut-off marker to its current scene if needed, then
-		 * re-evaluates every relationship connected to tab_view against that scene, promoting/
-		 * demoting each one that's no longer consistent with where its partner table lives. Called
-		 * whenever a table's item may have just been relocated to a different scene (see
-		 * moveToSchema() and relocateEditedObject()) */
-		void reevaluateTableRelationships(BaseTableView *tab_view);
+		//! \brief Builds the graphical item representing graph_obj (Table, ForeignTable or View), or nullptr for any other type
+		QGraphicsItem *createGraphicItem(BaseGraphicObject *graph_obj);
 
-		//! \brief Destroys rel's RelationshipView and registers it as an external (cut-off) connection instead
-		void demoteRelationship(BaseRelationship *rel);
-
-		/*! \brief Discards rel's existing RelationshipView and builds a fresh one in dst_scene --
-		 * used when both of rel's tables (trivially true for a self-relationship) already ended up
-		 * sharing dst_scene. Moving the existing view across scenes via ObjectsScene::relocateItem()
-		 * instead of recreating it leaves some of its internal line items corrupted in a way that
-		 * only crashes later, when the view is finally destroyed */
-		void relocateRelationshipView(BaseRelationship *rel, ObjectsScene *dst_scene);
-
-		//! \brief Creates a RelationshipView for rel in shared_scene, clearing its cut-off markers
-		void promoteRelationship(BaseRelationship *rel, ObjectsScene *shared_scene);
+		/*! \brief Creates rel's RelationshipView if both its tables currently share a scene, or
+		 * registers it as an external (cut-off) connection on both otherwise -- same rule as
+		 * handleObjectAddition()'s Relationship case, reading each table's scene fresh every time
+		 * it's called. Used to re-route a relationship after one of its tables was relocated */
+		void routeRelationship(BaseRelationship *rel);
 
 		/*! \brief Moves obj_wgt's edited object to its new schema's scene, if the schema selector in
 		 * the object's editing form actually changed it (see BaseObjectWidget::prev_schema) --
@@ -499,6 +488,14 @@ class __libgui ModelWidget: public QWidget {
 
 		//! \brief Returns the scene that currently holds the graphical representation of the given object, or nullptr if the object has none
 		ObjectsScene *getSceneForObject(BaseObject *object);
+
+		/*! \brief Discards graph_obj's existing item and builds a fresh one directly in dst_scene,
+		 * re-routing (see routeRelationship()) every relationship that was connected to it -- a
+		 * no-op if graph_obj has no item yet, or is already in dst_scene. Used by moveToSchema()
+		 * and relocateEditedObject() instead of ObjectsScene::relocateItem(): moving an existing
+		 * item across scenes leaves some of its internal child items corrupted in a way that only
+		 * crashes later, confirmed for RelationshipView and avoided here for every relocatable type */
+		void relocateObjectView(BaseGraphicObject *graph_obj, ObjectsScene *dst_scene);
 
 		//! \brief Returns the scene view used by the model
 		QGraphicsView *getViewport();
