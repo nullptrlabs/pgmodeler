@@ -27,9 +27,15 @@
 SceneInfoWidget::SceneInfoWidget(QWidget *parent): QWidget(parent)
 {
 	setupUi(this);
-	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint,
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::TabBarFrmHint,
 															{ cursor_pos_info_frm, separator_ln,
-																obj_sel_info_frm, separator_ln2 });
+																obj_sel_info_frm, separator_ln2,
+																seg_mode_frm });
+
+	GuiUtilsNs::configureWidgetsFont({ scenes_cmb, seg_modes_cmb, threshold_spb, mouse_pos_info_lbl,
+																		 zoom_info_lbl, sel_obj_count_lbl, obj_pos_info_lbl, threshold_spb },
+																	 GuiUtilsNs::MediumFontFactor);
 }
 
 void SceneInfoWidget::updateSelectedObject(BaseObjectView *object)

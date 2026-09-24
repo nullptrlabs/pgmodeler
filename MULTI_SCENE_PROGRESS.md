@@ -107,8 +107,56 @@
   uma segunda, ainda vazia), remove todas as tabelas da primeira e confirma que as duas cenas
   continuam lá, e que uma inserção nova depois disso continua indo pra última cena (nunca reutiliza
   a que ficou vazia). Suíte inteira (13 testes) + o teste novo isolado rodaram limpos sob ASan.
-  **Próxima frente de trabalho: subtarefa 2.5** (supressão dinâmica de `SchemaView` cross-scene —
-  a mais complexa da fase, ver achado de revisão de código já registrado sobre ela).
+- **2.5 redesenhada e implementada (2026-09-24): `SchemaView` suprimido em qualquer modo de
+  segmentação, não só cross-scene.** O desenho original desta subtarefa (supressão dinâmica por
+  schema — promoção/rebaixamento do `SchemaView` conforme os filhos de um schema convergiam ou se
+  espalhavam entre cenas, com três pontos de disparo próprios) foi descartado pelo usuário por
+  complexidade desnecessária, antes de qualquer código ser escrito para ele. Redesenho: o
+  `SchemaView` simplesmente nunca é criado em nenhum modo de segmentação (nem por schema, nem por
+  threshold) — só existe no modo clássico `NoSegmentation`. Elimina o problema original pela raiz
+  (não sobra nenhum caso em que o retângulo seria parcial/composto) e, como ganho colateral, evita o
+  custo de recálculo de bounding box que `SchemaView::configureObject()` fazia a cada
+  `Schema::s_objectModified` em qualquer modo segmentado.
+  - **Implementação**: `ModelWidget::handleObjectAddition()`
+    ([modelwidget.cpp:1237-1244](libs/libgui/src/widgets/modelwidget.cpp#L1237)), `case Schema` —
+    `item = new SchemaView(schema)` só roda quando `seg_mode == DatabaseModel::NoSegmentation`.
+  - **Decisão do usuário: `Schema::setRectVisible()`/`isRectVisible()` (core) não são tocados** —
+    cheguei a propor um guard ali bloqueando `setRectVisible(true)` durante segmentação; usuário
+    rejeitou porque esse controle fino não pertence a `Schema`, e bloquear a flag em si faria a
+    configuração "retângulo visível" se perder ao alternar de volta pra `NoSegmentation` (o usuário
+    liga o retângulo achando que está configurando a preferência, mas o valor nunca seria gravado).
+    A supressão fica inteiramente em `ModelWidget`; `isRectVisible()` continua lido/escrito
+    normalmente em qualquer modo, só sem efeito visual enquanto não existe `SchemaView`.
+  - **Três travas de UI, feitas manualmente pelo usuário em seguida**, pra impedir a tentativa antes
+    de virar um no-op silencioso: checkbox "show rect" desabilitado em `SchemaWidget::
+    setAttributes()` (com tooltip explicando o motivo) quando o modelo está segmentado; ação de
+    menu de contexto "Schemas rectangles" (`action_schemas_rects`) removida do popup em
+    `ModelWidget::configurePopupMenu()` no mesmo caso; e um achado correlato em
+    `TableTitleView::configureObject()` — o código que esconde o nome do schema no título da tabela
+    (redundante quando o retângulo já mostra o nome) rodava incondicionalmente em
+    `schema->isRectVisible()`, sem checar se o retângulo de fato estava sendo desenhado, então em
+    modo segmentado o título escondia o nome do schema achando que a informação estava visível em
+    outro lugar — corrigido pra só esconder quando `getSegmentationMode() == NoSegmentation`.
+  - **Efeito colateral achado durante a implementação**: vários testes de regressão (Fase 1 e 2.1)
+    usavam `ModelWidget::getSceneForObject(schema)` como atalho de conveniência pra "qual cena esse
+    schema está" — getter genérico que resolve via `getOverlyingObject()->scene()`, e que portanto
+    passou a devolver sempre `nullptr` pra `Schema` (nunca mais tem `getOverlyingObject()` em modo
+    segmentado). Não é regressão de produção: a API certa já existia —
+    `ModelWidget::getSchemaScene()`, independente de `SchemaView` — só nunca tinha sido usada pelos
+    testes porque, até então, os dois caminhos davam a mesma resposta. `getSchemaScene()` (antes
+    `private`) virou `public`, mesmo padrão já adotado nesta sessão pra `relocateObjectView()`/
+    `getOperationList()`. Seis call sites em `modelwidgettest.cpp` corrigidos pra usar
+    `getSchemaScene()`; um sétimo (`thresholdModeOpensNewSceneAfterCrossingCount`, que usava o
+    truque só pra pegar "a cena inicial" em modo threshold, onde `getSchemaScene()` não se aplica)
+    trocado por `getObjectsScene(0)` diretamente.
+  - **Teste novo**: `ModelWidgetTest::segmentedModesNeverCreateSchemaRectangles` — confirma, nos
+    dois modos segmentados, que `schema->getOverlyingObject() == nullptr` depois de inserir filhos
+    mesmo com `setRectVisible(true)` chamado antes; confirma que a flag em si sobrevive intacta
+    depois de voltar pra `NoSegmentation`, provando que a supressão nunca tocou o dado do modelo, só
+    a criação do item gráfico. Suíte inteira (14 testes) passa sob `ASAN_OPTIONS=detect_leaks=0`.
+    Build limpo (`core`+`canvas`+`gui`+`modelwidgettest`).
+  - **Fase 2 completa** (2.1-2.5, todas implementadas e testadas). Não commitado ainda — aguardando
+    decisão do usuário.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
