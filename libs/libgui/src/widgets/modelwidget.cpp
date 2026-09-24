@@ -2813,111 +2813,104 @@ BaseTable *ModelWidget::getRelationshipPartner(BaseRelationship *rel, BaseTable 
 	return src_tab == tab ? rel->getTable(BaseRelationship::DstTable) : src_tab;
 }
 
-void ModelWidget::demoteRelationship(BaseRelationship *rel)
+QGraphicsItem *ModelWidget::createGraphicItem(BaseGraphicObject *graph_obj)
 {
-	QGraphicsItem *item = dynamic_cast<QGraphicsItem *>(rel->getOverlyingObject());
-
-	if(!item)
-		return;
-
-	ObjectsScene *view_scene = dynamic_cast<ObjectsScene *>(item->scene());
-
-	if(view_scene)
-		view_scene->removeItem(item);
-
-	BaseTableView *src_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::SrcTable)->getOverlyingObject()),
-								 *dst_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::DstTable)->getOverlyingObject());
-
-	if(src_view)
-		src_view->addExternalRelationship(rel);
-
-	if(dst_view)
-		dst_view->addExternalRelationship(rel);
-}
-
-void ModelWidget::relocateRelationshipView(BaseRelationship *rel, ObjectsScene *dst_scene)
-{
-	QGraphicsItem *item = dynamic_cast<QGraphicsItem *>(rel->getOverlyingObject());
-	ObjectsScene *cur_scene = item ? dynamic_cast<ObjectsScene *>(item->scene()) : nullptr;
-
-	if(!cur_scene)
-		return;
-
-	/* Moving the existing RelationshipView across scenes via ObjectsScene::relocateItem() leaves
-	 * some of its internal line items (lines/fk_lines/pk_lines/src_cf_lines/dst_cf_lines) with
-	 * corrupted state that only crashes later, when the view is finally destroyed -- confirmed by
-	 * a dedicated regression test and traced down to bad memory in the line item itself (its
-	 * vtable pointer no longer points into Qt's library), not a scene-registration mismatch.
-	 * Sidestepping the issue entirely: discard the old view and build a fresh one directly in the
-	 * destination scene, exactly like promoteRelationship() already does */
-	cur_scene->removeItem(item);
-	dst_scene->addItem(new RelationshipView(rel));
-}
-
-void ModelWidget::promoteRelationship(BaseRelationship *rel, ObjectsScene *shared_scene)
-{
-	BaseTableView *src_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::SrcTable)->getOverlyingObject()),
-								 *dst_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::DstTable)->getOverlyingObject());
-
-	if(src_view)
-		src_view->removeExternalRelationship(rel);
-
-	if(dst_view)
-		dst_view->removeExternalRelationship(rel);
-
-	shared_scene->addItem(new RelationshipView(rel));
-}
-
-void ModelWidget::reevaluateTableRelationships(BaseTableView *tab_view)
-{
-	if(!tab_view)
-		return;
-
-	ObjectsScene *tab_scene = dynamic_cast<ObjectsScene *>(tab_view->scene());
-	BaseTable *tab = dynamic_cast<BaseTable *>(tab_view->getUnderlyingObject());
-
-	if(!tab_scene || !tab)
-		return;
-
-	/* The cut-off marker is a standalone QGraphicsItem, tracked only by BaseTableView::cutoff_item
-	 * (not a Qt child of the table's own item), added directly to whichever scene the table was in
-	 * when the marker was first created -- relocating the table's item never touches it, so without
-	 * this it's left orphaned in the table's old scene, still reacting to the table's signals but
-	 * rendered nowhere near it */
-	if(tab_view->getCutoffItem())
+	switch(graph_obj->getObjectType())
 	{
-		ObjectsScene *cutoff_scene = dynamic_cast<ObjectsScene *>(tab_view->getCutoffItem()->scene());
+		case ObjectType::ForeignTable:
+		case ObjectType::Table:
+			return new TableView(dynamic_cast<PhysicalTable *>(graph_obj));
 
-		if(cutoff_scene && cutoff_scene != tab_scene)
-			cutoff_scene->relocateItem(tab_view->getCutoffItem(), tab_scene);
+		case ObjectType::View:
+			return new GraphicalView(dynamic_cast<View *>(graph_obj));
+
+		default:
+			return nullptr;
 	}
+}
 
-	/* Snapshot both lists first -- demoteRelationship()/promoteRelationship() mutate
-	 * connected_rels/external_rels as they run, which would invalidate a live iteration */
-	std::vector<BaseRelationship *> in_scene_rels = tab_view->connected_rels;
-	QList<BaseRelationship *> ext_rels = tab_view->getExternalRelationships();
+void ModelWidget::routeRelationship(BaseRelationship *rel)
+{
+	BaseTableView *src_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::SrcTable)->getOverlyingObject()),
+								 *dst_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::DstTable)->getOverlyingObject());
+	ObjectsScene *src_scene = src_view ? dynamic_cast<ObjectsScene *>(src_view->scene()) : nullptr,
+							 *dst_scene = dst_view ? dynamic_cast<ObjectsScene *>(dst_view->scene()) : nullptr;
 
-	for(auto &rel : in_scene_rels)
+	/* Same routing rule as handleObjectAddition()'s Relationship case (kept as a separate, small
+	 * duplication instead of extracting a shared method -- that choke point already carries a lot
+	 * of surrounding side effects, e.g. blink_new_objs/setModified/emit s_objectAdded, that a mere
+	 * re-route shouldn't trigger): same scene now -> real RelationshipView; different scenes -> no
+	 * view, register as an external (cut-off) connection on both tables instead */
+	if(src_scene && src_scene == dst_scene)
+		src_scene->addItem(new RelationshipView(rel));
+	else
 	{
-		BaseTableView *partner_view = dynamic_cast<BaseTableView *>(getRelationshipPartner(rel, tab)->getOverlyingObject());
+		if(src_view)
+			src_view->addExternalRelationship(rel);
 
-		/* Self-relationships resolve their own partner as tab itself, so this branch is always
-		 * taken for them once tab_view has already been relocated -- the RelationshipView still
-		 * needs to physically follow, moveToSchema()/relocateEditedObject() only relocate the
-		 * table's own item, never the relationships attached to it */
-		if(partner_view && dynamic_cast<ObjectsScene *>(partner_view->scene()) == tab_scene)
-			relocateRelationshipView(rel, tab_scene);
-		else
-			demoteRelationship(rel);
+		if(dst_view)
+			dst_view->addExternalRelationship(rel);
+	}
+}
+
+void ModelWidget::relocateObjectView(BaseGraphicObject *graph_obj, ObjectsScene *dst_scene)
+{
+	BaseTableView *old_view = dynamic_cast<BaseTableView *>(graph_obj->getOverlyingObject());
+	ObjectsScene *old_scene = old_view ? dynamic_cast<ObjectsScene *>(old_view->scene()) : nullptr;
+
+	if(!old_view || !old_scene || !dst_scene || old_scene == dst_scene)
+		return;
+
+	/* connected_rels/external_rels live on the view instance, not the model -- read them now,
+	 * before old_view is discarded, or this table's relationships would be silently lost instead
+	 * of re-routed */
+	std::vector<BaseRelationship *> rels = old_view->connected_rels;
+	QList<BaseRelationship *> ext_rels = old_view->getExternalRelationships();
+
+	/* Detach every relationship from this table BEFORE its view is destroyed:
+	 * - A same-scene relationship's RelationshipView must be removed here, not after -- removing
+	 *   it calls disconnectTables(), which dereferences both tables[] pointers. Doing this once
+	 *   old_view is already gone would leave a dangling pointer the instant the view is touched.
+	 * - A cross-scene relationship has no view -- drop it from both tables' external list. Doing
+	 *   this on old_view's own side too (not just the partner's) matters: its cut-off marker is a
+	 *   standalone QGraphicsItem added directly to old_scene, not a Qt child of old_view, so
+	 *   removing/discarding old_view below never touches it on its own -- left alone, it stays
+	 *   orphaned, still rendered in old_scene, for as long as that scene lives */
+	BaseTable *tab = dynamic_cast<BaseTable *>(graph_obj);
+
+	for(auto &rel : rels)
+	{
+		QGraphicsItem *rel_item = dynamic_cast<QGraphicsItem *>(rel->getOverlyingObject());
+		ObjectsScene *rel_scene = rel_item ? dynamic_cast<ObjectsScene *>(rel_item->scene()) : nullptr;
+
+		if(rel_scene)
+			rel_scene->removeItem(rel_item);
 	}
 
 	for(auto &rel : ext_rels)
 	{
 		BaseTableView *partner_view = dynamic_cast<BaseTableView *>(getRelationshipPartner(rel, tab)->getOverlyingObject());
 
-		if(partner_view && dynamic_cast<ObjectsScene *>(partner_view->scene()) == tab_scene)
-			promoteRelationship(rel, tab_scene);
+		if(partner_view && partner_view != old_view)
+			partner_view->removeExternalRelationship(rel);
+
+		old_view->removeExternalRelationship(rel);
 	}
+
+	old_scene->removeItem(old_view);
+	dst_scene->addItem(createGraphicItem(graph_obj));
+
+	/* Re-route every relationship now that the table has a new view in its new scene --
+	 * routeRelationship() reads each table's *current* scene fresh, so this alone also self-heals
+	 * the case where two related tables are relocated together in the same operation: the first
+	 * one to move routes its relationship as external (partner hasn't moved yet), and re-routing
+	 * it again once the second table follows finds them sharing a scene again and creates a real
+	 * RelationshipView */
+	for(auto &rel : rels)
+		routeRelationship(rel);
+
+	for(auto &rel : ext_rels)
+		routeRelationship(rel);
 }
 
 void ModelWidget::relocateEditedObject(BaseObjectWidget *obj_wgt)
@@ -2928,14 +2921,10 @@ void ModelWidget::relocateEditedObject(BaseObjectWidget *obj_wgt)
 		return;
 
 	Schema *schema = dynamic_cast<Schema *>(graph_obj->getSchema());
-	BaseObjectView *item_view = dynamic_cast<BaseObjectView *>(graph_obj->getOverlyingObject());
-	ObjectsScene *cur_scene = item_view ? dynamic_cast<ObjectsScene *>(item_view->scene()) : nullptr,
-								*dst_scene = schema ? getSchemaScene(schema) : nullptr;
+	ObjectsScene *dst_scene = schema ? getSchemaScene(schema) : nullptr;
 
-	if(cur_scene && dst_scene && cur_scene != dst_scene)
-		cur_scene->relocateItem(item_view, dst_scene);
-
-	reevaluateTableRelationships(dynamic_cast<BaseTableView *>(item_view));
+	if(dst_scene)
+		relocateObjectView(graph_obj, dst_scene);
 }
 
 void ModelWidget::moveToSchema()
@@ -2957,33 +2946,33 @@ void ModelWidget::moveToSchema()
 			//Change the object's schema only if the new schema is different from the current
 			if(obj->acceptsSchema() && obj->getSchema()!=schema)
 			{
-				op_id=op_list->registerObject(obj, Operation::ObjModified, -1);
+				obj_graph=dynamic_cast<BaseGraphicObject *>(obj);
+
+				/* Undo/redo doesn't know how to restore a scene relocation yet -- OperationList::
+				 * executeOperation() only restores the schema attribute in-place and flags both
+				 * schemas for redraw, it never moves the object's view back to its original scene,
+				 * so Ctrl+Z would leave the view stranded in the destination scene. Until that's
+				 * implemented, leave graphical objects out of the operation history here so this
+				 * change is simply not undoable instead of half-undoable */
+				if(!obj_graph)
+					op_id=op_list->registerObject(obj, Operation::ObjModified, -1);
 
 				obj->clearDependencies();
 				obj->setSchema(schema);
 				obj->updateDependencies();
 
-				obj_graph=dynamic_cast<BaseGraphicObject *>(obj);
-
 				//If the object is a graphical one, relocate its item to the destination schema's scene
 				if(obj_graph)
 				{
-					BaseObjectView *item_view=dynamic_cast<BaseObjectView *>(obj_graph->getOverlyingObject());
-					ObjectsScene *cur_scene=item_view ? dynamic_cast<ObjectsScene *>(item_view->scene()) : nullptr,
-												*dst_scene=getSchemaScene(schema);
+					ObjectsScene *dst_scene=getSchemaScene(schema);
 
 					/* Each schema owns its own scene -- the item follows its object to the destination
 					 * schema's scene, keeping its own (x, y): the destination scene is an independent
 					 * canvas, so there's no longer a reason to snap it near the new schema's box the
 					 * way single-scene mode used to -- doing that here would stack every object moved
 					 * into the same schema at the same spot, destroying whatever layout the user had */
-					if(cur_scene && dst_scene && cur_scene!=dst_scene)
-						cur_scene->relocateItem(item_view, dst_scene);
-
-					/* The table may have just left the scene shared with some of its relationship
-					 * partners (or entered one shared with a former cross-scene partner) -- re-check
-					 * every connected/external relationship now that the scene actually changed */
-					reevaluateTableRelationships(dynamic_cast<BaseTableView *>(item_view));
+					if(dst_scene)
+						relocateObjectView(obj_graph, dst_scene);
 				}
 
 				//Invalidating the code of the object's references
