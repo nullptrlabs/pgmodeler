@@ -1380,7 +1380,11 @@ diferentes.
 
 2.4. Documentar e validar com teste a política de não-rebalanceamento (cenas esvaziadas por
      remoção não são mescladas/destruídas automaticamente no modo threshold) — verificação, não
-     feature nova. Depende de: 2.1.
+     feature nova. Depende de: 2.1. **Confirmado (2026-09-24)**: `ModelWidget::removeScene()` só é
+     chamado a partir do ramo de remoção de `Schema` em `handleObjectRemoval()`, gated por
+     `getSchemaScene()` — nunca dispara pra Table/View/ForeignTable removidos no modo threshold,
+     então uma cena esvaziada por remoção simplesmente permanece na coleção, vazia, sem nenhuma
+     mudança de código necessária.
 
 2.5. Supressão dinâmica de `SchemaView` cross-scene — **não é reaproveitamento de choke point
      existente** (achado de revisão de código, 2026-09-24: ver subseção acima) — o mecanismo de

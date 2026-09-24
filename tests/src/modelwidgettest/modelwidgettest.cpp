@@ -56,6 +56,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void thresholdModeOpensNewSceneAfterCrossingCount();
 		void thresholdModeSceneAssignmentSurvivesSaveAndReload();
 		void thresholdModeCrossSceneRelationshipGetsCutoffMarkers();
+		void thresholdModeDoesNotRebalanceEmptiedScenes();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -856,6 +857,65 @@ void ModelWidgetTest::thresholdModeCrossSceneRelationshipGetsCutoffMarkers()
 		QVERIFY(table_b_view->getCutoffItem() != nullptr);
 		QCOMPARE(table_a_view->getCutoffItem()->getRelationshipsCount(), 1);
 		QCOMPARE(table_b_view->getCutoffItem()->getRelationshipsCount(), 1);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Unlike schema-segmentation mode -- where a scene is destroyed because its owning Schema
+was removed -- a threshold-segmentation scene has no owning object whose removal could trigger
+destruction. Emptying every table out of a scene by removal must leave the scene itself untouched:
+still present in the collection, never merged into another one or destroyed. */
+void ModelWidgetTest::thresholdModeDoesNotRebalanceEmptiedScenes()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+		db_model->createSystemObjects(true);
+
+		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(public_sch != nullptr);
+
+		std::vector<Table *> tables;
+
+		//Fills the first scene exactly to the threshold, which also opens a second, still-empty scene
+		for(unsigned i = 0; i < ModelWidget::SceneObjThreshold; i++)
+		{
+			Table *table = new Table;
+			table->setName(QString("table_%1").arg(i));
+			table->setSchema(public_sch);
+			db_model->addTable(table);
+			tables.push_back(table);
+		}
+
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+
+		ObjectsScene *first_scene = model_wgt.getObjectsScenes().first();
+		ObjectsScene *second_scene = model_wgt.getObjectsScenes().last();
+		QVERIFY(first_scene != second_scene);
+
+		//Empties the first scene entirely by removing every table that landed in it
+		for(auto &table : tables)
+			db_model->removeObject(table);
+
+		//No automatic merge/destruction: both scenes must still be there, same instances as before
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+		QVERIFY(model_wgt.getObjectsScenes().contains(first_scene));
+		QVERIFY(model_wgt.getObjectsScenes().contains(second_scene));
+
+		//The emptied scene keeps accepting new objects normally, it's just not the routing target
+		//anymore -- the counter only ever appends to the last scene, never reuses an earlier one
+		Table *new_table = new Table;
+		new_table->setName("table_after_removal");
+		new_table->setSchema(public_sch);
+		db_model->addTable(new_table);
+
+		QCOMPARE(model_wgt.getSceneForObject(new_table), second_scene);
 	}
 	catch(Exception &e)
 	{

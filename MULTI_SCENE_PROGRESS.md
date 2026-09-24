@@ -97,8 +97,18 @@
   código de produção — só o teste novo `thresholdModeCrossSceneRelationshipGetsCutoffMarkers`,
   provando que um relacionamento entre duas tabelas separadas pelo contador de threshold vira
   marcador cut-off nas duas pontas, sem `RelationshipView`, exatamente como no modo por schema.
-  Suíte inteira (12 testes) + o teste novo isolado rodaram limpos sob ASan. **Próxima frente de
-  trabalho: subtarefa 2.4** (documentar e validar com teste a política de não-rebalanceamento).
+  Suíte inteira (12 testes) + o teste novo isolado rodaram limpos sob ASan.
+- **2.4 implementada (2026-09-24): política de não-rebalanceamento confirmada.** Verificação, não
+  feature nova — `ModelWidget::removeScene()` só é chamado a partir do ramo de remoção de `Schema`
+  em `handleObjectRemoval()` (gated por `getSchemaScene()`), então remover Table/View/ForeignTable
+  no modo threshold nunca dispara destruição de cena; uma cena esvaziada por remoção simplesmente
+  fica na coleção, vazia, pra sempre. Nenhuma mudança de código de produção — só o teste novo
+  `thresholdModeDoesNotRebalanceEmptiedScenes`, que enche a primeira cena até o threshold (abrindo
+  uma segunda, ainda vazia), remove todas as tabelas da primeira e confirma que as duas cenas
+  continuam lá, e que uma inserção nova depois disso continua indo pra última cena (nunca reutiliza
+  a que ficou vazia). Suíte inteira (13 testes) + o teste novo isolado rodaram limpos sob ASan.
+  **Próxima frente de trabalho: subtarefa 2.5** (supressão dinâmica de `SchemaView` cross-scene —
+  a mais complexa da fase, ver achado de revisão de código já registrado sobre ela).
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
