@@ -82,8 +82,23 @@
   livre pra usar essa numeração normalmente (a regra é só sobre comentários no código-fonte).
   Também fechada no plano a decisão do contador de threshold sobreviver entre sessões via
   recálculo (ver subseção correspondente na Fase 2), que estava registrada como pergunta em aberto
-  antes da 2.2 resolvê-la na prática. **Próxima frente de trabalho: subtarefa 2.3** (reaproveitamento
-  do marcador cut-off da Fase 1 para os cross-scene do modo threshold).
+  antes da 2.2 resolvê-la na prática.
+- **Achado do usuário (2026-09-24)**: entre as sessões, o usuário renomeou os valores do enum
+  `DatabaseModel::SegmentationMode` (`BySchema`/`ByThreshold` → `SegBySchema`/`SegByThreshold`, mais
+  claros), simplificou a checagem de tipo em `handleObjectAddition()` pra reusar
+  `BaseTable::isBaseTable()` em vez de comparar os três tipos manualmente, baixou
+  `ModelWidget::SceneObjThreshold` de 1000 pra 500 (mais fácil de disparar manualmente na GUI), e
+  deixou instrumentação de `qDebug()` temporária (atrás de `#warning`) rastreando o roteamento
+  durante teste manual — não removida, é scaffolding próprio dele.
+- **2.3 implementada (2026-09-24): reaproveitamento do marcador cut-off confirmado gratuito.**
+  Verificação, não feature nova — `BaseTableView::addExternalRelationship()`/`CutoffItem` já eram
+  inteiramente agnósticos a como a cena de cada tabela foi escolhida (só leem `this->scene()`), sem
+  nenhuma suposição específica do modo por schema vazada do desenho da Fase 1. Nenhuma mudança de
+  código de produção — só o teste novo `thresholdModeCrossSceneRelationshipGetsCutoffMarkers`,
+  provando que um relacionamento entre duas tabelas separadas pelo contador de threshold vira
+  marcador cut-off nas duas pontas, sem `RelationshipView`, exatamente como no modo por schema.
+  Suíte inteira (12 testes) + o teste novo isolado rodaram limpos sob ASan. **Próxima frente de
+  trabalho: subtarefa 2.4** (documentar e validar com teste a política de não-rebalanceamento).
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
