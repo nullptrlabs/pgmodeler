@@ -157,7 +157,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 
 	db_model = new DatabaseModel(this);
 
-#warning "Fase 2 test scaffolding: remove this forced ByThreshold segmentation mode once real mode selection exists (see MULTI_SCENE_PLAN.md subtarefa 2.1)"
+#warning "test scaffolding: remove this forced ByThreshold segmentation mode once real mode selection exists"
 	db_model->setSegmentationMode(DatabaseModel::ByThreshold);
 
 	xmlparser = db_model->getXMLParser();
@@ -182,8 +182,8 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	viewport->setAcceptDrops(true);
 	viewport->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	/* Fase 1.3: temporary floating control to switch the active scene manually, until a definitive
-	 * scene-switching UI replaces it (see MULTI_SCENE_PLAN.md) */
+	/* Temporary floating control to switch the active scene manually, until a definitive
+	 * scene-switching UI replaces it */
 	scene_combo = new QComboBox(viewport);
 	scene_combo->setToolTip(tr("Switch active scene (temporary control)"));
 	scene_combo->setFixedWidth(200);
@@ -1256,9 +1256,9 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 
 			if(persisted_idx >= 0)
 			{
-				/* Object already carries a scene index (Fase 2, subtarefa 2.2) -- from a file being
-				 * loaded, or an undo restoring a previously-removed object. Widen the scenes collection
-				 * as needed and route it there directly, bypassing the live counter entirely */
+				/* Object already carries a scene index -- from a file being loaded, or an undo
+				 * restoring a previously-removed object. Widen the scenes collection as needed and
+				 * route it there directly, bypassing the live counter entirely */
 				while(scenes.size() <= persisted_idx)
 				{
 					ObjectsScene *new_scene = addScene(scenes.isEmpty());
@@ -1269,10 +1269,9 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 			}
 			else
 			{
-				/* Naive counter (MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.1): every SceneObjThreshold
-				 * Table/View/ForeignTable insertions opens a new scene, and every insertion after that
-				 * goes to it -- same rule for interactive creation and file loading, no clustering by
-				 * connectivity (decisão #7, seção 3) */
+				/* Naive counter: every SceneObjThreshold Table/View/ForeignTable insertions opens a
+				 * new scene, and every insertion after that goes to it -- no clustering by
+				 * connectivity, strictly insertion order */
 				if(scenes.isEmpty())
 				{
 					target_scene = addScene();
@@ -2197,11 +2196,10 @@ void ModelWidget::loadModel(const QString &filename)
 		db_model->loadModel(filename);
 		blink_new_objs = curr_blink_objs;
 
-		/* Threshold-segmentation mode (MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.2): every loaded
-		 * Table/View/ForeignTable already routed itself via its own persisted scene index (see
-		 * handleObjectAddition()), without touching threshold_obj_count -- reseed it now from how many
-		 * of them landed in the last scene, so further interactive insertions resume filling it
-		 * correctly instead of restarting the threshold count from zero */
+		/* In threshold-segmentation mode, every loaded Table/View/ForeignTable already routed itself
+		 * via its own persisted scene index (see handleObjectAddition()), without touching
+		 * threshold_obj_count -- reseed it now from how many of them landed in the last scene, so
+		 * further interactive insertions resume filling it instead of restarting the count at zero */
 		if(db_model->getSegmentationMode() == DatabaseModel::ByThreshold && !scenes.isEmpty())
 		{
 			int last_idx = scenes.size() - 1;
