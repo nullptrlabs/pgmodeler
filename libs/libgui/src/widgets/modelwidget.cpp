@@ -1237,7 +1237,13 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 					}
 				}
 
-				item = new SchemaView(schema);
+				/* The schema rectangle groups children that share a single view and recomputes its
+				 * bounding box on every child edit -- in any segmented mode that either runs for
+				 * nothing (schema == scene, so the box would just mirror the scene itself) or can't
+				 * be drawn correctly at all (children split across scenes), so it's skipped outright
+				 * rather than built and hidden */
+				if(seg_mode == DatabaseModel::NoSegmentation)
+					item = new SchemaView(schema);
 			}
 			break;
 
@@ -5298,7 +5304,11 @@ void ModelWidget::configurePopupMenu(const std::vector<BaseObject *> &objects)
 			popup_menu.addAction(action_pagination);
 		}
 
-		if(objects.empty() || (objects.size() == 1 && objects[0]->getObjectType() == ObjectType::Database))
+		/* Toggling schema rectangles is available only when the model is not
+		 * segmented in multiple scenes */
+		if(db_model->getSegmentationMode() == DatabaseModel::NoSegmentation &&
+			 (objects.empty() ||
+			 (objects.size() == 1 && objects[0]->getObjectType() == ObjectType::Database)))
 			popup_menu.addAction(action_schemas_rects);
 	}
 

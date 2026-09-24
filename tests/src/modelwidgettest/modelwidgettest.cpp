@@ -57,6 +57,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void thresholdModeSceneAssignmentSurvivesSaveAndReload();
 		void thresholdModeCrossSceneRelationshipGetsCutoffMarkers();
 		void thresholdModeDoesNotRebalanceEmptiedScenes();
+		void segmentedModesNeverCreateSchemaRectangles();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -85,7 +86,7 @@ void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
 		table_b->setSchema(schema_a);
 		db_model->addTable(table_b);
 
-		ObjectsScene *schema_scene = model_wgt.getSceneForObject(schema_a);
+		ObjectsScene *schema_scene = model_wgt.getSchemaScene(schema_a);
 
 		QVERIFY(schema_scene != nullptr);
 		QCOMPARE(model_wgt.getSceneForObject(table), schema_scene);
@@ -116,7 +117,7 @@ void ModelWidgetTest::differentSchemasGetDifferentScenes()
 		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
 
 		QVERIFY(public_sch != nullptr);
-		QVERIFY(model_wgt.getSceneForObject(schema_a) != model_wgt.getSceneForObject(public_sch));
+		QVERIFY(model_wgt.getSchemaScene(schema_a) != model_wgt.getSchemaScene(public_sch));
 	}
 	catch(Exception &e)
 	{
@@ -185,7 +186,7 @@ void ModelWidgetTest::discardingAndRecreatingRelationshipViewSurvivesModelClose(
 		db_model->addRelationship(rel);
 
 		ObjectsScene *scene_a = model_wgt.getSceneForObject(table_a);
-		ObjectsScene *scene_b = model_wgt.getSceneForObject(schema_b);
+		ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
 		QGraphicsItem *rel_item = dynamic_cast<QGraphicsItem *>(rel->getOverlyingObject());
 
 		QVERIFY(scene_a != nullptr);
@@ -279,7 +280,7 @@ void ModelWidgetTest::relocatingTablesTogetherPreservesTheirRelationship()
 		db_model->addRelationship(rel);
 
 		ObjectsScene *scene_a = model_wgt.getSceneForObject(table_a);
-		ObjectsScene *scene_b = model_wgt.getSceneForObject(schema_b);
+		ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
 
 		QVERIFY(scene_a != nullptr);
 		QVERIFY(scene_b != nullptr);
@@ -469,7 +470,7 @@ void ModelWidgetTest::undoRedoOfTablesMovedTogetherKeepsExactlyOneRelationshipVi
 		db_model->addRelationship(rel);
 
 		ObjectsScene *scene_a = model_wgt.getSceneForObject(table_a);
-		ObjectsScene *scene_b = model_wgt.getSceneForObject(schema_b);
+		ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
 
 		QVERIFY(scene_a != nullptr);
 		QVERIFY(scene_b != nullptr);
@@ -595,7 +596,7 @@ void ModelWidgetTest::undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedV
 		db_model->addRelationship(rel_ac);
 
 		ObjectsScene *scene_pub = model_wgt.getSceneForObject(table_a);
-		ObjectsScene *scene_dest = model_wgt.getSceneForObject(schema_dest);
+		ObjectsScene *scene_dest = model_wgt.getSchemaScene(schema_dest);
 
 		QVERIFY(scene_pub != nullptr);
 		QVERIFY(scene_dest != nullptr);
@@ -686,7 +687,8 @@ void ModelWidgetTest::thresholdModeOpensNewSceneAfterCrossingCount()
 		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
 		QVERIFY(public_sch != nullptr);
 
-		ObjectsScene *first_scene = model_wgt.getSceneForObject(public_sch);
+		//No SchemaView exists in threshold mode -- grab the sole scene created so far directly
+		ObjectsScene *first_scene = model_wgt.getObjectsScene(0);
 		Table *last_table = nullptr;
 
 		for(unsigned i = 0; i < ModelWidget::SceneObjThreshold; i++)
@@ -916,6 +918,60 @@ void ModelWidgetTest::thresholdModeDoesNotRebalanceEmptiedScenes()
 		db_model->addTable(new_table);
 
 		QCOMPARE(model_wgt.getSceneForObject(new_table), second_scene);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Neither segmented mode instantiates a SchemaView -- not schema-segmentation (where the
+rectangle would just mirror the scene it's alone in) nor threshold (where it can't even be drawn
+correctly, since a schema's children may be split across scenes). The gate lives entirely in
+ModelWidget::handleObjectAddition(); Schema::isRectVisible() itself is untouched by segmentation
+mode, so the setting survives a later switch back to NoSegmentation. */
+void ModelWidgetTest::segmentedModesNeverCreateSchemaRectangles()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_a = new Schema;
+		schema_a->setName("schema_a");
+		schema_a->setRectVisible(true);
+		db_model->addSchema(schema_a);
+
+		Table *table_a = new Table;
+		table_a->setName("table_a");
+		table_a->setSchema(schema_a);
+		db_model->addTable(table_a);
+
+		//The schema is still routed to its own scene -- only the rectangle item itself is skipped
+		QVERIFY(model_wgt.getSchemaScene(schema_a) != nullptr);
+		QVERIFY(schema_a->getOverlyingObject() == nullptr);
+
+		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(public_sch != nullptr);
+
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+		public_sch->setRectVisible(true);
+
+		Table *table_b = new Table;
+		table_b->setName("table_b");
+		table_b->setSchema(public_sch);
+		db_model->addTable(table_b);
+
+		QVERIFY(public_sch->getOverlyingObject() == nullptr);
+
+		/* The flag itself was never touched by segmentation mode -- switching back to NoSegmentation
+		must not have lost either schema's rect-visible setting */
+		db_model->setSegmentationMode(DatabaseModel::NoSegmentation);
+		QVERIFY(schema_a->isRectVisible());
+		QVERIFY(public_sch->isRectVisible());
 	}
 	catch(Exception &e)
 	{

@@ -302,9 +302,6 @@ class __libgui ModelWidget: public QWidget {
 		 * viewport never ends up pointing at a freed scene */
 		void removeScene(ObjectsScene *scn);
 
-		//! \brief Returns the scene that holds the given schema and its children, or nullptr if none is assigned yet
-		ObjectsScene *getSchemaScene(Schema *schema);
-
 		//! \brief Returns whichever of rel's two tables isn't tab (the other side of the relationship)
 		BaseTable *getRelationshipPartner(BaseRelationship *rel, BaseTable *tab);
 
@@ -504,6 +501,13 @@ class __libgui ModelWidget: public QWidget {
 
 		//! \brief Returns the scene that currently holds the graphical representation of the given object, or nullptr if the object has none
 		ObjectsScene *getSceneForObject(BaseObject *object);
+
+		/*! \brief Returns the scene assigned to the given schema, or nullptr if none is assigned yet.
+		 * Unlike getSceneForObject(), this doesn't depend on the schema having a graphical item of its
+		 * own -- schema-segmentation mode never draws one (see ModelWidget::handleObjectAddition()) --
+		 * and only ever resolves to something outside of that mode, since it's the only one where a
+		 * schema maps to exactly one scene */
+		ObjectsScene *getSchemaScene(Schema *schema);
 
 		/*! \brief Discards graph_obj's existing item and builds a fresh one directly in dst_scene,
 		 * re-routing (see routeRelationship()) every relationship that was connected to it -- a
