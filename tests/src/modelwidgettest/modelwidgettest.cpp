@@ -34,8 +34,8 @@
 #include "operationlist.h"
 #include "pgmodelerunittest.h"
 
-/*! \brief Covers MULTI_SCENE_PLAN.md subtarefa 1.4: in schema-segmentation mode, a Schema and
-its children must always land in the same ObjectsScene, since SchemaView::configureObject()
+/*! \brief In schema-segmentation mode, a Schema and its children must always land in the same
+ObjectsScene, since SchemaView::configureObject()
 computes its bounding rect directly from its children's positions without ever mapping between
 scenes. Table is used as the representative child type here -- Table/View/ForeignTable all
 resolve their target scene through the same ModelWidget::getSchemaScene() call. */
@@ -64,7 +64,7 @@ void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
-		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
 		db_model->setSegmentationMode(DatabaseModel::BySchema);
 
 		db_model->createSystemObjects(true);
@@ -102,7 +102,7 @@ void ModelWidgetTest::differentSchemasGetDifferentScenes()
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
-		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
 		db_model->setSegmentationMode(DatabaseModel::BySchema);
 
 		db_model->createSystemObjects(true);
@@ -122,7 +122,7 @@ void ModelWidgetTest::differentSchemasGetDifferentScenes()
 	}
 }
 
-/*! \brief Regression test for a SIGSEGV found while testing subtarefa 1.10: relocating an existing
+/*! \brief Regression test for a SIGSEGV found while testing schema removal: relocating an existing
 RelationshipView across scenes via the now-removed ObjectsScene::relocateItem() left some of the
 view's internal line items (lines/fk_lines/pk_lines/src_cf_lines/dst_cf_lines) with corrupted memory
 that only crashed later, when the view was finally destroyed (confirmed with gdb: the bad item's
@@ -144,7 +144,7 @@ void ModelWidgetTest::discardingAndRecreatingRelationshipViewSurvivesModelClose(
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
-		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
 		db_model->setSegmentationMode(DatabaseModel::BySchema);
 
 		db_model->createSystemObjects(true);
@@ -238,7 +238,7 @@ void ModelWidgetTest::relocatingTablesTogetherPreservesTheirRelationship()
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
-		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
 		db_model->setSegmentationMode(DatabaseModel::BySchema);
 
 		db_model->createSystemObjects(true);
@@ -326,7 +326,7 @@ void ModelWidgetTest::relocatingTableIntoPartnersSceneClearsBothCutoffMarkers()
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
-		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
 		db_model->setSegmentationMode(DatabaseModel::BySchema);
 
 		db_model->createSystemObjects(true);
@@ -427,7 +427,7 @@ void ModelWidgetTest::undoRedoOfTablesMovedTogetherKeepsExactlyOneRelationshipVi
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
-		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
 		db_model->setSegmentationMode(DatabaseModel::BySchema);
 		OperationList *op_list = model_wgt.getOperationList();
 
@@ -545,7 +545,7 @@ void ModelWidgetTest::undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedV
 		ModelWidget model_wgt;
 		DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
-		//These tests exercise schema-segmentation specifically -- opt in explicitly (see Fase 2, subtarefa 2.1)
+		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
 		db_model->setSegmentationMode(DatabaseModel::BySchema);
 		OperationList *op_list = model_wgt.getOperationList();
 
@@ -667,8 +667,8 @@ void ModelWidgetTest::undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedV
 	}
 }
 
-/*! \brief Covers MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.1: in threshold-segmentation mode, the
-Table/View/ForeignTable insertion counter opens a new scene only once SceneObjThreshold insertions
+/*! \brief In threshold-segmentation mode, the Table/View/ForeignTable insertion counter opens a
+new scene only once SceneObjThreshold insertions
 have landed in the current one -- the insertion that crosses the threshold still belongs to the
 old scene, and only the next one after it goes to the freshly-opened scene. */
 void ModelWidgetTest::thresholdModeOpensNewSceneAfterCrossingCount()
@@ -713,8 +713,8 @@ void ModelWidgetTest::thresholdModeOpensNewSceneAfterCrossingCount()
 	}
 }
 
-/*! \brief Covers MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.2: each Table's persisted `scene` attribute
-must survive a save/reload round-trip and route it back to the same scene bucket, and
+/*! \brief Each Table's persisted `scene` attribute must survive a save/reload round-trip and route
+it back to the same scene bucket, and
 threshold_obj_count must be reseeded from the reloaded data instead of restarting at zero -- otherwise
 a single insertion right after reload would open a spurious extra scene instead of resuming the one
 already left partially filled by the file. */

@@ -137,14 +137,14 @@ class __libgui ModelWidget: public QWidget {
 		QHash<Schema *, ObjectsScene *> schema_scenes;
 
 		/*! \brief Running count of Table/View/ForeignTable insertions in threshold-segmentation mode.
-		 * Not persisted yet (see MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.2) -- resets every session. */
+		 * Not itself persisted -- reseeded from the loaded objects' scene indexes on loadModel() */
 		unsigned threshold_obj_count;
 
 		//! \brief Manages the objects scene
 		QGraphicsView *viewport;
 
 		/*! \brief Temporary floating control to switch the active scene, until a definitive UI
-		replaces it (see MULTI_SCENE_PLAN.md subtarefa 1.3) */
+		replaces it */
 		QComboBox *scene_combo;
 
 		//! \brief Model's general context menu

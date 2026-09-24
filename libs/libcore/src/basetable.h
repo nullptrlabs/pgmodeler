@@ -63,7 +63,7 @@ class __libcore BaseTable: public BaseGraphicObject {
 		QPointF cutoff_pos;
 
 		/*! \brief Index of the ObjectsScene bucket this object belongs to, in threshold-segmentation
-		 * mode (see MULTI_SCENE_PLAN.md Fase 2, subtarefa 2.2). -1 means unset */
+		 * mode. -1 means unset */
 		int scene_idx;
 
 		void setSceneIndexAttribute();
