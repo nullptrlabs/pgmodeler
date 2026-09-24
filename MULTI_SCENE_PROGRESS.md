@@ -17,7 +17,16 @@
 - **Leak de `RelationshipView` do undo/redo (decisão #11) reproduzido e corrigido (2026-09-24)**
   — bug pré-existente em `~RelationshipView()` (`round_cf_descriptors` não limpo em lados de
   relação obrigatórios), não específico da feature multi-cena. Ver seção própria mais abaixo.
-  Fix ainda não commitado.
+  Commitado.
+- **Reorganização de prioridade: threshold antecipado (2026-09-24)** — decisão do usuário de
+  implementar a segmentação por threshold logo após a Fase 1, em vez de fechar toda a persistência
+  do modo por schema primeiro: o código ainda está pouco acoplado a "1 Schema = 1 cena" nesta
+  altura, então reconciliar os dois modos agora é mais barato do que esperar a persistência
+  aprofundar esse acoplamento. `MULTI_SCENE_PLAN.md` foi reorganizado: a antiga Fase 3 (Threshold)
+  virou a nova **Fase 2**, a antiga Fase 2 (Persistência) virou a nova **Fase 3** — mesmo conteúdo,
+  só trocaram de posição/número (subtarefas renumeradas para bater com a fase nova; Fase 4, CLI,
+  não foi afetada). Subtarefas 1.11-1.15 da Fase 1 ficam em **standby** (não descartadas) até a
+  nova Fase 2 estar pronta. Próximo passo de trabalho: iniciar a nova Fase 2 (threshold).
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

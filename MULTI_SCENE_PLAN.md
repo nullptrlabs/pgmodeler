@@ -3,27 +3,37 @@
 > Branch: `multi-scene-support-2.1.x`. Este documento é o plano de trabalho de referência entre sessões/máquinas.
 > Estado: implementação em andamento — ver `MULTI_SCENE_PROGRESS.md` para onde paramos exatamente
 > (log sessão a sessão, não duplicado aqui).
-> Prioridade: fechar segmentação por schema (Fases 0-2) primeiro, ponta a ponta, antes de detalhar
-> o modo por threshold (Fase 3) — ver seção 4. **Fase 4** (paridade do `pgmodeler-cli`) é dona do
-> usuário e só começa depois das Fases 0-3 prontas — não iniciar por conta própria.
+> **Atualização 2026-09-24**: prioridade revisada — antecipar a segmentação por threshold (nova
+> **Fase 2**) em vez de terminar toda a persistência do modo por schema primeiro.
+> Motivo do usuário: o código ainda está pouco acoplado a "1 Schema = 1 cena" nesta altura —
+> reconciliar os dois modos agora é mais barato do que esperar a complexidade da Fase 3 (persistência
+> por schema) crescer mais. **Fases renumeradas**: o que era Fase 3 (Threshold) é a nova **Fase 2**;
+> o que era Fase 2 (Persistência) é a nova **Fase 3** — mesmo conteúdo, só trocaram de posição/número
+> (subtarefas antigas 2.x/3.x foram renumeradas para bater com a fase nova). **Subtarefas 1.11-1.15
+> ficam em standby** (não descartadas, só fora da ordem de trabalho corrente) até a Fase 2 nova
+> (threshold) estar pronta — ver nota em cada uma na Fase 1.
+> Prioridade: fechar Fases 0-2 (fundação + os dois modos base, por schema e threshold) ponta a
+> ponta antes de aprofundar a persistência fina do modo por schema (Fase 3) — ver seção 4. **Fase 4**
+> (paridade do `pgmodeler-cli`) é dona do usuário e só começa depois das Fases 0-3 prontas — não
+> iniciar por conta própria.
 > Atualização 2026-09-18: seções marcadas "achado de revisão de código" / "verificado em revisão
 > de código" foram adicionadas após uma leitura profunda do código real envolvido na Fase 0 (ver
 > arquivos citados nas próprias notas). Uma delas corrige uma afirmação da versão anterior deste
 > documento sobre `connected_rels` (ver subseção "Relacionamentos cross-scene: promoção/
 > rebaixamento dinâmico" na Fase 1).
-> Atualização 2026-09-21: decisão #7 (seção 3) fecha o algoritmo da Fase 3 (contador ingênuo, sem
+> Atualização 2026-09-21: decisão #7 (seção 3) fecha o algoritmo da Fase 2 (contador ingênuo, sem
 > clustering ciente de conectividade dentro do modo threshold). Clustering ciente de conectividade
 > **não foi descartado** — vira candidato a um terceiro modo de segmentação futuro, separado do
-> threshold ingênuo (ver seção 5). Fase 3 reescrita para refletir isso. A decisão #8 (terminologia
+> threshold ingênuo (ver seção 5). Fase 2 reescrita para refletir isso. A decisão #8 (terminologia
 > "Workspace") foi cogitada e depois **revertida no mesmo dia** — o nome final é "cena"/"Scene" em
 > tudo, ver decisão #8 atualizada na seção 3. Fechado também o design completo de retângulo por
 > cena persistido (achado de revisão de código expandido na seção 2): sem retângulo global
 > compartilhado, formato XML mirror de `changelog`/`entry` (tag `<scenes>`/`<scene>`), com
-> retrocompatibilidade explícita para arquivos de versões anteriores — ver Fase 2, subtarefa 2.2.
+> retrocompatibilidade explícita para arquivos de versões anteriores — ver Fase 3, subtarefa 3.2.
 > Também registrado (achado do usuário): `SchemaView` tem o mesmo problema que `RelationshipView`
 > tinha antes da decisão #1, mas só no modo threshold — schema deixa de ser 1:1 com cena, então um
 > schema com filhos em cenas diferentes precisa suprimir seu retângulo em vez de tentar renderizar
-> algo cross-scene. Ver subseção dedicada e subtarefa 3.5 na Fase 3.
+> algo cross-scene. Ver subseção dedicada e subtarefa 2.5 na Fase 2.
 > Atualização 2026-09-21 (2): chave de identidade de `<scene>`/`LastScene` revisada de nome do
 > schema para **índice numérico, atributo XML `id`** — uniformiza os três modos de segmentação
 > (threshold e o futuro modo com clustering não têm nome natural) e é seguro por verificação de
@@ -32,7 +42,7 @@
 > comprovada ainda; pode ser reintroduzido no futuro se surgir um motivo concreto. Limitação aceita:
 > `swapObjectsIds()`/"Edit creation order" pode desalinhar índices no save/reload seguinte —
 > documentado como conhecido, sem código de mitigação (decisão do
-> usuário). Ver seção 2, decisões #3 e #7 (seção 3), e subtarefas 2.1/2.2.
+> usuário). Ver seção 2, decisões #3 e #7 (seção 3), e subtarefas 3.1/3.2.
 > **Atualização 2026-09-21 (4)**: DTD de `<scenes>`/`<scene>` vira arquivo dedicado
 > `assets/schemas/xml/dtd/scene.dtd` (mirror fiel de `changelog.dtd`, incluído em `dbmodel.dtd` via
 > entidade, não declarações soltas nele) — a pedido do usuário.
@@ -172,9 +182,9 @@ Estas decisões foram tomadas em conversa e **não devem ser reabertas** sem jus
    container std quando houver razão técnica concreta que o Qt não cubra (raro) — e nesse caso,
    registrar o motivo inline no código. Não é retroativo: código pré-existente que já usa std
    (ex. `ModelWidget::selected_objects`) não precisa ser convertido como parte deste trabalho.
-7. **Segmentação por threshold (Fase 3): estritamente ingênua, sem clustering — clustering vira
+7. **Segmentação por threshold (Fase 2): estritamente ingênua, sem clustering — clustering vira
    candidato a um TERCEIRO modo futuro, separado** (adicionado em 2026-09-21, refinado depois da
-   revisão do usuário no mesmo dia). O algoritmo da Fase 3 é só um contador incremental de objetos
+   revisão do usuário no mesmo dia). O algoritmo da Fase 2 é só um contador incremental de objetos
    inseridos — ao cruzar o threshold, abre-se uma nova cena e as inserções seguintes vão para ela,
    sem nenhum agrupamento ciente de conectividade. Motivo: sofisticar o critério de particionamento
    **dentro do modo threshold** arriscaria reordenar objetos entre cenas de um jeito que o usuário
@@ -188,13 +198,13 @@ Estas decisões foram tomadas em conversa e **não devem ser reabertas** sem jus
    (BFS/union-find sobre o grafo de relacionamentos) continua uma opção válida — só não como uma
    variação/flag do modo threshold ingênuo, e sim como um **modo de segmentação novo e independente**
    a considerar no futuro (candidato a "Fase 4", fora do escopo atual). Ver seção 5 ("Fora de
-   escopo") e a nota correspondente na Fase 3.
+   escopo") e a nota correspondente na Fase 2.
 8. ~~**Terminologia: "Workspace" para o usuário, "cena" internamente**~~ **REVERTIDA em
    2026-09-21** — decisão final do usuário: usar **"cena"/"Scene"** em tudo (UI futura, atributos
    no arquivo `.dbm`, código), sem distinção usuário/interno. Motivo dado: praticidade, e o formato
    já tem atributos nomeados com "Scene" (`SceneRect`, `LastScene`) — introduzir "Workspace" só pro
    lado do usuário criaria uma inconsistência de nomenclatura sem necessidade real. Onde quer que
-   este documento mencione "Workspace"/"workspace" (decisão #7, Fase 3, subtarefa 1.3, etc.), leia
+   este documento mencione "Workspace"/"workspace" (decisão #7, Fase 2, subtarefa 1.3, etc.), leia
    como "cena"/"Scene" — foi feita uma varredura corrigindo essas menções nesta mesma atualização,
    mas se algo escapou, esta é a decisão que vale.
 9. **Cena-local vs. modelo-inteiro-replicado-por-cena: dois tipos diferentes de "corrigir uma
@@ -320,7 +330,7 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
   `ModelWidget::adjustSceneRect(use_model_rect=true)` na carga do arquivo
   ([modelwidget.cpp:1946-1951](libs/libgui/src/widgets/modelwidget.cpp#L1946)). Com N cenas por
   schema esse único retângulo persistido fica ambíguo — vira por-cena, indexado pela mesma chave
-  que `LastScene` (Fase 2).
+  que `LastScene` (Fase 3).
   - **`ObjectsScene::setSceneRect(rect)` não move nem reposiciona item nenhum**
     ([objectsscene.cpp:676-693](libs/libcanvas/src/objectsscene.cpp#L676)) — só ajusta o retângulo
     de rolagem/indexação espacial da `QGraphicsScene`. Um objeto persistido com posição absoluta
@@ -359,7 +369,7 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
     fallback pra quando o usuário desliga a segmentação e volta pro modo de cena única, preservando
     a área de trabalho "como se fosse uma cena só" sem pagar o custo de impressão/exportação
     durante a operação segmentada normal. Ver detalhamento e o método novo proposto
-    (`updateModelSceneRectInfo()`) nas subtarefas 2.0/2.2.
+    (`updateModelSceneRectInfo()`) nas subtarefas 3.0/3.2.
   - **Formato de persistência escolhido**: mirror do mecanismo já existente e testado de
     `changelog`/`<entry>` ([databasemodel.cpp:10520-10555](libs/libcore/src/databasemodel.cpp#L10520)
     escrita, [databasemodel.cpp:3647-3664](libs/libcore/src/databasemodel.cpp#L3647) leitura;
@@ -450,10 +460,10 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
   (na prática, deveria ser sempre a cena ativa, já que só a cena anexada ao `viewport` recebe
   eventos de mouse reais do usuário — mas o código não deve depender dessa suposição implícita sem
   verificar).
-- Preparar (mas não necessariamente popular ainda) os novos atributos de persistência que as
-  Fases 1-2 vão usar (modo de segmentação, cena focada) para estabilizar o formato de arquivo
-  desde já. Reservar espaço no formato/enum para o modo threshold (Fase 3, ainda não detalhada),
-  sem implementar nada em cima disso agora.
+- Preparar (mas não necessariamente popular ainda) os novos atributos de persistência que a
+  Fase 3 vai usar (modo de segmentação, cena focada) para estabilizar o formato de arquivo
+  desde já. Reservar espaço no formato/enum para o modo threshold (Fase 2, ainda não detalhada
+  nesta subtarefa), sem implementar nada em cima disso agora.
 - **Critério de aceite da Fase 0**: suíte de regressão / abertura dos `.dbm` de exemplo do repo
   não deve mudar nada visualmente ou funcionalmente — é puramente estrutural.
 
@@ -607,9 +617,9 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
      entra aqui: virou seu próprio design fechado (ver "Achado de revisão de código, expandido em
      2026-09-21" na seção 2) — tag `<scenes><scene id="" left="" top="" right="" bottom="" />
      </scenes>` (`id` numérico é a chave), mirror de `changelog`/`<entry>`, DTD e `.sch` inclusos —
-     e fica inteiramente na Fase 2 (subtarefas 2.2), já que só faz sentido calcular/persistir de
+     e fica inteiramente na Fase 3 (subtarefa 3.2), já que só faz sentido calcular/persistir de
      verdade quando as cenas da Fase 1 existirem. `LastScene` (também numérico, mesma chave `id`)
-     também fica para a Fase 2 (subtarefa 2.1). Depende de: nenhuma (independente do resto da
+     também fica para a Fase 3 (subtarefa 3.1). Depende de: nenhuma (independente do resto da
      fase).
 
 > **Gate de aceite da fase (não é commit de código)**: depois de 0.1-0.8, rodar a suíte de
@@ -632,7 +642,7 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
     fica `nullptr` — e em vez disso registrar o relacionamento na lista de "conexões externas" de
     cada uma das duas tabelas, para que cada `BaseTableView` desenhe seu próprio marcador cut-off.
   - **`Textbox` não pertence a nenhum schema** (achado durante a implementação da subtarefa 1.1,
-    2026-09-22) — nem a chave "1 Schema = 1 cena" nem o contador da Fase 3 (que só conta Table/
+    2026-09-22) — nem a chave "1 Schema = 1 cena" nem o contador da Fase 2 (que só conta Table/
     View/ForeignTable) cobrem esse tipo. **Decisão do usuário**: roteia sempre pra **cena ativa no
     momento da inserção** (`ModelWidget::scene`), nos dois modos de segmentação — casa com a
     expectativa de quem desenha um textbox olhando pra uma cena específica, e durante carga de
@@ -641,15 +651,15 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
     persistência nova por ser, hoje, determinística na carga (a cena ativa durante o load é sempre
     a mesma, graças ao tratamento `pg_catalog`/`public` da 1.1) — mas isso só cobre o caso
     "recarregar sem editar". Dois casos que essa regra **não** cobre ainda, e que apontam pra um
-    mecanismo comum: (a) **modo threshold** (Fase 3) já vai precisar de um atributo `Scene`
-    persistido por objeto (subtarefa 3.2) — hoje redigido só pra Table/View/ForeignTable, mas
+    mecanismo comum: (a) **modo threshold** (Fase 2) já vai precisar de um atributo `Scene`
+    persistido por objeto (subtarefa 2.2) — hoje redigido só pra Table/View/ForeignTable, mas
     `Textbox` provavelmente precisa do mesmo tratamento lá, já que não participa do contador; (b)
     **movimentação manual de um objeto entre cenas** (ainda sem UI/mecanismo desenhado em lugar
     nenhum do plano — diferente de `moveToSchema()`, que já existe pra tabelas com schema) também
     precisaria gravar explicitamente "esse objeto pertence à cena X" pra sobreviver a um
     save/reload, em vez de recair na regra implícita "cena ativa no momento". Ou seja, o mesmo
-    atributo `Scene` por objeto que a Fase 3 vai introduzir é candidato natural a também resolver
-    (a) e (b) — não é escopo da Fase 1 fechar isso agora, mas vale desenhar o atributo (3.2) já
+    atributo `Scene` por objeto que a Fase 2 vai introduzir é candidato natural a também resolver
+    (a) e (b) — não é escopo da Fase 1 fechar isso agora, mas vale desenhar o atributo (2.2) já
     pensando em cobrir `Textbox` e reatribuição manual, não só o contador de threshold.
     **Reconfirmado pelo usuário (2026-09-23), testando a 1.9.6**: diferente de Table/View/
     ForeignTable — que já ganharam um mecanismo de mover entre cenas na 1.9 (`moveToSchema()`/
@@ -746,7 +756,7 @@ daquele schema precisa ser destruída quando o schema for removido.
   `viewport` (cena "focada"), é preciso trocar o `viewport` para outra cena existente (ex. a
   primeira disponível) **antes** de destruir o objeto `ObjectsScene`, para nunca deixar
   `QGraphicsView` apontando para um ponteiro liberado. Mesmo cuidado vale para o atributo
-  persistido `LastScene` (Fase 2): se ele referenciar um schema que não existe mais na próxima
+  persistido `LastScene` (Fase 3): se ele referenciar um schema que não existe mais na próxima
   carga do arquivo, cair para um fallback (primeira cena / cena "Default").
 - **Marcadores cut-off apontando para dentro do schema removido**: como (após o refinamento da
   decisão #1) um relacionamento cross-scene não tem `RelationshipView` nenhum — só marcadores nas
@@ -977,8 +987,8 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
      da mesma cena do próprio `SchemaView` no modo por schema. Commit pequeno/de teste, separado
      para não esconder essa verificação dentro do commit de feature 1.2. Depende de: 1.2.
      **Nota**: essa garantia vale só para o modo por schema (schema e cena são 1:1 por construção);
-     no modo threshold (Fase 3) ela não vale mais — ver subseção "`SchemaView` cross-scene:
-     supressão dinâmica" na Fase 3, achado à parte, não é bug desta subtarefa.
+     no modo threshold (Fase 2) ela não vale mais — ver subseção "`SchemaView` cross-scene:
+     supressão dinâmica" na Fase 2, achado à parte, não é bug desta subtarefa.
      **Implementação (2026-09-22)**: nenhuma mudança de código em `SchemaView` foi necessária —
      confirmado que o cálculo do retângulo usa posição absoluta (`obj_view->pos()`, sem
      `mapFromItem`/`mapToItem` entre cenas) e que 1.1/1.2 resolvem a cena de um schema e de seus
@@ -1181,6 +1191,10 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
       destruir o objeto, e atualizar/reposicionar a seleção do combo de 1.3); limpar entradas de
       conexão externa apontando para o schema removido. Depende de: 1.3, 1.6, 1.8.
 
+> **Subtarefas 1.11-1.15 em standby (2026-09-24)** — decisão do usuário de antecipar a Fase 2
+> (segmentação por threshold) em vez de fechar todos os pontos em aberto da Fase 1 primeiro. Não
+> descartadas, só fora da ordem de trabalho corrente; retomam quando a Fase 2 nova estiver pronta.
+
 1.11. **Teste de regressão dedicado: cascade delete de schema + undo** — cobrir explicitamente
       schema com filhos cross-scene, remoção da cena atualmente focada, e undo completo de uma
       remoção em cascata (ver riscos, seção 6). Commit de teste próprio, separado de 1.10, para
@@ -1219,145 +1233,19 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
 > cut-off aparecendo/sumindo conforme tabelas mudam de schema. As três subtarefas 1.12-1.14 só
 > entram depois de fechadas com o usuário (seção 6).
 
-### Fase 2 — Persistência (modo de segmentação, cena focada)
+### Fase 2 — Segmentação por Threshold (algoritmo fechado, detalhes de UX/borda a refinar)
 
-Objetivo: fechar a segmentação por schema de ponta a ponta (carga, edição, salvamento, reabertura)
-antes de sequer começar a olhar para threshold. Foco exclusivo em persistência do modo por schema
-nesta fase — nada de atributo de bucket/threshold ainda (isso fica para a Fase 3, quando o modo
-threshold for de fato detalhado). **A fase abre com a subtarefa 2.0** (fix mecânico do retângulo
-de cena, sem persistência nova) antes de qualquer trabalho de persistência — a pedido do usuário,
-por mexer numa base de métodos que 2.2 reaproveita depois.
-
-- Novos atributos em `DatabaseModel` (mesmo padrão de `LastPosition`/`LastZoomFactor`):
-  - Modo de segmentação do modelo (por ora só nenhum / por schema — deixar o valor reservado para
-    "por threshold" no enum/atributo, mas sem implementar nada em cima disso ainda).
-  - `LastScene`: identificador da cena focada (nome do schema, já que no modo por schema a chave
-    natural é o próprio schema).
-  - `getSceneRect()`/`setSceneRect()` ([databasemodel.h:898-899](libs/libcore/src/databasemodel.h#L898))
-    hoje persistem um único `QRectF` no atributo legado `scene-rect`. Passa a existir também uma
-    versão por-chave (mesma chave de `LastScene`), persistida numa tag `<scenes>` nova — design
-    completo, incluindo o motivo de não usar um retângulo global e o formato XML exato (mirror de
-    `changelog`/`entry`), na seção 2 ("Achado de revisão de código, expandido em 2026-09-21"). O
-    atributo `scene-rect` legado continua sendo escrito como hoje sempre que há só 1 cena
-    (segmentação desligada) — formato de arquivo inalterado nesse caso.
-- Estender `ModelWidget::saveLastCanvasPosition()`/`restoreLastCanvasPosition()`
-  ([modelwidget.cpp:972-1023](libs/libgui/src/widgets/modelwidget.cpp#L972)) para gravar/ler
-  `LastScene` e, na restauração, ativar aquela cena **antes** de aplicar scroll/zoom salvos.
-- **Critério de aceite da Fase 2**: fechar, salvar, reabrir um modelo segmentado por schema deve
-  preservar cena focada + zoom/posição daquela cena, e a segmentação por schema deve se
-  reconstruir corretamente na carga sem depender de nenhum estado extra persistido por tabela
-  (a chave é o próprio schema de cada objeto, já persistido hoje).
-
-#### Subtarefas da Fase 2 (uma por commit)
-
-2.0. **Fix mecânico: retângulo de cada cena, não só da cena ativa** — primeira subtarefa da fase
-     (a pedido do usuário, 2026-09-22), antes de qualquer persistência nova, porque mexe numa série
-     de métodos ligados a retângulo de cena que 2.2 vai reaproveitar/estender depois. **Motivação**:
-     confirmado por teste manual (ver seção 6 e nota na 2.2) que, com a Fase 1 já criando múltiplas
-     cenas, toda cena que não é a ativa fica com o retângulo minúsculo padrão do construtor de
-     `ObjectsScene` — `ModelWidget::adjustSceneRect(use_model_rect=true)`, chamado uma única vez ao
-     final de `loadModel()` ([modelwidget.cpp:2051](libs/libgui/src/widgets/modelwidget.cpp#L2051)),
-     só toca a cena ativa. **Escopo**: novo método `ModelWidget::adjustAllScenesRects()` (nome
-     sugerido, chamado no lugar do `adjustSceneRect(true)` atual dentro de `loadModel()`) — aplica
-     o único `scene-rect` legado à cena ativa como hoje (ainda sem persistência por-cena, isso é a
-     2.2), e para **cada outra cena**, calcula o retângulo a partir dos seus próprios itens via
-     `itemsBoundingRect(true, false)` — **nunca** `ObjectsScene::adjustSceneRect(false)` pra esse
-     cálculo inicial, porque puxa a borda esquerda/superior pra origem incondicionalmente (achado
-     já registrado na seção 2, "Cuidado real encontrado"). **Fora de escopo aqui**: os demais call
-     sites de `adjustSceneRect(false)` (recalculo reativo a interação do usuário — mover objeto,
-     etc., [modelwidget.cpp:3505,5467,5744,6044](libs/libgui/src/widgets/modelwidget.cpp#L3505) e
-     dois em `mainwindow.cpp`) continuam cena-local, tocando só a cena ativa — não é bug, é
-     categoria "cena-local" da decisão #9 (seção 3): mover um objeto numa cena não deveria mexer no
-     retângulo de outra. O mesmo vale pra `ModelWidget::expandSceneRect()`/as ações de menu
-     "expandir topo/esquerda/baixo/direita" — continuam tocando só a cena ativa, sem sincronizar as
-     demais (reafirmado explicitamente com o usuário em 2026-09-22, ver seção 2).
-     **Escopo adicional — retângulo "geral" pro atributo legado `scene-rect`** (adicionado
-     2026-09-22, junto da reafirmação da decisão "sem retângulo global"): novo método
-     `ModelWidget::updateModelSceneRectInfo()` (nome sugerido, mesmo padrão de
-     `updateModelLayersInfo()`), chamado só no momento de salvar, que calcula a **união**
-     (`QRectF::united()`) do `sceneRect()` atual de todas as cenas e grava em
-     `db_model->setSceneRect(...)` — populando o atributo legado `scene-rect` com "como se todas as
-     cenas fossem uma só", usado como fallback se o usuário desligar a segmentação depois. **Corrige
-     um bug real introduzido pela própria subtarefa 0.1 (correção)**: o handler de
-     `ObjectsScene::s_sceneRectChanged` já commitado dentro de `addScene()` hoje chama
-     `db_model->setSceneRect(rect)` **reativamente, com o retângulo de uma única cena** toda vez que
-     qualquer cena muda de tamanho — isso precisa ser removido dali (só sobra
-     `viewport->resetCachedContent()`/`setModified(true)` nesse handler); o `scene-rect` do modelo
-     só deve ser escrito pela nova lógica de união, e só no save, nunca reativamente por-cena.
-     Depende de: 1.1, 1.2 (precisa de múltiplas cenas de verdade pra ter o que corrigir).
-
-2.1. **Persistência de modo de segmentação + `LastScene`** — popular de fato (leitura/escrita XML)
-     o scaffolding preparado em 0.8: modo de segmentação do modelo e `LastScene` (índice numérico
-     da cena focada — não o nome do schema, ver decisão revisada na seção 2). Ainda sem uso em
-     runtime neste commit — só grava/lê. Depende de: 0.8.
-
-2.2. **Persistência de retângulo por cena** — implementação completa do design fechado na seção 2:
-     - DTD dedicado novo [assets/schemas/xml/dtd/scene.dtd](assets/schemas/xml/dtd/scene.dtd) com
-       `<!ELEMENT scenes (scene*)>`/`<!ELEMENT scene EMPTY>` (`id`/`left`/`top`/`right`/`bottom`),
-       mirror exato de [changelog.dtd](assets/schemas/xml/dtd/changelog.dtd) (arquivo próprio, não
-       declarações soltas em `dbmodel.dtd`);
-       [assets/schemas/xml/dtd/dbmodel.dtd](assets/schemas/xml/dtd/dbmodel.dtd) ganha só
-       `<!ENTITY % scene SYSTEM "scene.dtd"> %scene;` (mirror da linha do changelog,
-       [dbmodel.dtd:89-90](assets/schemas/xml/dtd/dbmodel.dtd#L89)); mantém `scene-rect` como está.
-     - Templates novos [assets/schemas/xml/scenes.sch](assets/schemas/xml/scenes.sch) (container) e
-       [assets/schemas/xml/scene.sch](assets/schemas/xml/scene.sch) (entrada), mirror de
-       `changelog.sch`/`entry.sch`; adicionar `%if {scenes} %then {scenes} %end` em
-       [dbmodel.sch](assets/schemas/xml/dbmodel.sch), mirror do `%if {changelog}...` já existente.
-     - `Attributes::Scenes`/`Attributes::Scene` novos em
-       [attributes.h](libs/libparsers/src/attributes.h) (`Id`/`Left`/`Top`/`Right`/`Bottom` já
-       existem).
-     - `DatabaseModel`: `QMap<int, QRectF>` indexado por `id` (mesma chave de `LastScene`); escrita
-       mirror de `getChangelogDefinition()` ([databasemodel.cpp:10520-10555](libs/libcore/src/databasemodel.cpp#L10520)),
-       leitura mirror do parse de `<changelog>` ([databasemodel.cpp:3647-3664](libs/libcore/src/databasemodel.cpp#L3647)).
-       `id` escrito é a posição da cena na `QList<ObjectsScene *> scenes` em memória no momento do
-       save. Quando há só 1 cena (segmentação desligada), continua escrevendo só o `scene-rect`
-       legado, sem `<scenes>` — formato de arquivo inalterado nesse caso.
-     - Carga de arquivo antigo (sem `<scenes>`) num modelo que a Fase 1 segmenta em N cenas: cada
-       cena cai no fallback já existente (`itemsBoundingRect()` a partir dos seus próprios itens) —
-       não tentar redistribuir o `scene-rect` legado entre as cenas novas.
-     - **Não implementar** nenhuma checagem de validação cruzada na carga (ex. detectar
-       desalinhamento de `id` pós "Edit creation order" e cair pro fallback) — decisão do usuário:
-       aceitar esse desalinhamento como limitação documentada (ver seção 2), não como algo a
-       mitigar em código.
-     - **Confirmado por teste manual (2026-09-22, usuário)**: com múltiplas cenas já criadas pela
-       Fase 1, o retângulo de cada cena que não é a ativa fica errado hoje — não é mais só um risco
-       teórico do design fechado na seção 2. O fix mecânico (iterar todas as cenas, sem depender
-       ainda da persistência) virou a subtarefa **2.0**, a primeira da fase — ver lá para a causa
-       exata e o escopo. Esta subtarefa (2.2) reaproveita/estende o método que a 2.0 introduz,
-       trocando o recomputo via `itemsBoundingRect()` (fallback de arquivo antigo) pela leitura do
-       valor persistido por-cena quando disponível.
-     Depende de: 2.0, 0.8, 1.1 (precisa que cenas por schema já existam de verdade para ter o que
-     persistir por cena).
-
-2.3. **Wiring runtime de `LastScene`** — estender
-     `ModelWidget::saveLastCanvasPosition()`/`restoreLastCanvasPosition()`
-     ([modelwidget.cpp:972-1023](libs/libgui/src/widgets/modelwidget.cpp#L972)) para gravar o
-     índice da cena ativa ao salvar e, ao restaurar, ativar aquela cena por índice (via
-     `setActiveScene()`, 0.2) **antes** de aplicar zoom/scroll salvos. Depende de: 2.1, 0.2.
-
-2.4. **Fallback de `LastScene` inválido** — se o índice referenciado por `LastScene` estiver fora
-     dos limites da coleção de cenas na carga do arquivo (ex. cena removida em edição posterior ao
-     save, deixando `LastScene` apontando além do fim da lista), cair para a primeira cena
-     disponível em vez de falhar. Depende de: 2.3, 1.10 (cenário de schema removido já precisa
-     existir para este fallback fazer sentido).
-
-2.5. **Teste de regressão fim-a-fim da Fase 2** — fechar, salvar, reabrir um modelo segmentado por
-     schema preserva cena focada + zoom/posição daquela cena, e a segmentação por schema se
-     reconstrói corretamente na carga. **Inclui retrocompatibilidade** (requisito explícito do
-     usuário): abrir um `.dbm` salvo por uma versão anterior a esta feature (só `scene-rect` legado,
-     sem `<scenes>`) precisa continuar funcionando — cada cena calcula seu retângulo pelo fallback
-     existente, sem erro nem tentativa de redistribuir o valor legado. Depende de: 2.2, 2.3.
-
-### Fase 3 — Segmentação por Threshold (algoritmo fechado, detalhes de UX/borda a refinar)
-
-> Deliberadamente deixada por último. O modo por schema (Fases 1-2) precisa estar "redondo" —
-> implementado, testado, com os pontos de estudo dedicado (ferramenta de relacionamento, seleção,
-> Object Search Widget) resolvidos — antes de investir tempo em detalhar o modo threshold.
+> **Subtarefas 1.11-1.15 (Fase 1) em standby (2026-09-24)** — não descartadas, só fora da ordem de
+> trabalho corrente; retomam quando esta fase (Fase 2, threshold) estiver pronta.
+> **Antecipada nesta reorganização (2026-09-24)** — decisão do usuário de implementar o modo
+> threshold logo após a Fase 1, em vez de deixá-lo por último: o código ainda está pouco acoplado a
+> "1 Schema = 1 cena" nesta altura, então reconciliar os dois modos agora é mais barato do que
+> esperar a Fase 3 (persistência fina do modo por schema) aprofundar esse acoplamento.
 > **Atualização 2026-09-21**: o algoritmo central (decisão #7, seção 3) já está fechado — contador
 > ingênuo, sem clustering, com persistência por objeto obrigatória desde o início. O que ainda
 > falta detalhar são os pontos de borda (fallback de contador entre sessões de edição, formato
 > exato do atributo de cena por objeto) — bem menos em aberto do que a versão anterior desta seção,
-> mas ainda assim revisitar antes de codar 3.1 em diante.
+> mas ainda assim revisitar antes de codar 2.1 em diante.
 
 - Contador de objetos inseridos (Table + View + ForeignTable, sem distinção de tipo, cf.
   especificação original). Ao cruzar um múltiplo do threshold, abre-se uma nova `ObjectsScene` e as
@@ -1391,7 +1279,7 @@ por mexer numa base de métodos que 2.2 reaproveita depois.
   sessões de edição — ex. usuário abre o arquivo, a cena mais recente ainda tem espaço sobrando no
   threshold, cria mais 3 tabelas manualmente: elas devem continuar enchendo aquela cena ou sempre
   abrir uma nova? Precisa decidir se o contador persiste seu valor corrente (provavelmente como
-  parte do mesmo mecanismo de atributo de segmentação da Fase 2) ou se é recalculado a partir da
+  parte do mesmo mecanismo de atributo de segmentação da Fase 3) ou se é recalculado a partir da
   contagem de objetos já atribuídos a cada cena na carga do arquivo.
 
 #### `SchemaView` cross-scene: supressão dinâmica (achado do usuário, 2026-09-21)
@@ -1428,13 +1316,13 @@ diferentes.
     mudança — aceitável para começar; otimizar (ex. contador incremental por schema) só se motivado
     por medição real de performance.
 
-#### Subtarefas da Fase 3 (a refinar quando a fase for retomada, mas algoritmo já fechado)
+#### Subtarefas da Fase 2 (uma por commit; renumeradas de 3.x nesta reorganização)
 
-3.1. Contador ingênuo (Table + View + ForeignTable) + criação de nova cena ao cruzar o threshold —
+2.1. Contador ingênuo (Table + View + ForeignTable) + criação de nova cena ao cruzar o threshold —
      mesmo algoritmo para criação interativa e carga de arquivo. Depende de: 1.1, 1.2, 1.5, 1.6
      (reaproveita o choke point de criação de cena e de roteamento).
 
-3.2. Persistência do atributo `Scene` por objeto (novo atributo por tabela/view/ftable, análogo ao
+2.2. Persistência do atributo `Scene` por objeto (novo atributo por tabela/view/ftable, análogo ao
      atributo de layer já persistido por objeto) + resolução do "ponto ainda em aberto" acima (como
      o contador sobrevive entre sessões). **Escopo a revisitar** (achado do usuário na Fase 1,
      2026-09-22): avaliar se esse mesmo atributo deve cobrir também `Textbox` (que não entra no
@@ -1442,20 +1330,150 @@ diferentes.
      intro da Fase 1) e reatribuição manual de qualquer objeto entre cenas (mecanismo ainda não
      desenhado em nenhum modo) — os três casos (threshold, `Textbox`, reatribuição manual)
      precisam da mesma pergunta de fundo respondida: "essa cena persistida sobrevive a um
-     save/reload independente da ordem de carga?" Depende de: 3.1.
+     save/reload independente da ordem de carga?" Depende de: 2.1.
 
-3.3. Reaproveitamento do marcador cut-off da Fase 1 (1.8) para os cross-scene resultantes no modo
+2.3. Reaproveitamento do marcador cut-off da Fase 1 (1.8) para os cross-scene resultantes no modo
      threshold — deve ser praticamente gratuito se 1.8 foi bem desenhado; se não for, é sinal de
-     que o desenho de 1.8 vazou detalhes específicos do modo por schema. Depende de: 3.1, 1.8.
+     que o desenho de 1.8 vazou detalhes específicos do modo por schema. Depende de: 2.1, 1.8.
 
-3.4. Documentar e validar com teste a política de não-rebalanceamento (cenas esvaziadas por
+2.4. Documentar e validar com teste a política de não-rebalanceamento (cenas esvaziadas por
      remoção não são mescladas/destruídas automaticamente no modo threshold) — verificação, não
-     feature nova. Depende de: 3.1.
+     feature nova. Depende de: 2.1.
 
-3.5. Supressão dinâmica de `SchemaView` cross-scene — estender o choke point de promoção/
+2.5. Supressão dinâmica de `SchemaView` cross-scene — estender o choke point de promoção/
      rebaixamento (já usado pra relacionamentos) para também reavaliar, ao mover uma tabela de
      cena, se o schema dela ainda tem todos os filhos numa única cena; criar/destruir o
-     `SchemaView` conforme a subseção acima. Depende de: 3.1.
+     `SchemaView` conforme a subseção acima. Depende de: 2.1.
+
+### Fase 3 — Persistência (modo de segmentação, cena focada)
+
+Objetivo: fechar a segmentação por schema de ponta a ponta (carga, edição, salvamento, reabertura),
+depois que os dois modos de segmentação de base (Fase 1 por schema, Fase 2 threshold) já estiverem
+prontos. Foco exclusivo em persistência do modo por schema nesta fase. **A fase abre com a
+subtarefa 3.0** (fix mecânico do retângulo de cena, sem persistência nova) antes de qualquer
+trabalho de persistência — a pedido do usuário, por mexer numa base de métodos que 3.2 reaproveita
+depois.
+
+- Novos atributos em `DatabaseModel` (mesmo padrão de `LastPosition`/`LastZoomFactor`):
+  - Modo de segmentação do modelo — a essa altura o enum/atributo já cobre nenhum/schema/threshold
+    de verdade (a Fase 2 já implementou o modo threshold); aqui só falta persistir/restaurar qual
+    modo está ativo e a cena focada.
+  - `LastScene`: identificador da cena focada (índice numérico, mesma chave usada em `<scenes>` —
+    ver decisão revisada na seção 2).
+  - `getSceneRect()`/`setSceneRect()` ([databasemodel.h:898-899](libs/libcore/src/databasemodel.h#L898))
+    hoje persistem um único `QRectF` no atributo legado `scene-rect`. Passa a existir também uma
+    versão por-chave (mesma chave de `LastScene`), persistida numa tag `<scenes>` nova — design
+    completo, incluindo o motivo de não usar um retângulo global e o formato XML exato (mirror de
+    `changelog`/`entry`), na seção 2 ("Achado de revisão de código, expandido em 2026-09-21"). O
+    atributo `scene-rect` legado continua sendo escrito como hoje sempre que há só 1 cena
+    (segmentação desligada) — formato de arquivo inalterado nesse caso.
+- Estender `ModelWidget::saveLastCanvasPosition()`/`restoreLastCanvasPosition()`
+  ([modelwidget.cpp:972-1023](libs/libgui/src/widgets/modelwidget.cpp#L972)) para gravar/ler
+  `LastScene` e, na restauração, ativar aquela cena **antes** de aplicar scroll/zoom salvos.
+- **Critério de aceite da Fase 3**: fechar, salvar, reabrir um modelo segmentado por schema deve
+  preservar cena focada + zoom/posição daquela cena, e a segmentação por schema deve se
+  reconstruir corretamente na carga sem depender de nenhum estado extra persistido por tabela
+  (a chave é o próprio schema de cada objeto, já persistido hoje).
+
+#### Subtarefas da Fase 3 (uma por commit; renumeradas de 2.x nesta reorganização)
+
+3.0. **Fix mecânico: retângulo de cada cena, não só da cena ativa** — primeira subtarefa da fase
+     (a pedido do usuário, 2026-09-22), antes de qualquer persistência nova, porque mexe numa série
+     de métodos ligados a retângulo de cena que 3.2 vai reaproveitar/estender depois. **Motivação**:
+     confirmado por teste manual (ver seção 6 e nota na 3.2) que, com a Fase 1 já criando múltiplas
+     cenas, toda cena que não é a ativa fica com o retângulo minúsculo padrão do construtor de
+     `ObjectsScene` — `ModelWidget::adjustSceneRect(use_model_rect=true)`, chamado uma única vez ao
+     final de `loadModel()` ([modelwidget.cpp:2051](libs/libgui/src/widgets/modelwidget.cpp#L2051)),
+     só toca a cena ativa. **Escopo**: novo método `ModelWidget::adjustAllScenesRects()` (nome
+     sugerido, chamado no lugar do `adjustSceneRect(true)` atual dentro de `loadModel()`) — aplica
+     o único `scene-rect` legado à cena ativa como hoje (ainda sem persistência por-cena, isso é a
+     3.2), e para **cada outra cena**, calcula o retângulo a partir dos seus próprios itens via
+     `itemsBoundingRect(true, false)` — **nunca** `ObjectsScene::adjustSceneRect(false)` pra esse
+     cálculo inicial, porque puxa a borda esquerda/superior pra origem incondicionalmente (achado
+     já registrado na seção 2, "Cuidado real encontrado"). **Fora de escopo aqui**: os demais call
+     sites de `adjustSceneRect(false)` (recalculo reativo a interação do usuário — mover objeto,
+     etc., [modelwidget.cpp:3505,5467,5744,6044](libs/libgui/src/widgets/modelwidget.cpp#L3505) e
+     dois em `mainwindow.cpp`) continuam cena-local, tocando só a cena ativa — não é bug, é
+     categoria "cena-local" da decisão #9 (seção 3): mover um objeto numa cena não deveria mexer no
+     retângulo de outra. O mesmo vale pra `ModelWidget::expandSceneRect()`/as ações de menu
+     "expandir topo/esquerda/baixo/direita" — continuam tocando só a cena ativa, sem sincronizar as
+     demais (reafirmado explicitamente com o usuário em 2026-09-22, ver seção 2).
+     **Escopo adicional — retângulo "geral" pro atributo legado `scene-rect`** (adicionado
+     2026-09-22, junto da reafirmação da decisão "sem retângulo global"): novo método
+     `ModelWidget::updateModelSceneRectInfo()` (nome sugerido, mesmo padrão de
+     `updateModelLayersInfo()`), chamado só no momento de salvar, que calcula a **união**
+     (`QRectF::united()`) do `sceneRect()` atual de todas as cenas e grava em
+     `db_model->setSceneRect(...)` — populando o atributo legado `scene-rect` com "como se todas as
+     cenas fossem uma só", usado como fallback se o usuário desligar a segmentação depois. **Corrige
+     um bug real introduzido pela própria subtarefa 0.1 (correção)**: o handler de
+     `ObjectsScene::s_sceneRectChanged` já commitado dentro de `addScene()` hoje chama
+     `db_model->setSceneRect(rect)` **reativamente, com o retângulo de uma única cena** toda vez que
+     qualquer cena muda de tamanho — isso precisa ser removido dali (só sobra
+     `viewport->resetCachedContent()`/`setModified(true)` nesse handler); o `scene-rect` do modelo
+     só deve ser escrito pela nova lógica de união, e só no save, nunca reativamente por-cena.
+     Depende de: 1.1, 1.2 (precisa de múltiplas cenas de verdade pra ter o que corrigir).
+
+3.1. **Persistência de modo de segmentação + `LastScene`** — popular de fato (leitura/escrita XML)
+     o scaffolding preparado em 0.8: modo de segmentação do modelo e `LastScene` (índice numérico
+     da cena focada — não o nome do schema, ver decisão revisada na seção 2). Ainda sem uso em
+     runtime neste commit — só grava/lê. Depende de: 0.8.
+
+3.2. **Persistência de retângulo por cena** — implementação completa do design fechado na seção 2:
+     - DTD dedicado novo [assets/schemas/xml/dtd/scene.dtd](assets/schemas/xml/dtd/scene.dtd) com
+       `<!ELEMENT scenes (scene*)>`/`<!ELEMENT scene EMPTY>` (`id`/`left`/`top`/`right`/`bottom`),
+       mirror exato de [changelog.dtd](assets/schemas/xml/dtd/changelog.dtd) (arquivo próprio, não
+       declarações soltas em `dbmodel.dtd`);
+       [assets/schemas/xml/dtd/dbmodel.dtd](assets/schemas/xml/dtd/dbmodel.dtd) ganha só
+       `<!ENTITY % scene SYSTEM "scene.dtd"> %scene;` (mirror da linha do changelog,
+       [dbmodel.dtd:89-90](assets/schemas/xml/dtd/dbmodel.dtd#L89)); mantém `scene-rect` como está.
+     - Templates novos [assets/schemas/xml/scenes.sch](assets/schemas/xml/scenes.sch) (container) e
+       [assets/schemas/xml/scene.sch](assets/schemas/xml/scene.sch) (entrada), mirror de
+       `changelog.sch`/`entry.sch`; adicionar `%if {scenes} %then {scenes} %end` em
+       [dbmodel.sch](assets/schemas/xml/dbmodel.sch), mirror do `%if {changelog}...` já existente.
+     - `Attributes::Scenes`/`Attributes::Scene` novos em
+       [attributes.h](libs/libparsers/src/attributes.h) (`Id`/`Left`/`Top`/`Right`/`Bottom` já
+       existem).
+     - `DatabaseModel`: `QMap<int, QRectF>` indexado por `id` (mesma chave de `LastScene`); escrita
+       mirror de `getChangelogDefinition()` ([databasemodel.cpp:10520-10555](libs/libcore/src/databasemodel.cpp#L10520)),
+       leitura mirror do parse de `<changelog>` ([databasemodel.cpp:3647-3664](libs/libcore/src/databasemodel.cpp#L3647)).
+       `id` escrito é a posição da cena na `QList<ObjectsScene *> scenes` em memória no momento do
+       save. Quando há só 1 cena (segmentação desligada), continua escrevendo só o `scene-rect`
+       legado, sem `<scenes>` — formato de arquivo inalterado nesse caso.
+     - Carga de arquivo antigo (sem `<scenes>`) num modelo que a Fase 1 segmenta em N cenas: cada
+       cena cai no fallback já existente (`itemsBoundingRect()` a partir dos seus próprios itens) —
+       não tentar redistribuir o `scene-rect` legado entre as cenas novas.
+     - **Não implementar** nenhuma checagem de validação cruzada na carga (ex. detectar
+       desalinhamento de `id` pós "Edit creation order" e cair pro fallback) — decisão do usuário:
+       aceitar esse desalinhamento como limitação documentada (ver seção 2), não como algo a
+       mitigar em código.
+     - **Confirmado por teste manual (2026-09-22, usuário)**: com múltiplas cenas já criadas pela
+       Fase 1, o retângulo de cada cena que não é a ativa fica errado hoje — não é mais só um risco
+       teórico do design fechado na seção 2. O fix mecânico (iterar todas as cenas, sem depender
+       ainda da persistência) virou a subtarefa **3.0**, a primeira da fase — ver lá para a causa
+       exata e o escopo. Esta subtarefa (3.2) reaproveita/estende o método que a 3.0 introduz,
+       trocando o recomputo via `itemsBoundingRect()` (fallback de arquivo antigo) pela leitura do
+       valor persistido por-cena quando disponível.
+     Depende de: 3.0, 0.8, 1.1 (precisa que cenas por schema já existam de verdade para ter o que
+     persistir por cena).
+
+3.3. **Wiring runtime de `LastScene`** — estender
+     `ModelWidget::saveLastCanvasPosition()`/`restoreLastCanvasPosition()`
+     ([modelwidget.cpp:972-1023](libs/libgui/src/widgets/modelwidget.cpp#L972)) para gravar o
+     índice da cena ativa ao salvar e, ao restaurar, ativar aquela cena por índice (via
+     `setActiveScene()`, 0.2) **antes** de aplicar zoom/scroll salvos. Depende de: 3.1, 0.2.
+
+3.4. **Fallback de `LastScene` inválido** — se o índice referenciado por `LastScene` estiver fora
+     dos limites da coleção de cenas na carga do arquivo (ex. cena removida em edição posterior ao
+     save, deixando `LastScene` apontando além do fim da lista), cair para a primeira cena
+     disponível em vez de falhar. Depende de: 3.3, 1.10 (cenário de schema removido já precisa
+     existir para este fallback fazer sentido).
+
+3.5. **Teste de regressão fim-a-fim da Fase 3** — fechar, salvar, reabrir um modelo segmentado por
+     schema preserva cena focada + zoom/posição daquela cena, e a segmentação por schema se
+     reconstrói corretamente na carga. **Inclui retrocompatibilidade** (requisito explícito do
+     usuário): abrir um `.dbm` salvo por uma versão anterior a esta feature (só `scene-rect` legado,
+     sem `<scenes>`) precisa continuar funcionando — cada cena calcula seu retângulo pelo fallback
+     existente, sem erro nem tentativa de redistribuir o valor legado. Depende de: 3.2, 3.3.
 
 ### Fase 4 — Paridade do `pgmodeler-cli` com a segmentação multi-cena
 
@@ -1507,16 +1525,17 @@ mapeado):
   implementada, porque toda a densidade cai numa única cena. Confirma que os dois modos base são
   complementares, não substitutos: por schema ajuda quando os objetos já estão distribuídos entre
   vários schemas; `big_model.dbm` é justamente o caso oposto, candidato natural a threshold (Fase
-  3). Ideia registrada para depois de threshold estar pronto: o pgModeler poderia detectar esse
+  2). Ideia registrada para depois de threshold estar pronto: o pgModeler poderia detectar esse
   padrão (poucos schemas populados concentrando a maior parte dos objetos) e sugerir ativamente ao
   usuário o modo de segmentação mais adequado, em vez de deixar a escolha inteiramente manual. Não
   é escopo das Fases 1-3 (que só fecham os dois modos base) — é uma camada de UX por cima deles.
 - **Terceiro modo de segmentação: threshold com agrupamento ciente de conectividade** (BFS/
   union-find sobre o grafo de relacionamentos, para minimizar cross-scene mantendo clusters
   fortemente conectados no mesmo bucket). Não descartado — é um modo candidato genuíno, só fica
-  para depois: primeiro por schema (Fases 1-2) e threshold ingênuo (Fase 3) precisam estar redondos
-  e em uso. Quando for retomado, tratar como um modo de segmentação novo e independente (não uma
-  flag/variação do threshold ingênuo da Fase 3, que precisa continuar existindo e previsível como
+  para depois: primeiro os dois modos base — por schema (Fase 1 + Fase 3) e threshold ingênuo
+  (Fase 2) — precisam estar redondos e em uso. Quando for retomado, tratar como um modo de
+  segmentação novo e independente (não uma flag/variação do threshold ingênuo da Fase 2, que
+  precisa continuar existindo e previsível como
   está — ver decisão #7, seção 3), já que muda a proposta de valor: o ingênuo prioriza ordem
   previsível dos objetos, o com clustering prioriza minimizar cross-scene à custa de reordenar
   objetos entre cenas de um jeito não literal à ordem de inserção.
@@ -1526,8 +1545,8 @@ mapeado):
 - **Retângulo de cena errado pra toda cena que não está ativa** (confirmado por teste manual do
   usuário, 2026-09-22, com a Fase 1 já criando cenas por schema) — `adjustSceneRect()` e seus call
   sites só tocam a cena ativa hoje, nunca as demais; cenas recém-criadas ficam com o retângulo
-  minúsculo padrão do construtor. Vira a subtarefa **2.0**, primeira da Fase 2 (a pedido do
-  usuário, por mexer numa base de métodos que a 2.2 também usa) — não corrigir fora dessa
+  minúsculo padrão do construtor. Vira a subtarefa **3.0**, primeira da Fase 3 (a pedido do
+  usuário, por mexer numa base de métodos que a 3.2 também usa) — não corrigir fora dessa
   subtarefa.
 - **Vários targets de `tests/` (fora do multi-scene) estão quebrados hoje** (achado ao rodar a
   suíte inteira pela primeira vez pra validar a subtarefa 1.4, já que `BUILD_TESTS` estava
