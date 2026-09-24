@@ -690,6 +690,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 
 	connect(db_model, &DatabaseModel::s_objectAdded, this, &ModelWidget::handleObjectAddition);
 	connect(db_model, &DatabaseModel::s_objectRemoved, this, &ModelWidget::handleObjectRemoval);
+	connect(op_list, &OperationList::s_operationExecuted, this, &ModelWidget::handleObjectSchemaChanged);
 
 	wheel_timer.setInterval(300);
 
@@ -2913,6 +2914,22 @@ void ModelWidget::relocateObjectView(BaseGraphicObject *graph_obj, ObjectsScene 
 		routeRelationship(rel);
 }
 
+void ModelWidget::handleObjectSchemaChanged(BaseObject *object, Operation::OperType op_type)
+{
+	BaseGraphicObject *graph_obj = dynamic_cast<BaseGraphicObject *>(object);
+
+	if(!graph_obj ||
+		 !BaseTable::isBaseTable(graph_obj->getObjectType()) ||
+		 op_type != Operation::ObjModified)
+		return;
+
+	Schema *schema = dynamic_cast<Schema *>(graph_obj->getSchema());
+	ObjectsScene *dst_scene = schema ? getSchemaScene(schema) : nullptr;
+
+	if(dst_scene)
+		relocateObjectView(graph_obj, dst_scene);
+}
+
 void ModelWidget::relocateEditedObject(BaseObjectWidget *obj_wgt)
 {
 	BaseGraphicObject *graph_obj = dynamic_cast<BaseGraphicObject *>(obj_wgt->object);
@@ -2946,20 +2963,13 @@ void ModelWidget::moveToSchema()
 			//Change the object's schema only if the new schema is different from the current
 			if(obj->acceptsSchema() && obj->getSchema()!=schema)
 			{
-				obj_graph=dynamic_cast<BaseGraphicObject *>(obj);
-
-				/* Undo/redo doesn't know how to restore a scene relocation yet -- OperationList::
-				 * executeOperation() only restores the schema attribute in-place and flags both
-				 * schemas for redraw, it never moves the object's view back to its original scene,
-				 * so Ctrl+Z would leave the view stranded in the destination scene. Until that's
-				 * implemented, leave graphical objects out of the operation history here so this
-				 * change is simply not undoable instead of half-undoable */
-				if(!obj_graph)
-					op_id=op_list->registerObject(obj, Operation::ObjModified, -1);
+				op_id=op_list->registerObject(obj, Operation::ObjModified, -1);
 
 				obj->clearDependencies();
 				obj->setSchema(schema);
 				obj->updateDependencies();
+
+				obj_graph=dynamic_cast<BaseGraphicObject *>(obj);
 
 				//If the object is a graphical one, relocate its item to the destination schema's scene
 				if(obj_graph)

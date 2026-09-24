@@ -217,6 +217,45 @@ Estas decisões foram tomadas em conversa e **não devem ser reabertas** sem jus
    Ao encontrar uma nova suposição de cena única durante a implementação, classificar antes de
    "corrigir" — errar para o lado de agregar/replicar por reflexo (como a redação original da
    subtarefa 0.5 fez) introduz comportamento que ninguém pediu.
+10. **Relocação de item entre cenas: sempre descartar e recriar, nunca mover o `QGraphicsItem`
+    existente** (adicionado em 2026-09-23, supersede a descrição de "promoção/rebaixamento
+    in-place" da Fase 1 abaixo). Motivo: mover um `RelationshipView` já existente entre cenas via
+    `ObjectsScene::relocateItem()` (a abordagem original) corrompia a memória de seus itens-filho
+    internos (`lines`/`fk_lines`/`pk_lines`/etc.) de um jeito só detectável depois, na destruição —
+    achado via `gdb`, sem entender o mecanismo exato do bug nos internals do Qt, e três tentativas
+    de consertar `relocateItem()` no lugar falharam identicamente. Em vez de provar caso a caso
+    quais tipos de item são "seguros" o bastante pra relocar de verdade, a regra virou universal:
+    **para relocar qualquer item (Table/View/ForeignTable/Relationship) de uma cena pra outra,
+    remove-se o item por completo da cena de origem e recria-se do zero na cena de destino** —
+    `ObjectsScene::relocateItem()` foi removido por completo, sem nenhum call site restante.
+    `ModelWidget::relocateObjectView(graph_obj, dst_scene)` é o único ponto de entrada público pra
+    isso (tabelas/views); `ModelWidget::routeRelationship(rel)` decide, lendo a cena atual de cada
+    tabela, se um relacionamento vira `RelationshipView` real (mesma cena) ou registro externo/
+    cut-off (cenas diferentes) — chamado tanto por `relocateObjectView()` (pra re-rotear os
+    relacionamentos da tabela relocada) quanto reutilizável em outros pontos. Nenhum método de
+    relocação deve existir em `libcanvas`/`ObjectsScene` — toda a lógica fica em `ModelWidget`.
+11. **Undo/redo de uma relocação de cena passa por um sinal do `OperationList`, não por
+    conhecimento de cena no `libcore`** (adicionado em 2026-09-23). `OperationList::executeOperation()`
+    restaura o atributo `schema` de uma tabela in-place (troca de campos via `CoreUtilsNs::
+    copyObject()`), mas `libcore` não tem — e não deve ganhar — nenhuma noção de `ObjectsScene`
+    (conceito de `libcanvas`/`libgui`). A ponte é um sinal novo, `OperationList::s_operationExecuted
+    (BaseObject *object, Operation::OperType op_type)`, emitido ao final de `executeOperation()`
+    pra QUALQUER operação restaurada (undo ou redo) — `libcore` só avisa "restaurei isso, foi esse
+    tipo de operação", sem saber nem se importar com o motivo. `ModelWidget` conecta esse sinal uma
+    única vez (no construtor) a `handleObjectSchemaChanged(BaseObject*, Operation::OperType)`, que
+    filtra por `BaseTable::isBaseTable()` + `op_type` em `{ObjModified, ObjMoved}` e só then resolve
+    `getSchemaScene(graph_obj->getSchema())`, chamando `relocateObjectView()` se ela divergir da
+    cena atual da view — inofensivo (no-op) pra qualquer outro tipo de undo/redo, já que
+    `relocateObjectView()` também tem sua própria guarda de "mesma cena não faz nada". Essa é a
+    correção de um gap pré-existente (não introduzido pelas mudanças desta sessão): antes desta
+    mudança, desfazer um `moveToSchema()` restaurava o schema no modelo mas nunca devolvia a view
+    gráfica à cena original.
+    **Estado em 2026-09-23 (fim de sessão): há um leak de `RelationshipView` confirmado por ASan em
+    teste manual do usuário (undo+redo de uma tabela com 2 relacionamentos cut-off, ver
+    MULTI_SCENE_PROGRESS.md), ainda não reproduzido em teste automatizado apesar de várias
+    tentativas fiéis à sequência relatada — investigação retoma com o modelo `.dbm` real do
+    usuário.** Até isso ser resolvido, esta decisão/mecanismo deve ser tratada como **instável**,
+    não como fechada.
 
 ## 4. Fases de implementação
 
@@ -623,6 +662,14 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
     a ação de mover em si, que Table/View/ForeignTable já têm e Textbox não. Não implementar agora.
 
 #### Relacionamentos cross-scene: promoção/rebaixamento dinâmico
+
+**Atualização 2026-09-23**: a mecânica descrita abaixo (destruir/criar o `RelationshipView` in-place
+dentro de `moveToSchema()`) foi implementada e depois generalizada/substituída pela decisão #10
+(seção 3) — descartar+recriar é a regra universal agora, e o roteamento vive em
+`ModelWidget::routeRelationship()`. O "o quê" (promoção/rebaixamento dinâmico como propriedade
+derivada da cena atual das duas tabelas) descrito aqui embaixo continua válido; o "como" (código
+específico citado) está desatualizado — ver decisão #10 e MULTI_SCENE_PROGRESS.md para o estado
+real do código.
 
 "Ter ou não um `RelationshipView`" não é decidido só na criação do relacionamento — é reavaliado
 toda vez que uma das duas tabelas muda de cena (refinamento da decisão #1, seção 3):
