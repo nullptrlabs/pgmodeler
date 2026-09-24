@@ -1373,6 +1373,10 @@ diferentes.
 2.3. Reaproveitamento do marcador cut-off da Fase 1 (1.8) para os cross-scene resultantes no modo
      threshold — deve ser praticamente gratuito se 1.8 foi bem desenhado; se não for, é sinal de
      que o desenho de 1.8 vazou detalhes específicos do modo por schema. Depende de: 2.1, 1.8.
+     **Confirmado (2026-09-24)**: gratuito de fato — `BaseTableView::addExternalRelationship()`/
+     `CutoffItem` só olham pra `this->scene()` da própria view, sem nenhuma suposição sobre como
+     aquela cena foi escolhida; nenhuma mudança de código foi necessária, só um teste de regressão
+     dedicado provando o cross-scene no modo threshold.
 
 2.4. Documentar e validar com teste a política de não-rebalanceamento (cenas esvaziadas por
      remoção não são mescladas/destruídas automaticamente no modo threshold) — verificação, não
