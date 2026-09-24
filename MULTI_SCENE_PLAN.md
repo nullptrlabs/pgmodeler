@@ -1302,19 +1302,53 @@ diferentes.
   seus filhos vivem em mais de uma cena — nenhum item "meio existente" escondido em alguma cena
   arbitrária. Custo baixo: o nome qualificado por schema continua aparecendo no cabeçalho de cada
   tabela, só a moldura visual de agrupamento some.
-  - **Promoção** (schema tinha filhos em >1 cena, todos convergiram pra uma só — ex. depois de uma
-    futura movimentação manual entre cenas): cria/reativa o `SchemaView` normalmente naquela cena,
-    igual ao comportamento de hoje.
+  - **Promoção** (schema tinha filhos em >1 cena, todos convergiram pra uma só): cria/reativa o
+    `SchemaView` normalmente naquela cena, igual ao comportamento de hoje.
   - **Rebaixamento** (schema tinha todos os filhos numa cena, um deles foi pra outra): destrói/
     remove o `SchemaView` daquele schema.
-  - Reavaliado no mesmo choke point de mudança de cena de um objeto que já dispara a lógica
-    equivalente pra relacionamentos (promoção/rebaixamento, subseção da Fase 1) — não precisa de
-    mecanismo de detecção novo, só estender o que já existe pra também considerar o schema da
-    tabela movida, não só seus relacionamentos.
   - **Não otimizado ainda**: a verificação "todos os filhos deste schema estão na mesma cena?" pode
     começar como um re-scan completo dos filhos do schema afetado (não do modelo inteiro) a cada
     mudança — aceitável para começar; otimizar (ex. contador incremental por schema) só se motivado
     por medição real de performance.
+- **Achado de revisão de código, revisitado em 2026-09-24 (invalida a suposição original de reuso de
+  choke point)**: a redação original desta subseção dizia para reavaliar "no mesmo choke point de
+  mudança de cena de um objeto que já dispara a lógica equivalente pra relacionamentos" — essa
+  suposição não corresponde mais ao código depois da simplificação das decisões #10/#11 (seção 3).
+  Hoje, `ModelWidget::relocateObjectView()`
+  ([modelwidget.cpp:2857](libs/libgui/src/widgets/modelwidget.cpp#L2857)) — o único ponto que de
+  fato tira a view de uma `ObjectsScene` e recria em outra, reavaliando relacionamentos via
+  `routeRelationship()` — só é chamado a partir de três lugares
+  (`moveToSchema()` [modelwidget.cpp:2947](libs/libgui/src/widgets/modelwidget.cpp#L2947),
+  `relocateEditedObject()` [modelwidget.cpp:2933](libs/libgui/src/widgets/modelwidget.cpp#L2933),
+  `handleObjectSchemaChanged()` [modelwidget.cpp:2917](libs/libgui/src/widgets/modelwidget.cpp#L2917)
+  — undo/redo), e **todos os três resolvem o destino via `getSchemaScene(schema)`**
+  ([modelwidget.cpp:1013](libs/libgui/src/widgets/modelwidget.cpp#L1013)), que só devolve uma cena
+  não-nula se `schema_scenes` já tiver uma entrada pra aquele schema — e `schema_scenes` só é
+  populado pelo próprio roteamento por schema da Fase 1
+  ([modelwidget.cpp:1219](libs/libgui/src/widgets/modelwidget.cpp#L1219),
+  [modelwidget.cpp:1386](libs/libgui/src/widgets/modelwidget.cpp#L1386)). Ou seja: **no modo
+  threshold puro, os três call sites acima são no-ops** (`dst_scene` sempre nulo) — não existe hoje
+  nenhum evento de "tabela mudou de cena" pra threshold reavaliar, porque threshold não relocaliza
+  view nenhuma depois da inserção (consistente com a própria política de não-rebalanceamento desta
+  fase). Não há choke point existente pra estender; a supressão de `SchemaView` no modo threshold
+  precisa de pontos de disparo próprios, novos:
+  1. **Inserção** — dentro do roteamento por contador que a subtarefa 2.1 introduz em
+     `handleObjectAddition()` (hoje o `case` de `Table`/`View`/`ForeignTable` mistura a rota por
+     schema com um override incondicional em
+     [modelwidget.cpp:1238-1239](libs/libgui/src/widgets/modelwidget.cpp#L1238) — 2.1 precisa
+     tornar esse override condicional ao modo de segmentação, não só adicionar o contador), reavaliar
+     o schema do objeto recém-inserido após ele ganhar cena.
+  2. **Remoção** — em `ModelWidget::handleObjectRemoval()`, depois de remover uma
+     `Table`/`View`/`ForeignTable`, reavaliar o schema que ela deixou pra trás (a remoção do "filho
+     divergente" pode reunificar o schema numa única cena).
+  3. **Reatribuição de schema sem troca de cena** (caso novo, não considerado na redação anterior):
+     no modo threshold, `moveToSchema()`/`relocateEditedObject()` mudam o schema de uma tabela sem
+     mover sua `ObjectsScene` (a cena é derivada da ordem de inserção, não do schema) — mesmo assim,
+     essa troca pode mudar o status cross-scene tanto do schema de origem quanto do de destino, já
+     que a tabela passa a contar para outro schema permanecendo na mesma cena física. Precisa
+     reavaliar os dois schemas envolvidos, mesmo sem nenhuma relocação de view acontecer.
+  Os três pontos só se aplicam quando o modo de segmentação ativo é threshold — no modo por schema o
+  invariante 1:1 schema/cena já garante que isso nunca acontece (subtarefa 1.4).
 
 #### Subtarefas da Fase 2 (uma por commit; renumeradas de 3.x nesta reorganização)
 
@@ -1340,10 +1374,15 @@ diferentes.
      remoção não são mescladas/destruídas automaticamente no modo threshold) — verificação, não
      feature nova. Depende de: 2.1.
 
-2.5. Supressão dinâmica de `SchemaView` cross-scene — estender o choke point de promoção/
-     rebaixamento (já usado pra relacionamentos) para também reavaliar, ao mover uma tabela de
-     cena, se o schema dela ainda tem todos os filhos numa única cena; criar/destruir o
-     `SchemaView` conforme a subseção acima. Depende de: 2.1.
+2.5. Supressão dinâmica de `SchemaView` cross-scene — **não é reaproveitamento de choke point
+     existente** (achado de revisão de código, 2026-09-24: ver subseção acima) — o mecanismo de
+     relocação de view usado pelas relações (`relocateObjectView()`/`routeRelationship()`) só
+     dispara via `getSchemaScene()`, que nunca resolve nada no modo threshold. Precisa de três
+     pontos de disparo novos e próprios: inserção (dentro do roteamento por contador da 2.1),
+     remoção, e reatribuição de schema sem troca de cena (`moveToSchema()`/`relocateEditedObject()`
+     no modo threshold, reavaliando os dois schemas envolvidos). Em cada um, checar se o schema
+     afetado ainda tem todos os filhos numa única cena e criar/destruir o `SchemaView` conforme a
+     subseção acima. Depende de: 2.1.
 
 ### Fase 3 — Persistência (modo de segmentação, cena focada)
 
