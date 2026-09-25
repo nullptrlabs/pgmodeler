@@ -35,6 +35,7 @@ namespace Attributes {
 	AlertOpenSqlTabs("alert-open-sqltabs"),
 	AlertUnsavedModels("alert-unsaved-models"),
 	AlertResizeRowsCols("alert-resize-rows-cols"),
+	AlertSaveReloadModel("alert-save-reload-model"),
 	Alias("alias"),
 	Alignment("alignment"),
 	AlignObjsToGrid("align-objs-to-grid"),

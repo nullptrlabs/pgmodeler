@@ -1203,14 +1203,10 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 		models_tbw->blockSignals(true);
 		models_tbw->setUpdatesEnabled(false);
 
-		if(model_idx < 0 || model_idx >= models_tbw->count())
+		if(model_idx < 0)
 			model_idx = models_tbw->addTab(model_wgt, obj_name);
-		else
-		{
-			/* Check if the current tab has a child model, if that's
-			 * the case, raise an error */
+		else		
 			model_idx = models_tbw->insertTab(model_idx, model_wgt, obj_name);
-		}
 
 		models_tbw->setCurrentIndex(model_idx);
 		models_tbw->blockSignals(false);
@@ -1266,12 +1262,7 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 		model_wgt->db_model->setInvalidated(false);
 
 		if(start_timers)
-		{
-			if(model_save_timer.interval() > 0)
-				model_save_timer.start();
-
-			tmpmodel_save_timer.start();
-		}
+			stopSaveTimers(true);
 
 		action_save_model->setEnabled(false);
 
@@ -1283,7 +1274,7 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 	catch(Exception &e)
 	{
 		if(model_idx >= 0)
-			closeModel(model_idx, false, false);
+			closeModel(model_idx, false);
 
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
@@ -1628,7 +1619,7 @@ void MainWindow::removeModelActions()
 	}
 }
 
-bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
+bool MainWindow::closeModel(int model_id, bool confirm)
 {
 	QWidget *tab = nullptr;
 
@@ -1661,6 +1652,9 @@ bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
 																	tr("The model <strong>%1</strong> was modified! Do you really want to close without saving it?")
 																	.arg(model->getDatabaseModel()->getName()),
 																	Messagebox::YesNoButtons);
+
+		if(msg_res == Messagebox::Rejected)
+			return false;
 	}
 
 	if(!model->isModified() ||
@@ -1679,34 +1673,22 @@ bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
 
 		//Removing model specific actions from general toolbar
 		removeModelActions();
-
-		/* Remove the parent tab if the flag is not set
-		 * to keep it untouched */
-		if(!keep_tab)
-			models_tbw->removeTab(model_id);
-
+		models_tbw->removeTab(model_id);
 		model_closed = true;
 	}
 
-	/* If the parent tab was removed we force the definition of
-	 * the current model based on the new current index or do
-	 * clean-ups if there is no model left to display */
-	if(!keep_tab && model_closed)
+	if(models_tbw->count() > 0)
+		setCurrentModel();
+	else
 	{
-		if(models_tbw->count() > 0)
-			setCurrentModel();
-		else
-		{
-			current_model = nullptr;
-			setCurrentModel();
-			model_save_timer.stop();
-			tmpmodel_save_timer.stop();
-			models_tbw->setVisible(false);
-		}
-
-		delete model;
-		emit s_modelClosed();
+		current_model = nullptr;
+		setCurrentModel();
+		stopSaveTimers(true);
+		models_tbw->setVisible(false);
 	}
+
+	delete model;
+	emit s_modelClosed();
 
 	return model_closed;
 }
@@ -1718,7 +1700,7 @@ void MainWindow::reloadModel(const QString &filename, int model_idx)
 		if(model_idx < 0)
 			return;
 
-		if(!closeModel(model_idx, true))
+		if(!closeModel(model_idx))
 			return;
 
 		if(!filename.endsWith(GlobalAttributes::DbModelExt))
@@ -1886,7 +1868,7 @@ void MainWindow::saveModel(ModelWidget *model)
 						if(model != aux_model && model->getFilename() == aux_model->getFilename())
 						{
 							msg_box.show(tr("<strong>WARNING:</strong> the database model <strong>%1</strong>, file <strong>%2</strong>, is also loaded in another tab! Saving the current model to the file may lead to data loss if its version in memory is outdated compared to what is loaded in the other tab. Do you really want to proceed with the saving?")
-													 .arg(model->getDatabaseModel()->getName()).arg(model->getFilename()),
+													 .arg(model->getDatabaseModel()->getName(), model->getFilename()),
 													 Messagebox::Alert, Messagebox::YesNoButtons);
 
 							save_model = msg_box.isAccepted();
