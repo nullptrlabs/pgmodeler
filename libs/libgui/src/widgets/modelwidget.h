@@ -29,7 +29,6 @@
 #define MODEL_WIDGET_H
 
 #include <QMenu>
-#include <QComboBox>
 #include "databasemodel.h"
 #include "operationlist.h"
 #include "messagebox.h"
@@ -142,10 +141,6 @@ class __libgui ModelWidget: public QWidget {
 
 		//! \brief Manages the objects scene
 		QGraphicsView *viewport;
-
-		/*! \brief Temporary floating control to switch the active scene, until a definitive UI
-		replaces it */
-		QComboBox *scene_combo;
 
 		//! \brief Model's general context menu
 		QMenu popup_menu,
@@ -328,9 +323,6 @@ class __libgui ModelWidget: public QWidget {
 		 * covers the same schema-change-implies-scene-change case as moveToSchema(), but for the
 		 * schema selector embedded in each object's own editing form instead of the popup menu */
 		void relocateEditedObject(BaseObjectWidget *obj_wgt);
-
-		//! \brief Rebuilds scene_combo's items from scenes and selects the currently active one
-		void updateSceneCombo();
 
 	protected:
 		QAction *action_source_code,

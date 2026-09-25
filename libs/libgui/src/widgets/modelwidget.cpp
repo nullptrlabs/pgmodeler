@@ -178,17 +178,6 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	viewport->setAcceptDrops(true);
 	viewport->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	/* Temporary floating control to switch the active scene manually, until a definitive
-	 * scene-switching UI replaces it */
-	scene_combo = new QComboBox(viewport);
-	scene_combo->setToolTip(tr("Switch active scene (temporary control)"));
-	scene_combo->setFixedWidth(200);
-	scene_combo->move(8, 8);
-	scene_combo->raise();
-
-	connect(scene_combo, qOverload<int>(&QComboBox::activated), this, &ModelWidget::setActiveScene);
-	connect(this, &ModelWidget::s_activeSceneChanged, scene_combo, &QComboBox::setCurrentIndex);
-
 	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(20, GuiUtilsNs::LtSpacing, this);
 	vbox->addWidget(protected_model_frm);
 	vbox->addWidget(viewport);
@@ -1034,17 +1023,6 @@ int ModelWidget::getActiveSceneIndex()
 	return active_scene_idx;
 }
 
-void ModelWidget::updateSceneCombo()
-{
-	scene_combo->blockSignals(true);
-	scene_combo->clear();
-	scene_combo->addItems(getSceneNames());
-	scene_combo->setCurrentIndex(active_scene_idx);
-	scene_combo->blockSignals(false);
-
-	emit s_scenesListChanged();
-}
-
 ObjectsScene *ModelWidget::addScene(bool auto_activate)
 {
 	ObjectsScene *new_scene = new ObjectsScene(this);
@@ -1103,7 +1081,7 @@ ObjectsScene *ModelWidget::addScene(bool auto_activate)
 		viewport->setScene(new_scene);
 	}
 
-	updateSceneCombo();
+	emit s_scenesListChanged();
 
 	return new_scene;
 }
@@ -1147,7 +1125,7 @@ void ModelWidget::removeScene(ObjectsScene *scn)
 		active_scene_idx = scenes.indexOf(scene);
 
 	delete scn;
-	updateSceneCombo();
+	emit s_scenesListChanged();
 }
 
 void ModelWidget::setActiveScene(int idx)
