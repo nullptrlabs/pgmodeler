@@ -1162,6 +1162,11 @@ void ModelWidget::setPendingSegmentationMode(DatabaseModel::SegmentationMode mod
 
 		if(msgbox.isAccepted())
 			emit s_modelSaveReloadRequested();
+
+		GeneralConfigWidget::appendConfigurationSection(Attributes::Configuration,
+																										{{ Attributes::AlertSaveReloadModel,
+																											 msgbox.isCustomOptionChecked() ?
+																											 Attributes::False : Attributes::True }});
 	}
 }
 

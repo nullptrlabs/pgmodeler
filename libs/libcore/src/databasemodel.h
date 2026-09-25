@@ -900,7 +900,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		double getLastZoomFactor();
 
 		//! \brief Default number of Table/View/ForeignTable insertions per scene in SegByThreshold mode
-		static constexpr unsigned DefaultSegThreshold = 250;
+		static constexpr unsigned DefaultSegThreshold = 200;
 
 		void setSegmentationMode(SegmentationMode mode);
 		SegmentationMode getSegmentationMode();
