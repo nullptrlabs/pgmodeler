@@ -986,6 +986,9 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
      (marcador cut-off), 1.8 (promoção/rebaixamento ao mover tabela de schema) e as subtarefas de
      decisão 1.12/1.13/1.14 — sem ele, testar troca de cena exigiria código de teste descartável
      em cada uma dessas subtarefas. Depende de: 0.1, 0.2, 1.2.
+     **Removido (2026-09-25)**: cumpriu seu papel de scaffolding e foi retirado assim que o
+     `SceneInfoWidget` (combo `scenes_cmb`, ver Fase 2) passou a cobrir a mesma função de forma
+     definitiva — ver `MULTI_SCENE_PROGRESS.md` para o detalhamento da troca.
 
 1.4. **Confirmação de `SchemaView::fetchChildren()`** — validar com teste (não necessariamente
      mudança de código) que `getObjects(type, schema)`

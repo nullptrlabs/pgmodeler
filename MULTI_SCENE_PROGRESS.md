@@ -227,6 +227,17 @@
     (também sem a flag, deliberadamente). Suíte inteira (15 testes) + rebuild de `gui` limpos depois
     do fix; app reinstalado e reaberto headless sem crash (mas, de novo, sem valor de confirmação
     real pra esse tipo de bug especificamente).
+- **Removido o `scene_combo` temporário da subtarefa 1.3 (2026-09-25)**: cumpriu seu papel de
+  scaffolding pra testar troca de cena manualmente antes de existir UI definitiva — agora que o
+  `SceneInfoWidget` cobre a mesma função (`scenes_cmb`, já commitado), foi removido por completo:
+  o membro `QComboBox *scene_combo` (e o `#include <QComboBox>`, sem mais uso), a criação dele no
+  construtor do `ModelWidget` (posicionado sobre o `viewport`), e `ModelWidget::updateSceneCombo()`
+  — método que já tinha ficado reduzido a popular esse combo específico e emitir
+  `s_scenesListChanged()`; os dois call sites (`addScene()`/`removeScene()`) agora emitem o sinal
+  direto, sem o método intermediário. Suíte inteira (15 testes) sob ASan e build de `gui` seguem
+  limpos. **Ajuste de processo (2026-09-25)**: usuário pediu pra eu parar de fazer rebuild/install/
+  smoke-test do app completo a cada mudança — ele mesmo testa manualmente; daqui pra frente só
+  build+suíte de teste automatizada da minha parte.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
