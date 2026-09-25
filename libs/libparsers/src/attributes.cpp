@@ -634,6 +634,8 @@ namespace Attributes {
 	SecurityBarrier("security-barrier"),
 	SecurityInvoker("security-invoker"),
 	SecurityType("security-type"),
+	SegMode("seg-mode"),
+	SegThreshold("seg-threshold"),
 	SelectExp("select-exp"),
 	SelectObjects("select-objects"),
 	SelectPriv("select"),

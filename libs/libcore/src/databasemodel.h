@@ -278,8 +278,20 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 
 		double last_zoom;
 
-		//! \brief Stores how the model's ObjectsScene collection is segmented
+		//! \brief Stores how the model's ObjectsScene collection is segmented in the current session
 		SegmentationMode scene_seg_mode;
+
+		/*! \brief Stores the segmentation mode to be written to the file on the next save. Editing
+		 * this does not affect scene_seg_mode -- a mode change only takes effect after the model is
+		 * reloaded */
+		SegmentationMode saved_seg_mode;
+
+		//! \brief Number of Table/View/ForeignTable insertions per scene, in SegByThreshold mode, for the current session
+		unsigned seg_threshold;
+
+		/*! \brief Threshold value to be written to the file on the next save. Editing this does not
+		 * affect seg_threshold -- a threshold change only takes effect after the model is reloaded */
+		unsigned saved_seg_threshold;
 
 		//! \brief Returns an object seaching it by its name and type. The third parameter stores the object index
 		BaseObject *getObject(const QString &name, ObjectType obj_type, int &obj_idx);
@@ -887,8 +899,22 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		void setLastZoomFactor(double zoom);
 		double getLastZoomFactor();
 
+		//! \brief Default number of Table/View/ForeignTable insertions per scene in SegByThreshold mode
+		static constexpr unsigned DefaultSegThreshold = 250;
+
 		void setSegmentationMode(SegmentationMode mode);
 		SegmentationMode getSegmentationMode();
+
+		//! \brief Defines the segmentation mode to be persisted on the next save (takes effect only after a reload)
+		void setSavedSegmentationMode(SegmentationMode mode);
+		SegmentationMode getSavedSegmentationMode();
+
+		void setSegThreshold(unsigned value);
+		unsigned getSegThreshold();
+
+		//! \brief Defines the segmentation threshold to be persisted on the next save (takes effect only after a reload)
+		void setSavedSegThreshold(unsigned value);
+		unsigned getSavedSegThreshold();
 
 		/*! \brief This method exposes the XML parser for the outside world. In order to create objects from xml code inside the current
 		 database model you need first get the parser (through this method), populate the parser with the desired XML and then call

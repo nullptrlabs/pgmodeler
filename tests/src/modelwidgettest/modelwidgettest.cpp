@@ -58,6 +58,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void thresholdModeCrossSceneRelationshipGetsCutoffMarkers();
 		void thresholdModeDoesNotRebalanceEmptiedScenes();
 		void segmentedModesNeverCreateSchemaRectangles();
+		void pendingSegmentationChangesDoNotApplyUntilReload();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -671,7 +672,7 @@ void ModelWidgetTest::undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedV
 }
 
 /*! \brief In threshold-segmentation mode, the Table/View/ForeignTable insertion counter opens a
-new scene only once SceneObjThreshold insertions
+new scene only once getSegThreshold() insertions
 have landed in the current one -- the insertion that crosses the threshold still belongs to the
 old scene, and only the next one after it goes to the freshly-opened scene. */
 void ModelWidgetTest::thresholdModeOpensNewSceneAfterCrossingCount()
@@ -691,7 +692,7 @@ void ModelWidgetTest::thresholdModeOpensNewSceneAfterCrossingCount()
 		ObjectsScene *first_scene = model_wgt.getObjectsScene(0);
 		Table *last_table = nullptr;
 
-		for(unsigned i = 0; i < ModelWidget::SceneObjThreshold; i++)
+		for(unsigned i = 0; i < db_model->getSegThreshold(); i++)
 		{
 			Table *table = new Table;
 			table->setName(QString("table_%1").arg(i));
@@ -733,12 +734,16 @@ void ModelWidgetTest::thresholdModeSceneAssignmentSurvivesSaveAndReload()
 			DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
 			db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+
+			//The saved (pending) mode is what gets persisted -- set it too so the reload below picks it up
+			db_model->setSavedSegmentationMode(DatabaseModel::SegByThreshold);
+
 			db_model->createSystemObjects(true);
 
 			Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
 			QVERIFY(public_sch != nullptr);
 
-			for(unsigned i = 0; i < ModelWidget::SceneObjThreshold + 5; i++)
+			for(unsigned i = 0; i < db_model->getSegThreshold() + 5; i++)
 			{
 				Table *table = new Table;
 				table->setName(QString("table_%1").arg(i));
@@ -754,7 +759,7 @@ void ModelWidgetTest::thresholdModeSceneAssignmentSurvivesSaveAndReload()
 			ModelWidget model_wgt;
 			DatabaseModel *db_model = model_wgt.getDatabaseModel();
 
-			db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+			//The active mode comes from the file's persisted seg-mode attribute now (set above), not from here
 			db_model->createSystemObjects(false);
 			model_wgt.loadModel(tmp_file);
 
@@ -767,9 +772,9 @@ void ModelWidgetTest::thresholdModeSceneAssignmentSurvivesSaveAndReload()
 			QVERIFY(table_0 != nullptr);
 			QCOMPARE(model_wgt.getSceneForObject(table_0), model_wgt.getObjectsScenes().first());
 
-			//The last table (SceneObjThreshold + 4) was the overflow that landed in the second scene
+			//The last table (getSegThreshold() + 4) was the overflow that landed in the second scene
 			Table *overflow_table = dynamic_cast<Table *>(db_model->getObject(
-					QString("table_%1").arg(ModelWidget::SceneObjThreshold + 4), ObjectType::Table));
+					QString("table_%1").arg(db_model->getSegThreshold() + 4), ObjectType::Table));
 			QVERIFY(overflow_table != nullptr);
 			QCOMPARE(model_wgt.getSceneForObject(overflow_table), last_scene);
 
@@ -827,7 +832,7 @@ void ModelWidgetTest::thresholdModeCrossSceneRelationshipGetsCutoffMarkers()
 		db_model->addTable(table_a);
 
 		//Fill up the first scene so the next table lands in a freshly-opened second one
-		for(unsigned i = 0; i < ModelWidget::SceneObjThreshold; i++)
+		for(unsigned i = 0; i < db_model->getSegThreshold(); i++)
 		{
 			Table *filler = new Table;
 			filler->setName(QString("filler_%1").arg(i));
@@ -886,7 +891,7 @@ void ModelWidgetTest::thresholdModeDoesNotRebalanceEmptiedScenes()
 		std::vector<Table *> tables;
 
 		//Fills the first scene exactly to the threshold, which also opens a second, still-empty scene
-		for(unsigned i = 0; i < ModelWidget::SceneObjThreshold; i++)
+		for(unsigned i = 0; i < db_model->getSegThreshold(); i++)
 		{
 			Table *table = new Table;
 			table->setName(QString("table_%1").arg(i));
@@ -977,6 +982,61 @@ void ModelWidgetTest::segmentedModesNeverCreateSchemaRectangles()
 	{
 		QFAIL(e.getExceptionsText().toStdString().c_str());
 	}
+}
+
+/*! \brief ModelWidget::setPendingSegmentationMode()/setPendingSceneThreshold() (the slots the
+SceneInfoWidget's segmentation combo/threshold spinbox forward user edits to) must only ever touch
+DatabaseModel's saved (to-be-persisted) fields -- the active ones governing this session's routing
+stay put until the model is actually reloaded, at which point the previously-saved values become
+the new active ones. */
+void ModelWidgetTest::pendingSegmentationChangesDoNotApplyUntilReload()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_pending_seg.dbm");
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(true);
+
+			QCOMPARE(db_model->getSegmentationMode(), DatabaseModel::NoSegmentation);
+
+			model_wgt.setModified(false);
+			model_wgt.setPendingSegmentationMode(DatabaseModel::SegByThreshold);
+			model_wgt.setPendingSceneThreshold(321);
+
+			//Editing the pending fields must not touch the active session's behavior
+			QCOMPARE(db_model->getSegmentationMode(), DatabaseModel::NoSegmentation);
+			QCOMPARE(db_model->getSavedSegmentationMode(), DatabaseModel::SegByThreshold);
+			QCOMPARE(db_model->getSavedSegThreshold(), 321u);
+			QVERIFY(model_wgt.isModified());
+
+			db_model->saveModel(tmp_file, SchemaParser::XmlCode);
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_file);
+
+			//Reloading is what finally makes the previously-saved values become active
+			QCOMPARE(db_model->getSegmentationMode(), DatabaseModel::SegByThreshold);
+			QCOMPARE(db_model->getSegThreshold(), 321u);
+			QCOMPARE(db_model->getSavedSegmentationMode(), DatabaseModel::SegByThreshold);
+			QCOMPARE(db_model->getSavedSegThreshold(), 321u);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
 }
 
 QTEST_MAIN(ModelWidgetTest)

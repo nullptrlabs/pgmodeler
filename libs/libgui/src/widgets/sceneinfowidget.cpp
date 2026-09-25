@@ -38,9 +38,48 @@ SceneInfoWidget::SceneInfoWidget(QWidget *parent): QWidget(parent)
 																		 obj_pos_info_lbl, threshold_spb->findChild<QLineEdit *>() },
 																	 GuiUtilsNs::MediumFontFactor);
 
+	threshold_spb->setValue(DatabaseModel::DefaultSegThreshold);
+	threshold_spb->setSingleStep(DatabaseModel::DefaultSegThreshold / 2);
+	threshold_spb->setMinimum(DatabaseModel::DefaultSegThreshold);
+	threshold_spb->setMaximum(DatabaseModel::DefaultSegThreshold * 5);
+
+	connect(scenes_cmb, &QComboBox::activated, this, &SceneInfoWidget::s_activeSceneSelected);
+
 	connect(seg_modes_cmb, &QComboBox::activated, this, [this](int idx){
-		threshold_spb->setEnabled(idx >= 2);
+		DatabaseModel::SegmentationMode mode = static_cast<DatabaseModel::SegmentationMode>(idx);
+		threshold_spb->setEnabled(mode == DatabaseModel::SegByThreshold);
+		emit s_segmentationModeSelected(mode);
 	});
+
+	connect(threshold_spb, &QSpinBox::editingFinished, this, [this](){
+		emit s_thresholdSelected(static_cast<unsigned>(threshold_spb->value()));
+	});
+}
+
+void SceneInfoWidget::updateScenesCombo(const QStringList &names, int active_idx)
+{
+	scenes_cmb->blockSignals(true);
+	scenes_cmb->clear();
+	scenes_cmb->addItems(names);
+	scenes_cmb->setCurrentIndex(active_idx);
+	scenes_cmb->blockSignals(false);
+}
+
+void SceneInfoWidget::updateSegmentationInfo(DatabaseModel::SegmentationMode mode, unsigned threshold)
+{
+	seg_modes_cmb->blockSignals(true);
+	seg_modes_cmb->setCurrentIndex(static_cast<int>(mode));
+	seg_modes_cmb->blockSignals(false);
+
+	threshold_spb->blockSignals(true);
+
+	//Widens the ceiling instead of silently clamping a legitimately larger persisted/loaded value
+	if(static_cast<int>(threshold) > threshold_spb->maximum())
+		threshold_spb->setMaximum(static_cast<int>(threshold));
+
+	threshold_spb->setValue(static_cast<int>(threshold));
+	threshold_spb->setEnabled(mode == DatabaseModel::SegByThreshold);
+	threshold_spb->blockSignals(false);
 }
 
 void SceneInfoWidget::updateSelectedObject(BaseObjectView *object)

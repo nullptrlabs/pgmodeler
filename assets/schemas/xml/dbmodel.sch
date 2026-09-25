@@ -26,6 +26,10 @@ $br $tb
 
 [ show-sys-schemas-rects=] "{show-sys-schemas-rects}"
 
+[ seg-mode=] "{seg-mode}"
+
+[ seg-threshold=] "{seg-threshold}"
+
 %if {last-position} %or {last-position} %or {scene-rect} %then
 	$br $tb
 
@@ -39,7 +43,7 @@ $br $tb
 
 	%if {scene-rect} %then
 		[ scene-rect=] "{scene-rect}"
-	%end	
+	%end
 %end
 
 %if {default-schema} %or {default-owner} %then

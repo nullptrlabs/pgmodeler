@@ -168,6 +168,51 @@
   possivelmente, decidir o que fazer com o `scene_combo` temporário da subtarefa 1.3 e o `#warning`
   que força `SegByThreshold` no construtor do `ModelWidget`, já que este widget parece ser o caminho
   pretendido pra seleção de modo de verdade).
+- **`SceneInfoWidget` conectado à lógica real (2026-09-25)** — especificação exata dada pelo usuário
+  antes de implementar, quatro pontos: (1) `scenes_cmb` reflete as cenas atuais do modelo; (2)
+  `seg_modes_cmb` alterna o modo de segmentação, habilitando `threshold_spb` só em "By threshold";
+  (3) mudar `scenes_cmb` troca a cena ativa no modelo; (4) mudar `seg_modes_cmb`/`threshold_spb`
+  grava a configuração no `DatabaseModel` (persistida no XML), efeito adiado pra próxima carga, e
+  marca o `ModelWidget` como modificado. Duas exigências de design explícitas: toda comunicação
+  `SceneInfoWidget` ↔ modelo só por sinais (widget nunca guarda `ModelWidget*`); mudança de modo/
+  threshold não é aplicada em tempo real, exige recarregar o modelo.
+  - **`DatabaseModel` ganhou dois pares "ativo"/"a salvar"** (ver nota na subtarefa 3.1, adiantada
+    parcialmente): `scene_seg_mode`/`saved_seg_mode` e (novo) `seg_threshold`/`saved_seg_threshold`
+    (`DefaultSegThreshold = 250`, mesma constante que substituiu o antigo `ModelWidget::
+    SceneObjThreshold`, removido). Getters/setters novos: `getSavedSegmentationMode()`/
+    `setSavedSegmentationMode()`, `getSegThreshold()`/`setSegThreshold()`, `getSavedSegThreshold()`/
+    `setSavedSegThreshold()`. Persistência nova: atributos XML `seg-mode`/`seg-threshold` em
+    `<dbmodel>`, mirror do padrão já usado por `scene-rect` (DTD + `.sch` + leitura no início de
+    `loadModel()`, escrita em `setDatabaseModelAttributes()`). Na carga, o valor persistido vira
+    tanto o "ativo" quanto o ponto de partida do "a salvar" — os dois só voltam a divergir quando o
+    usuário mexe nos controles de novo.
+  - **`ModelWidget` ganhou o meio de campo**: `getSceneNames()`/`getActiveSceneIndex()` (extraídos
+    de `updateSceneCombo()`, que passou a emitir o novo sinal `s_scenesListChanged()`); dois slots
+    novos, `setPendingSegmentationMode()`/`setPendingSceneThreshold()`, que só escrevem nos campos
+    "a salvar" do `DatabaseModel` e chamam `setModified(true)` — nunca tocam no roteamento ativo
+    desta sessão. Removida a constante `SceneObjThreshold` e o `#warning` que forçava
+    `SegByThreshold` no construtor (ambos scaffolding temporário de sessões anteriores, agora sem
+    função com a seleção de modo de verdade existindo).
+  - **`SceneInfoWidget` ganhou sinais próprios** (`s_activeSceneSelected`, `s_segmentationModeSelected`,
+    `s_thresholdSelected`) em vez de expor os widgets internos pra `MainWindow` mexer direto — e dois
+    métodos de população (`updateScenesCombo()`, `updateSegmentationInfo()`), ambos com
+    `blockSignals()` pra popular sem re-emitir de volta. Nenhuma referência a `ModelWidget` guardada.
+  - **`MainWindow::setCurrentModel()`** (já era o choke point de reconexão por-aba pros outros sinais
+    do `scene_info_wgt`) ganhou as novas conexões nos dois sentidos, mais a população inicial ao
+    trocar de aba. **Achado durante a implementação**: as conexões modelo→widget já existentes nunca
+    precisaram desconectar o modelo anterior (só o receptor persistente reage, então múltiplas cenas
+    "esquecidas" de abas antigas não causam problema visível); o sentido novo, widget→modelo, já não
+    tem essa proteção de graça — sem desconectar explicitamente o `prev_model` antes de reconectar,
+    editar `scenes_cmb`/`seg_modes_cmb` numa aba continuaria também disparando `setActiveScene()`/
+    `setPendingSegmentationMode()` no modelo de uma aba anterior. Corrigido com um
+    `disconnect(scene_info_wgt, nullptr, prev_model, nullptr)` logo no início do método.
+  - **Teste novo**: `ModelWidgetTest::pendingSegmentationChangesDoNotApplyUntilReload` — confirma que
+    os dois slots `setPending*` só alteram os campos "a salvar" (não o roteamento ativo), marcam o
+    `ModelWidget` modificado, e que só um `saveModel()` + `loadModel()` faz o valor "a salvar" virar
+    o "ativo" da próxima sessão. Suíte inteira (15 testes) + o teste novo isolado rodaram limpos sob
+    ASan. Smoke test manual (`pgmodeler` headless, `QT_QPA_PLATFORM=offscreen`, abrindo
+    `assets/samples/demo.dbm`) não reproduziu crash nem warning novo — **não substitui teste manual
+    de verdade da interação com os combos/spinbox na GUI**, que só o usuário pode fazer.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
