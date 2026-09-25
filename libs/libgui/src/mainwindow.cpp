@@ -1479,13 +1479,16 @@ void MainWindow::setCurrentModel(int idx)
 		connect(current_model, qOverload<const QPointF &>(&ModelWidget::s_sceneInteracted), scene_info_wgt, &SceneInfoWidget::updateMousePosition, Qt::UniqueConnection);
 		connect(current_model, &ModelWidget::s_zoomModified, scene_info_wgt, &SceneInfoWidget::updateSceneZoom, Qt::UniqueConnection);
 
+		/* Qt::UniqueConnection doesn't support lambda slots (only plain member-function pointers) --
+		 * asserts at runtime if passed one. Matches the existing s_modelModified lambda connection
+		 * below/elsewhere in this method, which is also deliberately left without it */
 		connect(current_model, &ModelWidget::s_scenesListChanged, this, [this](){
 			scene_info_wgt->updateScenesCombo(current_model->getSceneNames(), current_model->getActiveSceneIndex());
-		}, Qt::UniqueConnection);
+		});
 
 		connect(current_model, &ModelWidget::s_activeSceneChanged, this, [this](int idx){
 			scene_info_wgt->updateScenesCombo(current_model->getSceneNames(), idx);
-		}, Qt::UniqueConnection);
+		});
 
 		connect(scene_info_wgt, &SceneInfoWidget::s_activeSceneSelected, current_model, &ModelWidget::setActiveScene, Qt::UniqueConnection);
 		connect(scene_info_wgt, &SceneInfoWidget::s_segmentationModeSelected, current_model, &ModelWidget::setPendingSegmentationMode, Qt::UniqueConnection);

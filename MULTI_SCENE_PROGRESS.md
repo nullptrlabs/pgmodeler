@@ -213,6 +213,20 @@
     ASan. Smoke test manual (`pgmodeler` headless, `QT_QPA_PLATFORM=offscreen`, abrindo
     `assets/samples/demo.dbm`) não reproduziu crash nem warning novo — **não substitui teste manual
     de verdade da interação com os combos/spinbox na GUI**, que só o usuário pode fazer.
+  - **Bug real pego pelo usuário no teste manual (2026-09-25)**: crash com
+    `ASSERT failure: "QObject::connect: Unique connection requires the slot to be a pointer to a
+    member function of a QObject subclass."`. Causa: os dois `connect()` novos que repopulam
+    `scenes_cmb` em `MainWindow::setCurrentModel()` usavam lambda como slot **e** passavam
+    `Qt::UniqueConnection` — Qt não suporta as duas coisas juntas (só ponteiro-membro pode ser
+    deduplicado; lambda não tem como comparar). O smoke test headless não reproduziu isso — não é
+    claro se é porque esse build específico do Qt não aborta nesse warning, ou porque o caminho
+    offscreen não exercita `setCurrentModel()` da mesma forma que o uso interativo real; de qualquer
+    forma, confirma que o smoke test headless não é suficiente pra pegar essa classe de bug.
+    **Fix**: removida a flag `Qt::UniqueConnection` dos dois `connect()` com lambda, seguindo o
+    mesmo padrão já usado pela conexão lambda pré-existente de `s_modelModified` no mesmo método
+    (também sem a flag, deliberadamente). Suíte inteira (15 testes) + rebuild de `gui` limpos depois
+    do fix; app reinstalado e reaberto headless sem crash (mas, de novo, sem valor de confirmação
+    real pra esse tipo de bug especificamente).
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
