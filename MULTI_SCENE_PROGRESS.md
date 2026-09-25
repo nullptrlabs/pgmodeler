@@ -266,6 +266,118 @@
   inteira (16 testes) sob ASan limpa; leak isolado do teste novo (677 alocações/110KB, todas
   "Indirect") comparado com um teste não relacionado já existente (690/116KB) pra confirmar que é o
   mesmo ruído de fundo pré-existente, não algo introduzido por este fix.
+- **Causa raiz mais profunda do bug de rename achada, fluxo de "salvar e recarregar" implementado
+  (2026-09-25, `b49d4bb3d`)** — sessão paralela (não esta conversa, a julgar pelo commit). O fix
+  anterior (`connect(schema, &Schema::s_objectModified, ...)`) dependia de algo emitir
+  `s_objectModified` na *própria* instância do schema renomeado — mas
+  `DatabaseModel::validateSchemaRenaming()` ([databasemodel.cpp:8972](libs/libcore/src/databasemodel.cpp#L8972))
+  — o choke point único por onde `ObjectRenameWidget`, `SchemaWidget` e o undo/redo de
+  `OperationList` roteiam um rename de schema — só marcava os **filhos/referências** do schema como
+  modificados (pra forçar redesenho deles), nunca o schema em si. Fix: `schema->setModified(true)`
+  no fim de `validateSchemaRenaming()`; deixou redundante (removido) um `setModified(true)` que
+  `OperationList::executeOperation()` fazia manualmente só no caminho de undo/redo
+  ([operationlist.cpp:927-940](libs/libcore/src/operationlist.cpp#L927)). Teste
+  `schemaSegmentationScenesComboStaysInSyncWithSchemaNames` atualizado pra exercitar
+  `validateSchemaRenaming()` de verdade em vez do `setName()`+`setModified()` manual anterior.
+  - **Fluxo novo: confirmar e recarregar mudanças pendentes de segmentação** —
+    `ModelWidget::s_modelSaveReloadRequested`, conectado em `MainWindow` pra salvar + validar
+    (`ModelValidationWidget::hasValidationErrors()`, getter novo) + recarregar o modelo;
+    `MainWindow::reloadModel()` passou a chamar `addModel()` diretamente pra arquivos `.dbm`. Polish
+    de UI no `SceneInfoWidget`/`sceneinfowidget.ui` (trocado `activated` por `currentIndexChanged`,
+    `threshold_spb` escondido em vez de só desabilitado fora do modo threshold, ajustes de tamanho).
+  - **Pendência ainda em aberto, registrada no próprio commit**: `pg_catalog` continua sem mostrar o
+    nome no `scenes_cmb` em teste manual real na GUI, mesmo com o teste automatizado (que exercita a
+    mesma lógica `schema_scenes`/`getSceneNames()`) passando limpo — o gap está em algum lugar da
+    ligação real `MainWindow`/`SceneInfoWidget` que `ModelWidgetTest` não consegue exercitar. Não
+    root-causado ainda; nenhum commit posterior até `a8ae540d6` mexeu nisso.
+- **Configuração pra suprimir o alerta de "salvar e recarregar" (2026-09-25, `a0c62e46e`)**: novo
+  atributo de configuração `alert-save-reload-model` (DTD/schema + `Attributes::
+  AlertSaveReloadModel`), coberto pela lógica de "resetar escolhas de alerta" já existente em
+  `GeneralConfigWidget`. `ModelWidget::setPendingSegmentationMode()` só mostra o diálogo quando o
+  alerta está habilitado, com texto de opção customizada e botões Yes/No.
+  - **Possível inconsistência, não confirmada com o usuário**: o `emit s_modelSaveReloadRequested()`
+    (que dispara o salvar+recarregar de fato) fica **dentro** do bloco `if(alerta habilitado)`
+    ([modelwidget.cpp:1154-1172](libs/libgui/src/widgets/modelwidget.cpp#L1154)) — se o usuário já
+    marcou "não perguntar de novo" numa sessão anterior, o campo "a salvar" é atualizado (linha
+    acima do `if`) mas o sinal nunca é emitido, então a troca de modo/threshold fica pendente
+    indefinidamente até o usuário salvar+recarregar manualmente por conta própria, sem nenhum aviso
+    de que isso é necessário. Pode ser intencional (não incomodar quem já pediu silêncio) ou um
+    descuido (o `emit` deveria rodar sempre que aceito, dentro ou fora do `if`) — registrado aqui
+    como achado, não alterado.
+  - `MainWindow::closeModel()` perdeu o parâmetro `keep_tab` (sempre remove a aba) e passou a
+    retornar cedo (`return false`) se o usuário rejeitar fechar um modelo modificado — antes, a
+    função continuava executando mesmo após a rejeição. `addModel()`/`reloadModel()` atualizados pra
+    a assinatura nova. `addModel()` também passou a sempre anexar a aba quando `model_idx < 0` (em
+    vez de checar `>= models_tbw->count()` também) e usar `stopSaveTimers()` no lugar do
+    start/stop manual dos dois timers.
+- **Auto-correção no mesmo dia (2026-09-25, `647d933d0`)**: o `stopSaveTimers()` novo introduzido em
+  `a0c62e46e` tem semântica invertida do nome (`true` = para os timers, `false` = inicia) —
+  `addModel()` chamava `stopSaveTimers(true)` justamente no ponto em que deveria **iniciar** os
+  timers de auto-save depois de carregar um modelo, então todo modelo recém-aberto ficava sem
+  auto-save. Fix de uma linha: `stopSaveTimers(false)`.
+- **Ajustes finais (2026-09-25, `a8ae540d6`)**: `DatabaseModel::DefaultSegThreshold` de 250 pra 200;
+  `threshold_spb` passou de `setEnabled()` pra `setVisible()` (some da UI em vez de só ficar
+  acinzentado fora do modo threshold); a escolha do checkbox "não perguntar de novo" agora é
+  persistida de volta em `GeneralConfigWidget` (`appendConfigurationSection()`) logo depois do
+  diálogo de salvar+recarregar.
+- **Build/suíte não re-verificados por mim para estes quatro commits** — código já estava commitado
+  quando retomei a sessão (2026-09-25); rebuild de `core`+`canvas`+`gui`+`modelwidgettest` contra o
+  HEAD atual e suíte completa (16/16) confirmados limpos nesta retomada, mas sem crédito de tê-los
+  validado individualmente commit a commit.
+- **Bug do `pg_catalog` sem nome no `scenes_cmb`: causa raiz, correção do usuário, e uma lacuna mais
+  funda achada e corrigida em seguida (2026-09-25/26, não commitado ainda)** — usuário reportou que,
+  no modo por schema, `pg_catalog` nunca aparece pelo nome no combo, sempre como "Scene 1" genérico.
+  - **Causa raiz (diagnóstico)**: `MainWindow::addModel()` chama
+    `model_wgt->db_model->createSystemObjects(filename.isEmpty())`
+    ([mainwindow.cpp:1216](libs/libgui/src/mainwindow.cpp#L1216)) **antes** de
+    `model_wgt->loadModel(filename)` ([mainwindow.cpp:1224](libs/libgui/src/mainwindow.cpp#L1224)).
+    `createSystemObjects()` cria `pg_catalog` incondicionalmente
+    ([databasemodel.cpp:9052-9055](libs/libcore/src/databasemodel.cpp#L9052)), disparando
+    `handleObjectAddition()` nesse instante — mas `scene_seg_mode` (o que `getSegmentationMode()`
+    devolve) só é atualizado a partir do atributo `seg-mode` do XML dentro de
+    `DatabaseModel::loadModel()` ([databasemodel.cpp:3563-3565](libs/libcore/src/databasemodel.cpp#L3563)),
+    que só roda depois. Ou seja: `pg_catalog` é sempre roteado com `seg_mode == NoSegmentation`,
+    nunca entra no branch de `SegBySchema` que popula `schema_scenes`, e cai na rede de segurança
+    genérica ([modelwidget.cpp:1342-1347](libs/libgui/src/widgets/modelwidget.cpp#L1342) antes da
+    correção) — `getSceneNames()` não encontra entrada em `schema_scenes` pra essa cena e cai no
+    fallback `"Scene N"`.
+  - **Correção do usuário (`ModelWidget::addScene(Schema*)` + relabel em `loadModel()`)**: novo
+    overload `addScene(Schema *schema)` (fábrica pequena, cria a cena e já registra
+    `schema_scenes[schema]`, absorvendo a lógica que antes protegia `pg_catalog` de virar a cena
+    ativa); `handleObjectAddition()` passou a chamar esse overload no lugar do código inline. E, em
+    `ModelWidget::loadModel()`, logo depois de `db_model->loadModel(filename)` retornar (quando o
+    modo real já é conhecido), um bloco novo reatribuía `schema_scenes[pg_catalog] = scenes.first()`
+    — reaproveitando a cena "órfã" que `pg_catalog` já tinha ganhado via rede de segurança, em vez
+    de criar/mover pra uma nova. Resolvia o sintoma relatado (nome no combo).
+  - **Lacuna mais profunda, achada em discussão antes de implementar**: e se `pg_catalog` tiver
+    tabelas de verdade (reverse engineering, raro mas possível)? Essas tabelas são parseadas durante
+    `db_model->loadModel()`, **antes** do relabel em `ModelWidget::loadModel()` rodar (que só
+    acontece depois que o parse inteiro termina) — nesse momento, `getSchemaScene(pg_catalog)` ainda
+    devolve `nullptr` (a correção do usuário só populava a entrada depois), então cada tabela de
+    `pg_catalog` cairia na sua **própria** rede de segurança, cada uma numa cena órfã **diferente**,
+    nem consolidadas entre si, muito menos com a cena que o próprio `pg_catalog` acabou usando —
+    quebrando a invariante "schema e filhos share uma cena" (a mesma que a subtarefa 1.4 garante pra
+    todo outro schema) especificamente pra esse caso raro.
+  - **Solução adotada (a pedido do usuário, "solução 1" entre duas propostas)**: em vez de relabelar
+    depois do fato, registrar `schema_scenes[schema]` **na hora**, dentro da própria rede de
+    segurança ([modelwidget.cpp:1342-1357](libs/libgui/src/widgets/modelwidget.cpp#L1342)) — quando
+    o objeto que cai ali é um `Schema` (`dynamic_cast<Schema *>(graph_obj)`), registra
+    imediatamente, **independente do modo atual** (é bookkeeping inerte em `NoSegmentation`/
+    `SegByThreshold`, já que `schema_scenes` só é consultado quando `seg_mode == SegBySchema` em
+    todo call site existente). Efeito: no instante em que `pg_catalog` ganha sua cena órfã, ela já
+    fica registrada — qualquer filho seu parseado depois, ainda dentro do mesmo `loadModel()`, já
+    encontra `getSchemaScene(pg_catalog)` resolvendo pra ela. Isso tornou o bloco de relabel pós-hoc
+    em `ModelWidget::loadModel()` (a correção anterior do usuário) redundante — **removido**.
+  - **Teste novo**: `ModelWidgetTest::pgCatalogChildrenShareItsSceneAfterSchemaSegmentedReload` —
+    salva um modelo com `SegBySchema` e uma tabela dentro de `pg_catalog`, recarrega replicando a
+    ordem real de `MainWindow::addModel()` (`createSystemObjects(false)` antes de `loadModel()`),
+    confirma `getSchemaScene(pg_catalog) != nullptr`, `"pg_catalog"` presente em `getSceneNames()`, e
+    que a tabela reverse-engineered compartilha a mesma cena do schema (`getSceneForObject(table) ==
+    getSchemaScene(pg_catalog)`). **Verificado que o teste de fato pega o bug**: revertido
+    temporariamente só `modelwidget.cpp` (`git stash`) mantendo o teste, rodou e falhou exatamente
+    como esperado (`pg_catalog_scene != nullptr` falso); restaurado depois, suíte completa
+    **17/17** sob ASan limpa.
+  - Build limpo (`core`+`canvas`+`gui`+`modelwidgettest`). Não commitado ainda.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

@@ -60,6 +60,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void segmentedModesNeverCreateSchemaRectangles();
 		void pendingSegmentationChangesDoNotApplyUntilReload();
 		void schemaSegmentationScenesComboStaysInSyncWithSchemaNames();
+		void pgCatalogChildrenShareItsSceneAfterSchemaSegmentedReload();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -1096,6 +1097,75 @@ void ModelWidgetTest::schemaSegmentationScenesComboStaysInSyncWithSchemaNames()
 	{
 		QFAIL(e.getExceptionsText().toStdString().c_str());
 	}
+}
+
+/*! \brief Regression test for a deeper consequence of the pg_catalog-scene bug: createSystemObjects()
+always creates pg_catalog before ModelWidget::loadModel() has read the file's persisted seg-mode
+attribute (that only happens inside DatabaseModel::loadModel(), called from within
+ModelWidget::loadModel()) -- so pg_catalog's own Schema object is routed while segmentation mode still
+reads as NoSegmentation. If it has any children of its own (reverse-engineered tables, rare but
+possible), those are parsed later, once the mode is genuinely SegBySchema, and must still find
+pg_catalog's scene via getSchemaScene() -- otherwise each one falls through its own safety net and
+lands in its own separate orphan scene instead of sharing pg_catalog's. */
+void ModelWidgetTest::pgCatalogChildrenShareItsSceneAfterSchemaSegmentedReload()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_pg_catalog_scene.dbm");
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+			db_model->setSavedSegmentationMode(DatabaseModel::SegBySchema);
+
+			db_model->createSystemObjects(true);
+
+			Schema *pg_catalog = dynamic_cast<Schema *>(db_model->getObject("pg_catalog", ObjectType::Schema));
+			QVERIFY(pg_catalog != nullptr);
+
+			//Stand-in for a reverse-engineered table living directly in pg_catalog
+			Table *table = new Table;
+			table->setName("pg_class_stub");
+			table->setSchema(pg_catalog);
+			db_model->addTable(table);
+
+			db_model->saveModel(tmp_file, SchemaParser::XmlCode);
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			//Mirrors MainWindow::addModel()'s real ordering: system objects (pg_catalog included)
+			//are created before the file's own seg-mode attribute is read by loadModel() below
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_file);
+
+			QCOMPARE(db_model->getSegmentationMode(), DatabaseModel::SegBySchema);
+
+			Schema *pg_catalog = dynamic_cast<Schema *>(db_model->getObject("pg_catalog", ObjectType::Schema));
+			QVERIFY(pg_catalog != nullptr);
+
+			ObjectsScene *pg_catalog_scene = model_wgt.getSchemaScene(pg_catalog);
+			QVERIFY(pg_catalog_scene != nullptr);
+			QVERIFY(model_wgt.getSceneNames().contains("pg_catalog"));
+
+			Table *table = dynamic_cast<Table *>(db_model->getObject("pg_class_stub", ObjectType::Table));
+			QVERIFY(table != nullptr);
+
+			//The table must share pg_catalog's scene, not fall through to its own orphan scene
+			QCOMPARE(model_wgt.getSceneForObject(table), pg_catalog_scene);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
 }
 
 QTEST_MAIN(ModelWidgetTest)

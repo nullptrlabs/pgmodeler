@@ -291,6 +291,7 @@ class __libgui ModelWidget: public QWidget {
 		/*! \brief Creates a new scene, appends it to scenes and returns it. When auto_activate is true (the
 		default) it activates the new scene if none is active yet */
 		ObjectsScene *addScene(bool auto_activate = true);
+		ObjectsScene *addScene(Schema *schema);
 
 		/*! \brief Removes scn from scenes and destroys it. If scn is the active scene, activates
 		 * another one first (the first remaining scene, or none if scn was the last one), so
