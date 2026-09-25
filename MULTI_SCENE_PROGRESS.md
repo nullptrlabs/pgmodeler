@@ -238,6 +238,34 @@
   limpos. **Ajuste de processo (2026-09-25)**: usuário pediu pra eu parar de fazer rebuild/install/
   smoke-test do app completo a cada mudança — ele mesmo testa manualmente; daqui pra frente só
   build+suíte de teste automatizada da minha parte.
+- **Dois bugs achados pelo usuário no teste manual do modo por schema (2026-09-25)**:
+  1. Renomear um schema não atualizava o nome da cena correspondente em `scenes_cmb`
+     (`SceneInfoWidget`).
+  2. `pg_catalog` sempre aparecia como "Scene N" no combo, nunca pelo nome.
+  **Causa raiz comum**: `scenes_cmb` é populado por `ModelWidget::getSceneNames()`, que resolve o
+  nome de cada cena fazendo `schema_scenes.key(scene, nullptr)` — mas nada notificava o
+  `SceneInfoWidget` pra chamar esse método de novo quando (a) um schema era renomeado, ou (b)
+  `schema_scenes[schema]` só ficava populado *depois* que `addScene()` já tinha emitido
+  `s_scenesListChanged()` (a atribuição acontece no chamador, `handleObjectAddition()`, não dentro
+  de `addScene()`) — então o primeiro (e às vezes único) refresh via sinal capturava o mapeamento
+  incompleto. Isso "se autocorrigia" quando outro schema era adicionado depois (o refresh seguinte já
+  encontrava o mapeamento certo), exceto pro **último** schema processado sem nenhum evento
+  posterior — tipicamente `pg_catalog`, criado antes dos schemas do próprio arquivo.
+  **Fix**: em `handleObjectAddition()` (`case Schema`, ramo `SegBySchema`), logo após
+  `schema_scenes[schema] = target_scene`: (a) `connect(schema, &Schema::s_objectModified, this,
+  &ModelWidget::s_scenesListChanged)` — conexão sinal-a-sinal, uma vez por schema, reaproveitando o
+  mesmo gancho que o antigo `SchemaView` usava antes da 2.5; (b) `emit s_scenesListChanged();`
+  explícito, garantindo um refresh com o mapeamento já completo, sem depender da emissão (agora
+  sabidamente prematura) de dentro de `addScene()`. **Achado ao escrever o teste**: `Schema::setName()`
+  sozinho não emite `s_objectModified()` — quem emite é `setModified(true)`, chamado pelo fluxo real
+  de aplicar edições de um formulário (mesmo padrão já usado em `toggleSchemasRectangles()`); o teste
+  precisou reproduzir isso explicitamente (`setName()` + `setModified(true)`), não só `setName()`.
+  **Verificação do teste**: revertido o fix temporariamente (`git stash`) pra confirmar que o teste
+  novo falha exatamente como o bug reportado (`"Scene 1"` em vez de `"pg_catalog"`), depois restaurado.
+  Teste novo: `ModelWidgetTest::schemaSegmentationScenesComboStaysInSyncWithSchemaNames`. Suíte
+  inteira (16 testes) sob ASan limpa; leak isolado do teste novo (677 alocações/110KB, todas
+  "Indirect") comparado com um teste não relacionado já existente (690/116KB) pra confirmar que é o
+  mesmo ruído de fundo pré-existente, não algo introduzido por este fix.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

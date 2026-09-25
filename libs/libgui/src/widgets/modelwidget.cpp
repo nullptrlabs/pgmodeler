@@ -1234,6 +1234,13 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 						processed first */
 						if(db_model->isModelLoading() && schema->getName() == "public")
 							setActiveScene(scenes.indexOf(target_scene));
+
+						/* addScene() above already emitted s_scenesListChanged(), but schema_scenes didn't
+						 * have this schema's entry yet at that point -- getSceneNames() would've fallen back
+						 * to "Scene N" for it. Re-emit now that the mapping is complete, and keep the combo
+						 * in sync with future renames too (scenes_cmb has no view of its own to react to) */
+						connect(schema, &Schema::s_objectModified, this, &ModelWidget::s_scenesListChanged);
+						emit s_scenesListChanged();
 					}
 				}
 

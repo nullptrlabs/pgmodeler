@@ -59,6 +59,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void thresholdModeDoesNotRebalanceEmptiedScenes();
 		void segmentedModesNeverCreateSchemaRectangles();
 		void pendingSegmentationChangesDoNotApplyUntilReload();
+		void schemaSegmentationScenesComboStaysInSyncWithSchemaNames();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -1037,6 +1038,59 @@ void ModelWidgetTest::pendingSegmentationChangesDoNotApplyUntilReload()
 	}
 
 	QFile::remove(tmp_file);
+}
+
+/*! \brief Regression test for two bugs found by the user in schema-segmentation mode:
+(1) SceneInfoWidget's scenes_cmb never refreshed the scene name for whichever schema was the last
+one processed with no later scene-list-changing event afterward -- typically pg_catalog, since
+addScene() emits s_scenesListChanged() before ModelWidget::handleObjectAddition() finishes mapping
+the new schema into schema_scenes, and nothing re-emitted afterward once that mapping was complete.
+(2) Renaming a schema had no path to the combo at all -- schema-segmentation mode no longer creates
+a SchemaView (see subtarefa 2.5), which used to be what reacted to Schema::s_objectModified. */
+void ModelWidgetTest::schemaSegmentationScenesComboStaysInSyncWithSchemaNames()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+
+		QStringList last_names;
+		int emit_count = 0;
+
+		connect(&model_wgt, &ModelWidget::s_scenesListChanged, [&](){
+			last_names = model_wgt.getSceneNames();
+			emit_count++;
+		});
+
+		//pg_catalog ends up the only (and therefore last) schema created here -- no schema is
+		//added afterward whose own scene-list-changing event could incidentally fix a stale entry
+		db_model->createSystemObjects(false);
+
+		QVERIFY(emit_count > 0);
+		QCOMPARE(last_names, QStringList{ "pg_catalog" });
+
+		Schema *schema_a = new Schema;
+		schema_a->setName("schema_a");
+		db_model->addSchema(schema_a);
+
+		QCOMPARE(last_names, (QStringList{ "pg_catalog", "schema_a" }));
+
+		int emit_count_before_rename = emit_count;
+
+		//Mirrors the real edit-form apply flow: setName() alone doesn't emit s_objectModified(),
+		//the caller applying the edited attributes does
+		schema_a->setName("schema_b");
+		schema_a->setModified(true);
+
+		QVERIFY2(emit_count > emit_count_before_rename, "renaming a schema must refresh the scenes combo");
+		QCOMPARE(last_names, (QStringList{ "pg_catalog", "schema_b" }));
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
 }
 
 QTEST_MAIN(ModelWidgetTest)
