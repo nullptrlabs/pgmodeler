@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>752</width>
-    <height>40</height>
+    <width>884</width>
+    <height>41</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -66,115 +66,178 @@
        <number>3</number>
       </property>
       <item>
-       <widget class="QLabel" name="sel_obj_icon_lbl_3">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <property name="spacing">
+         <number>5</number>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
+        <property name="rightMargin">
+         <number>0</number>
         </property>
-        <property name="toolTip">
-         <string>Currently selected object(s)</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Shape::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Shadow::Plain</enum>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="pixmap">
-         <pixmap resource="../../res/resources.qrc">:/icons/icons/segmentation.png</pixmap>
-        </property>
-        <property name="scaledContents">
-         <bool>true</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::TextInteractionFlag::NoTextInteraction</set>
-        </property>
-       </widget>
+        <item>
+         <widget class="QLabel" name="sel_obj_icon_lbl_4">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Currently selected object(s)</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Shape::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Shadow::Plain</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="../../res/resources.qrc">:/icons/icons/design.png</pixmap>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignCenter</set>
+          </property>
+          <property name="textInteractionFlags">
+           <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="scenes_cmb">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Scene</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Scene 1</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QComboBox" name="scenes_cmb">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+       <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <property name="spacing">
+         <number>5</number>
         </property>
-        <property name="toolTip">
-         <string>&lt;strong&gt;No segmentation:&lt;/strong&gt; All objects are created on a single scene (canvas). This is the classic behavior. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;Segment by schema:&lt;/strong&gt; Each schema defines a new scene (canvas) where tables, views, and foreign tables are routed according to their parent schemas. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;Segment by threshold:&lt;/strong&gt; Whenever the number of tables, views, or foreign tables reaches a multiple of the defined threshold, a new scene (canvas) is created and new objects are routed to it. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; Schemas' visual representations are disabled when the model is segmented.</string>
+        <property name="rightMargin">
+         <number>0</number>
         </property>
         <item>
-         <property name="text">
-          <string>Scene 1</string>
-         </property>
+         <widget class="QLabel" name="sel_obj_icon_lbl_3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Currently selected object(s)</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Shape::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Shadow::Plain</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="../../res/resources.qrc">:/icons/icons/segmentation.png</pixmap>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignCenter</set>
+          </property>
+          <property name="textInteractionFlags">
+           <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+          </property>
+         </widget>
         </item>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="seg_modes_cmb">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>&lt;strong&gt;No segmentation:&lt;/strong&gt; All objects are created on a single scene (canvas). This is the classic behavior. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;Segment by schema:&lt;/strong&gt; Each schema defines a new scene (canvas) where tables, views, and foreign tables are routed according to their parent schemas. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;Segment by threshold:&lt;/strong&gt; Whenever the number of tables, views, or foreign tables reaches a multiple of the defined threshold, a new scene (canvas) is created and new objects are routed to it. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; Schemas' visual representations are disabled when the model is segmented.</string>
-        </property>
         <item>
-         <property name="text">
-          <string>No segmentation</string>
-         </property>
+         <widget class="QComboBox" name="seg_modes_cmb">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Determines the model's segmentation mode. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;None:&lt;/strong&gt; All objects are created on a single scene (canvas). This is the classic behavior. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;By schema:&lt;/strong&gt; Each schema defines a new scene (canvas) where tables, views, and foreign tables are routed according to their parent schemas. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;By threshold:&lt;/strong&gt; Whenever the number of tables, views, or foreign tables reaches a multiple of the defined threshold, a new scene (canvas) is created and new objects are routed to it. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; Schemas' visual representations are disabled when the model is segmented.</string>
+          </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QComboBox::SizeAdjustPolicy::AdjustToContentsOnFirstShow</enum>
+          </property>
+          <item>
+           <property name="text">
+            <string>None</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>By schema</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>By threshold</string>
+           </property>
+          </item>
+         </widget>
         </item>
         <item>
-         <property name="text">
-          <string>Segmentate by schema</string>
-         </property>
+         <widget class="QSpinBox" name="threshold_spb">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</string>
+          </property>
+          <property name="maximum">
+           <number>1000</number>
+          </property>
+          <property name="singleStep">
+           <number>100</number>
+          </property>
+          <property name="value">
+           <number>200</number>
+          </property>
+         </widget>
         </item>
-        <item>
-         <property name="text">
-          <string>Segmentate by threshold</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="threshold_spb">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</string>
-        </property>
-        <property name="maximum">
-         <number>1000</number>
-        </property>
-        <property name="singleStep">
-         <number>100</number>
-        </property>
-        <property name="value">
-         <number>200</number>
-        </property>
-       </widget>
+       </layout>
       </item>
      </layout>
     </widget>

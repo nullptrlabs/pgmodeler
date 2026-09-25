@@ -33,9 +33,14 @@ SceneInfoWidget::SceneInfoWidget(QWidget *parent): QWidget(parent)
 																obj_sel_info_frm, separator_ln2,
 																seg_mode_frm });
 
-	GuiUtilsNs::configureWidgetsFont({ scenes_cmb, seg_modes_cmb, threshold_spb, mouse_pos_info_lbl,
-																		 zoom_info_lbl, sel_obj_count_lbl, obj_pos_info_lbl, threshold_spb },
+	GuiUtilsNs::configureWidgetsFont({ scenes_cmb, seg_modes_cmb, threshold_spb,
+																		 mouse_pos_info_lbl, zoom_info_lbl, sel_obj_count_lbl,
+																		 obj_pos_info_lbl, threshold_spb->findChild<QLineEdit *>() },
 																	 GuiUtilsNs::MediumFontFactor);
+
+	connect(seg_modes_cmb, &QComboBox::activated, this, [this](int idx){
+		threshold_spb->setEnabled(idx >= 2);
+	});
 }
 
 void SceneInfoWidget::updateSelectedObject(BaseObjectView *object)
