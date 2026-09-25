@@ -124,6 +124,9 @@
           <property name="toolTip">
            <string>Scene</string>
           </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
+          </property>
           <item>
            <property name="text">
             <string>Scene 1</string>
@@ -215,7 +218,7 @@
         <item>
          <widget class="QSpinBox" name="threshold_spb">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -245,7 +248,7 @@
    <item>
     <widget class="QFrame" name="cursor_pos_info_frm">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -321,7 +324,7 @@
          <widget class="QLabel" name="mouse_pos_info_lbl">
           <property name="minimumSize">
            <size>
-            <width>105</width>
+            <width>80</width>
             <height>0</height>
            </size>
           </property>
@@ -421,7 +424,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>45</width>
+            <width>30</width>
             <height>0</height>
            </size>
           </property>
@@ -529,7 +532,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>50</width>
+            <width>40</width>
             <height>0</height>
            </size>
           </property>
@@ -623,7 +626,7 @@
          <widget class="QLabel" name="obj_pos_info_lbl">
           <property name="minimumSize">
            <size>
-            <width>50</width>
+            <width>40</width>
             <height>0</height>
            </size>
           </property>

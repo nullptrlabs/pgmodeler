@@ -9018,6 +9018,12 @@ void DatabaseModel::validateSchemaRenaming(Schema *schema, const QString &prev_s
 
 		refs.clear();
 	}
+
+	/* This method marks every child/reference as modified to force their redraw, but never the
+	 * renamed schema itself -- callers (ObjectRenameWidget, SchemaWidget, OperationList undo/redo)
+	 * all route a schema rename through here, so it's also the one place that can reliably notify
+	 * whatever's listening to the schema's own s_objectModified() (e.g. a scene-name display) */
+	schema->setModified(true);
 }
 
 void DatabaseModel::createSystemObjects(bool create_public)

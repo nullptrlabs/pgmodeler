@@ -1490,6 +1490,15 @@ void MainWindow::setCurrentModel(int idx)
 			scene_info_wgt->updateScenesCombo(current_model->getSceneNames(), idx);
 		});
 
+		connect(current_model, &ModelWidget::s_modelSaveReloadRequested, this, [this]() {
+			saveModel(current_model);
+
+			if(model_valid_wgt->hasValidationErrors())
+				Messagebox::alert(tr("Could not reload the model because the validation process found errors that must be resolved."));
+			else
+				reloadModel(current_model->getFilename(), models_tbw->currentIndex());
+		});
+
 		connect(scene_info_wgt, &SceneInfoWidget::s_activeSceneSelected, current_model, &ModelWidget::setActiveScene, Qt::UniqueConnection);
 		connect(scene_info_wgt, &SceneInfoWidget::s_segmentationModeSelected, current_model, &ModelWidget::setPendingSegmentationMode, Qt::UniqueConnection);
 		connect(scene_info_wgt, &SceneInfoWidget::s_thresholdSelected, current_model, &ModelWidget::setPendingSceneThreshold, Qt::UniqueConnection);
@@ -1712,7 +1721,10 @@ void MainWindow::reloadModel(const QString &filename, int model_idx)
 		if(!closeModel(model_idx, true))
 			return;
 
-		emit s_modelLoadRequested(filename, model_idx);
+		if(!filename.endsWith(GlobalAttributes::DbModelExt))
+			emit s_modelLoadRequested(filename, model_idx);
+		else
+			addModel(filename, model_idx);
 	}
 	catch(Exception &e)
 	{

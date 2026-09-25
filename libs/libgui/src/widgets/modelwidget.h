@@ -760,6 +760,7 @@ class __libgui ModelWidget: public QWidget {
 		void s_zoomModified(double);
 		void s_maginifierAreaVisible(bool);
 		void s_modelResized();
+		void s_modelSaveReloadRequested();
 
 		//! \brief Emitted after setActiveScene() switches the scene attached to the viewport
 		void s_activeSceneChanged(int new_idx);

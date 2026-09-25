@@ -1150,6 +1150,15 @@ void ModelWidget::setPendingSegmentationMode(DatabaseModel::SegmentationMode mod
 {
 	db_model->setSavedSegmentationMode(mode);
 	setModified(true);
+
+	Messagebox msgbox;
+
+	msgbox.show(tr("Changing the segmentation mode takes effect only after saving and reloading the model. Do you want to proceed?"),
+							Messagebox::Confirm, Messagebox::OkCancelButtons);
+	msgbox.setCustomOptionText(tr("Don't ask to save and reload again"));
+
+	if(msgbox.isAccepted())
+		emit s_modelSaveReloadRequested();
 }
 
 void ModelWidget::setPendingSceneThreshold(unsigned value)
