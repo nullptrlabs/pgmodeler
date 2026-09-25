@@ -79,7 +79,7 @@ void SceneInfoWidget::updateSegmentationInfo(DatabaseModel::SegmentationMode mod
 		threshold_spb->setMaximum(static_cast<int>(threshold));
 
 	threshold_spb->setValue(static_cast<int>(threshold));
-	threshold_spb->setEnabled(mode == DatabaseModel::SegByThreshold);
+	threshold_spb->setVisible(mode == DatabaseModel::SegByThreshold);
 	threshold_spb->blockSignals(false);
 }
 
