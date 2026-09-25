@@ -927,19 +927,14 @@ void OperationList::executeOperation(Operation *oper, bool redo)
 				if(bkp_obj)
 					dynamic_cast<BaseGraphicObject *>(bkp_obj->getSchema())->setModified(op_type==Operation::ObjModified);
 			}
-		}
-		else if(op_type==Operation::ObjModified)
-		{			
-			if(obj_type==ObjectType::Schema)
-			{
+
+			if(obj_type == ObjectType::Schema)
 				model->validateSchemaRenaming(dynamic_cast<Schema *>(object), bkp_obj->getName());
-				dynamic_cast<Schema *>(object)->setModified(true);
-			}
-			else if(obj_type==ObjectType::Tag)
-			{
-				for(auto &obj : object->getReferences())
-					dynamic_cast<BaseTable *>(obj)->setModified(true);
-			}
+		}
+		else if(op_type==Operation::ObjModified && obj_type==ObjectType::Tag)
+		{
+			for(auto &obj : object->getReferences())
+				dynamic_cast<BaseTable *>(obj)->setModified(true);
 		}
 
 		/* bkp_obj/aux_obj are temporary snapshots allocated above purely for this function's own

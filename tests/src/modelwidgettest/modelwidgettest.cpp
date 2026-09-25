@@ -1046,7 +1046,10 @@ one processed with no later scene-list-changing event afterward -- typically pg_
 addScene() emits s_scenesListChanged() before ModelWidget::handleObjectAddition() finishes mapping
 the new schema into schema_scenes, and nothing re-emitted afterward once that mapping was complete.
 (2) Renaming a schema had no path to the combo at all -- schema-segmentation mode no longer creates
-a SchemaView (see subtarefa 2.5), which used to be what reacted to Schema::s_objectModified. */
+a SchemaView, which used to be what reacted to Schema::s_objectModified(); and even after hooking
+ModelWidget up to that same signal, DatabaseModel::validateSchemaRenaming() -- the single choke
+point ObjectRenameWidget/SchemaWidget/undo-redo all route a schema rename through -- never actually
+called setModified() on the schema itself, only on its children, so the signal never fired. */
 void ModelWidgetTest::schemaSegmentationScenesComboStaysInSyncWithSchemaNames()
 {
 	try
@@ -1079,10 +1082,12 @@ void ModelWidgetTest::schemaSegmentationScenesComboStaysInSyncWithSchemaNames()
 
 		int emit_count_before_rename = emit_count;
 
-		//Mirrors the real edit-form apply flow: setName() alone doesn't emit s_objectModified(),
-		//the caller applying the edited attributes does
+		/* Mirrors the real rename path: ObjectRenameWidget, SchemaWidget and OperationList's
+		 * undo/redo of a schema rename all call setName() followed by validateSchemaRenaming() --
+		 * setName() alone never emits s_objectModified() */
+		QString prev_name = schema_a->getName();
 		schema_a->setName("schema_b");
-		schema_a->setModified(true);
+		db_model->validateSchemaRenaming(schema_a, prev_name);
 
 		QVERIFY2(emit_count > emit_count_before_rename, "renaming a schema must refresh the scenes combo");
 		QCOMPARE(last_names, (QStringList{ "pg_catalog", "schema_b" }));

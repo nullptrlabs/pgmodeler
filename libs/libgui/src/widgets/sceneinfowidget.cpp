@@ -42,12 +42,13 @@ SceneInfoWidget::SceneInfoWidget(QWidget *parent): QWidget(parent)
 	threshold_spb->setSingleStep(DatabaseModel::DefaultSegThreshold / 2);
 	threshold_spb->setMinimum(DatabaseModel::DefaultSegThreshold);
 	threshold_spb->setMaximum(DatabaseModel::DefaultSegThreshold * 5);
+	threshold_spb->setVisible(false);
 
 	connect(scenes_cmb, &QComboBox::activated, this, &SceneInfoWidget::s_activeSceneSelected);
 
-	connect(seg_modes_cmb, &QComboBox::activated, this, [this](int idx){
+	connect(seg_modes_cmb, &QComboBox::currentIndexChanged, this, [this](int idx) {
 		DatabaseModel::SegmentationMode mode = static_cast<DatabaseModel::SegmentationMode>(idx);
-		threshold_spb->setEnabled(mode == DatabaseModel::SegByThreshold);
+		threshold_spb->setVisible(mode == DatabaseModel::SegByThreshold);
 		emit s_segmentationModeSelected(mode);
 	});
 
