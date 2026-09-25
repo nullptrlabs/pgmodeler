@@ -1023,6 +1023,21 @@ int ModelWidget::getActiveSceneIndex()
 	return active_scene_idx;
 }
 
+ObjectsScene *ModelWidget::addScene(Schema *schema)
+{
+	if(!schema || schema_scenes.contains(schema))
+		return nullptr;
+
+	/* pg_catalog is a system schema rarely touched directly by the user (usually
+	 * populated via reverse engineering) -- never let it claim the default active scene,
+	 * even when it's the first schema processed (createSystemObjects() always creates it
+	 * before the file's own schemas are parsed on load) */
+	ObjectsScene *new_scene = addScene(schema->getName() != "pg_catalog");
+	schema_scenes[schema] = new_scene;
+
+	return new_scene;
+}
+
 ObjectsScene *ModelWidget::addScene(bool auto_activate)
 {
 	ObjectsScene *new_scene = new ObjectsScene(this);
@@ -1237,14 +1252,7 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 
 					if(!target_scene)
 					{
-						/* pg_catalog is a system schema rarely touched directly by the user (usually
-						populated via reverse engineering) -- never let it claim the default active scene,
-						even when it's the first schema processed (createSystemObjects() always creates it
-						before the file's own schemas are parsed on load) */
-						bool is_pg_catalog = (schema->getName() == "pg_catalog");
-
-						target_scene = addScene(!is_pg_catalog);
-						schema_scenes[schema] = target_scene;
+						target_scene = addScene(schema);
 						applySceneLayers(target_scene);
 
 						/* public is the conventional default schema -- while the model is being built/loaded,
@@ -1336,6 +1344,18 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 		{
 			target_scene = addScene();
 			applySceneLayers(target_scene);
+
+			/* A schema can land here when its segmentation-mode routing wasn't available yet at the
+			 * time it was added (e.g. pg_catalog, always created by createSystemObjects() before the
+			 * file's own seg-mode attribute is read from the XML in loadModel()). Register it in
+			 * schema_scenes right away, regardless of the current mode -- otherwise, in schema
+			 * segmentation, any of its own children parsed later in the same load (a reverse-engineered
+			 * table living directly in pg_catalog, for instance) would find getSchemaScene() still
+			 * returning nullptr and each land in their own separate safety-net scene instead of this one */
+			Schema *schema = dynamic_cast<Schema *>(graph_obj);
+
+			if(schema && !schema_scenes.contains(schema))
+				schema_scenes[schema] = target_scene;
 		}
 
 		if(item)
@@ -2259,6 +2279,7 @@ void ModelWidget::loadModel(const QString &filename)
 		}
 
 		this->filename = filename;
+
 		updateSceneLayers();
 		updateObjectsOpacity();
 		adjustSceneRect(true);
