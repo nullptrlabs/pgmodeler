@@ -1262,7 +1262,7 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 		model_wgt->db_model->setInvalidated(false);
 
 		if(start_timers)
-			stopSaveTimers(true);
+			stopSaveTimers(false);
 
 		action_save_model->setEnabled(false);
 
