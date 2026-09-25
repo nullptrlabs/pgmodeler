@@ -155,8 +155,19 @@
     depois de voltar pra `NoSegmentation`, provando que a supressão nunca tocou o dado do modelo, só
     a criação do item gráfico. Suíte inteira (14 testes) passa sob `ASAN_OPTIONS=detect_leaks=0`.
     Build limpo (`core`+`canvas`+`gui`+`modelwidgettest`).
-  - **Fase 2 completa** (2.1-2.5, todas implementadas e testadas). Não commitado ainda — aguardando
-    decisão do usuário.
+  - **Fase 2 completa** (2.1-2.5, todas implementadas e testadas, commitadas).
+- **Scaffolding de UI no `SceneInfoWidget`, feito manualmente pelo usuário (2026-09-25), sem lógica
+  ainda ("Pending logic" no commit)**: `sceneinfowidget.ui` ganhou `seg_modes_cmb` (combo com "None"/
+  "By schema"/"By threshold", tooltip explicando os três modos e notando que retângulos de schema
+  ficam desabilitados quando segmentado — mesma decisão da 2.5) e `threshold_spb` (spinbox do valor
+  de threshold). No `.cpp`, só uma conexão local `seg_modes_cmb::activated` habilitando/desabilitando
+  `threshold_spb` conforme o índice selecionado (`idx >= 2`, i.e. só quando "By threshold" está
+  selecionado) — nada ainda lê `DatabaseModel::getSegmentationMode()` nem chama
+  `setSegmentationMode()`/altera `ModelWidget::SceneObjThreshold` a partir desses controles. Este é
+  provavelmente o próximo passo de trabalho: conectar esses dois controles à lógica real (e,
+  possivelmente, decidir o que fazer com o `scene_combo` temporário da subtarefa 1.3 e o `#warning`
+  que força `SegByThreshold` no construtor do `ModelWidget`, já que este widget parece ser o caminho
+  pretendido pra seleção de modo de verdade).
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
