@@ -58,7 +58,8 @@ DatabaseModel::DatabaseModel()
 
 	conn_limit=-1;
 	last_zoom=1;
-	scene_seg_mode=NoSegmentation;
+	scene_seg_mode=saved_seg_mode=NoSegmentation;
+	seg_threshold=saved_seg_threshold=DefaultSegThreshold;
 	loading_model=invalidated=append_at_eod=prepend_at_bod=false;
 	attributes[Attributes::Encoding]="";
 	attributes[Attributes::TemplateDb]="";
@@ -3556,6 +3557,20 @@ void DatabaseModel::loadModel(const QString &filename)
 			scene_rect.setHeight(pos_str[3].toDouble());
 		}
 
+		/* A mode/threshold change made through the UI only takes effect on the next load -- so
+		 * whatever is read here becomes both the active value for this session and the starting
+		 * point of the saved value, keeping the two in sync until the user edits them again */
+		scene_seg_mode = attribs[Attributes::SegMode].isEmpty() ?
+											NoSegmentation : static_cast<SegmentationMode>(attribs[Attributes::SegMode].toUInt());
+		saved_seg_mode = scene_seg_mode;
+
+		seg_threshold = attribs[Attributes::SegThreshold].toUInt();
+
+		if(seg_threshold == 0)
+			seg_threshold = DefaultSegThreshold;
+
+		saved_seg_threshold = seg_threshold;
+
 		this->is_template = attribs[Attributes::IsTemplate] == Attributes::True;
 		this->allow_conns = (attribs[Attributes::AllowConns].isEmpty() ||
 												 attribs[Attributes::AllowConns] == Attributes::True);
@@ -4023,6 +4038,36 @@ void DatabaseModel::setSegmentationMode(SegmentationMode mode)
 DatabaseModel::SegmentationMode DatabaseModel::getSegmentationMode()
 {
 	return scene_seg_mode;
+}
+
+void DatabaseModel::setSavedSegmentationMode(SegmentationMode mode)
+{
+	saved_seg_mode=mode;
+}
+
+DatabaseModel::SegmentationMode DatabaseModel::getSavedSegmentationMode()
+{
+	return saved_seg_mode;
+}
+
+void DatabaseModel::setSegThreshold(unsigned value)
+{
+	seg_threshold=value;
+}
+
+unsigned DatabaseModel::getSegThreshold()
+{
+	return seg_threshold;
+}
+
+void DatabaseModel::setSavedSegThreshold(unsigned value)
+{
+	saved_seg_threshold=value;
+}
+
+unsigned DatabaseModel::getSavedSegThreshold()
+{
+	return saved_seg_threshold;
 }
 
 Role *DatabaseModel::createRole()
@@ -7996,6 +8041,10 @@ void DatabaseModel::setDatabaseModelAttributes(attribs_map &attribs, SchemaParse
 			attribs[Attributes::Changelog] = persist_changelog ? getChangelogDefinition() : "";
 			attribs[Attributes::GenDisabledObjsCode]= gen_dis_objs_code ? Attributes::True : Attributes::False;
 			attribs[Attributes::ShowSysSchemasRects]= show_sys_sch_rects ? Attributes::True : Attributes::False;
+
+			//Persists the saved (pending) mode/threshold, not the active one -- see loadModel()
+			attribs[Attributes::SegMode] = QString::number(saved_seg_mode);
+			attribs[Attributes::SegThreshold] = QString::number(saved_seg_threshold);
 		}
 		catch (Exception &e)
 		{

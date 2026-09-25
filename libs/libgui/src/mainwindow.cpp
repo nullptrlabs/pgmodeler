@@ -1355,6 +1355,14 @@ void MainWindow::setCurrentModel(int idx)
 	if(prev_model && (prev_model == current_model))
 		return;
 
+	/* scene_info_wgt is a single persistent widget shared by every tab, but its scene/segmentation
+	 * controls forward user edits straight to whichever ModelWidget is "current" at connection time
+	 * -- unlike the model-to-widget signals below (Qt::UniqueConnection only dedupes identical
+	 * sender/signal/receiver/slot tuples, it doesn't drop a *previous* receiver), so the old model
+	 * must be explicitly disconnected here or it keeps receiving edits meant for the new one */
+	if(prev_model)
+		disconnect(scene_info_wgt, nullptr, prev_model, nullptr);
+
 	layers_cfg_wgt->setVisible(false);
 	models_tbw->setVisible(models_tbw->count() > 0);
 
@@ -1470,6 +1478,19 @@ void MainWindow::setCurrentModel(int idx)
 		connect(current_model, qOverload<int, const QRectF &>(&ModelWidget::s_sceneInteracted), scene_info_wgt, &SceneInfoWidget::updateSelectedObjects, Qt::UniqueConnection);
 		connect(current_model, qOverload<const QPointF &>(&ModelWidget::s_sceneInteracted), scene_info_wgt, &SceneInfoWidget::updateMousePosition, Qt::UniqueConnection);
 		connect(current_model, &ModelWidget::s_zoomModified, scene_info_wgt, &SceneInfoWidget::updateSceneZoom, Qt::UniqueConnection);
+
+		connect(current_model, &ModelWidget::s_scenesListChanged, this, [this](){
+			scene_info_wgt->updateScenesCombo(current_model->getSceneNames(), current_model->getActiveSceneIndex());
+		}, Qt::UniqueConnection);
+
+		connect(current_model, &ModelWidget::s_activeSceneChanged, this, [this](int idx){
+			scene_info_wgt->updateScenesCombo(current_model->getSceneNames(), idx);
+		}, Qt::UniqueConnection);
+
+		connect(scene_info_wgt, &SceneInfoWidget::s_activeSceneSelected, current_model, &ModelWidget::setActiveScene, Qt::UniqueConnection);
+		connect(scene_info_wgt, &SceneInfoWidget::s_segmentationModeSelected, current_model, &ModelWidget::setPendingSegmentationMode, Qt::UniqueConnection);
+		connect(scene_info_wgt, &SceneInfoWidget::s_thresholdSelected, current_model, &ModelWidget::setPendingSceneThreshold, Qt::UniqueConnection);
+
 		connect(current_model, &ModelWidget::s_newLayerRequested, this, &MainWindow::addNewLayer);
 		connect(current_model, &ModelWidget::s_objectsLayerChanged, layers_cfg_wgt, &LayersConfigWidget::updateRelsVisibility);
 
@@ -1498,6 +1519,9 @@ void MainWindow::setCurrentModel(int idx)
 
 		scene_info_wgt->updateMousePosition(QPointF(0,0));
 		scene_info_wgt->updateSceneZoom(current_model->getCurrentZoom());
+		scene_info_wgt->updateScenesCombo(current_model->getSceneNames(), current_model->getActiveSceneIndex());
+		scene_info_wgt->updateSegmentationInfo(current_model->getDatabaseModel()->getSavedSegmentationMode(),
+																						current_model->getDatabaseModel()->getSavedSegThreshold());
 		current_model->emitSceneInteracted();
 
 		ObjectsScene::setLockDelimiterScale(action_lock_delim->isChecked(),

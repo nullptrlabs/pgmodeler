@@ -434,9 +434,6 @@ class __libgui ModelWidget: public QWidget {
 		MaximumZoom = ObjectsScene::MaxScaleFactor,
 		ZoomIncrement = 0.050000;
 
-		//! \brief Number of objects per scene in threshold-segmentation mode
-		static constexpr unsigned SceneObjThreshold = 500;
-
 		static constexpr char SaveDisabled[] { "save-disabled" },
 		ModelImported[] { "model-imported" },
 		AltFilename[] { "alt-filename" };
@@ -498,6 +495,12 @@ class __libgui ModelWidget: public QWidget {
 
 		//! \brief Returns the number of scenes currently managed by this widget
 		int getSceneCount();
+
+		//! \brief Returns the index of the currently active scene within the scenes collection
+		int getActiveSceneIndex();
+
+		//! \brief Returns a display name for each scene in the collection, in order (schema name if schema-segmented, "Scene N" otherwise)
+		QStringList getSceneNames();
 
 		//! \brief Returns the scene that currently holds the graphical representation of the given object, or nullptr if the object has none
 		ObjectsScene *getSceneForObject(BaseObject *object);
@@ -737,6 +740,16 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Activates the scene at the given index, reattaching it to the viewport
 		void setActiveScene(int idx);
 
+		/*! \brief Sets the segmentation mode to be persisted on the next save. Doesn't affect live
+		 * routing this session (see DatabaseModel::setSavedSegmentationMode()) -- just marks the
+		 * model modified */
+		void setPendingSegmentationMode(DatabaseModel::SegmentationMode mode);
+
+		/*! \brief Sets the segmentation threshold to be persisted on the next save. Doesn't affect
+		 * live routing this session (see DatabaseModel::setSavedSegThreshold()) -- just marks the
+		 * model modified */
+		void setPendingSceneThreshold(unsigned value);
+
 		void loadModel(const QString &filename);
 		void saveModel(const QString &filename);
 		void saveModel();
@@ -758,6 +771,9 @@ class __libgui ModelWidget: public QWidget {
 
 		//! \brief Emitted after setActiveScene() switches the scene attached to the viewport
 		void s_activeSceneChanged(int new_idx);
+
+		//! \brief Emitted whenever a scene is added to or removed from the scenes collection
+		void s_scenesListChanged();
 
 		//! \brief Signal emitted whenever the interaction status is changes (see setInteractive)
 		void s_interactiveChanged(bool);

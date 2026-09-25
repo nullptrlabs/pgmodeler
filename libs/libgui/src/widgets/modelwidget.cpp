@@ -156,10 +156,6 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	protected_model_frm->adjustSize();
 
 	db_model = new DatabaseModel(this);
-
-#warning "test scaffolding: remove this forced ByThreshold segmentation mode once real mode selection exists"
-	db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
-
 	xmlparser = db_model->getXMLParser();
 	op_list = new OperationList(db_model, this);
 
@@ -1020,19 +1016,33 @@ ObjectsScene *ModelWidget::getSchemaScene(Schema *schema)
 	return schema_scenes.value(schema, nullptr);
 }
 
-void ModelWidget::updateSceneCombo()
+QStringList ModelWidget::getSceneNames()
 {
-	scene_combo->blockSignals(true);
-	scene_combo->clear();
+	QStringList names;
 
 	for(int i = 0; i < scenes.size(); i++)
 	{
 		Schema *schema = schema_scenes.key(scenes.at(i), nullptr);
-		scene_combo->addItem(schema ? schema->getName() : tr("Scene %1").arg(i + 1));
+		names.append(schema ? schema->getName() : tr("Scene %1").arg(i + 1));
 	}
 
+	return names;
+}
+
+int ModelWidget::getActiveSceneIndex()
+{
+	return active_scene_idx;
+}
+
+void ModelWidget::updateSceneCombo()
+{
+	scene_combo->blockSignals(true);
+	scene_combo->clear();
+	scene_combo->addItems(getSceneNames());
 	scene_combo->setCurrentIndex(active_scene_idx);
 	scene_combo->blockSignals(false);
+
+	emit s_scenesListChanged();
 }
 
 ObjectsScene *ModelWidget::addScene(bool auto_activate)
@@ -1158,6 +1168,18 @@ void ModelWidget::setActiveScene(int idx)
 	emit s_activeSceneChanged(active_scene_idx);
 }
 
+void ModelWidget::setPendingSegmentationMode(DatabaseModel::SegmentationMode mode)
+{
+	db_model->setSavedSegmentationMode(mode);
+	setModified(true);
+}
+
+void ModelWidget::setPendingSceneThreshold(unsigned value)
+{
+	db_model->setSavedSegThreshold(value);
+	setModified(true);
+}
+
 void ModelWidget::handleObjectAddition(BaseObject *object)
 {
 	BaseGraphicObject *graph_obj=dynamic_cast<BaseGraphicObject *>(object);
@@ -1277,7 +1299,7 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 			}
 			else
 			{
-				/* Naive counter: every SceneObjThreshold Table/View/ForeignTable insertions opens a
+				/* Naive counter: every getSegThreshold() Table/View/ForeignTable insertions opens a
 				 * new scene, and every insertion after that goes to it -- no clustering by
 				 * connectivity, strictly insertion order */
 				if(scenes.isEmpty())
@@ -1290,7 +1312,7 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 
 				base_tab->setSceneIndex(scenes.indexOf(target_scene));
 
-				if(++threshold_obj_count % SceneObjThreshold == 0)
+				if(++threshold_obj_count % db_model->getSegThreshold() == 0)
 				{
 					ObjectsScene *new_scene = addScene(false);
 					applySceneLayers(new_scene);

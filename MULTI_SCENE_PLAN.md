@@ -1495,6 +1495,16 @@ depois.
      o scaffolding preparado em 0.8: modo de segmentação do modelo e `LastScene` (índice numérico
      da cena focada — não o nome do schema, ver decisão revisada na seção 2). Ainda sem uso em
      runtime neste commit — só grava/lê. Depende de: 0.8.
+     **Metade adiantada (2026-09-25)**: a persistência de modo de segmentação + threshold já foi
+     implementada, puxada pra frente pra viabilizar o `SceneInfoWidget` (combo de modo + spinbox de
+     threshold) — ver `DatabaseModel::scene_seg_mode`/`saved_seg_mode`/`seg_threshold`/
+     `saved_seg_threshold` e os atributos XML `seg-mode`/`seg-threshold` (`<dbmodel>`, mirror de
+     `scene-rect`). Falta só `LastScene` (cena focada) — essa parte da subtarefa continua aberta.
+     **Desenho do "atual vs. a salvar"**: como uma troca de modo/threshold só deve valer depois de
+     recarregar o modelo (decisão do usuário), cada um dos dois vive em dois campos — o "ativo"
+     (usado pelo roteamento desta sessão, só muda na carga) e o "a salvar" (editável a qualquer
+     momento pela UI, é o que vai pro XML). Os dois só convergem de novo quando o arquivo é
+     recarregado — nunca em tempo real.
 
 3.2. **Persistência de retângulo por cena** — implementação completa do design fechado na seção 2:
      - DTD dedicado novo [assets/schemas/xml/dtd/scene.dtd](assets/schemas/xml/dtd/scene.dtd) com
