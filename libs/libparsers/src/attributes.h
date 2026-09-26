@@ -642,6 +642,7 @@ extern __libparsers const QString
 	SaveRestoreGeometry,
 	Scene,
 	SceneRect,
+	Scenes,
 	Schema,
 	SchemaOid,
 	Schemas,

@@ -64,6 +64,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void nonActiveSceneRectsMatchTheirItemsAfterReload();
 		void savingWritesLegacySceneRectAsUnionOfAllScenes();
 		void lastSceneSurvivesSaveAndReload();
+		void perSceneRectsSurviveSaveAndReload();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -1340,6 +1341,79 @@ void ModelWidgetTest::lastSceneSurvivesSaveAndReload()
 													 GlobalAttributes::DirSeparator + QString("demo.dbm"));
 
 			QCOMPARE(db_model->getLastScene(), 0);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
+}
+
+/*! \brief Regression test for subtask 3.2: a non-active scene's persisted rect must be restored as-is
+on reload, taking precedence over the itemsBoundingRect() fallback that subtask 3.0 introduced for
+scenes with no persisted entry (old file format, or a brand new scene). Sets a deliberately
+distinctive rect -- one itemsBoundingRect() would never compute on its own from the table's actual
+position -- so a fallback silently kicking in instead of the real persisted value is unambiguous. */
+void ModelWidgetTest::perSceneRectsSurviveSaveAndReload()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_per_scene_rects.dbm");
+
+	/* ObjectsScene::setSceneRect() clamps the size up to a page-derived minimum, but never touches
+	 * the top-left position -- offsetting the position far from where the table actually sits is
+	 * therefore what makes this distinctive regardless of that clamping */
+	QPointF distinctive_pos(9000, 9000);
+	QRectF expected_rect;
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+			db_model->setSavedSegmentationMode(DatabaseModel::SegBySchema);
+			db_model->createSystemObjects(true);
+
+			Schema *schema_a = new Schema;
+			schema_a->setName("schema_a");
+			db_model->addSchema(schema_a);
+
+			Table *table_a = new Table;
+			table_a->setName("table_a");
+			table_a->setSchema(schema_a);
+			table_a->setPosition(QPointF(50, 50));
+			db_model->addTable(table_a);
+
+			ObjectsScene *schema_a_scene = model_wgt.getSchemaScene(schema_a);
+			QVERIFY(schema_a_scene != nullptr);
+			QVERIFY(schema_a_scene != model_wgt.getObjectsScene());
+			QVERIFY(schema_a_scene->sceneRect().topLeft() != distinctive_pos);
+
+			schema_a_scene->setSceneRect(QRectF(distinctive_pos, schema_a_scene->sceneRect().size()));
+			expected_rect = schema_a_scene->sceneRect();
+			QCOMPARE(expected_rect.topLeft(), distinctive_pos);
+
+			model_wgt.saveModel(tmp_file);
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_file);
+
+			Schema *schema_a = dynamic_cast<Schema *>(db_model->getObject("schema_a", ObjectType::Schema));
+			QVERIFY(schema_a != nullptr);
+
+			ObjectsScene *schema_a_scene = model_wgt.getSchemaScene(schema_a);
+			QVERIFY(schema_a_scene != nullptr);
+			QVERIFY(schema_a_scene != model_wgt.getObjectsScene());
+
+			QCOMPARE(schema_a_scene->sceneRect(), expected_rect);
 		}
 	}
 	catch(Exception &e)

@@ -88,6 +88,8 @@
 %procedure;
 <!ENTITY % changelog SYSTEM "changelog.dtd">
 %changelog;
+<!ENTITY % scene SYSTEM "scene.dtd">
+%scene;
 
 <!ELEMENT dbmodel ANY>
 <!ATTLIST dbmodel author CDATA #IMPLIED>

@@ -98,6 +98,7 @@ $br $tb
 %end
 
 > $br
+%if {scenes} %then {scenes} %end
 %if {objects} %then {objects} %end
 %if {permission} %then {permission} %end
 %if {changelog} %then {changelog} %end
