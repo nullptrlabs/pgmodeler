@@ -66,6 +66,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void lastSceneSurvivesSaveAndReload();
 		void perSceneRectsSurviveSaveAndReload();
 		void reloadingModelActivatesTheSavedLastScene();
+		void invalidLastSceneFallsBackToFirstScene();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -1487,6 +1488,50 @@ void ModelWidgetTest::reloadingModelActivatesTheSavedLastScene()
 	}
 
 	QFile::remove(tmp_file);
+}
+
+/*! \brief Regression test for subtask 3.4: a LastScene index that no longer maps to an existing
+scene -- e.g. the file was hand-edited, or the scene it pointed to was removed after the save that
+wrote it -- must fall back to the first available scene, not just silently leave whatever scene
+happened to be active after load. Deliberately activates a non-zero scene first, so a no-op
+wouldn't be mistaken for the fallback actually firing. */
+void ModelWidgetTest::invalidLastSceneFallsBackToFirstScene()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+		db_model->setSavedSegmentationMode(DatabaseModel::SegBySchema);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_a = new Schema;
+		schema_a->setName("schema_a");
+		db_model->addSchema(schema_a);
+
+		Table *table_a = new Table;
+		table_a->setName("table_a");
+		table_a->setSchema(schema_a);
+		db_model->addTable(table_a);
+
+		int scene_count = model_wgt.getObjectsScenes().size();
+		QVERIFY(scene_count > 1);
+
+		model_wgt.setActiveScene(scene_count - 1);
+		QCOMPARE(model_wgt.getActiveSceneIndex(), scene_count - 1);
+
+		//Simulates a stale index -- e.g. the scene it pointed to was removed after the save that wrote it
+		db_model->setLastScene(scene_count + 5);
+
+		model_wgt.restoreLastCanvasPosition();
+
+		QCOMPARE(model_wgt.getActiveSceneIndex(), 0);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
 }
 
 QTEST_MAIN(ModelWidgetTest)

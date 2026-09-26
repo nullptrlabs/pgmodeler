@@ -1581,6 +1581,10 @@ depois.
      save, deixando `LastScene` apontando além do fim da lista), cair para a primeira cena
      disponível em vez de falhar. Depende de: 3.3, 1.10 (cenário de schema removido já precisa
      existir para este fallback fazer sentido).
+     **Implementado (2026-09-26)**: `restoreLastCanvasPosition()` valida `getLastScene()` contra os
+     limites de `scenes` antes de ativar — fora dos limites, ativa o índice `0` explicitamente em
+     vez de deixar o valor inválido passar direto pro guard silencioso de `setActiveScene()` (que já
+     existia e evitava crash, mas não garantia cair especificamente na primeira cena).
 
 3.5. **Teste de regressão fim-a-fim da Fase 3** — fechar, salvar, reabrir um modelo segmentado por
      schema preserva cena focada + zoom/posição daquela cena, e a segmentação por schema se
