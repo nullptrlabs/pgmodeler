@@ -9,13 +9,14 @@
 > reconciliar os dois modos agora é mais barato do que esperar a complexidade da Fase 3 (persistência
 > por schema) crescer mais. **Fases renumeradas**: o que era Fase 3 (Threshold) é a nova **Fase 2**;
 > o que era Fase 2 (Persistência) é a nova **Fase 3** — mesmo conteúdo, só trocaram de posição/número
-> (subtarefas antigas 2.x/3.x foram renumeradas para bater com a fase nova). **Subtarefas 1.11-1.15
-> ficam em standby** (não descartadas, só fora da ordem de trabalho corrente) até a Fase 2 nova
-> (threshold) estar pronta — ver nota em cada uma na Fase 1.
+> (subtarefas antigas 2.x/3.x foram renumeradas para bater com a fase nova).
 > Prioridade: fechar Fases 0-2 (fundação + os dois modos base, por schema e threshold) ponta a
-> ponta antes de aprofundar a persistência fina do modo por schema (Fase 3) — ver seção 4. **Fase 4**
-> (paridade do `pgmodeler-cli`) é dona do usuário e só começa depois das Fases 0-3 prontas — não
-> iniciar por conta própria.
+> ponta antes de aprofundar a persistência fina do modo por schema (Fase 3) — ver seção 4.
+> **Atualização 2026-09-26**: Fases 0-3 concluídas. As antigas subtarefas 1.11-1.15 (que tinham
+> ficado em standby) e os achados/perguntas em aberto que estavam registrados só na seção 5 ("Fora
+> de escopo") foram consolidados numa nova **Fase 4**, um item por subtarefa — ver seção 4. A antiga
+> Fase 4 (paridade do `pgmodeler-cli`) virou **Fase 5**, conteúdo inalterado, ainda dona do usuário
+> e só começa depois da Fase 4 nova estar pronta — não iniciar por conta própria.
 > Atualização 2026-09-18: seções marcadas "achado de revisão de código" / "verificado em revisão
 > de código" foram adicionadas após uma leitura profunda do código real envolvido na Fase 0 (ver
 > arquivos citados nas próprias notas). Uma delas corrige uma afirmação da versão anterior deste
@@ -203,8 +204,8 @@ Estas decisões foram tomadas em conversa e **não devem ser reabertas** sem jus
    **Importante — não é a mesma coisa que descartar a ideia**: agrupamento ciente de conectividade
    (BFS/union-find sobre o grafo de relacionamentos) continua uma opção válida — só não como uma
    variação/flag do modo threshold ingênuo, e sim como um **modo de segmentação novo e independente**
-   a considerar no futuro (candidato a "Fase 4", fora do escopo atual). Ver seção 5 ("Fora de
-   escopo") e a nota correspondente na Fase 2.
+   a considerar no futuro, ainda sem fase própria definida (registrado como pendência de discussão
+   na Fase 4, subtarefa 4.9) e a nota correspondente na Fase 2.
 8. ~~**Terminologia: "Workspace" para o usuário, "cena" internamente**~~ **REVERTIDA em
    2026-09-21** — decisão final do usuário: usar **"cena"/"Scene"** em tudo (UI futura, atributos
    no arquivo `.dbm`, código), sem distinção usuário/interno. Motivo dado: praticidade, e o formato
@@ -659,30 +660,10 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
     View/ForeignTable) cobrem esse tipo. **Decisão do usuário**: roteia sempre pra **cena ativa no
     momento da inserção** (`ModelWidget::scene`), nos dois modos de segmentação — casa com a
     expectativa de quem desenha um textbox olhando pra uma cena específica, e durante carga de
-    arquivo cai naturalmente na cena inicial (nada troca a cena ativa durante o load).
-    **Consideração futura registrada pelo usuário (2026-09-22)**: essa regra funciona sem
-    persistência nova por ser, hoje, determinística na carga (a cena ativa durante o load é sempre
-    a mesma, graças ao tratamento `pg_catalog`/`public` da 1.1) — mas isso só cobre o caso
-    "recarregar sem editar". Dois casos que essa regra **não** cobre ainda, e que apontam pra um
-    mecanismo comum: (a) **modo threshold** (Fase 2) já vai precisar de um atributo `Scene`
-    persistido por objeto (subtarefa 2.2) — hoje redigido só pra Table/View/ForeignTable, mas
-    `Textbox` provavelmente precisa do mesmo tratamento lá, já que não participa do contador; (b)
-    **movimentação manual de um objeto entre cenas** (ainda sem UI/mecanismo desenhado em lugar
-    nenhum do plano — diferente de `moveToSchema()`, que já existe pra tabelas com schema) também
-    precisaria gravar explicitamente "esse objeto pertence à cena X" pra sobreviver a um
-    save/reload, em vez de recair na regra implícita "cena ativa no momento". Ou seja, o mesmo
-    atributo `Scene` por objeto que a Fase 2 vai introduzir é candidato natural a também resolver
-    (a) e (b) — não é escopo da Fase 1 fechar isso agora, mas vale desenhar o atributo (2.2) já
-    pensando em cobrir `Textbox` e reatribuição manual, não só o contador de threshold.
-    **Reconfirmado pelo usuário (2026-09-23), testando a 1.9.6**: diferente de Table/View/
-    ForeignTable — que já ganharam um mecanismo de mover entre cenas na 1.9 (`moveToSchema()`/
-    `schema_sel` de `BaseObjectWidget`, ambos guiados por schema) — `Textbox` não tem schema
-    nenhum pra guiar uma troca de cena, então hoje não existe **nenhum** caminho, nem indireto,
-    pra realocar um textbox de cena depois de criado. Ainda não é bloqueio (a regra "cena ativa na
-    inserção" cobre o caso comum), mas qualquer modo de segmentação futuro que precise mover um
-    textbox de cena (reatribuição manual, ou um textbox "preso" numa cena que o modo threshold
-    decidiu esvaziar) vai precisar desse mecanismo do zero — não é só persistência (3.2), é também
-    a ação de mover em si, que Table/View/ForeignTable já têm e Textbox não. Não implementar agora.
+    arquivo cai naturalmente na cena inicial (nada troca a cena ativa durante o load). Essa regra
+    cobre bem o caso "recarregar sem editar", mas não cobre reatribuição manual entre cenas (nem
+    para `Textbox`, nem para nenhum outro tipo de objeto) — mecanismo ainda não desenhado, movido
+    para a Fase 4, subtarefa 4.2.
 
 #### Relacionamentos cross-scene: promoção/rebaixamento dinâmico
 
@@ -796,163 +777,12 @@ daquele schema precisa ser destruída quando o schema for removido.
   schema + undo completo) antes de fechar a Fase 1, já que a conclusão acima é baseada na leitura
   do código de consumo da pilha, não em execução observada.
 
-#### Ferramenta de criação de relacionamento (caso cross-scene) — PRECISA DE ESTUDO DEDICADO
-
-> Sinalizado explicitamente pelo usuário como um ponto que exige cuidado extra antes de
-> implementar. O que segue é o mapeamento do mecanismo atual e uma direção possível — **não é
-> uma decisão fechada** como as da seção 3. Antes de implementar a Fase 1, revisitar esta
-> subseção com o usuário e fechar o desenho de interação.
-
-**Mecanismo atual (single-scene)**: a criação interativa de relacionamento é dirigida quase
-inteiramente por `ModelWidget::configureObjectSelection()`
-([modelwidget.cpp:1393-1469](libs/libgui/src/widgets/modelwidget.cpp#L1393)), que a cada mudança de
-seleção lê `scene->selectedItems()` (a **cena única**, hard-coded) e decide o que fazer:
-
-1. Usuário aciona uma ação de "novo relacionamento" → `ModelWidget::addNewObject()`
-   ([modelwidget.cpp:1092-1182](libs/libgui/src/widgets/modelwidget.cpp#L1092)) arma
-   `new_obj_type` com o tipo de relacionamento e muda o cursor.
-2. Usuário clica na tabela A (origem) → `scene->selectedItems().size()==1` →
-   `configureObjectSelection()` chama `scene->showRelationshipLine(true, centro_da_tabela_A)`
-   ([modelwidget.cpp:1445-1447](libs/libgui/src/widgets/modelwidget.cpp#L1445)), que ativa
-   `rel_line` — um `QGraphicsLineItem` **membro da própria `ObjectsScene`**, criado no construtor
-   dela ([objectsscene.cpp:75-81](libs/libcanvas/src/objectsscene.cpp#L75)) — desenhando uma linha
-   de borracha da tabela A até o cursor.
-3. Enquanto `rel_line->isVisible()`, `ObjectsScene::mousePressEvent()` força
-   `Qt::ControlModifier` no evento ([objectsscene.cpp:1126-1127](libs/libcanvas/src/objectsscene.cpp#L1126))
-   para que o próximo clique **adicione** a tabela B à seleção em vez de substituí-la.
-4. Com as duas tabelas selecionadas na mesma cena, `configureObjectSelection()` roda de novo,
-   detecta `count==2` ([modelwidget.cpp:1457-1458](libs/libgui/src/widgets/modelwidget.cpp#L1457))
-   e chama `showObjectForm(new_obj_type)` diretamente, finalizando a criação.
-
-**Por que isso não funciona entre cenas diferentes**: `rel_line` é um item gráfico local a UMA
-`ObjectsScene` — não pode ser "arrastado visualmente" de uma cena para outra, porque cada cena
-só recebe eventos de mouse do viewport enquanto está anexada a ele. E mais grave:
-`configureObjectSelection()` conta objetos selecionados lendo **apenas a cena atualmente ativa**
-— uma tabela selecionada numa cena que deixou de estar ativa simplesmente não aparece em
-`scene->selectedItems()` da cena nova, então hoje não há nenhum jeito do estado "tabela A já
-escolhida como origem" sobreviver a uma troca de cena.
-
-**Direção possível (a validar)**: desacoplar a contagem de "quantas tabelas foram escolhidas
-para o relacionamento" da leitura direta de `scene->selectedItems()`, substituindo por um estado
-explícito em `ModelWidget` (não em `ObjectsScene`), algo como um `BaseTable *pending_rel_src`
-que **não** é derivado da seleção do Qt e portanto sobrevive a uma troca de cena:
-
-- Clique na tabela A → grava `pending_rel_src`, mostra `rel_line` normalmente **se** a cena da
-  tabela A for a cena ativa (comportamento atual preservado 1:1 para o caso same-scene).
-- Se o usuário trocar de cena com `pending_rel_src` setado, a linha de borracha não pode mais
-  aparecer (pertence à cena antiga) — o core precisa expor esse estado
-  (`ModelWidget::hasPendingRelationshipSource()` / `getPendingRelationshipSource()`) para que
-  alguma UI futura sinalize "relacionamento pendente, origem: `public.pedidos`" de algum jeito
-  (mensagem, cursor diferente, badge na tabela de origem se ela ainda estiver visível em outro
-  local) — a forma exata de comunicar isso ao usuário é decisão de UX, fora do escopo deste plano
-  de core, mas o **hook** de estado precisa existir.
-- Clique na tabela B numa cena diferente da tabela A finaliza a criação usando
-  `pending_rel_src` + tabela B — cai direto no caminho de conector off-page (decisão #1) em vez
-  de um `RelationshipView` único.
-- Cancelamento (`ModelWidget::cancelObjectAddition()`, Esc, clique fora, etc.) precisa limpar
-  `pending_rel_src` do mesmo jeito que hoje limpa a seleção/linha da cena única.
-
-**Pergunta em aberto para a próxima sessão**: vale a pena permitir a criação cross-scene via essa
-interação em duas etapas (clica A, troca de cena, clica B), ou é aceitável exigir que o usuário
-crie relacionamentos cross-scene por outro caminho (ex. formulário de relacionamento aberto
-manualmente, escolhendo origem/destino de uma lista, sem depender de clique-e-arrasto no canvas)?
-A segunda opção é bem mais simples de implementar e evita todo esse desenho de estado
-pendente — vale decidir isso explicitamente antes de codar a Fase 1.
-
-#### Seleção é sempre local à cena ativa
-
-Levantado junto com o ponto acima: hoje `ModelWidget::selected_objects` é um cache atualizado por
-`configureObjectSelection()` toda vez que `scene->selectionChanged()` dispara, sempre refletindo
-`scene->selectedItems()` da única cena existente. Cada `ObjectsScene` já tem, de graça, seu
-próprio estado de seleção isolado (a flag `QGraphicsItem::isSelected()` só existe nos itens
-daquela cena) — o problema é que o Qt **não limpa automaticamente** a seleção de uma cena quando
-ela deixa de estar anexada ao `viewport`. Sem tratamento, um usuário poderia selecionar objetos na
-cena A, trocar para a cena B, selecionar mais objetos lá, e uma operação em lote generalizada pela
-Fase 0 ("iterar por todas as cenas e agregar", usada por remoção múltipla, copy/paste, set layer
-em lote, etc.) passaria a incluir também os objetos "esquecidos" selecionados na cena A —
-invisíveis no momento, mas afetados pela operação. Isso é perigoso (ex.: usuário acha que está
-removendo só o que vê na cena B, mas também remove algo que tinha selecionado na cena A minutos
-antes e esqueceu).
-
-- **Decisão recomendada** (conforme apontado pelo usuário): `ModelWidget::setActiveScene(int idx)`
-  (API mínima, seção 7) deve chamar `clearSelection()` na cena que está sendo desativada (ou em
-  todas as cenas, por simplicidade/segurança) como parte da troca. Isso já dispara o
-  `selectionChanged()` existente → `configureObjectSelection()` → `selected_objects` esvazia
-  naturalmente, sem precisar de nenhum código novo de sincronização.
-- **Tensão a resolver**: algumas ações de seleção semântica existentes seguem relacionamentos e
-  podem, no caso cross-scene, precisar tocar objetos fora da cena ativa —
-  `ModelWidget::selectTableRelationships()` (seleciona relacionamentos conectados a uma tabela;
-  no caso cross-scene, um desses relacionamentos "pertence" à outra cena) é o exemplo mais claro.
-  `selectSchemaChildren()` fica automaticamente seguro no modo por schema (schema == cena, por
-  construção), mas `selectTaggedTables()` pode span múltiplas cenas livremente (tags não são
-  amarradas a schema/bucket). **Ainda não decidido**: essas ações (a) só selecionam a parte
-  alcançável na cena ativa e sinalizam visualmente o que ficou de fora (via o mesmo conector
-  off-page), ou (b) têm uma exceção explícita à regra "seleção só na cena ativa" para casos de
-  seleção programática/semântica. Precisa da mesma revisão dedicada do item anterior antes da
-  Fase 1.
-
-#### Multi-seleção no Object Search Widget — PRECISA DE ESTUDO DEDICADO
-
-> Sinalizado explicitamente pelo usuário. A busca de objetos é, por natureza, uma operação
-> **de modelo inteiro** (procura em todas as tabelas/views/relacionamentos/schemas do
-> `DatabaseModel`, sem noção de cena) — isso coloca essa feature em tensão direta com a regra
-> "seleção só na cena ativa" da subseção anterior, de um jeito diferente dos outros dois pontos
-> desta fase. Aqui o cross-scene não é uma exceção rara, é o caso normal de uso.
-
-**Mecanismo atual**: `ObjectSearchWidget` mantém **duas** listas de seleção paralelas,
-independentes da seleção nativa do Qt:
-
-- `selected_obj` / `ObjectSearchWidget::selectObject()`
-  ([objectsearchwidget.cpp:291-358](libs/libgui/src/widgets/objectsearchwidget.cpp#L291)): reage à
-  seleção na lista de resultados (`result_view`). Primeiro faz
-  `model_wgt->scene->clearSelection()` (cena única, hard-coded,
-  [objectsearchwidget.cpp:295](libs/libgui/src/widgets/objectsearchwidget.cpp#L295)), monta seu
-  próprio `selected_objs` (vetor local, não é `ModelWidget::selected_objects`), e para **cada**
-  objeto selecionado na lista chama `model_wgt->viewport->centerOn(obj_view)` seguido de
-  `obj_view->setSelected(true)` ([objectsearchwidget.cpp:344-346, 352](libs/libgui/src/widgets/objectsearchwidget.cpp#L344)).
-  Se o usuário multi-seleciona 5 linhas da lista de resultados espalhadas em 3 cenas diferentes,
-  hoje isso chamaria `centerOn()` 5 vezes seguidas — sem nenhum `viewport->setScene()` entre elas
-  — e marcaria `isSelected(true)` em itens de 3 `QGraphicsScene` diferentes simultaneamente.
-- `ObjectSearchWidget::selectObjects()` ([objectsearchwidget.cpp:168-218](libs/libgui/src/widgets/objectsearchwidget.cpp#L168))
-  — a ação de menu "selecionar todos os encontrados" (ou o complemento, "selecionar os não
-  encontrados") — itera por **todos** os objetos do tipo Table/View/Textbox/Relationship/
-  BaseRelationship/Schema do `DatabaseModel` inteiro, chama `obj_view->setSelected(true)` em cada
-  um, e ao final chama `model_wgt->configureObjectSelection()`
-  ([objectsearchwidget.cpp:217](libs/libgui/src/widgets/objectsearchwidget.cpp#L217)) — ou seja,
-  **esta** via alimenta o `ModelWidget::selected_objects` normal, reabrindo exatamente a mesma
-  questão da subseção anterior (bulk-ops agregando por todas as cenas via Fase 0).
-
-**Por que isso é diferente dos outros dois pontos desta fase**: no caso da ferramenta de
-relacionamento e do clique manual no canvas, cross-scene é a exceção que precisa de tratamento
-especial. Aqui, "selecionar todos os objetos que batem com o filtro de busca no modelo inteiro" é
-**a proposta de valor da feature** — restringir a busca à cena ativa por padrão de segurança
-anularia boa parte da utilidade dela (ex.: fade-out em massa de todas as tabelas com um
-determinado prefixo, espalhadas pelo modelo inteiro).
-
-**Opções levantadas pelo usuário, sem decisão fechada ainda**:
-
-1. **Permitir livremente** — seleção lógica (`selected_objs`, ações do próprio widget: editar,
-   fade, popup menu, que operam sobre `BaseObject*` do modelo e não dependem de estar todos na
-   mesma cena) continua cross-scene sem restrição. Only a materialização visual no canvas
-   (`setSelected`/`centerOn`) precisa de uma regra: por exemplo, focar automaticamente a cena do
-   primeiro objeto da seleção, selecionar visualmente só os objetos que pertencem a ela, e para os
-   demais manter apenas a marca lógica em `selected_objs` (sem tocar `isSelected()` de itens fora
-   da cena focada) — evita a "seleção fantasma" acumulando em cenas fora de vista.
-2. **Restringir** — multi-seleção nos resultados só permitida entre objetos da mesma cena;
-   selecionar um objeto de outra cena junto com uma seleção existente é bloqueado ou substitui a
-   seleção anterior. Mais simples e mais seguro, mas quebra o caso de uso "operar em lote no
-   modelo inteiro" que hoje já existe (`selectObjects()`/"select all found").
-3. **Híbrida** — a busca e a seleção lógica continuam sempre cross-scene (nenhuma restrição na
-   ação de encontrar/marcar), mas ações que dependem de estado visual do canvas (abrir formulário
-   que centraliza a view, popup-menu no canvas) escolhem uma cena-alvo (ex. a do primeiro objeto)
-   e ignoram/avisam sobre os demais só para fins de destaque visual; ações "de dados" (fade,
-   set layer, set tag, remoção) continuam operando sobre a lista lógica completa, sem exigir mesma
-   cena.
-
-Recomendação preliminar (a confirmar com o usuário antes da Fase 1): opção 3, por preservar o
-propósito original da feature (operar em lote no modelo inteiro) sem violar a regra de segurança
-de seleção-visual-por-cena fechada na subseção anterior. Mas, assim como os outros dois pontos
-desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
+> **As três subseções de estudo dedicado que ficavam aqui** ("Ferramenta de criação de
+> relacionamento cross-scene", "Seleção é sempre local à cena ativa", "Multi-seleção no Object
+> Search Widget") **foram movidas para a Fase 4** (subtarefas 4.3, 4.4 e 4.5) em 2026-09-26, junto
+> com o resto das pendências da Fase 1 — nenhuma das três foi decidida nem implementada durante a
+> Fase 1 em si. Ver seção 4, Fase 4, para o mapeamento completo do mecanismo atual e as opções já
+> levantadas para cada uma.
 
 #### Subtarefas da Fase 1 (uma por commit)
 
@@ -1211,52 +1041,19 @@ desta fase, **não implementar antes de revisitar esta escolha com o usuário**.
       destruir o objeto, e atualizar/reposicionar a seleção do combo de 1.3); limpar entradas de
       conexão externa apontando para o schema removido. Depende de: 1.3, 1.6, 1.8.
 
-> **Subtarefas 1.11-1.15 em standby (2026-09-24)** — decisão do usuário de antecipar a Fase 2
-> (segmentação por threshold) em vez de fechar todos os pontos em aberto da Fase 1 primeiro. Não
-> descartadas, só fora da ordem de trabalho corrente; retomam quando a Fase 2 nova estiver pronta.
-
-1.11. **Teste de regressão dedicado: cascade delete de schema + undo** — cobrir explicitamente
-      schema com filhos cross-scene, remoção da cena atualmente focada, e undo completo de uma
-      remoção em cascata (ver riscos, seção 6). Commit de teste próprio, separado de 1.10, para
-      poder reverter só a destruição de cena caso o teste revele um problema sem perder o resto da
-      fase. Depende de: 1.10.
-
-1.12. **[Requer fechamento de decisão com o usuário] Ferramenta de criação de relacionamento
-      cross-scene** — implementar `pending_rel_src` (ou a alternativa de formulário manual,
-      conforme a pergunta em aberto da subseção "Ferramenta de criação de relacionamento") só
-      depois de decidir com o usuário qual caminho seguir. O combo de 1.3 é útil aqui mesmo se a
-      direção escolhida não depender dele, como forma rápida de montar cenários de teste
-      cross-scene. Depende de: 1.8.
-
-1.13. **[Requer fechamento de decisão com o usuário] Seleção sempre local à cena ativa** —
-      `setActiveScene()` limpa a seleção ao trocar de cena (testável diretamente pelo combo de
-      1.3); resolver a tensão com `selectTableRelationships()`/`selectTaggedTables()` (opção (a)
-      ou (b) da subseção "Seleção é sempre local à cena ativa"). Depende de: 0.2, 1.3, 1.8.
-
-1.14. **[Requer fechamento de decisão com o usuário] Multi-seleção no Object Search Widget** —
-      implementar a política escolhida entre as opções 1/2/3 da subseção dedicada (recomendação
-      preliminar: opção 3). Depende de: 1.13.
-
-1.15. **Cor exclusiva para o marcador cut-off** — hoje `CutoffItem` reaproveita
-      `Attributes::PositionInfo` (fill/border/font) pra desenhar a linha e o rótulo, sem ter
-      identidade visual própria. Precisa de: (a) nova chave em `Attributes::` (libparsers) pra
-      identificar o elemento; (b) entrada nova em `AppearanceConfigWidget::element_cmb`
-      (`appearanceconfigwidget.cpp`, junto de `conf_ids`/`obj_conf_ids`) pra expor fill/border/font
-      configuráveis pelo usuário, do mesmo jeito que os demais elementos gráficos; (c) atualizar o
-      arquivo de configuração de aparência (tema padrão + persistência) com a chave nova; (d)
-      trocar `CutoffItem` (linha, fundo do rótulo, texto, `obj_selection`) de `PositionInfo` pra
-      essa chave nova. Depende de: 1.8.
+> **Antigas subtarefas 1.11-1.15, movidas para a Fase 4 (2026-09-26)** — tinham ficado em standby
+> desde 2026-09-24 (decisão de antecipar a Fase 2) e nunca foram retomadas depois; consolidadas na
+> nova Fase 4 junto com os achados/perguntas em aberto da seção 5, um item por subtarefa. Ver seção
+> 4, Fase 4, para o conteúdo completo de cada uma (teste de cascade delete + undo, ferramenta de
+> relacionamento cross-scene, seleção local à cena ativa, Object Search Widget, cor do cut-off).
 
 > **Gate de aceite da fase (não é commit de código)**: modelo grande
 > (`/home/raphael/dbm_models/big_model.dbm`) segmentado por schema deve navegar (usando o combo de
 > 1.3), editar, remover (com e sem cascade) e desfazer/refazer corretamente, com conectores
-> cut-off aparecendo/sumindo conforme tabelas mudam de schema. As três subtarefas 1.12-1.14 só
-> entram depois de fechadas com o usuário (seção 6).
+> cut-off aparecendo/sumindo conforme tabelas mudam de schema.
 
 ### Fase 2 — Segmentação por Threshold (algoritmo fechado, detalhes de UX/borda a refinar)
 
-> **Subtarefas 1.11-1.15 (Fase 1) em standby (2026-09-24)** — não descartadas, só fora da ordem de
-> trabalho corrente; retomam quando esta fase (Fase 2, threshold) estiver pronta.
 > **Antecipada nesta reorganização (2026-09-24)** — decisão do usuário de implementar o modo
 > threshold logo após a Fase 1, em vez de deixá-lo por último: o código ainda está pouco acoplado a
 > "1 Schema = 1 cena" nesta altura, então reconciliar os dois modos agora é mais barato do que
@@ -1596,13 +1393,312 @@ depois.
      (subtarefa é só de teste, todo o comportamento coberto já foi implementado em 3.0-3.4). Ver
      `MULTI_SCENE_PROGRESS.md` para detalhamento.
 
-### Fase 4 — Paridade do `pgmodeler-cli` com a segmentação multi-cena
+### Fase 4 — Pendências da Fase 1 + achados registrados fora de escopo
 
-> **Tarefa pendente, ainda não iniciada.** Encontrada na subtarefa 0.7, registrada aqui a pedido
-> do usuário. Ordem de trabalho definida por ele: só começar depois que as Fases 0-3 (o lado GUI,
-> via `ModelWidget`) estiverem inteiramente acertadas. Dono: usuário ("Eu farei a revisão da CLI
-> assim que tivermos tudo acertado na GUI", 2026-09-21) — não iniciar por conta própria antes
-> disso.
+> **Criada em 2026-09-26**, a pedido do usuário, consolidando num único lugar: (a) as antigas
+> subtarefas 1.11-1.15 da Fase 1, que tinham ficado em standby desde 2026-09-24 e nunca foram
+> retomadas; (b) o achado sobre `Textbox` sem mecanismo de reatribuição de cena, que estava na
+> intro da Fase 1; (c) os achados/perguntas em aberto que estavam registrados na seção 5 ("Fora de
+> escopo"), cada um com pergunta de design própria, nunca fechada com o usuário; (d) um débito de
+> limpeza (scaffolding de debug) achado numa revisão de código, não registrado em lugar nenhum
+> antes. Cada um vira uma subtarefa numerada abaixo, um item por commit, mesma convenção do resto
+> do plano. Como esta fase mistura naturezas bem diferentes (teste, cosmético, limpeza, e decisões
+> de design ainda não fechadas), a ordem de trabalho é: subtarefas sem marcação especial têm lógica
+> já concreta e podem ser implementadas diretamente; subtarefas marcadas
+> **[Requer fechamento de decisão com o usuário]** precisam de uma conversa fechando a abordagem
+> antes de qualquer código.
+
+4.1. **Teste de regressão dedicado: cascade delete de schema + undo** (ex-1.11) — cobrir
+     explicitamente schema com filhos cross-scene, remoção da cena atualmente focada, e undo
+     completo de uma remoção em cascata (ver riscos, seção 6). Commit de teste próprio, separado
+     de 1.10, para poder reverter só a destruição de cena caso o teste revele um problema sem
+     perder o resto da fase. Lógica já concreta (comportamento a testar já está implementado desde
+     a 1.10) — pronta para implementação direta. Depende de: 1.10.
+
+4.2. **Reatribuição manual de objetos entre cenas** (achado da intro da Fase 1, 2026-09-22/23) —
+     hoje não existe nenhum mecanismo, nem indireto, para mover um objeto de uma cena para outra
+     sem passar por `moveToSchema()` (que só existe para Table/View/ForeignTable com schema, e é
+     guiado pelo schema, não por escolha direta de cena). `Textbox` é o caso mais claro — não tem
+     schema nenhum para guiar uma troca, então não tem caminho nenhum hoje. O mesmo atributo
+     persistido `Scene` que a subtarefa 2.2 introduziu para Table/View/ForeignTable é candidato
+     natural a também cobrir isso, mas 2.2 restringiu deliberadamente o escopo a esses três tipos
+     — a extensão para `Textbox` e para reatribuição manual de qualquer objeto (não só os que já
+     têm schema) continua não desenhada. **[Requer fechamento de decisão com o usuário]**: que UI
+     dispara a reatribuição (menu de contexto "mover para cena..."? arrastar entre abas/combo?) e
+     se o mecanismo é genérico (qualquer `BaseObject`) ou só fecha o buraco específico do
+     `Textbox`. Depende de: 2.2.
+
+4.3. **[Requer fechamento de decisão com o usuário] Ferramenta de criação de relacionamento
+     cross-scene** (ex-1.12) — sinalizado explicitamente pelo usuário como ponto que exige cuidado
+     extra antes de implementar.
+     - **Mecanismo atual (single-scene)**: a criação interativa de relacionamento é dirigida quase
+       inteiramente por `ModelWidget::configureObjectSelection()`
+       ([modelwidget.cpp:1393-1469](libs/libgui/src/widgets/modelwidget.cpp#L1393)), que a cada
+       mudança de seleção lê `scene->selectedItems()` (a **cena única**, hard-coded) e decide o que
+       fazer: (1) usuário aciona "novo relacionamento" → `ModelWidget::addNewObject()`
+       ([modelwidget.cpp:1092-1182](libs/libgui/src/widgets/modelwidget.cpp#L1092)) arma
+       `new_obj_type`; (2) clique na tabela A → `scene->selectedItems().size()==1` →
+       `scene->showRelationshipLine(true, centro_da_tabela_A)`
+       ([modelwidget.cpp:1445-1447](libs/libgui/src/widgets/modelwidget.cpp#L1445)) ativa `rel_line`
+       — um `QGraphicsLineItem` **membro da própria `ObjectsScene`**
+       ([objectsscene.cpp:75-81](libs/libcanvas/src/objectsscene.cpp#L75)); (3) enquanto
+       `rel_line->isVisible()`, `ObjectsScene::mousePressEvent()` força `Qt::ControlModifier`
+       ([objectsscene.cpp:1126-1127](libs/libcanvas/src/objectsscene.cpp#L1126)) para que o próximo
+       clique adicione a tabela B em vez de substituir a seleção; (4) com as duas na mesma cena,
+       `configureObjectSelection()` detecta `count==2`
+       ([modelwidget.cpp:1457-1458](libs/libgui/src/widgets/modelwidget.cpp#L1457)) e chama
+       `showObjectForm(new_obj_type)` diretamente.
+     - **Por que isso não funciona entre cenas diferentes**: `rel_line` é local a UMA `ObjectsScene`
+       — não pode ser "arrastado visualmente" de uma cena pra outra, porque cada cena só recebe
+       eventos de mouse enquanto anexada ao viewport. E mais grave: `configureObjectSelection()`
+       conta objetos selecionados lendo **apenas a cena ativa** — uma tabela selecionada numa cena
+       que deixou de estar ativa some de `scene->selectedItems()` da cena nova, então hoje não há
+       jeito do estado "tabela A já escolhida como origem" sobreviver a uma troca de cena.
+     - **Direção possível (a validar)**: desacoplar a contagem de "quantas tabelas foram escolhidas"
+       da leitura direta de `scene->selectedItems()`, substituindo por um estado explícito em
+       `ModelWidget` (não em `ObjectsScene`), tipo `BaseTable *pending_rel_src` que não é derivado
+       da seleção do Qt e sobrevive a uma troca de cena: clique na tabela A grava
+       `pending_rel_src` e mostra `rel_line` normalmente **se** a cena da tabela A for a ativa
+       (caso same-scene preservado 1:1); se o usuário trocar de cena com `pending_rel_src` setado,
+       a linha não pode mais aparecer (pertence à cena antiga) — o core precisa expor esse estado
+       (`hasPendingRelationshipSource()`/`getPendingRelationshipSource()`) para alguma UI futura
+       sinalizar "relacionamento pendente, origem: X" (forma exata é decisão de UX, fora do core,
+       mas o hook de estado precisa existir); clique na tabela B numa cena diferente finaliza a
+       criação usando `pending_rel_src` + tabela B, caindo no conector off-page (decisão #1) em vez
+       de `RelationshipView` único; cancelamento precisa limpar `pending_rel_src` do mesmo jeito que
+       hoje limpa seleção/linha da cena única.
+     - **Pergunta em aberto**: vale a pena permitir criação cross-scene via essa interação em duas
+       etapas (clica A, troca de cena, clica B), ou é aceitável exigir que o usuário crie
+       relacionamentos cross-scene por outro caminho (ex. formulário manual, escolhendo
+       origem/destino de uma lista, sem depender de clique-e-arrasto)? A segunda opção é bem mais
+       simples e evita todo o desenho de estado pendente. O combo de cenas (`SceneInfoWidget`,
+       Fase 2) é útil aqui mesmo se a direção escolhida não depender dele, como forma rápida de
+       montar cenários de teste cross-scene. Depende de: 1.8.
+
+4.4. **[Requer fechamento de decisão com o usuário] Seleção sempre local à cena ativa** (ex-1.13)
+     — hoje `ModelWidget::selected_objects` é um cache atualizado por `configureObjectSelection()`
+     toda vez que `scene->selectionChanged()` dispara, sempre refletindo `scene->selectedItems()`
+     da única cena existente. Cada `ObjectsScene` já tem, de graça, seu próprio estado de seleção
+     isolado (`QGraphicsItem::isSelected()` só existe nos itens daquela cena) — o problema é que o
+     Qt **não limpa automaticamente** a seleção de uma cena quando ela deixa de estar anexada ao
+     viewport. Sem tratamento, selecionar na cena A, trocar pra cena B, selecionar mais lá, e rodar
+     uma operação em lote (remoção múltipla, copy/paste, set layer em lote) passaria a incluir
+     também os objetos "esquecidos" selecionados na cena A — invisíveis no momento, mas afetados.
+     - `setActiveScene()` já limpa a seleção ao trocar de cena (decisão recomendada, já
+       implementada e testável diretamente pelo combo de cenas) — falta resolver a tensão com
+       ações de seleção semântica que seguem relacionamentos e podem, no caso cross-scene,
+       precisar tocar objetos fora da cena ativa: `selectTableRelationships()` (relacionamentos
+       conectados a uma tabela; no caso cross-scene, um deles "pertence" à outra cena) é o exemplo
+       mais claro. `selectSchemaChildren()` fica automaticamente seguro no modo por schema (schema
+       == cena, por construção), mas `selectTaggedTables()` pode espalhar por múltiplas cenas
+       livremente (tags não são amarradas a schema/bucket).
+     - **Ainda não decidido**: essas ações (a) só selecionam a parte alcançável na cena ativa e
+       sinalizam visualmente o que ficou de fora (via o mesmo conector off-page), ou (b) têm uma
+       exceção explícita à regra "seleção só na cena ativa" para casos de seleção
+       programática/semântica. Depende de: 0.2, 1.8.
+
+4.5. **[Requer fechamento de decisão com o usuário] Multi-seleção/navegação no Object Search
+     Widget** (ex-1.14) — sinalizado explicitamente pelo usuário; **este é o item que motivou a
+     criação desta fase** (relato de 2026-09-26: clicar num objeto encontrado não muda a cena
+     visível para a cena daquele objeto). A busca de objetos é, por natureza, uma operação **de
+     modelo inteiro** (procura em todas as tabelas/views/relacionamentos/schemas do
+     `DatabaseModel`, sem noção de cena) — isso coloca essa feature em tensão direta com a 4.4, de
+     um jeito diferente dos outros dois pontos desta fase: aqui o cross-scene não é uma exceção
+     rara, é o caso normal de uso.
+     - **Mecanismo atual, confirmado em código (2026-09-26)**: `ObjectSearchWidget` mantém duas
+       listas de seleção paralelas, independentes da seleção nativa do Qt. `selectObject()`
+       ([objectsearchwidget.cpp:290-349](libs/libgui/src/widgets/objectsearchwidget.cpp#L290))
+       reage à seleção na lista de resultados: primeiro faz `model_wgt->scene->clearSelection()`
+       (cena **ativa**, fixa, não a cena do objeto encontrado), monta seu próprio `selected_objs`
+       local, e para cada objeto chama `model_wgt->viewport->centerOn(obj_view)` seguido de
+       `obj_view->setSelected(true)` — **sem nunca chamar `setActiveScene()`/`viewport->setScene()`**.
+       Se o objeto pertence a uma cena diferente da ativa, `centerOn()` opera sobre uma cena que o
+       viewport nem está exibindo, e a seleção visual fica presa numa cena fora de vista — hoje não
+       existe nenhum caminho para clicar um resultado de outra cena e a cena mudar. Se o usuário
+       multi-seleciona 5 linhas espalhadas em 3 cenas, isso chamaria `centerOn()` 5 vezes seguidas
+       sem nenhum `setScene()` entre elas, e marcaria `isSelected(true)` em itens de 3
+       `QGraphicsScene` diferentes simultaneamente.
+     - `ObjectSearchWidget::selectObjects()`
+       ([objectsearchwidget.cpp:168-218](libs/libgui/src/widgets/objectsearchwidget.cpp#L168)) — a
+       ação de menu "selecionar todos os encontrados"/"selecionar os não encontrados" — itera por
+       **todos** os objetos do tipo Table/View/Textbox/Relationship/BaseRelationship/Schema do
+       `DatabaseModel` inteiro, chama `setSelected(true)` em cada um, e ao final chama
+       `model_wgt->configureObjectSelection()` — alimenta o `ModelWidget::selected_objects` normal,
+       reabrindo a mesma questão da 4.4 (bulk-ops agregando por todas as cenas via Fase 0).
+     - **Por que isso é diferente da 4.3/4.4**: lá, cross-scene é a exceção que precisa de
+       tratamento especial. Aqui, "selecionar todos os objetos que batem com o filtro de busca no
+       modelo inteiro" é **a proposta de valor da feature** — restringir a busca à cena ativa por
+       padrão anularia boa parte da utilidade (ex.: fade-out em massa de tabelas com um prefixo,
+       espalhadas pelo modelo inteiro).
+     - **Opções levantadas pelo usuário, sem decisão fechada**:
+       1. **Permitir livremente** — seleção lógica (`selected_objs`, ações do próprio widget:
+          editar, fade, popup menu, que operam sobre `BaseObject*` e não dependem de estarem todos
+          na mesma cena) continua cross-scene sem restrição; só a materialização visual no canvas
+          (`setSelected`/`centerOn`) precisa de regra — ex. focar automaticamente a cena do
+          primeiro objeto, selecionar visualmente só o que pertence a ela, manter marca lógica nos
+          demais sem tocar `isSelected()` deles.
+       2. **Restringir** — multi-seleção nos resultados só permitida entre objetos da mesma cena;
+          selecionar de outra cena junto com uma seleção existente é bloqueado ou substitui a
+          seleção anterior. Mais simples e seguro, mas quebra o caso de uso "operar em lote no
+          modelo inteiro" que já existe hoje (`selectObjects()`/"select all found").
+       3. **Híbrida** — busca e seleção lógica continuam sempre cross-scene; ações que dependem de
+          estado visual do canvas (abrir formulário que centraliza a view, popup-menu) escolhem uma
+          cena-alvo (ex. a do primeiro objeto) e ignoram/avisam sobre os demais só para fins de
+          destaque visual; ações "de dados" (fade, set layer, set tag, remoção) continuam operando
+          sobre a lista lógica completa, sem exigir mesma cena.
+     - Recomendação preliminar (a confirmar): opção 3, por preservar o propósito original da
+       feature sem violar a regra de segurança de seleção-visual-por-cena da 4.4. Depende de: 4.4.
+
+4.6. **Cor exclusiva para o marcador cut-off** (ex-1.15) — hoje `CutoffItem` reaproveita
+     `Attributes::PositionInfo` (fill/border/font) pra desenhar a linha e o rótulo, sem ter
+     identidade visual própria. Precisa de: (a) nova chave em `Attributes::` (libparsers) pra
+     identificar o elemento; (b) entrada nova em `AppearanceConfigWidget::element_cmb`
+     (`appearanceconfigwidget.cpp`, junto de `conf_ids`/`obj_conf_ids`) pra expor fill/border/font
+     configuráveis pelo usuário, do mesmo jeito que os demais elementos gráficos; (c) atualizar o
+     arquivo de configuração de aparência (tema padrão + persistência) com a chave nova; (d) trocar
+     `CutoffItem` (linha, fundo do rótulo, texto, `obj_selection`) de `PositionInfo` pra essa chave
+     nova. Lógica já concreta (é wiring de configuração, mesmo padrão já usado por outros elementos
+     gráficos) — pronta para implementação direta. Depende de: 1.8.
+
+4.7. **Limpeza de scaffolding de debug da subtarefa 2.1** (achado de revisão de código,
+     2026-09-26, não registrado em lugar nenhum antes) — três blocos de
+     `#warning "Testing segmentation by threshold"` + `qDebug()` ainda presentes em
+     `ModelWidget::handleObjectAddition()`
+     ([modelwidget.cpp:1328,1351,1357](libs/libgui/src/widgets/modelwidget.cpp#L1328)), resíduo de
+     teste manual da subtarefa 2.1 (Fase 2) nunca removido. Lógica já concreta (é só remover código
+     morto) — pronta para implementação direta. Depende de: 2.1.
+
+4.8. **Merge automático de cenas subutilizadas** — ideia registrada sem nenhum desenho ainda (só
+     uma linha na antiga seção 5). **[Requer fechamento de decisão com o usuário]**: sequer está
+     claro se isso é desejado — a política atual (2.4) é deliberadamente **não** mesclar/destruir
+     cenas esvaziadas no modo threshold. Precisa de conversa do zero antes de qualquer desenho.
+
+4.9. **Sugestão automática de modo de segmentação** (achado do usuário, 2026-09-21, confirmado
+     testando `big_model.dbm`) — esse modelo tem 4 schemas (`pg_catalog`, `public`, `dv4`,
+     `dvaudit`), mas só `dv4` tem objetos — a lentidão original persiste mesmo com a Fase 1 (por
+     schema) implementada, porque toda a densidade cai numa única cena. Confirma que os dois modos
+     base são complementares, não substitutos: por schema ajuda quando os objetos já estão
+     distribuídos entre vários schemas; `big_model.dbm` é o caso oposto, candidato natural a
+     threshold. Ideia: o pgModeler poderia detectar esse padrão (poucos schemas populados
+     concentrando a maior parte dos objetos) e sugerir ativamente ao usuário o modo mais adequado,
+     em vez de deixar a escolha inteiramente manual — é uma camada de UX por cima dos dois modos
+     base. **[Requer fechamento de decisão com o usuário]**: critério exato de detecção, e como/
+     quando a sugestão é apresentada (ao abrir o arquivo? sob demanda?).
+
+4.10. **Terceiro modo de segmentação: threshold com agrupamento ciente de conectividade** (BFS/
+      union-find sobre o grafo de relacionamentos, para minimizar cross-scene mantendo clusters
+      fortemente conectados no mesmo bucket). Não descartado — candidato genuíno, mas escopo bem
+      maior que as demais subtarefas desta fase (é um modo de segmentação novo e independente, não
+      uma flag/variação do threshold ingênuo da Fase 2, que precisa continuar existindo e
+      previsível como está — ver decisão #7, seção 3): o ingênuo prioriza ordem previsível dos
+      objetos, o com clustering prioriza minimizar cross-scene à custa de reordenar objetos entre
+      cenas de um jeito não literal à ordem de inserção. **[Requer fechamento de decisão com o
+      usuário]**: provavelmente vira sua própria fase (Fase 6?) quando for retomado, em vez de um
+      commit único desta Fase 4 — esta subtarefa é só o registro da pendência, não um compromisso
+      de tamanho.
+
+4.11. **Ações de contexto "criar tag/layer a partir dos schemas existentes"** (ideia do usuário,
+      2026-09-24) — no `ModelObjectsWidget` (árvore de objetos), ação de contexto sobre um `Schema`
+      específico e, no menu de contexto global do canvas, ação em lote sobre todos os schemas do
+      modelo — para criar automaticamente uma `Tag`/camada (`Layer`) por schema e associar às
+      tabelas/views/foreign tables filhas. Motivação: atalho pra granularizar ainda mais a
+      segmentação **visual** do modelo — tags e camadas são ortogonais à segmentação por cena
+      (funcionam dentro de qualquer cena, nos três modos).
+      - **Tags**: nova `Tag` por schema (nome a partir do nome do schema), associada a cada tabela
+        filha via a API de tag por objeto já existente. Cor: usar a mesma cor do retângulo do
+        schema (`Schema::getFillColor()`) como cor de título da tabela na tag nova
+        (`Tag::setElementColor(title_color_attrib, cor, ColorId::FillColor1)` — mesmo atributo que
+        `TableTitleView::configureObject()` já lê,
+        [tabletitleview.cpp:125-132](libs/libcanvas/src/tabletitleview.cpp#L125)). Em modo
+        segmentado, onde o retângulo do schema é suprimido (2.5), o usuário recupera uma pista
+        visual equivalente sem precisar do retângulo.
+      - **Layers**: nova camada por schema (`LayersConfigWidget::addLayer()`), com as tabelas
+        filhas adicionadas via `BaseGraphicObject::setLayers()`
+        ([basegraphicobject.h:140-141](libs/libcore/src/basegraphicobject.h#L140)).
+      - **[Requer fechamento de decisão com o usuário]**: (a) o que fazer se uma tabela já tiver
+        tag/camada própria — sobrescrever, pular, ou perguntar; (b) desambiguação de nome se já
+        existir uma tag/camada com o nome do schema; (c) a ação em lote do menu global processa
+        todos os schemas de uma vez ou pede seleção/confirmação antes; (d) disponibilidade em todo
+        modo de segmentação ou só em algum.
+
+4.12. **Algoritmos de rearranjo automático: cena atual ou todas?** (pergunta do usuário,
+      2026-09-24) — os três algoritmos por trás do menu "Rearrange objects"
+      (`MainWindow::arrangeObjects()`, [mainwindow.cpp:2424-2444](libs/libgui/src/mainwindow.cpp#L2424)
+      — `rearrangeSchemasInGrid()`, `rearrangeTablesHierarchically()`, `rearrangeTablesInSchemas()`)
+      são **inteiramente cena-agnósticos**: cada um itera `db_model->getObjectList(...)` (o modelo
+      inteiro) sem checar em qual `ObjectsScene` cada objeto está. `rearrangeTablesHierarchically()`,
+      por exemplo, escolhe uma única tabela "raiz" entre **todas** as tabelas do modelo e monta a
+      árvore inteira a partir dela, mesmo que schemas diferentes vivam em cenas diferentes hoje. Em
+      qualquer modo segmentado, essas três ações continuam reposicionando objetos de todas as cenas
+      de uma vez, ignorando por completo a divisão em cenas.
+      - **[Requer fechamento de decisão com o usuário]**: o rearranjo deve passar a considerar só a
+        cena ativa (cada cena rearranjada de forma independente) ou continuar operando sobre o
+        modelo inteiro (comportamento histórico da ferramenta)? Cena atual é consistente com a
+        filosofia geral da feature (decisão #9, seção 3); modelo inteiro preserva o comportamento
+        histórico.
+      - **Notas técnicas**: os três algoritmos já recebem/calculam posições absolutas (`QPointF`)
+        — restringir a uma cena seria filtrar `getObjectList()` por
+        `getSceneForObject(obj) == scene` (cena ativa) antes de processar, análogo ao filtro que
+        `selectAllObjects()` já usa. `rearrangeTablesHierarchically()` precisaria de atenção
+        redobrada: a escolha da tabela "raiz" e a travessia por relacionamentos cruzam schemas
+        livremente hoje — restringir por cena pode deixar relacionamentos cross-scene "cortando" a
+        árvore de um jeito que o algoritmo atual nunca precisou considerar. Cruza com a Fase 5
+        (achado colateral 2 do CLI, mesma pergunta).
+
+4.13. **Exportação para PNG/SVG fragmentada em múltiplos arquivos, um por cena** (achado do
+      usuário, 2026-09-26) — `ModelExportWidget::exportModel()`
+      ([modelexportwidget.cpp:293-347](libs/libgui/src/tools/modelexportwidget.cpp#L293)) itera
+      `getObjectsScenes()` e exporta **cada cena pro seu próprio arquivo** — com mais de uma cena,
+      insere sufixo `_<índice>` antes da extensão. Screenshots do usuário confirmam: exportar um
+      modelo com schemas `public`/`schema_a`/`schema_b` gera 3+ imagens separadas, cada uma só com
+      os objetos daquela cena — nenhuma visão única do modelo inteiro. Mesmo mecanismo pros dois
+      formatos (`exportToPNG`/`exportToSVG`, ambos recebem uma `ObjectsScene*` só). **Não afeta
+      exportação SQL** — essa já opera sobre `db_model` inteiro, sem noção de cena.
+      - **[Requer fechamento de decisão com o usuário]**: esse comportamento (um arquivo por cena)
+        tem valor de verdade, ou o esperado é sempre juntar tudo numa imagem única (como era antes
+        da segmentação existir)? Juntar não é trivial — cada `ObjectsScene` tem seu próprio sistema
+        de coordenadas independente, então "colar" os retângulos de várias cenas lado a lado exige
+        decidir um layout (grid? uma ao lado da outra? por ordem de criação?) que hoje não existe
+        em lugar nenhum do código. Existe também a opção de manter a fragmentação atual mas tornar
+        a decisão explícita pro usuário (checkbox "uma imagem por cena" vs "modelo inteiro") em vez
+        de comportamento implícito.
+
+4.14. **Formulário de engenharia reversa sem opção de escolher o modo de segmentação** (achado do
+      usuário, 2026-09-26) — `DatabaseImportWidget` (módulo `priv-core`, repositório separado) tem
+      dois caminhos: **importar como modelo novo**
+      ([databaseimportwidget.cpp:386-389](priv-core/src/libgui/tools/databaseimportwidget.cpp#L386))
+      — cria um `ModelWidget`/`DatabaseModel` do zero e chama `createSystemObjects(true)` — ou
+      **importar pra dentro de um modelo já aberto**
+      ([databaseimportwidget.cpp:171](priv-core/src/libgui/tools/databaseimportwidget.cpp#L171)).
+      O segundo caminho já resolve sozinho — os objetos importados entram pelo mesmo
+      `handleObjectAddition()` de sempre, herdando o modo de segmentação que aquele modelo já tem
+      configurado. O primeiro não: o `DatabaseModel` novo nasce com o modo default
+      (`NoSegmentation`), e nada no formulário deixa o usuário escolher outro antes da importação
+      rodar — hoje, importar sempre gera um modelo de cena única, mesmo que o caso mais natural
+      pra reverse engineering fosse abrir já segmentado por schema (o banco de origem já tem os
+      schemas reais).
+      - **Nota técnica, aprendida com o bug do `pg_catalog`** (ver decisão #11, seção 3, e
+        `MULTI_SCENE_PROGRESS.md`): se essa opção for adicionada, `setSegmentationMode()`/
+        `setSegThreshold()` precisam ser chamados **antes** de `createSystemObjects(true)`
+        ([databaseimportwidget.cpp:387](priv-core/src/libgui/tools/databaseimportwidget.cpp#L387)),
+        não depois — a mesma classe de bug se repetiria aqui se a ordem for invertida.
+      - **[Requer fechamento de decisão com o usuário]**: que controles exatamente entram no
+        formulário (mesmo combo de modo + spinbox de threshold que o `SceneInfoWidget` já tem? um
+        componente compartilhado entre os dois?), e se o modo escolhido no import deveria também
+        ficar valendo como sugestão default pra próximas importações. Também fora do repositório
+        principal (mexe em `priv-core`), então qualquer implementação futura precisa considerar
+        isso nos dois repositórios/branches envolvidos. A Fase 5 (CLI, subtarefa "achado novo
+        `--import-db`") depende diretamente desta decisão.
+
+### Fase 5 — Paridade do `pgmodeler-cli` com a segmentação multi-cena
+
+> **Tarefa pendente, ainda não iniciada. Renumerada de Fase 4 para Fase 5 em 2026-09-26**, quando a
+> antiga Fase 4 foi reaproveitada para consolidar as pendências da Fase 1 + os achados da (então)
+> seção 5 — conteúdo desta fase inalterado, só o número mudou. Encontrada na subtarefa 0.7,
+> registrada aqui a pedido do usuário. Ordem de trabalho definida por ele: só começar depois que as
+> Fases 0-4 (o lado GUI, via `ModelWidget`) estiverem inteiramente acertadas. Dono: usuário ("Eu
+> farei a revisão da CLI assim que tivermos tudo acertado na GUI", 2026-09-21) — não iniciar por
+> conta própria antes disso.
 
 **O problema**: `PgModelerCliApp` monta e usa seu próprio `ObjectsScene *scene`
 ([pgmodelercliapp.h:99](libs/libcli/src/pgmodelercliapp.h#L99)), construído direto a partir do
@@ -1630,8 +1726,8 @@ mapeado):
   isso for retomado.
 
 **Achado novo (2026-09-26): `pgmodeler-cli --import-db` tem o mesmo problema do formulário de
-engenharia reversa da GUI** (ver seção 5, entrada sobre `DatabaseImportWidget`) — **depende
-diretamente daquela anotação**, mesma pergunta em aberto, só que como flags de linha de comando em
+engenharia reversa da GUI** (ver Fase 4, subtarefa 4.14) — **depende diretamente daquela
+anotação**, mesma pergunta em aberto, só que como flags de linha de comando em
 vez de widgets. `PgModelerCliApp::importDatabase()` (código em
 [privpgmodelercliapp.cpp:25-42](priv-core/src/libcli/privpgmodelercliapp.cpp#L25), incluído em
 `pgmodelercliapp.cpp` via `PRIV_CODE_SYMBOLS` — módulo `priv-core`, repositório separado) cria um
@@ -1654,8 +1750,8 @@ pra escolher o modo de segmentação antes disso — todo modelo importado via C
   ([privpgmodelercliapp.cpp:33](priv-core/src/libcli/privpgmodelercliapp.cpp#L33)), chamado logo
   depois do import, já assume layout de cena única (organiza todos os schemas num grid dentro da
   MESMA cena) — se o modelo importado passar a ser segmentado, esse rearranjo provavelmente deixa
-  de fazer sentido como está. Cruza com a entrada "algoritmos de rearranjo automático" já
-  registrada na seção 5 (mesma pergunta em aberto, achado de novo aqui).
+  de fazer sentido como está. Cruza com a Fase 4, subtarefa 4.12 (mesma pergunta em aberto, achado
+  de novo aqui).
 
 ## 5. Fora de escopo (por enquanto)
 
@@ -1663,140 +1759,17 @@ pra escolher o modo de segmentação antes disso — todo modelo importado via C
   separadamente. O core deve deixar pronta uma API pública limpa para consumo futuro (seção 7).
   **Exceção**: a Fase 1 inclui um `QComboBox` simples (subtarefa 1.3) só como aid de teste manual
   durante o desenvolvimento — não é a UI definitiva e não deve receber investimento de design.
-- Merge automático de cenas subutilizadas.
 - Minimap unificado mostrando todas as cenas simultaneamente. **Decisão fechada**: o
   `ModelOverviewWidget` (minimap) passa a exibir sempre a cena atualmente ativa (foco), e se
   atualiza automaticamente quando a cena ativa muda — nenhuma visão combinada de múltiplas cenas
   é necessária. Ver detalhamento na Fase 0.
-- **Sugestão automática de modo de segmentação** (achado do usuário, 2026-09-21, confirmado
-  testando `big_model.dbm`): esse modelo tem 4 schemas (`pg_catalog`, `public`, `dv4`, `dvaudit`),
-  mas só `dv4` tem objetos — a lentidão original persiste mesmo com a Fase 1 (por schema) já
-  implementada, porque toda a densidade cai numa única cena. Confirma que os dois modos base são
-  complementares, não substitutos: por schema ajuda quando os objetos já estão distribuídos entre
-  vários schemas; `big_model.dbm` é justamente o caso oposto, candidato natural a threshold (Fase
-  2). Ideia registrada para depois de threshold estar pronto: o pgModeler poderia detectar esse
-  padrão (poucos schemas populados concentrando a maior parte dos objetos) e sugerir ativamente ao
-  usuário o modo de segmentação mais adequado, em vez de deixar a escolha inteiramente manual. Não
-  é escopo das Fases 1-3 (que só fecham os dois modos base) — é uma camada de UX por cima deles.
-- **Terceiro modo de segmentação: threshold com agrupamento ciente de conectividade** (BFS/
-  union-find sobre o grafo de relacionamentos, para minimizar cross-scene mantendo clusters
-  fortemente conectados no mesmo bucket). Não descartado — é um modo candidato genuíno, só fica
-  para depois: primeiro os dois modos base — por schema (Fase 1 + Fase 3) e threshold ingênuo
-  (Fase 2) — precisam estar redondos e em uso. Quando for retomado, tratar como um modo de
-  segmentação novo e independente (não uma flag/variação do threshold ingênuo da Fase 2, que
-  precisa continuar existindo e previsível como
-  está — ver decisão #7, seção 3), já que muda a proposta de valor: o ingênuo prioriza ordem
-  previsível dos objetos, o com clustering prioriza minimizar cross-scene à custa de reordenar
-  objetos entre cenas de um jeito não literal à ordem de inserção.
-- **Ações de contexto "criar tag/layer a partir dos schemas existentes" (ideia do usuário,
-  2026-09-24)**: no `ModelObjectsWidget` (árvore de objetos), uma ação de contexto sobre um `Schema`
-  específico e, no menu de contexto global do canvas (clique sem nenhum objeto selecionado), uma
-  ação em lote sobre todos os schemas do modelo — para criar automaticamente uma `Tag`/camada
-  (`Layer`, o que o usuário chamou de "layout") por schema e, se possível, já associar essa tag/
-  camada às tabelas/views/foreign tables filhas daquele schema. Motivação: atalho rápido pra
-  granularizar ainda mais a segmentação **visual** do modelo — tags e camadas são ortogonais à
-  segmentação por cena (funcionam dentro de qualquer cena, nos três modos) — sem o usuário precisar
-  criar/associar cada uma manualmente quando já existe uma organização natural por schema.
-  - **Tags**: nova `Tag` por schema (nome a partir do nome do schema), associada a cada tabela
-    filha via a API de tag por objeto já existente. **Cor**: usar a mesma cor do retângulo do
-    schema (`Schema::getFillColor()`) como cor de título da tabela na tag nova
-    (`Tag::setElementColor(title_color_attrib, cor, ColorId::FillColor1)` — mesmo atributo que
-    `TableTitleView::configureObject()` já lê pra pintar o título,
-    [tabletitleview.cpp:125-132](libs/libcanvas/src/tabletitleview.cpp#L125)). Efeito prático: em
-    modo segmentado, onde o retângulo do schema é suprimido (subtarefa 2.5), o usuário recupera uma
-    pista visual equivalente — cor do título de cada tabela — sem precisar do retângulo.
-  - **Layers**: nova camada por schema (`LayersConfigWidget::addLayer()`), com as tabelas filhas
-    adicionadas a ela via `BaseGraphicObject::setLayers()`
-    ([basegraphicobject.h:140-141](libs/libcore/src/basegraphicobject.h#L140)).
-  - **Escopo em aberto, não decidido ainda**: (a) o que fazer se uma tabela já tiver tag/camada
-    própria — sobrescrever, pular, ou perguntar; (b) desambiguação de nome se já existir uma tag/
-    camada com o nome do schema; (c) a ação em lote do menu global processa todos os schemas de uma
-    vez ou pede alguma seleção/confirmação antes; (d) disponibilidade em todo modo de segmentação ou
-    só em algum — como tags/camadas funcionam em qualquer modo, provavelmente sem restrição, mas não
-    discutido ainda. Nenhuma dessas perguntas foi conversada com o usuário — ficam para quando esta
-    ideia for promovida a subtarefa de verdade.
-  - **Fora de escopo das Fases 0-3 atuais** — registrado aqui só como ideia futura, sem número de
-    subtarefa ainda. Não depende de nenhum modo de segmentação específico, então pode ser promovida
-    a qualquer momento em que o usuário decidir priorizá-la.
-- **Algoritmos de rearranjo automático: cena atual ou todas? (pergunta do usuário, 2026-09-24, sem
-  decisão ainda)**. Hoje os três algoritmos por trás do menu "Rearrange objects"
-  (`MainWindow::arrangeObjects()`, [mainwindow.cpp:2424-2444](libs/libgui/src/mainwindow.cpp#L2424)
-  — `ModelWidget::rearrangeSchemasInGrid()`, `rearrangeTablesHierarchically()`,
-  `rearrangeTablesInSchemas()`) são **inteiramente cena-agnósticos**: cada um itera
-  `db_model->getObjectList(...)` (o modelo inteiro) sem nunca checar em qual `ObjectsScene` cada
-  objeto está, e recalcula posições como se todo o modelo fosse desenhado numa única superfície —
-  `rearrangeTablesHierarchically()`, por exemplo, escolhe uma única tabela "raiz" (mais
-  relacionamentos conectados) entre **todas** as tabelas do modelo e monta a árvore inteira a partir
-  dela, mesmo que schemas diferentes vivam em cenas diferentes hoje. Confirmado agora (não é
-  suposição): é exatamente esse o comportamento atual, aplicado a todas as cenas
-  indistintamente. Efeito prático: em qualquer modo segmentado, essas três ações continuam
-  reposicionando objetos de todas as cenas de uma vez só, ignorando por completo a divisão em cenas
-  — na prática tratando o modelo como se segmentação nenhuma existisse.
-  - **Pergunta em aberto, ainda não decidida com o usuário**: o rearranjo automático deve passar a
-    considerar **só a cena ativa** (cada cena rearranjada de forma independente, preservando a
-    divisão por schema/threshold) ou continuar operando sobre **o modelo inteiro** (comportamento
-    atual, que já existia antes da feature multi-cena)? As duas opções têm motivação legítima: cena
-    atual é consistente com a filosofia geral desta feature (decisão #9, seção 3 — a maioria das
-    operações de UI já é cena-local); modelo inteiro preserva o comportamento histórico da
-    ferramenta e pode fazer sentido pra quem só quer "arrumar tudo de uma vez" independente de como
-    o modelo está segmentado.
-  - **Notas técnicas pra quando isso for decidido**: os três algoritmos já recebem/calculam posições
-    absolutas (`QPointF`) — restringir a uma cena seria filtrar `getObjectList()` por
-    `getSceneForObject(obj) == scene` (cena ativa) antes de processar, análogo ao filtro que
-    `selectAllObjects()` já usa (ver achado de 2026-09-21 na Fase 1). `rearrangeTablesHierarchically()`
-    precisaria de atenção redobrada: a escolha da tabela "raiz" e a travessia por relacionamentos
-    (`evaluated_tabs`/`not_evaluated`) cruzam schemas livremente hoje — restringir por cena pode
-    deixar relacionamentos cross-scene "cortando" a árvore de um jeito que o algoritmo atual nunca
-    precisou considerar (mesma classe de problema que motivou os marcadores cut-off na Fase 1).
-  - **Fora de escopo das Fases 0-3 atuais** — registrado aqui só como pergunta em aberto. Precisa de
-    uma decisão explícita do usuário antes de qualquer código ser escrito.
-- **Exportação para PNG/SVG fragmentada em múltiplos arquivos, um por cena (achado do usuário,
-  2026-09-26, sem decisão ainda)** — `ModelExportWidget::exportModel()`
-  ([modelexportwidget.cpp:293-347](libs/libgui/src/tools/modelexportwidget.cpp#L293)) itera
-  `model_wgt->getObjectsScenes()` e exporta **cada cena pro seu próprio arquivo** — com mais de uma
-  cena, insere um sufixo `_<índice>` antes da extensão (linhas 312-323). Screenshots do usuário
-  confirmam o resultado prático: exportar um modelo com schemas `public`/`schema_a`/`schema_b`
-  gera 3+ imagens separadas, cada uma só com os objetos daquela cena — nenhuma visão única do
-  modelo inteiro. Mesmo mecanismo pros dois formatos (`exportToPNG(scn, ...)`/
-  `exportToSVG(scn, ...)`, ambos recebem uma `ObjectsScene*` só). **Não afeta exportação SQL**
-  (`export_to_file_tb`) — essa já opera sobre `db_model` inteiro, sem noção de cena.
-  - **Pergunta em aberto, ainda não decidida com o usuário**: esse comportamento (um arquivo por
-    cena) tem valor de verdade, ou o esperado é sempre juntar tudo numa imagem única (como era
-    antes da segmentação existir)? Juntar não é trivial — cada `ObjectsScene` tem seu próprio
-    sistema de coordenadas independente, então "colar" os retângulos de várias cenas lado a lado
-    exigiria decidir um layout (grid? uma ao lado da outra? por ordem de criação?) que hoje não
-    existe em lugar nenhum do código. Existe também a opção de manter a fragmentação atual mas
-    tornar a decisão explícita pro usuário (ex. checkbox "uma imagem por cena" vs "modelo inteiro")
-    em vez de comportamento implícito.
-  - **Fora de escopo das Fases 0-3 atuais** — registrado aqui só como pergunta em aberto,
-    a pedido do usuário, antes de decidir a abordagem.
-- **Formulário de engenharia reversa sem opção de escolher o modo de segmentação (achado do usuário,
-  2026-09-26, sem decisão ainda)** — `DatabaseImportWidget` (módulo `priv-core`, repositório git
-  próprio e separado — ver nota de estrutura do repo) tem dois caminhos pra onde os objetos
-  importados vão: **importar como modelo novo**
-  ([databaseimportwidget.cpp:386-389](priv-core/src/libgui/tools/databaseimportwidget.cpp#L386)) —
-  cria um `ModelWidget`/`DatabaseModel` do zero e chama `createSystemObjects(true)` — ou **importar
-  pra dentro de um modelo já aberto** ([databaseimportwidget.cpp:171](priv-core/src/libgui/tools/databaseimportwidget.cpp#L171),
-  `model_wgt = model_sel_wgt->getSelectedModel();`). O segundo caminho já resolve sozinho — os
-  objetos importados entram pelo mesmo `handleObjectAddition()` de sempre, herdando o modo de
-  segmentação que aquele modelo já tem configurado. O primeiro não: o `DatabaseModel` novo nasce com
-  o modo default (`NoSegmentation`), e nada no formulário deixa o usuário escolher outro antes da
-  importação rodar — hoje, importar sempre gera um modelo de cena única, mesmo que o usuário
-  quisesse abrir já segmentado por schema (o caso mais natural pra reverse engineering, já que o
-  banco de origem já tem os schemas reais).
-  - **Nota técnica, aprendida com o bug do `pg_catalog` (ver seção 3, decisão #11 e histórico em
-    `MULTI_SCENE_PROGRESS.md`)**: se essa opção for adicionada, `setSegmentationMode()`/
-    `setSegThreshold()` precisam ser chamados **antes** de `createSystemObjects(true)`
-    ([databaseimportwidget.cpp:387](priv-core/src/libgui/tools/databaseimportwidget.cpp#L387)), não
-    depois — a mesma classe de bug (`pg_catalog`/`public` roteados com o modo errado por terem sido
-    criados cedo demais) se repetiria aqui se a ordem for invertida.
-  - **Pergunta em aberto, ainda não decidida com o usuário**: que controles exatamente entram no
-    formulário (mesmo combo de modo + spinbox de threshold que o `SceneInfoWidget` já tem? um
-    componente compartilhado entre os dois?), e se o modo escolhido no import deveria também ficar
-    valendo como sugestão default pra próximas importações.
-  - **Fora de escopo das Fases 0-3 atuais** — registrado aqui só como pergunta em aberto. Também
-    fora do repositório principal (mexe em `priv-core`), então qualquer implementação futura precisa
-    considerar isso nos dois repositórios/branches envolvidos.
+
+> **Nota (2026-09-26)**: os demais achados/perguntas em aberto que estavam registrados nesta seção
+> (sugestão automática de modo, terceiro modo de segmentação com clustering, tags/layers por
+> schema, rearranjo automático, exportação PNG/SVG fragmentada, formulário de engenharia reversa)
+> foram movidos para a Fase 4 (seção 4) como subtarefas próprias, junto com as antigas subtarefas
+> 1.11-1.15 da Fase 1 — consolidação pedida pelo usuário para não deixar pendências espalhadas
+> entre a Fase 1 e esta seção.
 
 ## 6. Riscos conhecidos / pontos de atenção para quem retomar
 
@@ -1815,7 +1788,7 @@ pra escolher o modo de segmentação antes disso — todo modelo importado via C
   desses arquivos foi tocado nesta feature — bit-rot pré-existente, não relacionado ao multi-scene.
   Fora de escopo deste plano; só registrado aqui pra não se perder.
 - **`pgmodeler-cli` não participa da segmentação multi-cena** (achado na subtarefa 0.7) — virou
-  tarefa própria, **Fase 4**, dona: usuário, só depois das Fases 0-3 estarem prontas. Não
+  tarefa própria, **Fase 5**, dona: usuário, só depois das Fases 0-4 estarem prontas. Não
   implementar por conta própria antes disso ser pedido.
 - `RelationshipView::configureLine()` é grande (~700 linhas) e **não deve ser tocado** para tentar
   fazer `mapFromItem`/`mapToItem` funcionar entre cenas — pelo refinamento da decisão #1, um

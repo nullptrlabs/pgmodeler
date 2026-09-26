@@ -610,7 +610,38 @@
     temporariamente só `modelwidget.cpp` (`git stash`) mantendo o teste — falhou como esperado
     (`"pg_catalog"` em vez de `"Default scene"`); restaurado depois, suíte completa **26/26** sob
     ASan limpa.
-  - Build limpo (`gui`+`modelwidgettest`). Não commitado ainda.
+  - Build limpo (`gui`+`modelwidgettest`). Commitado (`c071378fc`).
+- **`MULTI_SCENE_PLAN.md` reorganizado a pedido do usuário (2026-09-26): nova Fase 4 consolidando
+  pendências.** Usuário pediu revisão de Fases 1-3 procurando pendências (motivado pela falta de
+  integração entre `ObjectSearchWidget` e multi-cena, achado confirmado em código —
+  `selectObject()` nunca chama `setActiveScene()`/`viewport->setScene()`, então clicar num objeto
+  de outra cena não muda a cena visível). Em vez de só reportar, o usuário pediu uma reorganização
+  estrutural do plano: criar uma nova **Fase 4** juntando (a) as antigas subtarefas 1.11-1.15 da
+  Fase 1 (paradas em standby desde 2026-09-24, nunca retomadas), (b) o achado sobre `Textbox` sem
+  mecanismo de reatribuição de cena (estava na intro da Fase 1), e (c) todos os achados/perguntas
+  em aberto que estavam só registrados na antiga seção 5 ("Fora de escopo") — cada um virando uma
+  subtarefa numerada própria. A antiga Fase 4 (paridade do `pgmodeler-cli`, dona do usuário) foi
+  renumerada para **Fase 5**, conteúdo inalterado.
+  - **14 subtarefas novas (4.1-4.14)**: 4.1 teste cascade delete+undo (ex-1.11); 4.2 reatribuição
+    manual de objetos entre cenas/Textbox (achado da Fase 1); 4.3 ferramenta de relacionamento
+    cross-scene (ex-1.12); 4.4 seleção local à cena ativa (ex-1.13); 4.5 multi-seleção/navegação no
+    Object Search Widget (ex-1.14, o item que motivou a revisão); 4.6 cor do marcador cut-off
+    (ex-1.15); 4.7 limpeza de scaffolding de debug (achado novo desta sessão, ver abaixo); 4.8
+    merge automático de cenas; 4.9 sugestão automática de modo; 4.10 terceiro modo de segmentação
+    (clustering); 4.11 tags/layers por schema; 4.12 rearranjo automático cena-atual-vs-todas; 4.13
+    exportação PNG/SVG fragmentada; 4.14 formulário de engenharia reversa sem opção de modo.
+  - **Achado novo, não registrado em lugar nenhum antes (2026-09-26)**: revisando o código durante
+    esta consolidação, achei 3 blocos de `#warning "Testing segmentation by threshold"` + `qDebug()`
+    ainda em `ModelWidget::handleObjectAddition()`
+    ([modelwidget.cpp:1328,1351,1357](libs/libgui/src/widgets/modelwidget.cpp#L1328)) — resíduo de
+    teste manual da subtarefa 2.1 (Fase 2), nunca removido. Virou subtarefa 4.7.
+  - **Marcação de prontidão**: subtarefas sem marcação especial (4.1, 4.6, 4.7) têm lógica já
+    concreta — prontas pra implementação direta. As marcadas
+    **[Requer fechamento de decisão com o usuário]** (4.2-4.5, 4.8-4.14) precisam de conversa
+    fechando a abordagem antes de qualquer código — a maioria já tinha opções levantadas no texto
+    original (movido junto, não reescrito do zero), só nunca foi decidida.
+  - Puro trabalho de documentação — nenhum código tocado. Só `MULTI_SCENE_PLAN.md` mudou nesta
+    entrada.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
