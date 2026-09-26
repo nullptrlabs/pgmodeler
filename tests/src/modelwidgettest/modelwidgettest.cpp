@@ -63,6 +63,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void pgCatalogChildrenShareItsSceneAfterSchemaSegmentedReload();
 		void nonActiveSceneRectsMatchTheirItemsAfterReload();
 		void savingWritesLegacySceneRectAsUnionOfAllScenes();
+		void lastSceneSurvivesSaveAndReload();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -1287,6 +1288,59 @@ void ModelWidgetTest::savingWritesLegacySceneRectAsUnionOfAllScenes()
 		scn->setSceneRect(scn->sceneRect().adjusted(0, 0, 500, 500));
 
 		QCOMPARE(db_model->getSceneRect(), expected_union);
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
+}
+
+/*! \brief Regression test for subtask 3.1: LastScene (the focused scene's index) must round-trip
+through save/reload. Unlike segmentation mode/threshold, there's no "active vs. saved" split for it --
+focusing a scene is an ordinary runtime action, so whatever is read on load becomes active right away.
+This subtask is persistence-only (no ModelWidget wiring yet, that's 3.3), so it's exercised directly
+on DatabaseModel. */
+void ModelWidgetTest::lastSceneSurvivesSaveAndReload()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_last_scene.dbm");
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(true);
+			QCOMPARE(db_model->getLastScene(), 0);
+
+			db_model->setLastScene(2);
+			db_model->saveModel(tmp_file, SchemaParser::XmlCode);
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_file);
+
+			QCOMPARE(db_model->getLastScene(), 2);
+		}
+
+		//A file saved without the attribute (pre-3.1) must fall back to 0, not misparse into garbage
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(GlobalAttributes::getSamplesPath() +
+													 GlobalAttributes::DirSeparator + QString("demo.dbm"));
+
+			QCOMPARE(db_model->getLastScene(), 0);
+		}
 	}
 	catch(Exception &e)
 	{

@@ -408,6 +408,7 @@ extern __libparsers const QString
 	LastAnalyze,
 	LastAutovacuum,
 	LastPosition,
+	LastScene,
 	LastSysOid,
 	LastVacuum,
 	LastValue,

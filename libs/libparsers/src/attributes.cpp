@@ -395,6 +395,7 @@ namespace Attributes {
 	LastAnalyze("last-analyze"),
 	LastAutovacuum("last-autovacuum"),
 	LastPosition("last-position"),
+	LastScene("last-scene"),
 	LastSysOid("last-sys-oid"),
 	LastVacuum("last-vacuum"),
 	LastValue("last-value"),

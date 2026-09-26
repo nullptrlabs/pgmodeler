@@ -1502,12 +1502,17 @@ depois.
      implementada, puxada pra frente pra viabilizar o `SceneInfoWidget` (combo de modo + spinbox de
      threshold) — ver `DatabaseModel::scene_seg_mode`/`saved_seg_mode`/`seg_threshold`/
      `saved_seg_threshold` e os atributos XML `seg-mode`/`seg-threshold` (`<dbmodel>`, mirror de
-     `scene-rect`). Falta só `LastScene` (cena focada) — essa parte da subtarefa continua aberta.
+     `scene-rect`).
      **Desenho do "atual vs. a salvar"**: como uma troca de modo/threshold só deve valer depois de
      recarregar o modelo (decisão do usuário), cada um dos dois vive em dois campos — o "ativo"
      (usado pelo roteamento desta sessão, só muda na carga) e o "a salvar" (editável a qualquer
      momento pela UI, é o que vai pro XML). Os dois só convergem de novo quando o arquivo é
      recarregado — nunca em tempo real.
+     **`LastScene` implementado (2026-09-26)**: `DatabaseModel::last_scene` (int, default `0`) +
+     `setLastScene()`/`getLastScene()`, atributo XML `last-scene` (`<dbmodel>`, mesmo grupo condicional
+     de `last-position`/`last-zoom`/`scene-rect` no `.sch`). **Sem a divisão "ativo"/"a salvar"** dos
+     dois campos acima — focar uma cena diferente é uma ação de runtime comum, não precisa esperar um
+     reload pra valer, então o valor lido na carga já vira o ativo na hora.
 
 3.2. **Persistência de retângulo por cena** — implementação completa do design fechado na seção 2:
      - DTD dedicado novo [assets/schemas/xml/dtd/scene.dtd](assets/schemas/xml/dtd/scene.dtd) com
@@ -1598,6 +1603,34 @@ mapeado):
   padrão da subtarefa 0.7 na GUI) ou se o CLI ganha uma flag explícita pra optar por isso.
 - Cobre os dois modos (por schema e por threshold) ou só o que estiver pronto no momento em que
   isso for retomado.
+
+**Achado novo (2026-09-26): `pgmodeler-cli --import-db` tem o mesmo problema do formulário de
+engenharia reversa da GUI** (ver seção 5, entrada sobre `DatabaseImportWidget`) — **depende
+diretamente daquela anotação**, mesma pergunta em aberto, só que como flags de linha de comando em
+vez de widgets. `PgModelerCliApp::importDatabase()` (código em
+[privpgmodelercliapp.cpp:25-42](priv-core/src/libcli/privpgmodelercliapp.cpp#L25), incluído em
+`pgmodelercliapp.cpp` via `PRIV_CODE_SYMBOLS` — módulo `priv-core`, repositório separado) cria um
+`ModelWidget` novo e chama `model->createSystemObjects(true)` no overload
+`importDatabase(DatabaseModel*, Connection)`
+([privpgmodelercliapp.cpp:95](priv-core/src/libcli/privpgmodelercliapp.cpp#L95)) sem nenhum switch
+pra escolher o modo de segmentação antes disso — todo modelo importado via CLI sai sempre
+`NoSegmentation`, precisando de uma edição manual + salvar + reabrir depois pra ganhar segmentação.
+- **Mesmo cuidado de ordem do bug do `pg_catalog`**: se isso virar switches novos (ex.
+  `--seg-mode`/`--seg-threshold`), `setSegmentationMode()`/`setSegThreshold()` precisam ser
+  aplicados **antes** de `model->createSystemObjects(true)` na linha citada acima, não depois.
+- **Achado colateral 1**: `PgModelerCliApp::importDatabase()`
+  ([privpgmodelercliapp.cpp:37](priv-core/src/libcli/privpgmodelercliapp.cpp#L37)) salva chamando
+  `model_wgt->getDatabaseModel()->saveModel(...)` **diretamente** — não passa por
+  `ModelWidget::saveModel()`, então bypassa o `updateModelSceneRectInfo()` que a subtarefa 3.0
+  acabou de introduzir (o `scene-rect` legado, união de todas as cenas, nunca seria recalculado
+  antes desse save). Precisa ser considerado quando isso for retomado — chamar
+  `updateModelSceneRectInfo()` manualmente antes do save, ou trocar pra `ModelWidget::saveModel()`.
+- **Achado colateral 2**: `model_wgt->rearrangeSchemasInGrid()`
+  ([privpgmodelercliapp.cpp:33](priv-core/src/libcli/privpgmodelercliapp.cpp#L33)), chamado logo
+  depois do import, já assume layout de cena única (organiza todos os schemas num grid dentro da
+  MESMA cena) — se o modelo importado passar a ser segmentado, esse rearranjo provavelmente deixa
+  de fazer sentido como está. Cruza com a entrada "algoritmos de rearranjo automático" já
+  registrada na seção 5 (mesma pergunta em aberto, achado de novo aqui).
 
 ## 5. Fora de escopo (por enquanto)
 
@@ -1692,6 +1725,53 @@ mapeado):
     precisou considerar (mesma classe de problema que motivou os marcadores cut-off na Fase 1).
   - **Fora de escopo das Fases 0-3 atuais** — registrado aqui só como pergunta em aberto. Precisa de
     uma decisão explícita do usuário antes de qualquer código ser escrito.
+- **Exportação para PNG/SVG fragmentada em múltiplos arquivos, um por cena (achado do usuário,
+  2026-09-26, sem decisão ainda)** — `ModelExportWidget::exportModel()`
+  ([modelexportwidget.cpp:293-347](libs/libgui/src/tools/modelexportwidget.cpp#L293)) itera
+  `model_wgt->getObjectsScenes()` e exporta **cada cena pro seu próprio arquivo** — com mais de uma
+  cena, insere um sufixo `_<índice>` antes da extensão (linhas 312-323). Screenshots do usuário
+  confirmam o resultado prático: exportar um modelo com schemas `public`/`schema_a`/`schema_b`
+  gera 3+ imagens separadas, cada uma só com os objetos daquela cena — nenhuma visão única do
+  modelo inteiro. Mesmo mecanismo pros dois formatos (`exportToPNG(scn, ...)`/
+  `exportToSVG(scn, ...)`, ambos recebem uma `ObjectsScene*` só). **Não afeta exportação SQL**
+  (`export_to_file_tb`) — essa já opera sobre `db_model` inteiro, sem noção de cena.
+  - **Pergunta em aberto, ainda não decidida com o usuário**: esse comportamento (um arquivo por
+    cena) tem valor de verdade, ou o esperado é sempre juntar tudo numa imagem única (como era
+    antes da segmentação existir)? Juntar não é trivial — cada `ObjectsScene` tem seu próprio
+    sistema de coordenadas independente, então "colar" os retângulos de várias cenas lado a lado
+    exigiria decidir um layout (grid? uma ao lado da outra? por ordem de criação?) que hoje não
+    existe em lugar nenhum do código. Existe também a opção de manter a fragmentação atual mas
+    tornar a decisão explícita pro usuário (ex. checkbox "uma imagem por cena" vs "modelo inteiro")
+    em vez de comportamento implícito.
+  - **Fora de escopo das Fases 0-3 atuais** — registrado aqui só como pergunta em aberto,
+    a pedido do usuário, antes de decidir a abordagem.
+- **Formulário de engenharia reversa sem opção de escolher o modo de segmentação (achado do usuário,
+  2026-09-26, sem decisão ainda)** — `DatabaseImportWidget` (módulo `priv-core`, repositório git
+  próprio e separado — ver nota de estrutura do repo) tem dois caminhos pra onde os objetos
+  importados vão: **importar como modelo novo**
+  ([databaseimportwidget.cpp:386-389](priv-core/src/libgui/tools/databaseimportwidget.cpp#L386)) —
+  cria um `ModelWidget`/`DatabaseModel` do zero e chama `createSystemObjects(true)` — ou **importar
+  pra dentro de um modelo já aberto** ([databaseimportwidget.cpp:171](priv-core/src/libgui/tools/databaseimportwidget.cpp#L171),
+  `model_wgt = model_sel_wgt->getSelectedModel();`). O segundo caminho já resolve sozinho — os
+  objetos importados entram pelo mesmo `handleObjectAddition()` de sempre, herdando o modo de
+  segmentação que aquele modelo já tem configurado. O primeiro não: o `DatabaseModel` novo nasce com
+  o modo default (`NoSegmentation`), e nada no formulário deixa o usuário escolher outro antes da
+  importação rodar — hoje, importar sempre gera um modelo de cena única, mesmo que o usuário
+  quisesse abrir já segmentado por schema (o caso mais natural pra reverse engineering, já que o
+  banco de origem já tem os schemas reais).
+  - **Nota técnica, aprendida com o bug do `pg_catalog` (ver seção 3, decisão #11 e histórico em
+    `MULTI_SCENE_PROGRESS.md`)**: se essa opção for adicionada, `setSegmentationMode()`/
+    `setSegThreshold()` precisam ser chamados **antes** de `createSystemObjects(true)`
+    ([databaseimportwidget.cpp:387](priv-core/src/libgui/tools/databaseimportwidget.cpp#L387)), não
+    depois — a mesma classe de bug (`pg_catalog`/`public` roteados com o modo errado por terem sido
+    criados cedo demais) se repetiria aqui se a ordem for invertida.
+  - **Pergunta em aberto, ainda não decidida com o usuário**: que controles exatamente entram no
+    formulário (mesmo combo de modo + spinbox de threshold que o `SceneInfoWidget` já tem? um
+    componente compartilhado entre os dois?), e se o modo escolhido no import deveria também ficar
+    valendo como sugestão default pra próximas importações.
+  - **Fora de escopo das Fases 0-3 atuais** — registrado aqui só como pergunta em aberto. Também
+    fora do repositório principal (mexe em `priv-core`), então qualquer implementação futura precisa
+    considerar isso nos dois repositórios/branches envolvidos.
 
 ## 6. Riscos conhecidos / pontos de atenção para quem retomar
 
