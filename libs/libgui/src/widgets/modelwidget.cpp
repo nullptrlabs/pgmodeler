@@ -1073,8 +1073,7 @@ ObjectsScene *ModelWidget::addScene(bool auto_activate)
 		viewport->ensureVisible(rect);
 	});
 
-	connect(new_scene, &ObjectsScene::s_sceneRectChanged, this, [this](const QRectF &rect){
-		db_model->setSceneRect(rect);
+	connect(new_scene, &ObjectsScene::s_sceneRectChanged, this, [this](const QRectF &){
 		viewport->resetCachedContent();
 		setModified(true);
 	});
@@ -2282,7 +2281,7 @@ void ModelWidget::loadModel(const QString &filename)
 
 		updateSceneLayers();
 		updateObjectsOpacity();
-		adjustSceneRect(true);
+		adjustAllScenesRects();
 
 		task_prog_wgt.close();
 		setProtected(db_model->isProtected());
@@ -2352,6 +2351,20 @@ void ModelWidget::adjustSceneRect(bool use_model_rect, bool expand_only)
 
 	setModified(true);
 	emit s_sceneInteracted(rect.size());
+}
+
+void ModelWidget::adjustAllScenesRects()
+{
+	adjustSceneRect(true);
+
+	for(auto &scn : scenes)
+	{
+		if(scn == scene)
+			continue;
+
+		//No side effects here -- just the items' own bounding rect, items stay exactly where they are
+		scn->setSceneRect(scn->itemsBoundingRect(true, false));
+	}
 }
 
 void ModelWidget::expandSceneRect(ObjectsScene::ExpandDirection exp_dir)
@@ -2519,6 +2532,7 @@ void ModelWidget::saveModel(const QString &filename)
 		}
 
 		saveLastCanvasPosition();
+		updateModelSceneRectInfo();
 		db_model->saveModel(filename, SchemaParser::XmlCode);
 		this->filename=filename;
 
@@ -5962,6 +5976,16 @@ void ModelWidget::editTableData()
 	openEditingForm(tab_data_wgt);
 	this->setModified(true);
 	emit s_objectManipulated();
+}
+
+void ModelWidget::updateModelSceneRectInfo()
+{
+	QRectF united_rect;
+
+	for(auto &scn : scenes)
+		united_rect = united_rect.united(scn->sceneRect());
+
+	db_model->setSceneRect(united_rect);
 }
 
 void ModelWidget::updateModelLayersInfo()

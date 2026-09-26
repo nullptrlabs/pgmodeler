@@ -325,7 +325,7 @@
   HEAD atual e suíte completa (16/16) confirmados limpos nesta retomada, mas sem crédito de tê-los
   validado individualmente commit a commit.
 - **Bug do `pg_catalog` sem nome no `scenes_cmb`: causa raiz, correção do usuário, e uma lacuna mais
-  funda achada e corrigida em seguida (2026-09-25/26, não commitado ainda)** — usuário reportou que,
+  funda achada e corrigida em seguida (2026-09-25/26, commitado em `5e8febaa2`)** — usuário reportou que,
   no modo por schema, `pg_catalog` nunca aparece pelo nome no combo, sempre como "Scene 1" genérico.
   - **Causa raiz (diagnóstico)**: `MainWindow::addModel()` chama
     `model_wgt->db_model->createSystemObjects(filename.isEmpty())`
@@ -377,6 +377,44 @@
     temporariamente só `modelwidget.cpp` (`git stash`) mantendo o teste, rodou e falhou exatamente
     como esperado (`pg_catalog_scene != nullptr` falso); restaurado depois, suíte completa
     **17/17** sob ASan limpa.
+  - Build limpo (`core`+`canvas`+`gui`+`modelwidgettest`). Commitado em `5e8febaa2`.
+- **Fase 3 iniciada: subtarefa 3.0 implementada (2026-09-26) — retângulo de cada cena, não só da
+  ativa; retângulo legado (`scene-rect`) escrito como união de todas as cenas, só no save.** Usuário
+  escolheu começar por ela em vez da 3.1 (persistência), seguindo a ordem definida no plano — mexe
+  numa base de métodos que a 3.2 (persistência por-cena) vai reaproveitar depois.
+  - **Retângulo por cena**: novo `ModelWidget::adjustAllScenesRects()`
+    ([modelwidget.cpp:2357-2368](libs/libgui/src/widgets/modelwidget.cpp#L2357)) — chama
+    `adjustSceneRect(true)` normalmente pra cena ativa (comportamento inalterado: aplica o
+    `scene-rect` legado do modelo), e para cada outra cena, `scn->setSceneRect(scn->
+    itemsBoundingRect(true, false))` — direto, sem efeitos colaterais. **Deliberadamente não
+    reaproveita `ObjectsScene::adjustSceneRect(false)`** pra esse cálculo inicial: esse método puxa
+    incondicionalmente a borda esquerda/superior pra origem (`lp = -rect.left()` quando
+    `rect.left() > 0`, [objectsscene.cpp:1712-1741](libs/libcanvas/src/objectsscene.cpp#L1712)) —
+    certo pra uma cena sendo redimensionada interativamente, errado aqui, onde os itens não estão
+    sendo movidos, só precisam de um retângulo que os contenha de verdade. Substitui a chamada
+    `adjustSceneRect(true)` que existia sozinha no fim de `loadModel()`
+    ([modelwidget.cpp:2285](libs/libgui/src/widgets/modelwidget.cpp#L2285) antes da mudança).
+  - **Retângulo legado como união, só no save**: novo `ModelWidget::updateModelSceneRectInfo()`
+    (mesmo padrão de `updateModelLayersInfo()`) — itera `scenes`, acumula `united()` de cada
+    `sceneRect()`, grava em `db_model->setSceneRect(...)`. Chamado uma vez em `ModelWidget::
+    saveModel()`, logo depois de `saveLastCanvasPosition()` e antes de `db_model->saveModel(...)` —
+    nunca reativamente.
+  - **Bug real corrigido, pré-existente desde a subtarefa 0.1**: o handler de `ObjectsScene::
+    s_sceneRectChanged` conectado dentro de `addScene()`
+    ([modelwidget.cpp:1076-1082](libs/libgui/src/widgets/modelwidget.cpp#L1076) antes da mudança)
+    chamava `db_model->setSceneRect(rect)` **a cada resize de qualquer cena individual**, gravando
+    só o retângulo daquela cena — corrompendo silenciosamente a união toda vez que qualquer cena
+    mudava de tamanho, sobrescrevendo com o valor de "qualquer que tenha mudado por último". Fix:
+    removida essa linha do handler — só sobra `viewport->resetCachedContent()`/`setModified(true)`,
+    como o plano já previa.
+  - **Dois testes novos**: `nonActiveSceneRectsMatchTheirItemsAfterReload` (salva um modelo com
+    2 cenas, tabela de `schema_a` longe da origem — recarrega replicando a ordem real de
+    `MainWindow::addModel()` — confirma que a cena não-ativa de `schema_a` contém de verdade a
+    tabela, não fica no retângulo minúsculo default) e `savingWritesLegacySceneRectAsUnionOfAllScenes`
+    (confirma `db_model->getSceneRect()` == união manual das cenas depois do save, e que redimensionar
+    uma cena isolada **não** corrompe reativamente esse valor). **Verificado que os dois pegam o bug**:
+    revertidos temporariamente `modelwidget.cpp`+`.h` (`git stash`) mantendo os testes — os dois
+    falharam exatamente como esperado; restaurado depois, suíte completa **19/19** sob ASan limpa.
   - Build limpo (`core`+`canvas`+`gui`+`modelwidgettest`). Não commitado ainda.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"

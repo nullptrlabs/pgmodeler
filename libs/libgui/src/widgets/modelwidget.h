@@ -449,6 +449,13 @@ class __libgui ModelWidget: public QWidget {
 		 * scene rect that no operation is done. */
 		void adjustSceneRect(bool use_model_rect, bool expand_only = false);
 
+		/*! \brief Applies adjustSceneRect(true) to the active scene (unchanged legacy behavior) and,
+		 * for every other scene, sets its rect straight from its own items' bounding rect -- never
+		 * ObjectsScene::adjustSceneRect(), which unconditionally pulls the left/top edge back to the
+		 * origin and would be wrong here, since these scenes aren't being resized interactively, just
+		 * given a correct rect for the first time */
+		void adjustAllScenesRects();
+
 		/*! \brief Expand the scene rect to the specified direction.
 		 * The size expanded is determined by the current page layout used by the scene. */
 		void expandSceneRect(ObjectsScene::ExpandDirection exp_dir);
@@ -713,6 +720,11 @@ class __libgui ModelWidget: public QWidget {
 		/*! \brief Update all the information about layer in the internal database model
 		 * so the correct info is written into the xml code of the model file */
 		void updateModelLayersInfo();
+
+		/*! \brief Writes the union of every scene's rect into the model's legacy scene-rect attribute,
+		 * used as a single-scene fallback if the model is later reopened/edited without segmentation.
+		 * Called only right before saving, never reactively per-scene */
+		void updateModelSceneRectInfo();
 
 		void showMagnifierArea(bool show);
 

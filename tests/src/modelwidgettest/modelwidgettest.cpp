@@ -61,6 +61,8 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void pendingSegmentationChangesDoNotApplyUntilReload();
 		void schemaSegmentationScenesComboStaysInSyncWithSchemaNames();
 		void pgCatalogChildrenShareItsSceneAfterSchemaSegmentedReload();
+		void nonActiveSceneRectsMatchTheirItemsAfterReload();
+		void savingWritesLegacySceneRectAsUnionOfAllScenes();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -1158,6 +1160,133 @@ void ModelWidgetTest::pgCatalogChildrenShareItsSceneAfterSchemaSegmentedReload()
 			//The table must share pg_catalog's scene, not fall through to its own orphan scene
 			QCOMPARE(model_wgt.getSceneForObject(table), pg_catalog_scene);
 		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
+}
+
+/*! \brief Regression test for subtask 3.0: ModelWidget::adjustSceneRect(true) (called once at the end
+of loadModel()) only ever touched the active scene -- every other scene kept the tiny default rect
+from ObjectsScene's constructor, confirmed wrong by manual testing once the model had more than one
+scene. adjustAllScenesRects() must give every scene, active or not, a rect that actually bounds its
+own items. */
+void ModelWidgetTest::nonActiveSceneRectsMatchTheirItemsAfterReload()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_scene_rects.dbm");
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+			db_model->setSavedSegmentationMode(DatabaseModel::SegBySchema);
+			db_model->createSystemObjects(true);
+
+			Schema *schema_a = new Schema;
+			schema_a->setName("schema_a");
+			db_model->addSchema(schema_a);
+
+			//Placed far from the origin -- the pre-fix default rect (anchored near (0,0)) would never contain it
+			Table *table_a = new Table;
+			table_a->setName("table_a");
+			table_a->setSchema(schema_a);
+			table_a->setPosition(QPointF(2000, 2000));
+			db_model->addTable(table_a);
+
+			db_model->saveModel(tmp_file, SchemaParser::XmlCode);
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			//public's scene is the one explicitly activated during load (see handleObjectAddition()),
+			//so schema_a's scene is guaranteed to be a non-active one here
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_file);
+
+			Schema *schema_a = dynamic_cast<Schema *>(db_model->getObject("schema_a", ObjectType::Schema));
+			QVERIFY(schema_a != nullptr);
+
+			ObjectsScene *schema_a_scene = model_wgt.getSchemaScene(schema_a);
+			QVERIFY(schema_a_scene != nullptr);
+			QVERIFY(schema_a_scene != model_wgt.getObjectsScene());
+
+			Table *table_a = dynamic_cast<Table *>(db_model->getObject("table_a", ObjectType::Table));
+			QVERIFY(table_a != nullptr);
+
+			BaseTableView *table_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
+			QVERIFY(table_view != nullptr);
+
+			QVERIFY2(schema_a_scene->sceneRect().contains(table_view->sceneBoundingRect()),
+					"a non-active scene's rect must actually bound its own items after reload");
+		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
+}
+
+/*! \brief Regression test for subtask 3.0: the model's legacy scene-rect attribute must reflect the
+union of every scene's rect, written only when the model is actually saved -- not reactively whenever
+any single scene resizes. Before the fix, ObjectsScene::s_sceneRectChanged's handler (wired in
+ModelWidget::addScene()) called db_model->setSceneRect() with just that one scene's rect on every
+resize, silently corrupting the union with whichever scene last changed. */
+void ModelWidgetTest::savingWritesLegacySceneRectAsUnionOfAllScenes()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_scene_rect_union.dbm");
+
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_a = new Schema;
+		schema_a->setName("schema_a");
+		db_model->addSchema(schema_a);
+
+		Table *table_a = new Table;
+		table_a->setName("table_a");
+		table_a->setSchema(schema_a);
+		table_a->setPosition(QPointF(3000, 3000));
+		db_model->addTable(table_a);
+
+		Table *table_public = new Table;
+		table_public->setName("table_public");
+		table_public->setSchema(dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema)));
+		db_model->addTable(table_public);
+
+		model_wgt.saveModel(tmp_file);
+
+		QList<ObjectsScene *> all_scenes = model_wgt.getObjectsScenes();
+		QVERIFY(all_scenes.size() >= 2);
+
+		QRectF expected_union;
+
+		for(auto &scn : all_scenes)
+			expected_union = expected_union.united(scn->sceneRect());
+
+		QCOMPARE(db_model->getSceneRect(), expected_union);
+
+		//A single scene resizing must not reactively overwrite the union with just its own rect
+		ObjectsScene *scn = all_scenes.first();
+		scn->setSceneRect(scn->sceneRect().adjusted(0, 0, 500, 500));
+
+		QCOMPARE(db_model->getSceneRect(), expected_union);
 	}
 	catch(Exception &e)
 	{
