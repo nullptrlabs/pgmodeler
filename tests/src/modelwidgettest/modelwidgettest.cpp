@@ -67,6 +67,8 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void perSceneRectsSurviveSaveAndReload();
 		void reloadingModelActivatesTheSavedLastScene();
 		void invalidLastSceneFallsBackToFirstScene();
+		void fase3EndToEndSchemaSegmentedReloadPreservesFocusAndSegmentation();
+		void legacyFileWithOnlyLegacySceneRectLoadsWithoutError();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -1526,6 +1528,137 @@ void ModelWidgetTest::invalidLastSceneFallsBackToFirstScene()
 
 		model_wgt.restoreLastCanvasPosition();
 
+		QCOMPARE(model_wgt.getActiveSceneIndex(), 0);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief End-to-end regression test for Fase 3 (subtasks 3.1-3.4 combined): closing, saving and
+reopening a schema-segmented model must preserve the focused scene and its zoom, while the schema
+segmentation itself reconstructs correctly on load -- exercising the whole chain (LastScene +
+per-scene rects + segmentation routing) together rather than each piece in isolation, as the other
+Fase 3 tests already do. */
+void ModelWidgetTest::fase3EndToEndSchemaSegmentedReloadPreservesFocusAndSegmentation()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_fase3_e2e.dbm");
+	double expected_zoom = 0;
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+			db_model->setSavedSegmentationMode(DatabaseModel::SegBySchema);
+			db_model->createSystemObjects(true);
+
+			Schema *schema_a = new Schema;
+			schema_a->setName("schema_a");
+			db_model->addSchema(schema_a);
+
+			Table *table_a = new Table;
+			table_a->setName("table_a");
+			table_a->setSchema(schema_a);
+			db_model->addTable(table_a);
+
+			Schema *schema_b = new Schema;
+			schema_b->setName("schema_b");
+			db_model->addSchema(schema_b);
+
+			Table *table_b = new Table;
+			table_b->setName("table_b");
+			table_b->setSchema(schema_b);
+			db_model->addTable(table_b);
+
+			ObjectsScene *schema_b_scene = model_wgt.getSchemaScene(schema_b);
+			QVERIFY(schema_b_scene != nullptr);
+
+			//Focus a scene that isn't the one made active by default during load (see handleObjectAddition())
+			model_wgt.setActiveScene(model_wgt.getObjectsScenes().indexOf(schema_b_scene));
+			QCOMPARE(model_wgt.getObjectsScene(), schema_b_scene);
+
+			model_wgt.applyZoom(0.65);
+			expected_zoom = model_wgt.getCurrentZoom();
+
+			model_wgt.saveModel(tmp_file);
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			//Mirrors MainWindow::addModel()'s real ordering
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_file);
+			model_wgt.restoreLastCanvasPosition();
+
+			//Schema segmentation reconstructs correctly on load
+			Schema *schema_a = dynamic_cast<Schema *>(db_model->getObject("schema_a", ObjectType::Schema));
+			Schema *schema_b = dynamic_cast<Schema *>(db_model->getObject("schema_b", ObjectType::Schema));
+			QVERIFY(schema_a != nullptr);
+			QVERIFY(schema_b != nullptr);
+
+			ObjectsScene *schema_a_scene = model_wgt.getSchemaScene(schema_a);
+			ObjectsScene *schema_b_scene = model_wgt.getSchemaScene(schema_b);
+			QVERIFY(schema_a_scene != nullptr);
+			QVERIFY(schema_b_scene != nullptr);
+			QVERIFY(schema_a_scene != schema_b_scene);
+
+			Table *table_a = dynamic_cast<Table *>(db_model->getObject("table_a", ObjectType::Table));
+			Table *table_b = dynamic_cast<Table *>(db_model->getObject("table_b", ObjectType::Table));
+			QVERIFY(table_a != nullptr);
+			QVERIFY(table_b != nullptr);
+			QCOMPARE(model_wgt.getSceneForObject(table_a), schema_a_scene);
+			QCOMPARE(model_wgt.getSceneForObject(table_b), schema_b_scene);
+
+			//Focused scene preserved
+			QCOMPARE(model_wgt.getObjectsScene(), schema_b_scene);
+
+			//Zoom of that scene preserved
+			QCOMPARE(model_wgt.getCurrentZoom(), expected_zoom);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
+}
+
+/*! \brief Backward-compatibility regression test for Fase 3, explicitly requested by the user:
+opening a .dbm saved by a version prior to this feature -- only the legacy scene-rect attribute,
+no <scenes> and no last-scene -- must keep working exactly as before. rentacar.dbm (a real sample,
+predating both subtasks 2.2/3.2) is used as-is rather than a synthetic fixture, so this exercises
+the actual old file format instead of a hand-built approximation of it. */
+void ModelWidgetTest::legacyFileWithOnlyLegacySceneRectLoadsWithoutError()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->createSystemObjects(false);
+		model_wgt.loadModel(GlobalAttributes::getSamplesPath() +
+												 GlobalAttributes::DirSeparator + QString("rentacar.dbm"));
+
+		//No seg-mode/scenes/last-scene attributes in the file -- everything falls back to defaults
+		QCOMPARE(db_model->getSegmentationMode(), DatabaseModel::NoSegmentation);
+		QCOMPARE(db_model->getSceneRects().size(), 0);
+		QCOMPARE(db_model->getLastScene(), 0);
+
+		//A single scene in NoSegmentation mode -- its rect must come from the legacy scene-rect
+		//attribute (read by DatabaseModel::loadModel() the same way it always has), not an empty
+		//default rect, and with no attempt to redistribute that legacy value across scenes
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 1);
+		QVERIFY(!model_wgt.getObjectsScene()->sceneRect().isEmpty());
+
+		model_wgt.restoreLastCanvasPosition();
 		QCOMPARE(model_wgt.getActiveSceneIndex(), 0);
 	}
 	catch(Exception &e)

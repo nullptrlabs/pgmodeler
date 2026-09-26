@@ -550,6 +550,33 @@
     por coincidência. **Verificado que o teste de fato pega o problema**: revertido temporariamente
     só `modelwidget.cpp` (`git stash`) mantendo o teste — falhou como esperado (`Actual: 2, Expected:
     0`); restaurado depois, suíte completa **23/23** sob ASan limpa.
+  - Build limpo (`gui`+`modelwidgettest`). Commitado (`c79690889`).
+- **Subtarefa 3.5 implementada (2026-09-26) — teste de regressão fim-a-fim da Fase 3.** Só teste,
+  nenhuma mudança de código de produção — todo o comportamento coberto já tinha sido implementado
+  nas subtarefas 3.0-3.4, esta fecha o combo com um teste que exercita tudo junto em vez de cada
+  peça isolada.
+  - **`fase3EndToEndSchemaSegmentedReloadPreservesFocusAndSegmentation`**: modelo `SegBySchema` com
+    `schema_a`/`schema_b` (cada um com uma tabela), foca deliberadamente a cena de `schema_b` (não a
+    que fica ativa por padrão durante a carga — ver heurística do `public` na 1.1), aplica zoom
+    0.65, salva via `ModelWidget::saveModel()` (fluxo real, não `DatabaseModel::saveModel()` direto),
+    recarrega replicando a ordem de `MainWindow::addModel()`, chama `restoreLastCanvasPosition()` e
+    confirma junto: (a) `schema_a`/`schema_b` cada um com sua própria cena reconstruída
+    corretamente, tabelas roteadas pra cena certa; (b) cena focada preservada; (c) zoom preservado.
+    **Verificado que o teste de fato pega regressão**: comentei temporariamente a linha do
+    `setActiveScene(...)` em `restoreLastCanvasPosition()` (edição direta, não `git stash`, já que o
+    arquivo de produção não tinha diff pendente nesta subtarefa — restaurado depois com
+    `git checkout --`) — falhou como esperado (ponteiros de cena diferentes); restaurado, suíte
+    completa novamente **25/25**.
+  - **`legacyFileWithOnlyLegacySceneRectLoadsWithoutError`**: usa `rentacar.dbm`
+    ([assets/samples/rentacar.dbm](assets/samples/rentacar.dbm)) como está — arquivo real, não
+    fixture sintética, que já tem `scene-rect` legado (subtarefa 2.2 ou anterior) mas nenhum
+    `<scenes>`/`last-scene` (predata a 3.1/3.2). Confirma: carrega sem exceção, `getSegmentationMode()
+    == NoSegmentation`, `getSceneRects()` vazio, `getLastScene() == 0` (default), exatamente 1 cena
+    com retângulo não-vazio vindo do fallback legado, e `restoreLastCanvasPosition()` não quebra
+    nada. **Não verificado via reversão de código de produção** — ao contrário do teste acima, este
+    não teve uma mudança de produção correspondente nesta subtarefa pra reverter; ele é
+    essencialmente uma rede de segurança contra uma futura mudança que assuma `<scenes>`/`last-scene`
+    sempre presentes e quebre nesse caso, não a prova de um bug já corrigido.
   - Build limpo (`gui`+`modelwidgettest`). Não commitado ainda.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"

@@ -1592,6 +1592,9 @@ depois.
      usuário): abrir um `.dbm` salvo por uma versão anterior a esta feature (só `scene-rect` legado,
      sem `<scenes>`) precisa continuar funcionando — cada cena calcula seu retângulo pelo fallback
      existente, sem erro nem tentativa de redistribuir o valor legado. Depende de: 3.2, 3.3.
+     **Implementado (2026-09-26)**: dois testes novos, sem nenhuma mudança de código de produção
+     (subtarefa é só de teste, todo o comportamento coberto já foi implementado em 3.0-3.4). Ver
+     `MULTI_SCENE_PROGRESS.md` para detalhamento.
 
 ### Fase 4 — Paridade do `pgmodeler-cli` com a segmentação multi-cena
 
