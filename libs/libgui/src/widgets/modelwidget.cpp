@@ -965,8 +965,12 @@ void ModelWidget::restoreLastCanvasPosition()
 	{
 		QScrollBar *hscroll=viewport->horizontalScrollBar(),
 				*vscroll=viewport->verticalScrollBar();
+		int last_scene = db_model->getLastScene();
 
-		setActiveScene(db_model->getLastScene());
+		/* An out-of-bounds index (e.g. the file was hand-edited, or the scene it pointed to was
+		 * removed after the save that wrote it) falls back to the first available scene instead of
+		 * just leaving whichever scene load happened to leave active */
+		setActiveScene((last_scene >= 0 && last_scene < scenes.size()) ? last_scene : 0);
 
 		if(db_model->getLastZoomFactor() != 1.0)
 			this->applyZoom(db_model->getLastZoomFactor());

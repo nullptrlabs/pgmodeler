@@ -532,6 +532,24 @@
     fato pega o problema**: revertido temporariamente só `modelwidget.cpp` (`git stash`) mantendo o
     teste — falhou como esperado (`Actual: 1, Expected: 2`, a cena ativa padrão pós-load em vez da
     persistida); restaurado depois, suíte completa **22/22** sob ASan limpa.
+  - Build limpo (`gui`+`modelwidgettest`). Commitado (`47e862c17`).
+- **Subtarefa 3.4 implementada (2026-09-26) — fallback de `LastScene` inválido.** Dependência 1.10
+  já estava satisfeita (`removeScene()` já é chamado de `handleObjectRemoval()` no caso `Schema`,
+  [modelwidget.cpp:1495-1505](libs/libgui/src/widgets/modelwidget.cpp#L1495)) — não precisou de
+  trabalho extra ali. `restoreLastCanvasPosition()` agora valida `getLastScene()` contra
+  `scenes.size()` antes de repassar pra `setActiveScene()` — fora dos limites, ativa `0`
+  explicitamente. Sem essa mudança, um índice inválido só passava direto pro guard silencioso que
+  `setActiveScene()` já tinha (`idx < 0 || idx >= scenes.size()` → `return`) — isso já evitava
+  crash, mas deixava a cena ativa em qualquer estado em que o load a tivesse deixado (ex. `public`
+  forçado ativo pela heurística da 1.1), não necessariamente a primeira da lista como o plano pede.
+  - **Teste novo**: `invalidLastSceneFallsBackToFirstScene` — ativa deliberadamente a última cena
+    (não a 0) antes de simular o índice inválido (`db_model->setLastScene(scene_count + 5)`,
+    representando tanto arquivo editado à mão quanto cena removida depois do save que gravou o
+    índice), chama `restoreLastCanvasPosition()` e confirma que a cena ativa cai pra `0` — não pra
+    "o que já estava ativo antes", o que descartaria um cenário onde o guard silencioso já bastava
+    por coincidência. **Verificado que o teste de fato pega o problema**: revertido temporariamente
+    só `modelwidget.cpp` (`git stash`) mantendo o teste — falhou como esperado (`Actual: 2, Expected:
+    0`); restaurado depois, suíte completa **23/23** sob ASan limpa.
   - Build limpo (`gui`+`modelwidgettest`). Não commitado ainda.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
