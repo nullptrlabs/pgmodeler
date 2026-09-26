@@ -577,6 +577,39 @@
     não teve uma mudança de produção correspondente nesta subtarefa pra reverter; ele é
     essencialmente uma rede de segurança contra uma futura mudança que assuma `<scenes>`/`last-scene`
     sempre presentes e quebre nesse caso, não a prova de um bug já corrigido.
+  - Build limpo (`gui`+`modelwidgettest`). Commitado (`9748592c3`).
+- **Bug reportado pelo usuário, achado ao testar manualmente a Fase 3 (2026-09-26)**: em modelos
+  sem segmentação (`NoSegmentation`) ou por threshold (`SegByThreshold`), a cena aparecia nomeada
+  como `"pg_catalog"` no combo do `SceneInfoWidget`, em vez do nome genérico esperado. Usuário já
+  suspeitava corretamente que a causa era o próprio código da fix "solução 1" (bug do
+  `pg_catalog` sem nome em `SegBySchema`, ver entrada acima na seção). **Causa raiz confirmada**:
+  `pg_catalog` (ou, num modelo novo/vazio, `public` — ambos criados por `createSystemObjects()`
+  antes de qualquer cena existir e antes do `seg-mode` do arquivo ser conhecido) sempre cai no
+  safety net de `handleObjectAddition()`
+  ([modelwidget.cpp:1350-1365](libs/libgui/src/widgets/modelwidget.cpp#L1350)), que registra em
+  `schema_scenes` **incondicionalmente** — de propósito, para cobrir o caso `SegBySchema` (comentário
+  já dizia "regardless of the current mode"). O problema é que nem a escrita nem a leitura filtram
+  por modo depois: `getSceneNames()`
+  ([modelwidget.cpp:1016-1027](libs/libgui/src/widgets/modelwidget.cpp#L1016), antes da fix)
+  consultava `schema_scenes` pra **toda** cena, sempre, mesmo fora de `SegBySchema`.
+  - **Fix**: `getSceneNames()` agora ramifica por `db_model->getSegmentationMode()` — só consulta
+    `schema_scenes` em `SegBySchema` (comportamento inalterado); em `NoSegmentation` usa
+    `"Default scene"` (texto pedido explicitamente pelo usuário); em `SegByThreshold` usa
+    `"Scene N"` genérico, igual já era o fallback padrão. O registro em `schema_scenes` em si não
+    mudou — continua necessário pro caso `SegBySchema` (agrupar filhos de `pg_catalog` na mesma
+    cena, "solução 1").
+  - **Teste novo**: `pgCatalogNeverNamesTheSceneOutsideOfSchemaSegmentation` — replica a ordem real
+    de `MainWindow::addModel()` pra um arquivo existente (`createSystemObjects(false)`, só
+    `pg_catalog` criado antes do modo ser conhecido, igual ao relato original do usuário) nos três
+    modos, confirma `"Default scene"` (`NoSegmentation`), `"Scene 1"` (`SegByThreshold`), e que
+    `SegBySchema` continua intocado (`"pg_catalog"` no nome). **Verificado que o teste de fato pega
+    o problema, duas vezes**: primeira tentativa usou `createSystemObjects(true)` (modelo novo) e
+    revelou que o mesmo bug vaza também via `public` (criado antes de `pg_catalog` nesse caminho,
+    já que `createSystemObjects()` cria `public` primeiro quando `create_public=true`) — ajustado
+    pra `createSystemObjects(false)`, replicando com mais fidelidade o relato original. Revertido
+    temporariamente só `modelwidget.cpp` (`git stash`) mantendo o teste — falhou como esperado
+    (`"pg_catalog"` em vez de `"Default scene"`); restaurado depois, suíte completa **26/26** sob
+    ASan limpa.
   - Build limpo (`gui`+`modelwidgettest`). Não commitado ainda.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"

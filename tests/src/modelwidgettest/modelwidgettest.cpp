@@ -69,6 +69,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void invalidLastSceneFallsBackToFirstScene();
 		void fase3EndToEndSchemaSegmentedReloadPreservesFocusAndSegmentation();
 		void legacyFileWithOnlyLegacySceneRectLoadsWithoutError();
+		void pgCatalogNeverNamesTheSceneOutsideOfSchemaSegmentation();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -1660,6 +1661,56 @@ void ModelWidgetTest::legacyFileWithOnlyLegacySceneRectLoadsWithoutError()
 
 		model_wgt.restoreLastCanvasPosition();
 		QCOMPARE(model_wgt.getActiveSceneIndex(), 0);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Regression test for a bug found by the user: pg_catalog is always the first schema
+created (createSystemObjects(), before any scene exists and before the file's own seg-mode is
+known), so it always falls through handleObjectAddition()'s safety net and gets registered in
+schema_scenes -- regardless of what segmentation mode the model actually ends up in. getSceneNames()
+used to trust that map unconditionally, so the single scene in NoSegmentation mode (and the first
+scene in SegByThreshold mode) ended up displayed as "pg_catalog" instead of the generic name those
+modes are supposed to use. Only SegBySchema mode is supposed to name scenes after schemas. */
+void ModelWidgetTest::pgCatalogNeverNamesTheSceneOutsideOfSchemaSegmentation()
+{
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			//Mirrors MainWindow::addModel()'s ordering for an existing file (create_public=false) --
+			//pg_catalog ends up the only schema created before the mode is known, same as the user's report
+			db_model->createSystemObjects(false);
+
+			QCOMPARE(db_model->getSegmentationMode(), DatabaseModel::NoSegmentation);
+			QCOMPARE(model_wgt.getSceneNames(), QStringList{ "Default scene" });
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+			db_model->createSystemObjects(false);
+
+			QCOMPARE(model_wgt.getSceneNames(), QStringList{ "Scene 1" });
+		}
+
+		//Sanity check: SegBySchema must keep naming scenes after their schema, unaffected by the fix above
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+			db_model->createSystemObjects(false);
+
+			QVERIFY(model_wgt.getSceneNames().contains("pg_catalog"));
+		}
 	}
 	catch(Exception &e)
 	{

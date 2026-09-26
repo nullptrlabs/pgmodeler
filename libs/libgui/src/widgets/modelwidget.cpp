@@ -1016,11 +1016,24 @@ ObjectsScene *ModelWidget::getSchemaScene(Schema *schema)
 QStringList ModelWidget::getSceneNames()
 {
 	QStringList names;
+	DatabaseModel::SegmentationMode seg_mode = db_model->getSegmentationMode();
 
+	/* schema_scenes can hold a pg_catalog entry even outside of schema-segmentation -- it's always
+	 * the first schema created (see createSystemObjects()), before any scene exists and before the
+	 * file's own seg-mode is known, so it falls through handleObjectAddition()'s safety net and gets
+	 * registered there regardless of what the mode ends up being. Only trust that map here in the
+	 * mode where it's actually meaningful; every other mode uses its own generic naming */
 	for(int i = 0; i < scenes.size(); i++)
 	{
-		Schema *schema = schema_scenes.key(scenes.at(i), nullptr);
-		names.append(schema ? schema->getName() : tr("Scene %1").arg(i + 1));
+		if(seg_mode == DatabaseModel::SegBySchema)
+		{
+			Schema *schema = schema_scenes.key(scenes.at(i), nullptr);
+			names.append(schema ? schema->getName() : tr("Scene %1").arg(i + 1));
+		}
+		else if(seg_mode == DatabaseModel::NoSegmentation)
+			names.append(tr("Default scene"));
+		else
+			names.append(tr("Scene %1").arg(i + 1));
 	}
 
 	return names;
