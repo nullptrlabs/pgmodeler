@@ -501,7 +501,38 @@
   - **Assets sincronizados via `cmake --install`** (permissão nova do usuário, ver
     `feedback_multiscene_workflow` em memória) em vez de cópia manual pontual — cobre os três
     arquivos novos e os dois `dbmodel.dtd`/`dbmodel.sch` alterados.
-  - Build limpo (`core`+`canvas`+`gui`+`modelwidgettest`). Não commitado ainda.
+  - Build limpo (`core`+`canvas`+`gui`+`modelwidgettest`). Commitado (`a4428c02b`).
+- **Bug reportado pelo usuário, era implementação pendente e não bug (2026-09-26)**: ao testar
+  manualmente a 3.2, usuário notou que reabrir um modelo não restaura a cena que estava focada
+  antes do save — pediu investigação. Achado: `DatabaseModel::setLastScene()`/`getLastScene()`
+  (3.1) persistem corretamente no XML, mas nenhum ponto de `libgui` os chama — confirmado por
+  `grep -rn "LastScene\|last_scene"` fora de `databasemodel.*`/teste não retornando nada.
+  `ModelWidget::saveLastCanvasPosition()`/`restoreLastCanvasPosition()`
+  ([modelwidget.cpp:932-975](libs/libgui/src/widgets/modelwidget.cpp#L932)) só cuidavam de
+  zoom/scroll. Batia exatamente com a subtarefa 3.3, já registrada no plano como pendente — não
+  era regressão nem bug novo, só o próximo passo natural da Fase 3 ainda não implementado.
+- **Subtarefa 3.3 implementada (2026-09-26) — wiring runtime de `LastScene`.** Seguiu o plano à
+  risca: `saveLastCanvasPosition()` agora também grava `db_model->setLastScene(active_scene_idx)`,
+  e `restoreLastCanvasPosition()` chama `setActiveScene(db_model->getLastScene())` **antes** de
+  aplicar zoom/scroll — ambos atrás do mesmo `save_restore_pos` que já controla zoom/posição (se o
+  usuário desligou "lembrar posição", também não lembra a cena ativa; é a mesma preferência de
+  "estado de navegação salvo", não um conceito novo).
+  - **Fallback de índice inválido não precisou de código novo**: `setActiveScene()` já ignora
+    silenciosamente um `idx` fora dos limites (guarda pré-existente,
+    [modelwidget.cpp:1147](libs/libgui/src/widgets/modelwidget.cpp#L1147)) — um `LastScene`
+    inválido hoje só deixa a cena ativa padrão pós-load como está, sem crash. O fallback
+    *explícito* pra "primeira cena disponível" (distinto de "não fazer nada") continua sendo
+    escopo da 3.4, que depende também da 1.10 (cenário de schema removido).
+  - **Teste novo**: `reloadingModelActivatesTheSavedLastScene` — modelo `SegBySchema` com 2+ cenas,
+    ativa deliberadamente uma cena não-padrão, salva via `ModelWidget::saveModel()` (pra passar por
+    `saveLastCanvasPosition()` de verdade, não só `db_model->setLastScene()` direto como o teste da
+    3.1 já fazia), recarrega replicando a ordem real de `MainWindow::addModel()`, chama
+    `restoreLastCanvasPosition()` explicitamente (já que `loadModel()` sozinho não mexe na cena
+    ativa) e confirma `getActiveSceneIndex()` bate com o índice salvo. **Verificado que o teste de
+    fato pega o problema**: revertido temporariamente só `modelwidget.cpp` (`git stash`) mantendo o
+    teste — falhou como esperado (`Actual: 1, Expected: 2`, a cena ativa padrão pós-load em vez da
+    persistida); restaurado depois, suíte completa **22/22** sob ASan limpa.
+  - Build limpo (`gui`+`modelwidgettest`). Não commitado ainda.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

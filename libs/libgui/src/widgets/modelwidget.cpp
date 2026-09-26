@@ -937,13 +937,15 @@ bool ModelWidget::saveLastCanvasPosition()
 				*vscroll=viewport->verticalScrollBar();
 		QPoint pos=db_model->getLastPosition();
 
-		//Save the zoom or position only one of these attributes has changed
+		//Save the zoom, position or active scene only if one of these attributes has changed
 		if(db_model->getLastZoomFactor()!=current_zoom ||
-				pos.x()!=hscroll->value() || pos.y()!=vscroll->value())
+				pos.x()!=hscroll->value() || pos.y()!=vscroll->value() ||
+				db_model->getLastScene()!=active_scene_idx)
 		{
 			db_model->setLastPosition(QPoint(viewport->horizontalScrollBar()->value(),
 																			 viewport->verticalScrollBar()->value()));
 			db_model->setLastZoomFactor(this->current_zoom);
+			db_model->setLastScene(active_scene_idx);
 			return true;
 		}
 	}
@@ -963,6 +965,8 @@ void ModelWidget::restoreLastCanvasPosition()
 	{
 		QScrollBar *hscroll=viewport->horizontalScrollBar(),
 				*vscroll=viewport->verticalScrollBar();
+
+		setActiveScene(db_model->getLastScene());
 
 		if(db_model->getLastZoomFactor() != 1.0)
 			this->applyZoom(db_model->getLastZoomFactor());
