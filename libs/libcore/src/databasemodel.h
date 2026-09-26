@@ -35,6 +35,7 @@ Additionally, this class, saves, loads and generates the XML/SQL definition of a
 #include <QStringList>
 #include <QDateTime>
 #include <QHash>
+#include <QMap>
 #include "baseobject.h"
 #include "table.h"
 #include "function.h"
@@ -169,6 +170,12 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		/*! \brief The current scene (canvas) geometry that is restored when the database
 		 * model is rendered by a scene for the first time after loading the model. */
 		QRectF scene_rect;
+
+		/*! \brief Per-scene rectangles (key: scene index, matching LastScene/<scene id="">), only
+		 * meaningful when the model is segmented into more than one scene. Restored when each scene
+		 * is rendered for the first time after loading the model, same purpose as scene_rect but one
+		 * entry per scene instead of a single one for the whole model */
+		QMap<int, QRectF> scene_rects;
 
 		//! \brief Stores the layer information of FK relationships during the model loading
 		std::map<QString, QStringList> fk_rel_layers;
@@ -986,10 +993,17 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Returns the XML code for the changelog
 		QString getChangelogDefinition(bool csv_format = false);
 
+		//! \brief Returns the XML code for the <scenes> block (empty when there's only one scene)
+		QString getSceneRectsDefinition();
+
 		/*! \brief Defines the current scene rectangle in which the model is being rendered
 		 *  This is used to restore the original scene geometry when the model is loaded from file */
 		void setSceneRect(const QRectF &rect);
 		QRectF getSceneRect();
+
+		//! \brief Defines/returns the per-scene rectangles (key: scene index), see scene_rects
+		void setSceneRects(const QMap<int, QRectF> &rects);
+		QMap<int, QRectF> getSceneRects();
 
 		//! \brief Toggles the generation of SQL code of object with code disabled
 		void setGenDisabledObjsCode(bool value);

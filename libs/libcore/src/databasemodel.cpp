@@ -3685,6 +3685,25 @@ void DatabaseModel::loadModel(const QString &filename)
 
 						xmlparser.restorePosition();
 					}
+					else if(elem_name == Attributes::Scenes)
+					{
+						attribs_map scene_attr;
+						xmlparser.savePosition();
+
+						if(xmlparser.accessElement(XmlParser::ChildElement))
+						{
+							do
+							{
+								xmlparser.getElementAttributes(scene_attr);
+								scene_rects[scene_attr[Attributes::Id].toInt()] =
+										QRectF(QPointF(scene_attr[Attributes::Left].toDouble(), scene_attr[Attributes::Top].toDouble()),
+													 QPointF(scene_attr[Attributes::Right].toDouble(), scene_attr[Attributes::Bottom].toDouble()));
+							}
+							while(xmlparser.accessElement(XmlParser::NextElement));
+						}
+
+						xmlparser.restorePosition();
+					}
 					else if(obj_type == ObjectType::Database)
 					{
 						xmlparser.getElementAttributes(attribs);
@@ -8060,6 +8079,11 @@ void DatabaseModel::setDatabaseModelAttributes(attribs_map &attribs, SchemaParse
 			//Persists the saved (pending) mode/threshold, not the active one -- see loadModel()
 			attribs[Attributes::SegMode] = QString::number(saved_seg_mode);
 			attribs[Attributes::SegThreshold] = QString::number(saved_seg_threshold);
+
+			/* Only meaningful with more than one scene -- with a single scene (segmentation off),
+			 * the legacy scene-rect attribute below is the whole story, keeping the file format
+			 * unchanged for that (still the common) case */
+			attribs[Attributes::Scenes] = (scene_rects.size() > 1) ? getSceneRectsDefinition() : "";
 		}
 		catch (Exception &e)
 		{
@@ -10649,6 +10673,34 @@ QString DatabaseModel::getChangelogDefinition(bool csv_format)
 	}
 }
 
+QString DatabaseModel::getSceneRectsDefinition()
+{
+	try
+	{
+		QString buffer;
+		attribs_map attribs;
+
+		for(auto itr = scene_rects.begin(); itr != scene_rects.end(); itr++)
+		{
+			attribs[Attributes::Id] = QString::number(itr.key());
+			attribs[Attributes::Left] = QString::number(itr.value().left());
+			attribs[Attributes::Top] = QString::number(itr.value().top());
+			attribs[Attributes::Right] = QString::number(itr.value().right());
+			attribs[Attributes::Bottom] = QString::number(itr.value().bottom());
+			buffer += schparser.getSourceCode(Attributes::Scene, attribs, SchemaParser::XmlCode);
+		}
+
+		attribs.clear();
+		attribs[Attributes::Scene] = buffer;
+		schparser.ignoreEmptyAttributes(true);
+		return schparser.getSourceCode(Attributes::Scenes, attribs, SchemaParser::XmlCode);
+	}
+	catch(Exception &e)
+	{
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+	}
+}
+
 void DatabaseModel::setSceneRect(const QRectF &rect)
 {
 	if(!rect.isValid())
@@ -10661,6 +10713,17 @@ void DatabaseModel::setSceneRect(const QRectF &rect)
 QRectF DatabaseModel::getSceneRect()
 {
 	return scene_rect;
+}
+
+void DatabaseModel::setSceneRects(const QMap<int, QRectF> &rects)
+{
+	setCodeInvalidated(rects != scene_rects);
+	scene_rects = rects;
+}
+
+QMap<int, QRectF> DatabaseModel::getSceneRects()
+{
+	return scene_rects;
 }
 
 void DatabaseModel::setGenDisabledObjsCode(bool value)

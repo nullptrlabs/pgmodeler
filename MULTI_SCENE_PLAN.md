@@ -388,6 +388,13 @@ observável permanece idêntico ao atual (efetivamente 1 cena). Isola o refactor
     	<scene id="1" left="1001" top="0" right="2000" bottom="1200" />
     </scenes>
     ```
+  - **Posição de `<scenes>` dentro de `<dbmodel>` (decisão do usuário, 2026-09-26)**: fica **antes**
+    de `<database>`, não depois de `<changelog>` como no primeiro mirror proposto — ordem lógica
+    pedida: `<dbmodel> → <scenes> → <database> → ...`. Em [dbmodel.sch](assets/schemas/xml/dbmodel.sch),
+    isso é um `%if {scenes} %then {scenes} %end` logo depois do `>` que fecha a tag de abertura,
+    **antes** de `%if {objects} %then {objects} %end` (que é quem emite `<database>` e todo o resto
+    do grafo de objetos) — não depois de `{changelog}` como os outros blocos de metadado
+    (`{objects}`/`{permission}`/`{changelog}`), que continuam na ordem/posição atuais, inalterados.
   - **Chave de identidade: `id` (índice numérico), não nome** (revisado em 2026-09-21, a pedido
     do usuário). Motivação original era evitar o "custo de renomear a cena junto com o schema" —
     na prática esse custo não existiria mesmo com chave por nome, já que todo o bloco `<scenes>` é
@@ -1551,6 +1558,10 @@ depois.
        valor persistido por-cena quando disponível.
      Depende de: 3.0, 0.8, 1.1 (precisa que cenas por schema já existam de verdade para ter o que
      persistir por cena).
+     **Implementado (2026-09-26)**: seguiu o design acima à risca, com um ajuste de posição da tag
+     pedido pelo usuário antes de codar — `<scenes>` fica logo **antes** de `<database>` (ordem
+     lógica `<dbmodel> → <scenes> → <database> → ...`), não depois de `<changelog>` como os outros
+     blocos de metadado. Ver `MULTI_SCENE_PROGRESS.md` para detalhamento completo.
 
 3.3. **Wiring runtime de `LastScene`** — estender
      `ModelWidget::saveLastCanvasPosition()`/`restoreLastCanvasPosition()`

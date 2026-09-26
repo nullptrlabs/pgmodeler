@@ -2357,13 +2357,22 @@ void ModelWidget::adjustAllScenesRects()
 {
 	adjustSceneRect(true);
 
-	for(auto &scn : scenes)
+	QMap<int, QRectF> persisted_rects = db_model->getSceneRects();
+
+	for(int idx = 0; idx < scenes.size(); idx++)
 	{
+		ObjectsScene *scn = scenes.at(idx);
+
 		if(scn == scene)
 			continue;
 
-		//No side effects here -- just the items' own bounding rect, items stay exactly where they are
-		scn->setSceneRect(scn->itemsBoundingRect(true, false));
+		/* A persisted rect takes precedence -- falls back to the items' own bounding rect (no side
+		 * effects, items stay exactly where they are) for scenes with no persisted entry: an old
+		 * file predating this attribute, or a scene created since the last save */
+		if(persisted_rects.contains(idx))
+			scn->setSceneRect(persisted_rects.value(idx));
+		else
+			scn->setSceneRect(scn->itemsBoundingRect(true, false));
 	}
 }
 
@@ -5981,11 +5990,16 @@ void ModelWidget::editTableData()
 void ModelWidget::updateModelSceneRectInfo()
 {
 	QRectF united_rect;
+	QMap<int, QRectF> per_scene_rects;
 
-	for(auto &scn : scenes)
-		united_rect = united_rect.united(scn->sceneRect());
+	for(int idx = 0; idx < scenes.size(); idx++)
+	{
+		united_rect = united_rect.united(scenes.at(idx)->sceneRect());
+		per_scene_rects[idx] = scenes.at(idx)->sceneRect();
+	}
 
 	db_model->setSceneRect(united_rect);
+	db_model->setSceneRects(per_scene_rects);
 }
 
 void ModelWidget::updateModelLayersInfo()

@@ -446,6 +446,61 @@
     `setLastScene(2)` → save → reload → `getLastScene()==2`, e que um arquivo antigo sem o atributo
     (`assets/samples/demo.dbm`) cai no default `0` em vez de erro/lixo. Suíte completa **20/20** sob
     ASan limpa.
+  - Build limpo (`core`+`canvas`+`gui`+`modelwidgettest`). Commitado em `55a3ff2f7`.
+- **Subtarefa 3.2 implementada (2026-09-26) — persistência de retângulo por cena.** Design fechado
+  desde 2026-09-21 (seção 2 do plano), sem código até agora. Antes de implementar, usuário pediu uma
+  confirmação de onde exatamente `<scenes>` entraria dentro de `<dbmodel>` — resposta: mirror total
+  de `<changelog>` (mesmo par DTD/`.sch` dedicado, mesma técnica de container+entrada), exceto pela
+  **posição**: `<scenes>` fica **antes** de `<database>`, não depois de `<changelog>` — ordem lógica
+  pedida pelo usuário (`<dbmodel> → <scenes> → <database> → ...`).
+  - **Arquivos novos**: [scene.dtd](assets/schemas/xml/dtd/scene.dtd) (`<!ELEMENT scenes (scene*)>`/
+    `<!ELEMENT scene EMPTY>`, atributos `id`/`left`/`top`/`right`/`bottom`, todos `#REQUIRED` — mirror
+    exato de `changelog.dtd`); [scenes.sch](assets/schemas/xml/scenes.sch) (container, mirror de
+    `changelog.sch`) e [scene.sch](assets/schemas/xml/scene.sch) (entrada, mirror de `entry.sch`).
+    [dbmodel.dtd](assets/schemas/xml/dtd/dbmodel.dtd) ganha a entidade `%scene;` logo depois da
+    `%changelog;` já existente. [dbmodel.sch](assets/schemas/xml/dbmodel.sch) ganha
+    `%if {scenes} %then {scenes} %end` **antes** de `{objects}` (que é quem emite `<database>` e o
+    resto do grafo) — os outros blocos de metadado (`{objects}`/`{permission}`/`{changelog}`)
+    continuam intocados, na ordem/posição de sempre.
+  - **`Attributes::Scenes`** (plural, "scenes") novo — chave do bloco inteiro, usada em `dbmodel.sch`
+    e por `setDatabaseModelAttributes()`. **`Attributes::Scene`** (singular) já existia (subtarefa
+    2.2, atributo `scene` por tabela em modo threshold) — reaproveitado sem conflito real como nome
+    do template de cada entrada (`scene.sch`) e chave do buffer concatenado dentro do container,
+    mesmo padrão que `Attributes::Entry` já cumpre pro changelog (nome de arquivo de template e
+    chave de atributo são conceitos diferentes, mesmo compartilhando a string "scene").
+    `Id`/`Left`/`Top`/`Right`/`Bottom` já existiam, reaproveitados como o plano previa.
+  - **`DatabaseModel`**: novo `scene_rects` (`QMap<int, QRectF>`, chave = índice da cena — mesma
+    convenção de `LastScene`) + `setSceneRects()`/`getSceneRects()`
+    ([databasemodel.h](libs/libcore/src/databasemodel.h), ao lado de `scene_rect`/
+    `setSceneRect()`/`getSceneRect()`, o par legado que já existia). `getSceneRectsDefinition()`
+    novo — mirror linha a linha de `getChangelogDefinition()`: monta um `<scene id=... .../>` por
+    entrada do mapa via `schparser.getSourceCode(Attributes::Scene, ...)`, concatena, envolve com
+    `schparser.getSourceCode(Attributes::Scenes, ...)`. Escrita em `setDatabaseModelAttributes()`,
+    condicionada a `scene_rects.size() > 1` — com 1 cena só (segmentação desligada), nada muda,
+    só o `scene-rect` legado é escrito, exatamente como antes desta subtarefa. Leitura: novo branch
+    `else if(elem_name == Attributes::Scenes)` no laço principal de `loadModel()`, ao lado do branch
+    já existente pro `<changelog>` — não precisa de `scene_rects.clear()` no início (mesmo raciocínio
+    do `changelog`: `loadModel()` sempre roda sobre um `DatabaseModel` recém-construído na prática).
+  - **`ModelWidget`**: `updateModelSceneRectInfo()` (3.0) ganhou um segundo acumulador no mesmo laço
+    — além da união (`scene-rect` legado), agora também popula um `QMap<int, QRectF>` (índice da
+    cena → `sceneRect()`) e chama `db_model->setSceneRects(...)`. `adjustAllScenesRects()` (3.0)
+    passou a consultar `db_model->getSceneRects()` primeiro, pra cada cena não-ativa — só cai no
+    fallback `itemsBoundingRect()` quando não há entrada persistida pra aquele índice (arquivo
+    antigo, ou cena nova desde o último save).
+  - **Teste novo**: `perSceneRectsSurviveSaveAndReload` — seta um retângulo com posição bem
+    deslocada (não o tamanho, que `ObjectsScene::setSceneRect()` pode arredondar pra cima até um
+    mínimo derivado do layout de página — a posição nunca é tocada por esse clamp) numa cena
+    não-ativa, salva de verdade via `ModelWidget::saveModel()` (não o `DatabaseModel::saveModel()`
+    direto usado em outros testes, porque precisa passar por `updateModelSceneRectInfo()`), recarrega
+    replicando a ordem real de `MainWindow::addModel()`, confirma que o retângulo recarregado é
+    exatamente o valor persistido — não um recálculo coincidente. **Verificado que o teste de fato
+    pega o problema**: revertidos temporariamente `databasemodel.h`/`.cpp`, `modelwidget.cpp`,
+    `attributes.h`/`.cpp` (`git stash`) mantendo o teste — falhou (erro `UnkownAttribute 'scenes'`,
+    já que `dbmodel.sch` referencia `{scenes}` mas nada mais declara esse atributo sem o resto do
+    fix); restaurado depois, suíte completa **21/21** sob ASan limpa.
+  - **Assets sincronizados via `cmake --install`** (permissão nova do usuário, ver
+    `feedback_multiscene_workflow` em memória) em vez de cópia manual pontual — cobre os três
+    arquivos novos e os dois `dbmodel.dtd`/`dbmodel.sch` alterados.
   - Build limpo (`core`+`canvas`+`gui`+`modelwidgettest`). Não commitado ainda.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
