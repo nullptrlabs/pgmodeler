@@ -65,6 +65,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void savingWritesLegacySceneRectAsUnionOfAllScenes();
 		void lastSceneSurvivesSaveAndReload();
 		void perSceneRectsSurviveSaveAndReload();
+		void reloadingModelActivatesTheSavedLastScene();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -1414,6 +1415,69 @@ void ModelWidgetTest::perSceneRectsSurviveSaveAndReload()
 			QVERIFY(schema_a_scene != model_wgt.getObjectsScene());
 
 			QCOMPARE(schema_a_scene->sceneRect(), expected_rect);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
+}
+
+/*! \brief Regression test for subtask 3.3: ModelWidget::saveLastCanvasPosition()/restoreLastCanvasPosition()
+must round-trip which scene was active, not just LastScene's raw XML value (already covered by
+lastSceneSurvivesSaveAndReload() at the DatabaseModel level) -- this exercises the actual runtime
+wiring, i.e. that restoreLastCanvasPosition() really calls setActiveScene() with the persisted index. */
+void ModelWidgetTest::reloadingModelActivatesTheSavedLastScene()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_last_scene_wiring.dbm");
+	int expected_idx = -1;
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+			db_model->setSavedSegmentationMode(DatabaseModel::SegBySchema);
+			db_model->createSystemObjects(true);
+
+			Schema *schema_a = new Schema;
+			schema_a->setName("schema_a");
+			db_model->addSchema(schema_a);
+
+			Table *table_a = new Table;
+			table_a->setName("table_a");
+			table_a->setSchema(schema_a);
+			db_model->addTable(table_a);
+
+			ObjectsScene *schema_a_scene = model_wgt.getSchemaScene(schema_a);
+			QVERIFY(schema_a_scene != nullptr);
+
+			expected_idx = model_wgt.getObjectsScenes().indexOf(schema_a_scene);
+			QVERIFY(expected_idx > 0);
+			QVERIFY(expected_idx != model_wgt.getActiveSceneIndex());
+
+			model_wgt.setActiveScene(expected_idx);
+			QCOMPARE(model_wgt.getActiveSceneIndex(), expected_idx);
+
+			model_wgt.saveModel(tmp_file);
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_file);
+
+			//loadModel() alone doesn't touch the active scene -- only restoreLastCanvasPosition() does
+			model_wgt.restoreLastCanvasPosition();
+
+			QCOMPARE(model_wgt.getActiveSceneIndex(), expected_idx);
 		}
 	}
 	catch(Exception &e)

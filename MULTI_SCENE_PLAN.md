@@ -1568,6 +1568,13 @@ depois.
      ([modelwidget.cpp:972-1023](libs/libgui/src/widgets/modelwidget.cpp#L972)) para gravar o
      índice da cena ativa ao salvar e, ao restaurar, ativar aquela cena por índice (via
      `setActiveScene()`, 0.2) **antes** de aplicar zoom/scroll salvos. Depende de: 3.1, 0.2.
+     **Implementado (2026-09-26)**: ambos os métodos ganham a leitura/escrita de `active_scene_idx`
+     via `db_model->getLastScene()`/`setLastScene()`, atrás do mesmo `save_restore_pos` que já
+     controla zoom/posição — se o usuário desligou "lembrar posição", faz sentido também não lembrar
+     a cena ativa. `setActiveScene()` já ignora silenciosamente um índice fora dos limites (guarda
+     pré-existente), então um `LastScene` inválido hoje simplesmente mantém a cena ativa padrão pós
+     load, sem crash; o fallback explícito para "primeira cena disponível" continua sendo escopo da
+     3.4, não desta subtarefa.
 
 3.4. **Fallback de `LastScene` inválido** — se o índice referenciado por `LastScene` estiver fora
      dos limites da coleção de cenas na carga do arquivo (ex. cena removida em edição posterior ao
