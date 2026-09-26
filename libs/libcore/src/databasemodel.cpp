@@ -58,6 +58,7 @@ DatabaseModel::DatabaseModel()
 
 	conn_limit=-1;
 	last_zoom=1;
+	last_scene=0;
 	scene_seg_mode=saved_seg_mode=NoSegmentation;
 	seg_threshold=saved_seg_threshold=DefaultSegThreshold;
 	loading_model=invalidated=append_at_eod=prepend_at_bod=false;
@@ -3571,6 +3572,10 @@ void DatabaseModel::loadModel(const QString &filename)
 
 		saved_seg_threshold = seg_threshold;
 
+		/* No "active vs. saved" split here -- focusing a scene is an ordinary runtime action, unlike
+		 * the mode/threshold above, so whatever is read becomes the active value right away */
+		last_scene = attribs[Attributes::LastScene].isEmpty() ? 0 : attribs[Attributes::LastScene].toInt();
+
 		this->is_template = attribs[Attributes::IsTemplate] == Attributes::True;
 		this->allow_conns = (attribs[Attributes::AllowConns].isEmpty() ||
 												 attribs[Attributes::AllowConns] == Attributes::True);
@@ -4028,6 +4033,16 @@ void DatabaseModel::setLastZoomFactor(double zoom)
 double DatabaseModel::getLastZoomFactor()
 {
 	return last_zoom;
+}
+
+void DatabaseModel::setLastScene(int idx)
+{
+	last_scene=idx;
+}
+
+int DatabaseModel::getLastScene()
+{
+	return last_scene;
 }
 
 void DatabaseModel::setSegmentationMode(SegmentationMode mode)
@@ -8066,6 +8081,7 @@ void DatabaseModel::setDatabaseModelAttributes(attribs_map &attribs, SchemaParse
 		attribs[Attributes::Protected] = (this->is_protected ? Attributes::True : "");
 		attribs[Attributes::LastPosition] = QString("%1,%2").arg(last_pos.x()).arg(last_pos.y());
 		attribs[Attributes::LastZoom] = QString::number(last_zoom);
+		attribs[Attributes::LastScene] = QString::number(last_scene);
 		attribs[Attributes::DefaultSchema] = (default_objs[ObjectType::Schema] ? default_objs[ObjectType::Schema]->getName(true) : "");
 		attribs[Attributes::DefaultOwner] = (default_objs[ObjectType::Role] ? default_objs[ObjectType::Role]->getName(true) : "");
 		attribs[Attributes::DefaultTablespace] = (default_objs[ObjectType::Tablespace] ? default_objs[ObjectType::Tablespace]->getName(true) : "");

@@ -415,6 +415,37 @@
     uma cena isolada **não** corrompe reativamente esse valor). **Verificado que os dois pegam o bug**:
     revertidos temporariamente `modelwidget.cpp`+`.h` (`git stash`) mantendo os testes — os dois
     falharam exatamente como esperado; restaurado depois, suíte completa **19/19** sob ASan limpa.
+  - Build limpo (`core`+`canvas`+`gui`+`modelwidgettest`). Commitado em `7926ad70f`.
+- **Subtarefa 3.1 implementada (2026-09-26) — persistência de `LastScene`.** Modo de segmentação +
+  threshold já estavam persistidos (adiantado junto do `SceneInfoWidget`, ver acima); faltava só o
+  índice da cena focada. Ainda sem uso em runtime (não ativa a cena ao carregar) — isso é a 3.3.
+  - `DatabaseModel` ganhou `last_scene` (int, default `0`) +
+    `setLastScene()`/`getLastScene()` ([databasemodel.h](libs/libcore/src/databasemodel.h),
+    espelhando `last_pos`/`last_zoom`). **Sem a divisão "ativo"/"a salvar"** que `seg_mode`/
+    `seg_threshold` têm — focar uma cena diferente é uma ação comum de runtime, não precisa esperar
+    um reload pra valer (diferente de trocar o modo de segmentação inteiro, que exige rerotear todo
+    objeto existente). Novo atributo XML `last-scene` em `<dbmodel>`
+    ([dbmodel.dtd](assets/schemas/xml/dtd/dbmodel.dtd), [dbmodel.sch](assets/schemas/xml/dbmodel.sch)
+    — mesmo grupo condicional de `last-position`/`last-zoom`/`scene-rect` no template). Leitura no
+    início de `DatabaseModel::loadModel()`, escrita em `setDatabaseModelAttributes()`, ambos ao lado
+    de `LastPosition`/`LastZoom`.
+  - **Achado colateral no `.sch`**: a condição que decide se o grupo `last-position`/`last-zoom`/
+    `scene-rect` é emitido tinha `{last-position}` duplicado em vez de `{last-zoom}`
+    (`%if {last-position} %or {last-position} %or {scene-rect}`) — bug de digitação pré-existente,
+    inofensivo na prática (`last-position` quase sempre está setado junto), mas corrigido de
+    passagem por estar na mesma linha que eu já precisava tocar pra adicionar `{last-scene}`.
+  - **Achado de infra, já documentado em sessão anterior mas resurgiu**: o binário/teste roda com
+    `SCHEMASDIR` apontando pra `build/schemas`, não pra `assets/schemas` — editar só os arquivos em
+    `assets/` não bastou pro teste novo passar (o atributo `last-scene` simplesmente não aparecia no
+    XML salvo, mesmo com o código C++ correto). Sem rodar o target `install` completo (fora do
+    escopo permitido nesta sessão), copiei manualmente só os dois arquivos tocados
+    (`dbmodel.sch`/`dbmodel.dtd`) pra `build/schemas/xml/`— suficiente pra validar localmente; a
+    instalação de verdade (empacotamento/`cmake --install`) já copia esses arquivos normalmente, o
+    problema é só do meu fluxo de teste incremental.
+  - **Teste novo**: `lastSceneSurvivesSaveAndReload` — confirma default `0` num modelo novo, round-trip
+    `setLastScene(2)` → save → reload → `getLastScene()==2`, e que um arquivo antigo sem o atributo
+    (`assets/samples/demo.dbm`) cai no default `0` em vez de erro/lixo. Suíte completa **20/20** sob
+    ASan limpa.
   - Build limpo (`core`+`canvas`+`gui`+`modelwidgettest`). Não commitado ainda.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"

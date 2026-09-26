@@ -30,7 +30,7 @@ $br $tb
 
 [ seg-threshold=] "{seg-threshold}"
 
-%if {last-position} %or {last-position} %or {scene-rect} %then
+%if {last-position} %or {last-zoom} %or {scene-rect} %or {last-scene} %then
 	$br $tb
 
 	%if {last-position} %then
@@ -43,6 +43,10 @@ $br $tb
 
 	%if {scene-rect} %then
 		[ scene-rect=] "{scene-rect}"
+	%end
+
+	%if {last-scene} %then
+		[ last-scene=] "{last-scene}"
 	%end
 %end
 

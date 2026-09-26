@@ -293,6 +293,12 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		 * affect seg_threshold -- a threshold change only takes effect after the model is reloaded */
 		unsigned saved_seg_threshold;
 
+		/*! \brief Index (within the ObjectsScene collection, in creation order) of the scene that was
+		 * focused when the model was last saved -- unlike scene_seg_mode/seg_threshold, this has no
+		 * "active vs. saved" split: focusing a different scene is an ordinary runtime action, not one
+		 * that needs a reload to take effect */
+		int last_scene;
+
 		//! \brief Returns an object seaching it by its name and type. The third parameter stores the object index
 		BaseObject *getObject(const QString &name, ObjectType obj_type, int &obj_idx);
 
@@ -898,6 +904,9 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 
 		void setLastZoomFactor(double zoom);
 		double getLastZoomFactor();
+
+		void setLastScene(int idx);
+		int getLastScene();
 
 		//! \brief Default number of Table/View/ForeignTable insertions per scene in SegByThreshold mode
 		static constexpr unsigned DefaultSegThreshold = 200;
