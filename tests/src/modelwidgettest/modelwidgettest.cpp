@@ -21,6 +21,7 @@
 
 #include <QtTest/QtTest>
 #include <QTimer>
+#include <QGraphicsSceneMouseEvent>
 #include "modelwidget.h"
 #include "databasemodel.h"
 #include "schema.h"
@@ -82,6 +83,12 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void moveToSceneAdjustsDestinationSceneRectForTextbox();
 		void moveToSceneAdjustsDestinationSceneRectForTable();
 		void moveToSceneUndoRestoresTextboxToItsOriginScene();
+		void selectSchemaChildrenSpansMultipleScenesInThresholdMode();
+		void switchingActiveSceneNoLongerClearsSelection();
+		void handleObjectsMovementOnlyRegistersObjectsFromTheEmittingScene();
+		void selectionResetInOneSceneClearsEveryOtherScene();
+		void clickOnEmptySceneWithNothingLocallySelectedStillClearsOtherScenes();
+		void selectAllObjectsOfTypeSpansMultipleScenes();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -2425,6 +2432,332 @@ void ModelWidgetTest::moveToSceneAdjustsDestinationSceneRectForTable()
 		QCOMPARE(item->scene(), scene1);
 		QVERIFY2(scene1->sceneRect().contains(item->sceneBoundingRect()),
 						 "the second scene's rect must grow to include the relocated table");
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief A schema's children can be scattered across several scenes in threshold segmentation --
+selectSchemaChildren() must reach all of them, not just whichever happen to sit in the active
+scene, since it no longer goes through SchemaView (which has no notion of scenes at all). */
+void ModelWidgetTest::selectSchemaChildrenSpansMultipleScenesInThresholdMode()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		std::vector<Table *> tables;
+
+		for(unsigned i = 0; i <= db_model->getSegThreshold(); i++)
+		{
+			Table *table = new Table;
+			table->setName(QString("table_%1").arg(i));
+			table->setSchema(schema_pub);
+			db_model->addTable(table);
+			tables.push_back(table);
+		}
+
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+
+		//The last table, inserted after the threshold was crossed, must have landed in the second scene
+		BaseObjectView *last_view = dynamic_cast<BaseObjectView *>(tables.back()->getOverlyingObject());
+		QVERIFY(last_view != nullptr);
+		QCOMPARE(last_view->scene(), model_wgt.getObjectsScenes().at(1));
+
+		QAction sel_action;
+		sel_action.setData(QVariant::fromValue(static_cast<void *>(dynamic_cast<BaseObject *>(schema_pub))));
+		QObject::connect(&sel_action, SIGNAL(triggered(bool)), &model_wgt, SLOT(selectSchemaChildren()));
+		sel_action.trigger();
+
+		QCOMPARE(model_wgt.getSelectedObjects().size(), tables.size());
+
+		for(auto &table : tables)
+		{
+			BaseObjectView *view = dynamic_cast<BaseObjectView *>(table->getOverlyingObject());
+			QVERIFY(view != nullptr);
+			QVERIFY2(view->isSelected(), table->getName().toStdString().c_str());
+		}
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Selection now spans every scene at once -- switching the active scene must leave a
+previously-selected object (in a scene that just became inactive) still selected. */
+void ModelWidgetTest::switchingActiveSceneNoLongerClearsSelection()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		Schema *schema_b = new Schema;
+		schema_b->setName("schema_b");
+		db_model->addSchema(schema_b);
+
+		Table *table_pub = new Table;
+		table_pub->setName("table_pub");
+		table_pub->setSchema(schema_pub);
+		db_model->addTable(table_pub);
+
+		int idx_pub = model_wgt.getObjectsScenes().indexOf(model_wgt.getSchemaScene(schema_pub));
+		int idx_b = model_wgt.getObjectsScenes().indexOf(model_wgt.getSchemaScene(schema_b));
+
+		BaseObjectView *view_pub = dynamic_cast<BaseObjectView *>(table_pub->getOverlyingObject());
+		QVERIFY(view_pub != nullptr);
+
+		view_pub->setSelected(true);
+		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
+		QCOMPARE(model_wgt.getSelectedObjects().size(), size_t(1));
+
+		model_wgt.setActiveScene(idx_b);
+
+		QVERIFY2(view_pub->isSelected(), "switching scenes must not clear a selection made in the scene left behind");
+		QCOMPARE(model_wgt.getSelectedObjects().size(), size_t(1));
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Dragging is a mouse gesture that only ever happens in the scene currently attached to
+the viewport -- an object selected in another scene never receives a mouseMoveEvent and never
+actually moves, so it must not be registered on the operation list when the drag ends. */
+void ModelWidgetTest::handleObjectsMovementOnlyRegistersObjectsFromTheEmittingScene()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		Table *table_scene0 = nullptr;
+
+		for(unsigned i = 0; i <= db_model->getSegThreshold(); i++)
+		{
+			Table *table = new Table;
+			table->setName(QString("table_%1").arg(i));
+			table->setSchema(schema_pub);
+			db_model->addTable(table);
+
+			if(i == 0)
+				table_scene0 = table;
+		}
+
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+
+		Table *table_scene1 = dynamic_cast<Table *>(
+					db_model->getObject(QString("table_%1").arg(db_model->getSegThreshold()), ObjectType::Table));
+		QVERIFY(table_scene1 != nullptr);
+
+		ObjectsScene *scene0 = model_wgt.getObjectsScenes().at(0);
+		ObjectsScene *scene1 = model_wgt.getObjectsScenes().at(1);
+
+		BaseObjectView *view0 = dynamic_cast<BaseObjectView *>(table_scene0->getOverlyingObject());
+		BaseObjectView *view1 = dynamic_cast<BaseObjectView *>(table_scene1->getOverlyingObject());
+
+		QVERIFY(view0 != nullptr && view1 != nullptr);
+		QCOMPARE(view0->scene(), scene0);
+		QCOMPARE(view1->scene(), scene1);
+
+		view0->setSelected(true);
+		view1->setSelected(true);
+		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
+		QCOMPARE(model_wgt.getSelectedObjects().size(), size_t(2));
+
+		int idx_before = model_wgt.getOperationList()->getCurrentIndex();
+
+		QMetaObject::invokeMethod(&model_wgt, "handleObjectsMovement", Qt::DirectConnection,
+															 Q_ARG(ObjectsScene *, scene0), Q_ARG(bool, false));
+		QMetaObject::invokeMethod(&model_wgt, "handleObjectsMovement", Qt::DirectConnection,
+															 Q_ARG(ObjectsScene *, scene0), Q_ARG(bool, true));
+
+		int idx_after = model_wgt.getOperationList()->getCurrentIndex();
+
+		//Only table_scene0 (the scene that "emitted" the drag) must have been registered -- not table_scene1
+		QCOMPARE(idx_after - idx_before, 1);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief A click that resets one scene's own selection (empty area, or a plain click replacing a
+previous selection) must clear every other scene's selection too, not just the one that was clicked. */
+void ModelWidgetTest::selectionResetInOneSceneClearsEveryOtherScene()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		Schema *schema_b = new Schema;
+		schema_b->setName("schema_b");
+		db_model->addSchema(schema_b);
+
+		Table *table_pub = new Table;
+		table_pub->setName("table_pub");
+		table_pub->setSchema(schema_pub);
+		db_model->addTable(table_pub);
+
+		Table *table_b = new Table;
+		table_b->setName("table_b");
+		table_b->setSchema(schema_b);
+		db_model->addTable(table_b);
+
+		BaseObjectView *view_pub = dynamic_cast<BaseObjectView *>(table_pub->getOverlyingObject());
+		BaseObjectView *view_b = dynamic_cast<BaseObjectView *>(table_b->getOverlyingObject());
+		QVERIFY(view_pub != nullptr && view_b != nullptr);
+
+		view_pub->setSelected(true);
+		view_b->setSelected(true);
+		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
+		QCOMPARE(model_wgt.getSelectedObjects().size(), size_t(2));
+
+		//Mirrors what ObjectsScene::mousePressEvent() emits when a click resets its own selection
+		emit model_wgt.getSceneForObject(table_pub)->s_selectionResetTriggered();
+
+		QVERIFY2(!view_b->isSelected(), "a selection reset in one scene must clear every other scene too");
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief The reset-detection inside ObjectsScene::mousePressEvent() must not be gated on this
+scene's own selectedItems() being non-empty -- a scene with nothing selected locally (because the
+selection lives entirely in some OTHER scene) still needs a plain click on its empty area to clear
+that other scene's selection. A local-only check would never see anything to reset and silently
+leave it behind, which is exactly the bug the user found manually. */
+void ModelWidgetTest::clickOnEmptySceneWithNothingLocallySelectedStillClearsOtherScenes()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		Schema *schema_b = new Schema;
+		schema_b->setName("schema_b");
+		db_model->addSchema(schema_b);
+
+		Table *table_pub = new Table;
+		table_pub->setName("table_pub");
+		table_pub->setSchema(schema_pub);
+		db_model->addTable(table_pub);
+
+		BaseObjectView *view_pub = dynamic_cast<BaseObjectView *>(table_pub->getOverlyingObject());
+		QVERIFY(view_pub != nullptr);
+
+		view_pub->setSelected(true);
+		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
+		QCOMPARE(model_wgt.getSelectedObjects().size(), size_t(1));
+
+		//Switches to schema_b's scene, which never had anything selected in it at all
+		ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
+		int idx_b = model_wgt.getObjectsScenes().indexOf(scene_b);
+		model_wgt.setActiveScene(idx_b);
+
+		QVERIFY(scene_b->selectedItems().isEmpty());
+
+		//A plain left click on an empty area of scene_b, delivered the same way Qt would from a real click
+		QGraphicsSceneMouseEvent press_event(QEvent::GraphicsSceneMousePress);
+		press_event.setScenePos(QPointF(9000, 9000));
+		press_event.setButton(Qt::LeftButton);
+		press_event.setButtons(Qt::LeftButton);
+		QCoreApplication::sendEvent(scene_b, &press_event);
+
+		QVERIFY2(!view_pub->isSelected(),
+						 "a reset click on a scene with nothing selected locally must still clear other scenes");
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief "Select all objects of type X" is, by nature, a whole-model operation -- restricting it
+to the active scene would silently leave out every table routed to another scene in threshold
+segmentation, the same kind of gap selectSchemaChildren() had before it was reformulated. */
+void ModelWidgetTest::selectAllObjectsOfTypeSpansMultipleScenes()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		std::vector<Table *> tables;
+
+		for(unsigned i = 0; i <= db_model->getSegThreshold(); i++)
+		{
+			Table *table = new Table;
+			table->setName(QString("table_%1").arg(i));
+			table->setSchema(schema_pub);
+			db_model->addTable(table);
+			tables.push_back(table);
+		}
+
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+
+		BaseObjectView *last_view = dynamic_cast<BaseObjectView *>(tables.back()->getOverlyingObject());
+		QVERIFY(last_view != nullptr);
+		QCOMPARE(last_view->scene(), model_wgt.getObjectsScenes().at(1));
+
+		QAction sel_action;
+		sel_action.setData(static_cast<unsigned>(ObjectType::Table));
+		QObject::connect(&sel_action, SIGNAL(triggered(bool)), &model_wgt, SLOT(selectAllObjects()));
+		sel_action.trigger();
+
+		QCOMPARE(model_wgt.getSelectedObjects().size(), tables.size());
+
+		for(auto &table : tables)
+		{
+			BaseObjectView *view = dynamic_cast<BaseObjectView *>(table->getOverlyingObject());
+			QVERIFY(view != nullptr);
+			QVERIFY2(view->isSelected(), table->getName().toStdString().c_str());
+		}
 	}
 	catch(Exception &e)
 	{

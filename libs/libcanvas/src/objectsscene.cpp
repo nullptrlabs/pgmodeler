@@ -1151,6 +1151,19 @@ void ObjectsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 	if(rel_line->isVisible())
 		event->setModifiers(Qt::ControlModifier);
 
+	/* A click resets the whole (now cross-scene) selection when it's the kind of click that would
+	 * replace or clear a selection: an empty-area click, or a plain click (no Ctrl/Shift) on an
+	 * item that isn't already part of the selection. This must NOT be gated on is_deselection (or
+	 * on anything else derived from this scene's own selectedItems()) -- the whole point is to
+	 * reach scenes that have nothing selected locally at all (selection lives in some OTHER scene),
+	 * where a local-only check would never see anything to reset and silently leave it behind. A
+	 * plain click on an ALREADY selected item is excluded on purpose: that's how dragging an
+	 * existing multi-selection starts, and must not clear it */
+	bool resets_selection =
+			(!item && (event->buttons()==Qt::LeftButton || event->buttons()==Qt::RightButton)) ||
+			(event->buttons()==Qt::LeftButton && item && !item->isSelected() &&
+			 (event->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) == 0);
+
 	if(is_deselection)
 		this->blockItemsSignals(true);
 
@@ -1167,6 +1180,9 @@ void ObjectsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		this->blockItemsSignals(false);
 		emit s_objectSelected(nullptr, false);
 	}
+
+	if(resets_selection)
+		emit s_selectionResetTriggered();
 
 	if(event->buttons()==Qt::LeftButton)
 	{
