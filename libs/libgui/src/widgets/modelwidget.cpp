@@ -4156,7 +4156,7 @@ void ModelWidget::removeObjects(bool cascade)
 				{
 					for(BaseObject *sel_obj : sel_objs)
 					{
-						for(BaseObject *ref_obj : sel_obj->getReferences())
+						for(BaseObject *ref_obj : sel_obj->getReferences(true))
 						{
 							obj_id=ref_obj->getObjectId();
 							tab_obj=dynamic_cast<TableObject *>(ref_obj);
