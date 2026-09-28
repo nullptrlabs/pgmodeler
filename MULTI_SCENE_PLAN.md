@@ -1500,30 +1500,55 @@ depois.
        Fase 2) é útil aqui mesmo se a direção escolhida não depender dele, como forma rápida de
        montar cenários de teste cross-scene. Depende de: 1.8.
 
-4.4. **[Requer fechamento de decisão com o usuário] Seleção sempre local à cena ativa** (ex-1.13)
-     — hoje `ModelWidget::selected_objects` é um cache atualizado por `configureObjectSelection()`
-     toda vez que `scene->selectionChanged()` dispara, sempre refletindo `scene->selectedItems()`
-     da única cena existente. Cada `ObjectsScene` já tem, de graça, seu próprio estado de seleção
-     isolado (`QGraphicsItem::isSelected()` só existe nos itens daquela cena) — o problema é que o
-     Qt **não limpa automaticamente** a seleção de uma cena quando ela deixa de estar anexada ao
-     viewport. Sem tratamento, selecionar na cena A, trocar pra cena B, selecionar mais lá, e rodar
-     uma operação em lote (remoção múltipla, copy/paste, set layer em lote) passaria a incluir
-     também os objetos "esquecidos" selecionados na cena A — invisíveis no momento, mas afetados.
-     - `setActiveScene()` já limpa a seleção ao trocar de cena (decisão recomendada, já
-       implementada e testável diretamente pelo combo de cenas) — falta resolver a tensão com
-       ações de seleção semântica que seguem relacionamentos e podem, no caso cross-scene,
-       precisar tocar objetos fora da cena ativa: `selectTableRelationships()` (relacionamentos
-       conectados a uma tabela; no caso cross-scene, um deles "pertence" à outra cena) é o exemplo
-       mais claro. `selectSchemaChildren()` fica automaticamente seguro no modo por schema (schema
-       == cena, por construção), mas `selectTaggedTables()` pode espalhar por múltiplas cenas
-       livremente (tags não são amarradas a schema/bucket).
-     - **Ainda não decidido**: essas ações (a) só selecionam a parte alcançável na cena ativa e
-       sinalizam visualmente o que ficou de fora (via o mesmo conector off-page), ou (b) têm uma
-       exceção explícita à regra "seleção só na cena ativa" para casos de seleção
-       programática/semântica. Depende de: 0.2, 1.8.
+4.4. **Seleção passa a abranger todas as cenas, não só a ativa** (ex-1.13; decisão fechada e
+     implementada) — antes desta subtarefa, `ModelWidget::selected_objects` era um cache que
+     sempre refletia `scene->selectedItems()` da cena ativa apenas, e o Qt não limpa
+     automaticamente a seleção de uma cena quando ela deixa de estar anexada ao viewport. Isso
+     tinha duas consequências ruins ao mesmo tempo: seleção "esquecida" numa cena fora de vista
+     podia vazar pra dentro de uma operação em lote sem o usuário perceber, e ações legitimamente
+     cross-scene (ex.: selecionar todas as tabelas de um schema espalhadas por várias cenas em modo
+     threshold, pra movê-las juntas) não tinham como funcionar de uma vez só, exigindo repetir a
+     operação cena por cena.
+     - **Decisão**: seleção lógica e visual passam a andar sempre juntas — a alternativa de
+       desacoplar as duas (visual só na cena ativa, lógica sempre cross-scene) foi descartada de
+       propósito, porque a seleção visual já alimenta diretamente configuração de menu de
+       contexto/ações, e as duas divergirem geraria incoerência de UX. `configureObjectSelection()`
+       agora agrega `selectedItems()` de todas as `scenes`; `setActiveScene()` deixou de limpar a
+       seleção ao trocar de cena.
+     - **Reset continua existindo, só que agora é global**: uma ação que já resetava/substituía a
+       seleção dentro de uma cena (clique em área vazia, clique simples trocando uma seleção
+       múltipla por um único item) passa a limpar a seleção de **todas** as cenas, não só a que
+       recebeu o clique — novo sinal `ObjectsScene::s_selectionResetTriggered()`, emitido de
+       `mousePressEvent()` exatamente nos casos em que o Qt já ia zerar a seleção local por conta
+       própria (clicar num item ainda não selecionado, sem Ctrl/Shift, é excluído de propósito: é
+       assim que começa o arraste de uma multi-seleção existente, e isso não pode limpar nada).
+       `ModelWidget` escuta esse sinal por cena e limpa as demais.
+     - **`selectAllObjects()` também passou a operar cross-scene**: "selecionar todos os objetos
+       do tipo X" e "selecionar tudo" agora abrangem todas as cenas, mesma decisão da 4.4 aplicada
+       de forma consistente — antes ficava restrito à cena ativa de propósito, com um comentário
+       explícito nesse sentido; o usuário confirmou depois que o risco de selecionar muitos objetos
+       de uma vez num modelo grande é aceitável, e a restrição só reabriria a mesma inconsistência
+       que o resto da 4.4 corrigiu.
+     - **`selectSchemaChildren()` reformulado**: antes delegava pra `SchemaView::selectChildren()`,
+       que não tem noção de cena nenhuma e só existe em `NoSegmentation` — a ação inteira era um
+       no-op em qualquer modo segmentado. Agora lê os filhos direto do `DatabaseModel` (mesma
+       consulta que `SchemaView::fetchChildren()` já fazia) e seleciona a view de cada um onde quer
+       que ela esteja. `SchemaView::selectChildren()` continua existindo sem mudança nenhuma, só que
+       exclusivamente para o gesto de Shift+clique na própria caixa do schema
+       (`SchemaView::mousePressEvent()`) — inerentemente local a uma cena só, já que esse caminho só
+       existe quando schema e cena são a mesma coisa.
+     - **Ressalva importante, achado do usuário**: arrastar objetos com o mouse continua
+       estritamente local à cena ativa — só ela recebe `mouseMoveEvent`. `handleObjectsMovement()`
+       passou a receber explicitamente qual `ObjectsScene` disparou o movimento, e registra na
+       `OperationList` só o subconjunto da seleção (agora cross-scene) que pertence àquela cena; os
+       demais objetos selecionados em outras cenas nunca se moveram de fato e não entram na
+       operação.
+     - **Efeito colateral cosmético corrigido**: o feedback de mouse-move na status bar
+       (`s_sceneInteracted`) passou a unir o retângulo de itens selecionados de todas as cenas, não
+       só da ativa, pra bater com a contagem (agora também cross-scene) mostrada junto.
 
-4.5. **[Requer fechamento de decisão com o usuário] Multi-seleção/navegação no Object Search
-     Widget** (ex-1.14) — sinalizado explicitamente pelo usuário; **este é o item que motivou a
+4.5. **Multi-seleção/navegação no Object Search Widget** (ex-1.14; decisão fechada, ainda não
+     implementada) — sinalizado explicitamente pelo usuário; **este é o item que motivou a
      criação desta fase** (relato de 2026-09-26: clicar num objeto encontrado não muda a cena
      visível para a cena daquele objeto). A busca de objetos é, por natureza, uma operação **de
      modelo inteiro** (procura em todas as tabelas/views/relacionamentos/schemas do
@@ -1555,24 +1580,19 @@ depois.
        modelo inteiro" é **a proposta de valor da feature** — restringir a busca à cena ativa por
        padrão anularia boa parte da utilidade (ex.: fade-out em massa de tabelas com um prefixo,
        espalhadas pelo modelo inteiro).
-     - **Opções levantadas pelo usuário, sem decisão fechada**:
-       1. **Permitir livremente** — seleção lógica (`selected_objs`, ações do próprio widget:
-          editar, fade, popup menu, que operam sobre `BaseObject*` e não dependem de estarem todos
-          na mesma cena) continua cross-scene sem restrição; só a materialização visual no canvas
-          (`setSelected`/`centerOn`) precisa de regra — ex. focar automaticamente a cena do
-          primeiro objeto, selecionar visualmente só o que pertence a ela, manter marca lógica nos
-          demais sem tocar `isSelected()` deles.
-       2. **Restringir** — multi-seleção nos resultados só permitida entre objetos da mesma cena;
-          selecionar de outra cena junto com uma seleção existente é bloqueado ou substitui a
-          seleção anterior. Mais simples e seguro, mas quebra o caso de uso "operar em lote no
-          modelo inteiro" que já existe hoje (`selectObjects()`/"select all found").
-       3. **Híbrida** — busca e seleção lógica continuam sempre cross-scene; ações que dependem de
-          estado visual do canvas (abrir formulário que centraliza a view, popup-menu) escolhem uma
-          cena-alvo (ex. a do primeiro objeto) e ignoram/avisam sobre os demais só para fins de
-          destaque visual; ações "de dados" (fade, set layer, set tag, remoção) continuam operando
-          sobre a lista lógica completa, sem exigir mesma cena.
-     - Recomendação preliminar (a confirmar): opção 3, por preservar o propósito original da
-       feature sem violar a regra de segurança de seleção-visual-por-cena da 4.4. Depende de: 4.4.
+     - **Decisão**: consequência direta de como a 4.4 fechou (seleção lógica e visual sempre
+       juntas, agora nativamente cross-scene) — a tensão original com a 4.4 deixou de existir, e a
+       distinção cogitada entre ações "visuais" e ações "de dados" (opção híbrida) não é mais
+       necessária, porque não há mais regra de segurança seleção-visual-por-cena nenhuma pra violar.
+       Seleção simples (um resultado clicado) foca a cena do objeto, trocando a cena ativa via
+       `setActiveScene()`, se ela não for a já ativa. Multi-seleção (vários resultados de uma vez,
+       possivelmente espalhados por várias cenas) permanece na cena atual e seleciona os objetos
+       normalmente mesmo que estejam em outras cenas — sem necessidade de nenhum tratamento
+       especial além do que a 4.4 já oferece.
+     - **Ainda não implementado**: `ObjectSearchWidget::selectObject()`/`selectObjects()`
+       continuam precisando ser ajustados pra de fato chamar `setActiveScene()` no caso de seleção
+       simples — hoje nenhum dos dois caminhos faz isso, e `selectObject()` ainda opera sobre a
+       cena ativa fixa via `model_wgt->scene->clearSelection()`. Depende de: 4.4.
 
 4.6. **Cor exclusiva para o marcador cut-off** (ex-1.15) — hoje `CutoffItem` reaproveita
      `Attributes::PositionInfo` (fill/border/font) pra desenhar a linha e o rótulo, sem ter

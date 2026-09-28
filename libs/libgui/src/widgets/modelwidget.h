@@ -600,7 +600,7 @@ class __libgui ModelWidget: public QWidget {
 		void handleObjectRemoval(BaseObject *object);
 
 		//! \brief Handles the signals that indicates the object moviment on the scene
-		void handleObjectsMovement(bool end_moviment);
+		void handleObjectsMovement(ObjectsScene *src_scene, bool end_moviment);
 
 		//! \brief Handles the signals that indicates the object edition on the scene
 		void handleObjectModification(BaseGraphicObject *object);
@@ -651,7 +651,10 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Triggers the permission editing form
 		void editPermissions();
 
-		//! \brief Selects all the graphical objects under the selected schema
+		//! \brief Clears the selection on every scene, not just the active one
+		void clearSelectionInAllScenes();
+
+		//! \brief Selects all the graphical objects under the selected schema, regardless of which scene each one is in
 		void selectSchemaChildren();
 
 		//! \brief Selects all the relationships connected to the selected table

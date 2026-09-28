@@ -837,7 +837,100 @@
     Textbox de cena, confirma o undo restaura tanto `getSceneIndex()` quanto a cena real da view.
     Verificado que falha sem o fix (`sed` comentando a condição temporariamente) e passa com ele
     restaurado. Suíte completa **36/36**.
-  - Build (`gui`+`modelwidgettest`) limpo. **Aguardando decisão do usuário sobre commit.**
+  - Build (`gui`+`modelwidgettest`) limpo. **Commitado em `1762bb33d`** junto com o restante da
+    4.2 (subtarefa completa + os dois bugs encontrados na verificação manual, tudo em um commit só
+    — ver decisão de granularidade abaixo).
+- **Fase 4, subtarefa 4.4 implementada (2026-09-28): seleção agora abrange todas as cenas, não só a
+  ativa.** Discussão de design em várias rodadas com o usuário (ver plano, subtarefa 4.4, para o
+  texto final fechado) — puxada por um caso de uso concreto que o usuário trouxe: selecionar todas
+  as tabelas de um schema espalhadas por 10 cenas, hoje só dá pra fazer cena por cena.
+  - **Decisão principal**: seleção lógica (`ModelWidget::selected_objects`) e visual
+    (`QGraphicsItem::isSelected()`) continuam sempre juntas, agora as duas cross-scene — opção
+    "desacoplar as duas" foi cogitada e descartada pelo usuário ("ou fazemos tudo ou nada"), porque
+    a seleção visual já alimenta configuração de menu de contexto/ações diretamente.
+    `configureObjectSelection()` ([modelwidget.cpp:1785](libs/libgui/src/widgets/modelwidget.cpp#L1785))
+    agora agrega `selectedItems()` de todas as `scenes`, não só a ativa.
+    `ModelWidget::setActiveScene()` ([modelwidget.cpp:1193](libs/libgui/src/widgets/modelwidget.cpp#L1193))
+    deixou de limpar a seleção ao trocar de cena.
+  - **Reset de seleção agora é global**: novo sinal `ObjectsScene::s_selectionResetTriggered()`
+    ([objectsscene.h](libs/libcanvas/src/objectsscene.h)), emitido de `mousePressEvent()`
+    ([objectsscene.cpp:1138](libs/libcanvas/src/objectsscene.cpp#L1138)) exatamente nos casos em
+    que o Qt já ia zerar a seleção local por conta própria (clique em área vazia; clique simples
+    sem Ctrl/Shift sobre um item ainda não selecionado) — clicar num item **já selecionado** sem
+    modificador foi excluído de propósito, porque é assim que começa o arraste de uma
+    multi-seleção existente, e isso não pode disparar um reset.
+    `ModelWidget::addScene()` ([modelwidget.cpp:1093](libs/libgui/src/widgets/modelwidget.cpp#L1093))
+    escuta esse sinal por cena e limpa todas as outras.
+  - **`selectSchemaChildren()` reformulado** ([modelwidget.cpp:3520](libs/libgui/src/widgets/modelwidget.cpp#L3520)):
+    mapeamento de uso pedido pelo usuário antes de mexer — `SchemaView::selectChildren()` tinha
+    outro call site além do menu (`SchemaView::mousePressEvent()`, o gesto de Shift+clique na
+    caixa do schema, `NoSegmentation`-only), então não podia ser simplesmente removido. Ficou como
+    estava, intocado; `ModelWidget::selectSchemaChildren()` ganhou implementação própria, lendo os
+    filhos direto do `DatabaseModel` (mesma consulta que `SchemaView::fetchChildren()` já fazia) e
+    selecionando a view de cada um onde quer que ela esteja — funciona nos três modos de
+    segmentação agora (antes era um no-op silencioso em qualquer modo segmentado, já que
+    `SchemaView` só existe em `NoSegmentation`). `selectTableRelationships()`/`selectTaggedTables()`
+    também tiveram seu `scene->clearSelection()` trocado por um novo helper,
+    `ModelWidget::clearSelectionInAllScenes()`, pela mesma razão.
+  - **Achado do próprio usuário, faltava no desenho inicial**: arrastar objetos com o mouse
+    continua estritamente local à cena ativa — só ela recebe `mouseMoveEvent`. Sem tratamento,
+    `ModelWidget::handleObjectsMovement()` teria registrado na `OperationList` objetos selecionados
+    em cenas escondidas que nunca de fato se moveram. Corrigido dando ao método um parâmetro
+    explícito `ObjectsScene *src_scene` (passado via lambda no `connect()`, já que a assinatura do
+    sinal `ObjectsScene::s_objectsMoved` não carrega a cena) — só o subconjunto da seleção que
+    pertence a `src_scene` entra na operação.
+  - **Efeito colateral cosmético, também corrigido, em dois pontos**: o mesmo padrão --
+    `selected_objects.size()` (agora global) unido a `scene->itemsBoundingRect(true, true)` (só da
+    cena ativa) -- apareceu duas vezes, não uma: no feedback de mouse-move
+    ([modelwidget.cpp:830](libs/libgui/src/widgets/modelwidget.cpp#L830)) e em
+    `ModelWidget::emitSceneInteracted()`
+    ([modelwidget.cpp:1694](libs/libgui/src/widgets/modelwidget.cpp#L1694), chamado depois de toda
+    ação de seleção explícita). Os dois passaram a unir o retângulo de todas as cenas.
+  - **Testes**: 4 novos em `modelwidgettest.cpp` —
+    `selectSchemaChildrenSpansMultipleScenesInThresholdMode`,
+    `switchingActiveSceneNoLongerClearsSelection`,
+    `handleObjectsMovementOnlyRegistersObjectsFromTheEmittingScene`,
+    `selectionResetInOneSceneClearsEveryOtherScene`. Os quatro verificados individualmente contra
+    cada peça do fix (revert temporário via `sed`, confirma falha, restaura) antes de rodar a
+    suíte completa. Suíte completa **40/40**.
+  - **Bug real reportado pelo usuário, testando manualmente logo depois da 4.4 "pronta": selecionar
+    filhos de um schema (ou selecionar manualmente) numa cena, trocar pra outra cena sem nada
+    selecionado nela e clicar numa área vazia lá não limpa a seleção das demais cenas.** Causa
+    raiz: `resets_selection`, em `ObjectsScene::mousePressEvent()`, usava `is_deselection` como um
+    dos seus componentes -- e `is_deselection` (`!this->selectedItems().isEmpty() && !item`) só é
+    verdadeiro quando **esta própria cena** já tem algo selecionado localmente. Numa cena que nunca
+    teve nada selecionado (porque a seleção inteira mora em outra cena), um clique em área vazia
+    nunca marcava `resets_selection` como verdadeiro, e o novo sinal
+    `s_selectionResetTriggered()` nunca disparava -- exatamente o tipo de checagem local-only que o
+    sinal existe pra evitar, só que reintroduzida sem querer numa condição derivada.
+    - **Fix**: `resets_selection` não depende mais de `is_deselection`/de nada derivado da seleção
+      local desta cena -- passou a ser incondicional: clique (esquerdo ou direito) em área vazia,
+      ou clique esquerdo sem Ctrl/Shift num item ainda não selecionado
+      ([objectsscene.cpp:1162](libs/libcanvas/src/objectsscene.cpp#L1162)).
+    - **Teste**: `clickOnEmptySceneWithNothingLocallySelectedStillClearsOtherScenes`
+      ([modelwidgettest.cpp](tests/src/modelwidgettest/modelwidgettest.cpp)) -- este exigiu simular
+      um clique de verdade (`QGraphicsSceneMouseEvent` + `QCoreApplication::sendEvent()`
+      diretamente na cena, sem precisar de janela/viewport visível), diferente do teste anterior de
+      reset (`selectionResetInOneSceneClearsEveryOtherScene`) que só emitia o sinal manualmente --
+      por isso esse teste anterior não capturou o bug: ele testava a reação ao sinal, não a
+      condição que dispara o sinal. Verificado que falha sem o fix e passa com ele restaurado.
+      Suíte completa **41/41**.
+    - Build (`canvas`+`gui`+`modelwidgettest`) limpo. **Aguardando decisão do usuário sobre
+      commit.**
+  - **`selectAllObjects()` também estendido pra todas as cenas (decisão fechada em seguida,
+    2026-09-28)**: tanto "selecionar tudo" (`ObjectType::BaseObject`, via `setSelectionArea()` por
+    cena) quanto "selecionar todos os objetos do tipo X" passaram a cobrir todas as `scenes`, não
+    só a ativa ([modelwidget.cpp:1890](libs/libgui/src/widgets/modelwidget.cpp#L1890)). O ramo de
+    tipo específico também ganhou `clearSelectionInAllScenes()` antes de selecionar, pra não
+    misturar com uma seleção cross-scene anterior de outro tipo de objeto.
+    - **Teste**: `selectAllObjectsOfTypeSpansMultipleScenes`
+      ([modelwidgettest.cpp](tests/src/modelwidgettest/modelwidgettest.cpp)). Verificado que falha
+      sem o fix e passa com ele restaurado. Suíte completa **42/42**.
+    - Build (`gui`+`modelwidgettest`) limpo. **Aguardando decisão do usuário sobre commit.**
+  - **Subtarefa 4.5 (Object Search Widget) teve sua decisão de design fechada na mesma conversa**
+    (ver plano) como consequência direta da 4.4, mas **nenhum código foi alterado** —
+    `ObjectSearchWidget::selectObject()`/`selectObjects()` continuam precisando do ajuste pra
+    chamar `setActiveScene()` no caso de seleção simples.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

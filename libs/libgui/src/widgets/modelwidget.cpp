@@ -839,7 +839,15 @@ bool ModelWidget::eventFilter(QObject *object, QEvent *event)
 					emit s_sceneInteracted(graph_obj ? dynamic_cast<BaseObjectView *>(graph_obj->getOverlyingObject()) : nullptr);
 				}
 				else
-					emit s_sceneInteracted(static_cast<int>(selected_objects.size()), scene->itemsBoundingRect(true, true));
+				{
+					//Selection now spans every scene -- unite each one's own selected-items rect to reflect the whole thing
+					QRectF sel_rect;
+
+					for(auto &scn : scenes)
+						sel_rect = sel_rect.united(scn->itemsBoundingRect(true, true));
+
+					emit s_sceneInteracted(static_cast<int>(selected_objects.size()), sel_rect);
+				}
 			}
 		}
 
@@ -1070,7 +1078,9 @@ ObjectsScene *ModelWidget::addScene(bool auto_activate)
 	ObjectsScene *new_scene = new ObjectsScene(this);
 	new_scene->installEventFilter(this);
 
-	connect(new_scene, &ObjectsScene::s_objectsMoved, this, &ModelWidget::handleObjectsMovement);
+	connect(new_scene, &ObjectsScene::s_objectsMoved, this, [this, new_scene](bool end_moviment){
+		handleObjectsMovement(new_scene, end_moviment);
+	});
 	connect(new_scene, &ObjectsScene::s_objectModified, this,  &ModelWidget::handleObjectModification);
 	connect(new_scene, &ObjectsScene::s_objectDoubleClicked, this,  &ModelWidget::handleObjectDoubleClick);
 
@@ -1079,6 +1089,14 @@ ObjectsScene *ModelWidget::addScene(bool auto_activate)
 	connect(new_scene, qOverload<>(&ObjectsScene::s_popupMenuRequested), this,  &ModelWidget::showObjectMenu, Qt::QueuedConnection);
 	connect(new_scene, &ObjectsScene::s_childrenSelectionChanged, this, &ModelWidget::configureObjectSelection);
 	connect(new_scene, &ObjectsScene::s_objectsSelectedInRange, this, &ModelWidget::configureObjectSelection);
+
+	connect(new_scene, &ObjectsScene::s_selectionResetTriggered, this, [this, new_scene](){
+		for(auto &scn : scenes)
+		{
+			if(scn != new_scene)
+				scn->clearSelection();
+		}
+	});
 
 	connect(new_scene, &ObjectsScene::s_collapseModeChanged, this, [this](){
 		setModified(true);
@@ -1174,10 +1192,9 @@ void ModelWidget::setActiveScene(int idx)
 	if(idx < 0 || idx >= scenes.size() || idx == active_scene_idx)
 		return;
 
-	//Selection is local to the active scene -- clear it on the outgoing scene before switching
-	if(scene)
-		scene->clearSelection();
-
+	/* Selection now spans every scene at once -- switching the active scene must not touch it.
+	 * Only an explicit reset (empty-area click, or a plain click replacing a selection) clears
+	 * anything, and that already reaches every scene on its own (s_selectionResetTriggered) */
 	active_scene_idx = idx;
 	scene = scenes.at(active_scene_idx);
 
@@ -1573,7 +1590,7 @@ void ModelWidget::handleObjectDoubleClick(BaseGraphicObject *object)
 		this->showObjectForm(ObjectType::Database, db_model);
 }
 
-void ModelWidget::handleObjectsMovement(bool end_moviment)
+void ModelWidget::handleObjectsMovement(ObjectsScene *src_scene, bool end_moviment)
 {
 	std::vector<BaseObject *>::iterator itr, itr_end;
 	std::vector<BaseObject *> reg_tables;
@@ -1581,8 +1598,23 @@ void ModelWidget::handleObjectsMovement(bool end_moviment)
 	BaseGraphicObject *obj=nullptr;
 	Schema *schema=nullptr;
 
-	itr=selected_objects.begin();
-	itr_end=selected_objects.end();
+	/* Dragging is a purely visual, mouse-driven gesture that only ever happens in the scene
+	 * currently attached to the viewport -- objects selected in any other scene never receive a
+	 * mouseMoveEvent and don't actually move, so only src_scene's own subset of the (now
+	 * cross-scene) selection belongs in this operation */
+	std::vector<BaseObject *> moved_objs;
+
+	for(auto &sel_obj : selected_objects)
+	{
+		BaseGraphicObject *sel_graph_obj = dynamic_cast<BaseGraphicObject *>(sel_obj);
+		QGraphicsItem *sel_item = sel_graph_obj ? dynamic_cast<QGraphicsItem *>(sel_graph_obj->getOverlyingObject()) : nullptr;
+
+		if(sel_item && sel_item->scene() == src_scene)
+			moved_objs.push_back(sel_obj);
+	}
+
+	itr=moved_objs.begin();
+	itr_end=moved_objs.end();
 
 	// See the comment in startSceneMove() about dropping antialiasing while the view is actively changing
 	viewport->setRenderHint(QPainter::Antialiasing, end_moviment ? !disable_render_smooth : false);
@@ -1676,7 +1708,15 @@ void ModelWidget::emitSceneInteracted()
 			emit s_sceneInteracted(nullptr);
 	}
 	else
-		emit s_sceneInteracted(static_cast<int>(selected_objects.size()), scene->itemsBoundingRect(true, true));
+	{
+		//Selection now spans every scene -- unite each one's own selected-items rect to reflect the whole thing
+		QRectF sel_rect;
+
+		for(auto &scn : scenes)
+			sel_rect = sel_rect.united(scn->itemsBoundingRect(true, true));
+
+		emit s_sceneInteracted(static_cast<int>(selected_objects.size()), sel_rect);
+	}
 }
 
 void ModelWidget::setProtected(bool protect)
@@ -1759,7 +1799,12 @@ void ModelWidget::selectObjectsInLayers(const QList<unsigned int> &layer_ids)
 
 void ModelWidget::configureObjectSelection()
 {
-	QList<QGraphicsItem *> items = scene->selectedItems();
+	//Selection now spans every scene, not just the active one -- aggregate them all here
+	QList<QGraphicsItem *> items;
+
+	for(auto &scn : scenes)
+		items.append(scn->selectedItems());
+
 	BaseObjectView *item = nullptr;
 	std::map<unsigned, QGraphicsItem *> objs_map;
 	std::map<unsigned, QGraphicsItem *>::iterator itr;
@@ -1853,12 +1898,16 @@ void ModelWidget::selectAllObjects()
 
 	if(obj_type == ObjectType::BaseObject)
 	{
-		QPainterPath pth;
-		pth.addRect(scene->sceneRect());
+		//Selects everything in every scene -- setSelectionArea() replaces each scene's own selection, so nothing else to clear first
+		for(auto &scn : scenes)
+		{
+			QPainterPath pth;
+			pth.addRect(scn->sceneRect());
 
-		scene->blockItemsSignals(true);
-		scene->setSelectionArea(pth);
-		scene->blockItemsSignals(false);
+			scn->blockItemsSignals(true);
+			scn->setSelectionArea(pth);
+			scn->blockItemsSignals(false);
+		}
 	}
 	else
 	{
@@ -1872,12 +1921,13 @@ void ModelWidget::selectAllObjects()
 									db_model->getObjectList(ObjectType::BaseRelationship)->end());
 		}
 
+		clearSelectionInAllScenes();
+
 		for(auto &obj : objs)
 		{
 			obj_view = dynamic_cast<BaseObjectView *>(dynamic_cast<BaseGraphicObject *>(obj)->getOverlyingObject());
 
-			//Selection is local to the active scene -- objects living in other scenes are left untouched
-			if(obj_view && obj_view->scene() == scene)
+			if(obj_view)
 			{
 				obj_view->blockSignals(true);
 				obj_view->setSelected(true);
@@ -3474,23 +3524,61 @@ void ModelWidget::editObject()
 		showObjectForm(object->getObjectType(), object, (tab_obj ? tab_obj->getParentTable() : nullptr));
 }
 
+void ModelWidget::clearSelectionInAllScenes()
+{
+	for(auto &scn : scenes)
+		scn->clearSelection();
+}
+
 void ModelWidget::selectSchemaChildren()
 {
 	QObject *obj_sender=dynamic_cast<QAction *>(sender());
 	Schema *schema=nullptr;
-	SchemaView *sch_view = nullptr;
+	std::vector<ObjectType> types = { ObjectType::Table, ObjectType::ForeignTable, ObjectType::View };
+	std::vector<BaseObject *> children;
+	BaseObjectView *obj_view = nullptr;
 
 	schema=dynamic_cast<Schema *>(
 				 reinterpret_cast<BaseObject *>(
 					 dynamic_cast<QAction *>(obj_sender)->data().value<void *>()));
 
-	scene->clearSelection();
+	clearSelectionInAllScenes();
 
-	sch_view = 	dynamic_cast<SchemaView *>(
-				dynamic_cast<BaseObjectView *>(schema->getOverlyingObject()));
+	/* Reads the children straight from the model instead of going through SchemaView::selectChildren()
+	 * -- that method stays in place for its own, unrelated job (the Shift+click gesture on the
+	 * schema's own box, NoSegmentation-only, where schema and scene are the same thing by
+	 * construction), but it has no notion of scenes at all, so it can't be reused here: a schema's
+	 * children can be scattered across several scenes in threshold segmentation */
+	for(auto &type : types)
+	{
+		auto objs = db_model->getObjects(type, schema);
+		children.insert(children.end(), objs.begin(), objs.end());
+	}
 
-	if(sch_view)
-		sch_view->selectChildren();
+	for(auto &child : children)
+	{
+		obj_view = dynamic_cast<BaseObjectView *>(dynamic_cast<BaseGraphicObject *>(child)->getOverlyingObject());
+
+		if(obj_view)
+		{
+			obj_view->blockSignals(true);
+			obj_view->setSelected(true);
+			obj_view->blockSignals(false);
+		}
+	}
+
+	//Also selects the schema's own box, when it has one (NoSegmentation mode)
+	obj_view = dynamic_cast<BaseObjectView *>(schema->getOverlyingObject());
+
+	if(obj_view)
+	{
+		obj_view->blockSignals(true);
+		obj_view->setSelected(true);
+		obj_view->blockSignals(false);
+	}
+
+	configureObjectSelection();
+	emitSceneInteracted();
 }
 
 void ModelWidget::selectTableRelationships()
@@ -3502,7 +3590,7 @@ void ModelWidget::selectTableRelationships()
 				 reinterpret_cast<BaseObject *>(
 					 dynamic_cast<QAction *>(obj_sender)->data().value<void *>()));
 
-	scene->clearSelection();
+	clearSelectionInAllScenes();
 
 	dynamic_cast<BaseTableView *>(
 				dynamic_cast<BaseObjectView *>(table->getOverlyingObject()))->selectRelationships();
@@ -3518,7 +3606,7 @@ void ModelWidget::selectTaggedTables()
 				reinterpret_cast<BaseObject *>(
 					dynamic_cast<QAction *>(obj_sender)->data().value<void *>()));
 
-	scene->clearSelection();
+	clearSelectionInAllScenes();
 
 	for(auto &object : tag->getReferences())
 	{

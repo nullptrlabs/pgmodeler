@@ -457,6 +457,9 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		//! \brief Signal emitted when a blank area of the canvas is pressed
 		void s_scenePressed(Qt::MouseButtons);
 
+		//! \brief Signal emitted when a click on this scene resets its own selection (empty area, or a plain click replacing a previous selection)
+		void s_selectionResetTriggered();
+
 		//! \brief Signal emitted when the active layers change
 		void s_activeLayersChanged();
 
