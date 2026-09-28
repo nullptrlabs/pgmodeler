@@ -1584,15 +1584,21 @@ depois.
        juntas, agora nativamente cross-scene) — a tensão original com a 4.4 deixou de existir, e a
        distinção cogitada entre ações "visuais" e ações "de dados" (opção híbrida) não é mais
        necessária, porque não há mais regra de segurança seleção-visual-por-cena nenhuma pra violar.
-       Seleção simples (um resultado clicado) foca a cena do objeto, trocando a cena ativa via
-       `setActiveScene()`, se ela não for a já ativa. Multi-seleção (vários resultados de uma vez,
-       possivelmente espalhados por várias cenas) permanece na cena atual e seleciona os objetos
-       normalmente mesmo que estejam em outras cenas — sem necessidade de nenhum tratamento
-       especial além do que a 4.4 já oferece.
-     - **Ainda não implementado**: `ObjectSearchWidget::selectObject()`/`selectObjects()`
-       continuam precisando ser ajustados pra de fato chamar `setActiveScene()` no caso de seleção
-       simples — hoje nenhum dos dois caminhos faz isso, e `selectObject()` ainda opera sobre a
-       cena ativa fixa via `model_wgt->scene->clearSelection()`. Depende de: 4.4.
+     - **Ajuste feito numa segunda rodada**: a ideia inicial (seleção simples foca a cena do
+       objeto; multi-seleção permanece na cena atual) foi revista — para multi-seleção, cada objeto
+       clicado na lista de resultados também troca a cena ativa pra sua própria, na mesma ordem em
+       que é processado, e só então é centralizado/selecionado. Isso não precisa de nenhum
+       tratamento especial separado de seleção simples: as duas viram o mesmo caminho de código,
+       só que multi-seleção passa por ele mais de uma vez. A razão é que `centerOn()` só significa
+       alguma coisa pra cena que o viewport está mostrando no momento — sem trocar de cena a cada
+       item, o gesto de multi-seleção clicando na lista deixaria de mimetizar visualmente o
+       comportamento que já existia em modo de cena única (ver visão pra cada item clicado, um a
+       um), mesmo com a seleção lógica já correta desde a 4.4.
+     - **`ObjectSearchWidget::selectObjects()`** (o menu "selecionar todos os
+       encontrados"/"selecionar os não encontrados", ação em massa, não dirigida por clique linha a
+       linha) não ganhou esse tratamento — trocar de cena centenas/milhares de vezes numa seleção
+       em massa não tem o mesmo valor de mimetismo visual, e já se beneficia da agregação
+       cross-scene de `configureObjectSelection()` desde a 4.4 sem precisar de nada a mais.
 
 4.6. **Cor exclusiva para o marcador cut-off** (ex-1.15) — hoje `CutoffItem` reaproveita
      `Attributes::PositionInfo` (fill/border/font) pra desenhar a linha e o rótulo, sem ter
