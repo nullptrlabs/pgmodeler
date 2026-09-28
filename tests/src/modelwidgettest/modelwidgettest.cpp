@@ -20,6 +20,7 @@
 */
 
 #include <QtTest/QtTest>
+#include <QTimer>
 #include "modelwidget.h"
 #include "databasemodel.h"
 #include "schema.h"
@@ -71,6 +72,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void legacyFileWithOnlyLegacySceneRectLoadsWithoutError();
 		void pgCatalogNeverNamesTheSceneOutsideOfSchemaSegmentation();
 		void cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroysSceneAndUndoRestoresIt();
+		void cascadeDeleteThroughRealActionReachesTransitivelyReferencedObjects();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -1845,6 +1847,104 @@ void ModelWidgetTest::cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroy
 		QVERIFY2(rel->getOverlyingObject() == nullptr, "relationship must be back as a cut-off marker after undo, not a real RelationshipView");
 		QCOMPARE(table_pub_view->getExternalRelsCount(), 1);
 		QVERIFY(table_pub_view->getCutoffItem() != nullptr);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Regression test for the user's real bug report: cascade removal of a schema with
+transitively-referenced children (not just direct ones) failed with a chain of RemDirectReference/
+RemInderectReference errors, leaving the schema and several of its children behind instead of
+removing everything. Root cause was two bugs, fixed in two separate commits: (1)
+BaseObject::getLinkedObjects() silently discarded the indirect-links result it had just computed
+(baseobjecttest.cpp), and (2) even with that fixed, ModelWidget::removeObjects(true)'s cascade
+collection loop called sel_obj->getReferences() with no argument, defaulting to direct-only. This
+test exercises the real, interactive ModelWidget::removeObjects(true) slot -- unlike
+cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroysSceneAndUndoRestoresIt() above, which
+drives DatabaseModel/OperationList directly to get precise control over the undo chain, this one
+is specifically about proving the actual user-facing action works, confirmation dialog included.
+configurePopupMenu(BaseObject *) is the same call a non-canvas object selection (e.g. a tree-based
+object browser) uses to populate selected_objects for a context-menu action without the object
+having to be graphically selectable -- schema has no scene item at all in SegBySchema mode. Since
+removeObjects() is a private slot, it's invoked here via QMetaObject::invokeMethod(), same as Qt
+itself would for any other slot; the confirmation Messagebox it pops (a real, modal QDialog::exec())
+is accepted by a QTimer polling for the active modal widget while the call is in flight. */
+void ModelWidgetTest::cascadeDeleteThroughRealActionReachesTransitivelyReferencedObjects()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		Schema *schema_b = new Schema;
+		schema_b->setName("schema_b");
+		db_model->addSchema(schema_b);
+
+		Table *table_a = new Table;
+		table_a->setName("table_a");
+		table_a->setSchema(schema_pub);
+
+		Column *col_a = new Column;
+		col_a->setName("id");
+		col_a->setType(PgSqlType("serial"));
+		table_a->addColumn(col_a);
+
+		Constraint *pk_a = new Constraint;
+		pk_a->setName("table_a_pk");
+		pk_a->setConstraintType(ConstraintType::PrimaryKey);
+		pk_a->addColumn(table_a->getColumn("id"), Constraint::SourceCols);
+		table_a->addConstraint(pk_a);
+
+		//table_g is schema_b's only direct child; it only references schema_b directly
+		Table *table_g = new Table;
+		table_g->setName("table_g");
+		table_g->setSchema(schema_b);
+
+		db_model->addTable(table_a);
+		db_model->addTable(table_g);
+
+		//table_g_copies_table_a references table_g, not schema_b -- two hops away from schema_b,
+		//exactly the shape that failed in the user's report
+		Relationship *rel = new Relationship(BaseRelationship::Relationship1n, table_a, table_g);
+		rel->setName("table_g_copies_table_a");
+		db_model->addRelationship(rel);
+
+		QVERIFY(db_model->getObject("schema_b", ObjectType::Schema) != nullptr);
+		QVERIFY(db_model->getObject("table_g", ObjectType::Table) != nullptr);
+
+		//Same call a non-canvas object selection uses to populate selected_objects for a context-menu
+		//action -- schema_b has no scene item in SegBySchema mode, so it can't be scene-selected.
+		//It's a private slot too, so it's invoked the same way removeObjects() is below.
+		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+															 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(schema_b)));
+
+		//Auto-accepts the confirmation Messagebox(es) removeObjects(true) pops while it's in flight
+		QTimer poll_timer;
+		poll_timer.setInterval(20);
+
+		QObject::connect(&poll_timer, &QTimer::timeout, [](){
+			QDialog *dlg = qobject_cast<QDialog *>(qApp->activeModalWidget());
+
+			if(dlg)
+				dlg->accept();
+		});
+
+		poll_timer.start();
+		QMetaObject::invokeMethod(&model_wgt, "removeObjects", Qt::DirectConnection, Q_ARG(bool, true));
+		poll_timer.stop();
+
+		QVERIFY2(db_model->getObject("schema_b", ObjectType::Schema) == nullptr, "schema_b must be gone");
+		QVERIFY2(db_model->getObject("table_g", ObjectType::Table) == nullptr, "table_g must be gone too -- cascade must reach it even though it only references table_g, not schema_b, directly");
+		QVERIFY2(db_model->getObjectIndex(rel) < 0, "the relationship must be gone as well");
+		QVERIFY2(db_model->getObject("table_a", ObjectType::Table) != nullptr, "table_a (schema_b's sibling, unrelated to the cascade) must survive");
 	}
 	catch(Exception &e)
 	{
