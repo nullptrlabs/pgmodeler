@@ -33,8 +33,10 @@ BaseGraphicObject::BaseGraphicObject()
 	attributes[Attributes::FadedOut]="";
 	attributes[Attributes::Layers]="";
 	attributes[Attributes::ZValue]="";
+	attributes[Attributes::Scene]="";
 	receiver_object=nullptr;
 	z_value=0;
+	scene_idx=-1;
 	resetLayers();
 }
 
@@ -97,6 +99,27 @@ void BaseGraphicObject::setLayersAttribute()
 	attributes[Attributes::Layers] = layers_str.join(',');
 }
 
+void BaseGraphicObject::setSceneIndexAttribute()
+{
+	attributes[Attributes::Scene] = scene_idx >= 0 ? QString::number(scene_idx) : "";
+}
+
+void BaseGraphicObject::setSceneIndex(int idx)
+{
+	scene_idx = idx;
+	setCodeInvalidated(true);
+}
+
+int BaseGraphicObject::getSceneIndex()
+{
+	return scene_idx;
+}
+
+void BaseGraphicObject::resetSceneIndex()
+{
+	setSceneIndex(-1);
+}
+
 void BaseGraphicObject::setPositionAttribute()
 {
 	setPositionAttribute(position, Attributes::Position);
@@ -132,6 +155,7 @@ void BaseGraphicObject::operator = (BaseGraphicObject &obj)
 	*(dynamic_cast<BaseObject *>(this)) = dynamic_cast<BaseObject &>(obj);
 	this->position = obj.position;
 	this->z_value = obj.z_value;
+	this->scene_idx = obj.scene_idx;
 }
 
 void BaseGraphicObject::setReceiverObject(QObject *obj)

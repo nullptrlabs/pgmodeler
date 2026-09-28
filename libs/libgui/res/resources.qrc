@@ -140,6 +140,7 @@
         <file>icons/movefirst.png</file>
         <file>icons/movelast.png</file>
         <file>icons/movetoschema.png</file>
+        <file>icons/movetoscene.png</file>
         <file>icons/moveup.png</file>
         <file>icons/new.png</file>
         <file>icons/newdatamanip.png</file>

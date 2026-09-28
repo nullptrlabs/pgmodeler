@@ -730,6 +730,114 @@
       Verificado que falha exatamente como o relato original (revertendo só a linha do fix,
       `git stash`, mantendo o fix do bug 1); restaurado, suíte completa **28/28**. Build completo
       do `pgmodeler` limpo. Commitado (`ee3c6374e`).
+- **Fase 4, subtarefa 4.2 implementada (2026-09-28): reatribuição manual de objetos entre cenas
+  (`ModelWidget::moveToScene()`).** Decisão de design fechada com o usuário nesta sessão (ver plano,
+  subtarefa 4.2, para o texto final): menu de contexto "Move to scene" espelhando "Move to schema"
+  (`moveToSchema()` como referência de implementação direta); em `SegBySchema` só `Textbox` pode
+  ser realocado livremente (Table/View/ForeignTable ficam amarrados ao schema, sob pena de quebrar
+  o invariante 1 schema = 1 cena), em `SegByThreshold` qualquer um dos tipos elegíveis pode mover
+  livremente; objetos restritos pelo modo são ignorados com um alerta ao final. Perguntado
+  explicitamente ao usuário (via `AskUserQuestion`) se a reatribuição do `Textbox` deveria ganhar
+  persistência própria (estendendo o atributo `Scene` da 2.2) ou ficar só-da-sessão — escolheu
+  estender a persistência.
+  - **Refactor de base para viabilizar a persistência do `Textbox`**: `scene_idx` e
+    `getSceneIndex()`/`setSceneIndex()`/`resetSceneIndex()`/`setSceneIndexAttribute()`, antes
+    exclusivos de `BaseTable` (subtarefa 2.2), subiram para `BaseGraphicObject`
+    ([basegraphicobject.h](libs/libcore/src/basegraphicobject.h)) — mesmo padrão já usado por
+    posição/faded-out/layers ali, que toda classe gráfica herda de graça independente de gravar ou
+    não o atributo no XML. `BaseTable` perdeu sua cópia duplicada; nenhum call site existente
+    mudou (métodos continuam acessíveis do mesmo jeito, agora herdados). `Textbox` ganhou o
+    atributo `scene` em `textbox.sch`/`textbox.dtd` e a leitura/escrita em
+    `DatabaseModel::createTextbox()`/`Textbox::getSourceCode()`.
+  - **Bug latente achado no processo**: `BaseGraphicObject::operator=` nunca copiava `scene_idx` --
+    gap presente desde a 2.2, nunca exercitado porque nada além da criação inicial mutava
+    `scene_idx`. `moveToScene()` é o primeiro caminho a mudá-lo via `Operation::ObjModified`, então
+    sem o fix o undo/redo restauraria tudo, MENOS a cena. Corrigido junto (uma linha).
+  - **`relocateObjectView()` continua exclusivo de Table/View/ForeignTable** (faz cast pra
+    `BaseTableView`, roteia relacionamentos/cutoff markers — nenhum desses conceitos existe pra
+    `Textbox`) — ganhou uma contraparte trivial, `relocateTextboxView()` (descarta+recria o item,
+    sem a bagagem de relacionamento). `createGraphicItem()` ganhou o caso `Textbox`.
+  - **Resync de undo/redo estendido**: `handleObjectSchemaChanged()` (ligado a
+    `OperationList::s_operationExecuted`) só resincronizava pelo schema (`SegBySchema`) antes desta
+    subtarefa; ganhou uma segunda regra pela cena persistida (`Threshold`, e `Textbox` em qualquer
+    modo segmentado) — sem isso, desfazer um `moveToScene()` restauraria o atributo mas nunca
+    moveria o item gráfico de volta.
+  - **`handleObjectAddition()` ganhou um terceiro ramo de roteamento**, ao lado do já existente
+    schema/threshold: `Textbox` com `scene_idx` >= 0 (reatribuído manualmente, ou carregado de
+    arquivo) é roteado direto pra aquela cena, em qualquer modo segmentado — excluindo
+    `NoSegmentation` deliberadamente (só uma cena existe lá; um índice antigo de uma sessão
+    segmentada anterior não pode alargar a coleção de cenas).
+  - **Testes**: 5 novos em `modelwidgettest.cpp`, todos disparando a ação real via
+    `configurePopupMenu(BaseObject*)` (seleção) + um `QAction` descartável conectado a
+    `moveToScene()` via macros `SIGNAL`/`SLOT` antigas (contorna o controle de acesso do C++ do
+    mesmo jeito que `QMetaObject::invokeMethod`, mas por uma emissão de sinal de verdade, então
+    `sender()` dentro do slot resolve corretamente) — técnica nova, documentada no próprio teste
+    (`triggerMoveToScene()`), reaproveitável por testes futuros de qualquer ação ligada a menu de
+    contexto: `moveToSceneMovesTextboxFreelyEvenInSchemaSegmentationMode`,
+    `moveToSceneSkipsTableInSchemaSegmentationModeAndAlerts` (com o mesmo polling de `QTimer` pra
+    aceitar o `Messagebox` modal real, já estabelecido nos testes de cascade delete),
+    `moveToSceneMovesTableFreelyInThresholdMode`, `moveToSceneChangeSurvivesUndo`,
+    `movedTextboxScenePersistsAcrossSaveAndReload`. Suíte completa **33/33**.
+  - **Verificado que os testes de fato dependem da feature**: `git stash` de toda a mudança de
+    produção (core + gui + assets/schemas) — a suíte nem compila sem ela (`Textbox` não tem
+    `getSceneIndex()`), confirmando que não é um passthrough acidental. Restaurado depois.
+  - **Achado à parte, não relacionado a esta subtarefa**: os arquivos `.sch`/`.dtd` em `assets/`
+    não refletem automaticamente em `build/schemas/xml/` (usado em runtime via `SCHEMASDIR`) --
+    precisa de `cmake --install cmake-build` depois de editar qualquer schema XML, senão o
+    binário/testes continuam lendo a cópia antiga. Já era um comportamento conhecido (documentado
+    nas instruções de sessão), só reforçado aqui porque essa subtarefa mexeu num `.sch`/`.dtd`
+    pela primeira vez desde que o padrão foi estabelecido.
+  - Build completo (`core`+`canvas`+`connector`+`gui`+`cli`+`pgmodeler`+`modelwidgettest`+
+    `baseobjecttest`) limpo. **Aguardando decisão do usuário sobre commit.**
+- **Bug real reportado pelo usuário: cena de destino não recalcula seu retângulo ao mover um
+  objeto, deixando-o invisível.** Testado manualmente pelo usuário logo depois de confirmar a 4.2
+  funcionando: mover um Textbox pra uma posição além do retângulo atual da cena de destino deixava
+  o objeto invisível até um reajuste forçado de `sceneRect`. **Causa raiz**:
+  `relocateObjectView()`/`relocateTextboxView()` adicionam o item na cena de destino
+  (`dst_scene->addItem(...)`) mas nunca chamam `ObjectsScene::adjustSceneRect()` -- diferente do
+  fluxo de criação interativa (clique no canvas), que checa explicitamente se o ponto cai fora do
+  retângulo atual e ajusta. Bug pré-existente em `relocateObjectView()` (usado por `moveToSchema()`
+  desde antes desta sessão), só nunca notado porque a maioria dos reposicionamentos cai dentro do
+  retângulo já existente -- exposto agora porque mover pra outra cena claramente independente
+  aumenta a chance de a posição do item cair fora dela.
+  - **Fix**: uma chamada a `dst_scene->adjustSceneRect(true)` (modo só-expande) logo após
+    `addItem()`, nos dois métodos -- `ModelWidget` já é `friend class` de `ObjectsScene`, que
+    declara `adjustSceneRect()` `protected`.
+  - **Testes**: dois novos em `modelwidgettest.cpp`, cobrindo os dois métodos afetados --
+    `moveToSceneAdjustsDestinationSceneRectForTextbox` (via `relocateTextboxView()`) e
+    `moveToSceneAdjustsDestinationSceneRectForTable` (via `relocateObjectView()`, modo threshold).
+    Ambos posicionam o objeto bem fora do retângulo padrão antes de movê-lo, então verificam
+    `dst_scene->sceneRect().contains(item->sceneBoundingRect())`. Verificado que os dois falham sem
+    o fix (comentando as duas chamadas temporariamente) e passam com ele restaurado. Suíte completa
+    **35/35**.
+  - Build (`core`+`canvas`+`gui`+`modelwidgettest`) limpo. **Aguardando decisão do usuário sobre
+    commit.**
+- **Segundo bug real reportado pelo usuário: Textbox nunca volta pra sua cena original depois de um
+  `Ctrl+Z` no `moveToScene()`, mesmo com o resto da 4.2 funcionando.** Reportado logo depois do fix
+  do `sceneRect`. Reproduzido com um teste dedicado antes de qualquer mudança em código de produção
+  (modo schema-segmentation, Textbox movido de `public` pra outro schema, undo em seguida). **Causa
+  raiz**: `handleObjectAddition()` só grava o `scene_idx` de um Textbox recém-criado quando ele já
+  chega com um índice válido (arquivo carregado, ou undo de uma remoção) -- um Textbox comum, que
+  cai na cena ativa por rota padrão, nunca tem seu `scene_idx` setado, ficando preso em `-1` (o
+  branch equivalente pra Table em modo threshold já fazia esse `setSceneIndex()`, só faltava no
+  branch do Textbox). Como resultado, o snapshot que `moveToScene()` registra antes de mover
+  (`OperationList::addToPool()`) captura `scene_idx == -1` em vez do índice real de origem. No undo,
+  o objeto é restaurado pra esse `-1`, e `handleObjectSchemaChanged()` não consegue resolver `-1`
+  pra nenhuma cena (`scn_idx >= 0` falha), então retorna sem fazer nada -- a view fica parada onde
+  estava, na cena de destino.
+  - **Fix**: em `handleObjectAddition()`, logo antes do item ser adicionado à `target_scene` (depois
+    da rede de segurança que garante `target_scene` não-nulo), se o objeto é um Textbox em qualquer
+    modo segmentado e seu `scene_idx` ainda é negativo, grava `scenes.indexOf(target_scene)` nele --
+    mesma lógica que a Table já tinha em modo threshold, só que centralizada num único ponto que
+    cobre os dois modos segmentados de uma vez.
+  - **Escopo confirmado**: Table/View/ForeignTable em modo threshold não são afetados -- o teste
+    `moveToSceneChangeSurvivesUndo`, que já cobria esse caso, sempre passou; o branch de Table já
+    fazia o `setSceneIndex()` certo desde o início. O problema era exclusivo do Textbox.
+  - **Teste**: `moveToSceneUndoRestoresTextboxToItsOriginScene` em `modelwidgettest.cpp` -- move um
+    Textbox de cena, confirma o undo restaura tanto `getSceneIndex()` quanto a cena real da view.
+    Verificado que falha sem o fix (`sed` comentando a condição temporariamente) e passa com ele
+    restaurado. Suíte completa **36/36**.
+  - Build (`gui`+`modelwidgettest`) limpo. **Aguardando decisão do usuário sobre commit.**
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
