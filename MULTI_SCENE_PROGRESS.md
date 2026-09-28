@@ -642,6 +642,44 @@
     original (movido junto, não reescrito do zero), só nunca foi decidida.
   - Puro trabalho de documentação — nenhum código tocado. Só `MULTI_SCENE_PLAN.md` mudou nesta
     entrada.
+- **Fase 4, subtarefa 4.1 implementada (2026-09-28): teste de regressão de cascade delete de
+  schema + undo, e um crash real achado no processo.** Novo teste
+  `cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroysSceneAndUndoRestoresIt`
+  ([modelwidgettest.cpp:1729](tests/src/modelwidgettest/modelwidgettest.cpp#L1729)) cobre as três
+  pontas pedidas pela subtarefa (ver riscos, seção 6, do plano): schema com filho cross-scene
+  (relacionamento com marcador cut-off nos dois lados), remoção do schema cuja cena é a
+  atualmente focada pelo `viewport` (força `ModelWidget::removeScene()` a trocar a cena ativa
+  antes de destruir a antiga), e undo completo da cadeia inteira (relacionamento + tabela +
+  schema, uma única chamada `OperationList::undoOperation()`, já que os três foram registrados
+  num `startOperationChain()`/`finishOperationChain()` só). Cascade removal foi feito direto
+  contra `DatabaseModel`/`OperationList`, não via `ModelWidget::removeObjects(true)` — essa é a
+  ação interativa ligada ao menu e abre um `Messagebox` de confirmação real, inutilizável num
+  teste automatizado.
+  - **Crash real achado ao escrever o teste, não específico de multi-cena**: undo de uma remoção
+    de `Schema` segfaultava em `OperationList::executeOperation()`
+    ([operationlist.cpp:931-932](libs/libcore/src/operationlist.cpp#L931)) —
+    `model->validateSchemaRenaming(dynamic_cast<Schema *>(object), bkp_obj->getName())` rodava
+    dentro do bloco genérico `BaseGraphicObject::isGraphicObject(obj_type)` (que cobre
+    `ObjCreated`/`ObjRemoved`/`ObjModified`/`ObjMoved`), mas `bkp_obj` só é alocado antes, no ramo
+    específico `ObjModified || ObjMoved` — pra `ObjRemoved` (e `ObjCreated`) `bkp_obj` continua
+    `nullptr`, e `bkp_obj->getName()` derrefencia nulo.
+  - **Introduzido pelo próprio commit `b49d4bb3dc` desta sessão de trabalho (2026-09-25, "WIP: fix
+    schema rename combo refresh...")** — antes dessa refatoração a chamada vivia isolada dentro de
+    um `else if(op_type==Operation::ObjModified)` próprio, corretamente restrita ao único op_type
+    em que `bkp_obj` é garantido não-nulo; a fusão com o bloco genérico de objeto gráfico levou a
+    chamada junto sem preservar essa guarda. Não é um bug antigo do core, nem específico de
+    multi-cena — regressão recente e ainda não coberta por nenhum teste antes deste.
+  - **Fix** (usuário pediu explicitamente checar também a alocação de `bkp_obj`, não só o
+    `op_type`): condição virou `if(obj_type == ObjectType::Schema && op_type ==
+    Operation::ObjModified && bkp_obj)`, espelhando a defesa já existente logo acima
+    ([operationlist.cpp:927](libs/libcore/src/operationlist.cpp#L927), `if(bkp_obj) ...`) em vez de
+    confiar só no `op_type`.
+  - **Verificado que o teste de fato pega o bug**: revertido temporariamente só
+    `operationlist.cpp` (`git stash`) mantendo o teste — crash reproduzido (SIGSEGV em
+    `bkp_obj->getName()`, mesmo stack); restaurado depois, suíte completa **27/27** sob
+    `ASAN_OPTIONS=detect_leaks=0`.
+  - Build limpo (`core`+`canvas`+`connector`+`gui`+`modelwidgettest`). **Aguardando decisão do
+    usuário sobre commit.**
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

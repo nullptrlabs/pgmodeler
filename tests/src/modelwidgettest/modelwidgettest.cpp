@@ -70,6 +70,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void fase3EndToEndSchemaSegmentedReloadPreservesFocusAndSegmentation();
 		void legacyFileWithOnlyLegacySceneRectLoadsWithoutError();
 		void pgCatalogNeverNamesTheSceneOutsideOfSchemaSegmentation();
+		void cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroysSceneAndUndoRestoresIt();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -1711,6 +1712,139 @@ void ModelWidgetTest::pgCatalogNeverNamesTheSceneOutsideOfSchemaSegmentation()
 
 			QVERIFY(model_wgt.getSceneNames().contains("pg_catalog"));
 		}
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Fase 4, subtarefa 4.1 -- dedicated regression test for cascade schema removal, covering
+the three points flagged in the plan's risk section together: a schema with cross-scene children
+(a relationship whose partner lives in another scene, so it's a cut-off marker rather than a real
+RelationshipView), removing the schema whose scene is the currently focused one (so
+ModelWidget::removeScene() has to switch the viewport away before the scene is destroyed), and a
+full undo of the whole cascade chain. Cascade removal itself is driven directly against
+DatabaseModel/OperationList here, the same way every other undo/redo test in this file does,
+because ModelWidget::removeObjects(true) is the interactive action bound to a menu entry and pops a
+confirmation Messagebox -- unusable from an automated test. */
+void ModelWidgetTest::cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroysSceneAndUndoRestoresIt()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		//This test exercises schema-segmentation specifically -- opt in explicitly, it's no longer the default
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+		OperationList *op_list = model_wgt.getOperationList();
+
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		Schema *schema_doomed = new Schema;
+		schema_doomed->setName("schema_doomed");
+		db_model->addSchema(schema_doomed);
+
+		Table *table_pub = new Table;
+		table_pub->setName("table_pub");
+		table_pub->setSchema(schema_pub);
+
+		Column *col_pub = new Column;
+		col_pub->setName("id");
+		col_pub->setType(PgSqlType("serial"));
+		table_pub->addColumn(col_pub);
+
+		Constraint *pk_pub = new Constraint;
+		pk_pub->setName("table_pub_pk");
+		pk_pub->setConstraintType(ConstraintType::PrimaryKey);
+		pk_pub->addColumn(table_pub->getColumn("id"), Constraint::SourceCols);
+		table_pub->addConstraint(pk_pub);
+
+		Table *table_doomed = new Table;
+		table_doomed->setName("table_doomed");
+		table_doomed->setSchema(schema_doomed);
+
+		db_model->addTable(table_pub);
+		db_model->addTable(table_doomed);
+
+		//Cross-scene child of schema_doomed: table_pub stays in the public scene, so this relationship
+		//never gets a RelationshipView, only cut-off markers on both partners. table_pub is the "1"
+		//side (it's the one with a primary key), table_doomed the "n" side.
+		Relationship *rel = new Relationship(BaseRelationship::Relationship1n, table_pub, table_doomed);
+		db_model->addRelationship(rel);
+
+		ObjectsScene *scene_pub = model_wgt.getSceneForObject(table_pub);
+		ObjectsScene *scene_doomed = model_wgt.getSchemaScene(schema_doomed);
+
+		QVERIFY(scene_pub != nullptr);
+		QVERIFY(scene_doomed != nullptr);
+		QVERIFY(scene_pub != scene_doomed);
+		QVERIFY2(rel->getOverlyingObject() == nullptr, "cross-scene relationship must not get a real RelationshipView");
+
+		//Three scenes exist at this point: public, pg_catalog (createSystemObjects(true) always creates
+		//it too) and schema_doomed
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 3);
+
+		BaseTableView *table_pub_view = dynamic_cast<BaseTableView *>(table_pub->getOverlyingObject());
+		QCOMPARE(table_pub_view->getExternalRelsCount(), 1);
+		QVERIFY(table_pub_view->getCutoffItem() != nullptr);
+
+		//Focus the scene about to be destroyed -- removeScene() must reroute the viewport away from it
+		int scene_doomed_idx = model_wgt.getObjectsScenes().indexOf(scene_doomed);
+		model_wgt.setActiveScene(scene_doomed_idx);
+		QCOMPARE(model_wgt.getObjectsScenes().at(model_wgt.getActiveSceneIndex()), scene_doomed);
+
+		/* Cascade removal, leaf to root, mirroring the order ModelWidget::removeObjects(true) itself
+		 * removes objects in -- the interactive action isn't used directly here since it pops a
+		 * confirmation Messagebox that would block the test */
+		op_list->startOperationChain();
+
+		int rel_idx = db_model->getObjectIndex(rel);
+		db_model->removeObject(rel, rel_idx);
+		op_list->registerObject(rel, Operation::ObjRemoved, rel_idx);
+
+		int table_doomed_idx = db_model->getObjectIndex(table_doomed);
+		db_model->removeObject(table_doomed, table_doomed_idx);
+		op_list->registerObject(table_doomed, Operation::ObjRemoved, table_doomed_idx);
+
+		int schema_doomed_idx = db_model->getObjectIndex(schema_doomed);
+		db_model->removeObject(schema_doomed, schema_doomed_idx);
+		op_list->registerObject(schema_doomed, Operation::ObjRemoved, schema_doomed_idx);
+
+		op_list->finishOperationChain();
+
+		//scene_doomed must be gone (public and pg_catalog's scenes remain), and the viewport must have
+		//moved off it onto whatever scene remains
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+		QVERIFY(!model_wgt.getObjectsScenes().contains(scene_doomed));
+		QCOMPARE(model_wgt.getObjectsScenes().at(model_wgt.getActiveSceneIndex()), scene_pub);
+
+		//The cut-off marker on table_pub must be gone too, since its only external relationship was removed
+		QCOMPARE(table_pub_view->getExternalRelsCount(), 0);
+		QVERIFY(table_pub_view->getCutoffItem() == nullptr);
+
+		//Undo the whole cascade chain in one call -- schema, then table, then relationship, in that order
+		op_list->undoOperation();
+
+		Schema *restored_schema = dynamic_cast<Schema *>(db_model->getObject("schema_doomed", ObjectType::Schema));
+		QVERIFY2(restored_schema != nullptr, "schema_doomed must exist again after undo");
+
+		Table *restored_table = dynamic_cast<Table *>(db_model->getObject("table_doomed", ObjectType::Table));
+		QVERIFY2(restored_table != nullptr, "table_doomed must exist again after undo");
+
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 3);
+
+		ObjectsScene *restored_scene = model_wgt.getSchemaScene(restored_schema);
+		QVERIFY2(restored_scene != nullptr, "schema_doomed's scene must be recreated by undo, routed through the same handleObjectAddition() choke point as any other insertion");
+		QCOMPARE(model_wgt.getSceneForObject(restored_table), restored_scene);
+
+		//The relationship is back too, and still cross-scene -- back to a cut-off marker, not a real RelationshipView
+		QVERIFY2(rel->getOverlyingObject() == nullptr, "relationship must be back as a cut-off marker after undo, not a real RelationshipView");
+		QCOMPARE(table_pub_view->getExternalRelsCount(), 1);
+		QVERIFY(table_pub_view->getCutoffItem() != nullptr);
 	}
 	catch(Exception &e)
 	{

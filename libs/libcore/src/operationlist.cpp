@@ -928,7 +928,7 @@ void OperationList::executeOperation(Operation *oper, bool redo)
 					dynamic_cast<BaseGraphicObject *>(bkp_obj->getSchema())->setModified(op_type==Operation::ObjModified);
 			}
 
-			if(obj_type == ObjectType::Schema)
+			if(obj_type == ObjectType::Schema && op_type == Operation::ObjModified && bkp_obj)
 				model->validateSchemaRenaming(dynamic_cast<Schema *>(object), bkp_obj->getName());
 		}
 		else if(op_type==Operation::ObjModified && obj_type==ObjectType::Tag)
