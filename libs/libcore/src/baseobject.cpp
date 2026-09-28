@@ -1566,8 +1566,7 @@ std::vector<BaseObject *> BaseObject::getLinkedObjects(ObjLinkType lnk_type, boo
 		if(!excl_types.empty())
 			linked_objs = CoreUtilsNs::filterObjectsByType(linked_objs, excl_types);
 	}
-
-	if(!excl_types.empty())
+	else if(!excl_types.empty())
 		linked_objs = CoreUtilsNs::filterObjectsByType(*obj_list, excl_types);
 	else
 		linked_objs = *obj_list;
