@@ -927,10 +927,34 @@
       ([modelwidgettest.cpp](tests/src/modelwidgettest/modelwidgettest.cpp)). Verificado que falha
       sem o fix e passa com ele restaurado. Suíte completa **42/42**.
     - Build (`gui`+`modelwidgettest`) limpo. **Aguardando decisão do usuário sobre commit.**
-  - **Subtarefa 4.5 (Object Search Widget) teve sua decisão de design fechada na mesma conversa**
-    (ver plano) como consequência direta da 4.4, mas **nenhum código foi alterado** —
-    `ObjectSearchWidget::selectObject()`/`selectObjects()` continuam precisando do ajuste pra
-    chamar `setActiveScene()` no caso de seleção simples.
+- **Fase 4, subtarefa 4.5 implementada (2026-09-28): `ObjectSearchWidget` segue a cena de cada
+  objeto clicado nos resultados, para seleção simples e múltipla.** Ajuste de design feito nesta
+  rodada em relação à decisão original (ver plano) — em vez de multi-seleção permanecer na cena
+  atual, cada objeto processado (na ordem em que aparece na seleção da lista de resultados) troca
+  a cena ativa pra sua própria antes de ser centralizado/selecionado, mimetizando como
+  clicar-através-dos-resultados já se comportava em modo de cena única. Isso unificou seleção
+  simples e múltipla no mesmo caminho de código -- não existe mais distinção nenhuma entre os dois
+  casos.
+  - `ObjectSearchWidget::selectObject()`
+    ([objectsearchwidget.cpp:291](libs/libgui/src/widgets/objectsearchwidget.cpp#L291)): troca
+    `model_wgt->scene->clearSelection()` (só a cena ativa) por
+    `model_wgt->clearSelectionInAllScenes()`; novo lambda local `followObjectScene()`, chamado
+    antes de cada `centerOn()`, resolve a cena do item (`BaseObjectView` ou, pro caso de
+    `TableObject`, a `BaseTableView` da tabela-pai) e chama `model_wgt->setActiveScene()` se for
+    diferente da ativa.
+  - `ObjectSearchWidget::selectObjects()` (a ação de menu "selecionar todos os
+    encontrados"/"não encontrados", em massa) **não** ganhou esse tratamento de propósito --
+    decisão registrada no plano (trocar de cena centenas/milhares de vezes numa seleção em massa
+    não tem o mesmo valor de mimetismo visual que tem clicar linha por linha, e a seleção lógica já
+    funciona cross-scene desde a 4.4 sem precisar de nada a mais).
+  - **Lacuna de cobertura de teste, registrada explicitamente**: `ObjectSearchWidget` não tem
+    nenhuma infraestrutura de teste hoje, e `result_view` (a tabela de resultados cujo
+    `selectionModel()` dirige `selectObject()`) é membro privado, sem ponto de entrada público pra
+    simular multi-seleção de linhas a partir de um teste, sem antes criar infraestrutura nova
+    (arquivo de teste dedicado + provavelmente uma `friend class` de teste). Ficou sem teste
+    automatizado nesta rodada -- decisão de escopo pendente de confirmação do usuário (investir na
+    infraestrutura de teste agora, ou verificar manualmente como sempre foi feito nesta sessão).
+  - Build (`gui`) limpo. **Aguardando decisão do usuário sobre commit.**
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
