@@ -7195,6 +7195,8 @@ Textbox *DatabaseModel::createTextbox()
 
 		if(!attribs[Attributes::FontSize].isEmpty())
 			txtbox->setFontSize(attribs[Attributes::FontSize].toDouble());
+
+		txtbox->setSceneIndex(attribs[Attributes::Scene].isEmpty() ? -1 : attribs[Attributes::Scene].toInt());
 	}
 	catch(Exception &e)
 	{

@@ -317,6 +317,11 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	action_moveto_schema->setText(tr("Move to schema"));
 	addAction(action_moveto_schema);
 
+	action_moveto_scene = scenes_menu.menuAction();
+	action_moveto_scene->setIcon(GuiUtilsNs::getIcon("movetoscene"));
+	action_moveto_scene->setText(tr("Move to scene"));
+	addAction(action_moveto_scene);
+
 	action_set_layer = new QAction(GuiUtilsNs::getIcon("layers"), tr("Set layers"), this);
 	action_set_layer->setShortcut(QKeySequence("F3"));
 	addAction(action_set_layer);
@@ -712,6 +717,7 @@ ModelWidget::~ModelWidget()
 	new_object_menu.clear();
 	quick_actions_menu.clear();
 	schemas_menu.clear();
+	scenes_menu.clear();
 	owners_menu.clear();
 	tags_menu.clear();
 	break_rel_menu.clear();
@@ -1358,6 +1364,27 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 				qDebug() << object->getSignature() << " routed to scene: " << base_tab->getSceneIndex();
 			}
 		}
+		/* Textbox never enters the threshold counter (same rule as the rest of Fase 1/2: it has no
+		 * schema to route by, and doesn't count towards the insertion threshold either) -- but a
+		 * manually reassigned Textbox (subtask 4.2, moveToScene()) or one loaded from a file that
+		 * already carries a saved index still needs to land in that exact scene, in either segmented
+		 * mode. NoSegmentation is excluded on purpose: there's only ever one scene there, and a stale
+		 * index left over from a previous segmented-mode session must not widen the scenes collection */
+		else if(obj_type == ObjectType::Textbox && seg_mode != DatabaseModel::NoSegmentation)
+		{
+			int scn_idx = graph_obj->getSceneIndex();
+
+			if(scn_idx >= 0)
+			{
+				while(scenes.size() <= scn_idx)
+				{
+					ObjectsScene *new_scene = addScene(scenes.isEmpty());
+					applySceneLayers(new_scene);
+				}
+
+				target_scene = scenes.at(scn_idx);
+			}
+		}
 
 		//Safety net for the rare case an object arrives before any scene exists yet (e.g. no schema created so far)
 		if(!target_scene)
@@ -1377,6 +1404,14 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 			if(schema && !schema_scenes.contains(schema))
 				schema_scenes[schema] = target_scene;
 		}
+
+		/* A Textbox routed here without a scene index of its own (fresh object, landed on whatever
+		 * scene was active) still needs that index recorded on the model -- otherwise any later
+		 * operation that snapshots/restores it (moveToScene()'s undo, for instance) captures -1
+		 * instead of where it actually is, and can no longer resolve it back to a real scene */
+		if(obj_type == ObjectType::Textbox && seg_mode != DatabaseModel::NoSegmentation &&
+				graph_obj->getSceneIndex() < 0)
+			graph_obj->setSceneIndex(scenes.indexOf(target_scene));
 
 		if(item)
 			target_scene->addItem(item, blink_new_objs);
@@ -3004,6 +3039,9 @@ QGraphicsItem *ModelWidget::createGraphicItem(BaseGraphicObject *graph_obj)
 		case ObjectType::View:
 			return new GraphicalView(dynamic_cast<View *>(graph_obj));
 
+		case ObjectType::Textbox:
+			return new StyledTextboxView(dynamic_cast<Textbox *>(graph_obj));
+
 		default:
 			return nullptr;
 	}
@@ -3080,6 +3118,11 @@ void ModelWidget::relocateObjectView(BaseGraphicObject *graph_obj, ObjectsScene 
 	old_scene->removeItem(old_view);
 	dst_scene->addItem(createGraphicItem(graph_obj));
 
+	/* The item may sit outside dst_scene's current bounds (it keeps its own (x, y), and the
+	 * destination scene is an independent canvas with its own unrelated bounds) -- grow the rect
+	 * to include it, or it renders invisible until something else happens to touch the rect */
+	dst_scene->adjustSceneRect(true);
+
 	/* Re-route every relationship now that the table has a new view in its new scene --
 	 * routeRelationship() reads each table's *current* scene fresh, so this alone also self-heals
 	 * the case where two related tables are relocated together in the same operation: the first
@@ -3093,19 +3136,53 @@ void ModelWidget::relocateObjectView(BaseGraphicObject *graph_obj, ObjectsScene 
 		routeRelationship(rel);
 }
 
+void ModelWidget::relocateTextboxView(Textbox *txtbox, ObjectsScene *dst_scene)
+{
+	QGraphicsItem *old_item = dynamic_cast<QGraphicsItem *>(txtbox->getOverlyingObject());
+	ObjectsScene *old_scene = old_item ? dynamic_cast<ObjectsScene *>(old_item->scene()) : nullptr;
+
+	if(!old_item || !old_scene || !dst_scene || old_scene == dst_scene)
+		return;
+
+	old_scene->removeItem(old_item);
+	dst_scene->addItem(createGraphicItem(txtbox));
+	dst_scene->adjustSceneRect(true);
+}
+
 void ModelWidget::handleObjectSchemaChanged(BaseObject *object, Operation::OperType op_type)
 {
 	BaseGraphicObject *graph_obj = dynamic_cast<BaseGraphicObject *>(object);
 
-	if(!graph_obj ||
-		 !BaseTable::isBaseTable(graph_obj->getObjectType()) ||
-		 op_type != Operation::ObjModified)
+	if(!graph_obj || op_type != Operation::ObjModified)
 		return;
 
-	Schema *schema = dynamic_cast<Schema *>(graph_obj->getSchema());
-	ObjectsScene *dst_scene = schema ? getSchemaScene(schema) : nullptr;
+	ObjectType obj_type = graph_obj->getObjectType();
+	DatabaseModel::SegmentationMode seg_mode = db_model->getSegmentationMode();
+	ObjectsScene *dst_scene = nullptr;
 
-	if(dst_scene)
+	//Schema-segmentation: a Table/View/ForeignTable's scene follows its schema
+	if(BaseTable::isBaseTable(obj_type))
+	{
+		Schema *schema = dynamic_cast<Schema *>(graph_obj->getSchema());
+		dst_scene = schema ? getSchemaScene(schema) : nullptr;
+	}
+
+	/* Threshold-segmentation (Table/View/ForeignTable), or Textbox in either segmented mode
+	 * both driven by the object's own scene index instead of its schema */
+	if(!dst_scene &&
+			((BaseTable::isBaseTable(obj_type) && seg_mode == DatabaseModel::SegByThreshold) ||
+			 (obj_type == ObjectType::Textbox && seg_mode != DatabaseModel::NoSegmentation)))
+	{
+		int scn_idx = graph_obj->getSceneIndex();
+		dst_scene = (scn_idx >= 0 && scn_idx < scenes.size()) ? scenes.at(scn_idx) : nullptr;
+	}
+
+	if(!dst_scene)
+		return;
+
+	if(obj_type == ObjectType::Textbox)
+		relocateTextboxView(dynamic_cast<Textbox *>(graph_obj), dst_scene);
+	else
 		relocateObjectView(graph_obj, dst_scene);
 }
 
@@ -3180,8 +3257,83 @@ void ModelWidget::moveToSchema()
 	}
 	catch(Exception &e)
 	{
-		//qApp->restoreOverrideCursor();
+		if(op_id >=0 && op_id > op_curr_idx)
+			op_list->removeLastOperation();
 
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
+}
+
+void ModelWidget::moveToScene()
+{
+	QAction *act = dynamic_cast<QAction *>(sender());
+	int dst_idx = act->data().toInt();
+	ObjectsScene *dst_scene = (dst_idx >= 0 && dst_idx < scenes.size()) ? scenes.at(dst_idx) : nullptr;
+	DatabaseModel::SegmentationMode seg_mode = db_model->getSegmentationMode();
+	BaseGraphicObject *obj_graph = nullptr;
+	ObjectType obj_type;
+	bool some_skipped = false;
+	int op_id = -1, op_curr_idx = op_list->getCurrentIndex();
+
+	if(!dst_scene)
+		return;
+
+	try
+	{
+		qApp->setOverrideCursor(Qt::WaitCursor);
+
+		op_list->startOperationChain();
+
+		for(BaseObject *obj : selected_objects)
+		{
+			obj_graph=dynamic_cast<BaseGraphicObject *>(obj);
+			obj_type=obj->getObjectType();
+
+			/* Only Table/View/ForeignTable and Textbox have an independent position/scene at all --
+			 * anything else (Schema, Relationship...) is silently skipped, same as moveToSchema() does
+			 * for objects that don't accept a schema	*/
+			if(!obj_graph || !(BaseTable::isBaseTable(obj_type) || obj_type == ObjectType::Textbox))
+				continue;
+
+			/* Scope restriction in schema-segmentation mode, a Table/View/ForeignTable's scene is 
+			 * strictly tied to its schema (handleObjectAddition()), moving just one of them here 
+			 * without its schema would break that invariant. Only Textbox, which has no schema to 
+ 			 * begin with, can be freely reassigned in this mode.
+			 * Threshold-segmentation has no such restriction: every eligible type can move freely */
+			if(seg_mode == DatabaseModel::SegBySchema && obj_type != ObjectType::Textbox)
+			{
+				some_skipped = true;
+				continue;
+			}
+
+			if(obj_graph->getSceneIndex() == dst_idx)
+				continue;
+
+			op_id = op_list->registerObject(obj, Operation::ObjModified, -1);
+			obj_graph->setSceneIndex(dst_idx);
+
+			if(obj_type == ObjectType::Textbox)
+				relocateTextboxView(dynamic_cast<Textbox *>(obj_graph), dst_scene);
+			else
+				relocateObjectView(obj_graph, dst_scene);
+		}
+
+		op_list->finishOperationChain();
+		db_model->setObjectsModified();
+		this->setModified(true);
+
+		emit s_objectModified();
+		qApp->restoreOverrideCursor();
+
+		if(some_skipped)
+		{
+			Messagebox::alert(tr("Some of the selected objects were not moved due to the segmentation by schema mode."
+													 "Table-like objects cannot be moved to another scene other than the one representing their parent schemas."
+													 "Only text boxes can be freely reassigned to another scene in this mode."));
+		}
+	}
+	catch(Exception &e)
+	{
 		if(op_id >=0 && op_id > op_curr_idx)
 			op_list->removeLastOperation();
 
@@ -4492,7 +4644,7 @@ void ModelWidget::configureQuickMenu(BaseObject *object)
 	QAction *act = nullptr;
 	std::vector<BaseObject *> sel_objs;
 	ObjectType obj_type=ObjectType::BaseObject;
-	bool tab_or_view=false, is_graph_obj = false, accepts_owner=false, accepts_schema=false;
+	bool tab_or_view=false, is_graph_obj = false, accepts_owner=false, accepts_schema=false, movable_to_scene=false;
 
 	if(object)
 		sel_objs.push_back(object);
@@ -4500,7 +4652,7 @@ void ModelWidget::configureQuickMenu(BaseObject *object)
 		sel_objs = selected_objects;
 
 	/* Determining if one or more selected objects accepts schema, owner or are table/views,
-	 this is done to correctly show the actions to the user */
+	 * this is done to correctly show the actions to the user */
 	for(auto &obj : sel_objs)
 	{
 		obj_type=obj->getObjectType();
@@ -4517,9 +4669,17 @@ void ModelWidget::configureQuickMenu(BaseObject *object)
 		if(!accepts_schema)
 			accepts_schema=obj->acceptsSchema();
 
-		if(tab_or_view && accepts_owner && accepts_schema)
+		/* Table/View/ForeignTable and Textbox are the only types with an independently movable
+		 * scene -- the exact restriction by segmentation mode is enforced in moveToScene() itself */
+		if(!movable_to_scene)
+			movable_to_scene = (tab_or_view || obj_type == ObjectType::Textbox);
+
+		if(tab_or_view && accepts_owner && accepts_schema && movable_to_scene)
 			break;
 	}
+
+	//Meaningless with a single scene (NoSegmentation always has exactly one)
+	movable_to_scene = movable_to_scene && scenes.size() > 1;
 
 	if(!sel_objs.empty())
 	{
@@ -4561,7 +4721,6 @@ void ModelWidget::configureQuickMenu(BaseObject *object)
 
 						for(auto &obj : obj_list)
 						{
-							//act = new QAction(obj_list.back()->getName(), menus[i]);
 							act = new QAction(obj->getName(), menus[i]);
 							act->setIcon(GuiUtilsNs::getIcon(types[i]));
 
@@ -4597,6 +4756,31 @@ void ModelWidget::configureQuickMenu(BaseObject *object)
 			}
 		}
 
+		/* Configuring the "Move to scene" submenu. Entries are scene indexes, not
+		 * BaseObject instances, so it's built separately from the schemas/owners/tags loop above */
+		if(movable_to_scene)
+		{
+			scenes_menu.clear();
+
+			QStringList scene_names = getSceneNames();
+			BaseGraphicObject *single_sel_graph = sel_objs.size() == 1 ?
+																						 dynamic_cast<BaseGraphicObject *>(sel_objs[0]) : nullptr;
+
+			for(int i = 0; i < scene_names.size(); i++)
+			{
+				act = new QAction(scene_names.at(i), &scenes_menu);
+
+				act->setCheckable(sel_objs.size() == 1);
+				act->setChecked(single_sel_graph && getSceneForObject(single_sel_graph) == scenes.at(i));
+				act->setEnabled(!act->isChecked());
+				act->setIcon(GuiUtilsNs::getIcon("design"));
+				act->setData(i);
+
+				connect(act, &QAction::triggered, this, &ModelWidget::moveToScene);
+				scenes_menu.addAction(act);
+			}
+		}
+
 		//Display the quick rename action is a single object is selected
 		if((object && obj_type != ObjectType::Cast) || (sel_objs.size() > 1))
 		{
@@ -4609,6 +4793,9 @@ void ModelWidget::configureQuickMenu(BaseObject *object)
 
 		if(accepts_schema)
 			quick_actions_menu.addAction(action_moveto_schema);
+
+		if(movable_to_scene)
+			quick_actions_menu.addAction(action_moveto_scene);
 
 		if(accepts_owner)
 			quick_actions_menu.addAction(action_change_owner);

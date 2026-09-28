@@ -1415,18 +1415,43 @@ depois.
      perder o resto da fase. Lógica já concreta (comportamento a testar já está implementado desde
      a 1.10) — pronta para implementação direta. Depende de: 1.10.
 
-4.2. **Reatribuição manual de objetos entre cenas** (achado da intro da Fase 1, 2026-09-22/23) —
-     hoje não existe nenhum mecanismo, nem indireto, para mover um objeto de uma cena para outra
-     sem passar por `moveToSchema()` (que só existe para Table/View/ForeignTable com schema, e é
-     guiado pelo schema, não por escolha direta de cena). `Textbox` é o caso mais claro — não tem
-     schema nenhum para guiar uma troca, então não tem caminho nenhum hoje. O mesmo atributo
-     persistido `Scene` que a subtarefa 2.2 introduziu para Table/View/ForeignTable é candidato
-     natural a também cobrir isso, mas 2.2 restringiu deliberadamente o escopo a esses três tipos
-     — a extensão para `Textbox` e para reatribuição manual de qualquer objeto (não só os que já
-     têm schema) continua não desenhada. **[Requer fechamento de decisão com o usuário]**: que UI
-     dispara a reatribuição (menu de contexto "mover para cena..."? arrastar entre abas/combo?) e
-     se o mecanismo é genérico (qualquer `BaseObject`) ou só fecha o buraco específico do
-     `Textbox`. Depende de: 2.2.
+4.2. **Reatribuição manual de objetos entre cenas** (achado da intro da Fase 1, 2026-09-22/23;
+     decisão fechada e implementada em 2026-09-28) — antes desta subtarefa não existia nenhum
+     mecanismo, nem indireto, para mover um objeto de uma cena para outra sem passar por
+     `moveToSchema()` (guiado pelo schema, não por escolha direta de cena, e só existente para
+     Table/View/ForeignTable). `Textbox` era o caso mais claro — sem schema nenhum pra guiar uma
+     troca, não tinha caminho nenhum antes desta subtarefa.
+     - **UI**: menu de contexto "Move to scene", espelhando exatamente "Move to schema" (mesmo
+       `moveToSchema()` usado como referência de implementação) — `ModelWidget::moveToScene()`
+       ([modelwidget.cpp](libs/libgui/src/widgets/modelwidget.cpp)), com submenu listando as cenas
+       pelo nome de `getSceneNames()`, disparado por um `QAction` por cena cujo `data()` carrega o
+       índice de destino.
+     - **Mecanismo genérico, mas com restrição de escopo por modo de segmentação (pedido do
+       usuário)**: `Table`/`View`/`ForeignTable` e `Textbox` são os únicos tipos com posição/cena
+       independente. Em `SegBySchema`, só `Textbox` pode ser realocado livremente — a cena de
+       Table/View/ForeignTable é estritamente amarrada ao schema (`handleObjectAddition()`); mover
+       só o objeto sem o schema quebraria esse invariante. Em `SegByThreshold`, qualquer um dos
+       tipos elegíveis pode ser movido livremente, sem essa restrição. Objetos não-elegíveis
+       (Schema, Relationship, ...) numa seleção são ignorados silenciosamente, igual
+       `moveToSchema()` já faz para objetos que não aceitam schema; um Table/View/ForeignTable
+       ignorado especificamente pela restrição de modo dispara um alerta ao final informando que
+       alguns objetos não foram movidos.
+     - **Persistência estendida ao `Textbox`**: o atributo `Scene` (subtarefa 2.2) e os métodos
+       `getSceneIndex()`/`setSceneIndex()`/`resetSceneIndex()`/`setSceneIndexAttribute()`, antes
+       exclusivos de `BaseTable`, subiram para `BaseGraphicObject`
+       ([basegraphicobject.h](libs/libcore/src/basegraphicobject.h)) — mesmo padrão já usado por
+       posição/faded-out/layers, compartilhados por todo objeto gráfico independente de qual
+       subtipo realmente os grava no XML. `Textbox` ganhou o atributo `scene` no
+       `textbox.sch`/`.dtd`. Descoberta no processo: `BaseGraphicObject::operator=` nunca copiava
+       `scene_idx` — gap latente desde a 2.2 (nunca exercitado porque nada mutava `scene_idx` via
+       `ObjModified` antes desta subtarefa), corrigido junto para que undo/redo de `moveToScene()`
+       restaure o índice corretamente.
+     - **Resync de undo/redo**: `handleObjectSchemaChanged()` (o slot ligado a
+       `OperationList::s_operationExecuted`) estendido para também resincronizar pela cena
+       persistida (`Threshold`, e `Textbox` em qualquer modo segmentado), não só pelo schema
+       (`SegBySchema`) — `relocateObjectView()` continua exclusivo de Table/View/ForeignTable
+       (assume `BaseTableView`); `Textbox` ganhou sua própria contraparte trivial,
+       `relocateTextboxView()` (sem relacionamentos/cutoff pra tratar).
 
 4.3. **[Requer fechamento de decisão com o usuário] Ferramenta de criação de relacionamento
      cross-scene** (ex-1.12) — sinalizado explicitamente pelo usuário como ponto que exige cuidado

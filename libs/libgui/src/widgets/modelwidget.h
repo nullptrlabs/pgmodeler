@@ -154,6 +154,9 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Stores the schemas used by the "move to schema" operation
 		schemas_menu,
 
+		//! \brief Stores the scenes used by the "move to scene" operation (subtask 4.2)
+		scenes_menu,
+
 		//! \brief Stores the role names used by the "change owner" operation
 		owners_menu,
 
@@ -301,7 +304,7 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Returns whichever of rel's two tables isn't tab (the other side of the relationship)
 		BaseTable *getRelationshipPartner(BaseRelationship *rel, BaseTable *tab);
 
-		//! \brief Builds the graphical item representing graph_obj (Table, ForeignTable or View), or nullptr for any other type
+		//! \brief Builds the graphical item representing graph_obj (Table, ForeignTable, View or Textbox), or nullptr for any other type
 		QGraphicsItem *createGraphicItem(BaseGraphicObject *graph_obj);
 
 		/*! \brief Creates rel's RelationshipView if both its tables currently share a scene, or
@@ -311,12 +314,14 @@ class __libgui ModelWidget: public QWidget {
 		void routeRelationship(BaseRelationship *rel);
 
 		/*! \brief Reacts to OperationList::s_operationExecuted, connected once in the constructor --
-		 * covers undo/redo of Operation::ObjModified/ObjMoved, which restores the schema attribute in
-		 * place (see OperationList::executeOperation()) without ever calling moveToSchema()/
-		 * relocateEditedObject(), so nothing else notices the object may now belong in a different
-		 * scene. Ignores anything that isn't a Table/ForeignTable/View restored by one of those two
-		 * operation types, and relocates the view only when its scene actually disagrees with the
-		 * object's current schema -- a no-op for every other kind of undo/redo */
+		 * covers undo/redo of Operation::ObjModified, which restores the object's previous schema or
+		 * scene index in place (see OperationList::executeOperation()) without ever calling
+		 * moveToSchema()/moveToScene()/relocateEditedObject(), so nothing else notices the object may
+		 * now belong in a different scene. Two independent resync rules, since a Table/View/
+		 * ForeignTable's scene can be driven by either attribute depending on segmentation mode: its
+		 * schema (schema-segmentation, existing since before subtask 4.2) or its own scene index
+		 * (threshold-segmentation, and Textbox in either segmented mode, both added by 4.2). A no-op
+		 * whenever neither applies, or the view already agrees with the restored state */
 		void handleObjectSchemaChanged(BaseObject *object, Operation::OperType op_type);
 
 		/*! \brief Moves obj_wgt's edited object to its new schema's scene, if the schema selector in
@@ -342,6 +347,7 @@ class __libgui ModelWidget: public QWidget {
 		*action_new_object,
 		*action_rename,
 		*action_moveto_schema,
+		*action_moveto_scene,
 		*action_edit_perms,
 		*action_change_owner,
 		*action_quick_actions,
@@ -520,6 +526,13 @@ class __libgui ModelWidget: public QWidget {
 		 * crashes later, confirmed for RelationshipView and avoided here for every relocatable type */
 		void relocateObjectView(BaseGraphicObject *graph_obj, ObjectsScene *dst_scene);
 
+		/*! \brief Textbox counterpart to relocateObjectView() -- Textbox has no relationships, cut-off
+		 * markers or schema, so it needs none of that method's table-specific bookkeeping (it casts
+		 * the existing item to BaseTableView, which a Textbox's StyledTextboxView never is -- a no-op
+		 * if called on one). Same discard+recreate technique, just the trivial case: remove the old
+		 * item, build a fresh StyledTextboxView directly in dst_scene */
+		void relocateTextboxView(Textbox *txtbox, ObjectsScene *dst_scene);
+
 		//! \brief Returns the scene view used by the model
 		QGraphicsView *getViewport();
 
@@ -618,6 +631,13 @@ class __libgui ModelWidget: public QWidget {
 
 		//! \brief Move the selected object to a schema (selectable via menu)
 		void moveToSchema();
+
+		/*! \brief Moves the selected objects to a scene (selectable via menu, subtask 4.2). In
+		 * schema-segmentation mode, only Textbox can be freely reassigned this way -- Table/View/
+		 * ForeignTable's scene follows their schema there, so moving just one of them without its
+		 * schema would break that invariant. Any other type is silently skipped (an alert is shown
+		 * afterwards if anything was), fully applied only in threshold-segmentation mode */
+		void moveToScene();
 
 		//! \brief Update objects visibility according to the layers visibility
 		void updateObjectsLayers();

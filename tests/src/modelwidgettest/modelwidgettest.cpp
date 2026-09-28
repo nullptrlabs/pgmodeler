@@ -29,6 +29,7 @@
 #include "constraint.h"
 #include "relationship.h"
 #include "relationshipview.h"
+#include "textbox.h"
 #include "tableview.h"
 #include "cutoffitem.h"
 #include "objectsscene.h"
@@ -73,6 +74,14 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void pgCatalogNeverNamesTheSceneOutsideOfSchemaSegmentation();
 		void cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroysSceneAndUndoRestoresIt();
 		void cascadeDeleteThroughRealActionReachesTransitivelyReferencedObjects();
+		void moveToSceneMovesTextboxFreelyEvenInSchemaSegmentationMode();
+		void moveToSceneSkipsTableInSchemaSegmentationModeAndAlerts();
+		void moveToSceneMovesTableFreelyInThresholdMode();
+		void moveToSceneChangeSurvivesUndo();
+		void movedTextboxScenePersistsAcrossSaveAndReload();
+		void moveToSceneAdjustsDestinationSceneRectForTextbox();
+		void moveToSceneAdjustsDestinationSceneRectForTable();
+		void moveToSceneUndoRestoresTextboxToItsOriginScene();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -1945,6 +1954,477 @@ void ModelWidgetTest::cascadeDeleteThroughRealActionReachesTransitivelyReference
 		QVERIFY2(db_model->getObject("table_g", ObjectType::Table) == nullptr, "table_g must be gone too -- cascade must reach it even though it only references table_g, not schema_b, directly");
 		QVERIFY2(db_model->getObjectIndex(rel) < 0, "the relationship must be gone as well");
 		QVERIFY2(db_model->getObject("table_a", ObjectType::Table) != nullptr, "table_a (schema_b's sibling, unrelated to the cascade) must survive");
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Drives ModelWidget::moveToScene() (subtask 4.2) the same way the real "Move to scene"
+context-menu entry would, without reaching into ModelWidget's private QMenu machinery:
+configurePopupMenu(BaseObject *) (a private slot, invoked via QMetaObject::invokeMethod --
+established technique, see cascadeDeleteThroughRealActionReachesTransitivelyReferencedObjects())
+selects the object, then a throwaway QAction carrying the destination scene index in its data() is
+connected to the private moveToScene() slot via the old string-based SIGNAL/SLOT macros -- this
+bypasses C++ access control exactly like invokeMethod does, but through a real
+QAction::trigger()/triggered() emission this time, so sender() inside moveToScene() resolves to a
+genuine QAction with valid data(), same as the real menu entry would supply. */
+static void triggerMoveToScene(ModelWidget &model_wgt, int dst_idx)
+{
+	QAction move_action;
+	move_action.setData(dst_idx);
+	QObject::connect(&move_action, SIGNAL(triggered(bool)), &model_wgt, SLOT(moveToScene()));
+	move_action.trigger();
+}
+
+/*! \brief Textbox has no schema, so schema-segmentation mode's restriction (a Table/View/
+ForeignTable's scene must follow its schema) doesn't apply to it -- user-requested scope
+restriction, 2026-09-28: it's the one type moveToScene() lets move freely regardless of
+segmentation mode. */
+void ModelWidgetTest::moveToSceneMovesTextboxFreelyEvenInSchemaSegmentationMode()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		Schema *schema_b = new Schema;
+		schema_b->setName("schema_b");
+		db_model->addSchema(schema_b);
+
+		//Textbox has no schema to route it -- it lands wherever the active scene is (public's, here)
+		Textbox *txtbox = new Textbox;
+		txtbox->setName("note");
+		txtbox->setComment("note text");
+		db_model->addTextbox(txtbox);
+
+		ObjectsScene *scene_pub = model_wgt.getSchemaScene(schema_pub);
+		ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
+
+		QVERIFY(scene_pub != nullptr);
+		QVERIFY(scene_b != nullptr);
+		QCOMPARE(model_wgt.getSceneForObject(txtbox), scene_pub);
+
+		int dst_idx = model_wgt.getObjectsScenes().indexOf(scene_b);
+		QVERIFY(dst_idx >= 0);
+
+		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+															 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(txtbox)));
+
+		triggerMoveToScene(model_wgt, dst_idx);
+
+		QCOMPARE(model_wgt.getSceneForObject(txtbox), scene_b);
+		QCOMPARE(txtbox->getSceneIndex(), dst_idx);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief The other half of the same scope restriction: a Table's scene is pinned to its schema in
+schema-segmentation mode (handleObjectAddition()), so moving just the table without its schema
+would break that invariant -- moveToScene() must silently skip it and surface an alert instead of
+moving it. */
+void ModelWidgetTest::moveToSceneSkipsTableInSchemaSegmentationModeAndAlerts()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		Schema *schema_b = new Schema;
+		schema_b->setName("schema_b");
+		db_model->addSchema(schema_b);
+
+		Table *table_pub = new Table;
+		table_pub->setName("table_pub");
+		table_pub->setSchema(schema_pub);
+		db_model->addTable(table_pub);
+
+		ObjectsScene *scene_pub = model_wgt.getSchemaScene(schema_pub);
+		ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
+
+		QVERIFY(scene_pub != nullptr);
+		QVERIFY(scene_b != nullptr);
+		QCOMPARE(model_wgt.getSceneForObject(table_pub), scene_pub);
+
+		int dst_idx = model_wgt.getObjectsScenes().indexOf(scene_b);
+		QVERIFY(dst_idx >= 0);
+
+		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+															 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(table_pub)));
+
+		//Auto-accepts (and records) the alert Messagebox moveToScene() pops when it skips something
+		bool alert_seen = false;
+		QTimer poll_timer;
+		poll_timer.setInterval(20);
+
+		QObject::connect(&poll_timer, &QTimer::timeout, [&alert_seen](){
+			QDialog *dlg = qobject_cast<QDialog *>(qApp->activeModalWidget());
+
+			if(dlg)
+			{
+				alert_seen = true;
+				dlg->accept();
+			}
+		});
+
+		poll_timer.start();
+		triggerMoveToScene(model_wgt, dst_idx);
+		poll_timer.stop();
+
+		QVERIFY2(alert_seen, "moveToScene() must alert the user that the table was not moved");
+		QCOMPARE(model_wgt.getSceneForObject(table_pub), scene_pub);
+		QCOMPARE(table_pub->getSceneIndex(), -1);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Threshold-segmentation has no schema/scene coupling at all -- every eligible type
+(Table/View/ForeignTable, and Textbox) can move freely, matching the user's own description
+("moveToScene se aplica a qualquer objeto gráfico" in this mode). */
+void ModelWidgetTest::moveToSceneMovesTableFreelyInThresholdMode()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		std::vector<Table *> tables;
+
+		//Fills the first scene exactly to the threshold, which also opens a second, still-empty scene
+		for(unsigned i = 0; i < db_model->getSegThreshold(); i++)
+		{
+			Table *table = new Table;
+			table->setName(QString("table_%1").arg(i));
+			table->setSchema(schema_pub);
+			db_model->addTable(table);
+			tables.push_back(table);
+		}
+
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+
+		Table *table_first = tables.front();
+		ObjectsScene *scene0 = model_wgt.getObjectsScenes().at(0);
+		ObjectsScene *scene1 = model_wgt.getObjectsScenes().at(1);
+
+		QCOMPARE(model_wgt.getSceneForObject(table_first), scene0);
+
+		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+															 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(table_first)));
+
+		triggerMoveToScene(model_wgt, 1);
+
+		QCOMPARE(model_wgt.getSceneForObject(table_first), scene1);
+		QCOMPARE(table_first->getSceneIndex(), 1);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief handleObjectSchemaChanged() (extended by subtask 4.2 to also resync scene-index-driven
+placement, not just schema-driven) is what makes undo/redo of moveToScene() actually move the view
+back -- OperationList::executeOperation() only restores the object's scene_idx attribute, it
+never touches the graphical item on its own. */
+/*! \brief A Textbox that lands on its scene through the default routing path (never explicitly
+moved before) must still carry that scene's index on the model, not just on the view -- otherwise
+an operation that snapshots/restores it later (moveToScene()'s undo) captures a stale/absent index
+and can't resolve the object back to a real scene, leaving the view stranded wherever it was. */
+void ModelWidgetTest::moveToSceneUndoRestoresTextboxToItsOriginScene()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		Schema *schema_b = new Schema;
+		schema_b->setName("schema_b");
+		db_model->addSchema(schema_b);
+
+		Textbox *txtbox = new Textbox;
+		txtbox->setName("note");
+		txtbox->setComment("note text");
+		db_model->addTextbox(txtbox);
+
+		ObjectsScene *scene_pub = model_wgt.getSchemaScene(schema_pub);
+		ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
+		int origin_idx = model_wgt.getObjectsScenes().indexOf(scene_pub);
+		int dst_idx = model_wgt.getObjectsScenes().indexOf(scene_b);
+
+		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+															 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(txtbox)));
+
+		triggerMoveToScene(model_wgt, dst_idx);
+
+		QCOMPARE(model_wgt.getSceneForObject(txtbox), scene_b);
+		QCOMPARE(txtbox->getSceneIndex(), dst_idx);
+
+		model_wgt.getOperationList()->undoOperation();
+
+		QCOMPARE(txtbox->getSceneIndex(), origin_idx);
+		QCOMPARE(model_wgt.getSceneForObject(txtbox), scene_pub);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void ModelWidgetTest::moveToSceneChangeSurvivesUndo()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		std::vector<Table *> tables;
+
+		for(unsigned i = 0; i < db_model->getSegThreshold(); i++)
+		{
+			Table *table = new Table;
+			table->setName(QString("table_%1").arg(i));
+			table->setSchema(schema_pub);
+			db_model->addTable(table);
+			tables.push_back(table);
+		}
+
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+
+		Table *table_first = tables.front();
+		ObjectsScene *scene0 = model_wgt.getObjectsScenes().at(0);
+		ObjectsScene *scene1 = model_wgt.getObjectsScenes().at(1);
+
+		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+															 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(table_first)));
+
+		triggerMoveToScene(model_wgt, 1);
+
+		QCOMPARE(model_wgt.getSceneForObject(table_first), scene1);
+		QCOMPARE(table_first->getSceneIndex(), 1);
+
+		model_wgt.getOperationList()->undoOperation();
+
+		QCOMPARE(table_first->getSceneIndex(), 0);
+		QCOMPARE(model_wgt.getSceneForObject(table_first), scene0);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief The whole point of extending the persisted Scene attribute to Textbox (user's explicit
+choice when this subtask was discussed, over leaving it session-only): a manual scene reassignment
+must survive save+reload, the same way it already did for Table/View/ForeignTable since subtask
+2.2 -- without it, moveToScene() on a Textbox would silently revert on the next load. */
+void ModelWidgetTest::movedTextboxScenePersistsAcrossSaveAndReload()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_textbox_scene.dbm");
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+			db_model->setSavedSegmentationMode(DatabaseModel::SegBySchema);
+			db_model->createSystemObjects(true);
+
+			Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+			QVERIFY(schema_pub != nullptr);
+
+			Schema *schema_b = new Schema;
+			schema_b->setName("schema_b");
+			db_model->addSchema(schema_b);
+
+			Textbox *txtbox = new Textbox;
+			txtbox->setName("note");
+			txtbox->setComment("note text");
+			db_model->addTextbox(txtbox);
+
+			ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
+			QVERIFY(scene_b != nullptr);
+
+			int dst_idx = model_wgt.getObjectsScenes().indexOf(scene_b);
+			QVERIFY(dst_idx >= 0);
+
+			QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+																 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(txtbox)));
+
+			triggerMoveToScene(model_wgt, dst_idx);
+
+			QCOMPARE(model_wgt.getSceneForObject(txtbox), scene_b);
+			QCOMPARE(txtbox->getSceneIndex(), dst_idx);
+
+			model_wgt.saveModel(tmp_file);
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_file);
+
+			Schema *schema_b = dynamic_cast<Schema *>(db_model->getObject("schema_b", ObjectType::Schema));
+			QVERIFY(schema_b != nullptr);
+
+			Textbox *txtbox = dynamic_cast<Textbox *>(db_model->getObject("note", ObjectType::Textbox));
+			QVERIFY(txtbox != nullptr);
+
+			ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
+			QVERIFY(scene_b != nullptr);
+
+			QVERIFY2(txtbox->getSceneIndex() >= 0, "textbox's manually-assigned scene index must survive reload");
+			QCOMPARE(model_wgt.getSceneForObject(txtbox), scene_b);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
+}
+
+/*! \brief A moved item keeps its own (x, y) -- the destination scene is an independent canvas with
+its own, unrelated bounds, so the item can easily fall outside them and render invisible until
+something else happens to touch the scene's rect. relocateTextboxView()/relocateObjectView() must
+grow the destination scene's rect to include the item right after placing it there. */
+void ModelWidgetTest::moveToSceneAdjustsDestinationSceneRectForTextbox()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		Schema *schema_b = new Schema;
+		schema_b->setName("schema_b");
+		db_model->addSchema(schema_b);
+
+		Textbox *txtbox = new Textbox;
+		txtbox->setName("note");
+		txtbox->setComment("note text");
+		txtbox->setPosition(QPointF(9000, 9000));
+		db_model->addTextbox(txtbox);
+
+		ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
+		QVERIFY(scene_b != nullptr);
+		QVERIFY2(!scene_b->sceneRect().contains(txtbox->getPosition()),
+						 "schema_b's scene must start out too small to already contain the far-away position");
+
+		int dst_idx = model_wgt.getObjectsScenes().indexOf(scene_b);
+		QVERIFY(dst_idx >= 0);
+
+		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+															 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(txtbox)));
+
+		triggerMoveToScene(model_wgt, dst_idx);
+
+		QGraphicsItem *item = dynamic_cast<QGraphicsItem *>(txtbox->getOverlyingObject());
+		QVERIFY(item != nullptr);
+		QCOMPARE(item->scene(), scene_b);
+		QVERIFY2(scene_b->sceneRect().contains(item->sceneBoundingRect()),
+						 "schema_b's scene rect must grow to include the relocated textbox");
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+//Table/View/ForeignTable counterpart of the above, going through relocateObjectView() instead of
+//relocateTextboxView() -- the same gap affected both, since neither called adjustSceneRect()
+void ModelWidgetTest::moveToSceneAdjustsDestinationSceneRectForTable()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		//The view reads its initial on-screen position from the model object at creation time --
+		//setting it only takes effect for the far-away check below if done before addTable()
+		Table *table_first = new Table;
+		table_first->setName("table_0");
+		table_first->setSchema(schema_pub);
+		table_first->setPosition(QPointF(9000, 9000));
+		db_model->addTable(table_first);
+
+		for(unsigned i = 1; i < db_model->getSegThreshold(); i++)
+		{
+			Table *table = new Table;
+			table->setName(QString("table_%1").arg(i));
+			table->setSchema(schema_pub);
+			db_model->addTable(table);
+		}
+
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+
+		ObjectsScene *scene1 = model_wgt.getObjectsScenes().at(1);
+		QVERIFY2(!scene1->sceneRect().contains(table_first->getPosition()),
+						 "the still-empty second scene must start out too small to already contain the far-away position");
+
+		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+															 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(table_first)));
+
+		triggerMoveToScene(model_wgt, 1);
+
+		QGraphicsItem *item = dynamic_cast<QGraphicsItem *>(table_first->getOverlyingObject());
+		QVERIFY(item != nullptr);
+		QCOMPARE(item->scene(), scene1);
+		QVERIFY2(scene1->sceneRect().contains(item->sceneBoundingRect()),
+						 "the second scene's rect must grow to include the relocated table");
 	}
 	catch(Exception &e)
 	{
