@@ -678,8 +678,58 @@
     `operationlist.cpp` (`git stash`) mantendo o teste — crash reproduzido (SIGSEGV em
     `bkp_obj->getName()`, mesmo stack); restaurado depois, suíte completa **27/27** sob
     `ASAN_OPTIONS=detect_leaks=0`.
-  - Build limpo (`core`+`canvas`+`connector`+`gui`+`modelwidgettest`). **Aguardando decisão do
-    usuário sobre commit.**
+  - Build limpo (`core`+`canvas`+`connector`+`gui`+`modelwidgettest`). Commitado (`52b5582b2`).
+- **Bug real reportado pelo usuário: exclusão em cascata de schema falhando (2026-09-28), não
+  relacionado a multi-cena.** Usuário tentou excluir `schema_b` em cascata e recebeu uma cadeia de
+  erros `RemDirectReference`/`RemInderectReference` (`table_g` ainda referenciado por
+  `table_g_copies_table_a`, `schema_b.dummy_trig_func` por `dummy_trigger`, `schema_b.view_b` por
+  `schema_a.view_a`) — a exclusão só alcançava os filhos **diretos** do schema, não os filhos dos
+  filhos. Usuário já suspeitava ter introduzido algum guard; investigação revelou dois bugs
+  empilhados, ambos de setembro de 2023 (refactor `927b8904b8`/`9cd42745ce`, nada a ver com
+  multi-cena), corrigidos em dois commits separados a pedido do usuário.
+  - **Bug 1 (mais fundo)**: `BaseObject::getLinkedObjects()`
+    ([baseobject.cpp:1557-1583](libs/libcore/src/baseobject.cpp#L1557)), o motor comum por trás de
+    `getReferences()`/`getDependencies()`, calculava corretamente o fecho transitivo quando
+    `incl_ind_links` era `true`, mas em seguida **sempre** sobrescrevia o resultado com a lista
+    direta de novo — tornando o parâmetro um no-op em todo o código, não só na exclusão em cascata
+    (`ModelWidget::copyObjects()` também usa `getDependencies(true, {Column})`, e
+    `libcli/compat/reference.cpp` também). **Fix mínimo**: o segundo `if(!excl_types.empty())`
+    virou `else if` — o ramo `incl_ind_links==false` (usado em praticamente todo o resto do código,
+    inclusive nos próprios guards de `RemDirectReference`) ficou byte-a-byte intocado.
+    - **Cuidado especial pedido pelo usuário** dado o alcance amplo desse método: novo teste em
+      `tests/src/baseobjecttest/baseobjecttest.cpp` (`getReferencesWithIndirectLinksIncludesTheFullTransitiveClosure`,
+      cadeia schema→tabela→relacionamento de 3 níveis) confirma que a versão default
+      (`getReferences()`, sem args) continua só-direto e que `getReferences(true)` agora alcança a
+      cadeia inteira. `BaseObjectTest` não herdava `PgModelerUnitTest`/`SCHEMASDIR` ainda — corrigido
+      junto (senão o parser de schemas falha achando `/sql/drop.sch`). Verificado que o teste pega o
+      bug (`git stash` só em `baseobject.cpp`, teste falha; restaurado, passa). Suíte inteira
+      re-executada como rede de segurança: `baseobjecttest` (6/6), `modelwidgettest` (27/27, sem
+      regressão), `databasemodeltest` (a única falha pré-existente, `loadObjectsMetadata`,
+      confirmada idêntica com e sem o fix — bug de carga de `.omf`, nada a ver com esta mudança) e
+      build completo do binário `pgmodeler` (incluindo `libcli`) limpo. Commitado (`9248a6313`).
+  - **Bug 2 (ponto de chamada)**: `ModelWidget::removeObjects(bool cascade)`
+    ([modelwidget.cpp:4159](libs/libgui/src/widgets/modelwidget.cpp#L4159)) — o laço de coleta em
+    cascata chamava `sel_obj->getReferences()` sem argumento (default `false`), mesmo o comentário
+    logo acima dizendo "retrieve all references to the object (direct and indirect)". Antes de
+    2023 usava `DatabaseModel::__getObjectReferences()`, que era recursivo; o refactor trocou pra
+    `BaseObject::getReferences()` sem passar `true`. **Fix**: `getReferences()` →
+    `getReferences(true)`, uma linha. Só tem efeito de verdade depois do fix do bug 1 (sem ele,
+    passar `true` não mudava nada).
+    - **Novo teste** (`cascadeDeleteThroughRealActionReachesTransitivelyReferencedObjects`,
+      `modelwidgettest.cpp`) exercita a ação real e interativa
+      `ModelWidget::removeObjects(true)`, diferente do teste de undo da 4.1 (que dirige
+      `DatabaseModel`/`OperationList` direto por precisar de controle fino sobre a cadeia de undo).
+      Como `removeObjects()` é um slot privado, é chamado via `QMetaObject::invokeMethod()`; a
+      seleção do schema (que não tem item de cena nenhum em `SegBySchema`) é feita via
+      `configurePopupMenu(BaseObject *)` — mesmo mecanismo que uma seleção fora da cena (ex. uma
+      árvore de objetos) usaria — também privado, também via `invokeMethod()`. O `Messagebox` de
+      confirmação é um `QDialog::exec()` real e modal; um `QTimer` fazendo polling de
+      `qApp->activeModalWidget()` aceita automaticamente enquanto a chamada está em andamento.
+      Cenário: `schema_b` com `table_g` (filho direto) e um relacionamento `table_g_copies_table_a`
+      referenciando `table_g` (não `schema_b` diretamente) — a forma mínima do problema relatado.
+      Verificado que falha exatamente como o relato original (revertendo só a linha do fix,
+      `git stash`, mantendo o fix do bug 1); restaurado, suíte completa **28/28**. Build completo
+      do `pgmodeler` limpo. Commitado (`ee3c6374e`).
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
