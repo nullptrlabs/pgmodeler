@@ -91,6 +91,9 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void selectAllObjectsOfTypeSpansMultipleScenes();
 		void cancelingRelationshipCreationClearsLogicalSelectionToo();
 		void switchingSceneMidRelationshipLineToolCancelsIt();
+		void selectingACutoffClearsObjectSelectionAndOtherCutoffs();
+		void selectingARegularObjectClearsAnySelectedCutoff();
+		void cutoffMarkerCustomPositionSurvivesSaveAndReload();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -2916,6 +2919,267 @@ void ModelWidgetTest::switchingSceneMidRelationshipLineToolCancelsIt()
 	{
 		QFAIL(e.getExceptionsText().toStdString().c_str());
 	}
+}
+
+/*! \brief User-requested invariant: a cutoff marker's selection must be exclusive -- selecting one
+must clear any regular object selection, and only one cutoff may be selected at a time (no mixed
+selection of tables/relationships/cutoffs). Covers CutoffItem::itemChange()'s side of the rule. */
+void ModelWidgetTest::selectingACutoffClearsObjectSelectionAndOtherCutoffs()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+		db_model->createSystemObjects(true);
+
+		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(public_sch != nullptr);
+
+		Table *table_a = new Table;
+		table_a->setName("table_a");
+		table_a->setSchema(public_sch);
+
+		Column *col_a = new Column;
+		col_a->setName("id");
+		col_a->setType(PgSqlType("serial"));
+		table_a->addColumn(col_a);
+
+		Constraint *pk = new Constraint;
+		pk->setName("table_a_pk");
+		pk->setConstraintType(ConstraintType::PrimaryKey);
+		pk->addColumn(table_a->getColumn("id"), Constraint::SourceCols);
+		table_a->addConstraint(pk);
+
+		db_model->addTable(table_a);
+
+		//Fill up the first scene so table_b lands in a freshly-opened second one
+		for(unsigned i = 0; i < db_model->getSegThreshold(); i++)
+		{
+			Table *filler = new Table;
+			filler->setName(QString("filler_%1").arg(i));
+			filler->setSchema(public_sch);
+			db_model->addTable(filler);
+		}
+
+		Table *table_b = new Table;
+		table_b->setName("table_b");
+		table_b->setSchema(public_sch);
+		db_model->addTable(table_b);
+
+		QVERIFY(model_wgt.getSceneForObject(table_a) != model_wgt.getSceneForObject(table_b));
+
+		Relationship *rel = new Relationship(BaseRelationship::Relationship1n, table_a, table_b);
+		db_model->addRelationship(rel);
+
+		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject()),
+									 *table_b_view = dynamic_cast<BaseTableView *>(table_b->getOverlyingObject());
+
+		QVERIFY(table_a_view->getCutoffItem() != nullptr);
+		QVERIFY(table_b_view->getCutoffItem() != nullptr);
+
+		Table *filler_0 = dynamic_cast<Table *>(db_model->getObject("filler_0", ObjectType::Table));
+		BaseObjectView *filler_view = dynamic_cast<BaseObjectView *>(filler_0->getOverlyingObject());
+		QVERIFY(filler_view != nullptr);
+
+		//Selects a regular object first, in the same scene table_a's cutoff lives in
+		filler_view->setSelected(true);
+		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
+		QCOMPARE(model_wgt.getSelectedObjects().size(), size_t(1));
+
+		//Selects table_a's cutoff marker
+		table_a_view->getCutoffItem()->setSelected(true);
+		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
+
+		QVERIFY2(!filler_view->isSelected(), "selecting a cutoff must clear the regular object selection");
+		QVERIFY2(model_wgt.getSelectedObjects().empty(),
+						 "selecting a cutoff must clear ModelWidget::selected_objects too");
+		QVERIFY2(table_a_view->getCutoffItem()->isSelected(), "the clicked cutoff must remain selected");
+
+		//Selects table_b's cutoff marker (a different scene) -- only one cutoff may stay selected
+		table_b_view->getCutoffItem()->setSelected(true);
+
+		QVERIFY2(!table_a_view->getCutoffItem()->isSelected(), "selecting a second cutoff must deselect the first one");
+		QVERIFY2(table_b_view->getCutoffItem()->isSelected(), "the newly selected cutoff must remain selected");
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief The opposite direction of the same invariant: selecting a regular object must clear any
+cutoff marker currently selected, even one sitting in a different scene (selection has spanned every
+scene since 4.4, so the cutoff can outlive the scene that held it losing focus). Covers
+ModelWidget::configureObjectSelection()'s side of the rule. */
+void ModelWidgetTest::selectingARegularObjectClearsAnySelectedCutoff()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+		db_model->createSystemObjects(true);
+
+		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(public_sch != nullptr);
+
+		Table *table_a = new Table;
+		table_a->setName("table_a");
+		table_a->setSchema(public_sch);
+
+		Column *col_a = new Column;
+		col_a->setName("id");
+		col_a->setType(PgSqlType("serial"));
+		table_a->addColumn(col_a);
+
+		Constraint *pk = new Constraint;
+		pk->setName("table_a_pk");
+		pk->setConstraintType(ConstraintType::PrimaryKey);
+		pk->addColumn(table_a->getColumn("id"), Constraint::SourceCols);
+		table_a->addConstraint(pk);
+
+		db_model->addTable(table_a);
+
+		for(unsigned i = 0; i < db_model->getSegThreshold(); i++)
+		{
+			Table *filler = new Table;
+			filler->setName(QString("filler_%1").arg(i));
+			filler->setSchema(public_sch);
+			db_model->addTable(filler);
+		}
+
+		Table *table_b = new Table;
+		table_b->setName("table_b");
+		table_b->setSchema(public_sch);
+		db_model->addTable(table_b);
+
+		QVERIFY(model_wgt.getSceneForObject(table_a) != model_wgt.getSceneForObject(table_b));
+
+		Relationship *rel = new Relationship(BaseRelationship::Relationship1n, table_a, table_b);
+		db_model->addRelationship(rel);
+
+		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject()),
+									 *table_b_view = dynamic_cast<BaseTableView *>(table_b->getOverlyingObject());
+
+		QVERIFY(table_a_view->getCutoffItem() != nullptr);
+
+		table_a_view->getCutoffItem()->setSelected(true);
+		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
+		QVERIFY(table_a_view->getCutoffItem()->isSelected());
+
+		//table_b lives in a different scene than table_a's cutoff
+		table_b_view->setSelected(true);
+		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
+
+		QVERIFY2(!table_a_view->getCutoffItem()->isSelected(),
+						 "selecting a regular object in another scene must still clear a selected cutoff marker");
+		QCOMPARE(model_wgt.getSelectedObjects().size(), size_t(1));
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief User-reported bug: dragging a cutoff marker to a custom position and saving the model
+doesn't restore that position on reload. */
+void ModelWidgetTest::cutoffMarkerCustomPositionSurvivesSaveAndReload()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_cutoff_pos.dbm");
+
+	try
+	{
+		QPointF saved_pos;
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+			db_model->setSavedSegmentationMode(DatabaseModel::SegByThreshold);
+			db_model->createSystemObjects(true);
+
+			Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+			QVERIFY(public_sch != nullptr);
+
+			Table *table_a = new Table;
+			table_a->setName("table_a");
+			table_a->setSchema(public_sch);
+
+			Column *col_a = new Column;
+			col_a->setName("id");
+			col_a->setType(PgSqlType("serial"));
+			table_a->addColumn(col_a);
+
+			Constraint *pk = new Constraint;
+			pk->setName("table_a_pk");
+			pk->setConstraintType(ConstraintType::PrimaryKey);
+			pk->addColumn(table_a->getColumn("id"), Constraint::SourceCols);
+			table_a->addConstraint(pk);
+
+			db_model->addTable(table_a);
+
+			//Fill up the first scene so table_b lands in a freshly-opened second one
+			for(unsigned i = 0; i < db_model->getSegThreshold(); i++)
+			{
+				Table *filler = new Table;
+				filler->setName(QString("filler_%1").arg(i));
+				filler->setSchema(public_sch);
+				db_model->addTable(filler);
+			}
+
+			Table *table_b = new Table;
+			table_b->setName("table_b");
+			table_b->setSchema(public_sch);
+			db_model->addTable(table_b);
+
+			Relationship *rel = new Relationship(BaseRelationship::Relationship1n, table_a, table_b);
+			db_model->addRelationship(rel);
+
+			BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
+			QVERIFY(table_a_view->getCutoffItem() != nullptr);
+
+			//Drags the cutoff marker to a custom position, same as a real drag would via itemChange(ItemPositionHasChanged)
+			QPointF custom_pos = table_a_view->getCutoffItem()->pos() + QPointF(40, -25);
+			table_a_view->getCutoffItem()->setPos(custom_pos);
+			saved_pos = table_a_view->getCutoffItem()->pos();
+
+			model_wgt.saveModel(tmp_file);
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_file);
+
+			Table *table_a = dynamic_cast<Table *>(db_model->getObject("table_a", ObjectType::Table));
+			QVERIFY(table_a != nullptr);
+
+			BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
+			QVERIFY2(table_a_view->getCutoffItem() != nullptr, "table_a's cutoff marker must survive reload");
+
+			QPointF reloaded_pos = table_a_view->getCutoffItem()->pos();
+			bool close_enough = std::abs(reloaded_pos.x() - saved_pos.x()) < 1.0 &&
+													 std::abs(reloaded_pos.y() - saved_pos.y()) < 1.0;
+
+			QVERIFY2(close_enough,
+							 qPrintable(QString("saved (%1, %2) vs reloaded (%3, %4)")
+													.arg(saved_pos.x()).arg(saved_pos.y())
+													.arg(reloaded_pos.x()).arg(reloaded_pos.y())));
+		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
 }
 
 QTEST_MAIN(ModelWidgetTest)

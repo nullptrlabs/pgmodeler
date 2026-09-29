@@ -63,6 +63,16 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 		//! \brief Shown/hidden as the item is (de)selected, mirroring BaseObjectView::obj_selection
 		RoundedRectItem *obj_selection;
 
+		/*! \brief True while updatePosition() is repositioning this item on its own (construction,
+		 * or the table moving/resizing) -- itemChange(ItemPositionHasChanged) checks this to tell
+		 * that kind of move apart from an actual user drag, so it only ever persists a new
+		 * cutoff_pos in response to the latter. Without this, restoring a saved position (itself
+		 * done via setPos(), which re-enters itemChange() like any other move) could get clamped
+		 * against transient table geometry -- not yet settled this early in a model load -- and
+		 * that transient, over-clamped position would silently overwrite the correct one that was
+		 * actually saved */
+		bool restoring_position = false;
+
 		//! \brief Refreshes the label text/size to reflect the current relationship count
 		void updateLabel();
 
@@ -120,6 +130,16 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 		 * updated afterward -- without this override, hit-testing (selection, drag) only works
 		 * over the sliver the line occupied when it was first added to the group */
 		QRectF boundingRect() const override;
+
+		/*! \brief Public entry point to force a reposition against the table's current geometry.
+		 * Needed for a case updatePosition()'s own signal connections don't cover: right after a
+		 * model load, DatabaseModel::setObjectsModified() gives every table its real, final geometry
+		 * but deliberately suppresses the dimension-changed/relationship-update signals while doing
+		 * so (see BaseTable::isGeomChangesIgnored()) -- so a marker attached while that table's box
+		 * was still its pre-configuration 0x0 default (a real possibility, since updates are globally
+		 * disabled for the whole duration of a bulk load) never otherwise finds out its anchor point
+		 * changed. ModelWidget::loadModel() calls this once, explicitly, right after loading */
+		void refreshPosition();
 
 	private slots:
 		//! \brief Repositions the marker relative to table's current title geometry

@@ -1095,6 +1095,67 @@
   - **Pendência aberta, fora de escopo por enquanto**: cor uniforme em todos os temas (exceto
     inksaver) — ajuste fino por tema (contraste no dark/classicdark, por exemplo) fica pra depois,
     só se o usuário achar necessário depois de ver renderizado.
+  - **Commitado em `4a6a5a4f7`** (junto com o ajuste de cor pedido em seguida e o destaque em
+    negrito no rótulo do cut-off, mesmo commit).
+- **Dois ajustes de complemento pedidos pelo usuário sobre `CutoffItem` (2026-09-29)**:
+  1. **Seleção do marcador cut-off agora é exclusiva**: selecioná-lo limpa qualquer seleção de
+     objeto corrente, e só um cut-off pode ficar selecionado por vez — evita seleção mista entre
+     tabelas/relacionamentos/cut-offs.
+     - `CutoffItem::itemChange()` ([cutoffitem.cpp:262](libs/libcanvas/src/cutoffitem.cpp#L262)):
+       quando o próprio item fica selecionado, deseleciona todo o resto da cena (outro cut-off ou
+       objeto normal) e reemite `s_selectionResetTriggered()` da cena — reaproveita o mecanismo de
+       reset cross-scene que a 4.4 já criou para clique simples, necessário aqui porque Ctrl+click e
+       seleção por retângulo não passam por aquele caminho.
+     - `ModelWidget::configureObjectSelection()`
+       ([modelwidget.cpp:1844](libs/libgui/src/widgets/modelwidget.cpp#L1844)): direção oposta —
+       toda vez que a seleção agregada tiver algum objeto normal, varre todas as cenas e deseleciona
+       qualquer `CutoffItem` que ainda esteja selecionado (cobre o caso de o cut-off estar numa cena
+       diferente da que acabou de receber a seleção, já que seleção é cross-scene desde a 4.4).
+     - **Testes**: `selectingACutoffClearsObjectSelectionAndOtherCutoffs` e
+       `selectingARegularObjectClearsAnySelectedCutoff`
+       ([modelwidgettest.cpp](tests/src/modelwidgettest/modelwidgettest.cpp)). Verificado que cada
+       um falha sem o respectivo fix e passa com ele restaurado.
+  2. **Bug real reportado pelo usuário: posição customizada de um cut-off (arrastado manualmente)
+     não sobrevivia a salvar+recarregar o modelo.** Causa raiz, achada por instrumentação temporária
+     (removida ao final): `CutoffItem` é construído (via `BaseTableView::addExternalRelationship()`)
+     durante o carregamento em massa do XML, **enquanto `BaseGraphicObject::setUpdatesEnabled(false)`
+     está ativo** ([databasemodel.cpp:3503-3787](libs/libcore/src/databasemodel.cpp#L3503)) — nesse
+     intervalo, `TableView::configureObject()` sempre retorna cedo sem configurar nada
+     ([tableview.cpp:35](libs/libcanvas/src/tableview.cpp#L35)), então a tabela ainda está com
+     `sceneBoundingRect()` `0x0` no exato momento em que `CutoffItem::updatePosition()` roda pela
+     primeira vez. Dois problemas em cadeia:
+     - (a) `updatePosition()` chama `setPos()`, que passa pelo mesmo `itemChange()` de um arraste
+       real — clampado contra a geometria (ainda 0x0) da tabela, o resultado **sobrescreve
+       `cutoff_pos`** com um valor errado, corrompendo permanentemente a posição salva mesmo que
+       ela estivesse correta no XML.
+     - (b) Depois que o carregamento termina, `DatabaseModel::setObjectsModified()`
+       ([databasemodel.cpp:8938-8970](libs/libcore/src/databasemodel.cpp#L8938)) dá a cada tabela seu
+       tamanho real — mas propositalmente suprime `s_objectDimensionChanged`/`s_relUpdateRequest`
+       durante essa passada (via `BaseTable::setGeomChangesIgnored(true)`), exatamente os sinais que
+       `CutoffItem` escuta para se reposicionar — então mesmo depois da geometria da tabela ficar
+       correta, o marcador nunca fica sabendo.
+     - **Fix (a)**: `CutoffItem` ganhou `restoring_position` (bool, privado) — verdadeiro só durante
+       a chamada de `setPos()` dentro de `updatePosition()`; `itemChange(ItemPositionHasChanged)` só
+       persiste um novo `cutoff_pos` quando `!restoring_position`, ou seja, só em resposta a um
+       arraste de verdade do usuário, nunca a um reposicionamento que o próprio `CutoffItem` fez
+       sozinho.
+     - **Fix (b)**: `CutoffItem` ganhou um método público, `refreshPosition()` (wrapper trivial sobre
+       o `updatePosition()` privado); `ModelWidget::loadModel()`
+       ([modelwidget.cpp:2400](libs/libgui/src/widgets/modelwidget.cpp#L2400)) chama esse método
+       explicitamente pra cada tabela/view/foreign table com cut-off, logo depois de
+       `db_model->loadModel()` retornar (quando a geometria de todas as tabelas já está
+       definitivamente assentada). Achado colateral durante a implementação: o primeiro rascunho
+       usou `db_model->getObjects(type)`, que por padrão filtra por `schema==nullptr` (só objetos
+       **sem** schema) — silenciosamente não encontrava tabela nenhuma; trocado por
+       `*db_model->getObjectList(type)` (todos os objetos do tipo, sem filtro).
+     - **Teste**: `cutoffMarkerCustomPositionSurvivesSaveAndReload`
+       ([modelwidgettest.cpp](tests/src/modelwidgettest/modelwidgettest.cpp)) — arrasta um cut-off
+       pra uma posição customizada, salva, recarrega, compara a posição final (tolerância de 1
+       unidade de cena, por causa do arredondamento do `%1` do Qt ao serializar `double`). Verificado
+       em três estados: sem nenhum dos dois fixes (posição final MUITO diferente da salva, e o
+       próprio `cutoff_pos` do modelo corrompido), só com o fix (a) (posição do modelo correta, mas
+       exibição ainda errada) e com os dois fixes juntos (tudo correto).
+  - Build (`core`+`canvas`+`gui`+`modelwidgettest`) limpo. Suíte completa **47/47** sem regressão.
   - **Aguardando decisão do usuário sobre commit.**
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"

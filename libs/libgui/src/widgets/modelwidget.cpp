@@ -67,6 +67,7 @@
 #include "dbobjects/transformwidget.h"
 #include "dbobjects/procedurewidget.h"
 #include "coreutilsns.h"
+#include "cutoffitem.h"
 #include "graphicalview.h"
 #include "relationshipview.h"
 #include "schemaview.h"
@@ -1840,6 +1841,26 @@ void ModelWidget::configureObjectSelection()
 		itr++;
 	}
 
+	/* Cutoff marker selection is exclusive with regular object selection (see CutoffItem::
+	 * itemChange(), which handles the opposite direction). A cutoff can only ever be selected in
+	 * whichever scene was active at the time of the click, and it can outlive that scene losing
+	 * focus (selection now spans every scene, unchanged by setActiveScene()) -- so a table/
+	 * relationship/etc. picked up here, in any scene, still needs this sweep across every scene to
+	 * catch a cutoff left selected elsewhere */
+	if(!selected_objects.empty())
+	{
+		for(auto &scn : scenes)
+		{
+			for(auto &sel_item : scn->selectedItems())
+			{
+				CutoffItem *cutoff = dynamic_cast<CutoffItem *>(sel_item);
+
+				if(cutoff)
+					cutoff->setSelected(false);
+			}
+		}
+	}
+
 	/* Case the new_obj_type is a value greater the ObjectType::ObjBaseTable indicates that the user
 	(un)selected a object using some "Relationship" action */
 	if(new_obj_type > ObjectType::BaseTable)
@@ -2375,6 +2396,27 @@ void ModelWidget::loadModel(const QString &filename)
 		blink_new_objs = false;
 		db_model->loadModel(filename);
 		blink_new_objs = curr_blink_objs;
+
+		/* Any cut-off marker attached while its table's box was still stuck at its pre-configuration
+		 * 0x0 default (updates are globally disabled for the whole duration of a bulk load, so this
+		 * is a real possibility, not just a theoretical one) never gets a chance to reposition itself
+		 * against the table's real geometry -- DatabaseModel::loadModel()'s final setObjectsModified()
+		 * pass does give every table its final size, but deliberately suppresses the very signals
+		 * CutoffItem listens for while doing so (see BaseTable::isGeomChangesIgnored()). Refresh them
+		 * all explicitly, now that every table's box is settled.
+		 * Note: getObjectList() (every object of the type, unfiltered), not getObjects() (which
+		 * defaults to filtering by schema==nullptr, i.e. only schema-less objects -- never what's
+		 * wanted here) */
+		for(auto &type : { ObjectType::Table, ObjectType::View, ObjectType::ForeignTable })
+		{
+			for(auto &obj : *db_model->getObjectList(type))
+			{
+				BaseTableView *tab_view = dynamic_cast<BaseTableView *>(dynamic_cast<BaseGraphicObject *>(obj)->getOverlyingObject());
+
+				if(tab_view && tab_view->getCutoffItem())
+					tab_view->getCutoffItem()->refreshPosition();
+			}
+		}
 
 		/* In threshold-segmentation mode, every loaded Table/View/ForeignTable already routed itself
 		 * via its own persisted scene index (see handleObjectAddition()), without touching

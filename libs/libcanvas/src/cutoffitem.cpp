@@ -21,6 +21,7 @@
 
 #include "cutoffitem.h"
 #include "basetableview.h"
+#include "objectsscene.h"
 #include <cmath>
 
 CutoffItem::CutoffItem(BaseTableView *table)
@@ -264,6 +265,28 @@ QVariant CutoffItem::itemChange(GraphicsItemChange change, const QVariant &value
 	{
 		obj_selection->setVisible(value.toBool());
 		configureLineSelection(value.toBool());
+
+		if(value.toBool())
+		{
+			/* A cutoff marker's selection is exclusive: selecting one must clear every other
+			 * selected item -- another cutoff or a regular object -- in this scene, and (reusing the
+			 * same cross-scene reset mechanism a plain click already triggers) every other scene too.
+			 * A plain click already gets this for free from Qt's own click handling, but Ctrl+click
+			 * and rubber-band selection don't reset anything by design, so without this they could
+			 * still produce a mixed selection, which is exactly what must never happen */
+			ObjectsScene *cutoff_scene = dynamic_cast<ObjectsScene *>(this->scene());
+
+			if(cutoff_scene)
+			{
+				for(auto &item : cutoff_scene->selectedItems())
+				{
+					if(item != this)
+						item->setSelected(false);
+				}
+
+				emit cutoff_scene->s_selectionResetTriggered();
+			}
+		}
 	}
 	else if(change == ItemPositionChange)
 	{
@@ -279,8 +302,15 @@ QVariant CutoffItem::itemChange(GraphicsItemChange change, const QVariant &value
 		updateLabelPosition();
 		updateLine();
 
-		BaseTable *base_tab = dynamic_cast<BaseTable *>(table->getUnderlyingObject());
-		base_tab->setCutoffPosition(this->pos() - table->getCutoffAnchorPoint());
+		/* Only an actual user drag should persist a new cutoff_pos -- updatePosition()'s own
+		 * setPos() calls (construction, or the table moving/resizing) are restoring/following, not
+		 * choosing a new position, and must not feed back into the model (see restoring_position's
+		 * comment in the header for why that matters) */
+		if(!restoring_position)
+		{
+			BaseTable *base_tab = dynamic_cast<BaseTable *>(table->getUnderlyingObject());
+			base_tab->setCutoffPosition(this->pos() - table->getCutoffAnchorPoint());
+		}
 	}
 
 	return QGraphicsItemGroup::itemChange(change, value);
@@ -294,13 +324,20 @@ void CutoffItem::updatePosition()
 	if(std::isnan(offset.x()))
 		offset = QPointF(0, 0);
 
+	restoring_position = true;
 	this->setPos(table->getCutoffAnchorPoint() + offset);
+	restoring_position = false;
 
 	/* Covers a pure resize, where the table's rect changes but this item's pos() doesn't --
 	 * itemChange() above only runs when setPos() actually moves the item, so a resize needs both
 	 * calls repeated here explicitly */
 	updateLabelPosition();
 	updateLine();
+}
+
+void CutoffItem::refreshPosition()
+{
+	updatePosition();
 }
 
 void CutoffItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
