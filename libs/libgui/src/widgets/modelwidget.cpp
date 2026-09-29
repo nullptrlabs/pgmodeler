@@ -2411,10 +2411,11 @@ void ModelWidget::loadModel(const QString &filename)
 		{
 			for(auto &obj : *db_model->getObjectList(type))
 			{
-				BaseTableView *tab_view = dynamic_cast<BaseTableView *>(dynamic_cast<BaseGraphicObject *>(obj)->getOverlyingObject());
+				BaseTableView *tab_view =
+						dynamic_cast<BaseTableView *>(dynamic_cast<BaseGraphicObject *>(obj)->getOverlyingObject());
 
 				if(tab_view && tab_view->getCutoffItem())
-					tab_view->getCutoffItem()->refreshPosition();
+					tab_view->getCutoffItem()->updatePosition();
 			}
 		}
 

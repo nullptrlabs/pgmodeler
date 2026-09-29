@@ -335,11 +335,6 @@ void CutoffItem::updatePosition()
 	updateLine();
 }
 
-void CutoffItem::refreshPosition()
-{
-	updatePosition();
-}
-
 void CutoffItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
 	/* Same workaround as RelationshipView::paint(): QGraphicsItemGroup::paint() draws an
