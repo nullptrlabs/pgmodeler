@@ -5619,6 +5619,20 @@ void ModelWidget::configurePopupMenu(const std::vector<BaseObject *> &objects)
 	else
 	{
 		configureQuickMenu(nullptr);
+
+		/* Mirrors the pre-selected-tables shortcut addNewObject() already accepts
+		 * (modelwidget.cpp:1488-1494): exactly two tables selected together, from any scene(s),
+		 * is also a valid trigger for "New > Relationship" -- same as selecting a single table
+		 * already shows the relationship types in its own "New" menu */
+		if(objects.size() == 2 &&
+				objects[0]->getObjectType() == ObjectType::Table &&
+				objects[1]->getObjectType() == ObjectType::Table &&
+				!objects[0]->isProtected() && !objects[1]->isProtected())
+		{
+			new_object_menu.addAction(actions_new_objects[ObjectType::Relationship]);
+			popup_menu.insertAction(action_quick_actions, action_new_object);
+		}
+
 		popup_menu.addSeparator();
 		popup_menu.addAction(action_source_code);
 	}

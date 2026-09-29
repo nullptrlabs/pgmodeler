@@ -1035,8 +1035,32 @@
     ([modelwidgettest.cpp](tests/src/modelwidgettest/modelwidgettest.cpp)). Verificado que falha
     sem o fix (`isRelationshipLineVisible()` continua `true` depois da troca) e passa com ele
     restaurado. Suíte completa **44/44**.
-  - Build (`core`+`canvas`+`gui`+`modelwidgettest`) limpo. **Aguardando decisão do usuário sobre
-    commit.**
+  - Build (`core`+`canvas`+`gui`+`modelwidgettest`) limpo. **Commitado em `bec589101`.**
+- **Complemento reportado pelo usuário (2026-09-29): "New > Relationship" não aparecia no menu de
+  contexto ao selecionar duas tabelas pelo Object Search Widget (nem pelo canvas).**
+  `ObjectSearchWidget::selectObject()` chama `model_wgt->configurePopupMenu(selected_objs)`
+  ([objectsearchwidget.cpp:372](libs/libgui/src/widgets/objectsearchwidget.cpp#L372)) — a mesma
+  `ModelWidget::configurePopupMenu(const std::vector<BaseObject *> &)`
+  ([modelwidget.cpp:5588](libs/libgui/src/widgets/modelwidget.cpp#L5588)) usada pelo menu de
+  contexto do canvas, então o bug afetava os dois caminhos igualmente.
+  - **Causa raiz**: o ramo `objects.size() > 1` só chamava `configureQuickMenu(nullptr)` +
+    adicionava "Source code" — nunca montava `new_object_menu` nem inseria `action_new_object` no
+    `popup_menu`, então "New" nunca aparecia com mais de um objeto selecionado, independente do
+    tipo. Só os ramos de `objects.size() <= 1` (`configureBasicActions()`/`configureDatabaseActions()`)
+    inseriam essa ação.
+  - **Fix**: `configurePopupMenu()`
+    ([modelwidget.cpp:5619-5634](libs/libgui/src/widgets/modelwidget.cpp#L5619)) ganhou uma
+    checagem no ramo `else`, espelhando a mesma condição que `addNewObject()` já aceita pra
+    pré-seleção de relacionamento (exatamente 2 `ObjectType::Table`, nenhuma protegida) — nesse
+    caso monta `new_object_menu` só com a ação "Relationship" e insere `action_new_object` no
+    `popup_menu`, mesma posição usada no caso de objeto único (antes de "Quick").
+  - **Sem teste automatizado dedicado**: `popup_menu`/`new_object_menu`/`action_new_object` são
+    todos privados sem getter, e não há precedente nos testes de mexer nessa máquina de `QMenu`
+    diretamente (o comentário em
+    `cascadeDeleteThroughRealActionReachesTransitivelyReferencedObjects()` já documenta essa
+    escolha). Mesma linha da decisão tomada pra 4.5 — verificado manualmente pelo usuário,
+    funcionou como esperado.
+  - Build (`gui`) limpo, suíte completa **44/44** sem regressão. **Commitado.**
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
