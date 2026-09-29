@@ -90,6 +90,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void clickOnEmptySceneWithNothingLocallySelectedStillClearsOtherScenes();
 		void selectAllObjectsOfTypeSpansMultipleScenes();
 		void cancelingRelationshipCreationClearsLogicalSelectionToo();
+		void switchingSceneMidRelationshipLineToolCancelsIt();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -2846,6 +2847,70 @@ void ModelWidgetTest::cancelingRelationshipCreationClearsLogicalSelectionToo()
 		QVERIFY2(!view_b->isSelected(), "table_b must end up visually deselected after the cancel");
 		QVERIFY2(model_wgt.getSelectedObjects().empty(),
 						 "canceling relationship creation must clear the logical selection too, not just the visual one");
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Subtask 4.3 (deferred, then judged unnecessary once 4.4 shipped): pre-selecting both
+tables across scenes -- Ctrl+click, switching scenes freely in between -- and triggering "New >
+Relationship" already works with no scene awareness at all, since addNewObject()/showObjectForm()
+only ever look at selected_objects[0]/[1]. The one gesture that still can't survive a scene switch
+is the interactive line tool (click table A, drag/click table B): rel_line lives in the old
+ObjectsScene and only that scene gets mouse events while attached to the viewport, so switching
+scenes mid-gesture must cancel it instead of leaving it stuck pointing at an unreachable table. */
+void ModelWidgetTest::switchingSceneMidRelationshipLineToolCancelsIt()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		Schema *schema_b = new Schema;
+		schema_b->setName("schema_b");
+		db_model->addSchema(schema_b);
+
+		Table *table_a = new Table;
+		table_a->setName("table_a");
+		table_a->setSchema(schema_pub);
+		db_model->addTable(table_a);
+
+		BaseObjectView *view_a = dynamic_cast<BaseObjectView *>(table_a->getOverlyingObject());
+		QVERIFY(view_a != nullptr);
+
+		//Only table_a is selected when the user triggers "New > Relationship > 1:N"
+		view_a->setSelected(true);
+		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
+		QCOMPARE(model_wgt.getSelectedObjects().size(), size_t(1));
+
+		//Mirrors triggering the "1:N" action from the "New > Relationship" submenu (addNewObject())
+		QAction rel_action;
+		rel_action.setData(static_cast<unsigned>(ObjectType::Relationship) +
+												static_cast<unsigned>(BaseRelationship::Relationship1n));
+		QObject::connect(&rel_action, SIGNAL(triggered(bool)), &model_wgt, SLOT(addNewObject()));
+		rel_action.trigger();
+
+		ObjectsScene *scene_pub = model_wgt.getSceneForObject(table_a);
+		QVERIFY(scene_pub != nullptr);
+		QVERIFY2(scene_pub->isRelationshipLineVisible(),
+						 "the preview line must be showing after picking table_a as the source");
+
+		//User switches scenes mid-gesture, before clicking a second table
+		ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
+		int idx_b = model_wgt.getObjectsScenes().indexOf(scene_b);
+		model_wgt.setActiveScene(idx_b);
+
+		QVERIFY2(!scene_pub->isRelationshipLineVisible(),
+						 "switching scenes mid-gesture must cancel the pending relationship-line tool");
+		QCOMPARE(model_wgt.getViewport()->cursor().shape(), Qt::ArrowCursor);
 	}
 	catch(Exception &e)
 	{

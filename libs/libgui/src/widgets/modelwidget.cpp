@@ -1192,6 +1192,16 @@ void ModelWidget::setActiveScene(int idx)
 	if(idx < 0 || idx >= scenes.size() || idx == active_scene_idx)
 		return;
 
+	/* The interactive relationship-line tool (click table A, drag/click table B) is scene-local --
+	 * rel_line lives in the old ObjectsScene and only that scene ever receives mouse events while
+	 * attached to the viewport, so it can't follow the user to another scene. Cross-scene
+	 * relationships are still possible (select both tables first, Ctrl+click across scenes, then
+	 * "New > Relationship"), just not through this click-and-drag gesture -- so switching scenes
+	 * mid-gesture cancels it outright instead of leaving it stuck pointing at a table that's no
+	 * longer reachable */
+	if(new_obj_type > ObjectType::BaseTable)
+		cancelObjectAddition();
+
 	/* Selection now spans every scene at once -- switching the active scene must not touch it.
 	 * Only an explicit reset (empty-area click, or a plain click replacing a selection) clears
 	 * anything, and that already reaches every scene on its own (s_selectionResetTriggered) */
