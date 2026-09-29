@@ -2365,7 +2365,8 @@ void ModelWidget::convertRelationship1N()
 	}
 }
 
-void ModelWidget::loadModel(const QString &filename)
+void ModelWidget::loadModel(const QString &filename, bool override_seg_mode,
+														 DatabaseModel::SegmentationMode ovr_seg_mode, unsigned ovr_seg_threshold)
 {
 	TaskProgressWidget task_prog_wgt(this);
 	bool curr_blink_objs = blink_new_objs;
@@ -2383,7 +2384,7 @@ void ModelWidget::loadModel(const QString &filename)
 
 		// Disable objects blinking during model loading
 		blink_new_objs = false;
-		db_model->loadModel(filename);
+		db_model->loadModel(filename, override_seg_mode, ovr_seg_mode, ovr_seg_threshold);
 		blink_new_objs = curr_blink_objs;
 
 		/* Any cut-off marker attached while its table's box was still stuck at its pre-configuration
