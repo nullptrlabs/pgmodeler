@@ -37,6 +37,11 @@ void TextPolygonItem::setText(const QString &text)
 	text_item->setPlainText(text);
 }
 
+void TextPolygonItem::setHtml(const QString &html)
+{
+	text_item->setHtml(html);
+}
+
 void TextPolygonItem::setTextColor(const QColor &color)
 {
 	text_item->setDefaultTextColor(color);

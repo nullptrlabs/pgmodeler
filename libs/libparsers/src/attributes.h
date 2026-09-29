@@ -178,6 +178,7 @@ extern __libparsers const QString
 	CustomIdxs,
 	CustomScale,
 	Cutoff,
+	CutoffMarker,
 	CutoffPos,
 	Cycle,
 	Dark,

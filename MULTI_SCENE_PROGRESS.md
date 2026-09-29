@@ -1061,6 +1061,41 @@
     escolha). Mesma linha da decisão tomada pra 4.5 — verificado manualmente pelo usuário,
     funcionou como esperado.
   - Build (`gui`) limpo, suíte completa **44/44** sem regressão. **Commitado.**
+- **Fase 4, subtarefa 4.6 implementada (2026-09-29): `CutoffItem` ganha identidade visual própria
+  (`Attributes::CutoffMarker`), em vez de reaproveitar `Attributes::PositionInfo`.** Cor padrão
+  fechada com o usuário: borda verde (`#4caf50`), fundo verde claro (`#c8e6c9`), texto preto
+  (`#000000`) — ajustada uma vez após feedback visual (primeira tentativa, borda `#90ee90`/fundo
+  `#f0fff0`, ficou clara/esmaecida demais; usuário pediu borda mais escura, fundo um pouco mais
+  escuro e mais esverdeado) — igual em todos os temas, exceto `inksaver` (mantém sua convenção
+  grayscale própria: preenchimento branco, borda/texto `#303030`, igual a qualquer outro objeto do
+  tema).
+  - Nova chave `Attributes::CutoffMarker` = `"cutoff-marker"`
+    ([attributes.h:181](libs/libparsers/src/attributes.h#L181)).
+  - `element_cmb` ganhou duas entradas no **fim** da lista (índices 65/66, não inseridas no meio —
+    evita ter que renumerar os índices literais já hardcoded em `obj_conf_ids`), `conf_ids` e
+    `obj_conf_ids` atualizados de acordo
+    ([appearanceconfigwidget.cpp:137-144](libs/libgui/src/settings/appearanceconfigwidget.cpp#L137)).
+  - `.sch`/`.dtd` (`assets/conf/schemas/appearance.sch`, `assets/conf/dtd/appearance.dtd`) e os 5
+    arquivos de configuração de aparência (`assets/conf/appearance.conf` +
+    `assets/conf/themes/{light,dark,classicdark,inksaver}/appearance.conf`) ganharam as entradas
+    `font`/`object` pra `cutoff-marker`, logo depois de `pos-info`.
+  - `CutoffItem` ([cutoffitem.cpp](libs/libcanvas/src/cutoffitem.cpp)) trocou as 6 ocorrências de
+    `Attributes::PositionInfo` por `Attributes::CutoffMarker` — `obj_selection` continua em
+    `Attributes::ObjSelection`, sem mudança.
+  - **Verificação**: `xmllint --dtdvalid` confirma que os 5 `.conf` editados validam contra o `.dtd`
+    atualizado; harness descartável com `SchemaParser` direto confirma que `appearance.sch`
+    renderiza as duas linhas novas sem erro de sintaxe (pasta de schemas de configurações não é
+    coberta pelo `schemafilessyntaxtest`). Rastreada por leitura de código a cadeia completa que
+    garante que a cor já está populada na abertura do app, sem precisar abrir Configurações:
+    `MainWindow::loadConfigurations()` → `ConfigurationWidget::loadConfiguration()` →
+    `AppearanceConfigWidget::loadConfiguration()` → `applyConfiguration()` (chamado no fim de
+    `loadConfiguration()`) → `applyObjectsStyle()`.
+  - Build (`parsers`+`canvas`+`gui`) limpo. Suíte completa `modelwidgettest` **44/44** sem
+    regressão, `baseobjecttest` **6/6**, `schemafilessyntaxtest` **3/3**.
+  - **Pendência aberta, fora de escopo por enquanto**: cor uniforme em todos os temas (exceto
+    inksaver) — ajuste fino por tema (contraste no dark/classicdark, por exemplo) fica pra depois,
+    só se o usuário achar necessário depois de ver renderizado.
+  - **Aguardando decisão do usuário sobre commit.**
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
