@@ -6,6 +6,14 @@
 
 ## Estado atual
 
+> **Ponteiro mais recente (2026-09-29, HEAD `dcf36ccf0`)** — o resto desta seção é um log
+> cronológico que vai ficando desatualizado à medida que sessões avançam; para saber o estado real
+> sem reler tudo, confie neste bloco e no plano (`MULTI_SCENE_PLAN.md`), não nas primeiras linhas
+> do log abaixo. Fases 0-3 e Fase 4 subtarefas 4.1-4.7 — todas concluídas, testadas e commitadas.
+> Restam em aberto só as subtarefas 4.8-4.14 (todas **[requerem decisão do usuário]**, nenhuma
+> codada ainda) e a Fase 5 (paridade `pgmodeler-cli`, dona do usuário, bloqueada até 0-4 fecharem).
+> Branch sincronizada com `origin` depois de cada commit desta sessão.
+
 - Branch: `multi-scene-support-2.1.x`, com 1 commit à frente de `origin` (refactor próprio do
   usuário, `0f7ac6f61`, não relacionado a esta sessão — adicionou `BaseTableView::getCutoffItem()`
   como acesso público em vez de exigir `friend class ModelWidget`).
@@ -1156,7 +1164,21 @@
        próprio `cutoff_pos` do modelo corrompido), só com o fix (a) (posição do modelo correta, mas
        exibição ainda errada) e com os dois fixes juntos (tudo correto).
   - Build (`core`+`canvas`+`gui`+`modelwidgettest`) limpo. Suíte completa **47/47** sem regressão.
-  - **Aguardando decisão do usuário sobre commit.**
+  - **Commitado em `8f5f17a8c`** (seleção exclusiva + fix de posição customizada, mesmo commit).
+- **Simplificação de `CutoffItem::refreshPosition()` (2026-09-29, `6a18a4d70`)**: usuário removeu o
+  wrapper público `refreshPosition()` (criado no fix (b) acima só pra dar acesso externo ao
+  `updatePosition()` privado) e tornou `updatePosition()` público diretamente — `connect()` por
+  ponteiro de função não exige que o alvo seja slot, então a restrição `private slots:` nunca foi
+  necessária. `ModelWidget::loadModel()` chama `updatePosition()` direto agora. Sem mudança de
+  comportamento, só remove uma indireção. Build (`canvas`+`gui`) limpo (cache já válido — usuário
+  buildou antes de pedir o commit). Commitado (emendado uma vez pra incluir a linha de coautoria
+  que faltou na primeira tentativa).
+- **Fase 4, subtarefa 4.7 implementada (2026-09-29, `dcf36ccf0`): limpeza de scaffolding de debug
+  da 2.1.** Três blocos de `#warning "Testing segmentation by threshold"` + `qDebug()` ainda
+  presentes em `ModelWidget::handleObjectAddition()`, resíduo de teste manual da subtarefa 2.1
+  nunca removido (achado de revisão de código em 2026-09-26, só registrado no plano até agora).
+  Remoção mecânica, sem mudança de lógica — os três blocos identificados e removidos exatamente como
+  descritos no plano. Build (`gui`) limpo.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
