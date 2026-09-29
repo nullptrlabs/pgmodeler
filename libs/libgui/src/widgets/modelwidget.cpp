@@ -1358,9 +1358,6 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 				}
 
 				target_scene = scenes.at(scn_idx);
-
-				#warning "Testing segmentation by threshold"
-				qDebug() << object->getSignature() << " routed to scene: " << scn_idx;
 			}
 			else
 			{
@@ -1381,15 +1378,7 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 				{
 					ObjectsScene *new_scene = addScene(false);
 					applySceneLayers(new_scene);
-
-					#warning "Testing segmentation by threshold"
-					qDebug() << "** ";
-					qDebug() << "** Threshold reached, adding new scene **";
-					qDebug() << "** ";
 				}
-
-				#warning "Testing segmentation by threshold"
-				qDebug() << object->getSignature() << " routed to scene: " << base_tab->getSceneIndex();
 			}
 		}
 		/* Textbox never enters the threshold counter (same rule as the rest of Fase 1/2: it has no
