@@ -3495,7 +3495,84 @@ void DatabaseModel::configureDatabase(attribs_map &attribs)
 	setBasicAttributes(this);
 }
 
-void DatabaseModel::loadModel(const QString &filename)
+DatabaseModel::SegmentationSuggestion DatabaseModel::getSegmentationSuggestion(const QString &filename)
+{
+	SegmentationSuggestion suggestion;
+
+	if(filename.isEmpty())
+		return suggestion;
+
+	try
+	{
+		XmlParser xmlparser;
+		QHash<QString, unsigned> objs_per_schema;
+		QString elem_name;
+		attribs_map attribs;
+
+		xmlparser.loadXMLFile(filename);
+
+		if(!xmlparser.accessElement(XmlParser::ChildElement))
+			return suggestion;
+
+		do
+		{
+			if(xmlparser.getElementType() != XML_ELEMENT_NODE)
+				continue;
+
+			elem_name = xmlparser.getElementName();
+
+			if(!BaseTable::isBaseTable(BaseObject::getObjectType(elem_name)))
+				continue;
+
+			// Table/view/foreigntable elements reference their schema via a <schema name=".."/> child
+			xmlparser.savePosition();
+
+			if(xmlparser.accessElement(XmlParser::ChildElement))
+			{
+				do
+				{
+					if(xmlparser.getElementType() == XML_ELEMENT_NODE &&
+						 xmlparser.getElementName() == Attributes::Schema)
+					{
+						xmlparser.getElementAttributes(attribs);
+						objs_per_schema[attribs[Attributes::Name]]++;
+						break;
+					}
+				}
+				while(xmlparser.accessElement(XmlParser::NextElement));
+			}
+
+			xmlparser.restorePosition();
+		}
+		while(xmlparser.accessElement(XmlParser::NextElement));
+
+		for(auto itr = objs_per_schema.begin(); itr != objs_per_schema.end(); itr++)
+		{
+			suggestion.total_objs += itr.value();
+
+			if(itr.value() > suggestion.max_schema_objs)
+			{
+				suggestion.max_schema_objs = itr.value();
+				suggestion.max_schema_name = itr.key();
+			}
+		}
+
+		suggestion.suggested =
+				suggestion.total_objs >= DefaultSegThreshold &&
+				(static_cast<double>(suggestion.max_schema_objs) / suggestion.total_objs) >= ConcentrationSuggestThreshold;
+	}
+	/* A malformed/unreadable file here just means no suggestion -- the real loadModel() call right
+	 * after this one will surface the actual error to the user */
+	catch(Exception &)
+	{
+		return SegmentationSuggestion();
+	}
+
+	return suggestion;
+}
+
+void DatabaseModel::loadModel(const QString &filename, bool override_seg_mode,
+															 SegmentationMode ovr_seg_mode, unsigned ovr_seg_threshold)
 {
 	if(filename.isEmpty())
 		return;
@@ -3560,16 +3637,26 @@ void DatabaseModel::loadModel(const QString &filename)
 
 		/* A mode/threshold change made through the UI only takes effect on the next load -- so
 		 * whatever is read here becomes both the active value for this session and the starting
-		 * point of the saved value, keeping the two in sync until the user edits them again */
-		scene_seg_mode = attribs[Attributes::SegMode].isEmpty() ?
-											NoSegmentation : static_cast<SegmentationMode>(attribs[Attributes::SegMode].toUInt());
+		 * point of the saved value, keeping the two in sync until the user edits them again.
+		 * override_seg_mode (getSegmentationSuggestion() accepted before this call started) takes
+		 * priority over the file's own values so routing during this same load already reflects it */
+		if(override_seg_mode)
+		{
+			scene_seg_mode = ovr_seg_mode;
+			seg_threshold = (ovr_seg_threshold == 0) ? DefaultSegThreshold : ovr_seg_threshold;
+		}
+		else
+		{
+			scene_seg_mode = attribs[Attributes::SegMode].isEmpty() ?
+												NoSegmentation : static_cast<SegmentationMode>(attribs[Attributes::SegMode].toUInt());
+
+			seg_threshold = attribs[Attributes::SegThreshold].toUInt();
+
+			if(seg_threshold == 0)
+				seg_threshold = DefaultSegThreshold;
+		}
+
 		saved_seg_mode = scene_seg_mode;
-
-		seg_threshold = attribs[Attributes::SegThreshold].toUInt();
-
-		if(seg_threshold == 0)
-			seg_threshold = DefaultSegThreshold;
-
 		saved_seg_threshold = seg_threshold;
 
 		/* No "active vs. saved" split here -- focusing a scene is an ordinary runtime action, unlike

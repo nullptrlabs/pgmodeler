@@ -488,8 +488,14 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 
 		/*! \brief Loads a database model from a file. In case of loading errors
 		the objects in the model will not be destroyed automatically. The user need to call
-		destroyObjects() or delete the entire model */
-		void loadModel(const QString &filename);
+		destroyObjects() or delete the entire model.
+		When override_seg_mode is true, ovr_seg_mode/ovr_seg_threshold are used as the active
+		segmentation mode/threshold for this load instead of whatever is saved in the file -- so
+		routing during this same load already reflects them, without requiring a save+reload
+		round-trip. The overridden values still become the new "saved" ones, same as loading them
+		normally from the file would */
+		void loadModel(const QString &filename, bool override_seg_mode = false,
+										SegmentationMode ovr_seg_mode = NoSegmentation, unsigned ovr_seg_threshold = 0);
 
 		//! \brief Sets the database encoding
 		void setEncoding(EncodingType encod);
@@ -917,6 +923,35 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 
 		//! \brief Default number of Table/View/ForeignTable insertions per scene in SegByThreshold mode
 		static constexpr unsigned DefaultSegThreshold = 200;
+
+		/*! \brief Minimum fraction of a model's Table/View/ForeignTable count concentrated in a
+		 * single schema for getSegmentationSuggestion() to suggest SegByThreshold over the mode
+		 * saved in the file -- provisional value, to be calibrated later */
+		static constexpr double ConcentrationSuggestThreshold = 0.8;
+
+		//! \brief Result of a lightweight, pre-load scan of a model file for getSegmentationSuggestion()
+		struct SegmentationSuggestion {
+			//! \brief True when the schema-concentration pattern below warrants suggesting SegByThreshold
+			bool suggested = false;
+
+			//! \brief Total Table/View/ForeignTable count found in the file
+			unsigned total_objs = 0;
+
+			//! \brief Table/View/ForeignTable count belonging to the single most populated schema
+			unsigned max_schema_objs = 0;
+
+			//! \brief Name of that most populated schema
+			QString max_schema_name;
+		};
+
+		/*! \brief Scans filename's XML directly (no DTD validation, no object instantiation) tallying
+		 * Table/View/ForeignTable counts per referenced schema, to detect upfront -- before the real,
+		 * much more expensive loadModel() call -- whether this model concentrates most of its objects
+		 * in a single schema. In that case, segmenting by schema (the file's own saved mode, or the
+		 * default) wouldn't meaningfully distribute the load into separate scenes, and SegByThreshold
+		 * is likely a better fit. Only meant to inform a suggestion shown before the real load starts;
+		 * never modifies the file or any DatabaseModel instance */
+		static SegmentationSuggestion getSegmentationSuggestion(const QString &filename);
 
 		void setSegmentationMode(SegmentationMode mode);
 		SegmentationMode getSegmentationMode();
