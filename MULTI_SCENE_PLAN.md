@@ -1661,10 +1661,12 @@ depois.
      teste manual da subtarefa 2.1 (Fase 2) nunca removido. Lógica já concreta (é só remover código
      morto) — pronta para implementação direta. Depende de: 2.1.
 
-4.8. **Merge automático de cenas subutilizadas** — ideia registrada sem nenhum desenho ainda (só
-     uma linha na antiga seção 5). **[Requer fechamento de decisão com o usuário]**: sequer está
-     claro se isso é desejado — a política atual (2.4) é deliberadamente **não** mesclar/destruir
-     cenas esvaziadas no modo threshold. Precisa de conversa do zero antes de qualquer desenho.
+4.8. **[Adiada, 2026-09-29 — candidata a implementação futura, não a próxima frente de
+     trabalho]** Merge automático de cenas subutilizadas — ideia registrada sem nenhum desenho
+     ainda (só uma linha na antiga seção 5). **[Requer fechamento de decisão com o usuário]**:
+     sequer está claro se isso é desejado — a política atual (2.4) é deliberadamente **não**
+     mesclar/destruir cenas esvaziadas no modo threshold. Precisa de conversa do zero antes de
+     qualquer desenho. Decisão do usuário: não implementar agora, revisitar depois.
 
 4.9. **Sugestão automática de modo de segmentação** (achado do usuário, 2026-09-21, confirmado
      testando `big_model.dbm`) — esse modelo tem 4 schemas (`pg_catalog`, `public`, `dv4`,
