@@ -1679,6 +1679,35 @@ depois.
      em vez de deixar a escolha inteiramente manual — é uma camada de UX por cima dos dois modos
      base. **[Requer fechamento de decisão com o usuário]**: critério exato de detecção, e como/
      quando a sugestão é apresentada (ao abrir o arquivo? sob demanda?).
+     - **Decisões fechadas e implementadas (2026-09-29)**:
+       - **Critério**: contagem de `Table`+`View`+`ForeignTable` por schema referenciado
+         (`BaseTable::isBaseTable()`, mesmos três tipos do contador da Fase 2). Sugere
+         `SegByThreshold` quando `total_objs >= DatabaseModel::DefaultSegThreshold` (200 — reaproveita
+         o próprio limiar padrão como piso de "modelo grande o bastante pra importar") **e**
+         `max_schema_objs / total_objs >= DatabaseModel::ConcentrationSuggestThreshold` (constante
+         nova, `0.8` provisório — usuário pediu explicitamente pra deixar como constante própria
+         calibrável depois, sem fechar o valor definitivo agora).
+       - **Quando/como**: só automático, ao abrir um arquivo (`MainWindow::addModel()`) — sem action
+         de menu "sob demanda" nesta primeira versão. **Achado do usuário durante o desenho**: calcular
+         isso **depois** de `ModelWidget::loadModel()` terminar não fazia sentido, porque
+         `DatabaseModel::loadModel()` já lê `SegMode`/`SegThreshold` do próprio arquivo e roteia os
+         objetos durante essa mesma carga — sugerir a troca só depois exigiria um save+reload inteiro
+         só pra corrigir, pagando o carregamento lento duas vezes. Resolvido com uma
+         **pré-varredura leve do XML bruto antes do load de verdade**
+         (`DatabaseModel::getSegmentationSuggestion(filename)`, novo, estático — usa `XmlParser` sem
+         DTD, sem instanciar nenhum objeto do modelo, só soma `<table>`/`<view>`/`<foreigntable>` por
+         `<schema name="..">` filho) e um **parâmetro de override em `loadModel()`**
+         (`override_seg_mode`/`ovr_seg_mode`/`ovr_seg_threshold`, default = sem override, todos os
+         call sites existentes continuam compilando sem mudança) — quando presente, o valor passado
+         tem prioridade sobre o que está gravado no `<dbmodel>`, então o roteamento já usa o modo
+         sugerido nessa mesma carga, sem round-trip de save+reload.
+       - **Diálogo**: `Messagebox` simples Yes/No (`Messagebox::confirm`/`isAccepted`), mensagem com
+         schema/porcentagem/contagem. **Sem opção "não perguntar de novo"** — decisão explícita do
+         usuário: mostra sempre, usuário decide toda vez (motivo: os critérios ainda não estão
+         calibrados, então uma dispensa persistente poderia esconder a sugestão antes dela ser
+         confiável).
+       - Implementado em duas subtarefas/commits: 4.9.1 (`DatabaseModel` — pré-varredura + override
+         de `loadModel()`) e 4.9.2 (`ModelWidget`/`MainWindow` — diálogo e fiação).
 
 4.10. **Terceiro modo de segmentação: threshold com agrupamento ciente de conectividade** (BFS/
       union-find sobre o grafo de relacionamentos, para minimizar cross-scene mantendo clusters

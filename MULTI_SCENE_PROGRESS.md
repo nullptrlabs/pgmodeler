@@ -6,13 +6,15 @@
 
 ## Estado atual
 
-> **Ponteiro mais recente (2026-09-29, HEAD `dcf36ccf0`)** — o resto desta seção é um log
+> **Ponteiro mais recente (2026-09-29, HEAD `2f7af2613`)** — o resto desta seção é um log
 > cronológico que vai ficando desatualizado à medida que sessões avançam; para saber o estado real
 > sem reler tudo, confie neste bloco e no plano (`MULTI_SCENE_PLAN.md`), não nas primeiras linhas
-> do log abaixo. Fases 0-3 e Fase 4 subtarefas 4.1-4.7 — todas concluídas, testadas e commitadas.
-> Restam em aberto só as subtarefas 4.8-4.14 (todas **[requerem decisão do usuário]**, nenhuma
-> codada ainda) e a Fase 5 (paridade `pgmodeler-cli`, dona do usuário, bloqueada até 0-4 fecharem).
-> Branch sincronizada com `origin` depois de cada commit desta sessão.
+> do log abaixo. Fases 0-3 e Fase 4 subtarefas 4.1-4.7 e 4.9 (4.9.1/4.9.2) — todas concluídas e
+> commitadas (4.9 ainda sem teste manual do usuário). **4.8 adiada** de propósito (decisão do
+> usuário, candidata a implementação futura, não bloqueia o resto). Restam em aberto as subtarefas
+> 4.10-4.14 (todas **[requerem decisão do usuário]**, nenhuma codada ainda) e a Fase 5 (paridade
+> `pgmodeler-cli`, dona do usuário, bloqueada até 0-4 fecharem). Branch sincronizada com `origin`
+> depois de cada commit desta sessão.
 
 - Branch: `multi-scene-support-2.1.x`, com 1 commit à frente de `origin` (refactor próprio do
   usuário, `0f7ac6f61`, não relacionado a esta sessão — adicionou `BaseTableView::getCutoffItem()`
@@ -1179,6 +1181,38 @@
   nunca removido (achado de revisão de código em 2026-09-26, só registrado no plano até agora).
   Remoção mecânica, sem mudança de lógica — os três blocos identificados e removidos exatamente como
   descritos no plano. Build (`gui`) limpo.
+- **Fase 4, subtarefa 4.8 adiada (2026-09-29, `f5180ccbd`)**: usuário decidiu não implementar merge
+  automático de cenas subutilizadas agora — fica marcada no plano como candidata a implementação
+  futura, não a próxima frente de trabalho.
+- **Fase 4, subtarefa 4.9 implementada em duas partes (2026-09-29): sugestão automática de modo de
+  segmentação.** Antes de codar, apresentei um plano (cálculo pós-`loadModel()`) que o usuário
+  apontou como equivocado: nesse ponto o modelo já tinha sido roteado inteiro no modo antigo (lento,
+  no caso motivador do `big_model.dbm`) — aceitar a sugestão exigiria um save+reload completo só
+  pra corrigir, pagando o carregamento lento duas vezes. Usuário propôs a alternativa certa: uma
+  pré-varredura leve do XML bruto **antes** do load de verdade, aceitando a leitura dupla do arquivo
+  como troca justa por evitar o round-trip. Detalhamento completo dos critérios fechados no plano,
+  subtarefa 4.9 — não duplicado aqui.
+  - **4.9.1 (`5aced4229`)**: `DatabaseModel::getSegmentationSuggestion(filename)` novo, estático —
+    usa `XmlParser` sem DTD (só `removeDTD()`+`readBuffer()` internos, sem `setDTDFile()`) pra andar
+    pelos filhos de `<dbmodel>`, somando `<table>`/`<view>`/`<foreigntable>`
+    (`BaseTable::isBaseTable(BaseObject::getObjectType(elem_name))`, mesmos três tipos do contador
+    de threshold) por `<schema name="..">` filho direto — sem construir nenhum objeto do modelo, só
+    DOM + `QHash<QString, unsigned>`. `DatabaseModel::loadModel()` ganhou
+    `override_seg_mode`/`ovr_seg_mode`/`ovr_seg_threshold` (defaults preservam todos os call sites
+    existentes) — quando presente, substitui a leitura de `SegMode`/`SegThreshold` do próprio
+    `<dbmodel>` ([databasemodel.cpp:3564](libs/libcore/src/databasemodel.cpp#L3564)), mas ainda
+    grava em `saved_seg_mode`/`saved_seg_threshold` normalmente, então um save subsequente já
+    persiste a escolha. Build (`core`) limpo, nenhum call site existente de `loadModel()` precisou
+    mudar (confirmado por grep em todo o repo).
+  - **4.9.2 (`2f7af2613`)**: `ModelWidget::loadModel()` ganhou os mesmos três parâmetros, só
+    repassando pra `db_model->loadModel()`. `MainWindow::addModel()` chama
+    `getSegmentationSuggestion()` antes de `model_wgt->loadModel()` (só no branch de abrir um
+    arquivo existente, nunca pra modelo novo/vazio); se `.suggested`, `Messagebox::confirm()`
+    simples (Yes/No, sem opção de dispensa — decisão do usuário, ver plano) explica o motivo
+    (schema, porcentagem, contagem) e, se aceito, `loadModel(filename, true, SegByThreshold,
+    DefaultSegThreshold)` — sem mensagem extra de "só vale após salvar+recarregar", já que o
+    override aplica o modo na própria carga em curso. Build (`gui`, rebuild completo incluindo
+    `priv-core`) limpo. **Sem teste manual do usuário ainda**.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
