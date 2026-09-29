@@ -1605,16 +1605,53 @@ depois.
        em massa não tem o mesmo valor de mimetismo visual, e já se beneficia da agregação
        cross-scene de `configureObjectSelection()` desde a 4.4 sem precisar de nada a mais.
 
-4.6. **Cor exclusiva para o marcador cut-off** (ex-1.15) — hoje `CutoffItem` reaproveita
-     `Attributes::PositionInfo` (fill/border/font) pra desenhar a linha e o rótulo, sem ter
-     identidade visual própria. Precisa de: (a) nova chave em `Attributes::` (libparsers) pra
-     identificar o elemento; (b) entrada nova em `AppearanceConfigWidget::element_cmb`
-     (`appearanceconfigwidget.cpp`, junto de `conf_ids`/`obj_conf_ids`) pra expor fill/border/font
-     configuráveis pelo usuário, do mesmo jeito que os demais elementos gráficos; (c) atualizar o
-     arquivo de configuração de aparência (tema padrão + persistência) com a chave nova; (d) trocar
-     `CutoffItem` (linha, fundo do rótulo, texto, `obj_selection`) de `PositionInfo` pra essa chave
-     nova. Lógica já concreta (é wiring de configuração, mesmo padrão já usado por outros elementos
-     gráficos) — pronta para implementação direta. Depende de: 1.8.
+4.6. **Cor exclusiva para o marcador cut-off** (ex-1.15; implementada, 2026-09-29) — `CutoffItem`
+     reaproveitava `Attributes::PositionInfo` (fill/border/font) pra desenhar a linha e o rótulo,
+     sem identidade visual própria. Ganhou uma chave nova, `Attributes::CutoffMarker`
+     ("cutoff-marker"), com cor padrão fechada com o usuário: borda verde (`#4caf50`), fundo verde
+     claro (`#c8e6c9`), texto preto (`#000000`) — ajustada uma vez após feedback visual (primeira
+     tentativa, borda `#90ee90`/fundo `#f0fff0`, ficou clara/esmaecida demais; usuário pediu borda
+     mais escura, fundo um pouco mais escuro e mais esverdeado) — igual em todos os temas, exceto
+     `inksaver` (segue a própria convenção do tema: preenchimento branco, borda/texto `#303030`,
+     igual a todo objeto ali).
+     - **`Attributes::CutoffMarker`** ([attributes.h:181](libs/libparsers/src/attributes.h#L181)/
+       [attributes.cpp:168](libs/libparsers/src/attributes.cpp#L168)) = `"cutoff-marker"`.
+     - **`element_cmb`** ([appearanceconfigwidget.ui](libs/libgui/ui/settings/appearanceconfigwidget.ui))
+       ganhou duas entradas novas no fim da lista ("Global: Cutoff marker text"/"Global: Cutoff
+       marker box"), índices 65/66 — apendadas ao fim de propósito, em vez de inseridas no meio,
+       pra não precisar renumerar os índices literais já usados em `obj_conf_ids`. `conf_ids`
+       ([appearanceconfigwidget.cpp:137-139](libs/libgui/src/settings/appearanceconfigwidget.cpp#L137))
+       ganhou as duas entradas apontando pra `Attributes::CutoffMarker` (mesmo padrão de
+       `PositionInfo` aparecer duas vezes — uma pro font, uma pro box); `obj_conf_ids`
+       ([appearanceconfigwidget.cpp:141-144](libs/libgui/src/settings/appearanceconfigwidget.cpp#L141))
+       ganhou o índice 66 (a entrada "box").
+     - **`.sch`/`.dtd`**: `assets/conf/schemas/appearance.sch` ganhou as linhas `<font id="cutoff-marker" .../>` e `<object id="cutoff-marker" .../>`, logo depois das equivalentes de `pos-info`;
+       `assets/conf/dtd/appearance.dtd` ganhou `cutoff-marker` nas duas listas enumeradas de `id`
+       (`font` e `object`).
+     - **Temas**: `assets/conf/appearance.conf` (mirror do tema dark) e os 4 temas em
+       `assets/conf/themes/{light,dark,classicdark,inksaver}/appearance.conf` ganharam as entradas
+       `font`/`object` pra `cutoff-marker`, logo depois de `pos-info`.
+     - **`CutoffItem`** ([cutoffitem.cpp](libs/libcanvas/src/cutoffitem.cpp)) trocou as 6 ocorrências
+       de `Attributes::PositionInfo` por `Attributes::CutoffMarker` (linha, fundo do rótulo, cor da
+       fonte do rótulo, cor da linha selecionada/não-selecionada) — `obj_selection` continua usando
+       `Attributes::ObjSelection`, sem mudança (é o highlight de seleção, não a identidade visual do
+       marcador).
+     - **Verificação**: `xmllint --dtdvalid` confirma que os 5 arquivos `.conf` editados validam
+       contra o `.dtd` atualizado; um harness descartável usando `SchemaParser` diretamente confirma
+       que `appearance.sch` renderiza as duas linhas novas sem erro de sintaxe (não coberto pelo
+       `schemafilessyntaxtest`, que não inclui a pasta de schemas de configurações). Cadeia completa
+       de carregamento confirmada por leitura de código:
+       `MainWindow::loadConfigurations()` → `ConfigurationWidget::loadConfiguration()` →
+       `AppearanceConfigWidget::loadConfiguration()` → `applyConfiguration()` (chamado no fim de
+       `loadConfiguration()`, linha 658) → `applyObjectsStyle()` — roda incondicionalmente na
+       inicialização do app, então `BaseObjectView::color_config`/`font_config["cutoff-marker"]` já
+       ficam populados antes do usuário abrir as Configurações. Build (`parsers`+`canvas`+`gui`)
+       limpo, suíte completa `modelwidgettest` **44/44** sem regressão, `baseobjecttest` 6/6,
+       `schemafilessyntaxtest` 3/3.
+     - **Pendência aberta, fora de escopo por enquanto**: as cores foram aplicadas de forma
+       uniforme em todos os temas (exceto inksaver, por seguir sua própria convenção grayscale) —
+       ajuste fino por tema (ex.: contraste no tema dark/classicdark) fica pra depois, se o usuário
+       achar necessário depois de ver renderizado.
 
 4.7. **Limpeza de scaffolding de debug da subtarefa 2.1** (achado de revisão de código,
      2026-09-26, não registrado em lugar nenhum antes) — três blocos de

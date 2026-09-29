@@ -165,6 +165,7 @@ namespace Attributes {
 	CustomIdxs("customidxs"),
 	CustomScale("custom-scale"),
 	Cutoff("cutoff"),
+	CutoffMarker("cutoff-marker"),
 	CutoffPos("cutoff-pos"),
 	Cycle("cycle"),
 	Dark("dark"),

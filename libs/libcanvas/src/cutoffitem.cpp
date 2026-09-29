@@ -28,7 +28,7 @@ CutoffItem::CutoffItem(BaseTableView *table)
 	this->table = table;
 
 	line = new QGraphicsLineItem;
-	line->setPen(BaseObjectView::getBorderStyle(Attributes::PositionInfo));
+	line->setPen(BaseObjectView::getBorderStyle(Attributes::CutoffMarker));
 	this->addToGroup(line);
 
 	label_bg = new RoundedRectItem;
@@ -97,11 +97,11 @@ void CutoffItem::updateLabel()
 	// The relationship count can change label_bg's size, which changes boundingRect()'s result
 	prepareGeometryChange();
 
-	QTextCharFormat char_fmt = BaseObjectView::getFontStyle(Attributes::PositionInfo);
-	char_fmt.setFontPointSize(char_fmt.font().pointSizeF() * 0.80);
+	QTextCharFormat char_fmt = BaseObjectView::getFontStyle(Attributes::CutoffMarker);
+	char_fmt.setFontPointSize(char_fmt.font().pointSizeF() * 0.90);
 
 	label->setFont(char_fmt.font());
-	label->setText(tr("Cross rels: %1").arg(rels.size()));
+	label->setHtml(tr("Cross rels.: <b>%1</b>").arg(rels.size()));
 	label->setTextColor(char_fmt.foreground().color());
 
 	QSizeF box_size = label->getTextBoundingRect().size() +
@@ -112,9 +112,9 @@ void CutoffItem::updateLabel()
 	label->setPolygon(box_rect);
 
 	label_bg->setRect(box_rect);
-	label_bg->setBrush(BaseObjectView::getFillStyle(Attributes::PositionInfo));
+	label_bg->setBrush(BaseObjectView::getFillStyle(Attributes::CutoffMarker));
 
-	QPen pen = BaseObjectView::getBorderStyle(Attributes::PositionInfo);
+	QPen pen = BaseObjectView::getBorderStyle(Attributes::CutoffMarker);
 	pen.setWidthF(BaseObjectView::ObjectBorderWidth * BaseObjectView::getScreenDpiFactor());
 	label_bg->setPen(pen);
 	label->setTextPos(BaseObjectView::HorizSpacing * 0.75, BaseObjectView::VertSpacing * 0.75);
@@ -241,7 +241,7 @@ void CutoffItem::configureLineSelection(bool selected)
 	if(selected)
 	{
 		QColor sel_color = BaseObjectView::getBorderStyle(Attributes::ObjSelection).color(),
-				line_color = BaseObjectView::getBorderStyle(Attributes::PositionInfo).color(),
+				line_color = BaseObjectView::getBorderStyle(Attributes::CutoffMarker).color(),
 				color;
 
 		color.setRedF((sel_color.redF() + line_color.redF()) / 2.0);
@@ -252,7 +252,7 @@ void CutoffItem::configureLineSelection(bool selected)
 		pen.setColor(color);
 	}
 	else
-		pen.setColor(BaseObjectView::getBorderStyle(Attributes::PositionInfo).color());
+		pen.setColor(BaseObjectView::getBorderStyle(Attributes::CutoffMarker).color());
 
 	pen.setWidthF(getLinePenWidth());
 	line->setPen(pen);
