@@ -66,6 +66,9 @@ void BaseObjectView::blink()
 
 void BaseObjectView::fade(bool fd_in, int duration, int loop_cnt, qreal final_opacity)
 {
+	if(fade_tl.state() == QTimeLine::Running)
+		return;
+
 	fade_tl.setDirection(fd_in ? QTimeLine::Forward : QTimeLine::Backward);
 	fade_tl.setLoopCount(loop_cnt);
 	fade_tl.setDuration(duration);
