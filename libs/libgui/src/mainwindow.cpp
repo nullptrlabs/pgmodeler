@@ -1221,7 +1221,30 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 		{
 			try
 			{
-				model_wgt->loadModel(filename);
+				/* Lightweight scan of the raw file, before the real (much more expensive) load starts
+				 * -- lets a suggestion to switch segmentation mode be applied to this very load (via
+				 * loadModel()'s override params) instead of only taking effect after an extra
+				 * save+reload round-trip */
+				DatabaseModel::SegmentationSuggestion suggestion =
+						DatabaseModel::getSegmentationSuggestion(filename);
+				bool override_seg_mode = false;
+
+				if(suggestion.suggested)
+				{
+					double pct = (100.0 * suggestion.max_schema_objs) / suggestion.total_objs;
+
+					override_seg_mode = Messagebox::isAccepted(Messagebox::confirm(
+							tr("This model concentrates %1% of its %2 tables/views/foreign tables in a "
+								 "single schema (\"%3\"). Segmenting the canvas by schema wouldn't distribute "
+								 "much of that load into separate scenes -- load it with threshold-based "
+								 "segmentation instead?")
+								.arg(QString::number(pct, 'f', 0))
+								.arg(suggestion.total_objs)
+								.arg(suggestion.max_schema_name)));
+				}
+
+				model_wgt->loadModel(filename, override_seg_mode, DatabaseModel::SegByThreshold,
+															DatabaseModel::DefaultSegThreshold);
 				models_tbw->setTabToolTip(models_tbw->currentIndex(), filename);
 
 				//Get the "public" schema and set as system object

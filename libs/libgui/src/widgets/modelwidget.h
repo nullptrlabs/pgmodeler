@@ -778,7 +778,13 @@ class __libgui ModelWidget: public QWidget {
 		 * model modified */
 		void setPendingSceneThreshold(unsigned value);
 
-		void loadModel(const QString &filename);
+		/*! \brief Loads filename into this widget's model. When override_seg_mode is true,
+		 * ovr_seg_mode/ovr_seg_threshold are forced as the segmentation mode/threshold for this load
+		 * instead of whatever is saved in the file (see DatabaseModel::loadModel()) -- used to apply
+		 * a segmentation suggestion (see MainWindow::addModel()) without a save+reload round-trip */
+		void loadModel(const QString &filename, bool override_seg_mode = false,
+									 DatabaseModel::SegmentationMode ovr_seg_mode = DatabaseModel::NoSegmentation,
+									 unsigned ovr_seg_threshold = 0);
 		void saveModel(const QString &filename);
 		void saveModel();
 		void printModel(QPrinter *printer, bool print_grid, bool print_page_nums, bool resize_delims);
