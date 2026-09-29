@@ -915,8 +915,8 @@
       por isso esse teste anterior não capturou o bug: ele testava a reação ao sinal, não a
       condição que dispara o sinal. Verificado que falha sem o fix e passa com ele restaurado.
       Suíte completa **41/41**.
-    - Build (`canvas`+`gui`+`modelwidgettest`) limpo. **Aguardando decisão do usuário sobre
-      commit.**
+    - Build (`canvas`+`gui`+`modelwidgettest`) limpo. **Commitado em `c657f08d6`** junto com o
+      restante da 4.4.
   - **`selectAllObjects()` também estendido pra todas as cenas (decisão fechada em seguida,
     2026-09-28)**: tanto "selecionar tudo" (`ObjectType::BaseObject`, via `setSelectionArea()` por
     cena) quanto "selecionar todos os objetos do tipo X" passaram a cobrir todas as `scenes`, não
@@ -926,7 +926,8 @@
     - **Teste**: `selectAllObjectsOfTypeSpansMultipleScenes`
       ([modelwidgettest.cpp](tests/src/modelwidgettest/modelwidgettest.cpp)). Verificado que falha
       sem o fix e passa com ele restaurado. Suíte completa **42/42**.
-    - Build (`gui`+`modelwidgettest`) limpo. **Aguardando decisão do usuário sobre commit.**
+    - Build (`gui`+`modelwidgettest`) limpo. **Commitado em `c657f08d6`** junto com o restante da
+      4.4.
 - **Fase 4, subtarefa 4.5 implementada (2026-09-28): `ObjectSearchWidget` segue a cena de cada
   objeto clicado nos resultados, para seleção simples e múltipla.** Ajuste de design feito nesta
   rodada em relação à decisão original (ver plano) — em vez de multi-seleção permanecer na cena
@@ -954,7 +955,61 @@
     (arquivo de teste dedicado + provavelmente uma `friend class` de teste). Ficou sem teste
     automatizado nesta rodada -- decisão de escopo pendente de confirmação do usuário (investir na
     infraestrutura de teste agora, ou verificar manualmente como sempre foi feito nesta sessão).
-  - Build (`gui`) limpo. **Aguardando decisão do usuário sobre commit.**
+  - Build (`gui`) limpo. **Commitado em `f952d82b6`.**
+  - **Achado à parte durante esta rodada, não causado por mim**: edição própria do usuário em
+    `SchemaView::isChildrenSelected()` (limpeza de estilo, while → range-for) inverteu a lógica de
+    AND ("todos os filhos selecionados") pra OR ("algum filho selecionado") via um `return` precoce
+    dentro do laço. Sinalizado antes de commitar qualquer coisa; usuário corrigiu por conta própria,
+    verificado (build + suíte completa 42/42) e **commitado separadamente em `dec31d5ca`**.
+- **Ideia futura registrada no plano (2026-09-28, sem implementação): `QOpenGLWidget` como
+  viewport opcional do `QGraphicsView`, ortogonal à segmentação por cena.** Discussão exploratória
+  (não é tarefa numerada) — segmentação reduz custo de indexação/contagem de itens por cena;
+  OpenGL reduziria o custo de *pintura* da cena ativa, independente de quantas cenas existam. Uso
+  seria opt-in via configurações (não mandatório), com verificação de aceleração de hardware em
+  runtime antes de habilitar a opção — risco de regressões em ambientes sem GPU (VM, X11
+  forwarding) e de quirks de antialiasing/texto. Registrado em "Fora de escopo (por enquanto)" no
+  plano, pendente de profiling futuro depois que o trabalho de segmentação fechar por completo.
+  **Commitado em `1b2c1131d`** (só documentação, nenhum código).
+- **Bug real reportado pelo usuário (2026-09-29): cancelar a criação de um relacionamento
+  (`New > Relationship > 1:N`, form aberto e depois Esc/Cancel) limpava a seleção visual das
+  tabelas mas não a lógica — `SceneInfoWidget` continuava reportando "2 selecionados".** Fluxo
+  exato reproduzido: uma tabela pré-selecionada, ação de menu de relacionamento disparada
+  (`ModelWidget::addNewObject()`, [modelwidget.cpp:1446](libs/libgui/src/widgets/modelwidget.cpp#L1446)),
+  clique na segunda tabela no canvas entra no modo cursor (`new_obj_type` setado,
+  `configureObjectSelection()` mostra a linha de preview do relacionamento), segundo clique fecha
+  pra 2 selecionados e abre o formulário.
+  - **Causa raiz**: `ModelWidget::configureObjectSelection()`
+    ([modelwidget.cpp:1800](libs/libgui/src/widgets/modelwidget.cpp#L1800)), no ramo que abre o
+    formulário de relacionamento, envolve `this->showObjectForm(new_obj_type)` num
+    `scene->blockSignals(true)`/`blockSignals(false)` pra evitar reentrância. O próprio
+    `showObjectForm()` ([modelwidget.cpp:2833](libs/libgui/src/widgets/modelwidget.cpp#L2833)), no
+    ramo de `Relationship`, já limpava a seleção ali dentro (`scene->clearSelection()`) — só que
+    **dentro** da janela bloqueada, então a deseleção acontece de verdade (visualmente) mas o sinal
+    que resincroniza `ModelWidget::selected_objects` (`s_objectSelected` →
+    `ObjectsScene::handleObjectSelection()` → `ObjectsScene::s_objectSelected`, conectado a
+    `configureObjectSelection()` via `Qt::QueuedConnection`) nunca sai. De volta em
+    `configureObjectSelection()`, a chamada redundante de `clearSelection()` depois de
+    `blockSignals(false)` já não tem nada pra limpar (os itens já foram deselecionados dentro da
+    janela bloqueada) — nenhum sinal dispara, `selected_objects` nunca é resincronizado, e
+    `cancelObjectAddition()` usa esse vetor obsoleto pra montar o menu de contexto.
+  - **Fix**: as duas chamadas de `scene->clearSelection()` apontadas (só a cena ativa, incompatível
+    com seleção cross-scene desde a 4.4) viraram `clearSelectionInAllScenes()` — em
+    `showObjectForm()` ([modelwidget.cpp:2966](libs/libgui/src/widgets/modelwidget.cpp#L2966)) e em
+    `configureObjectSelection()` ([modelwidget.cpp:1882](libs/libgui/src/widgets/modelwidget.cpp#L1882)).
+    Como o problema real não é *qual* cena é limpa mas sim a resincronização nunca acontecer
+    enquanto os sinais estão bloqueados, `configureObjectSelection()` também ganhou um
+    `selected_objects.clear()` explícito logo depois, antes de `cancelObjectAddition()` — não
+    depende mais da cadeia de sinais pra este caso específico.
+  - **Teste**: `cancelingRelationshipCreationClearsLogicalSelectionToo`
+    ([modelwidgettest.cpp](tests/src/modelwidgettest/modelwidgettest.cpp)) — dirige o fluxo real
+    (`QAction` real conectada a `addNewObject()`, segunda tabela selecionada + `configureObjectSelection()`
+    invocado como o sinal real faria) e cancela o formulário modal via `QTimer` fazendo poll de
+    `qApp->activeModalWidget()` (mesmo padrão já usado em
+    `cascadeDeleteThroughRealActionReachesTransitivelyReferencedObjects()`). Verificado que falha
+    sem o fix (`selected_objects` não fica vazio) e passa com ele restaurado. Suíte completa
+    **43/43**.
+  - Build (`core`+`canvas`+`gui`+`modelwidgettest`) limpo. **Aguardando decisão do usuário sobre
+    commit.**
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

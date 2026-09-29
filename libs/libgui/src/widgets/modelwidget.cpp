@@ -1875,8 +1875,12 @@ void ModelWidget::configureObjectSelection()
 				this->showObjectForm(new_obj_type);
 				scene->blockSignals(false);
 
-				//Cancels the operation after showing the relationship editing form
-				scene->clearSelection();
+				/* Cancels the operation after showing the relationship editing form. The scenes were already
+				 * silently cleared above (blockSignals), so this rarely has any item left to deselect and the
+				 * usual selection-changed signal chain won't fire to resync selected_objects -- clear it here
+				 * directly instead of relying on that chain */
+				clearSelectionInAllScenes();
+				selected_objects.clear();
 				this->cancelObjectAddition();
 			}
 		}
@@ -2959,7 +2963,7 @@ void ModelWidget::showObjectForm(ObjectType obj_type, BaseObject *object, BaseOb
 				relationship_wgt->setAttributes(db_model, op_list, dynamic_cast<BaseRelationship *>(object));
 
 			res=openEditingForm(relationship_wgt);
-			scene->clearSelection();
+			clearSelectionInAllScenes();
 		}
 		else if(obj_type==ObjectType::Textbox)
 		{
