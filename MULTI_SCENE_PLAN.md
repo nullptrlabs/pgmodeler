@@ -1814,6 +1814,20 @@ pra escolher o modo de segmentação antes disso — todo modelo importado via C
   `ModelOverviewWidget` (minimap) passa a exibir sempre a cena atualmente ativa (foco), e se
   atualiza automaticamente quando a cena ativa muda — nenhuma visão combinada de múltiplas cenas
   é necessária. Ver detalhamento na Fase 0.
+- **`QOpenGLWidget` como viewport do `QGraphicsView`, pra renderização acelerada por hardware**
+  (ideia levantada pelo usuário, 2026-09-28, depois da segmentação por schema/threshold estarem
+  praticamente fechadas) — não depende da Fase 4 nem de nenhuma fase específica desta feature,
+  ortogonal à segmentação: `viewport->setViewport(new QOpenGLWidget())` afeta a *pintura* de
+  qualquer cena que esteja ativa no momento, enquanto a segmentação ataca quantos itens o Qt
+  precisa indexar/rastrear de uma vez (a BSP tree de cada `QGraphicsScene`) — são gargalos
+  diferentes, e a segmentação já reduz o caso mais caro (uma cena enorme) que o OpenGL mais
+  ajudaria a pintar. Ainda pode valer a pena para cenas individuais que continuem grandes mesmo
+  segmentadas (ex. um schema com milhares de tabelas em modo schema). **Desenho já discutido**:
+  opção nas configurações, desligada por padrão, habilitada só depois de uma checagem em runtime
+  confirmando aceleração de hardware disponível — nunca forçada, pra não regredir em ambientes sem
+  GPU (VM, X11 forwarding, comuns nesse tipo de ferramenta usada por DBAs). Ganho real não é óbvio
+  a priori, precisa de profiling depois que a segmentação estiver 100% fechada antes de decidir se
+  compensa investir.
 
 > **Nota (2026-09-26)**: os demais achados/perguntas em aberto que estavam registrados nesta seção
 > (sugestão automática de modo, terceiro modo de segmentação com clustering, tags/layers por
