@@ -131,17 +131,6 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 		 * over the sliver the line occupied when it was first added to the group */
 		QRectF boundingRect() const override;
 
-		/*! \brief Public entry point to force a reposition against the table's current geometry.
-		 * Needed for a case updatePosition()'s own signal connections don't cover: right after a
-		 * model load, DatabaseModel::setObjectsModified() gives every table its real, final geometry
-		 * but deliberately suppresses the dimension-changed/relationship-update signals while doing
-		 * so (see BaseTable::isGeomChangesIgnored()) -- so a marker attached while that table's box
-		 * was still its pre-configuration 0x0 default (a real possibility, since updates are globally
-		 * disabled for the whole duration of a bulk load) never otherwise finds out its anchor point
-		 * changed. ModelWidget::loadModel() calls this once, explicitly, right after loading */
-		void refreshPosition();
-
-	private slots:
 		//! \brief Repositions the marker relative to table's current title geometry
 		void updatePosition();
 };
