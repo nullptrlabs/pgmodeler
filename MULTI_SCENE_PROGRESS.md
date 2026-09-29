@@ -1008,6 +1008,33 @@
     `cascadeDeleteThroughRealActionReachesTransitivelyReferencedObjects()`). Verificado que falha
     sem o fix (`selected_objects` não fica vazio) e passa com ele restaurado. Suíte completa
     **43/43**.
+  - Build (`core`+`canvas`+`gui`+`modelwidgettest`) limpo. **Commitado em `d27aec3fe`.**
+- **Fase 4, subtarefa 4.3 retomada e fechada (2026-09-29): ferramenta de linha de relacionamento
+  cancela sozinha ao trocar de cena no meio do gesto.** Estava pulada desde 2026-09-28 a pedido do
+  usuário; retomada quando o usuário percebeu que a 4.4 (seleção cross-scene) já resolve o caso de
+  uso original sem precisar de nenhum estado novo: pré-selecionar as duas tabelas (clique numa
+  cena, trocar de cena, Ctrl+clique na outra) e só então acionar "New > Relationship" já cai direto
+  em `addNewObject()` → `showObjectForm(selected_objects[0], selected_objects[1])`, sem nenhuma
+  checagem de cena. O desenho original de `pending_rel_src` (estado explícito sobrevivendo à troca
+  de cena, ver plano subtarefa 4.3 antes desta rodada) ficou descartado por desnecessário.
+  - **O que restava**: só a ferramenta de linha interativa (clicar tabela A → cursor muda → linha
+    de preview até a próxima tabela) continua presa à cena ativa (`rel_line` é membro de
+    `ObjectsScene`, só recebe mouse events da cena anexada ao viewport) — mas trocar de cena no
+    meio do gesto deixava o estado preso (cursor trocado, `new_obj_type` armado, nada pra
+    completar).
+  - **Decisão**: em vez de fazer o gesto sobreviver à troca de cena, cancelar a ferramenta
+    incondicionalmente ao trocar de cena, em qualquer estado do gesto (desde o cursor armado até a
+    linha já visível) — regra simples, e a pré-seleção cross-scene já cobre quem realmente precisa
+    criar relacionamento entre cenas diferentes.
+  - **Fix**: `ModelWidget::setActiveScene()`
+    ([modelwidget.cpp:1190](libs/libgui/src/widgets/modelwidget.cpp#L1190)) ganhou
+    `if(new_obj_type > ObjectType::BaseTable) cancelObjectAddition();` no topo, antes de reatribuir
+    `scene`/`active_scene_idx` — a ordem importa, pois `cancelObjectAddition()` usa o `scene`
+    member e precisa ver a cena antiga (onde `rel_line` estava), não a nova.
+  - **Teste**: `switchingSceneMidRelationshipLineToolCancelsIt`
+    ([modelwidgettest.cpp](tests/src/modelwidgettest/modelwidgettest.cpp)). Verificado que falha
+    sem o fix (`isRelationshipLineVisible()` continua `true` depois da troca) e passa com ele
+    restaurado. Suíte completa **44/44**.
   - Build (`core`+`canvas`+`gui`+`modelwidgettest`) limpo. **Aguardando decisão do usuário sobre
     commit.**
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:

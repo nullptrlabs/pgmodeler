@@ -1453,52 +1453,57 @@ depois.
        (assume `BaseTableView`); `Textbox` ganhou sua própria contraparte trivial,
        `relocateTextboxView()` (sem relacionamentos/cutoff pra tratar).
 
-4.3. **[Requer fechamento de decisão com o usuário] Ferramenta de criação de relacionamento
-     cross-scene** (ex-1.12) — sinalizado explicitamente pelo usuário como ponto que exige cuidado
-     extra antes de implementar.
-     - **Mecanismo atual (single-scene)**: a criação interativa de relacionamento é dirigida quase
-       inteiramente por `ModelWidget::configureObjectSelection()`
-       ([modelwidget.cpp:1393-1469](libs/libgui/src/widgets/modelwidget.cpp#L1393)), que a cada
-       mudança de seleção lê `scene->selectedItems()` (a **cena única**, hard-coded) e decide o que
-       fazer: (1) usuário aciona "novo relacionamento" → `ModelWidget::addNewObject()`
-       ([modelwidget.cpp:1092-1182](libs/libgui/src/widgets/modelwidget.cpp#L1092)) arma
-       `new_obj_type`; (2) clique na tabela A → `scene->selectedItems().size()==1` →
-       `scene->showRelationshipLine(true, centro_da_tabela_A)`
-       ([modelwidget.cpp:1445-1447](libs/libgui/src/widgets/modelwidget.cpp#L1445)) ativa `rel_line`
-       — um `QGraphicsLineItem` **membro da própria `ObjectsScene`**
-       ([objectsscene.cpp:75-81](libs/libcanvas/src/objectsscene.cpp#L75)); (3) enquanto
-       `rel_line->isVisible()`, `ObjectsScene::mousePressEvent()` força `Qt::ControlModifier`
-       ([objectsscene.cpp:1126-1127](libs/libcanvas/src/objectsscene.cpp#L1126)) para que o próximo
-       clique adicione a tabela B em vez de substituir a seleção; (4) com as duas na mesma cena,
-       `configureObjectSelection()` detecta `count==2`
-       ([modelwidget.cpp:1457-1458](libs/libgui/src/widgets/modelwidget.cpp#L1457)) e chama
-       `showObjectForm(new_obj_type)` diretamente.
-     - **Por que isso não funciona entre cenas diferentes**: `rel_line` é local a UMA `ObjectsScene`
-       — não pode ser "arrastado visualmente" de uma cena pra outra, porque cada cena só recebe
-       eventos de mouse enquanto anexada ao viewport. E mais grave: `configureObjectSelection()`
-       conta objetos selecionados lendo **apenas a cena ativa** — uma tabela selecionada numa cena
-       que deixou de estar ativa some de `scene->selectedItems()` da cena nova, então hoje não há
-       jeito do estado "tabela A já escolhida como origem" sobreviver a uma troca de cena.
-     - **Direção possível (a validar)**: desacoplar a contagem de "quantas tabelas foram escolhidas"
-       da leitura direta de `scene->selectedItems()`, substituindo por um estado explícito em
-       `ModelWidget` (não em `ObjectsScene`), tipo `BaseTable *pending_rel_src` que não é derivado
-       da seleção do Qt e sobrevive a uma troca de cena: clique na tabela A grava
-       `pending_rel_src` e mostra `rel_line` normalmente **se** a cena da tabela A for a ativa
-       (caso same-scene preservado 1:1); se o usuário trocar de cena com `pending_rel_src` setado,
-       a linha não pode mais aparecer (pertence à cena antiga) — o core precisa expor esse estado
-       (`hasPendingRelationshipSource()`/`getPendingRelationshipSource()`) para alguma UI futura
-       sinalizar "relacionamento pendente, origem: X" (forma exata é decisão de UX, fora do core,
-       mas o hook de estado precisa existir); clique na tabela B numa cena diferente finaliza a
-       criação usando `pending_rel_src` + tabela B, caindo no conector off-page (decisão #1) em vez
-       de `RelationshipView` único; cancelamento precisa limpar `pending_rel_src` do mesmo jeito que
-       hoje limpa seleção/linha da cena única.
-     - **Pergunta em aberto**: vale a pena permitir criação cross-scene via essa interação em duas
-       etapas (clica A, troca de cena, clica B), ou é aceitável exigir que o usuário crie
-       relacionamentos cross-scene por outro caminho (ex. formulário manual, escolhendo
-       origem/destino de uma lista, sem depender de clique-e-arrasto)? A segunda opção é bem mais
-       simples e evita todo o desenho de estado pendente. O combo de cenas (`SceneInfoWidget`,
-       Fase 2) é útil aqui mesmo se a direção escolhida não depender dele, como forma rápida de
-       montar cenários de teste cross-scene. Depende de: 1.8.
+4.3. **Ferramenta de criação de relacionamento cross-scene** (ex-1.12; decisão fechada e
+     implementada, 2026-09-29) — inicialmente pulada a pedido do usuário ("sinalizado
+     explicitamente... ponto que exige cuidado extra"), retomada depois que a 4.4 tornou a
+     pergunta original bem mais simples do que parecia.
+     - **Mecanismo antigo (pré-4.4, contexto histórico)**: a criação interativa de relacionamento é
+       dirigida quase inteiramente por `ModelWidget::configureObjectSelection()`
+       ([modelwidget.cpp:1800](libs/libgui/src/widgets/modelwidget.cpp#L1800)), que a cada mudança
+       de seleção decide o que fazer: (1) usuário aciona "novo relacionamento" →
+       `ModelWidget::addNewObject()` ([modelwidget.cpp:1446](libs/libgui/src/widgets/modelwidget.cpp#L1446))
+       arma `new_obj_type`; (2) clique na tabela A → `scene->showRelationshipLine(true,
+       centro_da_tabela_A)` ativa `rel_line` — um `QGraphicsLineItem` **membro da própria
+       `ObjectsScene`** ([objectsscene.cpp:75-81](libs/libcanvas/src/objectsscene.cpp#L75)); (3)
+       clique na tabela B → `configureObjectSelection()` detecta `count==2` e chama
+       `showObjectForm(new_obj_type)` diretamente. Antes da 4.4, isso não podia funcionar entre
+       cenas diferentes por dois motivos: `rel_line` é local a uma `ObjectsScene` (não pode ser
+       "arrastado" pra outra, cada cena só recebe eventos de mouse enquanto anexada ao viewport), e
+       a seleção em si só existia na cena ativa — uma tabela selecionada numa cena que deixava de
+       estar ativa simplesmente sumia.
+     - **A 4.4 já resolveu metade do problema sem querer**: com seleção lógica+visual cross-scene
+       (`ModelWidget::selected_objects` agregando todas as `scenes`, sobrevivendo a troca de cena
+       ativa), pré-selecionar as duas tabelas primeiro — clique na tabela A numa cena, trocar de
+       cena, Ctrl+clique na tabela B na outra — e só então acionar "New > Relationship" já cai
+       direto em `addNewObject()` ([modelwidget.cpp:1488-1494](libs/libgui/src/widgets/modelwidget.cpp#L1488)),
+       que abre `showObjectForm()` a partir de `selected_objects[0]`/`[1]` **sem nenhuma checagem
+       de cena**. O desenho original de `pending_rel_src`/estado explícito sobrevivendo à troca de
+       cena, cogitado antes da 4.4 existir, ficou desnecessário — a seleção cross-scene já cumpre
+       esse papel.
+     - **O que ainda não funcionava**: só a ferramenta de linha interativa (clicar na tabela A com
+       zero tabelas pré-selecionadas, cursor muda, linha de preview esticando até a próxima
+       tabela). Continua sendo inerentemente local à cena — `rel_line` não pode seguir o usuário
+       pra outra cena — mas ao trocar de cena no meio do gesto o estado ficava "preso": cursor
+       trocado, `new_obj_type` armado, sem jeito de completar nem de perceber que precisava
+       recomeçar.
+     - **Decisão**: em vez de fazer esse gesto sobreviver a uma troca de cena (redesenho descartado
+       — a pré-seleção cross-scene já cobre esse caso de uso, adicionar um segundo caminho pra
+       mesma coisa não valeria a complexidade), trocar de cena **cancela** a ferramenta de linha se
+       ela estiver em andamento, em qualquer estado (desde o cursor armado até a linha de preview
+       já visível) — sem exceção, pra manter a regra simples de explicar: esse gesto específico é
+       local à cena ativa, ponto.
+     - **Implementação**: `ModelWidget::setActiveScene()`
+       ([modelwidget.cpp:1190](libs/libgui/src/widgets/modelwidget.cpp#L1190)) ganhou uma checagem
+       no topo — `if(new_obj_type > ObjectType::BaseTable) cancelObjectAddition();` — executada
+       **antes** de reatribuir `scene`/`active_scene_idx`, pra que `cancelObjectAddition()`
+       (que usa o `scene` member) ainda enxergue a cena antiga (onde `rel_line` estava) e não a
+       nova.
+     - **Teste**: `switchingSceneMidRelationshipLineToolCancelsIt`
+       ([modelwidgettest.cpp](tests/src/modelwidgettest/modelwidgettest.cpp)) — dirige o fluxo real
+       (uma tabela selecionada, `QAction` real conectada a `addNewObject()` pra armar a
+       ferramenta, confirma `isRelationshipLineVisible()`), troca de cena via `setActiveScene()` e
+       confirma que a linha some e o cursor volta ao normal. Verificado que falha sem o fix e passa
+       com ele restaurado. Suíte completa **44/44**.
 
 4.4. **Seleção passa a abranger todas as cenas, não só a ativa** (ex-1.13; decisão fechada e
      implementada) — antes desta subtarefa, `ModelWidget::selected_objects` era um cache que
