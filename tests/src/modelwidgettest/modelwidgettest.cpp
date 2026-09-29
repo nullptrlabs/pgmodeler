@@ -89,6 +89,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void selectionResetInOneSceneClearsEveryOtherScene();
 		void clickOnEmptySceneWithNothingLocallySelectedStillClearsOtherScenes();
 		void selectAllObjectsOfTypeSpansMultipleScenes();
+		void cancelingRelationshipCreationClearsLogicalSelectionToo();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -2758,6 +2759,93 @@ void ModelWidgetTest::selectAllObjectsOfTypeSpansMultipleScenes()
 			QVERIFY(view != nullptr);
 			QVERIFY2(view->isSelected(), table->getName().toStdString().c_str());
 		}
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Regression test for a bug the user found manually: with a single table selected,
+triggering "New > Relationship > 1:N" and then clicking a second table on canvas opens the
+relationship form through ModelWidget::configureObjectSelection()'s blockSignals(true)/
+showObjectForm()/blockSignals(false) window. Canceling that form left both tables visually
+deselected but ModelWidget::selected_objects (feeding SceneInfoWidget) stale with both tables --
+the resync used to rely on a selection-changed signal that window silences. */
+void ModelWidgetTest::cancelingRelationshipCreationClearsLogicalSelectionToo()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::NoSegmentation);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		Table *table_a = new Table;
+		table_a->setName("table_a");
+		table_a->setSchema(schema_pub);
+
+		Column *col_a = new Column;
+		col_a->setName("id");
+		col_a->setType(PgSqlType("serial"));
+		table_a->addColumn(col_a);
+
+		Constraint *pk = new Constraint;
+		pk->setName("table_a_pk");
+		pk->setConstraintType(ConstraintType::PrimaryKey);
+		pk->addColumn(table_a->getColumn("id"), Constraint::SourceCols);
+		table_a->addConstraint(pk);
+
+		Table *table_b = new Table;
+		table_b->setName("table_b");
+		table_b->setSchema(schema_pub);
+
+		db_model->addTable(table_a);
+		db_model->addTable(table_b);
+
+		BaseObjectView *view_a = dynamic_cast<BaseObjectView *>(table_a->getOverlyingObject());
+		BaseObjectView *view_b = dynamic_cast<BaseObjectView *>(table_b->getOverlyingObject());
+		QVERIFY(view_a != nullptr && view_b != nullptr);
+
+		//Only table_a is selected when the user triggers "New > Relationship > 1:N"
+		view_a->setSelected(true);
+		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
+		QCOMPARE(model_wgt.getSelectedObjects().size(), size_t(1));
+
+		//Mirrors triggering the "1:N" action from the "New > Relationship" submenu (addNewObject())
+		QAction rel_action;
+		rel_action.setData(static_cast<unsigned>(ObjectType::Relationship) +
+												static_cast<unsigned>(BaseRelationship::Relationship1n));
+		QObject::connect(&rel_action, SIGNAL(triggered(bool)), &model_wgt, SLOT(addNewObject()));
+		rel_action.trigger();
+
+		//Auto-cancels the relationship form (Esc/Cancel) as soon as it appears
+		QTimer poll_timer;
+		poll_timer.setInterval(20);
+
+		QObject::connect(&poll_timer, &QTimer::timeout, [](){
+			QDialog *dlg = qobject_cast<QDialog *>(qApp->activeModalWidget());
+
+			if(dlg)
+				dlg->reject();
+		});
+
+		poll_timer.start();
+
+		//Picking the second table on canvas -- same signal chain a real click on it would go through
+		view_b->setSelected(true);
+		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
+
+		poll_timer.stop();
+
+		QVERIFY2(!view_a->isSelected(), "table_a must end up visually deselected after the cancel");
+		QVERIFY2(!view_b->isSelected(), "table_b must end up visually deselected after the cancel");
+		QVERIFY2(model_wgt.getSelectedObjects().empty(),
+						 "canceling relationship creation must clear the logical selection too, not just the visual one");
 	}
 	catch(Exception &e)
 	{
