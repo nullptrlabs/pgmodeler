@@ -1825,29 +1825,60 @@ depois.
           subtarefa ("tags e camadas são ortogonais à segmentação por cena"), sem necessidade de
           perguntar: não há razão pra restringir um atalho puramente visual a um modo específico.
 
-4.12. **Algoritmos de rearranjo automático: cena atual ou todas?** (pergunta do usuário,
-      2026-09-24) — os três algoritmos por trás do menu "Rearrange objects"
-      (`MainWindow::arrangeObjects()`, [mainwindow.cpp:2424-2444](libs/libgui/src/mainwindow.cpp#L2424)
-      — `rearrangeSchemasInGrid()`, `rearrangeTablesHierarchically()`, `rearrangeTablesInSchemas()`)
-      são **inteiramente cena-agnósticos**: cada um itera `db_model->getObjectList(...)` (o modelo
-      inteiro) sem checar em qual `ObjectsScene` cada objeto está. `rearrangeTablesHierarchically()`,
-      por exemplo, escolhe uma única tabela "raiz" entre **todas** as tabelas do modelo e monta a
-      árvore inteira a partir dela, mesmo que schemas diferentes vivam em cenas diferentes hoje. Em
-      qualquer modo segmentado, essas três ações continuam reposicionando objetos de todas as cenas
-      de uma vez, ignorando por completo a divisão em cenas.
-      - **[Requer fechamento de decisão com o usuário]**: o rearranjo deve passar a considerar só a
-        cena ativa (cada cena rearranjada de forma independente) ou continuar operando sobre o
-        modelo inteiro (comportamento histórico da ferramenta)? Cena atual é consistente com a
-        filosofia geral da feature (decisão #9, seção 3); modelo inteiro preserva o comportamento
-        histórico.
-      - **Notas técnicas**: os três algoritmos já recebem/calculam posições absolutas (`QPointF`)
-        — restringir a uma cena seria filtrar `getObjectList()` por
-        `getSceneForObject(obj) == scene` (cena ativa) antes de processar, análogo ao filtro que
-        `selectAllObjects()` já usa. `rearrangeTablesHierarchically()` precisaria de atenção
-        redobrada: a escolha da tabela "raiz" e a travessia por relacionamentos cruzam schemas
-        livremente hoje — restringir por cena pode deixar relacionamentos cross-scene "cortando" a
-        árvore de um jeito que o algoritmo atual nunca precisou considerar. Cruza com a Fase 5
-        (achado colateral 2 do CLI, mesma pergunta).
+4.12. **[Implementada, 2026-09-30 — aguardando teste manual do usuário]** Algoritmos de rearranjo
+      automático: cena atual ou todas? (pergunta do usuário, 2026-09-24) — os três algoritmos por
+      trás do menu "Rearrange objects" (`MainWindow::arrangeObjects()`,
+      [mainwindow.cpp:2446](libs/libgui/src/mainwindow.cpp#L2446) —
+      `rearrangeSchemasInGrid()`, `rearrangeTablesHierarchically()`, `rearrangeTablesInSchemas()`)
+      eram **inteiramente cena-agnósticos**: cada um iterava `db_model->getObjectList(...)` (o
+      modelo inteiro) sem checar em qual `ObjectsScene` cada objeto está.
+      - **Decisão do usuário**: deixar o usuário escolher em tempo de execução — se o modelo tem
+        mais de uma cena, perguntar "cena atual ou todas as cenas" antes de rodar; e, além disso,
+        garantir que cada cena seja tratada dentro do seu próprio retângulo/estado, não misturada
+        com as demais mesmo no modo "todas as cenas".
+      - **Achado durante a implementação, mudou o escopo real da subtarefa**: `SchemaView` (o
+        retângulo do schema) só é construído em modo `NoSegmentation`
+        ([modelwidget.cpp:1346](libs/libgui/src/widgets/modelwidget.cpp#L1346)) — nos dois modos
+        segmentados, `schema->getOverlyingObject()` é sempre `nullptr`. Isso significa que
+        `rearrangeSchemasInGrid()` e `rearrangeTablesInSchemas()` já eram **no-op silencioso** em
+        qualquer modo segmentado (ambos checam `if(sch_view && ...)`/`if(!sch_view) continue;`,
+        sempre falso) — não eram só "cena-agnósticos" como o texto original desta subtarefa dizia,
+        já não funcionavam de jeito nenhum fora de `NoSegmentation`. Só `rearrangeTablesHierarchically()`
+        já funcionava (não depende de `SchemaView`), só sem noção de cena.
+      - **Decisão adicional do usuário, motivada por esse achado**: em qualquer modo segmentado,
+        onde "grade de schemas" não faz sentido (`SegBySchema`: cena já É o schema, a caixa só
+        espelharia a cena; `SegByThreshold`: schema não mapeia pra cena nenhuma), as duas ações
+        tratam a cena como um grupo só de tabelas, sem caixas de schema — mesmo resultado visual de
+        "arranjar tabelas soltas", ignorando fronteira de schema.
+      - **Implementação**: as três funções públicas ganharam um parâmetro `bool
+        current_scene_only` — quando `true`, rodam uma vez, escopadas à cena ativa; quando `false`,
+        rodam uma vez **por cena**, cada uma do zero (`ModelWidget::getSceneObjects(ObjectType,
+        ObjectsScene*, BaseObject* parent_obj = nullptr)`, helper novo, filtra por
+        `getSceneForObject(obj) == target_scene`) — isso já resolve a segunda parte do pedido
+        (nunca mistura estado/grade entre cenas, cada chamada começa do zero com sua própria
+        origem). `rearrangeTablesHierarchically()` ganhou um filtro extra na travessia: um
+        relacionamento cujo parceiro está em outra cena (cut-off, sem `RelationshipView` de
+        verdade) é tratado como não-conectado, não "corta" a árvore da cena atual. `MainWindow::
+        arrangeObjects()` pergunta "cena atual ou todas" só quando `getObjectsScenes().size() > 1`.
+      - **Refactors de suporte**: `rearrangeTablesInGrid(Schema*, ...)` generalizado pra
+        `rearrangeTablesInGrid(std::vector<BaseObject*> tables, ...)` (recebe a lista já pronta,
+        reusado tanto pelo caminho por-schema quanto pelo caminho flat-por-cena);
+        `rearrangeTablesInSchema(Schema*, QPointF)` teve o núcleo de espalhamento/colisão extraído
+        pra `ModelWidget::arrangeTablesScattered(std::vector<BaseObject*>, QPointF)`, mesma reuse.
+      - **Dois outros call sites ajustados** (fora do escopo desta feature, só pra manter
+        compilando após a mudança de assinatura): `priv-core/.../databaseimportwidget.cpp` e
+        `priv-core/.../privpgmodelercliapp.cpp` (import de banco real, GUI e CLI) — ambos passam
+        `true` (cena única recém-criada, `current_scene_only` é indiferente ali).
+      - **Teste novo**: `rearrangeAlgorithmsRespectSceneScopeInThresholdMode` — `SegByThreshold`,
+        threshold 3, 5 tabelas (3 na primeira cena, 2 na segunda), um relacionamento same-scene e
+        um cross-scene (cut-off). Roda as três funções com `current_scene_only=true` escopadas à
+        primeira cena e confirma que as posições das tabelas da segunda cena não mudam nem um
+        pixel — inclusive a tabela do lado cut-off do relacionamento cross-scene, confirmando que
+        `rearrangeTablesHierarchically()` não atravessa pra outra cena através dele. Roda as três
+        de novo com `current_scene_only=false` só confirmando ausência de crash. Suíte completa:
+        49/49 (48 + o novo), build `gui`+`pgmodeler`+`modelwidgettest`+CLI limpo.
+      - **Notas técnicas do texto original, ainda válidas**: cruza com a Fase 5 (achado colateral 2
+        do CLI, mesma pergunta) — não tocado aqui, fora do escopo GUI desta fase.
 
 4.13. **Exportação para PNG/SVG fragmentada em múltiplos arquivos, um por cena** (achado do
       usuário, 2026-09-26) — `ModelExportWidget::exportModel()`

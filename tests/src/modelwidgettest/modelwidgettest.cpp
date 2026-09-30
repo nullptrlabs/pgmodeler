@@ -95,6 +95,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void selectingACutoffClearsObjectSelectionAndOtherCutoffs();
 		void selectingARegularObjectClearsAnySelectedCutoff();
 		void cutoffMarkerCustomPositionSurvivesSaveAndReload();
+		void rearrangeAlgorithmsRespectSceneScopeInThresholdMode();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -3270,6 +3271,95 @@ void ModelWidgetTest::cutoffMarkerCustomPositionSurvivesSaveAndReload()
 	}
 
 	QFile::remove(tmp_file);
+}
+
+/*! \brief Covers Fase 4.12: the three "Rearrange objects" algorithms restricted to a single scene
+ * (SegByThreshold, where a schema doesn't map to a scene at all -- the trickiest of the three
+ * segmentation modes for them, since rearrangeSchemasInGrid()/rearrangeTablesInSchemas() have no
+ * SchemaView to work with there and fall back to a flat per-scene arrangement). Confirms none of
+ * the three crash in that fallback, and that current_scene_only=true never touches the other
+ * scene's tables -- including via a cross-scene relationship, which rearrangeTablesHierarchically()
+ * must treat as not connected (its partner has no same-scene RelationshipView to traverse). */
+void ModelWidgetTest::rearrangeAlgorithmsRespectSceneScopeInThresholdMode()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+		db_model->setSegThreshold(3);
+		db_model->createSystemObjects(true);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		QVERIFY(schema_pub != nullptr);
+
+		std::vector<Table *> tables;
+
+		for(unsigned i = 0; i < 5; i++)
+		{
+			Table *table = new Table;
+			table->setName(QString("table_%1").arg(i));
+			table->setSchema(schema_pub);
+
+			Column *col = new Column;
+			col->setName("id");
+			col->setType(PgSqlType("serial"));
+			table->addColumn(col);
+
+			Constraint *pk = new Constraint;
+			pk->setName(QString("table_%1_pk").arg(i));
+			pk->setConstraintType(ConstraintType::PrimaryKey);
+			pk->addColumn(table->getColumn("id"), Constraint::SourceCols);
+			table->addConstraint(pk);
+
+			db_model->addTable(table);
+			tables.push_back(table);
+		}
+
+		//Threshold 3, 5 tables: table_0/1/2 land in the first scene, table_3/4 in the second
+		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+
+		ObjectsScene *scene0 = model_wgt.getObjectsScenes().at(0);
+		ObjectsScene *scene1 = model_wgt.getObjectsScenes().at(1);
+
+		QCOMPARE(model_wgt.getSceneForObject(tables[0]), scene0);
+		QCOMPARE(model_wgt.getSceneForObject(tables[3]), scene1);
+
+		//Same-scene relationship, exercises the normal traversal
+		Relationship *rel_same_scene = new Relationship(BaseRelationship::Relationship1n, tables[0], tables[1]);
+		db_model->addRelationship(rel_same_scene);
+
+		//Cross-scene (cut-off) relationship -- table_3 must never be reachable while scoped to scene0
+		Relationship *rel_cross_scene = new Relationship(BaseRelationship::Relationship1n, tables[2], tables[3]);
+		db_model->addRelationship(rel_cross_scene);
+
+		QPointF table3_pos_before = dynamic_cast<BaseObjectView *>(tables[3]->getOverlyingObject())->pos();
+		QPointF table4_pos_before = dynamic_cast<BaseObjectView *>(tables[4]->getOverlyingObject())->pos();
+
+		model_wgt.setActiveScene(0);
+
+		model_wgt.rearrangeTablesHierarchically(true);
+		QCOMPARE(dynamic_cast<BaseObjectView *>(tables[3]->getOverlyingObject())->pos(), table3_pos_before);
+		QCOMPARE(dynamic_cast<BaseObjectView *>(tables[4]->getOverlyingObject())->pos(), table4_pos_before);
+
+		model_wgt.rearrangeSchemasInGrid(true);
+		QCOMPARE(dynamic_cast<BaseObjectView *>(tables[3]->getOverlyingObject())->pos(), table3_pos_before);
+		QCOMPARE(dynamic_cast<BaseObjectView *>(tables[4]->getOverlyingObject())->pos(), table4_pos_before);
+
+		model_wgt.rearrangeTablesInSchemas(true);
+		QCOMPARE(dynamic_cast<BaseObjectView *>(tables[3]->getOverlyingObject())->pos(), table3_pos_before);
+		QCOMPARE(dynamic_cast<BaseObjectView *>(tables[4]->getOverlyingObject())->pos(), table4_pos_before);
+
+		//"All scenes" mode: every scene is scoped internally, one at a time -- just needs to not crash
+		model_wgt.rearrangeTablesInSchemas(false);
+		model_wgt.rearrangeSchemasInGrid(false);
+		model_wgt.rearrangeTablesHierarchically(false);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
 }
 
 QTEST_MAIN(ModelWidgetTest)

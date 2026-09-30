@@ -331,15 +331,24 @@ class __libgui ModelWidget: public QWidget {
 
 		void breakRelationshipLine(BaseRelationship *rel, RelBreakMode break_type);
 
-		/*! \brief Arrange tables starting from a specified root in a hierarchical way
-		where for a certain table its child (or related) tables are places aside from left to right and top to bottom.
-		This method returns the bounding rect of the items after the rearrangement */
-		QRectF rearrangeTablesHierarchically(BaseTableView *root, std::vector<BaseObject *> &evaluated_tabs);
+		//! \brief Per-scene worker for the public rearrangeTablesHierarchically(bool)
+		void rearrangeTablesHierarchically(ObjectsScene *target_scene);
+
+		/*! \brief Arrange tables starting from a specified root in a hierarchical way, considering only
+		relationships whose other table is also in target_scene (a cross-scene/cut-off partner is treated
+		as not connected) -- for a certain table its child (or related) tables are places aside from left
+		to right and top to bottom. This method returns the bounding rect of the items after the rearrangement */
+		QRectF rearrangeTablesHierarchically(ObjectsScene *target_scene, BaseTableView *root, std::vector<BaseObject *> &evaluated_tabs);
 
 		/*! \brief Arrange tables inside the provided schema randomly (scattered). An start point should
 		 * be provided. The method will avoid to put two or more tables in the same position causing
 		 * overlaping. This method causes the schema rectangle to be enabled. */
 		void rearrangeTablesInSchema(Schema *schema, QPointF start);
+
+		/*! \brief Core of rearrangeTablesInSchema(), minus the schema-specific rectangle handling --
+		 * scatters the given tables (already gathered by the caller) randomly around start, avoiding
+		 * collisions between them. Reused directly for a flat, schema-less scene arrangement */
+		void arrangeTablesScattered(std::vector<BaseObject *> tables, QPointF start);
 
 		void updateMagnifierArea();
 
@@ -485,10 +494,21 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Disables the model actions when some new object action is active
 		void enableModelActions(bool value);
 
-		/*! \brief Reorganizes the tables of a specific schema over the scene. The parameter are:
-		 the schema in which the tables will be rearranged, an origin point, number of tables per row
-		 a object spacing */
-		void rearrangeTablesInGrid(Schema *schema, unsigned tabs_per_row, QPointF origin, double obj_spacing);
+		/*! \brief Reorganizes the given tables/views/foreign tables in a grid form. The parameters are:
+		 the objects to arrange (already gathered by the caller -- a schema's children or a whole
+		 scene's, flat), an origin point, number of tables per row and a object spacing */
+		void rearrangeTablesInGrid(std::vector<BaseObject *> tables, unsigned tabs_per_row, QPointF origin, double obj_spacing);
+
+		//! \brief Per-scene worker for the public rearrangeSchemasInGrid(bool, ...) -- see there for the segmented-mode fallback
+		void rearrangeSchemasInGrid(ObjectsScene *target_scene, unsigned tabs_per_row, unsigned sch_per_row,
+																QPointF origin, double obj_spacing);
+
+		//! \brief Per-scene worker for the public rearrangeTablesInSchemas(bool) -- see there for the segmented-mode fallback
+		void rearrangeTablesInSchemas(ObjectsScene *target_scene);
+
+		/*! \brief Filters the given type's objects (all of them, or just parent_obj's children when
+		 * provided) down to the ones whose graphical item currently lives in target_scene */
+		std::vector<BaseObject *> getSceneObjects(ObjectType type, ObjectsScene *target_scene, BaseObject *parent_obj = nullptr);
 
 		void fadeObjects(const std::vector<BaseObject *> &objects, bool fade_in);
 
@@ -645,16 +665,21 @@ class __libgui ModelWidget: public QWidget {
 		void updateObjectsOpacity();
 
 		/*! \brief Rearrange table/view/textboxes in the canvas in such way to provide better visualization
-		 * of the whole model. Currently only hierachical arrangement is possible. See rearrangeTablesHierarchically() */
-		void rearrangeTablesHierarchically();
+		 * of the whole model. Currently only hierachical arrangement is possible. See rearrangeTablesHierarchically().
+		 * current_scene_only restricts it to the active scene; otherwise every scene is rearranged, each
+		 * independently (own root, own textbox/leftover-table layout, own bounding area) */
+		void rearrangeTablesHierarchically(bool current_scene_only);
 
-		/*! \brief Reorganizes the schemas over the scene in a grid form. The parameters are: an origin point,
-		number of tables per row, schemas per row and a object spacing */
-		void rearrangeSchemasInGrid(unsigned tabs_per_row = 0, unsigned sch_per_row = 0,
+		/*! \brief Reorganizes the schemas over the scene in a grid form. The parameters are: whether to
+		 * restrict to the active scene or arrange every scene independently, an origin point, number of
+		 * tables per row, schemas per row and a object spacing. Outside of NoSegmentation there's no
+		 * schema box to grid (see ModelWidget::handleObjectAddition()) -- each scene's tables are
+		 * arranged directly in a flat grid instead, schema grouping ignored */
+		void rearrangeSchemasInGrid(bool current_scene_only, unsigned tabs_per_row = 0, unsigned sch_per_row = 0,
 																QPointF origin = QPointF(50, 50), double obj_spacing = 75);
 
-		//! \brief Arrange all tables it their schemas randomly (scattered)
-		void rearrangeTablesInSchemas();
+		//! \brief Arrange all tables in their schemas randomly (scattered). See rearrangeSchemasInGrid() for current_scene_only
+		void rearrangeTablesInSchemas(bool current_scene_only);
 
 		void emitSceneInteracted();
 
