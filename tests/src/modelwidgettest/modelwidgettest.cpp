@@ -835,10 +835,13 @@ void ModelWidgetTest::thresholdModeSceneAssignmentSurvivesSaveAndReload()
 }
 
 /*! \brief Changing seg-threshold and saving without touching any Table/View/ForeignTable leaves
-the per-object scene indices on disk still reflecting the OLD threshold -- a plain reload must
-detect that mismatch and redo the bucketing under the new threshold instead of trusting the stale
-distribution. This guards the bug report: changing the threshold from the UI silently had no effect
-on an already-segmented model, no matter how many times it was reloaded afterward. */
+the per-object scene indices AND the per-scene rects on disk still reflecting the OLD threshold --
+a plain reload must detect that mismatch, redo the bucketing under the new threshold, and recompute
+every scene's rect from its real (now different) contents instead of trusting either stale value.
+This guards two bug reports: changing the threshold from the UI silently had no effect on an
+already-segmented model no matter how many times it was reloaded, and once that was fixed, tables
+merged into a scene whose rect was still the old, narrower one ended up positioned outside it --
+unreachable by scrolling, effectively "disappeared". */
 void ModelWidgetTest::changingThresholdRebucketsScenesOnReload()
 {
 	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_threshold_rebucket.dbm");
@@ -859,11 +862,15 @@ void ModelWidgetTest::changingThresholdRebucketsScenesOnReload()
 			Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
 			QVERIFY(public_sch != nullptr);
 
+			/* Each old-scene batch of 5 gets positions far apart from the others -- mirrors how
+			 * unrelated scenes end up with unrelated coordinate ranges in a real model, so a stale
+			 * rect fitted to only one batch can be shown to provably not contain another's */
 			for(unsigned i = 0; i < 12; i++)
 			{
 				Table *table = new Table;
 				table->setName(QString("table_%1").arg(i));
 				table->setSchema(public_sch);
+				table->setPosition(QPointF((i / 5) * 9000, (i / 5) * 9000));
 				db_model->addTable(table);
 			}
 
@@ -873,7 +880,8 @@ void ModelWidgetTest::changingThresholdRebucketsScenesOnReload()
 			model_wgt.saveModel(tmp_file);
 
 			/* Widen the threshold well past the object count without touching any table -- the scene
-			 * indices already on disk still reflect the threshold of 5 that produced them */
+			 * indices and per-scene rects already on disk still reflect the threshold of 5 that
+			 * produced them */
 			model_wgt.setPendingSceneThreshold(1000);
 			model_wgt.saveModel(tmp_file);
 		}
@@ -889,6 +897,21 @@ void ModelWidgetTest::changingThresholdRebucketsScenesOnReload()
 
 			//12 tables under threshold 1000 all belong in a single scene -- the stale indices must have been discarded
 			QCOMPARE(model_wgt.getObjectsScenes().size(), 1);
+
+			ObjectsScene *merged_scene = model_wgt.getObjectsScenes().first();
+
+			//Every table's real position must fall within the scene's rect, not just the batch a stale persisted rect happened to fit
+			for(unsigned i = 0; i < 12; i++)
+			{
+				Table *table = dynamic_cast<Table *>(db_model->getObject(QString("table_%1").arg(i), ObjectType::Table));
+				QVERIFY(table != nullptr);
+
+				QGraphicsItem *item = dynamic_cast<QGraphicsItem *>(table->getOverlyingObject());
+				QVERIFY(item != nullptr);
+
+				QVERIFY2(merged_scene->sceneRect().contains(item->sceneBoundingRect()),
+								 qPrintable(QString("table_%1 fell outside the merged scene's rect").arg(i)));
+			}
 		}
 	}
 	catch(Exception &e)

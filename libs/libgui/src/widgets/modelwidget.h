@@ -507,12 +507,18 @@ class __libgui ModelWidget: public QWidget {
 		 * scene rect that no operation is done. */
 		void adjustSceneRect(bool use_model_rect, bool expand_only = false);
 
-		/*! \brief Applies adjustSceneRect(true) to the active scene (unchanged legacy behavior) and,
-		 * for every other scene, sets its rect straight from its own items' bounding rect -- never
-		 * ObjectsScene::adjustSceneRect(), which unconditionally pulls the left/top edge back to the
-		 * origin and would be wrong here, since these scenes aren't being resized interactively, just
-		 * given a correct rect for the first time */
-		void adjustAllScenesRects();
+		/*! \brief When use_model_rect is true (the default), applies adjustSceneRect(true) to the
+		 * active scene (unchanged legacy behavior, pulling from DatabaseModel's single saved
+		 * scene-rect) and, for every other scene, sets its rect straight from its own items' bounding
+		 * rect -- never ObjectsScene::adjustSceneRect(), which unconditionally pulls the left/top edge
+		 * back to the origin and would be wrong here, since these scenes aren't being resized
+		 * interactively, just given a correct rect for the first time.
+		 * When false, the active scene gets the exact same items'-bounding-rect treatment as every
+		 * other one instead of the DatabaseModel-sourced shortcut -- used right after a threshold
+		 * rebucketing (see loadModel()), where scene membership just changed and any rect sourced from
+		 * before that -- the model's single legacy rect included -- no longer describes what's
+		 * actually in each scene now */
+		void adjustAllScenesRects(bool use_model_rect = true);
 
 		/*! \brief Expand the scene rect to the specified direction.
 		 * The size expanded is determined by the current page layout used by the scene. */

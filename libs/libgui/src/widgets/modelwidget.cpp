@@ -2570,10 +2570,12 @@ void ModelWidget::loadModel(const QString &filename, bool check_alt_seg_mode)
 		// Disable objects blinking during model loading
 		blink_new_objs = false;
 
+		bool rebucketed = needsThresholdRebucketing(filename);
+
 		db_model->loadModel(filename,
 												alt_seg_mode.isValid(), alt_seg_mode.mode,
 												DatabaseModel::DefaultSegThreshold,
-												needsThresholdRebucketing(filename));
+												rebucketed);
 
 		blink_new_objs = curr_blink_objs;
 
@@ -2622,9 +2624,17 @@ void ModelWidget::loadModel(const QString &filename, bool check_alt_seg_mode)
 
 		this->filename = filename;
 
+		/* The persisted per-scene rects below are keyed by scene index and were fitted to whichever
+		 * objects occupied that index under the OLD threshold -- rebucketing just changed which
+		 * objects occupy each index, so trusting them here would clip scenes to a bounding box that
+		 * no longer matches what they actually contain. Clearing them makes adjustAllScenesRects()
+		 * fall back to recomputing every scene's rect from its real, current items instead */
+		if(rebucketed)
+			db_model->setSceneRects({});
+
 		updateSceneLayers();
 		updateObjectsOpacity();
-		adjustAllScenesRects();
+		adjustAllScenesRects(!rebucketed);
 
 		task_prog_wgt.close();
 		setProtected(db_model->isProtected());
@@ -2696,9 +2706,10 @@ void ModelWidget::adjustSceneRect(bool use_model_rect, bool expand_only)
 	emit s_sceneInteracted(rect.size());
 }
 
-void ModelWidget::adjustAllScenesRects()
+void ModelWidget::adjustAllScenesRects(bool use_model_rect)
 {
-	adjustSceneRect(true);
+	if(use_model_rect)
+		adjustSceneRect(true);
 
 	QMap<int, QRectF> persisted_rects = db_model->getSceneRects();
 
@@ -2706,12 +2717,14 @@ void ModelWidget::adjustAllScenesRects()
 	{
 		ObjectsScene *scn = scenes.at(idx);
 
-		if(scn == scene)
+		if(use_model_rect && scn == scene)
 			continue;
 
 		/* A persisted rect takes precedence -- falls back to the items' own bounding rect (no side
 		 * effects, items stay exactly where they are) for scenes with no persisted entry: an old
-		 * file predating this attribute, or a scene created since the last save */
+		 * file predating this attribute, a scene created since the last save, or -- when this whole
+		 * method was called with use_model_rect false -- every scene, since the caller already knows
+		 * none of the persisted rects (cleared beforehand) describe current scene membership */
 		if(persisted_rects.contains(idx))
 			scn->setSceneRect(persisted_rects.value(idx));
 		else
