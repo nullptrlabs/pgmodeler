@@ -1332,6 +1332,14 @@ depois.
      threshold atual. Preço aceito explicitamente pelo usuário: qualquer realocação manual feita via
      `moveToScene()` (subtarefa 4.2) também é descartada quando isso acontece, já que usa o mesmo
      atributo — só ocorre quando o threshold de fato mudou desde o último save, nunca no caso comum.
+     **Bug de acompanhamento, achado pelo usuário logo em seguida testando com modelo real**: os
+     retângulos por cena (`db_model->getSceneRects()`), também mantidos por índice, ficavam
+     igualmente obsoletos após o rebucketing — cenas sobreviventes herdavam o retângulo pequeno,
+     ajustado à distribuição antiga, cortando objetos recém-fundidos que caíam fora dele
+     ("desapareciam"). Fechado limpando `scene_rects` junto com o descarte dos índices de objeto, e
+     dando a `ModelWidget::adjustAllScenesRects()` um parâmetro (`use_model_rect`) pra também tratar
+     a cena ativa como as demais nesse caso — ela tinha um atalho separado (`db_model->
+     getSceneRect()`, o retângulo legado único) que nem o descarte de `scene_rects` cobria.
      Ver detalhamento completo em `MULTI_SCENE_PROGRESS.md`.
 
 3.2. **Persistência de retângulo por cena** — implementação completa do design fechado na seção 2:

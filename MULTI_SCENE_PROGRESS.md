@@ -1327,7 +1327,47 @@
     em vez de 1) sem o fix, passa com ele restaurado.
   - Suíte `modelwidgettest` completa: 48/48 (47 + o novo). `schemafilessyntaxtest`: 3/3. Build
     `core`+`gui`+`modelwidgettest`+`schemafilessyntaxtest` limpo, `cmake --install` rodado pra
-    sincronizar `dbmodel.sch`/`dbmodel.dtd`. **Ainda não commitado.**
+    sincronizar `dbmodel.sch`/`dbmodel.dtd`. **Commitado em `a6d92756b`**, junto com um resave não
+    relacionado de `taskprogresswidget.ui` (Qt Designer) que o usuário pediu pra incluir no mesmo
+    commit.
+  - **Segundo bug encontrado pelo próprio usuário testando com um modelo real (2026-09-29, mesmo
+    dia): objetos "desapareciam" depois do rebucketing.** Trocar threshold 500→1000 corretamente
+    reduzia o número de cenas, mas alguns objetos ficavam com a posição fora dos limites da nova
+    cena — inacessíveis por scroll.
+    - **Causa raiz**: `ModelWidget::loadModel()` sempre termina chamando `adjustAllScenesRects()`
+      ([modelwidget.cpp:2709-2730](libs/libgui/src/widgets/modelwidget.cpp#L2709-L2730)), que
+      restaura o `sceneRect()` de cada cena a partir de `db_model->getSceneRects()` — retângulos
+      **por índice de cena**, ajustados aos objetos que ocupavam aquele índice sob o threshold
+      **antigo**. O fix do rebucketing muda quem ocupa cada índice, mas não invalidava esses
+      retângulos — cenas sobreviventes (a maioria, já que o arquivo antigo tinha mais cenas que o
+      threshold novo produz) continuavam recebendo o retângulo pequeno e específico de antes,
+      cortando objetos que agora foram fundidos ali mas caem fora dele.
+    - **Fix em duas partes, a segunda achada só depois de instrumentar e ver o teste falhar mesmo
+      com a primeira aplicada**: (1) `ModelWidget::loadModel()` chama `db_model->setSceneRects({})`
+      quando `rebucketed` é `true`, antes de `adjustAllScenesRects()` — o `if(persisted_rects.
+      contains(idx))` já existente passa a falhar pra toda cena, caindo no fallback correto
+      (`itemsBoundingRect()`, recalculado do que realmente está lá agora). (2) Essa limpeza sozinha
+      não bastou pra cena **ativa**: `adjustAllScenesRects()` sempre chamava `adjustSceneRect(true)`
+      incondicionalmente pra ela no início, e **pulava** ela no loop (`if(scn == scene) continue;`)
+      — então ela nunca passava pelo fallback, só pegava `db_model->getSceneRect()` (o retângulo
+      legado, singular, união de todas as cenas antigas — igualmente obsoleto, e sem guarda de
+      "limpar" já que `DatabaseModel::setSceneRect()` ignora silenciosamente um `QRectF()`
+      inválido). Resolvido dando a `adjustAllScenesRects()` um parâmetro `bool use_model_rect =
+      true` (só esse um call site existia, então a assinatura pôde mudar sem afetar mais nada):
+      quando `false`, pula o atalho de `adjustSceneRect(true)` e não exclui mais a cena ativa do
+      loop, dando a ela o mesmo tratamento de `itemsBoundingRect()` que as demais.
+      `ModelWidget::loadModel()` passa `adjustAllScenesRects(!rebucketed)`.
+    - **Teste estendido** (não um teste novo): `changingThresholdRebucketsScenesOnReload()` ganhou
+      posições bem separadas por lote de 5 tabelas (`(i/5)*9000`, mesma convenção de "cenas
+      diferentes têm faixas de coordenada não relacionadas" já usada em outros testes da suíte) e,
+      depois do reload, verifica que a posição de **todas** as 12 tabelas cai dentro do
+      `sceneRect()` da cena única resultante. Verificado fail-then-pass duas vezes,
+      independentemente: sabotando só o `setSceneRects({})` e sabotando só o
+      `adjustAllScenesRects(!rebucketed)` (voltando pra `true`) — cada um sozinho reproduz a falha
+      relatada (`table_5 fell outside the merged scene's rect`), confirmando que as duas partes do
+      fix são necessárias, não redundantes.
+    - Suíte `modelwidgettest` completa: 48/48 sem regressão. Build `core`+`gui`+`modelwidgettest`
+      limpo. **Ainda não commitado.**
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
