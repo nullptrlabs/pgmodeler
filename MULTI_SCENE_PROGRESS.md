@@ -1213,6 +1213,55 @@
     DefaultSegThreshold)` — sem mensagem extra de "só vale após salvar+recarregar", já que o
     override aplica o modo na própria carga em curso. Build (`gui`, rebuild completo incluindo
     `priv-core`) limpo. **Sem teste manual do usuário ainda**.
+  - **Reorganização + extensão do critério (2026-09-29, mesmo dia, ainda não commitada)**: usuário
+    pediu pra concentrar toda a lógica espalhada entre `MainWindow`/`DatabaseModel` dentro de
+    `ModelWidget::loadModel()`, e pra sugestão passar a decidir de verdade entre `SegBySchema` e
+    `SegByThreshold` (antes só existia o caminho "trocar pra threshold"; concentração baixa não
+    levava a nenhuma sugestão de `SegBySchema`). O struct de resultado/`ConcentrationSuggestThreshold`/
+    o método de varredura saíram de `DatabaseModel` (público) e viraram privados em `ModelWidget`;
+    `DatabaseModel` manteve só `DefaultSegThreshold` e o mecanismo de override em `loadModel()`
+    (inalterado, ainda usado internamente). O método de varredura agora também lê `SegMode` do
+    elemento raiz na mesma pré-varredura (antes só filtrada implicitamente por `MainWindow` nunca
+    chamar isso de novo numa sessão) e volta com uma instância "inválida" de cara se já houver um
+    modo salvo — nenhum modelo que já escolheu
+    (explicitamente ou por uma sugestão anterior aceita) é questionado de novo. Quando
+    `total_objs >= DefaultSegThreshold`, a escolha agora é `SegByThreshold` se a concentração no
+    maior schema passa de `ConcentrationSuggestThreshold`, senão `SegBySchema` (mensagem do
+    `Messagebox` tem uma variante de texto pra cada caso).
+    `ModelWidget::loadModel()` trocou a assinatura de três parâmetros de override
+    (`override_seg_mode`/`ovr_seg_mode`/`ovr_seg_threshold`, só usados por `MainWindow`) por um único
+    `bool use_seg_suggestion = false` — default `false` preserva exatamente o comportamento de todo
+    outro call site (`AppearanceConfigWidget::previewModel()`, os ~15 call sites em
+    `modelwidgettest.cpp`) sem precisar tocar em nenhum deles; `MainWindow::addModel()` é o único que
+    passa `true`, e ficou reduzido a `model_wgt->loadModel(filename, true)`. Internamente,
+    `ModelWidget::loadModel()` calcula os `override_seg_mode`/`ovr_seg_mode`/`ovr_seg_threshold`
+    locais que repassa pra `db_model->loadModel()` — esses três continuam existindo, só que agora só
+    como implementação interna, nunca expostos. Build (`core`+`gui`) limpo; suíte `modelwidgettest`
+    completa (47/47) sem regressão — confirmado também que a falha pré-existente e não relacionada em
+    `databasemodeltest::loadObjectsMetadata()` (arquivo `build/demo.omf` obsoleto no ambiente local)
+    já ocorria antes desta mudança, via `git stash`. **Ainda não commitada.**
+  - **Segunda passada de nomenclatura (2026-09-29, mesmo dia, ainda não commitada)**: usuário achou
+    `SegmentationSuggestion` pouco técnico — renomeado pra `ModelWidget::AlternateSegInfo`, e o
+    método de varredura pra `getAlternateSegInfo()`. O campo `bool suggested` saiu do struct: em vez
+    dele, `AlternateSegInfo::isValid() const` deriva a validade de `mode != NoSegmentation` e dos
+    campos `unsigned` (`total_objs > 0 && max_schema_objs > 0 && max_schema_objs <= total_objs`) —
+    uma instância default-construída (`mode == NoSegmentation`) já é "inválida" por conta própria,
+    então os três retornos antecipados dentro de `getAlternateSegInfo()` (arquivo vazio, `SegMode` já
+    definido no elemento raiz, exceção no `catch`) simplificaram pra `return {}`/`return
+    AlternateSegInfo()` sem precisar setar nenhum campo à mão. Chamador em `loadModel()` trocou
+    `suggestion.suggested` por `suggestion.isValid()`. Build (`core`+`gui`+`modelwidgettest`) limpo,
+    suíte completa (47/47) sem regressão.
+  - **Terceira passada, refinamento feito pelo próprio usuário direto no editor (2026-09-29, mesmo
+    dia, ainda não commitada)**: struct renomeado de novo pra `AlternateSegMode`, método de varredura
+    pra `getAlternateSegMode()`. Extraiu o diálogo de dentro de `loadModel()` pra um método próprio,
+    `checkAlternateSegmentation()` — chama `getAlternateSegMode()`, monta a mensagem e mostra o
+    `Messagebox` só se `isValid()`, devolvendo o modo confirmado ou `{}`. `loadModel()` ficou mais
+    enxuto: só `if(check_alt_seg_mode) alt_seg_mode = checkAlternateSegmentation(filename);` no topo
+    e uma linha só chamando `db_model->loadModel()`, sem variáveis locais de override separadas.
+    Parâmetro de `loadModel()` renomeado de `use_seg_suggestion` pra `check_alt_seg_mode`. Revisei o
+    resultado (build `core`+`gui`+`modelwidgettest` limpo, suíte 47/47 sem regressão) e só corrigi
+    comentários que ainda citavam os nomes antigos (`modelwidget.h`, `mainwindow.cpp`,
+    `databasemodel.cpp`) — nenhum problema funcional encontrado.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

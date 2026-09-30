@@ -2345,8 +2345,6 @@ void ModelWidget::convertRelationship1N()
 	}
 	catch(Exception &e)
 	{
-		//qApp->restoreOverrideCursor();
-
 		if(op_count < op_list->getCurrentSize())
 		{
 			unsigned qtd = op_list->getCurrentSize() - op_count;
@@ -2365,14 +2363,139 @@ void ModelWidget::convertRelationship1N()
 	}
 }
 
-void ModelWidget::loadModel(const QString &filename, bool override_seg_mode,
-														 DatabaseModel::SegmentationMode ovr_seg_mode, unsigned ovr_seg_threshold)
+ModelWidget::AlternateSegMode ModelWidget::getAlternateSegMode(const QString &filename)
 {
-	TaskProgressWidget task_prog_wgt(this);
-	bool curr_blink_objs = blink_new_objs;
+	AlternateSegMode suggestion;
+
+	if(filename.isEmpty())
+		return suggestion;
 
 	try
 	{
+		XmlParser xmlparser;
+		QHash<QString, unsigned> objs_per_schema;
+		QString elem_name;
+		attribs_map attribs;
+
+		xmlparser.loadXMLFile(filename);
+		xmlparser.getElementAttributes(attribs);
+
+		// A model that already picked a mode -- explicitly or via a previous suggestion -- is never second-guessed
+		if(!attribs[Attributes::SegMode].isEmpty())
+			return suggestion;
+
+		if(!xmlparser.accessElement(XmlParser::ChildElement))
+			return suggestion;
+
+		do
+		{
+			if(xmlparser.getElementType() != XML_ELEMENT_NODE)
+				continue;
+
+			elem_name = xmlparser.getElementName();
+
+			if(!BaseTable::isBaseTable(BaseObject::getObjectType(elem_name)))
+				continue;
+
+			// Table/view/foreigntable elements reference their schema via a <schema name=".."/> child
+			xmlparser.savePosition();
+
+			if(xmlparser.accessElement(XmlParser::ChildElement))
+			{
+				do
+				{
+					if(xmlparser.getElementType() == XML_ELEMENT_NODE &&
+						 xmlparser.getElementName() == Attributes::Schema)
+					{
+						xmlparser.getElementAttributes(attribs);
+						objs_per_schema[attribs[Attributes::Name]]++;
+						break;
+					}
+				}
+				while(xmlparser.accessElement(XmlParser::NextElement));
+			}
+
+			xmlparser.restorePosition();
+		}
+		while(xmlparser.accessElement(XmlParser::NextElement));
+
+		for(auto itr = objs_per_schema.begin(); itr != objs_per_schema.end(); itr++)
+		{
+			suggestion.total_objs += itr.value();
+
+			if(itr.value() > suggestion.max_schema_objs)
+			{
+				suggestion.max_schema_objs = itr.value();
+				suggestion.max_schema_name = itr.key();
+			}
+		}
+
+		if(suggestion.total_objs >= DatabaseModel::DefaultSegThreshold)
+		{
+			bool concentrated =
+					(static_cast<double>(suggestion.max_schema_objs) / suggestion.total_objs) >= ConcentrationSuggestThreshold;
+
+			suggestion.mode = concentrated ? DatabaseModel::SegByThreshold : DatabaseModel::SegBySchema;
+		}
+	}
+	/* A malformed/unreadable file here just means no suggestion -- the real loadModel() call right
+	 * after this one will surface the actual error to the user */
+	catch(Exception &)
+	{
+		return {};
+	}
+
+	return suggestion;
+}
+
+ModelWidget::AlternateSegMode ModelWidget::checkAlternateSegmentation(const QString &filename)
+{
+	AlternateSegMode alt_seg_mode = getAlternateSegMode(filename);
+
+	if(!alt_seg_mode.isValid())
+		return {};
+
+	double pct = (100.0 * alt_seg_mode.max_schema_objs) / alt_seg_mode.total_objs;
+	QString msg;
+
+	if(alt_seg_mode.mode == DatabaseModel::SegByThreshold)
+	{
+		msg = tr("This model concentrates <strong>%1%</strong> of its <strong>%2</strong> tables/views/foreign tables in a "
+						 "single schema <strong>%3</strong>. Segmenting the canvas by schema wouldn't distribute "
+						 "much of that load into separate scenes. Load it with threshold-based segmentation instead?")
+					.arg(QString::number(pct, 'f', 0))
+					.arg(alt_seg_mode.total_objs)
+					.arg(alt_seg_mode.max_schema_name);
+	}
+	else
+	{
+		msg = tr("This model spreads its <strong>%1</strong> tables/views/foreign tables across several "
+						 "schemas, none concentrating more than <strong>%2%</strong> of them (the largest, <strong>%3</strong>, "
+						 "holds <strong>%4%</strong>). Segmenting the canvas by schema instead of by threshold would "
+						 "distribute that load into separate scenes. Load it with schema-based segmentation instead?")
+					.arg(alt_seg_mode.total_objs)
+					.arg(QString::number(100 * ConcentrationSuggestThreshold, 'f', 0),
+							 alt_seg_mode.max_schema_name,
+							 QString::number(pct, 'f', 0));
+	}
+
+	if(Messagebox::isAccepted(Messagebox::confirm(msg)))
+		return alt_seg_mode;
+
+	return {};
+}
+
+void ModelWidget::loadModel(const QString &filename, bool check_alt_seg_mode)
+{
+	TaskProgressWidget task_prog_wgt(this);
+	bool curr_blink_objs = blink_new_objs;
+	AlternateSegMode alt_seg_mode;
+
+	try
+	{
+		if(check_alt_seg_mode)
+			alt_seg_mode = checkAlternateSegmentation(filename);
+
 		#ifdef PGMODELER_DEBUG
 			quint64 start = QDateTime::currentMSecsSinceEpoch();
 		#endif
@@ -2384,7 +2507,11 @@ void ModelWidget::loadModel(const QString &filename, bool override_seg_mode,
 
 		// Disable objects blinking during model loading
 		blink_new_objs = false;
-		db_model->loadModel(filename, override_seg_mode, ovr_seg_mode, ovr_seg_threshold);
+
+		db_model->loadModel(filename,
+												alt_seg_mode.isValid(), alt_seg_mode.mode,
+												DatabaseModel::DefaultSegThreshold);
+
 		blink_new_objs = curr_blink_objs;
 
 		/* Any cut-off marker attached while its table's box was still stuck at its pre-configuration
