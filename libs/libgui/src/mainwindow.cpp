@@ -2448,19 +2448,46 @@ void MainWindow::arrangeObjects()
 	if(!current_model)
 		return;
 
-	int res =	Messagebox::confirm(tr("Rearrange objects over the canvas is an irreversible operation! Would like to proceed?"));
+	static const QString arrange_msg { tr("Rearranging objects on the canvas is an irreversible operation.") };
 
-	if(!Messagebox::isAccepted(res))
-		return;
+	bool current_scene_only = false;
+	DatabaseModel::SegmentationMode seg_mode =
+		current_model->getDatabaseModel()->getSegmentationMode();
+
+	int res =	Messagebox::Rejected;
+
+	if(seg_mode == DatabaseModel::NoSegmentation)
+	{
+		res = Messagebox::confirm(arrange_msg + tr(" Would like to proceed?"));
+
+		if(Messagebox::isRejected(res))
+			return;
+	}
+	else
+	{
+		//Only a real choice when the model actually has more than one scene to pick between
+		if(current_model->getObjectsScenes().size() > 1)
+		{
+			res = Messagebox::confirm(arrange_msg + tr(" How the rearrangement should be applied?"),
+																Messagebox::Confirm, Messagebox::AllButtons,
+																tr("This scene only"), tr("All scenes"), tr("Cancel"),
+																"", GuiUtilsNs::getIconPath("refresh"));
+
+			if(Messagebox::isCanceled(res))
+				return;
+
+			current_scene_only = Messagebox::isAccepted(res);
+		}
+	}
 
 	qApp->setOverrideCursor(Qt::WaitCursor);
 
 	if(sender() == arrange_menu.actions().at(0))
-		current_model->rearrangeSchemasInGrid();
+		current_model->rearrangeSchemasInGrid(current_scene_only);
 	else if(sender() == arrange_menu.actions().at(1))
-		current_model->rearrangeTablesHierarchically();
+		current_model->rearrangeTablesHierarchically(current_scene_only);
 	else
-		current_model->rearrangeTablesInSchemas();
+		current_model->rearrangeTablesInSchemas(current_scene_only);
 
 	qApp->restoreOverrideCursor();
 }

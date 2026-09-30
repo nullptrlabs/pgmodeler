@@ -6,7 +6,7 @@
 
 ## Estado atual
 
-> **Ponteiro mais recente (2026-09-30, HEAD `ae90d9d32`)** — o resto desta seção é um log
+> **Ponteiro mais recente (2026-09-30, HEAD `1f67b5b1b`)** — o resto desta seção é um log
 > cronológico que vai ficando desatualizado à medida que sessões avançam; para saber o estado real
 > sem reler tudo, confie neste bloco e no plano (`MULTI_SCENE_PLAN.md`), não nas primeiras linhas
 > do log abaixo. Fases 0-3 e Fase 4 subtarefas 4.1-4.7 e 4.9 (4.9.1/4.9.2) — todas concluídas e
@@ -15,9 +15,13 @@
 > por complexidade). Dois bugs de reload sob threshold, achados pelo usuário testando com um
 > modelo real no mesmo dia, já corrigidos e commitados: troca de threshold sem efeito após
 > salvar+recarregar (`a6d92756b`) e objetos fora do retângulo da cena após o rebucketing
-> (`ae90d9d32`). **4.11 (criar tag/layer a partir de schemas) implementada em 2026-09-30, já
-> revisada e ajustada (ver entrada própria mais abaixo), ainda não commitada — aguardando teste
-> manual do usuário**. Suíte `modelwidgettest` 48/48 limpa nessa rodada. Restam em aberto as
+> (`ae90d9d32`). **4.11 (criar tag/layer a partir de schemas) commitada** (`835a4c2e5`) — incluiu um
+> leak pré-existente e não relacionado achado pelo usuário via ASan logo depois, também corrigido e
+> commitado (`1f67b5b1b`, `BaseObjectView::mousePressEvent()`). **4.12 (escopo de cena pro
+> "Rearrange objects") implementada em 2026-09-30, ainda não commitada — aguardando teste manual
+> do usuário** (ver entrada própria mais abaixo; mexe em dois arquivos do `priv-core`, repositório
+> separado — não aparece no `git status` deste repo, precisa ser commitado à parte). Suíte
+> `modelwidgettest` 49/49 limpa nessa rodada. Restam em aberto as
 > subtarefas 4.12-4.14 (todas **[requerem decisão do usuário]**, nenhuma codada ainda)
 > e a Fase 5 (paridade
 > `pgmodeler-cli`, dona do usuário, bloqueada até 0-4 fecharem). Branch sincronizada com `origin`
@@ -1513,6 +1517,57 @@
     `m_event` é um objeto que este trecho cria só pra si mesmo (forçar a lógica de seleção do
     `QGraphicsItemGroup::mousePressEvent()` a rodar mesmo num clique direito); depois da chamada
     retornar, nada mais guarda ponteiro pra ele. Aprovado pelo usuário. **Commitado.**
+- **4.12 implementada (2026-09-30)**: escopo de cena pro menu "Rearrange objects" (os três
+  algoritmos: grid de schemas, hierárquico, tabelas-em-schemas).
+  - **Decisão do usuário**: deixar o usuário escolher em tempo de execução (cena atual vs. todas as
+    cenas) quando o modelo tiver mais de uma cena, e garantir que cada cena seja tratada isolada —
+    nunca misturando estado/grade entre cenas mesmo no modo "todas".
+  - **Achado que mudou o escopo real da subtarefa**: `SchemaView` só existe em modo
+    `NoSegmentation` ([modelwidget.cpp:1346](libs/libgui/src/widgets/modelwidget.cpp#L1346)) — nos
+    dois modos segmentados `schema->getOverlyingObject()` é sempre `nullptr`. Ou seja,
+    `rearrangeSchemasInGrid()` e `rearrangeTablesInSchemas()` **já eram no-op silencioso** em
+    qualquer modo segmentado antes desta subtarefa (guarda `if(sch_view && ...)` sempre falsa) — o
+    texto original da 4.12 ("cena-agnósticos") estava incompleto, não eram só "sem noção de cena",
+    já não funcionavam de jeito nenhum fora de `NoSegmentation`. Perguntei ao usuário o que fazer
+    nesse caso: decisão foi tratar a cena como um grupo flat de tabelas (sem caixas de schema) nos
+    dois algoritmos, em qualquer modo segmentado — `SegBySchema` degenera nisso de qualquer forma
+    (1 schema por cena, grade de 1 caixa só não faz sentido) e `SegByThreshold` nunca teve mapeamento
+    schema↔cena pra começo de conversa.
+  - **Implementação**: `rearrangeSchemasInGrid`, `rearrangeTablesHierarchically` e
+    `rearrangeTablesInSchemas` ganharam uma versão pública `(bool current_scene_only, ...)` e uma
+    privada `(ObjectsScene *target_scene, ...)` — a pública roda a privada uma vez (cena ativa) ou
+    uma vez por cena (`for(auto &scn : scenes)`), sempre do zero a cada chamada (resolve a parte
+    "nunca misturar estado entre cenas" só pela estrutura do loop). Novo helper
+    `ModelWidget::getSceneObjects(ObjectType, ObjectsScene*, BaseObject* parent_obj=nullptr)`
+    filtra qualquer lista de objetos (do modelo inteiro ou filhos de um objeto específico) por
+    `getSceneForObject(obj) == target_scene`.
+    `rearrangeTablesHierarchically()` ganhou um filtro extra na travessia de relacionamentos: um
+    parceiro em outra cena (relacionamento cut-off, sem `RelationshipView` de verdade) é tratado
+    como não-conectado — sem isso, um relacionamento cross-scene "vazaria" tabelas de outra cena
+    pra dentro da árvore sendo montada.
+  - **Refactors de suporte, pra eliminar duplicação entre o caminho por-schema e o caminho
+    flat-por-cena**: `rearrangeTablesInGrid(Schema*, ...)` generalizado pra
+    `rearrangeTablesInGrid(std::vector<BaseObject*> tables, ...)` (recebe a lista já pronta, quem
+    liga é o chamador); `rearrangeTablesInSchema(Schema*, QPointF)` teve o núcleo de
+    espalhamento/detecção-de-colisão extraído pra `ModelWidget::arrangeTablesScattered
+    (std::vector<BaseObject*>, QPointF)`, reusado nos dois caminhos.
+  - **Dois call sites fora do escopo GUI desta fase, ajustados só pra manter compilando** (ambos em
+    `priv-core`, repositório separado, não aparece no `git status` deste repo — **precisa ser
+    commitado à parte**): `databaseimportwidget.cpp` (import de banco via GUI) e
+    `privpgmodelercliapp.cpp` (`--import-db` da CLI) chamavam `rearrangeSchemasInGrid()` sem
+    argumento; passam `true` agora (modelo recém-criado, cena única, a escolha não importa ali).
+  - **Teste novo**: `rearrangeAlgorithmsRespectSceneScopeInThresholdMode`
+    ([modelwidgettest.cpp](tests/src/modelwidgettest/modelwidgettest.cpp)) — `SegByThreshold`,
+    threshold 3, 5 tabelas (3 na primeira cena, 2 na segunda), um relacionamento same-scene e um
+    cross-scene (cut-off). Roda as três funções escopadas à primeira cena e confirma que nenhuma
+    tabela da segunda cena se move um pixel sequer — inclusive o lado cut-off do relacionamento
+    cross-scene, confirmando que a travessia hierárquica não atravessa pra outra cena através dele.
+    Roda de novo em modo "todas as cenas" só confirmando ausência de crash no fallback flat (o
+    caminho que antes era 100% no-op e nunca tinha sido exercitado). Suíte completa: **49/49**
+    (48 + o novo). Build `gui`+`pgmodeler`(binário completo, CLI incluído)+`modelwidgettest` limpo.
+  - **Não commitado — aguardando teste manual do usuário** (recomendado testar nos três modos de
+    segmentação, já que o comportamento mudou de verdade em `SegBySchema`/`SegByThreshold`, que
+    antes não faziam nada pras duas ações de grade/schema).
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

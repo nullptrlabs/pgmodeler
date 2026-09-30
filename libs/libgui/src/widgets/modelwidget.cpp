@@ -6311,6 +6311,20 @@ ObjectsScene *ModelWidget::getSceneForObject(BaseObject *object)
 	return dynamic_cast<ObjectsScene *>(obj_view->scene());
 }
 
+std::vector<BaseObject *> ModelWidget::getSceneObjects(ObjectType type, ObjectsScene *target_scene, BaseObject *parent_obj)
+{
+	std::vector<BaseObject *> src_objs = parent_obj ? db_model->getObjects(type, parent_obj) : *db_model->getObjectList(type),
+														 result;
+
+	for(auto &obj : src_objs)
+	{
+		if(getSceneForObject(obj) == target_scene)
+			result.push_back(obj);
+	}
+
+	return result;
+}
+
 QGraphicsView *ModelWidget::getViewport()
 {
 	return viewport;
@@ -6611,8 +6625,44 @@ void ModelWidget::removeRelationshipPoints()
 	}
 }
 
-void ModelWidget::rearrangeSchemasInGrid(unsigned tabs_per_row, unsigned sch_per_row, QPointF origin, double obj_spacing)
+void ModelWidget::rearrangeSchemasInGrid(bool current_scene_only, unsigned tabs_per_row, unsigned sch_per_row, QPointF origin, double obj_spacing)
 {
+	if(current_scene_only)
+		rearrangeSchemasInGrid(scene, tabs_per_row, sch_per_row, origin, obj_spacing);
+	else
+	{
+		for(auto &scn : scenes)
+			rearrangeSchemasInGrid(scn, tabs_per_row, sch_per_row, origin, obj_spacing);
+	}
+
+	db_model->setObjectsModified({ ObjectType::Table, ObjectType::ForeignTable, ObjectType::View,
+																 ObjectType::BaseRelationship, ObjectType::Relationship});
+
+	if(current_scene_only)
+		adjustSceneRect(false);
+	else
+		adjustAllScenesRects(false);
+}
+
+void ModelWidget::rearrangeSchemasInGrid(ObjectsScene *target_scene, unsigned tabs_per_row, unsigned sch_per_row, QPointF origin, double obj_spacing)
+{
+	/* Outside of NoSegmentation there's no SchemaView to grid in the first place (see
+	 * ModelWidget::handleObjectAddition()) -- SegBySchema's scene already *is* the schema (a box
+	 * around it would just mirror the scene itself) and SegByThreshold mixes tables from several
+	 * schemas with no schema grouping at all. Either way, fall back to a flat grid of the scene's
+	 * own tables, schema boundaries ignored entirely */
+	if(db_model->getSegmentationMode() != DatabaseModel::NoSegmentation)
+	{
+		std::vector<BaseObject *> tables = getSceneObjects(ObjectType::Table, target_scene);
+		std::vector<BaseObject *> ftables = getSceneObjects(ObjectType::ForeignTable, target_scene);
+		std::vector<BaseObject *> views = getSceneObjects(ObjectType::View, target_scene);
+		tables.insert(tables.end(), ftables.begin(), ftables.end());
+		tables.insert(tables.end(), views.begin(), views.end());
+
+		rearrangeTablesInGrid(tables, tabs_per_row == 0 ? 5 : tabs_per_row, origin, obj_spacing);
+		return;
+	}
+
 	std::vector<BaseObject *> *objects=nullptr;
 	Schema *schema=nullptr;
 	SchemaView *sch_view=nullptr;
@@ -6652,7 +6702,13 @@ void ModelWidget::rearrangeSchemasInGrid(unsigned tabs_per_row, unsigned sch_per
 		if(sch_view && sch_view->getChildrenCount() > 0)
 		{
 			//Organizing the tables inside the schema
-			rearrangeTablesInGrid(schema, tabs_per_row, QPointF(x,y), obj_spacing);
+			std::vector<BaseObject *> tables = db_model->getObjects(ObjectType::Table, schema);
+			std::vector<BaseObject *> ftables = db_model->getObjects(ObjectType::ForeignTable, schema);
+			std::vector<BaseObject *> views = db_model->getObjects(ObjectType::View, schema);
+			tables.insert(tables.end(), ftables.begin(), ftables.end());
+			tables.insert(tables.end(), views.begin(), views.end());
+
+			rearrangeTablesInGrid(tables, tabs_per_row, QPointF(x,y), obj_spacing);
 			schema->setModified(true);
 
 			cy=sch_view->pos().y() + sch_view->boundingRect().height();
@@ -6677,60 +6733,43 @@ void ModelWidget::rearrangeSchemasInGrid(unsigned tabs_per_row, unsigned sch_per
 				x=sch_view->pos().x() + sch_view->boundingRect().width() + obj_spacing;
 		}
 	}
-
-	db_model->setObjectsModified({ ObjectType::Table, ObjectType::ForeignTable, ObjectType::View,
-																 ObjectType::BaseRelationship, ObjectType::Relationship});
-
-	//Adjust the whole scene size due to table/schema repositioning
-	this->adjustSceneRect(false);
 }
 
-void ModelWidget::rearrangeTablesInGrid(Schema *schema, unsigned tabs_per_row,  QPointF origin, double obj_spacing)
+void ModelWidget::rearrangeTablesInGrid(std::vector<BaseObject *> tables, unsigned tabs_per_row, QPointF origin, double obj_spacing)
 {
-	if(schema)
+	std::vector<BaseObject *>::iterator itr;
+	BaseTableView *tab_view=nullptr;
+	BaseTable *base_tab=nullptr;
+	unsigned tab_id=0;
+	double max_y=-1, x=origin.x(), y=origin.y(), cy=0;
+
+	itr=tables.begin();
+	while(itr!=tables.end())
 	{
-		std::vector<BaseObject *> tables, views, ftables;
-		std::vector<BaseObject *>::iterator itr;
-		BaseTableView *tab_view=nullptr;
-		BaseTable *base_tab=nullptr;
-		unsigned tab_id=0;
-		double max_y=-1, x=origin.x(), y=origin.y(), cy=0;
+		base_tab=dynamic_cast<BaseTable *>(*itr);
+		tab_view=dynamic_cast<BaseTableView *>(base_tab->getOverlyingObject());
+		tab_view->setPos(QPointF(x,y));
 
-		//Get the tables and views for the specified schema
-		tables=db_model->getObjects(ObjectType::Table, schema);
-		ftables=db_model->getObjects(ObjectType::ForeignTable, schema);
-		views=db_model->getObjects(ObjectType::View, schema);
-		tables.insert(tables.end(), ftables.begin(), ftables.end());
-		tables.insert(tables.end(), views.begin(), views.end());
+		//Defining the maximum y position to avoid table boxes colliding vertically
+		cy=tab_view->pos().y()  + tab_view->boundingRect().bottomRight().y();
+		if(max_y < cy)
+			max_y=cy;
 
-		itr=tables.begin();
-		while(itr!=tables.end())
+		//It the current table is the last of it's row
+		tab_id++;
+		if(tab_id >= tabs_per_row)
 		{
-			base_tab=dynamic_cast<BaseTable *>(*itr);
-			tab_view=dynamic_cast<BaseTableView *>(base_tab->getOverlyingObject());
-			tab_view->setPos(QPointF(x,y));
-
-			//Defining the maximum y position to avoid table boxes colliding vertically
-			cy=tab_view->pos().y()  + tab_view->boundingRect().bottomRight().y();
-			if(max_y < cy)
-				max_y=cy;
-
-			//It the current table is the last of it's row
-			tab_id++;
-			if(tab_id >= tabs_per_row)
-			{
-				//Incrementing the row position
-				tab_id=0;
-				y=max_y + obj_spacing;
-				x=origin.x();
-				max_y=-1;
-			}
-			else
-				//Configuring the x position for the next table on the current row
-				x=tab_view->pos().x() + tab_view->boundingRect().width() + obj_spacing;
-
-			itr++;
+			//Incrementing the row position
+			tab_id=0;
+			y=max_y + obj_spacing;
+			x=origin.x();
+			max_y=-1;
 		}
+		else
+			//Configuring the x position for the next table on the current row
+			x=tab_view->pos().x() + tab_view->boundingRect().width() + obj_spacing;
+
+		itr++;
 	}
 }
 
@@ -6822,20 +6861,38 @@ void ModelWidget::updateModelLayersInfo()
 	setModified(true);
 }
 
-void ModelWidget::rearrangeTablesHierarchically()
+void ModelWidget::rearrangeTablesHierarchically(bool current_scene_only)
 {
-	std::vector<BaseObject *> objects;
+	if(current_scene_only)
+		rearrangeTablesHierarchically(scene);
+	else
+	{
+		for(auto &scn : scenes)
+			rearrangeTablesHierarchically(scn);
+	}
+
+	if(current_scene_only)
+		adjustSceneRect(false);
+	else
+		adjustAllScenesRects(false);
+
+	viewport->updateScene({ scene->sceneRect() });
+}
+
+void ModelWidget::rearrangeTablesHierarchically(ObjectsScene *target_scene)
+{
+	std::vector<BaseObject *> objects = getSceneObjects(ObjectType::Table, target_scene);
+	std::vector<BaseObject *> scene_views = getSceneObjects(ObjectType::View, target_scene);
+	objects.insert(objects.end(), scene_views.begin(), scene_views.end());
+
 	BaseGraphicObject *graph_obj = nullptr;
 	BaseTableView *tab_view = nullptr, *root = nullptr;
 	int num_rels = 0;
 
-	scene->clearSelection();
-
-	objects.assign(db_model->getObjectList(ObjectType::Table)->begin(), db_model->getObjectList(ObjectType::Table)->end());
-	objects.insert(objects.end(), db_model->getObjectList(ObjectType::View)->begin(), db_model->getObjectList(ObjectType::View)->end());
+	target_scene->clearSelection();
 
 	//We determine the root by searching the table/view which contains the more amount of relationships connected
-	for(auto obj : objects)
+	for(auto &obj : objects)
 	{
 		graph_obj = dynamic_cast<BaseGraphicObject *>(obj);
 		dynamic_cast<Schema *>(graph_obj->getSchema())->setRectVisible(false);
@@ -6849,6 +6906,13 @@ void ModelWidget::rearrangeTablesHierarchically()
 		}
 	}
 
+	if(!root)
+	{
+		//This is a fallback arrangement when the scene does not have relationships
+		rearrangeSchemasInGrid(target_scene, 0, 0, QPointF(50, 50), 75);
+		return;
+	}
+
 	if(root)
 	{
 		BaseObjectView *obj_view = nullptr;
@@ -6860,12 +6924,8 @@ void ModelWidget::rearrangeTablesHierarchically()
 		//Positioning the root object at the top-left portion of canvas
 		root->setPos(QPointF(50, 50));
 		evaluated_tabs.push_back(root->getUnderlyingObject());
-		items_rect = rearrangeTablesHierarchically(root, evaluated_tabs);
+		items_rect = rearrangeTablesHierarchically(target_scene, root, evaluated_tabs);
 		max_w = items_rect.width();
-
-		objects.clear();
-		objects.assign(db_model->getObjectList(ObjectType::Table)->begin(), db_model->getObjectList(ObjectType::Table)->end());
-		objects.insert(objects.end(), db_model->getObjectList(ObjectType::View)->begin(), db_model->getObjectList(ObjectType::View)->end());
 
 		//Retrieving the rest of tables/views that were not evaluated in the previous iteration
 		std::sort(objects.begin(), objects.end());
@@ -6898,7 +6958,7 @@ void ModelWidget::rearrangeTablesHierarchically()
 			{
 				root->setPos(QPointF(50, items_rect.bottom() + 50));
 				evaluated_tabs.push_back(root->getUnderlyingObject());
-				items_rect = rearrangeTablesHierarchically(root, evaluated_tabs);
+				items_rect = rearrangeTablesHierarchically(target_scene, root, evaluated_tabs);
 				not_evaluated.erase(std::find(not_evaluated.begin(), not_evaluated.end(),  root->getUnderlyingObject()));
 
 				if(items_rect.width() > max_w)
@@ -6919,7 +6979,9 @@ void ModelWidget::rearrangeTablesHierarchically()
 		//Repositioning remaining tables (without relationships) and textboxes
 		objects.clear();
 		objects.assign(not_linked_tabs.begin(), not_linked_tabs.end());
-		objects.insert(objects.end(), db_model->getObjectList(ObjectType::Textbox)->begin(), db_model->getObjectList(ObjectType::Textbox)->end());
+
+		std::vector<BaseObject *> scene_textboxes = getSceneObjects(ObjectType::Textbox, target_scene);
+		objects.insert(objects.end(), scene_textboxes.begin(), scene_textboxes.end());
 
 		px = 50;
 		py = items_rect.bottom() + 100;
@@ -6942,10 +7004,13 @@ void ModelWidget::rearrangeTablesHierarchically()
 		}
 
 		objects.clear();
-		objects.assign(db_model->getObjectList(ObjectType::Relationship)->begin(), db_model->getObjectList(ObjectType::Relationship)->end());
-		objects.insert(objects.end(), db_model->getObjectList(ObjectType::BaseRelationship)->begin(), db_model->getObjectList(ObjectType::BaseRelationship)->end());
 
-		for(auto obj : objects)
+		std::vector<BaseObject *> scene_rels = getSceneObjects(ObjectType::Relationship, target_scene);
+		std::vector<BaseObject *> scene_base_rels = getSceneObjects(ObjectType::BaseRelationship, target_scene);
+		objects.insert(objects.end(), scene_rels.begin(), scene_rels.end());
+		objects.insert(objects.end(), scene_base_rels.begin(), scene_base_rels.end());
+
+		for(auto &obj : objects)
 		{
 			rel = dynamic_cast<BaseRelationship *>(obj);
 			rel->setPoints({});
@@ -6968,17 +7033,9 @@ void ModelWidget::rearrangeTablesHierarchically()
 
 		db_model->setObjectsModified({ ObjectType::Table, ObjectType::View, ObjectType::Schema, ObjectType::Relationship, ObjectType::BaseRelationship });
 	}
-	else
-	{
-		//This is a fallback arrangement when the model does not have relationships
-		rearrangeSchemasInGrid();
-	}
-
-	adjustSceneRect(false);
-	viewport->updateScene({ scene->sceneRect() });
 }
 
-QRectF ModelWidget::rearrangeTablesHierarchically(BaseTableView *root, std::vector<BaseObject *> &evaluated_tabs)
+QRectF ModelWidget::rearrangeTablesHierarchically(ObjectsScene *target_scene, BaseTableView *root, std::vector<BaseObject *> &evaluated_tabs)
 {
 	BaseTable *base_tab = dynamic_cast<BaseTable *>(root->getUnderlyingObject()),
 			*src_tab = nullptr, *dst_tab = nullptr, *curr_tab = nullptr;
@@ -7008,6 +7065,11 @@ QRectF ModelWidget::rearrangeTablesHierarchically(BaseTableView *root, std::vect
 			else if(dst_tab != base_tab)
 				curr_tab = dst_tab;
 			else
+				curr_tab = nullptr;
+
+			/* A cross-scene partner has no RelationshipView here (cut-off marker instead) -- treat it
+			 * as not connected, this scene's hierarchy shouldn't reach into another scene's tables */
+			if(curr_tab && getSceneForObject(curr_tab) != target_scene)
 				curr_tab = nullptr;
 
 			if(curr_tab && std::find(evaluated_tabs.begin(), evaluated_tabs.end(), dynamic_cast<BaseObject *>(curr_tab)) == evaluated_tabs.end())
@@ -7055,17 +7117,25 @@ QRectF ModelWidget::rearrangeTablesHierarchically(BaseTableView *root, std::vect
 
 void ModelWidget::rearrangeTablesInSchema(Schema *schema, QPointF start)
 {
-	std::vector<BaseObject *> tables, views, ftables;
-
 	if(!schema) return;
 
-	tables = db_model->getObjects(ObjectType::Table, schema);
-	ftables = db_model->getObjects(ObjectType::ForeignTable, schema);
-	views = db_model->getObjects(ObjectType::View, schema);
+	std::vector<BaseObject *> tables = db_model->getObjects(ObjectType::Table, schema);
+	std::vector<BaseObject *> ftables = db_model->getObjects(ObjectType::ForeignTable, schema);
+	std::vector<BaseObject *> views = db_model->getObjects(ObjectType::View, schema);
 
 	tables.insert(tables.end(), views.begin(), views.end());
 	tables.insert(tables.end(), ftables.begin(), ftables.end());
 
+	if(!tables.empty())
+	{
+		arrangeTablesScattered(tables, start);
+		schema->setRectVisible(true);
+		schema->setModified(true);
+	}
+}
+
+void ModelWidget::arrangeTablesScattered(std::vector<BaseObject *> tables, QPointF start)
+{
 	if(!tables.empty())
 	{
 		BaseTable *base_tab = nullptr;
@@ -7171,14 +7241,59 @@ void ModelWidget::rearrangeTablesInSchema(Schema *schema, QPointF start)
 				while(has_collision && tries < (tables.size() * 50));
 			}
 		}
-
-		schema->setRectVisible(true);
-		schema->setModified(true);
 	}
 }
 
-void ModelWidget::rearrangeTablesInSchemas()
+void ModelWidget::rearrangeTablesInSchemas(bool current_scene_only)
 {
+	if(current_scene_only)
+		rearrangeTablesInSchemas(scene);
+	else
+	{
+		for(auto &scn : scenes)
+			rearrangeTablesInSchemas(scn);
+	}
+
+	db_model->setObjectsModified({ ObjectType::Table, ObjectType::View, ObjectType::ForeignTable,
+																 ObjectType::Schema, ObjectType::Relationship, ObjectType::BaseRelationship });
+
+	if(current_scene_only)
+		adjustSceneRect(false);
+	else
+		adjustAllScenesRects(false);
+
+	viewport->updateScene({ scene->sceneRect() });
+}
+
+void ModelWidget::rearrangeTablesInSchemas(ObjectsScene *target_scene)
+{
+	/* Outside of NoSegmentation there's no SchemaView to treat as its own collidable region (see
+	 * ModelWidget::handleObjectAddition()) -- scatter the scene's tables directly instead, as one
+	 * flat group, schema boundaries ignored entirely */
+	if(db_model->getSegmentationMode() != DatabaseModel::NoSegmentation)
+	{
+		std::vector<BaseObject *> tables = getSceneObjects(ObjectType::Table, target_scene);
+		std::vector<BaseObject *> ftables = getSceneObjects(ObjectType::ForeignTable, target_scene);
+		std::vector<BaseObject *> views = getSceneObjects(ObjectType::View, target_scene);
+		tables.insert(tables.end(), ftables.begin(), ftables.end());
+		tables.insert(tables.end(), views.begin(), views.end());
+
+		arrangeTablesScattered(tables, QPointF(0, 0));
+
+		std::vector<BaseObject *> rels = getSceneObjects(ObjectType::Relationship, target_scene);
+		std::vector<BaseObject *> base_rels = getSceneObjects(ObjectType::BaseRelationship, target_scene);
+		rels.insert(rels.end(), base_rels.begin(), base_rels.end());
+
+		for(auto &obj : rels)
+		{
+			BaseRelationship *base_rel = dynamic_cast<BaseRelationship *>(obj);
+			base_rel->setPoints({});
+			base_rel->resetLabelsDistance();
+		}
+
+		return;
+	}
+
 	BaseRelationship *base_rel = nullptr;
 	Schema *schema = nullptr;
 	SchemaView *sch_view = nullptr, *sch_view_aux = nullptr;
@@ -7271,11 +7386,6 @@ void ModelWidget::rearrangeTablesInSchemas()
 		base_rel->setPoints({});
 		base_rel->resetLabelsDistance();
 	}
-
-	db_model->setObjectsModified({ ObjectType::Table, ObjectType::View, ObjectType::ForeignTable,
-																 ObjectType::Schema, ObjectType::Relationship, ObjectType::BaseRelationship });
-	adjustSceneRect(false);
-	viewport->updateScene({ scene->sceneRect() });
 }
 
 void ModelWidget::updateMagnifierArea()
