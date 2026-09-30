@@ -61,7 +61,7 @@ DatabaseModel::DatabaseModel()
 	last_scene=0;
 	scene_seg_mode=saved_seg_mode=NoSegmentation;
 	seg_threshold=saved_seg_threshold=DefaultSegThreshold;
-	loading_model=invalidated=append_at_eod=prepend_at_bod=false;
+	loading_model=discard_scene_idx=invalidated=append_at_eod=prepend_at_bod=false;
 	attributes[Attributes::Encoding]="";
 	attributes[Attributes::TemplateDb]="";
 	attributes[Attributes::ConnLimit]="";
@@ -3496,12 +3496,14 @@ void DatabaseModel::configureDatabase(attribs_map &attribs)
 }
 
 void DatabaseModel::loadModel(const QString &filename, bool override_seg_mode,
-															 SegmentationMode ovr_seg_mode, unsigned ovr_seg_threshold)
+															 SegmentationMode ovr_seg_mode, unsigned ovr_seg_threshold,
+															 bool discard_scene_idx)
 {
 	if(filename.isEmpty())
 		return;
 
 	BaseGraphicObject::setUpdatesEnabled(false);
+	this->discard_scene_idx = discard_scene_idx;
 
 	QString dtd_file, str_aux, elem_name;
 	ObjectType obj_type;
@@ -3778,6 +3780,7 @@ void DatabaseModel::loadModel(const QString &filename, bool override_seg_mode,
 		}
 
 		loading_model=false;
+		discard_scene_idx=false;
 
 		//If there are relationship make a relationship validation to recreate any special object left behind
 		if(!relationships.empty())
@@ -3804,6 +3807,7 @@ void DatabaseModel::loadModel(const QString &filename, bool override_seg_mode,
 	{
 		QString extra_info;
 		loading_model = false;
+		discard_scene_idx = false;
 
 		if(xmlparser.getCurrentElement())
 			extra_info = QObject::tr("%1 (line: %2)").arg(xmlparser.getLoadedFilename()).arg(xmlparser.getCurrentElement()->line);
@@ -6940,7 +6944,8 @@ View *DatabaseModel::createView()
 		view->setCurrentPage(BaseTable::ExtAttribsSection, attribs[Attributes::ExtAttribsPage].toUInt());
 		view->setFadedOut(attribs[Attributes::FadedOut]==Attributes::True);
 		view->setLayers(attribs[Attributes::Layers].split(','));
-		view->setSceneIndex(attribs[Attributes::Scene].isEmpty() ? -1 : attribs[Attributes::Scene].toInt());
+		if(!discard_scene_idx)
+			view->setSceneIndex(attribs[Attributes::Scene].isEmpty() ? -1 : attribs[Attributes::Scene].toInt());
 
 		if(xmlparser.accessElement(XmlParser::ChildElement))
 		{
@@ -8092,6 +8097,17 @@ void DatabaseModel::setDatabaseModelAttributes(attribs_map &attribs, SchemaParse
 			//Persists the saved (pending) mode/threshold, not the active one -- see loadModel()
 			attribs[Attributes::SegMode] = QString::number(saved_seg_mode);
 			attribs[Attributes::SegThreshold] = QString::number(saved_seg_threshold);
+
+			/* Table/View/ForeignTable count backing the scene distribution saved below (the <scenes>
+			 * element) -- only meaningful in threshold-segmentation mode, where that distribution comes
+			 * from replaying this count against seg-threshold, not from anything derivable from the
+			 * objects themselves (unlike schema-segmentation). Lets a reload detect a seg-threshold
+			 * changed since this save (ModelWidget::needsThresholdRebucketing()) and re-bucket instead of
+			 * trusting a distribution that no longer matches the current threshold */
+			attribs[Attributes::SegObjCount] = (saved_seg_mode != SegByThreshold) ? "" :
+					QString::number(getObjectCount(ObjectType::Table) +
+													getObjectCount(ObjectType::View) +
+													getObjectCount(ObjectType::ForeignTable));
 
 			/* Only meaningful with more than one scene -- with a single scene (segmentation off),
 			 * the legacy scene-rect attribute below is the whole story, keeping the file format
@@ -10332,7 +10348,8 @@ TableClass *DatabaseModel::createPhysicalTable()
 		table->setCurrentPage(BaseTable::ExtAttribsSection, attribs[Attributes::ExtAttribsPage].toUInt());
 		table->setFadedOut(attribs[Attributes::FadedOut]==Attributes::True);
 		table->setLayers(attribs[Attributes::Layers].split(','));
-		table->setSceneIndex(attribs[Attributes::Scene].isEmpty() ? -1 : attribs[Attributes::Scene].toInt());
+		if(!discard_scene_idx)
+			table->setSceneIndex(attribs[Attributes::Scene].isEmpty() ? -1 : attribs[Attributes::Scene].toInt());
 
 		if(xmlparser.accessElement(XmlParser::ChildElement))
 		{

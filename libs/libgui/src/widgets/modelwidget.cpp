@@ -1249,198 +1249,198 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 {
 	BaseGraphicObject *graph_obj=dynamic_cast<BaseGraphicObject *>(object);
 
-	if(graph_obj)
+	if(!graph_obj)
+		return;
+
+	ObjectType obj_type = graph_obj->getObjectType();
+	QGraphicsItem *item = nullptr;
+	ObjectsScene *target_scene = scene;
+	DatabaseModel::SegmentationMode seg_mode = db_model->getSegmentationMode();
+
+	switch(obj_type)
 	{
-		ObjectType obj_type = graph_obj->getObjectType();
-		QGraphicsItem *item = nullptr;
-		ObjectsScene *target_scene = scene;
-		DatabaseModel::SegmentationMode seg_mode = db_model->getSegmentationMode();
+		case ObjectType::ForeignTable:
+		case ObjectType::Table:
+			item = new TableView(dynamic_cast<PhysicalTable *>(graph_obj));
+		break;
 
-		switch(obj_type)
+		case ObjectType::View:
+			item = new GraphicalView(dynamic_cast<View *>(graph_obj));
+		break;
+
+		case ObjectType::Relationship:
+		case ObjectType::BaseRelationship:
 		{
-			case ObjectType::ForeignTable:
-			case ObjectType::Table:
-				item = new TableView(dynamic_cast<PhysicalTable *>(graph_obj));
-			break;
+			BaseRelationship *rel = dynamic_cast<BaseRelationship *>(graph_obj);
+			BaseTableView *src_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::SrcTable)->getOverlyingObject()),
+										 *dst_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::DstTable)->getOverlyingObject());
+			ObjectsScene *src_scene = src_view ? dynamic_cast<ObjectsScene *>(src_view->scene()) : nullptr,
+									 *dst_scene = dst_view ? dynamic_cast<ObjectsScene *>(dst_view->scene()) : nullptr;
 
-			case ObjectType::View:
-				item = new GraphicalView(dynamic_cast<View *>(graph_obj));
-			break;
-
-			case ObjectType::Relationship:
-			case ObjectType::BaseRelationship:
+			/* Tables in the same scene get a regular RelationshipView. Tables in different scenes
+			get no RelationshipView at all -- the relationship is registered as an external
+			connection on each table instead, so BaseTableView can draw its own cut-off marker */
+			if(src_scene && src_scene == dst_scene)
 			{
-				BaseRelationship *rel = dynamic_cast<BaseRelationship *>(graph_obj);
-				BaseTableView *src_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::SrcTable)->getOverlyingObject()),
-											 *dst_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::DstTable)->getOverlyingObject());
-				ObjectsScene *src_scene = src_view ? dynamic_cast<ObjectsScene *>(src_view->scene()) : nullptr,
-										 *dst_scene = dst_view ? dynamic_cast<ObjectsScene *>(dst_view->scene()) : nullptr;
-
-				/* Tables in the same scene get a regular RelationshipView. Tables in different scenes
-				get no RelationshipView at all -- the relationship is registered as an external
-				connection on each table instead, so BaseTableView can draw its own cut-off marker */
-				if(src_scene && src_scene == dst_scene)
-				{
-					item = new RelationshipView(rel);
-					target_scene = src_scene;
-				}
-				else
-				{
-					if(src_view)
-						src_view->addExternalRelationship(rel);
-
-					if(dst_view)
-						dst_view->addExternalRelationship(rel);
-				}
-			}
-			break;
-
-			case ObjectType::Schema:
-			{
-				Schema *schema = dynamic_cast<Schema *>(graph_obj);
-
-				//Dedicated schema/scene 1:1 mapping only applies in schema-segmentation mode
-				if(seg_mode == DatabaseModel::SegBySchema)
-				{
-					target_scene = getSchemaScene(schema);
-
-					if(!target_scene)
-					{
-						target_scene = addScene(schema);
-						applySceneLayers(target_scene);
-
-						/* public is the conventional default schema -- while the model is being built/loaded,
-						make sure its scene ends up active even if pg_catalog (or some other schema) was
-						processed first */
-						if(db_model->isModelLoading() && schema->getName() == "public")
-							setActiveScene(scenes.indexOf(target_scene));
-
-						/* addScene() above already emitted s_scenesListChanged(), but schema_scenes didn't
-						 * have this schema's entry yet at that point -- getSceneNames() would've fallen back
-						 * to "Scene N" for it. Re-emit now that the mapping is complete, and keep the combo
-						 * in sync with future renames too (scenes_cmb has no view of its own to react to) */
-						connect(schema, &Schema::s_objectModified, this, &ModelWidget::s_scenesListChanged);
-						emit s_scenesListChanged();
-					}
-				}
-
-				/* The schema rectangle groups children that share a single view and recomputes its
-				 * bounding box on every child edit -- in any segmented mode that either runs for
-				 * nothing (schema == scene, so the box would just mirror the scene itself) or can't
-				 * be drawn correctly at all (children split across scenes), so it's skipped outright
-				 * rather than built and hidden */
-				if(seg_mode == DatabaseModel::NoSegmentation)
-					item = new SchemaView(schema);
-			}
-			break;
-
-			default:
-				item = new StyledTextboxView(dynamic_cast<Textbox *>(graph_obj));
-			break;
-		}
-
-		if(seg_mode == DatabaseModel::SegBySchema && graph_obj->getSchema())
-			target_scene = getSchemaScene(dynamic_cast<Schema *>(graph_obj->getSchema()));
-		else if(seg_mode == DatabaseModel::SegByThreshold && BaseTable::isBaseTable(obj_type))
-		{
-			BaseTable *base_tab = dynamic_cast<BaseTable *>(graph_obj);
-			int scn_idx = base_tab->getSceneIndex();
-
-			if(scn_idx >= 0)
-			{
-				/* Object already carries a scene index -- from a file being loaded, or an undo
-				 * restoring a previously-removed object. Widen the scenes collection as needed and
-				 * route it there directly, bypassing the live counter entirely */
-				while(scenes.size() <= scn_idx)
-				{
-					ObjectsScene *new_scene = addScene(scenes.isEmpty());
-					applySceneLayers(new_scene);
-				}
-
-				target_scene = scenes.at(scn_idx);
+				item = new RelationshipView(rel);
+				target_scene = src_scene;
 			}
 			else
 			{
-				/* Naive counter: every getSegThreshold() Table/View/ForeignTable insertions opens a
-				 * new scene, and every insertion after that goes to it -- no clustering by
-				 * connectivity, strictly insertion order */
-				if(scenes.isEmpty())
-				{
-					target_scene = addScene();
-					applySceneLayers(target_scene);
-				}
-				else
-					target_scene = scenes.last();
+				if(src_view)
+					src_view->addExternalRelationship(rel);
 
-				base_tab->setSceneIndex(scenes.indexOf(target_scene));
-
-				if(++threshold_obj_count % db_model->getSegThreshold() == 0)
-				{
-					ObjectsScene *new_scene = addScene(false);
-					applySceneLayers(new_scene);
-				}
+				if(dst_view)
+					dst_view->addExternalRelationship(rel);
 			}
 		}
-		/* Textbox never enters the threshold counter (same rule as the rest of Fase 1/2: it has no
-		 * schema to route by, and doesn't count towards the insertion threshold either) -- but a
-		 * manually reassigned Textbox (subtask 4.2, moveToScene()) or one loaded from a file that
-		 * already carries a saved index still needs to land in that exact scene, in either segmented
-		 * mode. NoSegmentation is excluded on purpose: there's only ever one scene there, and a stale
-		 * index left over from a previous segmented-mode session must not widen the scenes collection */
-		else if(obj_type == ObjectType::Textbox && seg_mode != DatabaseModel::NoSegmentation)
+		break;
+
+		case ObjectType::Schema:
 		{
-			int scn_idx = graph_obj->getSceneIndex();
-
-			if(scn_idx >= 0)
-			{
-				while(scenes.size() <= scn_idx)
-				{
-					ObjectsScene *new_scene = addScene(scenes.isEmpty());
-					applySceneLayers(new_scene);
-				}
-
-				target_scene = scenes.at(scn_idx);
-			}
-		}
-
-		//Safety net for the rare case an object arrives before any scene exists yet (e.g. no schema created so far)
-		if(!target_scene)
-		{
-			target_scene = addScene();
-			applySceneLayers(target_scene);
-
-			/* A schema can land here when its segmentation-mode routing wasn't available yet at the
-			 * time it was added (e.g. pg_catalog, always created by createSystemObjects() before the
-			 * file's own seg-mode attribute is read from the XML in loadModel()). Register it in
-			 * schema_scenes right away, regardless of the current mode -- otherwise, in schema
-			 * segmentation, any of its own children parsed later in the same load (a reverse-engineered
-			 * table living directly in pg_catalog, for instance) would find getSchemaScene() still
-			 * returning nullptr and each land in their own separate safety-net scene instead of this one */
 			Schema *schema = dynamic_cast<Schema *>(graph_obj);
 
-			if(schema && !schema_scenes.contains(schema))
-				schema_scenes[schema] = target_scene;
+			//Dedicated schema/scene 1:1 mapping only applies in schema-segmentation mode
+			if(seg_mode == DatabaseModel::SegBySchema)
+			{
+				target_scene = getSchemaScene(schema);
+
+				if(!target_scene)
+				{
+					target_scene = addScene(schema);
+					applySceneLayers(target_scene);
+
+					/* public is the conventional default schema -- while the model is being built/loaded,
+					make sure its scene ends up active even if pg_catalog (or some other schema) was
+					processed first */
+					if(db_model->isModelLoading() && schema->getName() == "public")
+						setActiveScene(scenes.indexOf(target_scene));
+
+					/* addScene() above already emitted s_scenesListChanged(), but schema_scenes didn't
+					 * have this schema's entry yet at that point -- getSceneNames() would've fallen back
+					 * to "Scene N" for it. Re-emit now that the mapping is complete, and keep the combo
+					 * in sync with future renames too (scenes_cmb has no view of its own to react to) */
+					connect(schema, &Schema::s_objectModified, this, &ModelWidget::s_scenesListChanged);
+					emit s_scenesListChanged();
+				}
+			}
+
+			/* The schema rectangle groups children that share a single view and recomputes its
+			 * bounding box on every child edit -- in any segmented mode that either runs for
+			 * nothing (schema == scene, so the box would just mirror the scene itself) or can't
+			 * be drawn correctly at all (children split across scenes), so it's skipped outright
+			 * rather than built and hidden */
+			if(seg_mode == DatabaseModel::NoSegmentation)
+				item = new SchemaView(schema);
 		}
+		break;
 
-		/* A Textbox routed here without a scene index of its own (fresh object, landed on whatever
-		 * scene was active) still needs that index recorded on the model -- otherwise any later
-		 * operation that snapshots/restores it (moveToScene()'s undo, for instance) captures -1
-		 * instead of where it actually is, and can no longer resolve it back to a real scene */
-		if(obj_type == ObjectType::Textbox && seg_mode != DatabaseModel::NoSegmentation &&
-				graph_obj->getSceneIndex() < 0)
-			graph_obj->setSceneIndex(scenes.indexOf(target_scene));
-
-		if(item)
-			target_scene->addItem(item, blink_new_objs);
-
-		if(!db_model->isModelLoading())
-			setModified(true);
-
-		emit s_objectAdded(graph_obj);
-
-		if(item && blink_new_objs)
-			viewport->centerOn(item);
+		default:
+			item = new StyledTextboxView(dynamic_cast<Textbox *>(graph_obj));
+		break;
 	}
+
+	if(seg_mode == DatabaseModel::SegBySchema && graph_obj->getSchema())
+		target_scene = getSchemaScene(dynamic_cast<Schema *>(graph_obj->getSchema()));
+	else if(seg_mode == DatabaseModel::SegByThreshold && BaseTable::isBaseTable(obj_type))
+	{
+		BaseTable *base_tab = dynamic_cast<BaseTable *>(graph_obj);
+		int scn_idx = base_tab->getSceneIndex();
+
+		if(scn_idx >= 0)
+		{
+			/* Object already carries a scene index -- from a file being loaded, or an undo
+			 * restoring a previously-removed object. Widen the scenes collection as needed and
+			 * route it there directly, bypassing the live counter entirely */
+			while(scenes.size() <= scn_idx)
+			{
+				ObjectsScene *new_scene = addScene(scenes.isEmpty());
+				applySceneLayers(new_scene);
+			}
+
+			target_scene = scenes.at(scn_idx);
+		}
+		else
+		{
+			/* Naive counter: every getSegThreshold() Table/View/ForeignTable insertions opens a
+			 * new scene, and every insertion after that goes to it -- no clustering by
+			 * connectivity, strictly insertion order */
+			if(scenes.isEmpty())
+			{
+				target_scene = addScene();
+				applySceneLayers(target_scene);
+			}
+			else
+				target_scene = scenes.last();
+
+			base_tab->setSceneIndex(scenes.indexOf(target_scene));
+
+			if(++threshold_obj_count % db_model->getSegThreshold() == 0)
+			{
+				ObjectsScene *new_scene = addScene(false);
+				applySceneLayers(new_scene);
+			}
+		}
+	}
+	/* Textbox never enters the threshold counter (same rule as the rest of Fase 1/2: it has no
+	 * schema to route by, and doesn't count towards the insertion threshold either) -- but a
+	 * manually reassigned Textbox (subtask 4.2, moveToScene()) or one loaded from a file that
+	 * already carries a saved index still needs to land in that exact scene, in either segmented
+	 * mode. NoSegmentation is excluded on purpose: there's only ever one scene there, and a stale
+	 * index left over from a previous segmented-mode session must not widen the scenes collection */
+	else if(obj_type == ObjectType::Textbox && seg_mode != DatabaseModel::NoSegmentation)
+	{
+		int scn_idx = graph_obj->getSceneIndex();
+
+		if(scn_idx >= 0)
+		{
+			while(scenes.size() <= scn_idx)
+			{
+				ObjectsScene *new_scene = addScene(scenes.isEmpty());
+				applySceneLayers(new_scene);
+			}
+
+			target_scene = scenes.at(scn_idx);
+		}
+	}
+
+	//Safety net for the rare case an object arrives before any scene exists yet (e.g. no schema created so far)
+	if(!target_scene)
+	{
+		target_scene = addScene();
+		applySceneLayers(target_scene);
+
+		/* A schema can land here when its segmentation-mode routing wasn't available yet at the
+		 * time it was added (e.g. pg_catalog, always created by createSystemObjects() before the
+		 * file's own seg-mode attribute is read from the XML in loadModel()). Register it in
+		 * schema_scenes right away, regardless of the current mode -- otherwise, in schema
+		 * segmentation, any of its own children parsed later in the same load (a reverse-engineered
+		 * table living directly in pg_catalog, for instance) would find getSchemaScene() still
+		 * returning nullptr and each land in their own separate safety-net scene instead of this one */
+		Schema *schema = dynamic_cast<Schema *>(graph_obj);
+
+		if(schema && !schema_scenes.contains(schema))
+			schema_scenes[schema] = target_scene;
+	}
+
+	/* A Textbox routed here without a scene index of its own (fresh object, landed on whatever
+	 * scene was active) still needs that index recorded on the model -- otherwise any later
+	 * operation that snapshots/restores it (moveToScene()'s undo, for instance) captures -1
+	 * instead of where it actually is, and can no longer resolve it back to a real scene */
+	if(obj_type == ObjectType::Textbox && seg_mode != DatabaseModel::NoSegmentation &&
+			graph_obj->getSceneIndex() < 0)
+		graph_obj->setSceneIndex(scenes.indexOf(target_scene));
+
+	if(item)
+		target_scene->addItem(item, blink_new_objs);
+
+	if(!db_model->isModelLoading())
+		setModified(true);
+
+	emit s_objectAdded(graph_obj);
+
+	if(item && blink_new_objs)
+		viewport->centerOn(item);
 }
 
 void ModelWidget::addNewObject()
@@ -2485,6 +2485,68 @@ ModelWidget::AlternateSegMode ModelWidget::checkAlternateSegmentation(const QStr
 	return {};
 }
 
+bool ModelWidget::needsThresholdRebucketing(const QString &filename)
+{
+	if(filename.isEmpty())
+		return false;
+
+	try
+	{
+		XmlParser xmlparser;
+		attribs_map attribs;
+
+		xmlparser.loadXMLFile(filename);
+		xmlparser.getElementAttributes(attribs);
+
+		if(attribs[Attributes::SegMode].isEmpty() ||
+			 static_cast<DatabaseModel::SegmentationMode>(attribs[Attributes::SegMode].toUInt()) != DatabaseModel::SegByThreshold ||
+			 attribs[Attributes::SegObjCount].isEmpty())
+			return false;
+
+		unsigned total_objs = attribs[Attributes::SegObjCount].toUInt();
+		unsigned threshold = attribs[Attributes::SegThreshold].toUInt();
+
+		if(threshold == 0)
+			threshold = DatabaseModel::DefaultSegThreshold;
+
+		// Same formula handleObjectAddition()'s naive counter reproduces, including its trailing empty scene when total_objs is an exact multiple of threshold
+		unsigned expected_scenes = (total_objs / threshold) + 1;
+		unsigned actual_scenes = 1;
+
+		if(xmlparser.accessElement(XmlParser::ChildElement))
+		{
+			do
+			{
+				if(xmlparser.getElementType() != XML_ELEMENT_NODE || xmlparser.getElementName() != Attributes::Scenes)
+					continue;
+
+				actual_scenes = 0;
+
+				if(xmlparser.accessElement(XmlParser::ChildElement))
+				{
+					do
+					{
+						if(xmlparser.getElementType() == XML_ELEMENT_NODE)
+							actual_scenes++;
+					}
+					while(xmlparser.accessElement(XmlParser::NextElement));
+				}
+
+				break;
+			}
+			while(xmlparser.accessElement(XmlParser::NextElement));
+		}
+
+		return expected_scenes != actual_scenes;
+	}
+	/* A malformed/unreadable file here just means no verdict -- the real loadModel() call right
+	 * after this one will surface the actual error to the user */
+	catch(Exception &)
+	{
+		return false;
+	}
+}
+
 void ModelWidget::loadModel(const QString &filename, bool check_alt_seg_mode)
 {
 	TaskProgressWidget task_prog_wgt(this);
@@ -2510,7 +2572,8 @@ void ModelWidget::loadModel(const QString &filename, bool check_alt_seg_mode)
 
 		db_model->loadModel(filename,
 												alt_seg_mode.isValid(), alt_seg_mode.mode,
-												DatabaseModel::DefaultSegThreshold);
+												DatabaseModel::DefaultSegThreshold,
+												needsThresholdRebucketing(filename));
 
 		blink_new_objs = curr_blink_objs;
 

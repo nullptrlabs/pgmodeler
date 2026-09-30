@@ -58,6 +58,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedView();
 		void thresholdModeOpensNewSceneAfterCrossingCount();
 		void thresholdModeSceneAssignmentSurvivesSaveAndReload();
+		void changingThresholdRebucketsScenesOnReload();
 		void thresholdModeCrossSceneRelationshipGetsCutoffMarkers();
 		void thresholdModeDoesNotRebalanceEmptiedScenes();
 		void segmentedModesNeverCreateSchemaRectangles();
@@ -822,6 +823,72 @@ void ModelWidgetTest::thresholdModeSceneAssignmentSurvivesSaveAndReload()
 			//The threshold counter must resume from the reloaded occupancy, not restart at zero
 			QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
 			QCOMPARE(model_wgt.getSceneForObject(new_table), last_scene);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
+}
+
+/*! \brief Changing seg-threshold and saving without touching any Table/View/ForeignTable leaves
+the per-object scene indices on disk still reflecting the OLD threshold -- a plain reload must
+detect that mismatch and redo the bucketing under the new threshold instead of trusting the stale
+distribution. This guards the bug report: changing the threshold from the UI silently had no effect
+on an already-segmented model, no matter how many times it was reloaded afterward. */
+void ModelWidgetTest::changingThresholdRebucketsScenesOnReload()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_threshold_rebucket.dbm");
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+			db_model->setSavedSegmentationMode(DatabaseModel::SegByThreshold);
+			db_model->setSegThreshold(5);
+			db_model->setSavedSegThreshold(5);
+
+			db_model->createSystemObjects(true);
+
+			Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+			QVERIFY(public_sch != nullptr);
+
+			for(unsigned i = 0; i < 12; i++)
+			{
+				Table *table = new Table;
+				table->setName(QString("table_%1").arg(i));
+				table->setSchema(public_sch);
+				db_model->addTable(table);
+			}
+
+			//12 tables at threshold 5 -> 3 occupied scenes (5, 5, 2)
+			QCOMPARE(model_wgt.getObjectsScenes().size(), 3);
+
+			model_wgt.saveModel(tmp_file);
+
+			/* Widen the threshold well past the object count without touching any table -- the scene
+			 * indices already on disk still reflect the threshold of 5 that produced them */
+			model_wgt.setPendingSceneThreshold(1000);
+			model_wgt.saveModel(tmp_file);
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_file);
+
+			QCOMPARE(db_model->getSegThreshold(), 1000u);
+
+			//12 tables under threshold 1000 all belong in a single scene -- the stale indices must have been discarded
+			QCOMPARE(model_wgt.getObjectsScenes().size(), 1);
 		}
 	}
 	catch(Exception &e)

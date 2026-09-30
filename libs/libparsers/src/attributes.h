@@ -652,6 +652,7 @@ extern __libparsers const QString
 	SecurityInvoker,
 	SecurityType,
 	SegMode,
+	SegObjCount,
 	SegThreshold,
 	SelectExp,
 	SelectObjects,

@@ -270,6 +270,11 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Indicates if the model is being loaded
 		bool loading_model,
 
+		/*! \brief True for the duration of a loadModel() call whose discard_scene_idx argument was
+		 * true -- checked by the Table/View/ForeignTable parsing methods to skip restoring their
+		 * saved scene index (see loadModel()) */
+		discard_scene_idx,
+
 		/*! \brief Indicates if the model was invalidated due to operations like insert / remove objects.
 		When this flag is set it's recommend to revalidate the model using the Model validation tool */
 		invalidated,
@@ -493,9 +498,15 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		segmentation mode/threshold for this load instead of whatever is saved in the file -- so
 		routing during this same load already reflects them, without requiring a save+reload
 		round-trip. The overridden values still become the new "saved" ones, same as loading them
-		normally from the file would */
+		normally from the file would.
+		When discard_scene_idx is true, every loaded Table/View/ForeignTable's own saved scene index
+		is left at its default (-1) instead of being restored from the file -- used when the caller
+		already determined that index is stale (see ModelWidget::needsThresholdRebucketing()), so
+		threshold-segmentation routing re-derives scene placement from scratch during this load
+		instead of trusting a distribution that no longer matches the active threshold */
 		void loadModel(const QString &filename, bool override_seg_mode = false,
-										SegmentationMode ovr_seg_mode = NoSegmentation, unsigned ovr_seg_threshold = 0);
+										SegmentationMode ovr_seg_mode = NoSegmentation, unsigned ovr_seg_threshold = 0,
+										bool discard_scene_idx = false);
 
 		//! \brief Sets the database encoding
 		void setEncoding(EncodingType encod);

@@ -180,6 +180,17 @@ class __libgui ModelWidget: public QWidget {
 		 * (invalid) AlternateSegMode when there's nothing to suggest or the user declines */
 		AlternateSegMode checkAlternateSegmentation(const QString &filename);
 
+		/*! \brief Lightweight, pre-load scan of filename's root attributes (no DTD validation, no
+		 * object instantiation) to tell whether its saved scene distribution is still consistent
+		 * with its own seg-threshold. Compares seg-obj-count (the Table/View/ForeignTable count that
+		 * produced the <scenes> below when the file was saved) against seg-threshold: replaying
+		 * seg-obj-count/seg-threshold+1 must reproduce the same scene count the file actually has, or
+		 * the threshold was changed (setPendingSceneThreshold()) after that save and the per-object
+		 * scene indices are stale. Only meaningful when the file's own SegMode is already
+		 * SegByThreshold -- returns false for anything else, including files predating seg-obj-count
+		 * (nothing to compare against, so nothing is second-guessed) */
+		static bool needsThresholdRebucketing(const QString &filename);
+
 		//! \brief Manages the objects scene
 		QGraphicsView *viewport;
 
