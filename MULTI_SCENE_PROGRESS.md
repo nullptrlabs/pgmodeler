@@ -6,26 +6,22 @@
 
 ## Estado atual
 
-> **Ponteiro mais recente (2026-09-30, HEAD `1f67b5b1b`)** — o resto desta seção é um log
-> cronológico que vai ficando desatualizado à medida que sessões avançam; para saber o estado real
-> sem reler tudo, confie neste bloco e no plano (`MULTI_SCENE_PLAN.md`), não nas primeiras linhas
-> do log abaixo. Fases 0-3 e Fase 4 subtarefas 4.1-4.7 e 4.9 (4.9.1/4.9.2) — todas concluídas e
-> commitadas. **4.8 e 4.10 adiadas** de propósito (decisão do usuário, candidatas a implementação
-> futura, não bloqueiam o resto — 4.10, o modo de segmentação com clustering, adiada em 2026-09-30
-> por complexidade). Dois bugs de reload sob threshold, achados pelo usuário testando com um
-> modelo real no mesmo dia, já corrigidos e commitados: troca de threshold sem efeito após
-> salvar+recarregar (`a6d92756b`) e objetos fora do retângulo da cena após o rebucketing
-> (`ae90d9d32`). **4.11 (criar tag/layer a partir de schemas) commitada** (`835a4c2e5`) — incluiu um
-> leak pré-existente e não relacionado achado pelo usuário via ASan logo depois, também corrigido e
-> commitado (`1f67b5b1b`, `BaseObjectView::mousePressEvent()`). **4.12 (escopo de cena pro
-> "Rearrange objects") implementada em 2026-09-30, ainda não commitada — aguardando teste manual
-> do usuário** (ver entrada própria mais abaixo; mexe em dois arquivos do `priv-core`, repositório
-> separado — não aparece no `git status` deste repo, precisa ser commitado à parte). Suíte
-> `modelwidgettest` 49/49 limpa nessa rodada. Restam em aberto as
-> subtarefas 4.12-4.14 (todas **[requerem decisão do usuário]**, nenhuma codada ainda)
-> e a Fase 5 (paridade
-> `pgmodeler-cli`, dona do usuário, bloqueada até 0-4 fecharem). Branch sincronizada com `origin`
-> depois de cada commit desta sessão.
+> **Ponteiro mais recente (2026-09-30)** — o resto desta seção é um log cronológico que vai ficando
+> desatualizado à medida que sessões avançam; para saber o estado real sem reler tudo, confie neste
+> bloco e no plano (`MULTI_SCENE_PLAN.md`), não nas primeiras linhas do log abaixo. Fases 0-3 e Fase
+> 4 subtarefas 4.1-4.7, 4.9, 4.11 e 4.12 — todas concluídas e commitadas (4.12 em `d8e5184bf`,
+> incluindo os dois call sites ajustados em `priv-core`, commitado à parte nesse repositório
+> separado). **4.8 e 4.10 adiadas** de propósito (decisão do usuário, candidatas a implementação
+> futura, não bloqueiam o resto). Dois bugs de reload sob threshold, achados pelo usuário testando
+> com um modelo real, corrigidos e commitados: troca de threshold sem efeito após salvar+recarregar
+> (`a6d92756b`) e objetos fora do retângulo da cena após o rebucketing (`ae90d9d32`). **4.11**
+> incluiu um leak pré-existente e não relacionado achado pelo usuário via ASan logo depois, também
+> corrigido e commitado (`1f67b5b1b`, `BaseObjectView::mousePressEvent()`). **Navegação entre cenas
+> no `SceneInfoWidget`** (botões anterior/próxima, fora do backlog numerado) implementada pelo
+> usuário e commitada nesta sessão (ver entrada própria mais abaixo). Suíte `modelwidgettest` 49/49
+> limpa. Restam em aberto as subtarefas **4.13-4.14** (ambas **[requerem decisão do usuário]**,
+> nenhuma codada ainda) e a Fase 5 (paridade `pgmodeler-cli`, dona do usuário, bloqueada até 0-4
+> fecharem). Branch sincronizada com `origin` depois de cada commit desta sessão.
 
 - Branch: `multi-scene-support-2.1.x`, com 1 commit à frente de `origin` (refactor próprio do
   usuário, `0f7ac6f61`, não relacionado a esta sessão — adicionou `BaseTableView::getCutoffItem()`
@@ -1565,9 +1561,18 @@
     Roda de novo em modo "todas as cenas" só confirmando ausência de crash no fallback flat (o
     caminho que antes era 100% no-op e nunca tinha sido exercitado). Suíte completa: **49/49**
     (48 + o novo). Build `gui`+`pgmodeler`(binário completo, CLI incluído)+`modelwidgettest` limpo.
-  - **Não commitado — aguardando teste manual do usuário** (recomendado testar nos três modos de
-    segmentação, já que o comportamento mudou de verdade em `SegBySchema`/`SegByThreshold`, que
-    antes não faziam nada pras duas ações de grade/schema).
+  - **Commitado em `d8e5184bf`.**
+- **Navegação entre cenas no `SceneInfoWidget` (2026-09-30), implementada pelo próprio usuário
+  direto no editor, commitada a pedido dele**: dois `QToolButton` novos (`previous_tb`/`next_tb`,
+  ícones dedicados em `icons-{small,medium,big}.conf`) avançam/retrocedem `scenes_cmb` e emitem
+  `s_activeSceneSelected()`, agrupados num `scene_nav_wgt` próprio que só fica visível fora de
+  `NoSegmentation` (`updateSegmentationInfo()`). `enableNavigationButtons()` novo
+  (`SceneInfoWidget::` privado) desabilita cada botão na ponta correspondente da lista de cenas
+  (`previous_tb` no índice 0, `next_tb` no último, e ambos com menos de 2 cenas) — chamado depois de
+  repovoar o combo (`updateScenesCombo()`) e depois de cada clique nos próprios botões. Terceira
+  linha separadora (`separator_ln3`) adicionada ao `CustomUiStyle::setStyleHint()` pra isolar
+  visualmente o novo grupo. Revisado (build `gui`+`modelwidgettest` limpo, suíte 49/49 sem
+  regressão) antes de commitar — nenhum ajuste meu necessário, só verificação.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
