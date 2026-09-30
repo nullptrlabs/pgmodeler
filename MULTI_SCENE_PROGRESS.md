@@ -1488,7 +1488,31 @@
   - Build `gui`+`modelwidgettest` limpo, sem warnings novos. Suíte `modelwidgettest`: **48/48**
     depois do refactor desta revisão. Nenhum teste de regressão novo escrito pra 4.11
     especificamente (subtarefa não pediu; feature é acionada por menu, mais natural de validar
-    manualmente na GUI primeiro). **Não commitado — aguardando teste manual do usuário.**
+    manualmente na GUI primeiro). Testado manualmente pelo usuário e aprovado, **commitado em
+    `835a4c2e5`**.
+  - **Leak achado pelo usuário via ASan logo depois do commit, investigado e corrigido — bug
+    pré-existente, não introduzido pela 4.11**: relatório mostrava 552 bytes/6 alocações vazando,
+    toda a pilha em `BaseObjectView::mousePressEvent()` ([baseobjectview.cpp:105](libs/libcanvas/src/baseobjectview.cpp#L105))
+    chamado via `SchemaView::mousePressEvent()`. Causa: esse método "finge" um clique esquerdo
+    quando o usuário clica com o **botão direito** num objeto ainda não selecionado (mecanismo pra
+    selecionar+abrir o menu de contexto num único clique) — aloca um `QGraphicsSceneMouseEvent`
+    novo com `new`, repassa pra `QGraphicsItemGroup::mousePressEvent()`, e nunca dá `delete`.
+    Confirmado pré-existente via `git log -L` na função: a linha é de 2016 (`40f99606c`), nada a
+    ver com esta sessão nem com a feature de multi-cena — só ficou mais exposto porque a 4.11 é
+    acionada bem por esse caminho (right-click num schema ou no canvas vazio pra abrir o menu
+    Quick). **Fix**: um `delete m_event;` depois de repassar o evento sintético (`baseobjectview.cpp`,
+    mesmo bloco). Build `canvas`+`gui`+`modelwidgettest` limpo, suíte 48/48. Não escrito teste de
+    regressão (exigiria simular um right-click via `QTest::mouseClick` com `Qt::RightButton` num
+    objeto não selecionado sob ASan com `detect_leaks=1`, fora do padrão atual dos testes desta
+    suíte). Usuário questionou se o `delete` não causaria um double-free (a mesma dúvida faz sentido
+    pra quem está acostumado com eventos que o próprio Qt destrói ao final do processamento via fila
+    — `QCoreApplication::postEvent()`); esclarecido que esse mecanismo de auto-deleção só vale pra
+    eventos **postados** na fila, e essa cadeia inteira (`BaseObjectView`/`SchemaView`/
+    `BaseTableView`/`RelationshipView`/`ObjectsScene`) não usa `postEvent`/`sendEvent` em lugar
+    nenhum — é só chamada de função virtual síncrona e direta (`ClasseBase::mousePressEvent(event)`).
+    `m_event` é um objeto que este trecho cria só pra si mesmo (forçar a lógica de seleção do
+    `QGraphicsItemGroup::mousePressEvent()` a rodar mesmo num clique direito); depois da chamada
+    retornar, nada mais guarda ponteiro pra ele. Aprovado pelo usuário. **Commitado.**
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

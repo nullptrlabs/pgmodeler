@@ -109,6 +109,7 @@ void BaseObjectView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		m_event->setButton(Qt::LeftButton);
 
 		QGraphicsItemGroup::mousePressEvent(m_event);
+		delete m_event;
 		event->ignore();
 	}
 	else if(event->button()==Qt::LeftButton)
