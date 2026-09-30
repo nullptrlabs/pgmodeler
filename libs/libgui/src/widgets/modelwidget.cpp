@@ -349,6 +349,15 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	addAction(action_sel_tagged_tabs);
 	addAction(action_sel_table_rels);
 
+	action_create_tag_from_schema=new QAction(GuiUtilsNs::getIcon("tag"), tr("Add tag from schema"), this);
+	action_create_layer_from_schema=new QAction(GuiUtilsNs::getIcon("layers"), tr("Add layer from schema"), this);
+	action_create_tags_all_schemas=new QAction(GuiUtilsNs::getIcon("tag"), tr("Add tags from schemas"), this);
+	action_create_layers_all_schemas=new QAction(GuiUtilsNs::getIcon("layers"), tr("Add layers from schemas"), this);
+	addAction(action_create_tag_from_schema);
+	addAction(action_create_layer_from_schema);
+	addAction(action_create_tags_all_schemas);
+	addAction(action_create_layers_all_schemas);
+
 	action_select_object=new QAction(GuiUtilsNs::getIcon("moved"), tr("Select"), this);
 	action_parent_rel=new QAction(GuiUtilsNs::getIcon("relationship"), tr("Open relationship"), this);
 	addAction(action_select_object);
@@ -650,6 +659,10 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	connect(action_sel_sch_children, &QAction::triggered, this, &ModelWidget::selectSchemaChildren);
 	connect(action_sel_table_rels, &QAction::triggered, this, &ModelWidget::selectTableRelationships);
 	connect(action_sel_tagged_tabs, &QAction::triggered, this, &ModelWidget::selectTaggedTables);
+	connect(action_create_tag_from_schema, &QAction::triggered, this, &ModelWidget::createTagFromSchema);
+	connect(action_create_layer_from_schema, &QAction::triggered, this, &ModelWidget::createLayerFromSchema);
+	connect(action_create_tags_all_schemas, &QAction::triggered, this, &ModelWidget::createTagsForAllSchemas);
+	connect(action_create_layers_all_schemas, &QAction::triggered, this, &ModelWidget::createLayersForAllSchemas);
 	connect(action_select_object, &QAction::triggered, this, &ModelWidget::highlightObject);
 	connect(action_parent_rel, &QAction::triggered, this, &ModelWidget::editObject);
 	connect(action_append_sql, &QAction::triggered, this, &ModelWidget::editCustomSQL);
@@ -3870,6 +3883,207 @@ void ModelWidget::selectTaggedTables()
 	emit emitSceneInteracted();
 }
 
+void ModelWidget::createTagFromSchema()
+{
+	QAction *act = dynamic_cast<QAction *>(sender());
+	Schema *schema = dynamic_cast<Schema *>(reinterpret_cast<BaseObject *>(act->data().value<void *>()));
+
+	createTagOrLayerFromSchemas({ schema }, false);
+}
+
+void ModelWidget::createLayerFromSchema()
+{
+	QAction *act = dynamic_cast<QAction *>(sender());
+	Schema *schema = dynamic_cast<Schema *>(reinterpret_cast<BaseObject *>(act->data().value<void *>()));
+
+	createTagOrLayerFromSchemas({ schema }, true);
+}
+
+void ModelWidget::createTagsForAllSchemas()
+{
+	createTagOrLayerFromSchemas({}, false);
+}
+
+void ModelWidget::createLayersForAllSchemas()
+{
+	createTagOrLayerFromSchemas({}, true);
+}
+
+void ModelWidget::createTagOrLayerFromSchemas(const std::vector<Schema *> &schemas, bool as_layer)
+{
+	std::vector<Schema *> all_schemas;
+
+	/* Empty schemas means "batch for every schema in the model" (see createTagsForAllSchemas()/
+	 * createLayersForAllSchemas()) -- that's the only case asking for the extra "this will
+	 * create N ..." confirmation, a single targeted schema doesn't need it */
+	if(schemas.empty())
+	{
+		for(auto &obj : *db_model->getObjectList(ObjectType::Schema))
+			all_schemas.push_back(dynamic_cast<Schema *>(obj));
+
+		QString msg = as_layer ?
+					tr("This will create <strong>%1</strong> layer(s), one for each schema in the model. Continue?") :
+					tr("This will create <strong>%1</strong> tag(s), one for each schema in the model. Continue?");
+
+		if(!Messagebox::isAccepted(Messagebox::confirm(msg.arg(all_schemas.size()))))
+			return;
+	}
+
+	const std::vector<Schema *> &target_schemas = schemas.empty() ? all_schemas : schemas;
+	std::vector<ObjectType> child_types = { ObjectType::Table, ObjectType::ForeignTable, ObjectType::View };
+	std::vector<std::pair<Schema *, std::vector<BaseTable *>>> schema_children;
+	int conflicting_tags = 0;
+
+	for(auto &schema : target_schemas)
+	{
+		std::vector<BaseTable *> children;
+
+		for(auto &type : child_types)
+		{
+			for(auto &obj : db_model->getObjects(type, schema))
+				children.push_back(dynamic_cast<BaseTable *>(obj));
+		}
+
+		/* Layers are cumulative (a table can belong to several at once), so they're always just
+		 * added alongside whatever the table already has -- nothing to conflict with. Tags are
+		 * exclusive (a table has at most one), so an existing one is a real conflict that needs
+		 * a decision upfront */
+		if(!as_layer)
+		{
+			for(auto &tab : children)
+			{
+				if(tab->getTag())
+					conflicting_tags++;
+			}
+		}
+
+		schema_children.push_back({ schema, children });
+	}
+
+	bool replace_tag = false;
+
+	if(conflicting_tags > 0)
+	{
+		replace_tag = Messagebox::isAccepted(Messagebox::confirm(
+					tr("Found <strong>%1</strong> table(s) that already have tags assigned. "
+						 "Should the new tag replace it on those tables?").arg(conflicting_tags)));
+	}
+
+	int op_id = -1, op_curr_idx = op_list->getCurrentIndex();
+	std::vector<BaseObject *> modified_objs;
+
+	try
+	{
+		op_list->startOperationChain();
+
+		for(auto &[schema, children] : schema_children)
+		{
+			if(children.empty())
+				continue;
+
+			if(as_layer)
+			{
+				/* Goes through the same path LayersWidget's "new layer" field uses (s_newLayerRequested
+				 * -> MainWindow::addNewLayer() -> LayersConfigWidget::addLayer()) instead of touching the
+				 * scenes directly, so LayersConfigWidget's own row list stays in sync -- it has no other
+				 * way of finding out a layer was added. Direct connection, so by the time emit returns
+				 * the layer is already appended to every scene, disambiguated and active in all of them */
+				emit s_newLayerRequested(schema->getName());
+				unsigned layer_id = static_cast<unsigned>(scene->getLayers().size() - 1);
+
+				for(auto &tab : children)
+				{
+					op_id = op_list->registerObject(tab, Operation::ObjModified, -1);
+					tab->addToLayer(layer_id);
+					modified_objs.push_back(tab);
+				}
+
+				/* Every child got added to the layer (layers have no conflict to skip on), so the
+				 * schema's own rectangle -- now redundant as a visual grouping cue -- can go */
+				if(schema->isRectVisible())
+				{
+					op_id = op_list->registerObject(schema, Operation::ObjModified, -1);
+					schema->setRectVisible(false);
+					schema->setModified(true);
+					modified_objs.push_back(schema);
+				}
+			}
+			else
+			{
+				Tag *tag = new Tag;
+				tag->setName(schema->getName());
+
+				if(db_model->getObjectIndex(tag->getSignature(), ObjectType::Tag) >= 0)
+					tag->setName(CoreUtilsNs::generateUniqueName(tag, *db_model->getObjectList(ObjectType::Tag)));
+
+				/* Seeds every element with the same default colors a plain (untagged) table
+				 * already has -- a freshly built Tag starts with every color zeroed out (black),
+				 * so without this every element other than TableTitle would render solid black */
+				for(auto &attr : Tag::getColorAttributes())
+				{
+					tag->setElementColor(attr, BaseObjectView::getElementColor(attr, ColorId::FillColor1), ColorId::FillColor1);
+
+					if(attr != Attributes::TableName && attr != Attributes::TableSchemaName)
+					{
+						tag->setElementColor(attr, BaseObjectView::getElementColor(attr, ColorId::FillColor2), ColorId::FillColor2);
+						tag->setElementColor(attr, BaseObjectView::getElementColor(attr, ColorId::BorderColor), ColorId::BorderColor);
+					}
+				}
+
+				tag->setElementColor(Attributes::TableTitle, schema->getFillColor(), ColorId::FillColor1);
+				tag->setElementColor(Attributes::TableTitle, schema->getFillColor(), ColorId::FillColor2);
+				tag->setElementColor(Attributes::TableTitle,
+														 CustomUiStyle::getAdjustedColor(schema->getFillColor(),
+																														 CustomUiStyle::MinFactor,
+																														 CustomUiStyle::MinFactor),
+														 ColorId::BorderColor);
+
+				db_model->addTag(tag);
+				op_id = op_list->registerObject(tag, Operation::ObjCreated);
+				modified_objs.push_back(tag);
+
+				bool any_tagged = false;
+
+				for(auto &tab : children)
+				{
+					if(tab->getTag() && !replace_tag)
+						continue;
+
+					op_id = op_list->registerObject(tab, Operation::ObjModified, -1);
+					tab->clearDependencies();
+					tab->setTag(tag);
+					tab->updateDependencies();
+					modified_objs.push_back(tab);
+					any_tagged = true;
+				}
+
+				/* Only hide the schema's rectangle if at least one of its children actually got the
+				 * new tag -- if every table was skipped due to an existing tag, the rectangle is
+				 * still the only visual grouping cue left for this schema */
+				if(any_tagged && schema->isRectVisible())
+				{
+					op_id = op_list->registerObject(schema, Operation::ObjModified, -1);
+					schema->setRectVisible(false);
+					schema->setModified(true);
+					modified_objs.push_back(schema);
+				}
+			}
+		}
+
+		op_list->finishOperationChain();
+		db_model->setObjectsModified(modified_objs);
+		setModified(true);
+		emit s_objectModified();
+	}
+	catch(Exception &e)
+	{
+		if(op_id >= 0 && op_id > op_curr_idx)
+			op_list->removeLastOperation();
+
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
+}
+
 void ModelWidget::protectObject()
 {
 	try
@@ -5169,6 +5383,23 @@ void ModelWidget::configureQuickMenu(BaseObject *object)
 				quick_actions_menu.addAction(action_disable_sql);
 		}
 
+		//Last items: create tag/layer from schema(s) -- singular for one schema, batch for the database itself
+		if(object && obj_type == ObjectType::Schema)
+		{
+			quick_actions_menu.addSeparator();
+			quick_actions_menu.addAction(action_create_tag_from_schema);
+			quick_actions_menu.addAction(action_create_layer_from_schema);
+			action_create_tag_from_schema->setData(QVariant::fromValue<void *>(object));
+			action_create_layer_from_schema->setData(QVariant::fromValue<void *>(object));
+		}
+		else if(object == dynamic_cast<BaseObject *>(db_model) &&
+						!db_model->getObjectList(ObjectType::Schema)->empty())
+		{
+			quick_actions_menu.addSeparator();
+			quick_actions_menu.addAction(action_create_tags_all_schemas);
+			quick_actions_menu.addAction(action_create_layers_all_schemas);
+		}
+
 		//Include the quick actions if it is not empty and the model is not protected
 		if(!db_model->isProtected() && !quick_actions_menu.isEmpty())
 			popup_menu.addAction(action_quick_actions);
@@ -5499,16 +5730,32 @@ void ModelWidget::toggleSchemasRectangles()
 {
 	bool visible = sender() == action_show_schemas_rects;
 	Schema *schema = nullptr;
+	int op_id = -1, op_curr_idx = op_list->getCurrentIndex();
 
-	for(auto obj : *db_model->getObjectList(ObjectType::Schema))
+	try
 	{
-		schema = dynamic_cast<Schema *>(obj);
+		op_list->startOperationChain();
 
-		if(schema && schema->isRectVisible() != visible)
+		for(auto &obj : *db_model->getObjectList(ObjectType::Schema))
 		{
-			schema->setRectVisible(visible);
-			schema->setModified(true);
+			schema = dynamic_cast<Schema *>(obj);
+
+			if(schema && schema->isRectVisible() != visible)
+			{
+				op_id = op_list->registerObject(schema, Operation::ObjModified, -1);
+				schema->setRectVisible(visible);
+				schema->setModified(true);
+			}
 		}
+
+		op_list->finishOperationChain();
+	}
+	catch(Exception &e)
+	{
+		if(op_id >= 0 && op_id > op_curr_idx)
+			op_list->removeLastOperation();
+
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	db_model->setShowSysSchemasRects(visible);
