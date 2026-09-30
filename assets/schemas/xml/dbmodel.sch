@@ -30,6 +30,10 @@ $br $tb
 
 [ seg-threshold=] "{seg-threshold}"
 
+%if {seg-obj-count} %then
+	[ seg-obj-count=] "{seg-obj-count}"
+%end
+
 %if {last-position} %or {last-zoom} %or {scene-rect} %or {last-scene} %then
 	$br $tb
 

@@ -1262,6 +1262,72 @@
     resultado (build `core`+`gui`+`modelwidgettest` limpo, suíte 47/47 sem regressão) e só corrigi
     comentários que ainda citavam os nomes antigos (`modelwidget.h`, `mainwindow.cpp`,
     `databasemodel.cpp`) — nenhum problema funcional encontrado.
+- **Bug reportado pelo usuário + fix (2026-09-29): mudar seg-threshold e salvar não redistribuía
+  nada, nem depois de recarregar.** Repro: modelo em `SegByThreshold` com threshold 500 gera 10
+  cenas; usuário muda o threshold pra 1000 (esperando 5 cenas) e salva; ao recarregar, continua com
+  as 10 cenas originais, não importa quantas vezes recarregue.
+  - **Causa raiz**: cada `Table`/`View`/`ForeignTable` carrega seu próprio índice de cena salvo
+    (`Attributes::Scene`), e `ModelWidget::handleObjectAddition()`
+    ([modelwidget.cpp:1344-1382](libs/libgui/src/widgets/modelwidget.cpp#L1344-L1382)) sempre
+    confia nele quando presente (`scn_idx >= 0`), nunca reconsiderando contra o `seg-threshold`
+    atual — o contador ingênuo só roda pra objetos genuinamente novos (`scn_idx < 0`).
+    `ModelWidget::setPendingSceneThreshold()`/`DatabaseModel::setSavedSegThreshold()` prometiam
+    "só vale depois de recarregar" mas nada no caminho de reload cumpria isso.
+  - **Complicação identificada antes do fix**: o mesmo atributo `scene`/`getSceneIndex()` também é
+    usado por `ModelWidget::moveToScene()` (subtarefa 4.2) pra realocação manual, que precisa
+    sobreviver a save+reload — então não dá pra simplesmente ignorar o `scene` salvo sempre; só
+    quando o threshold de fato mudou desde o save. Usuário confirmou explicitamente que aceita
+    perder realocações manuais nesse caso específico, em troca de correção ("o preço a se pagar").
+  - **Detecção**: usuário propôs guardar o `total_objs` (contagem de Table/View/ForeignTable) que
+    gerou a distribuição salva, como novo atributo no XML, em vez de recontar via scan — mais fiel
+    (é o N real usado pelo contador na sessão que salvou) e mais barato (não precisa descer em
+    `<table>`/`<view>`/`<foreigntable>`, só ler atributos-raiz + contar filhos de `<scenes>`).
+    Implementado como `Attributes::SegObjCount` (`seg-obj-count`), gravado em
+    `DatabaseModel::setDatabaseModelAttributes()`
+    ([databasemodel.cpp:8097-8106](libs/libcore/src/databasemodel.cpp#L8097-L8106)) só quando
+    `saved_seg_mode == SegByThreshold`, contagem atual em memória (`getObjectCount()` por tipo, sem
+    scan de XML). Precisou de `.sch`/`.dtd` novos
+    ([dbmodel.dtd:103](assets/schemas/xml/dtd/dbmodel.dtd#L103),
+    [dbmodel.sch:29-35](assets/schemas/xml/dbmodel.sch#L29-L35)) — **achado durante a implementação**:
+    diferente de `seg-mode`/`seg-threshold` (sempre não-vazios), `seg-obj-count` pode ser `""` fora
+    do modo threshold, e o `SchemaParser` trata um placeholder `{attr}` fora de `%if` com valor vazio
+    como "undefined" (`[UndefinedAttributeValue]`) — quebrou `saveModel()` pra **qualquer** modo até
+    eu envolver a linha em `%if {seg-obj-count} %then ... %end`, mesmo padrão já usado por
+    `author`/`max-obj-count`/`scenes`. Pego pela suíte inteira falhando (8 testes de save/reload,
+    todos com a mesma exceção), não só o teste novo.
+  - **Fórmula de comparação**: replicando exatamente a lógica do contador ingênuo (que pré-cria a
+    próxima cena assim que `threshold_obj_count % threshold == 0`, mesmo sem saber se sobra mais
+    algum objeto pra preenchê-la), o número de cenas realmente gravadas em `<scenes>` é sempre
+    `(total_objs / threshold) + 1` (divisão inteira) — sem precisar de `ceil`/condicional, já cobre
+    o caso de uma cena vazia sobrando quando `total_objs` é múltiplo exato do threshold. Verificada
+    contra os casos de borda (N=500/T=500→2, N=1200/T=500→3, N=499/T=500→1) antes de implementar.
+  - **Descarte dos índices salvos**: `DatabaseModel::loadModel()` ganhou o parâmetro
+    `discard_scene_idx` (+ membro privado homônimo, mesmo padrão de `loading_model`) que, quando
+    true, faz as duas restaurações de `Attributes::Scene` que importam
+    (`createPhysicalTable<TableClass>()` em
+    [databasemodel.cpp:10350](libs/libcore/src/databasemodel.cpp#L10350), cobre `Table`+
+    `ForeignTable`; e a de `View` em
+    [databasemodel.cpp:6947](libs/libcore/src/databasemodel.cpp#L6947)) pularem, deixando o índice
+    em -1 — o ramo `else` (contador ingênuo) que já existia em `handleObjectAddition()` pra objeto
+    novo assume a partir daí, sem nenhuma mudança de lógica de roteamento. A restauração de
+    `Textbox` ([databasemodel.cpp:7214](libs/libcore/src/databasemodel.cpp#L7214)) foi deixada de
+    fora de propósito — Textbox nunca conta pro threshold, descartar o índice dele seria um efeito
+    colateral sem relação com o bug.
+  - **Decisão de onde plugar**: `ModelWidget::needsThresholdRebucketing(filename)` novo (privado,
+    estático, mesmo estilo de `getAlternateSegMode()`) faz um pré-scan leve (root attribs +
+    contagem de filhos de `<scenes>`, sem descer em `<table>`) e roda incondicionalmente em
+    `ModelWidget::loadModel()` (não atrás de `check_alt_seg_mode`) — ao contrário de
+    `checkAlternateSegmentation()`, não mostra nenhum diálogo, então não tem o risco de travar
+    testes automatizados com um `Messagebox` modal; correção de bug não devia ser opt-in.
+  - **Teste de regressão**: `changingThresholdRebucketsScenesOnReload()` — 12 tabelas sob threshold
+    5 (3 cenas ocupadas), salva, muda o threshold pra 1000 via `setPendingSceneThreshold()`, salva
+    de novo sem tocar em nenhuma tabela, recarrega num `ModelWidget` novo, confirma 1 cena só.
+    Verificado fail-then-pass via sabotagem temporária (`needsThresholdRebucketing(filename)` →
+    `false` na chamada de `db_model->loadModel()`) — falha exatamente como o bug relatado (3 cenas
+    em vez de 1) sem o fix, passa com ele restaurado.
+  - Suíte `modelwidgettest` completa: 48/48 (47 + o novo). `schemafilessyntaxtest`: 3/3. Build
+    `core`+`gui`+`modelwidgettest`+`schemafilessyntaxtest` limpo, `cmake --install` rodado pra
+    sincronizar `dbmodel.sch`/`dbmodel.dtd`. **Ainda não commitado.**
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

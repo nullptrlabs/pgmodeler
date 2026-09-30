@@ -1317,6 +1317,22 @@ depois.
      de `last-position`/`last-zoom`/`scene-rect` no `.sch`). **Sem a divisão "ativo"/"a salvar"** dos
      dois campos acima — focar uma cena diferente é uma ação de runtime comum, não precisa esperar um
      reload pra valer, então o valor lido na carga já vira o ativo na hora.
+     **Bug encontrado e corrigido (2026-09-29)**: o "só vale depois de recarregar" nunca se
+     concretizava de fato em modo `SegByThreshold` — cada `Table`/`View`/`ForeignTable` carrega seu
+     próprio índice de cena salvo (`Attributes::Scene`), e ele sempre tinha prioridade sobre o
+     `seg-threshold` do arquivo em `ModelWidget::handleObjectAddition()`
+     ([modelwidget.cpp:1344-1382](libs/libgui/src/widgets/modelwidget.cpp#L1344-L1382)) — mudar o
+     threshold e salvar nunca redistribuía nada, nem depois de recarregar quantas vezes fosse.
+     Fechado com um novo atributo `Attributes::SegObjCount` (`seg-obj-count`, só gravado em modo
+     `SegByThreshold`, contagem de `Table`+`View`+`ForeignTable` no momento do save) que permite
+     detectar a incompatibilidade num pré-scan leve antes da carga real
+     (`ModelWidget::needsThresholdRebucketing()`) e, quando detectada, descartar os índices de cena
+     salvos (`DatabaseModel::loadModel()` ganhou o parâmetro `discard_scene_idx`) — o contador
+     ingênuo já existente em `handleObjectAddition()` reassume a distribuição do zero sob o
+     threshold atual. Preço aceito explicitamente pelo usuário: qualquer realocação manual feita via
+     `moveToScene()` (subtarefa 4.2) também é descartada quando isso acontece, já que usa o mesmo
+     atributo — só ocorre quando o threshold de fato mudou desde o último save, nunca no caso comum.
+     Ver detalhamento completo em `MULTI_SCENE_PROGRESS.md`.
 
 3.2. **Persistência de retângulo por cena** — implementação completa do design fechado na seção 2:
      - DTD dedicado novo [assets/schemas/xml/dtd/scene.dtd](assets/schemas/xml/dtd/scene.dtd) com

@@ -639,6 +639,7 @@ namespace Attributes {
 	SecurityInvoker("security-invoker"),
 	SecurityType("security-type"),
 	SegMode("seg-mode"),
+	SegObjCount("seg-obj-count"),
 	SegThreshold("seg-threshold"),
 	SelectExp("select-exp"),
 	SelectObjects("select-objects"),
