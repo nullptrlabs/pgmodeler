@@ -139,6 +139,47 @@ class __libgui ModelWidget: public QWidget {
 		 * Not itself persisted -- reseeded from the loaded objects' scene indexes on loadModel() */
 		unsigned threshold_obj_count;
 
+		/*! \brief Minimum fraction of a model's Table/View/ForeignTable count concentrated in a
+		 * single schema for getAlternateSegMode() to suggest SegByThreshold over SegBySchema
+		 * -- provisional value, to be calibrated later */
+		static constexpr double ConcentrationSuggestThreshold = 0.8;
+
+		//! \brief Result of a lightweight, pre-load scan of a model file for getAlternateSegMode()
+		struct AlternateSegMode {
+			//! \brief The suggested mode: SegBySchema or SegByThreshold, NoSegmentation when isValid() is false
+			DatabaseModel::SegmentationMode mode = DatabaseModel::NoSegmentation;
+
+			//! \brief Total Table/View/ForeignTable count found in the file
+			unsigned total_objs = 0;
+
+			//! \brief Table/View/ForeignTable count belonging to the single most populated schema
+			unsigned max_schema_objs = 0;
+
+			//! \brief Name of that most populated schema
+			QString max_schema_name;
+
+			//! \brief True when this instance carries an actual, checked alternate segmentation mode
+			bool isValid() const
+			{
+				return mode != DatabaseModel::NoSegmentation &&
+							 total_objs > 0 && max_schema_objs > 0 && max_schema_objs <= total_objs;
+			}
+		};
+
+		/*! \brief Scans filename's XML directly (no DTD validation, no object instantiation) tallying
+		 * Table/View/ForeignTable counts per referenced schema, to detect upfront -- before the real,
+		 * much more expensive loadModel() call -- whether SegBySchema or SegByThreshold is the better
+		 * fit for this model. Only runs the detection at all when the file has no segmentation mode
+		 * of its own saved yet (attribs[Attributes::SegMode] empty) -- a model that already picked a
+		 * mode, explicitly or via a previous suggestion, is never second-guessed. Never modifies the
+		 * file or any DatabaseModel instance */
+		static AlternateSegMode getAlternateSegMode(const QString &filename);
+
+		/*! \brief Runs getAlternateSegMode() against filename and, if it comes back valid, prompts
+		 * the user to confirm switching to it. Returns the confirmed mode, or a default-constructed
+		 * (invalid) AlternateSegMode when there's nothing to suggest or the user declines */
+		AlternateSegMode checkAlternateSegmentation(const QString &filename);
+
 		//! \brief Manages the objects scene
 		QGraphicsView *viewport;
 
@@ -578,7 +619,8 @@ class __libgui ModelWidget: public QWidget {
 
 		/*! \brief Reorganizes the schemas over the scene in a grid form. The parameters are: an origin point,
 		number of tables per row, schemas per row and a object spacing */
-		void rearrangeSchemasInGrid(unsigned tabs_per_row = 0, unsigned sch_per_row = 0, QPointF origin = QPointF(50, 50), double obj_spacing = 75);
+		void rearrangeSchemasInGrid(unsigned tabs_per_row = 0, unsigned sch_per_row = 0,
+																QPointF origin = QPointF(50, 50), double obj_spacing = 75);
 
 		//! \brief Arrange all tables it their schemas randomly (scattered)
 		void rearrangeTablesInSchemas();
@@ -778,13 +820,12 @@ class __libgui ModelWidget: public QWidget {
 		 * model modified */
 		void setPendingSceneThreshold(unsigned value);
 
-		/*! \brief Loads filename into this widget's model. When override_seg_mode is true,
-		 * ovr_seg_mode/ovr_seg_threshold are forced as the segmentation mode/threshold for this load
-		 * instead of whatever is saved in the file (see DatabaseModel::loadModel()) -- used to apply
-		 * a segmentation suggestion (see MainWindow::addModel()) without a save+reload round-trip */
-		void loadModel(const QString &filename, bool override_seg_mode = false,
-									 DatabaseModel::SegmentationMode ovr_seg_mode = DatabaseModel::NoSegmentation,
-									 unsigned ovr_seg_threshold = 0);
+		/*! \brief Loads filename into this widget's model. When check_alt_seg_mode is true and the
+		 * file has no segmentation mode of its own saved yet, checkAlternateSegmentation() is run
+		 * against it first and, if it suggests one, the user is prompted to apply it -- taking effect
+		 * on this very load (via DatabaseModel::loadModel()'s override params) instead of only after
+		 * an extra save+reload round-trip. Defaults to no use of suggestion. */
+		void loadModel(const QString &filename, bool check_alt_seg_mode = false);
 		void saveModel(const QString &filename);
 		void saveModel();
 		void printModel(QPrinter *printer, bool print_grid, bool print_page_nums, bool resize_delims);

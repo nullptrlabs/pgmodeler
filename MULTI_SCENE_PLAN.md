@@ -1681,12 +1681,16 @@ depois.
      quando a sugestão é apresentada (ao abrir o arquivo? sob demanda?).
      - **Decisões fechadas e implementadas (2026-09-29)**:
        - **Critério**: contagem de `Table`+`View`+`ForeignTable` por schema referenciado
-         (`BaseTable::isBaseTable()`, mesmos três tipos do contador da Fase 2). Sugere
-         `SegByThreshold` quando `total_objs >= DatabaseModel::DefaultSegThreshold` (200 — reaproveita
-         o próprio limiar padrão como piso de "modelo grande o bastante pra importar") **e**
-         `max_schema_objs / total_objs >= DatabaseModel::ConcentrationSuggestThreshold` (constante
-         nova, `0.8` provisório — usuário pediu explicitamente pra deixar como constante própria
-         calibrável depois, sem fechar o valor definitivo agora).
+         (`BaseTable::isBaseTable()`, mesmos três tipos do contador da Fase 2). Só roda quando o
+         arquivo **não tem `SegMode` salvo** (modelo já com um modo definido, explicitamente ou por
+         uma sugestão anterior, nunca é questionado de novo). Decide entre os dois modos base, não só
+         "trocar pra threshold": quando `total_objs >= DatabaseModel::DefaultSegThreshold` (piso de
+         "modelo grande o bastante pra importar"), sugere `SegByThreshold` se
+         `max_schema_objs / total_objs >= ModelWidget::ConcentrationSuggestThreshold` (`0.8`
+         provisório, calibrável depois) — concentração alta, por-esquema não distribuiria nada — e
+         `SegBySchema` caso contrário — já bem distribuído entre vários schemas, threshold só
+         fragmentaria de um jeito menos legível. Abaixo do piso, nenhuma sugestão (modelo pequeno
+         demais pra importar o modo).
        - **Quando/como**: só automático, ao abrir um arquivo (`MainWindow::addModel()`) — sem action
          de menu "sob demanda" nesta primeira versão. **Achado do usuário durante o desenho**: calcular
          isso **depois** de `ModelWidget::loadModel()` terminar não fazia sentido, porque
@@ -1694,20 +1698,51 @@ depois.
          objetos durante essa mesma carga — sugerir a troca só depois exigiria um save+reload inteiro
          só pra corrigir, pagando o carregamento lento duas vezes. Resolvido com uma
          **pré-varredura leve do XML bruto antes do load de verdade**
-         (`DatabaseModel::getSegmentationSuggestion(filename)`, novo, estático — usa `XmlParser` sem
-         DTD, sem instanciar nenhum objeto do modelo, só soma `<table>`/`<view>`/`<foreigntable>` por
-         `<schema name="..">` filho) e um **parâmetro de override em `loadModel()`**
-         (`override_seg_mode`/`ovr_seg_mode`/`ovr_seg_threshold`, default = sem override, todos os
-         call sites existentes continuam compilando sem mudança) — quando presente, o valor passado
-         tem prioridade sobre o que está gravado no `<dbmodel>`, então o roteamento já usa o modo
-         sugerido nessa mesma carga, sem round-trip de save+reload.
+         (`ModelWidget::getAlternateSegMode(filename)`, privado, estático — usa `XmlParser` sem
+         DTD, sem instanciar nenhum objeto do modelo, lê `SegMode` do elemento raiz e soma
+         `<table>`/`<view>`/`<foreigntable>` por `<schema name="..">` filho) que, quando aceita pelo
+         usuário, é repassada para o **parâmetro de override já existente em `DatabaseModel::
+         loadModel()`** (`override_seg_mode`/`ovr_seg_mode`/`ovr_seg_threshold`) — o roteamento já usa
+         o modo sugerido nessa mesma carga, sem round-trip de save+reload.
        - **Diálogo**: `Messagebox` simples Yes/No (`Messagebox::confirm`/`isAccepted`), mensagem com
-         schema/porcentagem/contagem. **Sem opção "não perguntar de novo"** — decisão explícita do
-         usuário: mostra sempre, usuário decide toda vez (motivo: os critérios ainda não estão
-         calibrados, então uma dispensa persistente poderia esconder a sugestão antes dela ser
-         confiável).
-       - Implementado em duas subtarefas/commits: 4.9.1 (`DatabaseModel` — pré-varredura + override
-         de `loadModel()`) e 4.9.2 (`ModelWidget`/`MainWindow` — diálogo e fiação).
+         schema/porcentagem/contagem (texto varia conforme o modo sugerido). **Sem opção "não
+         perguntar de novo"** — decisão explícita do usuário: mostra sempre, usuário decide toda vez
+         (motivo: os critérios ainda não estão calibrados, então uma dispensa persistente poderia
+         esconder a sugestão antes dela ser confiável).
+       - **Reorganização (2026-09-29, mesmo dia)**: a lógica inteira — struct de resultado,
+         constante `ConcentrationSuggestThreshold` e o método de varredura — foi movida de
+         `DatabaseModel` (público) para dentro de `ModelWidget` (privado), concentrando toda a decisão
+         em `ModelWidget::loadModel()` em vez de espalhá-la entre `MainWindow::addModel()` (disparo +
+         diálogo) e `DatabaseModel` (varredura). `DatabaseModel` manteve só o que já era seu por
+         natureza: a constante `DefaultSegThreshold` e o mecanismo de override em `loadModel()` (usado
+         internamente por `ModelWidget`, não mudou). `ModelWidget::loadModel()` ganhou um parâmetro
+         `bool use_seg_suggestion = false` — default `false` preserva o comportamento de todo outro
+         call site (`AppearanceConfigWidget`, todos os testes) inalterado; `MainWindow::addModel()` é
+         o único que passa `true`. `MainWindow::addModel()` ficou reduzido a uma linha
+         (`model_wgt->loadModel(filename, true)`), sem saber mais nada sobre a mecânica de sugestão.
+       - **Segunda passada de nomenclatura (2026-09-29, mesmo dia)**: o struct virou
+         `ModelWidget::AlternateSegInfo` (nome anterior, `SegmentationSuggestion`, considerado pouco
+         técnico) e o método passou a se chamar `getAlternateSegInfo()`. O campo booleano `suggested`
+         foi removido em favor de um método `isValid() const` que deriva a validade diretamente de
+         `mode != NoSegmentation` e dos campos `unsigned` (`total_objs > 0 && max_schema_objs > 0 &&
+         max_schema_objs <= total_objs`) — uma instância default-construída já é naturalmente
+         "inválida" (`mode == NoSegmentation`), então os retornos antecipados de
+         `getAlternateSegInfo()` (arquivo vazio, `SegMode` já definido, exceção) voltaram a ser um
+         simples `return {}`/`return AlternateSegInfo()`, sem precisar setar nada explicitamente.
+       - **Terceira passada, refinamento próprio do usuário (2026-09-29, mesmo dia)**: struct
+         renomeado de novo, pra `ModelWidget::AlternateSegMode`; o método de varredura acompanhou,
+         virando `getAlternateSegMode()`. O diálogo (`Messagebox`) saiu de dentro de `loadModel()` e
+         virou seu próprio método, `AlternateSegMode checkAlternateSegmentation(const QString
+         &filename)` — chama `getAlternateSegMode()`, se o resultado for inválido devolve `{}` direto,
+         senão monta a mensagem, mostra o diálogo e devolve o modo confirmado (ou `{}` se recusado).
+         `loadModel()` ficou reduzido a `if(check_alt_seg_mode) alt_seg_mode =
+         checkAlternateSegmentation(filename);` no topo e um único
+         `db_model->loadModel(filename, alt_seg_mode.isValid(), alt_seg_mode.mode,
+         DatabaseModel::DefaultSegThreshold)` — sem variáveis locais `override_seg_mode`/
+         `ovr_seg_mode`/`ovr_seg_threshold` separadas (o `isValid()` supre o bool, o `DefaultSegThreshold`
+         passado incondicionalmente é inofensivo porque só é lido quando o override está ativo). O
+         parâmetro de `loadModel()` também foi renomeado, de `use_seg_suggestion` pra
+         `check_alt_seg_mode`.
 
 4.10. **Terceiro modo de segmentação: threshold com agrupamento ciente de conectividade** (BFS/
       union-find sobre o grafo de relacionamentos, para minimizar cross-scene mantendo clusters
