@@ -60,6 +60,9 @@ class __libgui SceneInfoWidget: public QWidget, public Ui::SceneInfoWidget {
 
 		//! \brief Emitted when the user commits a new value in threshold_spb
 		void s_thresholdSelected(unsigned value);
+
+	private slots:
+		void enableNavigationButtons();
 };
 
 #endif
