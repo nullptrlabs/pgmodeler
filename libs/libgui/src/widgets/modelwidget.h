@@ -316,6 +316,16 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Configures the basic actions in the popup menu for the database object
 		void configureDatabaseActions();
 
+		/*! \brief Creates a Tag (as_layer=false) or a layer (as_layer=true) named after each schema in
+		 * schemas, associating that schema's Table/View/ForeignTable children with it. An empty
+		 * schemas means every schema in the model, and additionally asks for confirmation first
+		 * (the batch actions in the canvas' popup menu call it this way). If any table already has a
+		 * tag, asks once whether the new one should replace it -- layers have no such conflict, a
+		 * table can freely belong to more than one. A schema whose children actually got the new
+		 * tag/layer has its rectangle hidden afterwards (undoable, like the rest of this method),
+		 * now redundant as a visual grouping cue */
+		void createTagOrLayerFromSchemas(const std::vector<Schema *> &schemas, bool as_layer);
+
 		//! \brief Fades in our out the object types held by the specified action
 		void fadeObjects(QAction *action, bool fade_in);
 
@@ -406,6 +416,10 @@ class __libgui ModelWidget: public QWidget {
 		*action_sel_sch_children,
 		*action_sel_table_rels,
 		*action_sel_tagged_tabs,
+		*action_create_tag_from_schema,
+		*action_create_layer_from_schema,
+		*action_create_tags_all_schemas,
+		*action_create_layers_all_schemas,
 		*action_select_object,
 		*action_parent_rel,
 		*action_append_sql,
@@ -722,6 +736,18 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Selects all the tables and views that references the selected tag
 		void selectTaggedTables();
 
+		//! \brief Creates a tag named after the schema targeted by the popup menu, tagging its children
+		void createTagFromSchema();
+
+		//! \brief Creates a layer named after the schema targeted by the popup menu, adding its children to it
+		void createLayerFromSchema();
+
+		//! \brief Batch version of createTagFromSchema() for every schema in the model, asked for via the canvas' popup menu
+		void createTagsForAllSchemas();
+
+		//! \brief Batch version of createLayerFromSchema() for every schema in the model, asked for via the canvas' popup menu
+		void createLayersForAllSchemas();
+
 		//! \brief Removes the selected objects
 		void removeObjects(bool cascade = false);
 
@@ -902,8 +928,8 @@ class __libgui ModelWidget: public QWidget {
 		void s_sceneDragDropped(const QMimeData *mime_data);
 
 		/*! \brief This signal is emitted whenever the user requests via context menu Quick > Set layer > New layer button
-		 *  the creation of a new layer. This signal just redirects the new layer name to the outside world do be
-		 *  handled properly (currently, in MainWindow) */
+		 *  the creation of a new layer, or via Quick > Create layer from schema(s). This signal just redirects the
+		 *  new layer name to the outside world do be handled properly (currently, in MainWindow) */
 		void s_newLayerRequested(const QString &layer_name);
 
 		//! \brief Signal emitted whenever the layers of the selected object is changed via "Set layers" menu item

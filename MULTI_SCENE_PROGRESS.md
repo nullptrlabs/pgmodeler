@@ -6,13 +6,20 @@
 
 ## Estado atual
 
-> **Ponteiro mais recente (2026-09-29, HEAD `2f7af2613`)** — o resto desta seção é um log
+> **Ponteiro mais recente (2026-09-30, HEAD `ae90d9d32`)** — o resto desta seção é um log
 > cronológico que vai ficando desatualizado à medida que sessões avançam; para saber o estado real
 > sem reler tudo, confie neste bloco e no plano (`MULTI_SCENE_PLAN.md`), não nas primeiras linhas
 > do log abaixo. Fases 0-3 e Fase 4 subtarefas 4.1-4.7 e 4.9 (4.9.1/4.9.2) — todas concluídas e
-> commitadas (4.9 ainda sem teste manual do usuário). **4.8 adiada** de propósito (decisão do
-> usuário, candidata a implementação futura, não bloqueia o resto). Restam em aberto as subtarefas
-> 4.10-4.14 (todas **[requerem decisão do usuário]**, nenhuma codada ainda) e a Fase 5 (paridade
+> commitadas. **4.8 e 4.10 adiadas** de propósito (decisão do usuário, candidatas a implementação
+> futura, não bloqueiam o resto — 4.10, o modo de segmentação com clustering, adiada em 2026-09-30
+> por complexidade). Dois bugs de reload sob threshold, achados pelo usuário testando com um
+> modelo real no mesmo dia, já corrigidos e commitados: troca de threshold sem efeito após
+> salvar+recarregar (`a6d92756b`) e objetos fora do retângulo da cena após o rebucketing
+> (`ae90d9d32`). **4.11 (criar tag/layer a partir de schemas) implementada em 2026-09-30, já
+> revisada e ajustada (ver entrada própria mais abaixo), ainda não commitada — aguardando teste
+> manual do usuário**. Suíte `modelwidgettest` 48/48 limpa nessa rodada. Restam em aberto as
+> subtarefas 4.12-4.14 (todas **[requerem decisão do usuário]**, nenhuma codada ainda)
+> e a Fase 5 (paridade
 > `pgmodeler-cli`, dona do usuário, bloqueada até 0-4 fecharem). Branch sincronizada com `origin`
 > depois de cada commit desta sessão.
 
@@ -1367,7 +1374,121 @@
       relatada (`table_5 fell outside the merged scene's rect`), confirmando que as duas partes do
       fix são necessárias, não redundantes.
     - Suíte `modelwidgettest` completa: 48/48 sem regressão. Build `core`+`gui`+`modelwidgettest`
-      limpo. **Ainda não commitado.**
+      limpo. **Commitado em `ae90d9d32`.**
+- **4.10 adiada e 4.11 implementada (2026-09-30)**: 4.10 (terceiro modo de segmentação com
+  clustering) marcada `[Adiada]` no plano por decisão do usuário — complexidade alta demais pra
+  essa etapa, candidata a implementação futura. 4.11 ("criar tag/layer a partir dos schemas
+  existentes") teve as decisões em aberto fechadas com o usuário e foi implementada na sequência:
+  - **Decisões fechadas** (ver plano, subtarefa 4.11, pra texto completo): duas ações de menu
+    separadas (tag e layer, não uma combinada); conflito por tabela já tageada/em outra layer
+    resolvido com uma confirmação única antes de processar o lote inteiro (perguntando se deve
+    sobrepor); colisão de nome desambiguada automaticamente via `CoreUtilsNs::generateUniqueName()`;
+    ação em lote do menu global do canvas com confirmação simples ("vai criar N tags/layers,
+    continuar?"); disponível nos três modos de segmentação (decisão minha, sem precisar perguntar —
+    é um atalho puramente visual, ortogonal à cena).
+  - **Achado técnico durante a implementação, não coberto pela decisão original, depois corrigido
+    numa revisão de código do usuário**: o conflito de "sobrepor" não se aplica às duas ações do
+    mesmo jeito, porque o modelo de dados é diferente. `BaseTable::tag` é um ponteiro único
+    (`basetable.h`) — uma tabela só pode ter uma tag por vez, então `setTag()` sempre substitui, e
+    "não sobrepor" só pode significar **pular** a tabela (tag antiga fica, tabela não entra no
+    grupo novo) — a confirmação de conflito faz sentido aqui. Já `BaseGraphicObject::layers` é uma
+    lista (`QList<unsigned>`) — uma tabela pode estar em várias layers ao mesmo tempo, então **não
+    existe conflito de verdade pra layer**: a nova é sempre adicionada livremente via
+    `addToLayer()`, sem checar nem perguntar nada. A primeira versão desta subtarefa tratava os
+    dois casos de forma simétrica (incluindo um `resetLayers()` condicional pro "sobrepor" de
+    layer) — removido na revisão; só tags têm a pergunta de conflito agora.
+  - **Undo**: a criação da tag + a mudança de tag em cada tabela usam o mecanismo padrão
+    (`op_list->registerObject()` dentro de um `startOperationChain()`/`finishOperationChain()`
+    único pro lote inteiro), igual ao que `ModelWidget::setTag()` já fazia. Pra layers isso é novo:
+    o mecanismo de membership de layer (`setLayers()`/`addToLayer()`) nunca tinha sido registrado
+    no `op_list` em lugar nenhum do código (`LayersWidget`/`updateObjectsLayers()` chamam esses
+    métodos direto, sem undo) — estendi o mesmo padrão genérico do Tag pra manter os dois undoáveis
+    de forma consistente, já que o usuário esperaria Ctrl+Z funcionar igual nas duas ações. A
+    ressalva herdada do sistema de layers pré-existente continua valendo: o **nome da layer em si**
+    (a lista em `DatabaseModel`/`ObjectsScene`) não tem mecanismo de undo hoje (nunca teve, nem via
+    `LayersConfigWidget`) — só o membership por tabela é desfeito, a layer nova em si permanece na
+    lista mesmo depois de um Ctrl+Z. Não é regressão, é limitação pré-existente do sistema de
+    layers que esta subtarefa não se propôs a resolver.
+  - **Bug reportado pelo usuário, corrigido depois**: a primeira versão criava a layer com um
+    helper próprio, `ModelWidget::createLayerAcrossScenes()`, que replicava na mão o núcleo de
+    `LayersConfigWidget::addLayer()` (`scene->addLayer()` + espelhar pras outras cenas + marcar
+    ativa em todas) sem depender de `LayersConfigWidget`/`MainWindow`. Isso criava a layer e movia
+    os objetos corretamente, mas a UI do `LayersConfigWidget` (a lista de layers no dock) nunca
+    ficava sabendo — só é reconstruída em `LayersConfigWidget::setModel()` (troca de aba do
+    model) ou incrementalmente dentro do próprio `LayersConfigWidget::addLayer()` (via
+    `__addLayer()`), nenhum dos dois acontecia nesse caminho direto.
+  - **Fix**: removido o helper; `createTagOrLayerFromSchemas()` passou a usar o mesmo mecanismo que
+    `LayersWidget` já usa pro campo "nova layer" do diálogo "Set layers"
+    (`emit s_newLayerRequested(nome)` → `MainWindow::addNewLayer()` (mainwindow.cpp:172) →
+    `LayersConfigWidget::addLayer()`), em vez de mexer nas cenas diretamente. `ModelWidget::
+    s_newLayerRequested` já existe pra isso (era só reemitido de `LayersWidget`, nunca emitido
+    direto por `ModelWidget` antes). Conexão em `MainWindow` é direta (mesma thread), então ao
+    `emit` retornar a layer já está criada, espelhada e ativa em todas as cenas, **e** a UI do
+    `LayersConfigWidget` já está sincronizada — resolve o bug reportado como efeito colateral de
+    usar o caminho certo, sem precisar de nenhuma sincronização manual adicional. Índice da layer
+    nova lido depois via `scene->getLayers().size() - 1` (sempre a última, já que `addLayer()`
+    só faz `push_back`).
+  - **Menus, versão final (movida a pedido do usuário depois da primeira versão)**: as 4 ações não
+    ficam mais soltas em `configureBasicActions()`/`configureDatabaseActions()` — entram como os
+    últimos itens do submenu "Quick" (`quick_actions_menu`), dentro de
+    `ModelWidget::configureQuickMenu(BaseObject *object)`, mesma função que já monta "Rename",
+    "Set layers", "Move to schema" etc. Segue a mesma lógica de todo o resto dessa função (que já
+    despacha por `object`, não por seleção múltipla): `object` é um `Schema` → ação singular (tag/
+    layer só daquele schema); `object == db_model` (nada selecionado — `configureDatabaseActions()`
+    chama `configureQuickMenu(db_model)`) → ação em lote, com a mesma guarda de "só aparece se o
+    modelo tiver pelo menos um schema" que antes estava em `configureDatabaseActions()`. Seleção
+    múltipla (`configureQuickMenu(nullptr)`) não ganha nenhuma das duas — não pedido, mantém o
+    escopo só nos dois casos citados pelo usuário.
+  - **Melhoria pedida pelo usuário depois da primeira versão**: schema cujos filhos efetivamente
+    receberam a tag/layer nova tem seu retângulo escondido em seguida (`schema->setRectVisible
+    (false)`) — a tag/layer já vira a pista visual de agrupamento, o retângulo fica redundante.
+    Só esconde se pelo menos uma tabela de fato entrou no grupo (pra tag, isso pode ser zero se
+    todas as tabelas do schema já tinham tag e o usuário respondeu "não sobrepor" no conflito — aí
+    o retângulo continua sendo a única pista visual que sobrou, então fica visível). Para layer,
+    como não há conflito, isso é sempre todas as tabelas do schema (se `children` não é vazio o
+    laço já garante ao menos uma).
+  - **Correção pedida pelo usuário logo depois**: a primeira versão deixava a mudança de
+    `setRectVisible()` de fora do `op_list` (decisão de seguir o precedente de
+    `ModelWidget::toggleSchemasRectangles()`, que nunca teve undo). Usuário pediu pra reverter essa
+    escolha e trackear undo nos dois lugares — inclusive retroativamente em
+    `toggleSchemasRectangles()`, que ganhou o mesmo tratamento nesta rodada (antes chamava
+    `schema->setRectVisible()` direto num loop simples; agora envolve o loop em
+    `startOperationChain()`/`registerObject(schema, Operation::ObjModified)`/
+    `finishOperationChain()` dentro de um `try/catch`, mesmo padrão usado em
+    `ModelWidget::setTag()` e no resto de `createTagOrLayerFromSchemas()`). `db_model->
+    setShowSysSchemasRects()` continua fora do tracking — é um flag solto em `DatabaseModel`, não
+    um `BaseObject`, não há como registrá-lo no `op_list` sem infraestrutura nova que não foi
+    pedida; só a visibilidade por-schema (o que de fato aparece na tela) é undoável agora.
+  - **Cores da tag nova**: uma `Tag` recém-`new`ada começa com todo atributo de cor zerado (preto,
+    ver `Tag::Tag()`) — só sobrescrever a cor de `Attributes::TableTitle` (como a primeira versão
+    fazia) deixava todo o resto do elemento (corpo, toggler, nome do schema, ...) preto na tela.
+    Corrigido semeando cada atributo de `Tag::getColorAttributes()` com o mesmo padrão que
+    `TagWidget::setAttributes()` já usa pra uma tag nova sem instância (`tag == nullptr` nesse
+    form): `BaseObjectView::getElementColor(attr, color_id)`, que devolve a cor "default" (sem tag
+    nenhuma) — assim a tag nova replica visualmente uma tabela normal em todos os elementos, exceto
+    `TableTitle`, sobrescrito depois com a cor do schema (fill 1, fill 2 e borda um pouco mais
+    escura).
+  - **Refactor pedido em revisão de código do usuário**: a duplicação entre
+    `createTagsForAllSchemas()`/`createLayersForAllSchemas()` (popular a lista de todos os schemas
+    + rodar a confirmação "vai criar N...") foi movida pra dentro de
+    `createTagOrLayerFromSchemas()`, ativada quando `schemas` chega vazio — as duas funções de lote
+    viraram um one-liner cada, só repassando `{}`. De quebra: parâmetro trocado de
+    `std::vector<Schema *>` (por valor) pra `const std::vector<Schema *> &` (evita cópia
+    desnecessária), e todo range-loop da função revisado pra usar `auto &`/`const auto &` em vez de
+    `auto` por valor.
+  - **Achado não relacionado, durante a validação**: `changingThresholdRebucketsScenesOnReload()`
+    tinha falhado numa rodada isolada (`getObjectsScenes().size()`: esperado 1, obtido 3) —
+    confirmado via `git stash` que a falha **também acontecia no HEAD limpo (`ae90d9d32`)** naquele
+    momento, então não seria regressão da 4.11 de qualquer forma. Hipótese registrada então:
+    `build/schemas/xml/dbmodel.sch` desatualizado em relação à fonte. Na rodada seguinte (já com o
+    refactor desta revisão aplicado) a suíte inteira passou limpa, incluindo esse teste — não
+    investigado further por que se resolveu sozinho (possivelmente algo sincronizou o diretório
+    `build/` entre as duas rodadas); registrado aqui só pra não confundir quem ler o histórico e
+    ver a menção à falha antes.
+  - Build `gui`+`modelwidgettest` limpo, sem warnings novos. Suíte `modelwidgettest`: **48/48**
+    depois do refactor desta revisão. Nenhum teste de regressão novo escrito pra 4.11
+    especificamente (subtarefa não pediu; feature é acionada por menu, mais natural de validar
+    manualmente na GUI primeiro). **Não commitado — aguardando teste manual do usuário.**
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou

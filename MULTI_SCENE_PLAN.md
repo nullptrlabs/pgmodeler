@@ -1768,19 +1768,22 @@ depois.
          parâmetro de `loadModel()` também foi renomeado, de `use_seg_suggestion` pra
          `check_alt_seg_mode`.
 
-4.10. **Terceiro modo de segmentação: threshold com agrupamento ciente de conectividade** (BFS/
-      union-find sobre o grafo de relacionamentos, para minimizar cross-scene mantendo clusters
-      fortemente conectados no mesmo bucket). Não descartado — candidato genuíno, mas escopo bem
-      maior que as demais subtarefas desta fase (é um modo de segmentação novo e independente, não
-      uma flag/variação do threshold ingênuo da Fase 2, que precisa continuar existindo e
-      previsível como está — ver decisão #7, seção 3): o ingênuo prioriza ordem previsível dos
-      objetos, o com clustering prioriza minimizar cross-scene à custa de reordenar objetos entre
-      cenas de um jeito não literal à ordem de inserção. **[Requer fechamento de decisão com o
-      usuário]**: provavelmente vira sua própria fase (Fase 6?) quando for retomado, em vez de um
-      commit único desta Fase 4 — esta subtarefa é só o registro da pendência, não um compromisso
-      de tamanho.
+4.10. **[Adiada, 2026-09-30 — candidata a implementação futura, não a próxima frente de
+      trabalho]** Terceiro modo de segmentação: threshold com agrupamento ciente de conectividade
+      (BFS/union-find sobre o grafo de relacionamentos, para minimizar cross-scene mantendo
+      clusters fortemente conectados no mesmo bucket). Não descartado — candidato genuíno, mas
+      escopo bem maior que as demais subtarefas desta fase (é um modo de segmentação novo e
+      independente, não uma flag/variação do threshold ingênuo da Fase 2, que precisa continuar
+      existindo e previsível como está — ver decisão #7, seção 3): o ingênuo prioriza ordem
+      previsível dos objetos, o com clustering prioriza minimizar cross-scene à custa de reordenar
+      objetos entre cenas de um jeito não literal à ordem de inserção. **[Requer fechamento de
+      decisão com o usuário]**: provavelmente vira sua própria fase (Fase 6?) quando for retomado,
+      em vez de um commit único desta Fase 4 — esta subtarefa é só o registro da pendência, não um
+      compromisso de tamanho. Decisão do usuário: não implementar agora, complexidade alta demais
+      pra essa etapa — revisitar depois.
 
-4.11. **Ações de contexto "criar tag/layer a partir dos schemas existentes"** (ideia do usuário,
+4.11. **[Implementada, 2026-09-30 — aguardando teste manual do usuário]** Ações de contexto
+      "criar tag/layer a partir dos schemas existentes" (ideia do usuário,
       2026-09-24) — no `ModelObjectsWidget` (árvore de objetos), ação de contexto sobre um `Schema`
       específico e, no menu de contexto global do canvas, ação em lote sobre todos os schemas do
       modelo — para criar automaticamente uma `Tag`/camada (`Layer`) por schema e associar às
@@ -1798,11 +1801,29 @@ depois.
       - **Layers**: nova camada por schema (`LayersConfigWidget::addLayer()`), com as tabelas
         filhas adicionadas via `BaseGraphicObject::setLayers()`
         ([basegraphicobject.h:140-141](libs/libcore/src/basegraphicobject.h#L140)).
-      - **[Requer fechamento de decisão com o usuário]**: (a) o que fazer se uma tabela já tiver
-        tag/camada própria — sobrescrever, pular, ou perguntar; (b) desambiguação de nome se já
-        existir uma tag/camada com o nome do schema; (c) a ação em lote do menu global processa
-        todos os schemas de uma vez ou pede seleção/confirmação antes; (d) disponibilidade em todo
-        modo de segmentação ou só em algum.
+      - **Decisões fechadas (2026-09-30)**:
+        - **Duas ações separadas**, não uma combinada: "Criar tag a partir do schema" e "Criar
+          layer a partir do schema" como itens de menu distintos (tanto no contexto do `Schema`
+          na árvore quanto no lote do menu global do canvas) — o usuário escolhe qual mecanismo
+          quer, sem ser forçado a criar os dois juntos.
+        - **Tabela já com tag/camada própria**: antes de criar, mostrar uma mensagem de
+          confirmação perguntando se a tag/camada nova deve **sobrepor** a(s) já associada(s) nas
+          tabelas que já têm alguma — só aparece quando existe pelo menos um conflito real no lote
+          sendo processado (nenhuma tabela conflitante não mostra nada). Resposta se aplica a todo
+          o lote (não é por tabela): "sim" remove a tag/camada antiga daquelas tabelas antes de
+          associar a nova; "não" mantém a antiga e adiciona a nova ao lado (tabela fica com as
+          duas).
+        - **Colisão de nome** (já existe tag/camada com o nome do schema): desambiguar
+          automaticamente via `CoreUtilsNs::generateUniqueName()`
+          ([coreutilsns.h:67-69](libs/libcore/src/coreutilsns.h#L67-L69)), sem perguntar — mesmo
+          padrão já usado em todo o resto do código pra nomes de objetos gerados automaticamente
+          (constraints/índices/colunas de relacionamento).
+        - **Ação em lote (menu global)**: confirmação simples antes de rodar — diálogo tipo "Isso
+          vai criar N tags/camadas, uma por schema. Continuar?", sem seleção individual de schemas.
+        - **Disponibilidade por modo de segmentação**: todos os três modos (`NoSegmentation`,
+          `SegBySchema`, `SegByThreshold`) — decisão já implícita na motivação original da
+          subtarefa ("tags e camadas são ortogonais à segmentação por cena"), sem necessidade de
+          perguntar: não há razão pra restringir um atalho puramente visual a um modo específico.
 
 4.12. **Algoritmos de rearranjo automático: cena atual ou todas?** (pergunta do usuário,
       2026-09-24) — os três algoritmos por trás do menu "Rearrange objects"
