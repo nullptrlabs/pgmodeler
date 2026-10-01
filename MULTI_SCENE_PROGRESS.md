@@ -22,10 +22,12 @@
 > numa imagem só) e testada manualmente pelo usuário com `big_model.dbm`, mas PNG esbarra num teto
 > de alocação do Qt (~59000px de altura falhou) e SVG gerou 500MB que nem o Inkscape abre — revertida
 > de volta à fragmentação já existente (ver entrada própria mais abaixo). Suíte `modelwidgettest`
-> de volta a 49/49. Resta em aberto a subtarefa **4.14** (**[requer decisão do usuário]**, não
-> codada ainda) e a Fase 5 (paridade
-> `pgmodeler-cli`, dona do usuário, bloqueada até 0-4 fecharem). Branch sincronizada com `origin`
-> depois de cada commit.
+> de volta a 49/49. **4.14** implementada no `priv-core` (`c235412`) e **4.15** (formulário de
+> relacionamentos cross-scene no duplo clique do cutoff) implementada e commitada (`d47cc7a3f`), com
+> dois commits de infraestrutura que ela expôs: `getObjectIndex(BaseObject *)` seguro com ponteiro
+> deletado (`4f9ced1ae`) e o vazamento do `DatabaseModel` no fechamento de modelo (`2e6749009`,
+> ver entradas abaixo). Suíte `modelwidgettest` em 56/56. Resta a Fase 5 (paridade `pgmodeler-cli`,
+> dona do usuário), cujo pré-requisito (Fases 0-4 fechadas, salvo as adiadas 4.8, 4.10 e 4.13) está atendido.
 
 - Branch: `multi-scene-support-2.1.x`, com 1 commit à frente de `origin` (refactor próprio do
   usuário, `0f7ac6f61`, não relacionado a esta sessão — adicionou `BaseTableView::getCutoffItem()`
@@ -1603,6 +1605,71 @@
     `layoutScenesJustifiedWrapsCentersAndHandlesEdgeCases` que cobria só a matemática do layout).
     Suíte de volta a **49/49** (a baseline de antes desta subtarefa), nada commitado em nenhum
     momento — reversão de árvore de trabalho, não precisou desfazer commit.
+- **Exportação PNG/SVG pulava mal cenas vazias (2026-10-01, `9791d3990`)**:
+  `ModelExportWidget::exportModel()` agora ignora cenas sem nenhum objeto (`itemsBoundingRect(true,
+  ...)` vazio) em vez de gravar um arquivo praticamente em branco pra elas — só em modelos
+  segmentados (em `NoSegmentation` a única cena vazia significa modelo vazio). O sufixo `_<n>` do
+  nome passou a usar um contador próprio, incrementado só quando um arquivo é de fato escrito, pra
+  não deixar buracos na numeração.
+- **Cancelamento do carregamento de modelo (2026-10-01, `d54a32be0` e `04cecf75c`)**: cancelamento
+  cooperativo em `DatabaseModel::loadModel()` via callback `is_canceled`, checado a cada objeto
+  carregado, e botão Cancelar no `TaskProgressWidget`. Como o load roda síncrono na thread da GUI (as
+  views são criadas durante o parse, via `s_objectAdded`), thread separada não é viável —
+  `updateProgress()` passa a bombear a fila de eventos a cada tick pro clique ser processado. De
+  quebra corrigiu dois bugs pré-existentes: `BaseGraphicObject::setUpdatesEnabled(true)` nunca era
+  restaurado no `catch` de `loadModel()`, e o estado padrão do `cancel_btn` passou a ser garantido
+  em código. O `04cecf75c` restaura o cursor ao cancelar (`restoreOverrideCursor()`) e fixa cursor
+  de seta no botão.
+- **4.14 implementada no `priv-core` (2026-10-01, `c235412` naquele repositório)** — combo de modo +
+  spinbox de threshold no `DatabaseImportWidget`, só pra modelo novo; modo/threshold ativos e
+  `saved_*` aplicados antes de importar; rearranjo em grade de fim de importação agora cobre todas
+  as cenas. Decisão registrada no plano. **Achado desta revisão**: a nota técnica da 4.14 ("setar
+  antes de `createSystemObjects(true)`") não se confirmou — teste temporário no `modelwidgettest`
+  com a ordem inversa, usada no código, mostrou `public` com cena própria e tabelas nela (o
+  fallback de `handleObjectAddition()` registra os schemas de sistema em `schema_scenes`). Teste
+  descartado, nada commitado.
+- **4.15 implementada (2026-10-01, `d47cc7a3f`)**: duplo clique no `CutoffItem` abre um `BaseForm`
+  (só "Close") com o novo `CrossSceneRelsWidget`: `ObjectSelectorWidget` somente leitura com a
+  tabela do marcador + `CustomTableWidget` (relacionamento, tipo, tabela do outro lado). Duplo
+  clique numa linha abre o dialog do relacionamento e, ao fechá-lo, a grid é recarregada.
+  - **Sinal**: `ObjectsScene::mouseDoubleClickEvent()` ganhou o ramo do `CutoffItem` (antes um
+    duplo clique no marcador não emitia nada) e emite `s_cutoffDoubleClicked(BaseTable *)` — a
+    tabela, não o item, que pode ser destruído durante a edição. `CutoffItem::getTable()` novo.
+  - **Validação** (requisito do usuário): a edição pode remover o relacionamento, a tabela de
+    destino ou a própria tabela do marcador por cascata. O widget revalida a linha com
+    `getObjectIndex()` antes de ativá-la e a tabela dona antes de dereferenciá-la na recarga; a lista
+    vem sempre de `BaseTableView::getExternalRelationships()`, nunca em cache. Se a tabela dona
+    some, a grid fica vazia e o seletor limpo (o form não fecha sozinho).
+  - Detalhes de implementação que vale lembrar: o teste do duplo clique precisou clicar num filho
+    do grupo (o centro do `boundingRect` do marcador cai no vão entre a linha e o rótulo, e aí o
+    ramo "nenhum selecionado" abre o form do database); o form modal é fechado por `QTimer` no teste.
+    Testes novos: `doubleClickingACutoffEmitsItsTable`,
+    `cutoffRelationshipsWidgetListsAndRefreshesRelationships`,
+    `crossSceneRelsWidgetIgnoresStaleRelationship`, `crossSceneRelsWidgetSurvivesItsTableBeingRemoved`
+    (os dois últimos falham com a validação sabotada).
+- **`DatabaseModel::removed_objs` (2026-10-01, `4f9ced1ae`)**: `getObjectIndex(BaseObject *)` lia
+  `object->getObjectType()` antes de qualquer outra coisa, então com ponteiro já deletado (o
+  `OperationList` apaga objetos removidos ao aparar o histórico) era leitura de memória liberada.
+  Agora `__removeObject()` registra o objeto num `QSet<BaseObject *> removed_objs` (só depois do
+  `erase`), `__addObject()` o retira (o undo de uma remoção passa por ali) e `getObjectIndex()`
+  devolve -1 pra eles antes de tocar no objeto; `destroyObjects()` limpa o conjunto. O conjunto só
+  compara endereços, então entradas de objetos já deletados são inofensivas e reuso de endereço
+  não dá falso positivo (objeto novo ou nunca entrou no modelo, ou entra via `__addObject()`).
+  Teste: `getObjectIndexTreatsRemovedObjectsAsOutsideTheModel` — só tem poder de detecção do
+  use-after-free em build com ASan (o build local não é ASan).
+- **Vazamento do `DatabaseModel` ao fechar modelo (2026-10-01, `2e6749009`)** — achado do usuário
+  testando o `removed_objs`: o `removed_objs` nunca era limpo ao fechar um modelo e o ASan não
+  reportava leak. Causa: `ModelWidget` nunca destruía o `db_model` (`//delete db_model;` ficou
+  comentado e foi removido em `eb76b3227`, 2023; `DatabaseModel(ModelWidget *)` não faz `setParent`),
+  então fechar um modelo vazava o `DatabaseModel` inteiro. O LeakSanitizer não via porque o
+  `static std::vector<UserTypeConfig> PgSqlType::user_types` guarda `pmodel`/`ptype`, mantendo o
+  modelo alcançável (só `destroyObjects()` invalida essas entradas). Confirmado empiricamente com
+  `QObject::destroyed`. **Correção**: `~ModelWidget()` bloqueia os sinais e destrói, nesta ordem,
+  as scenes (as views apontam pros objetos do modelo), o `op_list` (`removeOperations()` ainda
+  consulta o modelo) e o `db_model` — mesma ordem do `~PgModelerCliApp()`. Confirmado pelo usuário
+  com ASan: sem leak nem use-after-free. **Se um leak/use-after-free inesperado aparecer ao fechar
+  modelos, o `~ModelWidget()` é o primeiro lugar a olhar.** Teste de regressão:
+  `closingModelWidgetDestroysItsDatabaseModel`.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
