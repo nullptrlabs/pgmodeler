@@ -1932,13 +1932,40 @@ depois.
         `setSegThreshold()` precisam ser chamados **antes** de `createSystemObjects(true)`
         ([databaseimportwidget.cpp:387](priv-core/src/libgui/tools/databaseimportwidget.cpp#L387)),
         não depois — a mesma classe de bug se repetiria aqui se a ordem for invertida.
-      - **[Requer fechamento de decisão com o usuário]**: que controles exatamente entram no
-        formulário (mesmo combo de modo + spinbox de threshold que o `SceneInfoWidget` já tem? um
-        componente compartilhado entre os dois?), e se o modo escolhido no import deveria também
-        ficar valendo como sugestão default pra próximas importações. Também fora do repositório
-        principal (mexe em `priv-core`), então qualquer implementação futura precisa considerar
-        isso nos dois repositórios/branches envolvidos. A Fase 5 (CLI, subtarefa "achado novo
-        `--import-db`") depende diretamente desta decisão.
+      - **Decisão fechada**: o `DatabaseImportWidget` ganha o mesmo par de controles do
+        `SceneInfoWidget` — combo de modo de segmentação + spinbox de threshold (só visível em
+        `SegByThreshold`) —, ativos **apenas ao importar como modelo novo** (desabilitados ao importar
+        pra dentro de um modelo aberto, que herda o modo que já tem). O valor escolhido vai pro
+        `DatabaseModel` recém-criado antes de qualquer objeto ser importado, tanto o modo/threshold
+        ativos quanto os `saved_*` (que o `SceneInfoWidget` lê ao exibir o modelo logo após o import).
+        Ao final da importação o rearranjo em grade cobre **todas** as cenas, não só a ativa — um
+        modelo recém-importado não tem layout manual a preservar. Não faz parte da decisão lembrar o
+        modo escolhido como default das próximas importações.
+      - **Correção da nota técnica acima**: a ordem de chamadas não é crítica nesse caso — testado com
+        `createSystemObjects(true)` **antes** de `setSegmentationMode(SegBySchema)`: `public` ainda
+        ganha cena própria (o fallback de `handleObjectAddition()` registra os schemas de sistema em
+        `schema_scenes`) e suas tabelas caem nela.
+      - Mexe em `priv-core` (repositório separado); a Fase 5 (CLI, subtarefa "achado novo
+        `--import-db`") depende desta decisão.
+
+4.15. **Formulário de relacionamentos cross-scene ao dar duplo clique no marcador cut-off** — fecha a
+      interação do marcador deixada em aberto na subtarefa 1.8 ("form dedicado ou menu de
+      contexto"). Duplo clique num `CutoffItem` abre um `BaseForm` (só o botão "Close") que hospeda
+      um `CrossSceneRelsWidget` (`libgui/src/widgets`): um `ObjectSelectorWidget` somente leitura
+      com a tabela dona do marcador e um `CustomTableWidget` com uma linha por relacionamento
+      cross-scene — nome, tipo, e a tabela do outro lado. Duplo clique numa linha abre o dialog de
+      edição daquele relacionamento (`ModelWidget::showObjectForm()`); ao fechá-lo, aplicando ou
+      cancelando, a grid é recarregada, porque a edição pode remover relacionamentos (e até a
+      própria tabela, em deleção em cascata).
+      - O widget **não guarda a lista**: relê `BaseTableView::getExternalRelationships()` da view
+        atual da tabela a cada atualização, já que o `CutoffItem` some quando a última relação é
+        removida e a view da tabela pode ser recriada ao trocar de cena.
+      - Cada linha é revalidada contra o modelo antes de ser ativada
+        (`DatabaseModel::getObjectIndex()` no relacionamento e nas duas tabelas) — linha obsoleta
+        só provoca recarga da grid. Isso depende de `getObjectIndex(BaseObject *)` ser seguro com
+        ponteiro já deletado (ver `DatabaseModel::removed_objs`, em `MULTI_SCENE_PROGRESS.md`).
+      - `ObjectsScene` emite `s_cutoffDoubleClicked(BaseTable *)` (não o `CutoffItem`, que pode
+        desaparecer durante a edição); `ModelWidget::showCutoffRelationships()` trata o sinal.
 
 ### Fase 5 — Paridade do `pgmodeler-cli` com a segmentação multi-cena
 
