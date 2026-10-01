@@ -35,6 +35,7 @@ Additionally, this class, saves, loads and generates the XML/SQL definition of a
 #include <QStringList>
 #include <QDateTime>
 #include <QHash>
+#include <QSet>
 #include <QMap>
 #include <functional>
 #include "baseobject.h"
@@ -122,6 +123,11 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		 * and by updateObjectIndex() (called from BaseObject::setName()/setSchema()). */
 		std::map<ObjectType, QHash<QString, BaseObject *>> name_idx,
 		sig_idx;
+
+		/*! \brief Objects taken out of the model by __removeObject() and not yet put back by __addObject().
+		 * They may have been deleted since (e.g. by the operation list), so the pointers in this set
+		 * are only ever compared, never dereferenced */
+		QSet<BaseObject *> removed_objs;
 
 		//! \brief Builds the lookup key for an object's raw name, honoring the current quoting/case mode
 		static QString getNameIndexKey(BaseObject *object);
@@ -480,7 +486,8 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Returns the object index searching by its name
 		int getObjectIndex(const QString &name, ObjectType obj_type);
 
-		//! \brief Retuns the passed object index
+		/*! \brief Retuns the passed object index, or -1 if it's not in the model. Pointers of objects
+		 * already removed from the model (even if deleted afterwards) are safely reported as -1 */
 		int getObjectIndex(BaseObject *object);
 
 		//! \brief Adds an object to the model
