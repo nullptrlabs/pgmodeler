@@ -728,6 +728,23 @@ ModelWidget::~ModelWidget()
 		cut_objects.clear();
 	}
 
+	/* Nothing may react to the teardown, and the order matters: the views point to the model's
+	 * objects, the operation list still queries the model while being destroyed, and only then
+	 * the model itself (and every object in it) can go */
+	for(auto &scn : scenes)
+		scn->blockSignals(true);
+
+	op_list->blockSignals(true);
+	db_model->blockSignals(true);
+
+	while(!scenes.isEmpty())
+		delete scenes.takeLast();
+
+	scene = nullptr;
+
+	delete op_list;
+	delete db_model;
+
 	popup_menu.clear();
 	new_object_menu.clear();
 	quick_actions_menu.clear();
