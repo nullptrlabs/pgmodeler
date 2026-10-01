@@ -103,6 +103,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void taskProgressWidgetCancelButtonSurvivesShow();
 		void rearrangeAlgorithmsRespectSceneScopeInThresholdMode();
 		void doubleClickingACutoffEmitsItsTable();
+		void closingModelWidgetDestroysItsDatabaseModel();
 		void cutoffRelationshipsWidgetListsAndRefreshesRelationships();
 		void crossSceneRelsWidgetIgnoresStaleRelationship();
 		void crossSceneRelsWidgetSurvivesItsTableBeingRemoved();
@@ -3772,6 +3773,42 @@ void ModelWidgetTest::crossSceneRelsWidgetSurvivesItsTableBeingRemoved()
 
 		QCOMPARE(rels_tab->getRowCount(), 0u);
 		QVERIFY(table_sel->getSelectedObject() == nullptr);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void ModelWidgetTest::closingModelWidgetDestroysItsDatabaseModel()
+{
+	try
+	{
+		ModelWidget *model_wgt = new ModelWidget;
+		DatabaseModel *db_model = model_wgt->getDatabaseModel();
+		bool destroyed = false;
+
+		connect(db_model, &QObject::destroyed, this, [&destroyed](){ destroyed = true; });
+		db_model->createSystemObjects(true);
+
+		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		Table *table = new Table, *removed_table = new Table;
+
+		table->setName("tab");
+		table->setSchema(public_sch);
+		db_model->addTable(table);
+
+		/* A table taken out of the model but still alive (as the operation list's pool keeps it)
+		 * must not stop the model from being destroyed */
+		removed_table->setName("removed_tab");
+		removed_table->setSchema(public_sch);
+		db_model->addTable(removed_table);
+		db_model->removeTable(removed_table);
+
+		delete model_wgt;
+		delete removed_table;
+
+		QVERIFY2(destroyed, "deleting the model widget must destroy the database model it owns");
 	}
 	catch(Exception &e)
 	{
