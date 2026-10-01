@@ -63,6 +63,7 @@ void TaskProgressWidget::cancelTask()
 	//Prevents piling up further clicks while the caller is still unwinding
 	cancel_btn->setEnabled(false);
 	text_lbl->setText(tr("Cancelling..."));
+	qApp->restoreOverrideCursor();
 }
 
 void TaskProgressWidget::addIcon(unsigned id, const QIcon &ico)

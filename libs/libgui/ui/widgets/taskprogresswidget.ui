@@ -205,6 +205,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="cursor">
+           <cursorShape>ArrowCursor</cursorShape>
+          </property>
           <property name="focusPolicy">
            <enum>Qt::FocusPolicy::ClickFocus</enum>
           </property>
