@@ -30,6 +30,10 @@ they must inherit from this class.
 #ifndef PGMODELER_UNIT_TEST_H
 #define PGMODELER_UNIT_TEST_H
 
+#ifndef SCHEMASDIR
+#define SCHEMASDIR "schemas"
+#endif
+
 #include "globalattributes.h"
 
 class PgModelerUnitTest {

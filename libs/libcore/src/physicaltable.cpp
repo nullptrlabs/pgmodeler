@@ -150,7 +150,7 @@ void PhysicalTable::setProtected(bool value)
 
 void PhysicalTable::setCommentAttribute(TableObject *tab_obj)
 {
-	if(tab_obj && !tab_obj->getComment().isEmpty() && tab_obj->isDeclaredInTable())
+	if(tab_obj && !tab_obj->getComment().isEmpty() && (tab_obj->isDeclaredInTable() || tab_obj->isAddedByRelationship()))
 	{
 		attribs_map attribs;
 

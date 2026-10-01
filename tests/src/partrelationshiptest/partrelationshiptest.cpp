@@ -36,6 +36,7 @@ class PartRelationhipTest: public QObject, public PgModelerUnitTest {
 		void connRelTablePartionHasMoreColsThanPartitionedTableShouldRaiseError();
 		void connRelTablePartionHasDifferentColsThanPartitionedTableShouldRaiseError();
 		void connRelShouldInvalidateIfPartitionedColumnChanges();
+		void fkColumnCommentGeneratesSqlComment();
 };
 
 void PartRelationhipTest::connRelTableNoColumnsAndTableTwoColumns()
@@ -265,6 +266,49 @@ void PartRelationhipTest::connRelShouldInvalidateIfPartitionedColumnChanges()
 		partitioned->getColumn(0)->setName("id");
 		partitioned->getColumn(0)->setType(PgSqlType("date"));
 		QVERIFY(part_rel->isInvalidated() == true);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getErrorMessage().toStdString().c_str());
+	}
+}
+
+void PartRelationhipTest::fkColumnCommentGeneratesSqlComment()
+{
+	Schema *schema = new Schema;
+	Table *table_a = new Table;
+	Table *table_b = new Table;
+	Column *col_a = new Column;
+	Constraint *pk_a = new Constraint;
+
+	try
+	{
+		schema->setName("public");
+		table_a->setSchema(schema);
+		table_b->setSchema(schema);
+
+		table_a->setName("table_a");
+		table_b->setName("table_b");
+
+		col_a->setName("id");
+		col_a->setType(PgSqlType("integer"));
+		table_a->addColumn(col_a);
+
+		pk_a->setName("table_a_pk");
+		pk_a->setConstraintType(ConstraintType::PrimaryKey);
+		pk_a->addColumn(col_a, Constraint::SourceCols);
+		table_a->addConstraint(pk_a);
+
+		Relationship *rel = new Relationship(BaseRelationship::Relationship1n, table_a, table_b);
+		rel->connectRelationship();
+
+		QVERIFY(table_b->getColumnCount() > 0);
+		Column *fk_col = table_b->getColumn(0);
+		QVERIFY(fk_col != nullptr);
+		fk_col->setComment("Foreign key referencing table_a");
+
+		QString sql = table_b->getSourceCode(SchemaParser::SqlCode);
+		QVERIFY(sql.contains("Foreign key referencing table_a"));
 	}
 	catch(Exception &e)
 	{

@@ -1912,6 +1912,9 @@ void Relationship::copyColumns(PhysicalTable *ref_tab, PhysicalTable *recv_tab, 
 			column->setComment("");
 
 			prev_name=prev_ref_col_names[column_aux->getObjectId()];
+			QString prev_comment=prev_ref_col_comments[column_aux->getObjectId()];
+			if(!prev_comment.isEmpty())
+				column->setComment(prev_comment);
 
 			if(rel_type!=RelationshipNn)
 			{
@@ -1954,15 +1957,11 @@ void Relationship::copyColumns(PhysicalTable *ref_tab, PhysicalTable *recv_tab, 
 				column->setName(name);
 			}
 
-			/* If the old name given to the column is different from the current name, the current name
-			of the column will be the old name when the relationship is disconnected and
-			reconnected again, so the column name history is not lost even when the columns
-			of the relationship is deallocated, this prevents the breakdown of the references to columns created
-			by the relationship. This operation is only performed for relationships 1-1, 1-n relationships to
-			the n-n relationships columns are always recreated without the need to keep the history because
-			the user can not reference the columns created by n-n relationships. */
 			if(prev_name!=name && (rel_type==Relationship11 || rel_type==Relationship1n))
 				prev_ref_col_names[column_aux->getObjectId()]=column->getName();
+
+			if(!column->getComment().isEmpty() && (rel_type==Relationship11 || rel_type==Relationship1n))
+				prev_ref_col_comments[column_aux->getObjectId()]=column->getComment();
 
 			recv_tab->addColumn(column);
 		}
@@ -1981,6 +1980,7 @@ void Relationship::copyColumns(PhysicalTable *ref_tab, PhysicalTable *recv_tab, 
 		}
 
 		prev_ref_col_names.clear();
+		prev_ref_col_comments.clear();
 		pk_columns.clear();
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
