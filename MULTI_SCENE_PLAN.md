@@ -1880,23 +1880,38 @@ depois.
       - **Notas técnicas do texto original, ainda válidas**: cruza com a Fase 5 (achado colateral 2
         do CLI, mesma pergunta) — não tocado aqui, fora do escopo GUI desta fase.
 
-4.13. **Exportação para PNG/SVG fragmentada em múltiplos arquivos, um por cena** (achado do
-      usuário, 2026-09-26) — `ModelExportWidget::exportModel()`
+4.13. **[Adiada, 2026-10-01 — candidata a implementação futura, tentada e revertida nesta sessão]**
+      Exportação para PNG/SVG fragmentada em múltiplos arquivos, um por cena (achado do usuário,
+      2026-09-26) — `ModelExportWidget::exportModel()`
       ([modelexportwidget.cpp:293-347](libs/libgui/src/tools/modelexportwidget.cpp#L293)) itera
       `getObjectsScenes()` e exporta **cada cena pro seu próprio arquivo** — com mais de uma cena,
-      insere sufixo `_<índice>` antes da extensão. Screenshots do usuário confirmam: exportar um
-      modelo com schemas `public`/`schema_a`/`schema_b` gera 3+ imagens separadas, cada uma só com
-      os objetos daquela cena — nenhuma visão única do modelo inteiro. Mesmo mecanismo pros dois
-      formatos (`exportToPNG`/`exportToSVG`, ambos recebem uma `ObjectsScene*` só). **Não afeta
-      exportação SQL** — essa já opera sobre `db_model` inteiro, sem noção de cena.
-      - **[Requer fechamento de decisão com o usuário]**: esse comportamento (um arquivo por cena)
-        tem valor de verdade, ou o esperado é sempre juntar tudo numa imagem única (como era antes
-        da segmentação existir)? Juntar não é trivial — cada `ObjectsScene` tem seu próprio sistema
-        de coordenadas independente, então "colar" os retângulos de várias cenas lado a lado exige
-        decidir um layout (grid? uma ao lado da outra? por ordem de criação?) que hoje não existe
-        em lugar nenhum do código. Existe também a opção de manter a fragmentação atual mas tornar
-        a decisão explícita pro usuário (checkbox "uma imagem por cena" vs "modelo inteiro") em vez
-        de comportamento implícito.
+      insere sufixo `_<índice>` antes da extensão. Comportamento mantido como está, sem alteração
+      — essa é a parte que continua valendo. **Não afeta exportação SQL** — essa já opera sobre
+      `db_model` inteiro, sem noção de cena.
+      - **Tentativa feita e revertida nesta sessão**: implementei uma opção "Join scenes" pra
+        juntar tudo numa imagem única, com um algoritmo de "linhas justificadas" (layout tipo
+        galeria de fotos — linhas até uma largura-alvo, altura da linha = máximo da linha,
+        centralização simétrica dos gaps) em `ModelExportHelper::layoutScenesJustified()` +
+        sobrecargas `exportToPNG`/`exportToSVG` recebendo `QList<ObjectsScene*>`. Chegou a compilar,
+        passar na suíte (50/50, incluindo um teste novo só da matemática do layout) e rodar — mas o
+        usuário testou com `big_model.dbm` (o mesmo modelo grande real usado na 4.9) e achou dois
+        problemas que inviabilizam a abordagem justamente pro caso que ela deveria ajudar:
+        - **PNG**: o `QPixmap pix(composite_size.toSize())` que materializa o composite inteiro
+          como um buffer raster esbarra num teto prático do Qt pra alocação de imagem — exportação
+          falhou com uma altura de composite de ~59000px.
+        - **SVG**: não tem esse teto de alocação (é vetorial, `QSvgGenerator` só recebe o tamanho
+          como metadado, nunca aloca um pixmap do tamanho do composite inteiro — só confirmei isso
+          lendo o próprio código antes de descartar a hipótese), mas na prática gerou um arquivo de
+          **500MB que nem o Inkscape conseguiu abrir** — grande demais de um jeito diferente
+          (complexidade/contagem de elementos vetoriais, não alocação de pixels).
+      - **Decisão do usuário**: reverter a implementação inteira (código + teste), manter só a
+        exportação fragmentada já existente. Não vale a pena perseguir mitigação (teto de tamanho
+        com erro claro, auto-redução de zoom, etc.) agora — registrado aqui como candidata, não
+        descartada de vez, caso surja uma abordagem que não esbarre nesses dois tetos (ex.: eles
+        vinham de **juntar tudo numa imagem só**; um formato diferente de "visão geral" — paginado,
+        um índice com miniaturas, etc. — poderia não ter o mesmo problema. Não explorado).
+      - Reversão confirmada limpa: `git checkout --` nos arquivos de código, suíte de volta a
+        49/49 (a baseline de antes desta subtarefa).
 
 4.14. **Formulário de engenharia reversa sem opção de escolher o modo de segmentação** (achado do
       usuário, 2026-09-26) — `DatabaseImportWidget` (módulo `priv-core`, repositório separado) tem

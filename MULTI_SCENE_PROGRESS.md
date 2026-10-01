@@ -6,7 +6,7 @@
 
 ## Estado atual
 
-> **Ponteiro mais recente (2026-09-30)** — o resto desta seção é um log cronológico que vai ficando
+> **Ponteiro mais recente (2026-10-01)** — o resto desta seção é um log cronológico que vai ficando
 > desatualizado à medida que sessões avançam; para saber o estado real sem reler tudo, confie neste
 > bloco e no plano (`MULTI_SCENE_PLAN.md`), não nas primeiras linhas do log abaixo. Fases 0-3 e Fase
 > 4 subtarefas 4.1-4.7, 4.9, 4.11 e 4.12 — todas concluídas e commitadas (4.12 em `d8e5184bf`,
@@ -18,10 +18,14 @@
 > incluiu um leak pré-existente e não relacionado achado pelo usuário via ASan logo depois, também
 > corrigido e commitado (`1f67b5b1b`, `BaseObjectView::mousePressEvent()`). **Navegação entre cenas
 > no `SceneInfoWidget`** (botões anterior/próxima, fora do backlog numerado) implementada pelo
-> usuário e commitada nesta sessão (ver entrada própria mais abaixo). Suíte `modelwidgettest` 49/49
-> limpa. Restam em aberto as subtarefas **4.13-4.14** (ambas **[requerem decisão do usuário]**,
-> nenhuma codada ainda) e a Fase 5 (paridade `pgmodeler-cli`, dona do usuário, bloqueada até 0-4
-> fecharem). Branch sincronizada com `origin` depois de cada commit desta sessão.
+> usuário e commitada (`cbb57570a`). **4.13 adiada** — chegou a ser implementada (junção de cenas
+> numa imagem só) e testada manualmente pelo usuário com `big_model.dbm`, mas PNG esbarra num teto
+> de alocação do Qt (~59000px de altura falhou) e SVG gerou 500MB que nem o Inkscape abre — revertida
+> de volta à fragmentação já existente (ver entrada própria mais abaixo). Suíte `modelwidgettest`
+> de volta a 49/49. Resta em aberto a subtarefa **4.14** (**[requer decisão do usuário]**, não
+> codada ainda) e a Fase 5 (paridade
+> `pgmodeler-cli`, dona do usuário, bloqueada até 0-4 fecharem). Branch sincronizada com `origin`
+> depois de cada commit.
 
 - Branch: `multi-scene-support-2.1.x`, com 1 commit à frente de `origin` (refactor próprio do
   usuário, `0f7ac6f61`, não relacionado a esta sessão — adicionou `BaseTableView::getCutoffItem()`
@@ -1573,6 +1577,32 @@
   linha separadora (`separator_ln3`) adicionada ao `CustomUiStyle::setStyleHint()` pra isolar
   visualmente o novo grupo. Revisado (build `gui`+`modelwidgettest` limpo, suíte 49/49 sem
   regressão) antes de commitar — nenhum ajuste meu necessário, só verificação.
+- **4.13 implementada e depois revertida, mesma sessão (2026-10-01)**: checkbox "Join scenes" na
+  exportação PNG/SVG, pra juntar todas as cenas numa imagem só em vez da fragmentação atual.
+  - **Algoritmo** (decidido com o usuário, depois de eu apresentar 3 opções com trade-offs):
+    "linhas justificadas" como galeria de fotos — linhas até uma largura-alvo (raiz quadrada da
+    área total dos tiles), altura da linha = máximo da linha, centralização simétrica pra
+    distribuir gaps — em vez de grid de N colunas fixas sem tratamento (mais simples, gaps
+    assimétricos) ou bin-packing 2D (mais compacto, reordena cenas, bem mais complexo).
+    Implementado em `ModelExportHelper::layoutScenesJustified()` — `static`, geometria pura, duas
+    passadas (decide as linhas primeiro, só depois centraliza contra uma largura final de canvas).
+    **Detalhe que vale lembrar se essa ideia voltar algum dia**: centralizar cada linha direto
+    contra a largura-alvo (uma passada só) dá margem assimétrica sempre que nenhuma linha preenche
+    a largura inteira — precisa das duas passadas, canvas final = `max(largura-alvo,
+    linha-mais-larga)`, só então centraliza contra essa largura fixa.
+  - **Por que foi revertida**: usuário testou com `big_model.dbm` (o modelo grande real já usado na
+    4.9) e achou dois problemas que inviabilizam a abordagem justamente pro caso que ela deveria
+    ajudar — modelos grandes. **PNG**: o `QPixmap` que materializa o composite inteiro como buffer
+    raster esbarra num teto prático de alocação do Qt — falhou com uma altura de ~59000px.
+    **SVG**: não tem esse teto (é vetorial, nunca aloca um pixmap do tamanho do composite inteiro —
+    confirmado lendo o código antes de descartar a hipótese), mas gerou um arquivo de 500MB que nem
+    o Inkscape abre. Decisão do usuário: reverter tudo, manter só a fragmentação já existente;
+    registrado no plano (subtarefa 4.13) como candidata futura, não descartada de vez.
+  - Reversão: `git checkout --` nos 5 arquivos de código tocados (`modelexporthelper.h/.cpp`,
+    `modelexportwidget.cpp`, `modelexportwidget.ui`, `modelwidgettest.cpp`, incluindo o teste
+    `layoutScenesJustifiedWrapsCentersAndHandlesEdgeCases` que cobria só a matemática do layout).
+    Suíte de volta a **49/49** (a baseline de antes desta subtarefa), nada commitado em nenhum
+    momento — reversão de árvore de trabalho, não precisou desfazer commit.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
