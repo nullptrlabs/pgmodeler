@@ -488,6 +488,7 @@ void DatabaseModel::__addObject(BaseObject *object, int obj_idx)
 
 	object->setDatabase(this);
 	indexObject(object);
+	removed_objs.remove(object);
 	emit s_objectAdded(object);
 	this->setInvalidated(true);
 }
@@ -552,6 +553,7 @@ void DatabaseModel::__removeObject(BaseObject *object, int obj_idx, bool check_r
 
 		obj_list->erase(obj_list->begin() + obj_idx);
 		unindexObject(object);
+		removed_objs.insert(object);
 	}
 
 	object->clearAllDepsRefs();
@@ -997,6 +999,8 @@ void DatabaseModel::destroyObjects()
 		for(auto type : rem_obj_types)
 			getObjectList(type)->clear();
 	}
+
+	removed_objs.clear();
 
 	BaseGraphicObject::setUpdatesEnabled(true);
 	BaseObject::setClearDepsInDtor(true);
@@ -3450,7 +3454,9 @@ int DatabaseModel::getObjectIndex(const QString &name, ObjectType obj_type)
 
 int DatabaseModel::getObjectIndex(BaseObject *object)
 {
-	if(!object)
+	/* Removed objects are checked first, by pointer only, since they can already be deleted
+	 * and getObjectType() below would read freed memory */
+	if(!object || removed_objs.contains(object))
 		return -1;
 
 	ObjectType obj_type=object->getObjectType();
