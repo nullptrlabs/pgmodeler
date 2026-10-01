@@ -36,6 +36,7 @@ Additionally, this class, saves, loads and generates the XML/SQL definition of a
 #include <QDateTime>
 #include <QHash>
 #include <QMap>
+#include <functional>
 #include "baseobject.h"
 #include "table.h"
 #include "function.h"
@@ -503,10 +504,16 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		is left at its default (-1) instead of being restored from the file -- used when the caller
 		already determined that index is stale (see ModelWidget::needsThresholdRebucketing()), so
 		threshold-segmentation routing re-derives scene placement from scratch during this load
-		instead of trusting a distribution that no longer matches the active threshold */
+		instead of trusting a distribution that no longer matches the active threshold.
+		is_canceled, when provided, is polled once per object loaded (right after each s_objectLoaded
+		emission) -- it returning true aborts the load by throwing an Exception with
+		ErrorCode::OperationCancelled, leaving the model exactly as far along as it got (the caller is
+		expected to discard it, same as it already would for any other load failure). Left as a plain
+		std::function instead of a GUI-facing type to keep this class free of a libgui dependency; see
+		ModelWidget::loadModel() for how the GUI side supplies it */
 		void loadModel(const QString &filename, bool override_seg_mode = false,
 										SegmentationMode ovr_seg_mode = NoSegmentation, unsigned ovr_seg_threshold = 0,
-										bool discard_scene_idx = false);
+										bool discard_scene_idx = false, std::function<bool()> is_canceled = nullptr);
 
 		//! \brief Sets the database encoding
 		void setEncoding(EncodingType encod);

@@ -24,6 +24,7 @@
 #include "guiutilsns.h"
 #include "utilsns.h"
 #include <QTimer>
+#include <QApplication>
 
 TaskProgressWidget::TaskProgressWidget(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f)
 {
@@ -33,8 +34,35 @@ TaskProgressWidget::TaskProgressWidget(QWidget *parent, Qt::WindowFlags f) : QDi
 	setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 	setAttribute(Qt::WA_TranslucentBackground, true);
 
+	canceled = false;
+	connect(cancel_btn, &QPushButton::clicked, this, &TaskProgressWidget::cancelTask);
+
+	//Enforced here instead of relying on the .ui file's default so it survives Designer edits
+	setCancelable(false);
+
 	for(auto &obj_tp : obj_types)
 		addIcon(enum_t(obj_tp), GuiUtilsNs::getIcon(obj_tp));
+}
+
+void TaskProgressWidget::setCancelable(bool value)
+{
+	cancelable = value;
+	cancel_btn->setVisible(value);
+	cancel_btn->setEnabled(value);
+}
+
+bool TaskProgressWidget::wasCanceled()
+{
+	return canceled;
+}
+
+void TaskProgressWidget::cancelTask()
+{
+	canceled = true;
+
+	//Prevents piling up further clicks while the caller is still unwinding
+	cancel_btn->setEnabled(false);
+	text_lbl->setText(tr("Cancelling..."));
 }
 
 void TaskProgressWidget::addIcon(unsigned id, const QIcon &ico)
@@ -57,6 +85,10 @@ void TaskProgressWidget::show()
 	 isn't used the task is not shown properly and sometimes stay only on taskbar not poping up
 	 to the user. */
 	QEventLoop event_loop;
+
+	canceled = false;
+	cancel_btn->setEnabled(cancelable);
+
 	GuiUtilsNs::resizeWidget(this);
 	QDialog::show();
 
@@ -87,6 +119,15 @@ void TaskProgressWidget::updateProgress(int progress, QString text, unsigned ico
 		icon_lbl->clear();
 
 	this->repaint();
+
+	/* Pumps the event queue so a pending click on cancel_btn (see setCancelable()) actually gets
+	 * delivered -- the caller is expected to be deep inside a long, synchronous operation at this
+	 * point, with no event loop of its own running, so this is the only chance that click has to
+	 * be processed before wasCanceled() is checked back. Bounded to 1ms so this stays cheap even
+	 * when called once per object on a large load. Safe to call unconditionally (not just when
+	 * cancelable): this dialog is application-modal (see the .ui file), so nothing other than it
+	 * can receive input while it's up, regardless of whether cancel_btn itself is visible */
+	qApp->processEvents(QEventLoop::AllEvents, 1);
 
 	/* MacOSX workaround: The event loop below is needed because on this system
 		 the task progress is not correctly updated. The event loop causes a little

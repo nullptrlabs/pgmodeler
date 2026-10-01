@@ -293,6 +293,7 @@ QString Exception::messages[Exception::ErrorCount][2]={
 	{"InvExprPersistentGroup", QT_TR_NOOP("The group `%1' has been declared as persistent but contains initial and/or final expression(s)! Persistent groups must not declare initial or final expressions.")},
 	{"InvExtensionObject", QT_TR_NOOP("Invalid child object being assigned to extension `%1'!")},
 	{"AsgInvSchemaExtension", QT_TR_NOOP("Assigning the schema `%1' to extension `%2' is not allowed because the schema is a child of the extension!")},
+	{"OperationCancelled", QT_TR_NOOP("Operation cancelled by the user!")},
 };
 
 Exception::Exception()

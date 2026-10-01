@@ -733,7 +733,9 @@ void MainWindow::restoreTemporaryModels()
 					if(!restoration_form->keep_models_chk->isChecked())
 						restoration_form->removeTemporaryModel(model_file);
 
-					Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
+					//A user-initiated cancellation isn't an error -- see DatabaseModel::loadModel()
+					if(e.getErrorCode() != ErrorCode::OperationCancelled)
+						Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 			}
 		}
@@ -803,7 +805,9 @@ void MainWindow::restoreLastSession()
 		}
 		catch(Exception &e)
 		{
-			Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
+			//A user-initiated cancellation isn't an error -- see DatabaseModel::loadModel()
+			if(e.getErrorCode() != ErrorCode::OperationCancelled)
+				Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
 	}
 }
@@ -1173,7 +1177,8 @@ void MainWindow::loadModelFromAction()
 
 			if(QFileInfo::exists(filename))
 				showFixMessage(e, filename);
-			else
+			//A user-initiated cancellation isn't an error -- see DatabaseModel::loadModel()
+			else if(e.getErrorCode() != ErrorCode::OperationCancelled)
 				Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
 	}
@@ -1488,7 +1493,7 @@ void MainWindow::setCurrentModel(int idx)
 			if(model_valid_wgt->hasValidationErrors())
 				Messagebox::alert(tr("Could not reload the model because the validation process found errors that must be resolved."));
 			else
-				reloadModel(current_model->getFilename(), models_tbw->currentIndex());
+				__trycatch( reloadModel(current_model->getFilename(), models_tbw->currentIndex()); )
 		});
 
 		connect(scene_info_wgt, &SceneInfoWidget::s_activeSceneSelected, current_model, &ModelWidget::setActiveScene, Qt::UniqueConnection);
@@ -2047,7 +2052,8 @@ void MainWindow::loadModels(const QStringList &files)
 
 		if(files[i].endsWith(GlobalAttributes::DbModelExt))
 			showFixMessage(e, files[i]);
-		else
+		//A user-initiated cancellation isn't an error -- see DatabaseModel::loadModel()
+		else if(e.getErrorCode() != ErrorCode::OperationCancelled)
 		{
 			Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
@@ -2056,6 +2062,10 @@ void MainWindow::loadModels(const QStringList &files)
 
 void MainWindow::showFixMessage(Exception &e, const QString &filename)
 {
+	//A cancelled load isn't a broken file -- nothing to offer fixing here
+	if(e.getErrorCode() == ErrorCode::OperationCancelled)
+		return;
+
 	Messagebox msg_box;
 
 	msg_box.show(Exception(Exception::getErrorMessage(ErrorCode::ModelFileNotLoaded).arg(filename),

@@ -35,6 +35,8 @@
 #include "cutoffitem.h"
 #include "objectsscene.h"
 #include "operationlist.h"
+#include "basegraphicobject.h"
+#include "taskprogresswidget.h"
 #include "pgmodelerunittest.h"
 
 /*! \brief In schema-segmentation mode, a Schema and its children must always land in the same
@@ -95,6 +97,8 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void selectingACutoffClearsObjectSelectionAndOtherCutoffs();
 		void selectingARegularObjectClearsAnySelectedCutoff();
 		void cutoffMarkerCustomPositionSurvivesSaveAndReload();
+		void loadModelCanBeCancelledMidLoad();
+		void taskProgressWidgetCancelButtonSurvivesShow();
 		void rearrangeAlgorithmsRespectSceneScopeInThresholdMode();
 };
 
@@ -3360,6 +3364,129 @@ void ModelWidgetTest::rearrangeAlgorithmsRespectSceneScopeInThresholdMode()
 	{
 		QFAIL(e.getExceptionsText().toStdString().c_str());
 	}
+}
+
+/*! \brief Covers the new cooperative cancellation support in DatabaseModel::loadModel(): the
+ * is_canceled callback, checked once per object right after each s_objectLoaded tick, aborts the
+ * load by throwing ErrorCode::OperationCancelled. Exercises the mechanism directly (a plain
+ * callback, no TaskProgressWidget/GUI click involved -- that part isn't reachable from a test,
+ * since ModelWidget::loadModel() keeps its TaskProgressWidget as a private local). Also covers the
+ * pre-existing bug this change piggybacked a fix for: the outer catch in loadModel() used to leave
+ * BaseGraphicObject's updates-enabled flag stuck at false on ANY load failure, not just a cancelled
+ * one -- which would have broken rendering for every model loaded after this one, in this process */
+void ModelWidgetTest::loadModelCanBeCancelledMidLoad()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_cancel_load.dbm");
+
+	try
+	{
+		//Build and save a small model with a few tables to load back
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+			db_model->createSystemObjects(true);
+
+			Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+			QVERIFY(public_sch != nullptr);
+
+			for(unsigned i = 0; i < 5; i++)
+			{
+				Table *table = new Table;
+				table->setName(QString("table_%1").arg(i));
+				table->setSchema(public_sch);
+
+				Column *col = new Column;
+				col->setName("id");
+				col->setType(PgSqlType("serial"));
+				table->addColumn(col);
+
+				db_model->addTable(table);
+			}
+
+			model_wgt.saveModel(tmp_file);
+		}
+
+		//Reload it with a callback that requests cancellation on the very first object seen
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+			db_model->createSystemObjects(false);
+
+			QVERIFY2(BaseGraphicObject::isUpdatesEnabled(), "sanity: must start enabled, or the assertion below proves nothing");
+
+			bool threw = false;
+			ErrorCode caught_code = ErrorCode::Custom;
+
+			try
+			{
+				db_model->loadModel(tmp_file, false, DatabaseModel::NoSegmentation, 0, false,
+														 [](){ return true; });
+			}
+			catch(Exception &e)
+			{
+				threw = true;
+				caught_code = e.getErrorCode();
+			}
+
+			QVERIFY2(threw, "cancelling mid-load must throw, not just stop silently");
+			QCOMPARE(enum_t(caught_code), enum_t(ErrorCode::OperationCancelled));
+
+			//Aborted on the first object -- the model must be left incomplete, not all 5 tables in it
+			QVERIFY(db_model->getObjectList(ObjectType::Table)->size() < 5);
+
+			QVERIFY2(BaseGraphicObject::isUpdatesEnabled(),
+								"updates must be re-enabled even when the load was cancelled, not just on success");
+		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
+}
+
+/*! \brief Regression test for a real bug: show() used to re-derive cancel_btn's enabled state from
+ * cancel_btn->isVisible(), but that call lands before QDialog::show() actually makes the dialog (and
+ * so its children) visible -- isVisible() misreports false right at that point even though
+ * setCancelable(true) had already been called, leaving the button visible but permanently
+ * unclickable. Fixed by tracking the cancelable request in its own member instead of re-deriving it
+ * from widget visibility. Covers both the fresh-show case and the reuse-after-a-click case. */
+void ModelWidgetTest::taskProgressWidgetCancelButtonSurvivesShow()
+{
+	TaskProgressWidget task_prog_wgt;
+
+	//Cancelable: button must end up both visible and enabled right after show(), not just visible
+	task_prog_wgt.setCancelable(true);
+	task_prog_wgt.show();
+
+	QVERIFY2(task_prog_wgt.cancel_btn->isVisible(), "cancel_btn must be visible when cancelable");
+	QVERIFY2(task_prog_wgt.cancel_btn->isEnabled(), "this is the bug: show() was disabling it right after setCancelable(true)");
+
+	//Simulates a click (cancelTask() is a private slot -- QAbstractButton::click() triggers the same
+	//press+release+clicked() sequence a real mouse click would, without needing to synthesize one)
+	task_prog_wgt.cancel_btn->click();
+
+	QVERIFY(task_prog_wgt.wasCanceled());
+	QVERIFY2(!task_prog_wgt.cancel_btn->isEnabled(), "must disable itself on click, to not pile up further cancel requests");
+
+	//Reused for a second task (same instance, same as how a caller might show() it again): show() must
+	//reset both wasCanceled() and the button back to enabled, not leave it stuck disabled from the click above
+	task_prog_wgt.show();
+
+	QVERIFY2(!task_prog_wgt.wasCanceled(), "show() must reset the cancellation flag for the new task");
+	QVERIFY2(task_prog_wgt.cancel_btn->isEnabled(), "show() must also re-enable the button, not just hide the staleness");
+
+	task_prog_wgt.close();
+
+	//Not cancelable: button must stay hidden through show(), regardless of the above
+	TaskProgressWidget task_prog_wgt2;
+	task_prog_wgt2.show();
+
+	QVERIFY2(!task_prog_wgt2.cancel_btn->isVisible(), "cancel_btn must stay hidden when setCancelable() was never called");
+
+	task_prog_wgt2.close();
 }
 
 QTEST_MAIN(ModelWidgetTest)
