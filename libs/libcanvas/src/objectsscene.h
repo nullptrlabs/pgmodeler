@@ -448,6 +448,9 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		//! \brief Signal emitted when the user double-click a object
 		void s_objectDoubleClicked(BaseGraphicObject *objeto);
 
+		//! \brief Signal emitted when the user double-clicks a cut-off marker. Carries the table the marker is attached to
+		void s_cutoffDoubleClicked(BaseTable *table);
+
 		//! \brief Signal emitted when a object is selected
 		void s_objectSelected(BaseGraphicObject *objeto, bool selecionado);
 

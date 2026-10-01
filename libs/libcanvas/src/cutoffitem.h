@@ -115,6 +115,9 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 	public:
 		CutoffItem(BaseTableView *table);
 
+		//! \brief Returns the table this marker is attached to
+		BaseTable *getTable();
+
 		void addRelationship(BaseRelationship *rel);
 
 		void removeRelationship(BaseRelationship *rel);
