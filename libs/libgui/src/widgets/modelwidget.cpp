@@ -57,6 +57,7 @@
 #include "dbobjects/eventtriggerwidget.h"
 #include "guiutilsns.h"
 #include "swapobjectsidswidget.h"
+#include "crossscenerelswidget.h"
 #include "dbobjects/genericsqlwidget.h"
 #include "dbobjects/policywidget.h"
 #include "tabledatawidget.h"
@@ -1097,6 +1098,7 @@ ObjectsScene *ModelWidget::addScene(bool auto_activate)
 	});
 	connect(new_scene, &ObjectsScene::s_objectModified, this,  &ModelWidget::handleObjectModification);
 	connect(new_scene, &ObjectsScene::s_objectDoubleClicked, this,  &ModelWidget::handleObjectDoubleClick);
+	connect(new_scene, &ObjectsScene::s_cutoffDoubleClicked, this,  &ModelWidget::showCutoffRelationships);
 
 	connect(new_scene, &ObjectsScene::s_objectSelected, this,  &ModelWidget::configureObjectSelection, Qt::QueuedConnection);
 	connect(new_scene, qOverload<BaseObject *>(&ObjectsScene::s_popupMenuRequested), this, qOverload<BaseObject *>(&ModelWidget::configurePopupMenu), Qt::QueuedConnection);
@@ -1601,6 +1603,28 @@ void ModelWidget::handleObjectDoubleClick(BaseGraphicObject *object)
 		this->showObjectForm(object->getObjectType(), object, nullptr, object->getPosition());
 	else
 		this->showObjectForm(ObjectType::Database, db_model);
+}
+
+void ModelWidget::showCutoffRelationships(BaseTable *table)
+{
+	if(!table)
+		return;
+
+	BaseForm base_form(this);
+	CrossSceneRelsWidget *cross_scene_rels_wgt = new CrossSceneRelsWidget;
+
+	cross_scene_rels_wgt->setAttributes(db_model, table);
+	base_form.setMainWidget(cross_scene_rels_wgt);
+	base_form.setButtonConfiguration(Messagebox::CloseButton);
+
+	connect(cross_scene_rels_wgt, &CrossSceneRelsWidget::s_relationshipActivated, this, [this, cross_scene_rels_wgt](BaseRelationship *rel){
+		showObjectForm(rel->getObjectType(), rel);
+		cross_scene_rels_wgt->updateRelationships();
+	});
+
+	GeneralConfigWidget::restoreWidgetGeometry(&base_form, cross_scene_rels_wgt->metaObject()->className());
+	base_form.exec();
+	GeneralConfigWidget::saveWidgetGeometry(&base_form, cross_scene_rels_wgt->metaObject()->className());
 }
 
 void ModelWidget::handleObjectsMovement(ObjectsScene *src_scene, bool end_moviment)

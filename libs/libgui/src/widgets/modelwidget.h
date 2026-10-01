@@ -706,6 +706,9 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Handles the signals that indicates the object was double clicked on the scene
 		void handleObjectDoubleClick(BaseGraphicObject *object);
 
+		//! \brief Shows the list of cross-scene relationships of the table a double-clicked cut-off marker belongs to
+		void showCutoffRelationships(BaseTable *table);
+
 		//! \brief Configures the popup menu specific for the passed object
 		void configurePopupMenu(BaseObject *object);
 

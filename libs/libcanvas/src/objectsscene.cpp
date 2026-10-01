@@ -1125,10 +1125,14 @@ void ObjectsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 	if(this->selectedItems().size()==1 && event->buttons()==Qt::LeftButton && !rel_line->isVisible())
 	{
 		//Gets the selected graphical object
-		BaseObjectView *obj=dynamic_cast<BaseObjectView *>(this->selectedItems().at(0));
+		QGraphicsItem *sel_item = this->selectedItems().at(0);
+		BaseObjectView *obj=dynamic_cast<BaseObjectView *>(sel_item);
+		CutoffItem *cutoff = dynamic_cast<CutoffItem *>(sel_item);
 
 		if(obj)
 			emit s_objectDoubleClicked(dynamic_cast<BaseGraphicObject *>(obj->getUnderlyingObject()));
+		else if(cutoff)
+			emit s_cutoffDoubleClicked(cutoff->getTable());
 	}
 	else
 		//Emit a signal indicating that no object was selected

@@ -23,6 +23,8 @@
 #include <QTimer>
 #include <QGraphicsSceneMouseEvent>
 #include "modelwidget.h"
+#include "crossscenerelswidget.h"
+#include "baseform.h"
 #include "databasemodel.h"
 #include "schema.h"
 #include "table.h"
@@ -100,6 +102,10 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void loadModelCanBeCancelledMidLoad();
 		void taskProgressWidgetCancelButtonSurvivesShow();
 		void rearrangeAlgorithmsRespectSceneScopeInThresholdMode();
+		void doubleClickingACutoffEmitsItsTable();
+		void cutoffRelationshipsWidgetListsAndRefreshesRelationships();
+		void crossSceneRelsWidgetIgnoresStaleRelationship();
+		void crossSceneRelsWidgetSurvivesItsTableBeingRemoved();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -3487,6 +3493,290 @@ void ModelWidgetTest::taskProgressWidgetCancelButtonSurvivesShow()
 	QVERIFY2(!task_prog_wgt2.cancel_btn->isVisible(), "cancel_btn must stay hidden when setCancelable() was never called");
 
 	task_prog_wgt2.close();
+}
+
+void ModelWidgetTest::doubleClickingACutoffEmitsItsTable()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+		db_model->createSystemObjects(true);
+
+		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		Table *table_a = new Table, *table_b = new Table;
+
+		table_a->setName("table_a");
+		table_a->setSchema(public_sch);
+
+		Column *col = new Column;
+		col->setName("id");
+		col->setType(PgSqlType("serial"));
+		table_a->addColumn(col);
+
+		Constraint *pk = new Constraint;
+		pk->setName("table_a_pk");
+		pk->setConstraintType(ConstraintType::PrimaryKey);
+		pk->addColumn(table_a->getColumn("id"), Constraint::SourceCols);
+		table_a->addConstraint(pk);
+		db_model->addTable(table_a);
+
+		for(unsigned i = 0; i < db_model->getSegThreshold(); i++)
+		{
+			Table *filler = new Table;
+			filler->setName(QString("filler_%1").arg(i));
+			filler->setSchema(public_sch);
+			db_model->addTable(filler);
+		}
+
+		table_b->setName("table_b");
+		table_b->setSchema(public_sch);
+		db_model->addTable(table_b);
+		db_model->addRelationship(new Relationship(BaseRelationship::Relationship1n, table_a, table_b));
+
+		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
+		QVERIFY(table_a_view->getCutoffItem() != nullptr);
+
+		ObjectsScene *scn = model_wgt.getSceneForObject(table_a);
+		QSignalSpy table_spy(scn, &ObjectsScene::s_cutoffDoubleClicked),
+							 obj_spy(scn, &ObjectsScene::s_objectDoubleClicked);
+
+		table_a_view->getCutoffItem()->setSelected(true);
+
+		QGraphicsSceneMouseEvent event(QEvent::GraphicsSceneMouseDoubleClick);
+		event.setButton(Qt::LeftButton);
+		event.setButtons(Qt::LeftButton);
+
+		/* The marker's overall rect center can fall in a gap between its line and its label, so
+		 * the click lands on the center of the first child that actually resolves back to the marker */
+		CutoffItem *cutoff = table_a_view->getCutoffItem();
+		QPointF click_pos;
+
+		for(auto &child : cutoff->childItems())
+		{
+			QPointF pos = child->sceneBoundingRect().center();
+
+			QGraphicsItem *hit = scn->itemAt(pos, QTransform());
+
+			if(hit && (hit == cutoff || hit->group() == cutoff))
+			{
+				click_pos = pos;
+				break;
+			}
+		}
+
+		QVERIFY(!click_pos.isNull());
+		event.setScenePos(click_pos);
+
+		//The signal opens the (modal) relationships form, so it's closed from outside to let the event return
+		bool form_shown = false;
+		QTimer::singleShot(200, [&form_shown](){
+			BaseForm *form = qobject_cast<BaseForm *>(QApplication::activeModalWidget());
+			form_shown = (form != nullptr);
+
+			if(form)
+				form->accept();
+		});
+
+		QCoreApplication::sendEvent(scn, &event);
+
+		QVERIFY2(form_shown, "double-clicking a cutoff must open the cross-scene relationships form");
+		QCOMPARE(table_spy.count(), 1);
+		QCOMPARE(table_spy.at(0).at(0).value<BaseTable *>(), table_a);
+		QCOMPARE(obj_spy.count(), 0);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void ModelWidgetTest::cutoffRelationshipsWidgetListsAndRefreshesRelationships()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+		db_model->createSystemObjects(true);
+
+		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		Table *table_a = new Table, *table_b = new Table;
+
+		table_a->setName("table_a");
+		table_a->setSchema(public_sch);
+
+		Column *col = new Column;
+		col->setName("id");
+		col->setType(PgSqlType("serial"));
+		table_a->addColumn(col);
+
+		Constraint *pk = new Constraint;
+		pk->setName("table_a_pk");
+		pk->setConstraintType(ConstraintType::PrimaryKey);
+		pk->addColumn(table_a->getColumn("id"), Constraint::SourceCols);
+		table_a->addConstraint(pk);
+		db_model->addTable(table_a);
+
+		for(unsigned i = 0; i < db_model->getSegThreshold(); i++)
+		{
+			Table *filler = new Table;
+			filler->setName(QString("filler_%1").arg(i));
+			filler->setSchema(public_sch);
+			db_model->addTable(filler);
+		}
+
+		table_b->setName("table_b");
+		table_b->setSchema(public_sch);
+		db_model->addTable(table_b);
+
+		Relationship *rel = new Relationship(BaseRelationship::Relationship1n, table_a, table_b);
+		db_model->addRelationship(rel);
+
+		CrossSceneRelsWidget cutoff_wgt;
+		cutoff_wgt.setAttributes(db_model, table_a);
+
+		CustomTableWidget *rels_tab = cutoff_wgt.findChild<CustomTableWidget *>();
+		ObjectSelectorWidget *table_sel = cutoff_wgt.findChild<ObjectSelectorWidget *>();
+
+		QVERIFY(table_sel != nullptr);
+		QCOMPARE(table_sel->getSelectedObject(), table_a);
+		QVERIFY(!cutoff_wgt.windowTitle().isEmpty());
+		QVERIFY(rels_tab != nullptr);
+		QCOMPARE(rels_tab->getRowCount(), 1u);
+		QCOMPARE(rels_tab->getCellText(0, 0), rel->getName());
+		QCOMPARE(rels_tab->getCellText(0, 2), table_b->getSignature(true));
+
+		//Double-clicking a row asks for that relationship's edition
+		QSignalSpy rel_spy(&cutoff_wgt, &CrossSceneRelsWidget::s_relationshipActivated);
+		emit rels_tab->s_cellDoubleClicked(0, 0);
+		QCOMPARE(rel_spy.count(), 1);
+		QCOMPARE(rel_spy.at(0).at(0).value<BaseRelationship *>(), rel);
+
+		//Once the relationship is gone, refreshing drops it from the grid
+		db_model->removeRelationship(rel);
+		cutoff_wgt.updateRelationships();
+		QCOMPARE(rels_tab->getRowCount(), 0u);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Builds a model where table_a and table_b live in different scenes (threshold mode)
+and are linked by rel, so table_a's cutoff marker lists rel */
+static void buildCrossSceneModel(ModelWidget &model_wgt, Table *&table_a, Table *&table_b, Relationship *&rel)
+{
+	DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+	db_model->setSegmentationMode(DatabaseModel::SegByThreshold);
+	db_model->createSystemObjects(true);
+
+	Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+	table_a = new Table;
+	table_b = new Table;
+
+	table_a->setName("table_a");
+	table_a->setSchema(public_sch);
+
+	Column *col = new Column;
+	col->setName("id");
+	col->setType(PgSqlType("serial"));
+	table_a->addColumn(col);
+
+	Constraint *pk = new Constraint;
+	pk->setName("table_a_pk");
+	pk->setConstraintType(ConstraintType::PrimaryKey);
+	pk->addColumn(table_a->getColumn("id"), Constraint::SourceCols);
+	table_a->addConstraint(pk);
+	db_model->addTable(table_a);
+
+	for(unsigned i = 0; i < db_model->getSegThreshold(); i++)
+	{
+		Table *filler = new Table;
+		filler->setName(QString("filler_%1").arg(i));
+		filler->setSchema(public_sch);
+		db_model->addTable(filler);
+	}
+
+	table_b->setName("table_b");
+	table_b->setSchema(public_sch);
+	db_model->addTable(table_b);
+
+	rel = new Relationship(BaseRelationship::Relationship1n, table_a, table_b);
+	db_model->addRelationship(rel);
+}
+
+void ModelWidgetTest::crossSceneRelsWidgetIgnoresStaleRelationship()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+		Table *table_a = nullptr, *table_b = nullptr;
+		Relationship *rel = nullptr;
+
+		buildCrossSceneModel(model_wgt, table_a, table_b, rel);
+
+		CrossSceneRelsWidget cross_wgt;
+		cross_wgt.setAttributes(db_model, table_a);
+
+		CustomTableWidget *rels_tab = cross_wgt.findChild<CustomTableWidget *>();
+		QCOMPARE(rels_tab->getRowCount(), 1u);
+
+		//The relationship is removed behind the grid's back, so its row is now stale
+		db_model->removeRelationship(rel);
+		delete rel;
+
+		QSignalSpy rel_spy(&cross_wgt, &CrossSceneRelsWidget::s_relationshipActivated);
+		emit rels_tab->s_cellDoubleClicked(0, 0);
+
+		QCOMPARE(rel_spy.count(), 0);
+		QCOMPARE(rels_tab->getRowCount(), 0u);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void ModelWidgetTest::crossSceneRelsWidgetSurvivesItsTableBeingRemoved()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+		Table *table_a = nullptr, *table_b = nullptr;
+		Relationship *rel = nullptr;
+
+		buildCrossSceneModel(model_wgt, table_a, table_b, rel);
+
+		CrossSceneRelsWidget cross_wgt;
+		cross_wgt.setAttributes(db_model, table_a);
+
+		CustomTableWidget *rels_tab = cross_wgt.findChild<CustomTableWidget *>();
+		ObjectSelectorWidget *table_sel = cross_wgt.findChild<ObjectSelectorWidget *>();
+		QCOMPARE(rels_tab->getRowCount(), 1u);
+
+		//Both the relationship and the widget's own table are deleted, as a cascade removal would do
+		db_model->removeRelationship(rel);
+		delete rel;
+		db_model->removeTable(table_a);
+		delete table_a;
+
+		cross_wgt.updateRelationships();
+
+		QCOMPARE(rels_tab->getRowCount(), 0u);
+		QVERIFY(table_sel->getSelectedObject() == nullptr);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
 }
 
 QTEST_MAIN(ModelWidgetTest)

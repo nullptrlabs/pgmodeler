@@ -68,6 +68,11 @@ CutoffItem::CutoffItem(BaseTableView *table)
 	updatePosition();
 }
 
+BaseTable *CutoffItem::getTable()
+{
+	return dynamic_cast<BaseTable *>(table->getUnderlyingObject());
+}
+
 void CutoffItem::addRelationship(BaseRelationship *rel)
 {
 	if(!rel || rels.contains(rel))
