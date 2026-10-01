@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>78</height>
+    <width>675</width>
+    <height>81</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -126,7 +126,23 @@
         <property name="spacing">
          <number>5</number>
         </property>
-        <item row="0" column="1" colspan="3">
+        <item row="1" column="0" colspan="3">
+         <widget class="QProgressBar" name="progress_pb">
+          <property name="value">
+           <number>0</number>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignCenter</set>
+          </property>
+          <property name="invertedAppearance">
+           <bool>false</bool>
+          </property>
+          <property name="format">
+           <string notr="true">%p%</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
          <widget class="QLabel" name="text_lbl">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -141,22 +157,6 @@
           </property>
           <property name="text">
            <string>Waiting for task to start...</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0" colspan="4">
-         <widget class="QProgressBar" name="progress_pb">
-          <property name="value">
-           <number>0</number>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-          <property name="invertedAppearance">
-           <bool>false</bool>
-          </property>
-          <property name="format">
-           <string notr="true">%p%</string>
           </property>
          </widget>
         </item>
@@ -194,6 +194,38 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="2">
+         <widget class="QToolButton" name="cancel_btn">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::FocusPolicy::ClickFocus</enum>
+          </property>
+          <property name="toolTip">
+           <string>Cancel operation</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res/resources.qrc">
+            <normaloff>:/icons/icons/cancel.png</normaloff>:/icons/icons/cancel.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -203,6 +235,7 @@
  </widget>
  <resources>
   <include location="../../../../priv-core/res/logoicons.qrc"/>
+  <include location="../../res/resources.qrc"/>
   <include location="../../../../priv-core/res/logoicons.qrc"/>
   <include location="../../../../priv-core/res/logoicons.qrc"/>
   <include location="../../../../priv-core/res/logoicons.qrc"/>

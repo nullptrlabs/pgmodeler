@@ -3497,7 +3497,7 @@ void DatabaseModel::configureDatabase(attribs_map &attribs)
 
 void DatabaseModel::loadModel(const QString &filename, bool override_seg_mode,
 															 SegmentationMode ovr_seg_mode, unsigned ovr_seg_threshold,
-															 bool discard_scene_idx)
+															 bool discard_scene_idx, std::function<bool()> is_canceled)
 {
 	if(filename.isEmpty())
 		return;
@@ -3741,6 +3741,15 @@ void DatabaseModel::loadModel(const QString &filename, bool override_seg_mode,
 																		tr("Loading: `%1' (%2)")
 																				.arg(object->getName(), object->getTypeName()),
 																		enum_t(obj_type));
+
+								/* Checked once per object, right after the progress tick above -- that signal
+								 * is what gives the GUI side (see TaskProgressWidget::updateProgress()) its one
+								 * chance to pump the event queue and actually notice a pending cancel click */
+								if(is_canceled && is_canceled())
+								{
+									throw Exception(Exception::getErrorMessage(ErrorCode::OperationCancelled),
+																	ErrorCode::OperationCancelled, PGM_FUNC, PGM_FILE, PGM_LINE);
+								}
 							}
 
 							xmlparser.restorePosition();
@@ -3809,8 +3818,17 @@ void DatabaseModel::loadModel(const QString &filename, bool override_seg_mode,
 		loading_model = false;
 		discard_scene_idx = false;
 
+		//Previously only set back to true on the success path below -- left every subsequent model's
+		//rendering silently disabled whenever a load failed partway through, cancellation included
+		BaseGraphicObject::setUpdatesEnabled(true);
+
 		if(xmlparser.getCurrentElement())
 			extra_info = QObject::tr("%1 (line: %2)").arg(xmlparser.getLoadedFilename()).arg(xmlparser.getCurrentElement()->line);
+
+		//Propagated as-is: a cancellation is neither a syntax error nor worth the generic
+		//"file not loaded" wrapping below, and callers need the original error code intact to detect it
+		if(e.getErrorCode() == ErrorCode::OperationCancelled)
+			throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e, extra_info);
 
 		if(e.getErrorCode() != ErrorCode::FileDirectoryNotAccessed &&
 			 e.getErrorCode() >= ErrorCode::InvalidSyntax)

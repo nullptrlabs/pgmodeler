@@ -2578,6 +2578,7 @@ void ModelWidget::loadModel(const QString &filename, bool check_alt_seg_mode)
 		connect(db_model, &DatabaseModel::s_objectLoaded, &task_prog_wgt, qOverload<int, QString, unsigned>(&TaskProgressWidget::updateProgress));
 		task_prog_wgt.addIcon(enum_t(ObjectType::BaseObject), GuiUtilsNs::getIcon("design"));
 		task_prog_wgt.setWindowTitle(tr("Loading database model"));
+		task_prog_wgt.setCancelable(true);
 		task_prog_wgt.show();
 
 		// Disable objects blinking during model loading
@@ -2588,7 +2589,8 @@ void ModelWidget::loadModel(const QString &filename, bool check_alt_seg_mode)
 		db_model->loadModel(filename,
 												alt_seg_mode.isValid(), alt_seg_mode.mode,
 												DatabaseModel::DefaultSegThreshold,
-												rebucketed);
+												rebucketed,
+												[&task_prog_wgt](){ return task_prog_wgt.wasCanceled(); });
 
 		blink_new_objs = curr_blink_objs;
 

@@ -32,7 +32,11 @@ unexpected behavior and crashes.
 
 #include <QObject>
 
-//! \brief This macro expands to a block of code inside a try/catch blockz
+/*! \brief This macro expands to a block of code inside a try/catch block. A user-initiated
+ * cancellation (ErrorCode::OperationCancelled, e.g. from TaskProgressWidget's cancel button, see
+ * DatabaseModel::loadModel()) is not an error and is silently swallowed instead of popping up an
+ * error dialog -- whatever cleanup the cancelled operation itself needed has already run by the
+ * time its exception reaches here */
 #define __trycatch(...) \
 try \
 { \
@@ -40,7 +44,8 @@ try \
 } \
 catch(Exception &e) \
 { \
-	Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE); \
+	if(e.getErrorCode() != ErrorCode::OperationCancelled) \
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE); \
 }
 
 /*! \brief This macro expands to a slot method call to be used with QObject::connect method.
