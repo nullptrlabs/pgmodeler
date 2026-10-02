@@ -583,13 +583,13 @@ class __libgui ModelWidget: public QWidget {
 		DatabaseModel *getDatabaseModel();
 
 		//! \brief Returns the currently active object scene used by the model
-		ObjectsScene *getObjectsScene();
+		ObjectsScene *getScene();
 
 		//! \brief Returns the scene at the given index in the scenes collection (nullptr if idx is out of bounds)
-		ObjectsScene *getObjectsScene(int idx);
+		ObjectsScene *getScene(int idx);
 
 		//! \brief Returns the full collection of scenes currently managed by this widget
-		QList<ObjectsScene *> getObjectsScenes();
+		QList<ObjectsScene *> getScenes();
 
 		//! \brief Returns the number of scenes currently managed by this widget
 		int getSceneCount();
@@ -759,9 +759,6 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Triggers the permission editing form
 		void editPermissions();
 
-		//! \brief Clears the selection on every scene, not just the active one
-		void clearSelectionInAllScenes();
-
 		//! \brief Selects all the graphical objects under the selected schema, regardless of which scene each one is in
 		void selectSchemaChildren();
 
@@ -880,6 +877,9 @@ class __libgui ModelWidget: public QWidget {
 		void selectObjectsInLayers(const QList<unsigned int> &layer_ids);
 
 	public slots:
+		//! \brief Clears the selection on every scene, not just the active one
+		void clearSelectionInAllScenes();
+
 		//! \brief Activates the scene at the given index, reattaching it to the viewport
 		void setActiveScene(int idx);
 

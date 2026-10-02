@@ -2476,7 +2476,7 @@ void MainWindow::arrangeObjects()
 	else
 	{
 		//Only a real choice when the model actually has more than one scene to pick between
-		if(current_model->getObjectsScenes().size() > 1)
+		if(current_model->getScenes().size() > 1)
 		{
 			res = Messagebox::confirm(arrange_msg + tr(" How the rearrangement should be applied?"),
 																Messagebox::Confirm, Messagebox::AllButtons,

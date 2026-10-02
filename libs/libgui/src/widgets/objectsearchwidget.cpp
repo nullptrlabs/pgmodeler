@@ -338,7 +338,7 @@ void ObjectSearchWidget::selectObject()
 	auto followObjectScene = [this](QGraphicsItem *item)
 	{
 		ObjectsScene *item_scene = item ? dynamic_cast<ObjectsScene *>(item->scene()) : nullptr;
-		int scn_idx = item_scene ? model_wgt->getObjectsScenes().indexOf(item_scene) : -1;
+		int scn_idx = item_scene ? model_wgt->getScenes().indexOf(item_scene) : -1;
 
 		if(scn_idx >= 0)
 			model_wgt->setActiveScene(scn_idx);
