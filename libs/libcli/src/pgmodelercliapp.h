@@ -169,6 +169,11 @@ class __libcli PgModelerCliApp: public Application {
 		in order to be parsed by the recreateObjects() method */
 		void extractObjectXML();
 
+		/*! \brief Reads the scene segmentation data (segmentation mode and threshold, last scene, scene
+		 * rectangles) from the <dbmodel> header and <scenes> element of the model being fixed and
+		 * applies it to the input model, so it's saved back in the fixed model */
+		void restoreSegmentation(const QString &header_xml);
+
 		//! \brief Recreates the objects from the obj_xml list fixing the creation order for them
 		void recreateObjects();
 

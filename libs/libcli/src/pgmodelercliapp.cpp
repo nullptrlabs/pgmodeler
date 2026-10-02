@@ -1448,6 +1448,7 @@ void PgModelerCliApp::extractObjectXML()
 		act_layers_ids.push_back(id.toUInt());
 
 	input_model->setActiveLayers(act_layers_ids);
+	restoreSegmentation(aux_buf);
 	buf.remove(0, dbm_start);
 
 	//Checking if the header ends on a role declaration
@@ -1592,6 +1593,57 @@ void PgModelerCliApp::extractObjectXML()
 			open_tag=close_tag=is_rel=false;
 		}
 	}
+}
+
+void PgModelerCliApp::restoreSegmentation(const QString &header_xml)
+{
+	/* The attributes of the <dbmodel> tag are read with regular expressions, like the other header
+	 * attributes in extractObjectXML(), since the header is not a standalone valid XML document here */
+	auto get_attr = [](const QString &xml, const QString &name) -> QString {
+		QRegularExpressionMatch match = QRegularExpression(QString("(?<![\\w-])%1=\"([^\"]*)\"").arg(name)).match(xml);
+		return match.hasMatch() ? match.captured(1) : QString();
+	};
+
+	QString dbm_tag = header_xml.left(header_xml.indexOf('>') + 1),
+			seg_mode_str = get_attr(dbm_tag, Attributes::SegMode),
+			rect_str = get_attr(dbm_tag, Attributes::SceneRect);
+	DatabaseModel::SegmentationMode seg_mode = DatabaseModel::NoSegmentation;
+	unsigned seg_threshold = get_attr(dbm_tag, Attributes::SegThreshold).toUInt();
+	QStringList rect_vals = rect_str.split(',');
+	QMap<int, QRectF> scene_rects;
+
+	// Models saved before the segmentation modes existed have no seg-mode and stay unsegmented
+	if(!seg_mode_str.isEmpty() && seg_mode_str.toUInt() <= DatabaseModel::SegByThreshold)
+		seg_mode = static_cast<DatabaseModel::SegmentationMode>(seg_mode_str.toUInt());
+
+	if(seg_threshold == 0)
+		seg_threshold = DatabaseModel::DefaultSegThreshold;
+
+	input_model->setSegmentationMode(seg_mode);
+	input_model->setSavedSegmentationMode(seg_mode);
+	input_model->setSegThreshold(seg_threshold);
+	input_model->setSavedSegThreshold(seg_threshold);
+	input_model->setLastScene(get_attr(dbm_tag, Attributes::LastScene).toInt());
+
+	// The legacy scene rect is stored as "x,y,width,height"
+	if(rect_vals.size() == 4)
+	{
+		input_model->setSceneRect(QRectF(rect_vals[0].toDouble(), rect_vals[1].toDouble(),
+																		 rect_vals[2].toDouble(), rect_vals[3].toDouble()));
+	}
+
+	QRegularExpressionMatchIterator itr = QRegularExpression(QString("<%1\\b[^>]*>").arg(Attributes::Scene)).globalMatch(header_xml);
+
+	while(itr.hasNext())
+	{
+		QString scene_tag = itr.next().captured(0);
+
+		scene_rects[get_attr(scene_tag, Attributes::Id).toInt()] =
+				QRectF(QPointF(get_attr(scene_tag, Attributes::Left).toDouble(), get_attr(scene_tag, Attributes::Top).toDouble()),
+							 QPointF(get_attr(scene_tag, Attributes::Right).toDouble(), get_attr(scene_tag, Attributes::Bottom).toDouble()));
+	}
+
+	input_model->setSceneRects(scene_rects);
 }
 
 void PgModelerCliApp::recreateObjects()
