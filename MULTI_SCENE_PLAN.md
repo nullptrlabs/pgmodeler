@@ -1976,6 +1976,9 @@ depois.
 > Fases 0-4 (o lado GUI, via `ModelWidget`) estiverem inteiramente acertadas. Dono: usuário ("Eu
 > farei a revisão da CLI assim que tivermos tudo acertado na GUI", 2026-09-21) — não iniciar por
 > conta própria antes disso.
+> **Atualização 2026-10-02**: usuário deu o start explícito só na fatia `--import-db` desta fase
+> (o "achado novo" abaixo) — o restante (export por cena, extração do roteamento objeto→cena)
+> continua não iniciado. Ver entrada correspondente em `MULTI_SCENE_PROGRESS.md`.
 
 **O problema**: `PgModelerCliApp` monta e usa seu próprio `ObjectsScene *scene`
 ([pgmodelercliapp.h:99](libs/libcli/src/pgmodelercliapp.h#L99)), construído direto a partir do
@@ -2002,33 +2005,21 @@ mapeado):
 - Cobre os dois modos (por schema e por threshold) ou só o que estiver pronto no momento em que
   isso for retomado.
 
-**Achado novo (2026-09-26): `pgmodeler-cli --import-db` tem o mesmo problema do formulário de
-engenharia reversa da GUI** (ver Fase 4, subtarefa 4.14) — **depende diretamente daquela
-anotação**, mesma pergunta em aberto, só que como flags de linha de comando em
-vez de widgets. `PgModelerCliApp::importDatabase()` (código em
-[privpgmodelercliapp.cpp:25-42](priv-core/src/libcli/privpgmodelercliapp.cpp#L25), incluído em
-`pgmodelercliapp.cpp` via `PRIV_CODE_SYMBOLS` — módulo `priv-core`, repositório separado) cria um
-`ModelWidget` novo e chama `model->createSystemObjects(true)` no overload
-`importDatabase(DatabaseModel*, Connection)`
-([privpgmodelercliapp.cpp:95](priv-core/src/libcli/privpgmodelercliapp.cpp#L95)) sem nenhum switch
-pra escolher o modo de segmentação antes disso — todo modelo importado via CLI sai sempre
-`NoSegmentation`, precisando de uma edição manual + salvar + reabrir depois pra ganhar segmentação.
-- **Mesmo cuidado de ordem do bug do `pg_catalog`**: se isso virar switches novos (ex.
-  `--seg-mode`/`--seg-threshold`), `setSegmentationMode()`/`setSegThreshold()` precisam ser
-  aplicados **antes** de `model->createSystemObjects(true)` na linha citada acima, não depois.
-- **Achado colateral 1**: `PgModelerCliApp::importDatabase()`
-  ([privpgmodelercliapp.cpp:37](priv-core/src/libcli/privpgmodelercliapp.cpp#L37)) salva chamando
-  `model_wgt->getDatabaseModel()->saveModel(...)` **diretamente** — não passa por
-  `ModelWidget::saveModel()`, então bypassa o `updateModelSceneRectInfo()` que a subtarefa 3.0
-  acabou de introduzir (o `scene-rect` legado, união de todas as cenas, nunca seria recalculado
-  antes desse save). Precisa ser considerado quando isso for retomado — chamar
-  `updateModelSceneRectInfo()` manualmente antes do save, ou trocar pra `ModelWidget::saveModel()`.
-- **Achado colateral 2**: `model_wgt->rearrangeSchemasInGrid()`
-  ([privpgmodelercliapp.cpp:33](priv-core/src/libcli/privpgmodelercliapp.cpp#L33)), chamado logo
-  depois do import, já assume layout de cena única (organiza todos os schemas num grid dentro da
-  MESMA cena) — se o modelo importado passar a ser segmentado, esse rearranjo provavelmente deixa
-  de fazer sentido como está. Cruza com a Fase 4, subtarefa 4.12 (mesma pergunta em aberto, achado
-  de novo aqui).
+**Achado novo (2026-09-26), implementado em 2026-10-02 — ver `MULTI_SCENE_PROGRESS.md`**:
+`pgmodeler-cli --import-db` tinha o mesmo problema do formulário de engenharia reversa da GUI (ver
+Fase 4, subtarefa 4.14), só que como flags de linha de comando em vez de widgets. Ganhou
+`--seg-mode [schema|threshold]`/`--seg-threshold [NUMBER]`, aplicados em
+`PgModelerCliApp::importDatabase()` antes de `model->createSystemObjects(true)` (mesma ordem da
+4.14, embora a 4.14 já tivesse constatado que a ordem não é crítica na prática). Os dois achados
+colaterais abaixo (scene-rect legado e rearranjo em grade pós-import) também foram corrigidos
+nesta mesma rodada.
+- ~~**Achado colateral 1**: `PgModelerCliApp::importDatabase()` salva chamando
+  `model_wgt->getDatabaseModel()->saveModel(...)` diretamente, bypassando
+  `updateModelSceneRectInfo()`.~~ **Corrigido**: `updateModelSceneRectInfo()` (antes privado) virou
+  público em `ModelWidget` e passou a ser chamado manualmente antes do save do CLI.
+- ~~**Achado colateral 2**: `model_wgt->rearrangeSchemasInGrid()` chamado logo depois do import já
+  assumia layout de cena única.~~ **Já havia sido corrigido** (fora desta sessão, achado ao
+  retomar o trabalho): a chamada já lê `getSegmentationMode()` para decidir `current_scene_only`.
 
 ## 5. Fora de escopo (por enquanto)
 

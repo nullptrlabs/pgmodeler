@@ -99,6 +99,10 @@ const QString PgModelerCliApp::MatchByName {"--match-by-name"};
 const QString PgModelerCliApp::ForceChildren {"--force-children"};
 const QString PgModelerCliApp::OnlyMatching {"--only-matching"};
 const QString PgModelerCliApp::CommentsAsAliases {"--comments-as-aliases"};
+const QString PgModelerCliApp::SegMode {"--seg-mode"};
+const QString PgModelerCliApp::SegThreshold {"--seg-threshold"};
+const QString PgModelerCliApp::SegModeSchema {"schema"};
+const QString PgModelerCliApp::SegModeThreshold {"threshold"};
 const QString PgModelerCliApp::PartialDiff {"--partial"};
 const QString PgModelerCliApp::Force {"--force"};
 const QString PgModelerCliApp::StartDate {"--start-date"};
@@ -165,7 +169,7 @@ std::map<QString, bool> PgModelerCliApp::long_opts {
 	{ DependenciesSql, false }, { ChildrenSql, false }, { GenDropScript, false },
 	{ GroupByType, false }, { CommentsAsAliases, false }, { IgnoreFaultyPlugins, false },
 	{ ListPlugins, false }, { Markdown, false }, { NonTransactional, false },
-	{ NoEscapeComments, false }
+	{ NoEscapeComments, false }, { SegMode, true }, { SegThreshold, true }
 };
 
 attribs_map PgModelerCliApp::short_opts {
@@ -194,7 +198,8 @@ attribs_map PgModelerCliApp::short_opts {
 	{ MissingOnly, "-mo" }, { DependenciesSql, "-ds" }, { ChildrenSql, "-cs" },
 	{ GroupByType, "-gt" },	{ GenDropScript, "-gd" }, { CommentsAsAliases, "-cl" },
 	{ IgnoreFaultyPlugins, "-ip" }, { ListPlugins, "-lp" }, { Markdown, "-md" },
-	{ NonTransactional, "-nt" }, { NoEscapeComments, "-ne" }
+	{ NonTransactional, "-nt" }, { NoEscapeComments, "-ne" },
+	{ SegMode, "-se" }, { SegThreshold, "-th" }
 };
 
 std::map<QString, QStringList> PgModelerCliApp::accepted_opts {
@@ -211,7 +216,7 @@ std::map<QString, QStringList> PgModelerCliApp::accepted_opts {
 	#ifdef PRIV_CODE_SYMBOLS
 		{{ ImportDb }, { InputDb, Output, IgnoreImportErrors, ImportSystemObjs, ImportExtensionObjs,
 											FilterObjects, OnlyMatching, MatchByName, ForceChildren, DebugMode, ConnAlias,
-											Host, Port, User, Passwd, InitialDb, CommentsAsAliases }},
+											Host, Port, User, Passwd, InitialDb, CommentsAsAliases, SegMode, SegThreshold }},
 
 		{{ Diff }, { Input, PgSqlVer, IgnoreDuplicates, IgnoreErrorCodes, CompareDb, CompareFile,
 								 PartialDiff, Force, StartDate, EndDate, SaveDiff, ApplyDiff, NoDiffPreview,
@@ -743,6 +748,8 @@ void PgModelerCliApp::showMenu()
 		menu_items.append(MenuItem(MatchByName, "", tr("Performs object matching based on names. Does not use signatures ([schema].[name]).")));
 		menu_items.append(MenuItem(ForceChildren, "[OBJECTS]", tr("Forces importing child objects related to tables/views/foreign tables. Provide comma-separated list of types.")));
 		menu_items.append(MenuItem(DebugMode, "", tr("Executes the import in debug mode. Prints all queries executed on the server.")));
+		menu_items.append(MenuItem(SegMode, "[MODE]", tr("Segments the imported model's canvas into multiple scenes. Available modes: [%1 | %2].").arg(SegModeSchema, SegModeThreshold)));
+		menu_items.append(MenuItem(SegThreshold, "[NUMBER]", tr("Number of tables/views/foreign tables per scene. Only for %1 %2.").arg(SegMode, SegModeThreshold)));
 		menu_items.append(MenuItem());
 
 		// Diff options
@@ -1028,6 +1035,15 @@ void PgModelerCliApp::parseOptions(attribs_map &opts)
 
 	if(import_db && !opts.count(InputDb))
 		throw Exception(tr("No input database was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(opts.count(SegMode) && opts[SegMode] != SegModeSchema && opts[SegMode] != SegModeThreshold)
+		throw Exception(tr("Invalid segmentation mode specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(opts.count(SegThreshold) && opts[SegMode] != SegModeThreshold)
+		throw Exception(tr("The option `%1' must be used only with `%2 %3'!").arg(SegThreshold, SegMode, SegModeThreshold), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(opts.count(SegThreshold) && opts[SegThreshold].toUInt() == 0)
+		throw Exception(tr("Invalid value specified for option `%1'!").arg(SegThreshold), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(!plugin_op && !export_dbms && !upd_mime && !list_conns &&
 		 !list_plugins && !diff && !create_configs && !opts.count(Output))
