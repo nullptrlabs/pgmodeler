@@ -1401,7 +1401,9 @@ void PgModelerCliApp::extractObjectXML()
 			//[,]OUT [schema].[type]
 			out_param { "(,)?(OUT )([a-z]|[0-9]|(\\.)|(\\_)|(\\-)|( )|(\\[)|(\\])|(&quot;))+((\\()([0-9])+(\\)))?" },
 
-			open_tag_rx { "^(((\n)|(\t))*(<))" };
+			open_tag_rx { "^(((\n)|(\t))*(<))" },
+
+			xml_comment_rx { "^\\s*<!--.*-->\\s*$" };
 
 	int attr_start =-1, attr_end = -1, dbm_start = -1;
 	QString aux_buf,
@@ -1466,6 +1468,12 @@ void PgModelerCliApp::extractObjectXML()
 	while(!ts.atEnd())
 	{
 		lin=ts.readLine();
+
+		/* XML comments between objects (e.g. the <!-- ID --> line that split models' .dbo files start with)
+		 * are not part of any object and, if left alone, are mistaken for the opening tag of an object
+		 * whose closing tag never shows up, swallowing the objects that follow */
+		if(!open_tag && !is_change_log && lin.contains(xml_comment_rx))
+			continue;
 
 		/* Collecting changelog entries if present and storing in a separated buffer
 		 * so it can be restored in the fixed model during objects' reconstruction */
