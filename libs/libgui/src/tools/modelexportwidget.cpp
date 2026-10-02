@@ -292,7 +292,7 @@ void ModelExportWidget::exportModel()
 		//Export to png
 		if(export_to_img_tb->isChecked())
 		{
-			QList<ObjectsScene *> all_scenes = model_wgt->getObjectsScenes();
+			QList<ObjectsScene *> all_scenes = model_wgt->getScenes();
 			QString base_path = img_file_sel->getSelectedPath();
 			QFileInfo base_finfo(base_path);
 

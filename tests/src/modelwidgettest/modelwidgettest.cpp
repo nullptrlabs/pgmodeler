@@ -678,7 +678,7 @@ void ModelWidgetTest::undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedV
 		QVERIFY(rel_ac->getOverlyingObject() == nullptr);
 
 		//User confirmed navigating to scene_dest's tab in between undo and redo -- switch the active scene the same way
-		model_wgt.setActiveScene(model_wgt.getObjectsScenes().indexOf(scene_dest));
+		model_wgt.setActiveScene(model_wgt.getScenes().indexOf(scene_dest));
 
 		//Redo -- table_a moves to schema_dest again, exactly as ASan's stack (OperationList::redoOperation()) proves happened
 		op_list->redoOperation();
@@ -737,7 +737,7 @@ void ModelWidgetTest::thresholdModeOpensNewSceneAfterCrossingCount()
 		QVERIFY(public_sch != nullptr);
 
 		//No SchemaView exists in threshold mode -- grab the sole scene created so far directly
-		ObjectsScene *first_scene = model_wgt.getObjectsScene(0);
+		ObjectsScene *first_scene = model_wgt.getScene(0);
 		Table *last_table = nullptr;
 
 		for(unsigned i = 0; i < db_model->getSegThreshold(); i++)
@@ -750,7 +750,7 @@ void ModelWidgetTest::thresholdModeOpensNewSceneAfterCrossingCount()
 		}
 
 		QCOMPARE(model_wgt.getSceneForObject(last_table), first_scene);
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+		QCOMPARE(model_wgt.getScenes().size(), 2);
 
 		Table *overflow_table = new Table;
 		overflow_table->setName("table_overflow");
@@ -758,7 +758,7 @@ void ModelWidgetTest::thresholdModeOpensNewSceneAfterCrossingCount()
 		db_model->addTable(overflow_table);
 
 		QVERIFY(model_wgt.getSceneForObject(overflow_table) != first_scene);
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+		QCOMPARE(model_wgt.getScenes().size(), 2);
 	}
 	catch(Exception &e)
 	{
@@ -799,7 +799,7 @@ void ModelWidgetTest::thresholdModeSceneAssignmentSurvivesSaveAndReload()
 				db_model->addTable(table);
 			}
 
-			QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+			QCOMPARE(model_wgt.getScenes().size(), 2);
 			db_model->saveModel(tmp_file, SchemaParser::XmlCode);
 		}
 
@@ -811,14 +811,14 @@ void ModelWidgetTest::thresholdModeSceneAssignmentSurvivesSaveAndReload()
 			db_model->createSystemObjects(false);
 			model_wgt.loadModel(tmp_file);
 
-			QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+			QCOMPARE(model_wgt.getScenes().size(), 2);
 
-			ObjectsScene *last_scene = model_wgt.getObjectsScenes().last();
+			ObjectsScene *last_scene = model_wgt.getScenes().last();
 
 			//The very first table crosses the threshold count much later -- it stays in the first scene
 			Table *table_0 = dynamic_cast<Table *>(db_model->getObject("table_0", ObjectType::Table));
 			QVERIFY(table_0 != nullptr);
-			QCOMPARE(model_wgt.getSceneForObject(table_0), model_wgt.getObjectsScenes().first());
+			QCOMPARE(model_wgt.getSceneForObject(table_0), model_wgt.getScenes().first());
 
 			//The last table (getSegThreshold() + 4) was the overflow that landed in the second scene
 			Table *overflow_table = dynamic_cast<Table *>(db_model->getObject(
@@ -833,7 +833,7 @@ void ModelWidgetTest::thresholdModeSceneAssignmentSurvivesSaveAndReload()
 			db_model->addTable(new_table);
 
 			//The threshold counter must resume from the reloaded occupancy, not restart at zero
-			QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+			QCOMPARE(model_wgt.getScenes().size(), 2);
 			QCOMPARE(model_wgt.getSceneForObject(new_table), last_scene);
 		}
 	}
@@ -887,7 +887,7 @@ void ModelWidgetTest::changingThresholdRebucketsScenesOnReload()
 			}
 
 			//12 tables at threshold 5 -> 3 occupied scenes (5, 5, 2)
-			QCOMPARE(model_wgt.getObjectsScenes().size(), 3);
+			QCOMPARE(model_wgt.getScenes().size(), 3);
 
 			model_wgt.saveModel(tmp_file);
 
@@ -908,9 +908,9 @@ void ModelWidgetTest::changingThresholdRebucketsScenesOnReload()
 			QCOMPARE(db_model->getSegThreshold(), 1000u);
 
 			//12 tables under threshold 1000 all belong in a single scene -- the stale indices must have been discarded
-			QCOMPARE(model_wgt.getObjectsScenes().size(), 1);
+			QCOMPARE(model_wgt.getScenes().size(), 1);
 
-			ObjectsScene *merged_scene = model_wgt.getObjectsScenes().first();
+			ObjectsScene *merged_scene = model_wgt.getScenes().first();
 
 			//Every table's real position must fall within the scene's rect, not just the batch a stale persisted rect happened to fit
 			for(unsigned i = 0; i < 12; i++)
@@ -1037,10 +1037,10 @@ void ModelWidgetTest::thresholdModeDoesNotRebalanceEmptiedScenes()
 			tables.push_back(table);
 		}
 
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+		QCOMPARE(model_wgt.getScenes().size(), 2);
 
-		ObjectsScene *first_scene = model_wgt.getObjectsScenes().first();
-		ObjectsScene *second_scene = model_wgt.getObjectsScenes().last();
+		ObjectsScene *first_scene = model_wgt.getScenes().first();
+		ObjectsScene *second_scene = model_wgt.getScenes().last();
 		QVERIFY(first_scene != second_scene);
 
 		//Empties the first scene entirely by removing every table that landed in it
@@ -1048,9 +1048,9 @@ void ModelWidgetTest::thresholdModeDoesNotRebalanceEmptiedScenes()
 			db_model->removeObject(table);
 
 		//No automatic merge/destruction: both scenes must still be there, same instances as before
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
-		QVERIFY(model_wgt.getObjectsScenes().contains(first_scene));
-		QVERIFY(model_wgt.getObjectsScenes().contains(second_scene));
+		QCOMPARE(model_wgt.getScenes().size(), 2);
+		QVERIFY(model_wgt.getScenes().contains(first_scene));
+		QVERIFY(model_wgt.getScenes().contains(second_scene));
 
 		//The emptied scene keeps accepting new objects normally, it's just not the routing target
 		//anymore -- the counter only ever appends to the last scene, never reuses an earlier one
@@ -1350,7 +1350,7 @@ void ModelWidgetTest::nonActiveSceneRectsMatchTheirItemsAfterReload()
 
 			ObjectsScene *schema_a_scene = model_wgt.getSchemaScene(schema_a);
 			QVERIFY(schema_a_scene != nullptr);
-			QVERIFY(schema_a_scene != model_wgt.getObjectsScene());
+			QVERIFY(schema_a_scene != model_wgt.getScene());
 
 			Table *table_a = dynamic_cast<Table *>(db_model->getObject("table_a", ObjectType::Table));
 			QVERIFY(table_a != nullptr);
@@ -1405,7 +1405,7 @@ void ModelWidgetTest::savingWritesLegacySceneRectAsUnionOfAllScenes()
 
 		model_wgt.saveModel(tmp_file);
 
-		QList<ObjectsScene *> all_scenes = model_wgt.getObjectsScenes();
+		QList<ObjectsScene *> all_scenes = model_wgt.getScenes();
 		QVERIFY(all_scenes.size() >= 2);
 
 		QRectF expected_union;
@@ -1520,7 +1520,7 @@ void ModelWidgetTest::perSceneRectsSurviveSaveAndReload()
 
 			ObjectsScene *schema_a_scene = model_wgt.getSchemaScene(schema_a);
 			QVERIFY(schema_a_scene != nullptr);
-			QVERIFY(schema_a_scene != model_wgt.getObjectsScene());
+			QVERIFY(schema_a_scene != model_wgt.getScene());
 			QVERIFY(schema_a_scene->sceneRect().topLeft() != distinctive_pos);
 
 			schema_a_scene->setSceneRect(QRectF(distinctive_pos, schema_a_scene->sceneRect().size()));
@@ -1542,7 +1542,7 @@ void ModelWidgetTest::perSceneRectsSurviveSaveAndReload()
 
 			ObjectsScene *schema_a_scene = model_wgt.getSchemaScene(schema_a);
 			QVERIFY(schema_a_scene != nullptr);
-			QVERIFY(schema_a_scene != model_wgt.getObjectsScene());
+			QVERIFY(schema_a_scene != model_wgt.getScene());
 
 			QCOMPARE(schema_a_scene->sceneRect(), expected_rect);
 		}
@@ -1587,7 +1587,7 @@ void ModelWidgetTest::reloadingModelActivatesTheSavedLastScene()
 			ObjectsScene *schema_a_scene = model_wgt.getSchemaScene(schema_a);
 			QVERIFY(schema_a_scene != nullptr);
 
-			expected_idx = model_wgt.getObjectsScenes().indexOf(schema_a_scene);
+			expected_idx = model_wgt.getScenes().indexOf(schema_a_scene);
 			QVERIFY(expected_idx > 0);
 			QVERIFY(expected_idx != model_wgt.getActiveSceneIndex());
 
@@ -1644,7 +1644,7 @@ void ModelWidgetTest::invalidLastSceneFallsBackToFirstScene()
 		table_a->setSchema(schema_a);
 		db_model->addTable(table_a);
 
-		int scene_count = model_wgt.getObjectsScenes().size();
+		int scene_count = model_wgt.getScenes().size();
 		QVERIFY(scene_count > 1);
 
 		model_wgt.setActiveScene(scene_count - 1);
@@ -1705,8 +1705,8 @@ void ModelWidgetTest::fase3EndToEndSchemaSegmentedReloadPreservesFocusAndSegment
 			QVERIFY(schema_b_scene != nullptr);
 
 			//Focus a scene that isn't the one made active by default during load (see handleObjectAddition())
-			model_wgt.setActiveScene(model_wgt.getObjectsScenes().indexOf(schema_b_scene));
-			QCOMPARE(model_wgt.getObjectsScene(), schema_b_scene);
+			model_wgt.setActiveScene(model_wgt.getScenes().indexOf(schema_b_scene));
+			QCOMPARE(model_wgt.getScene(), schema_b_scene);
 
 			model_wgt.applyZoom(0.65);
 			expected_zoom = model_wgt.getCurrentZoom();
@@ -1743,7 +1743,7 @@ void ModelWidgetTest::fase3EndToEndSchemaSegmentedReloadPreservesFocusAndSegment
 			QCOMPARE(model_wgt.getSceneForObject(table_b), schema_b_scene);
 
 			//Focused scene preserved
-			QCOMPARE(model_wgt.getObjectsScene(), schema_b_scene);
+			QCOMPARE(model_wgt.getScene(), schema_b_scene);
 
 			//Zoom of that scene preserved
 			QCOMPARE(model_wgt.getCurrentZoom(), expected_zoom);
@@ -1782,8 +1782,8 @@ void ModelWidgetTest::legacyFileWithOnlyLegacySceneRectLoadsWithoutError()
 		//A single scene in NoSegmentation mode -- its rect must come from the legacy scene-rect
 		//attribute (read by DatabaseModel::loadModel() the same way it always has), not an empty
 		//default rect, and with no attempt to redistribute that legacy value across scenes
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 1);
-		QVERIFY(!model_wgt.getObjectsScene()->sceneRect().isEmpty());
+		QCOMPARE(model_wgt.getScenes().size(), 1);
+		QVERIFY(!model_wgt.getScene()->sceneRect().isEmpty());
 
 		model_wgt.restoreLastCanvasPosition();
 		QCOMPARE(model_wgt.getActiveSceneIndex(), 0);
@@ -1911,16 +1911,16 @@ void ModelWidgetTest::cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroy
 
 		//Three scenes exist at this point: public, pg_catalog (createSystemObjects(true) always creates
 		//it too) and schema_doomed
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 3);
+		QCOMPARE(model_wgt.getScenes().size(), 3);
 
 		BaseTableView *table_pub_view = dynamic_cast<BaseTableView *>(table_pub->getOverlyingObject());
 		QCOMPARE(table_pub_view->getExternalRelsCount(), 1);
 		QVERIFY(table_pub_view->getCutoffItem() != nullptr);
 
 		//Focus the scene about to be destroyed -- removeScene() must reroute the viewport away from it
-		int scene_doomed_idx = model_wgt.getObjectsScenes().indexOf(scene_doomed);
+		int scene_doomed_idx = model_wgt.getScenes().indexOf(scene_doomed);
 		model_wgt.setActiveScene(scene_doomed_idx);
-		QCOMPARE(model_wgt.getObjectsScenes().at(model_wgt.getActiveSceneIndex()), scene_doomed);
+		QCOMPARE(model_wgt.getScenes().at(model_wgt.getActiveSceneIndex()), scene_doomed);
 
 		/* Cascade removal, leaf to root, mirroring the order ModelWidget::removeObjects(true) itself
 		 * removes objects in -- the interactive action isn't used directly here since it pops a
@@ -1943,9 +1943,9 @@ void ModelWidgetTest::cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroy
 
 		//scene_doomed must be gone (public and pg_catalog's scenes remain), and the viewport must have
 		//moved off it onto whatever scene remains
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
-		QVERIFY(!model_wgt.getObjectsScenes().contains(scene_doomed));
-		QCOMPARE(model_wgt.getObjectsScenes().at(model_wgt.getActiveSceneIndex()), scene_pub);
+		QCOMPARE(model_wgt.getScenes().size(), 2);
+		QVERIFY(!model_wgt.getScenes().contains(scene_doomed));
+		QCOMPARE(model_wgt.getScenes().at(model_wgt.getActiveSceneIndex()), scene_pub);
 
 		//The cut-off marker on table_pub must be gone too, since its only external relationship was removed
 		QCOMPARE(table_pub_view->getExternalRelsCount(), 0);
@@ -1960,7 +1960,7 @@ void ModelWidgetTest::cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroy
 		Table *restored_table = dynamic_cast<Table *>(db_model->getObject("table_doomed", ObjectType::Table));
 		QVERIFY2(restored_table != nullptr, "table_doomed must exist again after undo");
 
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 3);
+		QCOMPARE(model_wgt.getScenes().size(), 3);
 
 		ObjectsScene *restored_scene = model_wgt.getSchemaScene(restored_schema);
 		QVERIFY2(restored_scene != nullptr, "schema_doomed's scene must be recreated by undo, routed through the same handleObjectAddition() choke point as any other insertion");
@@ -2126,7 +2126,7 @@ void ModelWidgetTest::moveToSceneMovesTextboxFreelyEvenInSchemaSegmentationMode(
 		QVERIFY(scene_b != nullptr);
 		QCOMPARE(model_wgt.getSceneForObject(txtbox), scene_pub);
 
-		int dst_idx = model_wgt.getObjectsScenes().indexOf(scene_b);
+		int dst_idx = model_wgt.getScenes().indexOf(scene_b);
 		QVERIFY(dst_idx >= 0);
 
 		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
@@ -2176,7 +2176,7 @@ void ModelWidgetTest::moveToSceneSkipsTableInSchemaSegmentationModeAndAlerts()
 		QVERIFY(scene_b != nullptr);
 		QCOMPARE(model_wgt.getSceneForObject(table_pub), scene_pub);
 
-		int dst_idx = model_wgt.getObjectsScenes().indexOf(scene_b);
+		int dst_idx = model_wgt.getScenes().indexOf(scene_b);
 		QVERIFY(dst_idx >= 0);
 
 		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
@@ -2239,11 +2239,11 @@ void ModelWidgetTest::moveToSceneMovesTableFreelyInThresholdMode()
 			tables.push_back(table);
 		}
 
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+		QCOMPARE(model_wgt.getScenes().size(), 2);
 
 		Table *table_first = tables.front();
-		ObjectsScene *scene0 = model_wgt.getObjectsScenes().at(0);
-		ObjectsScene *scene1 = model_wgt.getObjectsScenes().at(1);
+		ObjectsScene *scene0 = model_wgt.getScenes().at(0);
+		ObjectsScene *scene1 = model_wgt.getScenes().at(1);
 
 		QCOMPARE(model_wgt.getSceneForObject(table_first), scene0);
 
@@ -2293,8 +2293,8 @@ void ModelWidgetTest::moveToSceneUndoRestoresTextboxToItsOriginScene()
 
 		ObjectsScene *scene_pub = model_wgt.getSchemaScene(schema_pub);
 		ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
-		int origin_idx = model_wgt.getObjectsScenes().indexOf(scene_pub);
-		int dst_idx = model_wgt.getObjectsScenes().indexOf(scene_b);
+		int origin_idx = model_wgt.getScenes().indexOf(scene_pub);
+		int dst_idx = model_wgt.getScenes().indexOf(scene_b);
 
 		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
 															 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(txtbox)));
@@ -2339,11 +2339,11 @@ void ModelWidgetTest::moveToSceneChangeSurvivesUndo()
 			tables.push_back(table);
 		}
 
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+		QCOMPARE(model_wgt.getScenes().size(), 2);
 
 		Table *table_first = tables.front();
-		ObjectsScene *scene0 = model_wgt.getObjectsScenes().at(0);
-		ObjectsScene *scene1 = model_wgt.getObjectsScenes().at(1);
+		ObjectsScene *scene0 = model_wgt.getScenes().at(0);
+		ObjectsScene *scene1 = model_wgt.getScenes().at(1);
 
 		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
 															 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(table_first)));
@@ -2397,7 +2397,7 @@ void ModelWidgetTest::movedTextboxScenePersistsAcrossSaveAndReload()
 			ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
 			QVERIFY(scene_b != nullptr);
 
-			int dst_idx = model_wgt.getObjectsScenes().indexOf(scene_b);
+			int dst_idx = model_wgt.getScenes().indexOf(scene_b);
 			QVERIFY(dst_idx >= 0);
 
 			QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
@@ -2472,7 +2472,7 @@ void ModelWidgetTest::moveToSceneAdjustsDestinationSceneRectForTextbox()
 		QVERIFY2(!scene_b->sceneRect().contains(txtbox->getPosition()),
 						 "schema_b's scene must start out too small to already contain the far-away position");
 
-		int dst_idx = model_wgt.getObjectsScenes().indexOf(scene_b);
+		int dst_idx = model_wgt.getScenes().indexOf(scene_b);
 		QVERIFY(dst_idx >= 0);
 
 		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
@@ -2523,9 +2523,9 @@ void ModelWidgetTest::moveToSceneAdjustsDestinationSceneRectForTable()
 			db_model->addTable(table);
 		}
 
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+		QCOMPARE(model_wgt.getScenes().size(), 2);
 
-		ObjectsScene *scene1 = model_wgt.getObjectsScenes().at(1);
+		ObjectsScene *scene1 = model_wgt.getScenes().at(1);
 		QVERIFY2(!scene1->sceneRect().contains(table_first->getPosition()),
 						 "the still-empty second scene must start out too small to already contain the far-away position");
 
@@ -2573,12 +2573,12 @@ void ModelWidgetTest::selectSchemaChildrenSpansMultipleScenesInThresholdMode()
 			tables.push_back(table);
 		}
 
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+		QCOMPARE(model_wgt.getScenes().size(), 2);
 
 		//The last table, inserted after the threshold was crossed, must have landed in the second scene
 		BaseObjectView *last_view = dynamic_cast<BaseObjectView *>(tables.back()->getOverlyingObject());
 		QVERIFY(last_view != nullptr);
-		QCOMPARE(last_view->scene(), model_wgt.getObjectsScenes().at(1));
+		QCOMPARE(last_view->scene(), model_wgt.getScenes().at(1));
 
 		QAction sel_action;
 		sel_action.setData(QVariant::fromValue(static_cast<void *>(dynamic_cast<BaseObject *>(schema_pub))));
@@ -2624,8 +2624,8 @@ void ModelWidgetTest::switchingActiveSceneNoLongerClearsSelection()
 		table_pub->setSchema(schema_pub);
 		db_model->addTable(table_pub);
 
-		int idx_pub = model_wgt.getObjectsScenes().indexOf(model_wgt.getSchemaScene(schema_pub));
-		int idx_b = model_wgt.getObjectsScenes().indexOf(model_wgt.getSchemaScene(schema_b));
+		int idx_pub = model_wgt.getScenes().indexOf(model_wgt.getSchemaScene(schema_pub));
+		int idx_b = model_wgt.getScenes().indexOf(model_wgt.getSchemaScene(schema_b));
 
 		BaseObjectView *view_pub = dynamic_cast<BaseObjectView *>(table_pub->getOverlyingObject());
 		QVERIFY(view_pub != nullptr);
@@ -2674,14 +2674,14 @@ void ModelWidgetTest::handleObjectsMovementOnlyRegistersObjectsFromTheEmittingSc
 				table_scene0 = table;
 		}
 
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+		QCOMPARE(model_wgt.getScenes().size(), 2);
 
 		Table *table_scene1 = dynamic_cast<Table *>(
 					db_model->getObject(QString("table_%1").arg(db_model->getSegThreshold()), ObjectType::Table));
 		QVERIFY(table_scene1 != nullptr);
 
-		ObjectsScene *scene0 = model_wgt.getObjectsScenes().at(0);
-		ObjectsScene *scene1 = model_wgt.getObjectsScenes().at(1);
+		ObjectsScene *scene0 = model_wgt.getScenes().at(0);
+		ObjectsScene *scene1 = model_wgt.getScenes().at(1);
 
 		BaseObjectView *view0 = dynamic_cast<BaseObjectView *>(table_scene0->getOverlyingObject());
 		BaseObjectView *view1 = dynamic_cast<BaseObjectView *>(table_scene1->getOverlyingObject());
@@ -2798,7 +2798,7 @@ void ModelWidgetTest::clickOnEmptySceneWithNothingLocallySelectedStillClearsOthe
 
 		//Switches to schema_b's scene, which never had anything selected in it at all
 		ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
-		int idx_b = model_wgt.getObjectsScenes().indexOf(scene_b);
+		int idx_b = model_wgt.getScenes().indexOf(scene_b);
 		model_wgt.setActiveScene(idx_b);
 
 		QVERIFY(scene_b->selectedItems().isEmpty());
@@ -2846,11 +2846,11 @@ void ModelWidgetTest::selectAllObjectsOfTypeSpansMultipleScenes()
 			tables.push_back(table);
 		}
 
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+		QCOMPARE(model_wgt.getScenes().size(), 2);
 
 		BaseObjectView *last_view = dynamic_cast<BaseObjectView *>(tables.back()->getOverlyingObject());
 		QVERIFY(last_view != nullptr);
-		QCOMPARE(last_view->scene(), model_wgt.getObjectsScenes().at(1));
+		QCOMPARE(last_view->scene(), model_wgt.getScenes().at(1));
 
 		QAction sel_action;
 		sel_action.setData(static_cast<unsigned>(ObjectType::Table));
@@ -3010,7 +3010,7 @@ void ModelWidgetTest::switchingSceneMidRelationshipLineToolCancelsIt()
 
 		//User switches scenes mid-gesture, before clicking a second table
 		ObjectsScene *scene_b = model_wgt.getSchemaScene(schema_b);
-		int idx_b = model_wgt.getObjectsScenes().indexOf(scene_b);
+		int idx_b = model_wgt.getScenes().indexOf(scene_b);
 		model_wgt.setActiveScene(idx_b);
 
 		QVERIFY2(!scene_pub->isRelationshipLineVisible(),
@@ -3329,10 +3329,10 @@ void ModelWidgetTest::rearrangeAlgorithmsRespectSceneScopeInThresholdMode()
 		}
 
 		//Threshold 3, 5 tables: table_0/1/2 land in the first scene, table_3/4 in the second
-		QCOMPARE(model_wgt.getObjectsScenes().size(), 2);
+		QCOMPARE(model_wgt.getScenes().size(), 2);
 
-		ObjectsScene *scene0 = model_wgt.getObjectsScenes().at(0);
-		ObjectsScene *scene1 = model_wgt.getObjectsScenes().at(1);
+		ObjectsScene *scene0 = model_wgt.getScenes().at(0);
+		ObjectsScene *scene1 = model_wgt.getScenes().at(1);
 
 		QCOMPARE(model_wgt.getSceneForObject(tables[0]), scene0);
 		QCOMPARE(model_wgt.getSceneForObject(tables[3]), scene1);

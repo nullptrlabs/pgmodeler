@@ -6316,12 +6316,12 @@ DatabaseModel *ModelWidget::getDatabaseModel()
 	return db_model;
 }
 
-ObjectsScene *ModelWidget::getObjectsScene()
+ObjectsScene *ModelWidget::getScene()
 {
 	return scene;
 }
 
-ObjectsScene *ModelWidget::getObjectsScene(int idx)
+ObjectsScene *ModelWidget::getScene(int idx)
 {
 	if(idx < 0 || idx >= scenes.size())
 		return nullptr;
@@ -6329,7 +6329,7 @@ ObjectsScene *ModelWidget::getObjectsScene(int idx)
 	return scenes.at(idx);
 }
 
-QList<ObjectsScene *> ModelWidget::getObjectsScenes()
+QList<ObjectsScene *> ModelWidget::getScenes()
 {
 	return scenes;
 }

@@ -102,7 +102,7 @@ void LayersWidget::setAttributes(ModelWidget *model_wgt)
 	BaseGraphicObject *graph_obj = nullptr;
 	QList<unsigned> sel_layers;
 	unsigned layer_id = 0;
-	QStringList layers = model_wgt->getObjectsScene()->getLayers();
+	QStringList layers = model_wgt->getScene()->getLayers();
 
 	setEnabled(true);
 	layers_changed = false;
