@@ -1448,6 +1448,8 @@ void PgModelerCliApp::extractObjectXML()
 		act_layers_ids.push_back(id.toUInt());
 
 	input_model->setActiveLayers(act_layers_ids);
+	model_header_tag = aux_buf.left(aux_buf.indexOf('>') + 1);
+	restoreModelAttributes(model_header_tag);
 	restoreSegmentation(aux_buf);
 	buf.remove(0, dbm_start);
 
@@ -1595,20 +1597,31 @@ void PgModelerCliApp::extractObjectXML()
 	}
 }
 
+/* The attributes of the <dbmodel> tag are read with regular expressions, like the other header
+ * attributes in extractObjectXML(), since the header is not a standalone valid XML document here */
+static QString getTagAttribute(const QString &tag, const QString &name)
+{
+	QRegularExpressionMatch match = QRegularExpression(QString("(?<![\\w-])%1=\"([^\"]*)\"").arg(name)).match(tag);
+	return match.hasMatch() ? match.captured(1) : QString();
+}
+
+static QString fromXmlEntities(QString value)
+{
+	// The ampersand entity is replaced last so an escaped entity (&amp;lt;) isn't unescaped twice
+	return value.replace(UtilsNs::EntityLt, "<")
+							.replace(UtilsNs::EntityGt, ">")
+							.replace(UtilsNs::EntityQuot, "\"")
+							.replace(UtilsNs::EntityApos, "'")
+							.replace(UtilsNs::EntityAmp, "&");
+}
+
 void PgModelerCliApp::restoreSegmentation(const QString &header_xml)
 {
-	/* The attributes of the <dbmodel> tag are read with regular expressions, like the other header
-	 * attributes in extractObjectXML(), since the header is not a standalone valid XML document here */
-	auto get_attr = [](const QString &xml, const QString &name) -> QString {
-		QRegularExpressionMatch match = QRegularExpression(QString("(?<![\\w-])%1=\"([^\"]*)\"").arg(name)).match(xml);
-		return match.hasMatch() ? match.captured(1) : QString();
-	};
-
 	QString dbm_tag = header_xml.left(header_xml.indexOf('>') + 1),
-			seg_mode_str = get_attr(dbm_tag, Attributes::SegMode),
-			rect_str = get_attr(dbm_tag, Attributes::SceneRect);
+			seg_mode_str = getTagAttribute(dbm_tag, Attributes::SegMode),
+			rect_str = getTagAttribute(dbm_tag, Attributes::SceneRect);
 	DatabaseModel::SegmentationMode seg_mode = DatabaseModel::NoSegmentation;
-	unsigned seg_threshold = get_attr(dbm_tag, Attributes::SegThreshold).toUInt();
+	unsigned seg_threshold = getTagAttribute(dbm_tag, Attributes::SegThreshold).toUInt();
 	QStringList rect_vals = rect_str.split(',');
 	QMap<int, QRectF> scene_rects;
 
@@ -1623,7 +1636,7 @@ void PgModelerCliApp::restoreSegmentation(const QString &header_xml)
 	input_model->setSavedSegmentationMode(seg_mode);
 	input_model->setSegThreshold(seg_threshold);
 	input_model->setSavedSegThreshold(seg_threshold);
-	input_model->setLastScene(get_attr(dbm_tag, Attributes::LastScene).toInt());
+	input_model->setLastScene(getTagAttribute(dbm_tag, Attributes::LastScene).toInt());
 
 	// The legacy scene rect is stored as "x,y,width,height"
 	if(rect_vals.size() == 4)
@@ -1638,12 +1651,61 @@ void PgModelerCliApp::restoreSegmentation(const QString &header_xml)
 	{
 		QString scene_tag = itr.next().captured(0);
 
-		scene_rects[get_attr(scene_tag, Attributes::Id).toInt()] =
-				QRectF(QPointF(get_attr(scene_tag, Attributes::Left).toDouble(), get_attr(scene_tag, Attributes::Top).toDouble()),
-							 QPointF(get_attr(scene_tag, Attributes::Right).toDouble(), get_attr(scene_tag, Attributes::Bottom).toDouble()));
+		scene_rects[getTagAttribute(scene_tag, Attributes::Id).toInt()] =
+				QRectF(QPointF(getTagAttribute(scene_tag, Attributes::Left).toDouble(), getTagAttribute(scene_tag, Attributes::Top).toDouble()),
+							 QPointF(getTagAttribute(scene_tag, Attributes::Right).toDouble(), getTagAttribute(scene_tag, Attributes::Bottom).toDouble()));
 	}
 
 	input_model->setSceneRects(scene_rects);
+}
+
+void PgModelerCliApp::restoreModelAttributes(const QString &dbm_tag)
+{
+	QStringList last_pos = getTagAttribute(dbm_tag, Attributes::LastPosition).split(','),
+			name_colors = getTagAttribute(dbm_tag, Attributes::LayerNameColors).split(',', Qt::SkipEmptyParts),
+			rect_colors = getTagAttribute(dbm_tag, Attributes::LayerRectColors).split(',', Qt::SkipEmptyParts);
+	double zoom = getTagAttribute(dbm_tag, Attributes::LastZoom).toDouble();
+
+	input_model->setAuthor(fromXmlEntities(getTagAttribute(dbm_tag, Attributes::Author)));
+	input_model->setGenDisabledObjsCode(getTagAttribute(dbm_tag, Attributes::GenDisabledObjsCode) == Attributes::True);
+
+	input_model->setShowSysSchemasRects(getTagAttribute(dbm_tag, Attributes::ShowSysSchemasRects) == Attributes::True);
+
+	if(last_pos.size() >= 2)
+		input_model->setLastPosition(QPoint(last_pos[0].toInt(), last_pos[1].toInt()));
+
+	if(zoom > 0)
+		input_model->setLastZoomFactor(zoom);
+
+	/* Colors that don't match the layers are left as the model generated them, since the layers
+	 * may have been adjusted by extractObjectXML() (e.g. the default layer added to old models) */
+	if(name_colors.size() == input_model->getLayers().size())
+		input_model->setLayerNameColors(name_colors);
+
+	if(rect_colors.size() == input_model->getLayers().size())
+		input_model->setLayerRectColors(rect_colors);
+
+	input_model->setLayerNamesVisible(getTagAttribute(dbm_tag, Attributes::ShowLayerNames) == Attributes::True);
+	input_model->setLayerRectsVisible(getTagAttribute(dbm_tag, Attributes::ShowLayerRects) == Attributes::True);
+}
+
+void PgModelerCliApp::restoreDefaultObjects()
+{
+	static const std::map<ObjectType, QString> def_attrs {
+		{ ObjectType::Schema, Attributes::DefaultSchema },
+		{ ObjectType::Role, Attributes::DefaultOwner },
+		{ ObjectType::Collation, Attributes::DefaultCollation },
+		{ ObjectType::Tablespace, Attributes::DefaultTablespace }
+	};
+
+	for(auto &[obj_type, attr] : def_attrs)
+	{
+		QString name = fromXmlEntities(getTagAttribute(model_header_tag, attr));
+		BaseObject *object = name.isEmpty() ? nullptr : input_model->getObject(name, obj_type);
+
+		// A default that no longer exists in the recreated model is dropped instead of aborting the fix
+		input_model->setDefaultObject(object, obj_type);
+	}
 }
 
 void PgModelerCliApp::recreateObjects()
@@ -2282,6 +2344,7 @@ void PgModelerCliApp::fixModel()
 	QFile::remove(fix_log);
 	extractObjectXML();
 	recreateObjects();
+	restoreDefaultObjects();
 
 	printMessage(tr("Updating relationships..."));
 
