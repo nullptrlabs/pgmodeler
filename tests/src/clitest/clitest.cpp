@@ -41,16 +41,36 @@ class CliTest: public QObject, public PgModelerUnitTest {
 		executable can't run due to the license validation (the test must then be skipped) */
 		bool fixModel(const QString &input, const QString &out_name, QString &output);
 
+		//! \brief Attributes of the <dbmodel> tag of a model file
+		static QMap<QString, QString> headerAttributes(const QString &filename);
+
+		//! \brief Rectangles of the <scenes> element of a model file, as the text of each <scene> tag
+		static QStringList sceneRects(const QString &filename);
+
+		//! \brief Scene index (the scene attribute) of each table, view, foreign table and textbox, by object name
+		static QMap<QString, QString> objectScenes(const QString &filename);
+
 		/*! \brief Names of the objects declared at the root of a model file (excluding relationships, which
 		can be generated), as "<tag>:<name>" */
 		static QStringList objectNames(const QString &filename);
+
+		static QString fixtureFile(const QString &name);
 
 	public:
 		CliTest() : PgModelerUnitTest(SCHEMASDIR){}
 
 	private slots:
+		void fixedModelKeepsSchemaSegmentation();
+		void fixedModelKeepsThresholdSegmentation();
+		void fixedModelKeepsOtherHeaderAttributes();
+		void fixingModelWithoutSegmentationKeepsItUnsegmented();
 		void objectsAfterIdCommentsAreNotDiscarded();
 };
+
+QString CliTest::fixtureFile(const QString &name)
+{
+	return QString("%1/fixtures/%2").arg(CLI_TEST_DIR, name);
+}
 
 bool CliTest::fixModel(const QString &input, const QString &out_name, QString &output)
 {
@@ -90,6 +110,66 @@ bool CliTest::fixModel(const QString &input, const QString &out_name, QString &o
 	return true;
 }
 
+QMap<QString, QString> CliTest::headerAttributes(const QString &filename)
+{
+	QMap<QString, QString> attrs;
+	QFile file(filename);
+
+	if(!file.open(QIODevice::ReadOnly))
+		return attrs;
+
+	QString xml = QString::fromUtf8(file.readAll());
+	QRegularExpressionMatch tag = QRegularExpression("<dbmodel(.*?)>", QRegularExpression::DotMatchesEverythingOption).match(xml);
+	QRegularExpressionMatchIterator itr = QRegularExpression("([\\w-]+)=\"([^\"]*)\"").globalMatch(tag.captured(1));
+
+	while(itr.hasNext())
+	{
+		QRegularExpressionMatch attr = itr.next();
+		attrs[attr.captured(1)] = attr.captured(2);
+	}
+
+	return attrs;
+}
+
+QStringList CliTest::sceneRects(const QString &filename)
+{
+	QStringList rects;
+	QFile file(filename);
+
+	if(!file.open(QIODevice::ReadOnly))
+		return rects;
+
+	QRegularExpressionMatchIterator itr = QRegularExpression("<scene [^>]*>").globalMatch(QString::fromUtf8(file.readAll()));
+
+	while(itr.hasNext())
+		rects.append(itr.next().captured(0));
+
+	return rects;
+}
+
+QMap<QString, QString> CliTest::objectScenes(const QString &filename)
+{
+	QMap<QString, QString> scenes;
+	QFile file(filename);
+
+	if(!file.open(QIODevice::ReadOnly))
+		return scenes;
+
+	QRegularExpressionMatchIterator itr = QRegularExpression("^<(table|view|foreigntable|textbox) ([^>]*)>",
+																													 QRegularExpression::MultilineOption).globalMatch(QString::fromUtf8(file.readAll()));
+
+	while(itr.hasNext())
+	{
+		QString attrs = itr.next().captured(2);
+		QRegularExpressionMatch name = QRegularExpression("name=\"([^\"]*)\"").match(attrs),
+				scene = QRegularExpression("(?<![\\w-])scene=\"([^\"]*)\"").match(attrs);
+
+		scenes[name.captured(1)] = scene.captured(1);
+	}
+
+	return scenes;
+}
+
 QStringList CliTest::objectNames(const QString &filename)
 {
 	QStringList names;
@@ -111,6 +191,72 @@ QStringList CliTest::objectNames(const QString &filename)
 
 	names.sort();
 	return names;
+}
+
+void CliTest::fixedModelKeepsSchemaSegmentation()
+{
+	QString input = fixtureFile("segmented_by_schema.dbm");
+	FIX_MODEL(fixed, input, "schema_fixed.dbm");
+	QMap<QString, QString> in_attrs = headerAttributes(input),
+			out_attrs = headerAttributes(fixed);
+
+	QCOMPARE(in_attrs["seg-mode"], QString("1"));
+
+	for(auto &attr : { "seg-mode", "seg-threshold", "last-scene", "scene-rect" })
+		QCOMPARE(out_attrs[attr], in_attrs[attr]);
+
+	QVERIFY(!sceneRects(input).isEmpty());
+	QCOMPARE(sceneRects(fixed), sceneRects(input));
+	QCOMPARE(objectScenes(fixed), objectScenes(input));
+}
+
+void CliTest::fixedModelKeepsThresholdSegmentation()
+{
+	QString input = fixtureFile("segmented_by_threshold.dbm");
+	FIX_MODEL(fixed, input, "threshold_fixed.dbm");
+	QMap<QString, QString> in_attrs = headerAttributes(input),
+			out_attrs = headerAttributes(fixed);
+
+	QCOMPARE(in_attrs["seg-mode"], QString("2"));
+
+	// seg-obj-count isn't copied, it's recomputed from the recreated objects, which must match the input's
+	for(auto &attr : { "seg-mode", "seg-threshold", "seg-obj-count", "last-scene", "scene-rect" })
+		QCOMPARE(out_attrs[attr], in_attrs[attr]);
+
+	QCOMPARE(sceneRects(fixed), sceneRects(input));
+	QCOMPARE(objectScenes(fixed), objectScenes(input));
+}
+
+void CliTest::fixedModelKeepsOtherHeaderAttributes()
+{
+	QString input = fixtureFile("segmented_by_schema.dbm");
+	FIX_MODEL(fixed, input, "header_fixed.dbm");
+	QMap<QString, QString> in_attrs = headerAttributes(input),
+			out_attrs = headerAttributes(fixed);
+
+	// The fixture uses values different from the model's defaults for all of these
+	QCOMPARE(in_attrs["author"], QString("Test &amp; Co"));
+
+	for(auto &attr : { "author", "default-schema", "default-owner", "last-position", "last-zoom",
+										 "show-sys-schemas-rects", "gen-disabled-objs-code", "layer-name-colors",
+										 "layer-rect-colors", "show-layer-names", "show-layer-rects", "layers", "active-layers" })
+	{
+		QVERIFY2(out_attrs.contains(attr), attr);
+		QCOMPARE(out_attrs[attr], in_attrs[attr]);
+	}
+}
+
+void CliTest::fixingModelWithoutSegmentationKeepsItUnsegmented()
+{
+	// A model created before the segmentation modes existed
+	FIX_MODEL(fixed, QString("%1/demo.dbm").arg(SAMPLESDIR), "demo_fixed.dbm");
+	QMap<QString, QString> attrs = headerAttributes(fixed);
+
+	QCOMPARE(attrs["seg-mode"], QString("0"));
+	QVERIFY(sceneRects(fixed).isEmpty());
+
+	for(auto &scene : objectScenes(fixed))
+		QVERIFY(scene.isEmpty());
 }
 
 void CliTest::objectsAfterIdCommentsAreNotDiscarded()
