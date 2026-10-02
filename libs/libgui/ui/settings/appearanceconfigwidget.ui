@@ -1522,6 +1522,16 @@
                    <string>Foreign table: Attributes toggler box</string>
                   </property>
                  </item>
+                 <item>
+                  <property name="text">
+                   <string>Global: Cutoff marker text</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Global: Cutoff marker box</string>
+                  </property>
+                 </item>
                 </widget>
                </item>
               </layout>

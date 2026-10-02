@@ -282,7 +282,7 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		 * The confirm parameter indicates if the user must be asked to save
 		 * a file before closing it .
 		 * This method returns a bool value indicating the model closing */
-		bool closeModel(int model_id = -1, bool keep_tab = false, bool confirm = true);
+		bool closeModel(int model_id = -1, bool confirm = true);
 
 		/*! \brief Closes/destroys the model in the specified index 'model_id',
 		 *  load a new one and assign it to the parent tab of the closed model */

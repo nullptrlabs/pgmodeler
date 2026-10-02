@@ -39,13 +39,14 @@ Schema::Schema()
 
 void Schema::setName(const QString &name)
 {
-	/* Schema names starting with pg_ is reserved to PostgreSQL if its the case
-		raises an error */
+	/* Schema names starting with pg_ is reserved to PostgreSQL if
+	 * its the case raises an error */
 	if(name.startsWith("pg_"))
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgReservedName)
-						.arg(this->getName())
-						.arg(BaseObject::getTypeName(ObjectType::Schema)),
+						.arg(this->getName(), BaseObject::getTypeName(ObjectType::Schema)),
 						ErrorCode::AsgReservedName,PGM_FUNC,PGM_FILE,PGM_LINE);
+	}
 
 	BaseObject::setName(name);
 

@@ -99,6 +99,10 @@ const QString PgModelerCliApp::MatchByName {"--match-by-name"};
 const QString PgModelerCliApp::ForceChildren {"--force-children"};
 const QString PgModelerCliApp::OnlyMatching {"--only-matching"};
 const QString PgModelerCliApp::CommentsAsAliases {"--comments-as-aliases"};
+const QString PgModelerCliApp::SegMode {"--seg-mode"};
+const QString PgModelerCliApp::SegThreshold {"--seg-threshold"};
+const QString PgModelerCliApp::SegModeSchema {"schema"};
+const QString PgModelerCliApp::SegModeThreshold {"threshold"};
 const QString PgModelerCliApp::PartialDiff {"--partial"};
 const QString PgModelerCliApp::Force {"--force"};
 const QString PgModelerCliApp::StartDate {"--start-date"};
@@ -165,7 +169,7 @@ std::map<QString, bool> PgModelerCliApp::long_opts {
 	{ DependenciesSql, false }, { ChildrenSql, false }, { GenDropScript, false },
 	{ GroupByType, false }, { CommentsAsAliases, false }, { IgnoreFaultyPlugins, false },
 	{ ListPlugins, false }, { Markdown, false }, { NonTransactional, false },
-	{ NoEscapeComments, false }
+	{ NoEscapeComments, false }, { SegMode, true }, { SegThreshold, true }
 };
 
 attribs_map PgModelerCliApp::short_opts {
@@ -194,7 +198,8 @@ attribs_map PgModelerCliApp::short_opts {
 	{ MissingOnly, "-mo" }, { DependenciesSql, "-ds" }, { ChildrenSql, "-cs" },
 	{ GroupByType, "-gt" },	{ GenDropScript, "-gd" }, { CommentsAsAliases, "-cl" },
 	{ IgnoreFaultyPlugins, "-ip" }, { ListPlugins, "-lp" }, { Markdown, "-md" },
-	{ NonTransactional, "-nt" }, { NoEscapeComments, "-ne" }
+	{ NonTransactional, "-nt" }, { NoEscapeComments, "-ne" },
+	{ SegMode, "-se" }, { SegThreshold, "-th" }
 };
 
 std::map<QString, QStringList> PgModelerCliApp::accepted_opts {
@@ -211,7 +216,7 @@ std::map<QString, QStringList> PgModelerCliApp::accepted_opts {
 	#ifdef PRIV_CODE_SYMBOLS
 		{{ ImportDb }, { InputDb, Output, IgnoreImportErrors, ImportSystemObjs, ImportExtensionObjs,
 											FilterObjects, OnlyMatching, MatchByName, ForceChildren, DebugMode, ConnAlias,
-											Host, Port, User, Passwd, InitialDb, CommentsAsAliases }},
+											Host, Port, User, Passwd, InitialDb, CommentsAsAliases, SegMode, SegThreshold }},
 
 		{{ Diff }, { Input, PgSqlVer, IgnoreDuplicates, IgnoreErrorCodes, CompareDb, CompareFile,
 								 PartialDiff, Force, StartDate, EndDate, SaveDiff, ApplyDiff, NoDiffPreview,
@@ -743,6 +748,8 @@ void PgModelerCliApp::showMenu()
 		menu_items.append(MenuItem(MatchByName, "", tr("Performs object matching based on names. Does not use signatures ([schema].[name]).")));
 		menu_items.append(MenuItem(ForceChildren, "[OBJECTS]", tr("Forces importing child objects related to tables/views/foreign tables. Provide comma-separated list of types.")));
 		menu_items.append(MenuItem(DebugMode, "", tr("Executes the import in debug mode. Prints all queries executed on the server.")));
+		menu_items.append(MenuItem(SegMode, "[MODE]", tr("Segments the imported model's canvas into multiple scenes. Available modes: [%1 | %2].").arg(SegModeSchema, SegModeThreshold)));
+		menu_items.append(MenuItem(SegThreshold, "[NUMBER]", tr("Number of tables/views/foreign tables per scene. Only for %1 %2.").arg(SegMode, SegModeThreshold)));
 		menu_items.append(MenuItem());
 
 		// Diff options
@@ -1028,6 +1035,15 @@ void PgModelerCliApp::parseOptions(attribs_map &opts)
 
 	if(import_db && !opts.count(InputDb))
 		throw Exception(tr("No input database was specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(opts.count(SegMode) && opts[SegMode] != SegModeSchema && opts[SegMode] != SegModeThreshold)
+		throw Exception(tr("Invalid segmentation mode specified!"), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(opts.count(SegThreshold) && opts[SegMode] != SegModeThreshold)
+		throw Exception(tr("The option `%1' must be used only with `%2 %3'!").arg(SegThreshold, SegMode, SegModeThreshold), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(opts.count(SegThreshold) && opts[SegThreshold].toUInt() == 0)
+		throw Exception(tr("Invalid value specified for option `%1'!").arg(SegThreshold), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(!plugin_op && !export_dbms && !upd_mime && !list_conns &&
 		 !list_plugins && !diff && !create_configs && !opts.count(Output))
@@ -1385,7 +1401,9 @@ void PgModelerCliApp::extractObjectXML()
 			//[,]OUT [schema].[type]
 			out_param { "(,)?(OUT )([a-z]|[0-9]|(\\.)|(\\_)|(\\-)|( )|(\\[)|(\\])|(&quot;))+((\\()([0-9])+(\\)))?" },
 
-			open_tag_rx { "^(((\n)|(\t))*(<))" };
+			open_tag_rx { "^(((\n)|(\t))*(<))" },
+
+			xml_comment_rx { "^\\s*<!--.*-->\\s*$" };
 
 	int attr_start =-1, attr_end = -1, dbm_start = -1;
 	QString aux_buf,
@@ -1430,6 +1448,9 @@ void PgModelerCliApp::extractObjectXML()
 		act_layers_ids.push_back(id.toUInt());
 
 	input_model->setActiveLayers(act_layers_ids);
+	model_header_tag = aux_buf.left(aux_buf.indexOf('>') + 1);
+	restoreModelAttributes(model_header_tag);
+	restoreSegmentation(aux_buf);
 	buf.remove(0, dbm_start);
 
 	//Checking if the header ends on a role declaration
@@ -1450,6 +1471,12 @@ void PgModelerCliApp::extractObjectXML()
 	while(!ts.atEnd())
 	{
 		lin=ts.readLine();
+
+		/* XML comments between objects (e.g. the <!-- ID --> line that split models' .dbo files start with)
+		 * are not part of any object and, if left alone, are mistaken for the opening tag of an object
+		 * whose closing tag never shows up, swallowing the objects that follow */
+		if(!open_tag && !is_change_log && lin.contains(xml_comment_rx))
+			continue;
 
 		/* Collecting changelog entries if present and storing in a separated buffer
 		 * so it can be restored in the fixed model during objects' reconstruction */
@@ -1567,6 +1594,117 @@ void PgModelerCliApp::extractObjectXML()
 			def_xml.clear();
 			open_tag=close_tag=is_rel=false;
 		}
+	}
+}
+
+/* The attributes of the <dbmodel> tag are read with regular expressions, like the other header
+ * attributes in extractObjectXML(), since the header is not a standalone valid XML document here */
+static QString getTagAttribute(const QString &tag, const QString &name)
+{
+	QRegularExpressionMatch match = QRegularExpression(QString("(?<![\\w-])%1=\"([^\"]*)\"").arg(name)).match(tag);
+	return match.hasMatch() ? match.captured(1) : QString();
+}
+
+static QString fromXmlEntities(QString value)
+{
+	// The ampersand entity is replaced last so an escaped entity (&amp;lt;) isn't unescaped twice
+	return value.replace(UtilsNs::EntityLt, "<")
+							.replace(UtilsNs::EntityGt, ">")
+							.replace(UtilsNs::EntityQuot, "\"")
+							.replace(UtilsNs::EntityApos, "'")
+							.replace(UtilsNs::EntityAmp, "&");
+}
+
+void PgModelerCliApp::restoreSegmentation(const QString &header_xml)
+{
+	QString dbm_tag = header_xml.left(header_xml.indexOf('>') + 1),
+			seg_mode_str = getTagAttribute(dbm_tag, Attributes::SegMode),
+			rect_str = getTagAttribute(dbm_tag, Attributes::SceneRect);
+	DatabaseModel::SegmentationMode seg_mode = DatabaseModel::NoSegmentation;
+	unsigned seg_threshold = getTagAttribute(dbm_tag, Attributes::SegThreshold).toUInt();
+	QStringList rect_vals = rect_str.split(',');
+	QMap<int, QRectF> scene_rects;
+
+	// Models saved before the segmentation modes existed have no seg-mode and stay unsegmented
+	if(!seg_mode_str.isEmpty() && seg_mode_str.toUInt() <= DatabaseModel::SegByThreshold)
+		seg_mode = static_cast<DatabaseModel::SegmentationMode>(seg_mode_str.toUInt());
+
+	if(seg_threshold == 0)
+		seg_threshold = DatabaseModel::DefaultSegThreshold;
+
+	input_model->setSegmentationMode(seg_mode);
+	input_model->setSavedSegmentationMode(seg_mode);
+	input_model->setSegThreshold(seg_threshold);
+	input_model->setSavedSegThreshold(seg_threshold);
+	input_model->setLastScene(getTagAttribute(dbm_tag, Attributes::LastScene).toInt());
+
+	// The legacy scene rect is stored as "x,y,width,height"
+	if(rect_vals.size() == 4)
+	{
+		input_model->setSceneRect(QRectF(rect_vals[0].toDouble(), rect_vals[1].toDouble(),
+																		 rect_vals[2].toDouble(), rect_vals[3].toDouble()));
+	}
+
+	QRegularExpressionMatchIterator itr = QRegularExpression(QString("<%1\\b[^>]*>").arg(Attributes::Scene)).globalMatch(header_xml);
+
+	while(itr.hasNext())
+	{
+		QString scene_tag = itr.next().captured(0);
+
+		scene_rects[getTagAttribute(scene_tag, Attributes::Id).toInt()] =
+				QRectF(QPointF(getTagAttribute(scene_tag, Attributes::Left).toDouble(), getTagAttribute(scene_tag, Attributes::Top).toDouble()),
+							 QPointF(getTagAttribute(scene_tag, Attributes::Right).toDouble(), getTagAttribute(scene_tag, Attributes::Bottom).toDouble()));
+	}
+
+	input_model->setSceneRects(scene_rects);
+}
+
+void PgModelerCliApp::restoreModelAttributes(const QString &dbm_tag)
+{
+	QStringList last_pos = getTagAttribute(dbm_tag, Attributes::LastPosition).split(','),
+			name_colors = getTagAttribute(dbm_tag, Attributes::LayerNameColors).split(',', Qt::SkipEmptyParts),
+			rect_colors = getTagAttribute(dbm_tag, Attributes::LayerRectColors).split(',', Qt::SkipEmptyParts);
+	double zoom = getTagAttribute(dbm_tag, Attributes::LastZoom).toDouble();
+
+	input_model->setAuthor(fromXmlEntities(getTagAttribute(dbm_tag, Attributes::Author)));
+	input_model->setGenDisabledObjsCode(getTagAttribute(dbm_tag, Attributes::GenDisabledObjsCode) == Attributes::True);
+
+	input_model->setShowSysSchemasRects(getTagAttribute(dbm_tag, Attributes::ShowSysSchemasRects) == Attributes::True);
+
+	if(last_pos.size() >= 2)
+		input_model->setLastPosition(QPoint(last_pos[0].toInt(), last_pos[1].toInt()));
+
+	if(zoom > 0)
+		input_model->setLastZoomFactor(zoom);
+
+	/* Colors that don't match the layers are left as the model generated them, since the layers
+	 * may have been adjusted by extractObjectXML() (e.g. the default layer added to old models) */
+	if(name_colors.size() == input_model->getLayers().size())
+		input_model->setLayerNameColors(name_colors);
+
+	if(rect_colors.size() == input_model->getLayers().size())
+		input_model->setLayerRectColors(rect_colors);
+
+	input_model->setLayerNamesVisible(getTagAttribute(dbm_tag, Attributes::ShowLayerNames) == Attributes::True);
+	input_model->setLayerRectsVisible(getTagAttribute(dbm_tag, Attributes::ShowLayerRects) == Attributes::True);
+}
+
+void PgModelerCliApp::restoreDefaultObjects()
+{
+	static const std::map<ObjectType, QString> def_attrs {
+		{ ObjectType::Schema, Attributes::DefaultSchema },
+		{ ObjectType::Role, Attributes::DefaultOwner },
+		{ ObjectType::Collation, Attributes::DefaultCollation },
+		{ ObjectType::Tablespace, Attributes::DefaultTablespace }
+	};
+
+	for(auto &[obj_type, attr] : def_attrs)
+	{
+		QString name = fromXmlEntities(getTagAttribute(model_header_tag, attr));
+		BaseObject *object = name.isEmpty() ? nullptr : input_model->getObject(name, obj_type);
+
+		// A default that no longer exists in the recreated model is dropped instead of aborting the fix
+		input_model->setDefaultObject(object, obj_type);
 	}
 }
 
@@ -2206,6 +2344,7 @@ void PgModelerCliApp::fixModel()
 	QFile::remove(fix_log);
 	extractObjectXML();
 	recreateObjects();
+	restoreDefaultObjects();
 
 	printMessage(tr("Updating relationships..."));
 

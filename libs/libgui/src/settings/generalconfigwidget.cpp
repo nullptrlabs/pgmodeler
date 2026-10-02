@@ -229,7 +229,8 @@ void GeneralConfigWidget::showEvent(QShowEvent *)
 																			 config_params[Attributes::Configuration][Attributes::UseDefDisambiguation] == Attributes::True ||
 																			 config_params[Attributes::Configuration][Attributes::AlertApplyMetadata] == Attributes::False ||
 																			 config_params[Attributes::Configuration][Attributes::AlertDisableQuoting] != Attributes::True ||
-																			 config_params[Attributes::Configuration][Attributes::AlertResizeRowsCols] == Attributes::False);
+																			 config_params[Attributes::Configuration][Attributes::AlertResizeRowsCols] == Attributes::False ||
+																			 config_params[Attributes::Configuration][Attributes::AlertSaveReloadModel] != Attributes::True);
 
 }
 
@@ -241,6 +242,7 @@ void GeneralConfigWidget::resetAlertChoices()
 	config_params[Attributes::Configuration][Attributes::AlertApplyMetadata] = Attributes::True;
 	config_params[Attributes::Configuration][Attributes::AlertDisableQuoting] = Attributes::True;
 	config_params[Attributes::Configuration][Attributes::AlertResizeRowsCols] = Attributes::True;
+	config_params[Attributes::Configuration][Attributes::AlertSaveReloadModel] = Attributes::True;
 	reset_alerts_choices_btn->setEnabled(false);
 }
 
@@ -262,7 +264,8 @@ void GeneralConfigWidget::loadConfiguration()
 			 !config_params[Attributes::Configuration].count(Attributes::UseDefDisambiguation) ||
 			 !config_params[Attributes::Configuration].count(Attributes::AlertApplyMetadata) ||
 			 !config_params[Attributes::Configuration].count(Attributes::AlertDisableQuoting) ||
-			 !config_params[Attributes::Configuration].count(Attributes::AlertResizeRowsCols))
+			 !config_params[Attributes::Configuration].count(Attributes::AlertResizeRowsCols) ||
+			 !config_params[Attributes::Configuration].count(Attributes::AlertSaveReloadModel))
 			resetAlertChoices();
 
 		oplist_size_spb->setValue((config_params[Attributes::Configuration][Attributes::OpListSize]).toUInt());

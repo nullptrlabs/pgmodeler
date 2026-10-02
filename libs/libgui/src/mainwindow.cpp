@@ -733,7 +733,9 @@ void MainWindow::restoreTemporaryModels()
 					if(!restoration_form->keep_models_chk->isChecked())
 						restoration_form->removeTemporaryModel(model_file);
 
-					Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
+					//A user-initiated cancellation isn't an error -- see DatabaseModel::loadModel()
+					if(e.getErrorCode() != ErrorCode::OperationCancelled)
+						Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 			}
 		}
@@ -803,7 +805,9 @@ void MainWindow::restoreLastSession()
 		}
 		catch(Exception &e)
 		{
-			Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
+			//A user-initiated cancellation isn't an error -- see DatabaseModel::loadModel()
+			if(e.getErrorCode() != ErrorCode::OperationCancelled)
+				Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
 	}
 }
@@ -1173,7 +1177,8 @@ void MainWindow::loadModelFromAction()
 
 			if(QFileInfo::exists(filename))
 				showFixMessage(e, filename);
-			else
+			//A user-initiated cancellation isn't an error -- see DatabaseModel::loadModel()
+			else if(e.getErrorCode() != ErrorCode::OperationCancelled)
 				Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
 	}
@@ -1203,14 +1208,10 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 		models_tbw->blockSignals(true);
 		models_tbw->setUpdatesEnabled(false);
 
-		if(model_idx < 0 || model_idx >= models_tbw->count())
+		if(model_idx < 0)
 			model_idx = models_tbw->addTab(model_wgt, obj_name);
-		else
-		{
-			/* Check if the current tab has a child model, if that's
-			 * the case, raise an error */
+		else		
 			model_idx = models_tbw->insertTab(model_idx, model_wgt, obj_name);
-		}
 
 		models_tbw->setCurrentIndex(model_idx);
 		models_tbw->blockSignals(false);
@@ -1225,7 +1226,8 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 		{
 			try
 			{
-				model_wgt->loadModel(filename);
+				// Segmentation-mode suggestion (see ModelWidget::checkAlternateSegmentation()) applies only here
+				model_wgt->loadModel(filename, true);
 				models_tbw->setTabToolTip(models_tbw->currentIndex(), filename);
 
 				//Get the "public" schema and set as system object
@@ -1266,24 +1268,19 @@ void MainWindow::addModel(const QString &filename, int model_idx)
 		model_wgt->db_model->setInvalidated(false);
 
 		if(start_timers)
-		{
-			if(model_save_timer.interval() > 0)
-				model_save_timer.start();
-
-			tmpmodel_save_timer.start();
-		}
+			stopSaveTimers(false);
 
 		action_save_model->setEnabled(false);
 
 		if(action_align_grid->isChecked())
-			current_model->scene->alignObjectsToGrid();
+			current_model->alignObjectsToGrid();
 
 		emit s_modelAdded(model_wgt);
 	}
 	catch(Exception &e)
 	{
 		if(model_idx >= 0)
-			closeModel(model_idx, false, false);
+			closeModel(model_idx, false);
 
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
@@ -1309,7 +1306,7 @@ void MainWindow::addModel(ModelWidget *model_wgt)
 		models_tbw->currentWidget()->layout()->setContentsMargins(0,0,0,0);
 
 		if(action_align_grid->isChecked())
-			current_model->scene->alignObjectsToGrid();
+			current_model->alignObjectsToGrid();
 
 		emit s_modelAdded(model_wgt);
 	}
@@ -1354,6 +1351,14 @@ void MainWindow::setCurrentModel(int idx)
 
 	if(prev_model && (prev_model == current_model))
 		return;
+
+	/* scene_info_wgt is a single persistent widget shared by every tab, but its scene/segmentation
+	 * controls forward user edits straight to whichever ModelWidget is "current" at connection time
+	 * -- unlike the model-to-widget signals below (Qt::UniqueConnection only dedupes identical
+	 * sender/signal/receiver/slot tuples, it doesn't drop a *previous* receiver), so the old model
+	 * must be explicitly disconnected here or it keeps receiving edits meant for the new one */
+	if(prev_model)
+		disconnect(scene_info_wgt, nullptr, prev_model, nullptr);
 
 	layers_cfg_wgt->setVisible(false);
 	models_tbw->setVisible(models_tbw->count() > 0);
@@ -1470,6 +1475,31 @@ void MainWindow::setCurrentModel(int idx)
 		connect(current_model, qOverload<int, const QRectF &>(&ModelWidget::s_sceneInteracted), scene_info_wgt, &SceneInfoWidget::updateSelectedObjects, Qt::UniqueConnection);
 		connect(current_model, qOverload<const QPointF &>(&ModelWidget::s_sceneInteracted), scene_info_wgt, &SceneInfoWidget::updateMousePosition, Qt::UniqueConnection);
 		connect(current_model, &ModelWidget::s_zoomModified, scene_info_wgt, &SceneInfoWidget::updateSceneZoom, Qt::UniqueConnection);
+
+		/* Qt::UniqueConnection doesn't support lambda slots (only plain member-function pointers) --
+		 * asserts at runtime if passed one. Matches the existing s_modelModified lambda connection
+		 * below/elsewhere in this method, which is also deliberately left without it */
+		connect(current_model, &ModelWidget::s_scenesListChanged, this, [this](){
+			scene_info_wgt->updateScenesCombo(current_model->getSceneNames(), current_model->getActiveSceneIndex());
+		});
+
+		connect(current_model, &ModelWidget::s_activeSceneChanged, this, [this](int idx){
+			scene_info_wgt->updateScenesCombo(current_model->getSceneNames(), idx);
+		});
+
+		connect(current_model, &ModelWidget::s_modelSaveReloadRequested, this, [this]() {
+			saveModel(current_model);
+
+			if(model_valid_wgt->hasValidationErrors())
+				Messagebox::alert(tr("Could not reload the model because the validation process found errors that must be resolved."));
+			else
+				__trycatch( reloadModel(current_model->getFilename(), models_tbw->currentIndex()); )
+		});
+
+		connect(scene_info_wgt, &SceneInfoWidget::s_activeSceneSelected, current_model, &ModelWidget::setActiveScene, Qt::UniqueConnection);
+		connect(scene_info_wgt, &SceneInfoWidget::s_segmentationModeSelected, current_model, &ModelWidget::setPendingSegmentationMode, Qt::UniqueConnection);
+		connect(scene_info_wgt, &SceneInfoWidget::s_thresholdSelected, current_model, &ModelWidget::setPendingSceneThreshold, Qt::UniqueConnection);
+
 		connect(current_model, &ModelWidget::s_newLayerRequested, this, &MainWindow::addNewLayer);
 		connect(current_model, &ModelWidget::s_objectsLayerChanged, layers_cfg_wgt, &LayersConfigWidget::updateRelsVisibility);
 
@@ -1498,6 +1528,9 @@ void MainWindow::setCurrentModel(int idx)
 
 		scene_info_wgt->updateMousePosition(QPointF(0,0));
 		scene_info_wgt->updateSceneZoom(current_model->getCurrentZoom());
+		scene_info_wgt->updateScenesCombo(current_model->getSceneNames(), current_model->getActiveSceneIndex());
+		scene_info_wgt->updateSegmentationInfo(current_model->getDatabaseModel()->getSavedSegmentationMode(),
+																						current_model->getDatabaseModel()->getSavedSegThreshold());
 		current_model->emitSceneInteracted();
 
 		ObjectsScene::setLockDelimiterScale(action_lock_delim->isChecked(),
@@ -1545,7 +1578,7 @@ void MainWindow::setGridOptions()
 		//Align the object to grid is the option is checked
 		if(action_align_grid->isChecked())
 		{
-			current_model->scene->alignObjectsToGrid();
+			current_model->alignObjectsToGrid();
 
 			//Forcing the relationship updating to fit the new position of the tables
 			current_model->getDatabaseModel()->setObjectsModified({ ObjectType::Relationship, ObjectType::BaseRelationship });
@@ -1592,7 +1625,7 @@ void MainWindow::removeModelActions()
 	}
 }
 
-bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
+bool MainWindow::closeModel(int model_id, bool confirm)
 {
 	QWidget *tab = nullptr;
 
@@ -1625,6 +1658,9 @@ bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
 																	tr("The model <strong>%1</strong> was modified! Do you really want to close without saving it?")
 																	.arg(model->getDatabaseModel()->getName()),
 																	Messagebox::YesNoButtons);
+
+		if(msg_res == Messagebox::Rejected)
+			return false;
 	}
 
 	if(!model->isModified() ||
@@ -1643,34 +1679,22 @@ bool MainWindow::closeModel(int model_id, bool keep_tab, bool confirm)
 
 		//Removing model specific actions from general toolbar
 		removeModelActions();
-
-		/* Remove the parent tab if the flag is not set
-		 * to keep it untouched */
-		if(!keep_tab)
-			models_tbw->removeTab(model_id);
-
+		models_tbw->removeTab(model_id);
 		model_closed = true;
 	}
 
-	/* If the parent tab was removed we force the definition of
-	 * the current model based on the new current index or do
-	 * clean-ups if there is no model left to display */
-	if(!keep_tab && model_closed)
+	if(models_tbw->count() > 0)
+		setCurrentModel();
+	else
 	{
-		if(models_tbw->count() > 0)
-			setCurrentModel();
-		else
-		{
-			current_model = nullptr;
-			setCurrentModel();
-			model_save_timer.stop();
-			tmpmodel_save_timer.stop();
-			models_tbw->setVisible(false);
-		}
-
-		delete model;
-		emit s_modelClosed();
+		current_model = nullptr;
+		setCurrentModel();
+		stopSaveTimers(true);
+		models_tbw->setVisible(false);
 	}
+
+	delete model;
+	emit s_modelClosed();
 
 	return model_closed;
 }
@@ -1682,10 +1706,13 @@ void MainWindow::reloadModel(const QString &filename, int model_idx)
 		if(model_idx < 0)
 			return;
 
-		if(!closeModel(model_idx, true))
+		if(!closeModel(model_idx))
 			return;
 
-		emit s_modelLoadRequested(filename, model_idx);
+		if(!filename.endsWith(GlobalAttributes::DbModelExt))
+			emit s_modelLoadRequested(filename, model_idx);
+		else
+			addModel(filename, model_idx);
 	}
 	catch(Exception &e)
 	{
@@ -1847,7 +1874,7 @@ void MainWindow::saveModel(ModelWidget *model)
 						if(model != aux_model && model->getFilename() == aux_model->getFilename())
 						{
 							msg_box.show(tr("<strong>WARNING:</strong> the database model <strong>%1</strong>, file <strong>%2</strong>, is also loaded in another tab! Saving the current model to the file may lead to data loss if its version in memory is outdated compared to what is loaded in the other tab. Do you really want to proceed with the saving?")
-													 .arg(model->getDatabaseModel()->getName()).arg(model->getFilename()),
+													 .arg(model->getDatabaseModel()->getName(), model->getFilename()),
 													 Messagebox::Alert, Messagebox::YesNoButtons);
 
 							save_model = msg_box.isAccepted();
@@ -2025,7 +2052,8 @@ void MainWindow::loadModels(const QStringList &files)
 
 		if(files[i].endsWith(GlobalAttributes::DbModelExt))
 			showFixMessage(e, files[i]);
-		else
+		//A user-initiated cancellation isn't an error -- see DatabaseModel::loadModel()
+		else if(e.getErrorCode() != ErrorCode::OperationCancelled)
 		{
 			Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
@@ -2034,6 +2062,10 @@ void MainWindow::loadModels(const QStringList &files)
 
 void MainWindow::showFixMessage(Exception &e, const QString &filename)
 {
+	//A cancelled load isn't a broken file -- nothing to offer fixing here
+	if(e.getErrorCode() == ErrorCode::OperationCancelled)
+		return;
+
 	Messagebox msg_box;
 
 	msg_box.show(Exception(Exception::getErrorMessage(ErrorCode::ModelFileNotLoaded).arg(filename),
@@ -2426,19 +2458,46 @@ void MainWindow::arrangeObjects()
 	if(!current_model)
 		return;
 
-	int res =	Messagebox::confirm(tr("Rearrange objects over the canvas is an irreversible operation! Would like to proceed?"));
+	static const QString arrange_msg { tr("Rearranging objects on the canvas is an irreversible operation.") };
 
-	if(!Messagebox::isAccepted(res))
-		return;
+	bool current_scene_only = false;
+	DatabaseModel::SegmentationMode seg_mode =
+		current_model->getDatabaseModel()->getSegmentationMode();
+
+	int res =	Messagebox::Rejected;
+
+	if(seg_mode == DatabaseModel::NoSegmentation)
+	{
+		res = Messagebox::confirm(arrange_msg + tr(" Would like to proceed?"));
+
+		if(Messagebox::isRejected(res))
+			return;
+	}
+	else
+	{
+		//Only a real choice when the model actually has more than one scene to pick between
+		if(current_model->getScenes().size() > 1)
+		{
+			res = Messagebox::confirm(arrange_msg + tr(" How the rearrangement should be applied?"),
+																Messagebox::Confirm, Messagebox::AllButtons,
+																tr("This scene only"), tr("All scenes"), tr("Cancel"),
+																"", GuiUtilsNs::getIconPath("refresh"));
+
+			if(Messagebox::isCanceled(res))
+				return;
+
+			current_scene_only = Messagebox::isAccepted(res);
+		}
+	}
 
 	qApp->setOverrideCursor(Qt::WaitCursor);
 
 	if(sender() == arrange_menu.actions().at(0))
-		current_model->rearrangeSchemasInGrid();
+		current_model->rearrangeSchemasInGrid(current_scene_only);
 	else if(sender() == arrange_menu.actions().at(1))
-		current_model->rearrangeTablesHierarchically();
+		current_model->rearrangeTablesHierarchically(current_scene_only);
 	else
-		current_model->rearrangeTablesInSchemas();
+		current_model->rearrangeTablesInSchemas(current_scene_only);
 
 	qApp->restoreOverrideCursor();
 }

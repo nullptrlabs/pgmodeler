@@ -66,6 +66,9 @@ void BaseObjectView::blink()
 
 void BaseObjectView::fade(bool fd_in, int duration, int loop_cnt, qreal final_opacity)
 {
+	if(fade_tl.state() == QTimeLine::Running)
+		return;
+
 	fade_tl.setDirection(fd_in ? QTimeLine::Forward : QTimeLine::Backward);
 	fade_tl.setLoopCount(loop_cnt);
 	fade_tl.setDuration(duration);
@@ -106,6 +109,7 @@ void BaseObjectView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		m_event->setButton(Qt::LeftButton);
 
 		QGraphicsItemGroup::mousePressEvent(m_event);
+		delete m_event;
 		event->ignore();
 	}
 	else if(event->button()==Qt::LeftButton)
@@ -205,6 +209,14 @@ void BaseObjectView::setSourceObject(BaseObject *object)
 BaseObject *BaseObjectView::getUnderlyingObject()
 {
 	return reinterpret_cast<BaseObject *>(this->data(0).value<void *>());
+}
+
+void BaseObjectView::detachFromObject()
+{
+	BaseGraphicObject *graph_obj = dynamic_cast<BaseGraphicObject *>(getUnderlyingObject());
+
+	if(graph_obj)
+		graph_obj->setReceiverObject(nullptr);
 }
 
 void BaseObjectView::setFontStyle(const QString &id, QTextCharFormat font_fmt)

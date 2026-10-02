@@ -927,20 +927,22 @@ void OperationList::executeOperation(Operation *oper, bool redo)
 				if(bkp_obj)
 					dynamic_cast<BaseGraphicObject *>(bkp_obj->getSchema())->setModified(op_type==Operation::ObjModified);
 			}
-		}
-		else if(op_type==Operation::ObjModified)
-		{			
-			if(obj_type==ObjectType::Schema)
-			{
+
+			if(obj_type == ObjectType::Schema && op_type == Operation::ObjModified && bkp_obj)
 				model->validateSchemaRenaming(dynamic_cast<Schema *>(object), bkp_obj->getName());
-				dynamic_cast<Schema *>(object)->setModified(true);
-			}
-			else if(obj_type==ObjectType::Tag)
-			{
-				for(auto &obj : object->getReferences())
-					dynamic_cast<BaseTable *>(obj)->setModified(true);
-			}
 		}
+		else if(op_type==Operation::ObjModified && obj_type==ObjectType::Tag)
+		{
+			for(auto &obj : object->getReferences())
+				dynamic_cast<BaseTable *>(obj)->setModified(true);
+		}
+
+		/* bkp_obj/aux_obj are temporary snapshots allocated above purely for this function's own
+		 * restore dance -- CoreUtilsNs::copyObject() allocates them on demand (see its "allocates if
+		 * not allocated" branch) and neither is ever attached to the model or the operation pool, so
+		 * they leak if not freed here */
+		delete bkp_obj;
+		delete aux_obj;
 
 		//Case the object is a type update the tables that are referencing it
 		if(op_type==Operation::ObjModified &&
@@ -954,6 +956,8 @@ void OperationList::executeOperation(Operation *oper, bool redo)
 					dynamic_cast<Column *>(obj)->getParentTable()->setModified(true);
 			}
 		}
+
+		emit s_operationExecuted(object, op_type);
 	}
 }
 

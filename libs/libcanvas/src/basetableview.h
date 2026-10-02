@@ -38,6 +38,7 @@
 #include "baserelationship.h"
 #include "textpolygonitem.h"
 #include "attributestoggleritem.h"
+#include "cutoffitem.h"
 
 class __libcanvas BaseTableView: public BaseObjectView {
 	Q_OBJECT
@@ -50,6 +51,14 @@ class __libcanvas BaseTableView: public BaseObjectView {
 
 		/*! \brief Stores the references to the relationships connected to this table. */
 		std::vector<BaseRelationship *> connected_rels;
+
+		/*! \brief Stores the references to the relationships that connect this table to a table
+		 * placed in a different scene. These relationships have no RelationshipView of their own,
+		 * being represented instead by a cut-off marker on each side. */
+		QList<BaseRelationship *> external_rels;
+
+		//! \brief Marker representing external_rels on the canvas. Null while external_rels is empty
+		CutoffItem *cutoff_item;
 
 	protected:		
 		//! \brief Stores the selected child objects in order to retrieve them in ObjectScene/ModelWidget
@@ -104,6 +113,10 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		 * If 'only_self_rels' is true then only self relationship are searched */
 		int getConnectedRelationshipIndex(BaseRelationship *base_rel, bool only_self_rels = false);
 
+		void addExternalRelationship(BaseRelationship *base_rel);
+
+		void removeExternalRelationship(BaseRelationship *base_rel);
+
 		//! \brief Configures the tag object when the source object has one.
 		void configureTag();
 
@@ -129,6 +142,10 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		 * to be displayed in the current page. See configureObject() on TableView and GraphicalView */
 		bool configurePaginationParams(BaseTable::TableSection section_id, unsigned total_attrs, unsigned &start_attr, unsigned &end_attr);
 
+		void hoverLeaveEvent(QGraphicsSceneHoverEvent *) override;
+		void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
+		void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+
 	public:
 		enum ConnectionPoint: unsigned {
 			LeftConnPoint,
@@ -137,10 +154,6 @@ class __libcanvas BaseTableView: public BaseObjectView {
 
 		BaseTableView(BaseTable *base_tab);
 		~BaseTableView() override;
-
-		void hoverLeaveEvent(QGraphicsSceneHoverEvent *) override;
-		void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
-		void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 
 		//! brief Defines the amount of attributes per page to be displayed
 		static void setAttributesPerPage(BaseTable::TableSection section_id, unsigned value);
@@ -162,6 +175,19 @@ class __libcanvas BaseTableView: public BaseObjectView {
 
 		//! \brief Returns the current count of connected relationships
 		int getConnectRelsCount();
+
+		//! \brief Returns the current count of external (cross-scene) relationships
+		int getExternalRelsCount();
+
+		//! \brief Returns the list of relationships that connect this table to a table placed in a different scene
+		QList<BaseRelationship *> getExternalRelationships();
+
+		/*! \brief Returns, in scene coordinates, the point the cut-off marker's line attaches to
+		 * (title's right edge, vertically centered on the title) */
+		QPointF getCutoffAnchorPoint();
+
+		//! \brief Returns the cut-off marker currently attached to this table, or nullptr if it has none
+		CutoffItem *getCutoffItem();
 
 		//! \brief This method just emits the signal to indicate that the relationships attached must be updated
 		void requestRelationshipsUpdate();
@@ -224,6 +250,7 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		void s_sceneClearRequested();
 
 		friend class RelationshipView;
+		friend class ModelWidget;
 };
 
 #endif

@@ -35,6 +35,9 @@ Additionally, this class, saves, loads and generates the XML/SQL definition of a
 #include <QStringList>
 #include <QDateTime>
 #include <QHash>
+#include <QSet>
+#include <QMap>
+#include <functional>
 #include "baseobject.h"
 #include "table.h"
 #include "function.h"
@@ -88,6 +91,13 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 			GroupByType
 		};
 
+		//! \brief Constants used to determine how the model's ObjectsScene collection is segmented
+		enum SegmentationMode: unsigned {
+			NoSegmentation,
+			SegBySchema,
+			SegByThreshold
+		};
+
 	private:
 		//! \brief Constants used to access the tuple columns in the internal changelog
 		enum LogFields: unsigned {
@@ -113,6 +123,11 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		 * and by updateObjectIndex() (called from BaseObject::setName()/setSchema()). */
 		std::map<ObjectType, QHash<QString, BaseObject *>> name_idx,
 		sig_idx;
+
+		/*! \brief Objects taken out of the model by __removeObject() and not yet put back by __addObject().
+		 * They may have been deleted since (e.g. by the operation list), so the pointers in this set
+		 * are only ever compared, never dereferenced */
+		QSet<BaseObject *> removed_objs;
 
 		//! \brief Builds the lookup key for an object's raw name, honoring the current quoting/case mode
 		static QString getNameIndexKey(BaseObject *object);
@@ -162,6 +177,12 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		/*! \brief The current scene (canvas) geometry that is restored when the database
 		 * model is rendered by a scene for the first time after loading the model. */
 		QRectF scene_rect;
+
+		/*! \brief Per-scene rectangles (key: scene index, matching LastScene/<scene id="">), only
+		 * meaningful when the model is segmented into more than one scene. Restored when each scene
+		 * is rendered for the first time after loading the model, same purpose as scene_rect but one
+		 * entry per scene instead of a single one for the whole model */
+		QMap<int, QRectF> scene_rects;
 
 		//! \brief Stores the layer information of FK relationships during the model loading
 		std::map<QString, QStringList> fk_rel_layers;
@@ -256,6 +277,11 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Indicates if the model is being loaded
 		bool loading_model,
 
+		/*! \brief True for the duration of a loadModel() call whose discard_scene_idx argument was
+		 * true -- checked by the Table/View/ForeignTable parsing methods to skip restoring their
+		 * saved scene index (see loadModel()) */
+		discard_scene_idx,
+
 		/*! \brief Indicates if the model was invalidated due to operations like insert / remove objects.
 		When this flag is set it's recommend to revalidate the model using the Model validation tool */
 		invalidated,
@@ -270,6 +296,27 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		QPoint last_pos;
 
 		double last_zoom;
+
+		//! \brief Stores how the model's ObjectsScene collection is segmented in the current session
+		SegmentationMode scene_seg_mode;
+
+		/*! \brief Stores the segmentation mode to be written to the file on the next save. Editing
+		 * this does not affect scene_seg_mode -- a mode change only takes effect after the model is
+		 * reloaded */
+		SegmentationMode saved_seg_mode;
+
+		//! \brief Number of Table/View/ForeignTable insertions per scene, in SegByThreshold mode, for the current session
+		unsigned seg_threshold;
+
+		/*! \brief Threshold value to be written to the file on the next save. Editing this does not
+		 * affect seg_threshold -- a threshold change only takes effect after the model is reloaded */
+		unsigned saved_seg_threshold;
+
+		/*! \brief Index (within the ObjectsScene collection, in creation order) of the scene that was
+		 * focused when the model was last saved -- unlike scene_seg_mode/seg_threshold, this has no
+		 * "active vs. saved" split: focusing a different scene is an ordinary runtime action, not one
+		 * that needs a reload to take effect */
+		int last_scene;
 
 		//! \brief Returns an object seaching it by its name and type. The third parameter stores the object index
 		BaseObject *getObject(const QString &name, ObjectType obj_type, int &obj_idx);
@@ -439,7 +486,8 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Returns the object index searching by its name
 		int getObjectIndex(const QString &name, ObjectType obj_type);
 
-		//! \brief Retuns the passed object index
+		/*! \brief Retuns the passed object index, or -1 if it's not in the model. Pointers of objects
+		 * already removed from the model (even if deleted afterwards) are safely reported as -1 */
 		int getObjectIndex(BaseObject *object);
 
 		//! \brief Adds an object to the model
@@ -453,8 +501,26 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 
 		/*! \brief Loads a database model from a file. In case of loading errors
 		the objects in the model will not be destroyed automatically. The user need to call
-		destroyObjects() or delete the entire model */
-		void loadModel(const QString &filename);
+		destroyObjects() or delete the entire model.
+		When override_seg_mode is true, ovr_seg_mode/ovr_seg_threshold are used as the active
+		segmentation mode/threshold for this load instead of whatever is saved in the file -- so
+		routing during this same load already reflects them, without requiring a save+reload
+		round-trip. The overridden values still become the new "saved" ones, same as loading them
+		normally from the file would.
+		When discard_scene_idx is true, every loaded Table/View/ForeignTable's own saved scene index
+		is left at its default (-1) instead of being restored from the file -- used when the caller
+		already determined that index is stale (see ModelWidget::needsThresholdRebucketing()), so
+		threshold-segmentation routing re-derives scene placement from scratch during this load
+		instead of trusting a distribution that no longer matches the active threshold.
+		is_canceled, when provided, is polled once per object loaded (right after each s_objectLoaded
+		emission) -- it returning true aborts the load by throwing an Exception with
+		ErrorCode::OperationCancelled, leaving the model exactly as far along as it got (the caller is
+		expected to discard it, same as it already would for any other load failure). Left as a plain
+		std::function instead of a GUI-facing type to keep this class free of a libgui dependency; see
+		ModelWidget::loadModel() for how the GUI side supplies it */
+		void loadModel(const QString &filename, bool override_seg_mode = false,
+										SegmentationMode ovr_seg_mode = NoSegmentation, unsigned ovr_seg_threshold = 0,
+										bool discard_scene_idx = false, std::function<bool()> is_canceled = nullptr);
 
 		//! \brief Sets the database encoding
 		void setEncoding(EncodingType encod);
@@ -877,6 +943,26 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		void setLastZoomFactor(double zoom);
 		double getLastZoomFactor();
 
+		void setLastScene(int idx);
+		int getLastScene();
+
+		//! \brief Default number of Table/View/ForeignTable insertions per scene in SegByThreshold mode
+		static constexpr unsigned DefaultSegThreshold = 500;
+
+		void setSegmentationMode(SegmentationMode mode);
+		SegmentationMode getSegmentationMode();
+
+		//! \brief Defines the segmentation mode to be persisted on the next save (takes effect only after a reload)
+		void setSavedSegmentationMode(SegmentationMode mode);
+		SegmentationMode getSavedSegmentationMode();
+
+		void setSegThreshold(unsigned value);
+		unsigned getSegThreshold();
+
+		//! \brief Defines the segmentation threshold to be persisted on the next save (takes effect only after a reload)
+		void setSavedSegThreshold(unsigned value);
+		unsigned getSavedSegThreshold();
+
 		/*! \brief This method exposes the XML parser for the outside world. In order to create objects from xml code inside the current
 		 database model you need first get the parser (through this method), populate the parser with the desired XML and then call
 		 the create* method.
@@ -938,10 +1024,17 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Returns the XML code for the changelog
 		QString getChangelogDefinition(bool csv_format = false);
 
+		//! \brief Returns the XML code for the <scenes> block (empty when there's only one scene)
+		QString getSceneRectsDefinition();
+
 		/*! \brief Defines the current scene rectangle in which the model is being rendered
 		 *  This is used to restore the original scene geometry when the model is loaded from file */
 		void setSceneRect(const QRectF &rect);
 		QRectF getSceneRect();
+
+		//! \brief Defines/returns the per-scene rectangles (key: scene index), see scene_rects
+		void setSceneRects(const QMap<int, QRectF> &rects);
+		QMap<int, QRectF> getSceneRects();
 
 		//! \brief Toggles the generation of SQL code of object with code disabled
 		void setGenDisabledObjsCode(bool value);

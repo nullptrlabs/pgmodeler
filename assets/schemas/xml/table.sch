@@ -3,6 +3,7 @@
 # Code generation can be broken if incorrect changes are made.
 [<table name=] "&{name}"
 %if {layers} %then [ layers=] "{layers}" %end
+%if {scene} %then [ scene=] "{scene}" %end
 %if {alias} %then [ alias=] "&{alias}" %end
 %if {oids} %then [ oids="true"] %end
 %if {gen-alter-cmds} %then [ gen-alter-cmds="true"] %end
@@ -28,6 +29,7 @@
 %if {appended-sql} %then {appended-sql} %end
 %if {prepended-sql} %then {prepended-sql} %end
 {position}
+%if {cutoff-pos} %then {cutoff-pos} %end
 
 %if {columns} %then {columns} %end
 %if {constraints} %then {constraints} %end
