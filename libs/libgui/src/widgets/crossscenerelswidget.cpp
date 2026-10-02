@@ -40,6 +40,7 @@ CrossSceneRelsWidget::CrossSceneRelsWidget(QWidget *parent): QWidget(parent)
 	rels_tab->setHeaderLabel(tr("Type"), 1);
 	rels_tab->setHeaderLabel(tr("Related table"), 2);
 	rels_tab->setHeaderIcon(GuiUtilsNs::getIcon("table"), 2);
+	rels_tab->setHeaderVisible(Qt::Vertical, true);
 
 	QVBoxLayout *layout = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargin, GuiUtilsNs::LtSpacing, this);
 	layout->addWidget(table_sel);
