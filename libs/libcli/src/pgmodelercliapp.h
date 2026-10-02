@@ -152,6 +152,9 @@ class __libcli PgModelerCliApp: public Application {
 		//! \brief Stores the changelog of the model that is being fixed to reproduce it in the output model
 		QString changelog;
 
+		//! \brief The <dbmodel> tag of the model being fixed, kept so values that depend on the recreated objects can be applied later
+		QString model_header_tag;
+
 		static const QRegularExpression PasswordRegExp;
 
 		static const QString PasswordPlaceholder;
@@ -173,6 +176,14 @@ class __libcli PgModelerCliApp: public Application {
 		 * rectangles) from the <dbmodel> header and <scenes> element of the model being fixed and
 		 * applies it to the input model, so it's saved back in the fixed model */
 		void restoreSegmentation(const QString &header_xml);
+
+		/*! \brief Reads the remaining model-level attributes of the <dbmodel> tag (author, code generation
+		 * and visibility flags, last position/zoom, layer colors and visibility) and applies them to the input model */
+		void restoreModelAttributes(const QString &dbm_tag);
+
+		/*! \brief Applies the default schema, owner, collation and tablespace declared in the <dbmodel> tag.
+		 * Must run after the objects were recreated since the defaults are resolved by name */
+		void restoreDefaultObjects();
 
 		//! \brief Recreates the objects from the obj_xml list fixing the creation order for them
 		void recreateObjects();
