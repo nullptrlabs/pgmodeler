@@ -5,6 +5,7 @@ project(pgmodeler VERSION 2.0 LANGUAGES C CXX)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 include(BuildConfs)
+include(TranslationConfs)
 include(DefaultPaths)
 include(BuildNumDate)
 include(PrintSummary)
