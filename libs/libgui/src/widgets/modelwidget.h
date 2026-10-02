@@ -681,6 +681,13 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Arrange all tables in their schemas randomly (scattered). See rearrangeSchemasInGrid() for current_scene_only
 		void rearrangeTablesInSchemas(bool current_scene_only);
 
+		/*! \brief Writes the union of every scene's rect into the model's legacy scene-rect attribute,
+		 * used as a single-scene fallback if the model is later reopened/edited without segmentation.
+		 * Called only right before saving, never reactively per-scene. Public so pgmodeler-cli's
+		 * importDatabase() (which saves the DatabaseModel directly, bypassing ModelWidget::saveModel())
+		 * can call it too */
+		void updateModelSceneRectInfo();
+
 		void emitSceneInteracted();
 
 		//! \brief Toggles the protection over the model and display a message indicating the status
@@ -856,11 +863,6 @@ class __libgui ModelWidget: public QWidget {
 		/*! \brief Update all the information about layer in the internal database model
 		 * so the correct info is written into the xml code of the model file */
 		void updateModelLayersInfo();
-
-		/*! \brief Writes the union of every scene's rect into the model's legacy scene-rect attribute,
-		 * used as a single-scene fallback if the model is later reopened/edited without segmentation.
-		 * Called only right before saving, never reactively per-scene */
-		void updateModelSceneRectInfo();
 
 		void showMagnifierArea(bool show);
 

@@ -26,8 +26,12 @@
 > relacionamentos cross-scene no duplo clique do cutoff) implementada e commitada (`d47cc7a3f`), com
 > dois commits de infraestrutura que ela expôs: `getObjectIndex(BaseObject *)` seguro com ponteiro
 > deletado (`4f9ced1ae`) e o vazamento do `DatabaseModel` no fechamento de modelo (`2e6749009`,
-> ver entradas abaixo). Suíte `modelwidgettest` em 56/56. Resta a Fase 5 (paridade `pgmodeler-cli`,
-> dona do usuário), cujo pré-requisito (Fases 0-4 fechadas, salvo as adiadas 4.8, 4.10 e 4.13) está atendido.
+> ver entradas abaixo). Suíte `modelwidgettest` em 56/56. **Fase 5 (paridade `pgmodeler-cli`)**:
+> usuário deu start explícito só na fatia `--import-db` (o "achado novo" daquela fase) — ganhou
+> `--seg-mode`/`--seg-threshold`, aplicados ao `DatabaseModel` recém-criado antes do import, mais os
+> dois achados colaterais daquela mesma nota (scene-rect legado e rearranjo pós-import). Ver entrada
+> própria mais abaixo. Resto da Fase 5 (export por cena, extração do roteamento objeto→cena)
+> continua não iniciado.
 
 - Branch: `multi-scene-support-2.1.x`, com 1 commit à frente de `origin` (refactor próprio do
   usuário, `0f7ac6f61`, não relacionado a esta sessão — adicionou `BaseTableView::getCutoffItem()`
@@ -1670,6 +1674,28 @@
   com ASan: sem leak nem use-after-free. **Se um leak/use-after-free inesperado aparecer ao fechar
   modelos, o `~ModelWidget()` é o primeiro lugar a olhar.** Teste de regressão:
   `closingModelWidgetDestroysItsDatabaseModel`.
+- **Fase 5, fatia `--import-db` (2026-10-02)** — usuário deu o start explícito nesta fatia da Fase 5
+  (achado já registrado naquela seção desde 2026-09-26), sem abrir o resto da fase. `pgmodeler-cli`
+  ganhou `--seg-mode [schema|threshold]` e `--seg-threshold [NUMBER]` (grupo `ImportDb`, módulo
+  `priv-core`): `PgModelerCliApp::importDatabase()` aplica modo/threshold (ativos e `saved_*`) ao
+  `DatabaseModel` recém-criado antes de `importDatabase(model, connection)` (que por sua vez chama
+  `createSystemObjects(true)`), mesma ordem da 4.14. `--seg-mode` só aceita `schema`/`threshold` —
+  sem valor `none`: omitir a flag já é `NoSegmentation` (ajuste pedido pelo usuário depois da
+  primeira rodada, pra não forçar a pessoa a escrever "none" pra dizer que não quer segmentação).
+  `--seg-threshold` exige `--seg-mode threshold` e rejeita valor zero/não numérico (senão a conta
+  teria módulo por zero mais tarde em `ModelWidget::handleObjectAddition()`).
+  - Os dois achados colaterais daquela mesma nota também corrigidos: `updateModelSceneRectInfo()`
+    (antes privado, só chamado de dentro de `ModelWidget::saveModel()`) virou público e agora é
+    chamado manualmente antes do `saveModel()` direto do CLI, que bypassa `ModelWidget::saveModel()`
+    de propósito. O outro achado (`rearrangeSchemasInGrid()` assumindo cena única) já tinha sido
+    corrigido antes desta sessão retomar o trabalho — a chamada já lia `getSegmentationMode()` pra
+    decidir `current_scene_only`.
+  - Build (`core`+`canvas`+`gui`+`cli`+`pgmodeler-cli`+`modelwidgettest`) limpo, suíte em 56/56.
+  - **Nota de árvore de trabalho**: um refactor concorrente, não desta sessão, renomeou
+    `ModelWidget::getObjectsScene()/getObjectsScenes()` para `getScene()/getScenes()` e moveu
+    `clearSelectionInAllScenes()` pra `public slots` enquanto este trabalho estava em andamento.
+    O commit desta fatia foi isolado por hunk (`git apply --cached`) em `modelwidget.h` pra não
+    incluir esse refactor de terceiros — ele permanece não commitado na árvore de trabalho.
 - **Pendência da pausa anterior, resolvida por decisão de design em vez de investigação (2026-09-23)**:
   a dúvida "será que o bug de corrupção de memória do `relocateItem()` também afeta `TableView`?"
   (`columns`/`ext_attribs` têm a mesma estrutura de grupo aninhado com filhos dinâmicos que quebrou
