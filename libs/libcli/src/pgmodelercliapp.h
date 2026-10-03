@@ -165,6 +165,10 @@ class __libcli PgModelerCliApp: public Application {
 		//! \brief Returns if the specified options exists on short options map
 		bool isOptionRecognized(QString &op, bool &accepts_val);
 
+		/*! \brief Translates one of the file association messages (MsgFileAssociated and
+		 * MsgNoFileAssociation, which only hold the text to be translated) and fills in its arguments */
+		static QString getFileAssociationMsg(const QString &msg_tmpl);
+
 		//! \brief Loads the input model and perform all tasks needed to configure the graphical objects
 		void loadModel();
 

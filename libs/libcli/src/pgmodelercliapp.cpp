@@ -137,12 +137,17 @@ const QString PgModelerCliApp::ModelFixLog {"model_fix.log"};
 const QString PgModelerCliApp::MenuItemOptTmpl { "  %1, %2" };
 
 const QString PgModelerCliApp::MsgFileAssociated {
-	QString(QT_TR_NOOP("Database model files (*%1) are already associated with pgModeler! Use the option `%2' to force the file association installation.")).arg(GlobalAttributes::DbModelExt, Force)
+	PGM_TR2("Global", "Database model files (*%1) are already associated with pgModeler! Use the option `%2' to force the file association installation.")
 };
 
 const QString PgModelerCliApp::MsgNoFileAssociation {
-	QString(QT_TR_NOOP("No file association exists between pgModeler and *%1 files! Use the option `%2' to force the file association uninstallation.")).arg(GlobalAttributes::DbModelExt, Force)
+	PGM_TR2("Global", "No file association exists between pgModeler and *%1 files! Use the option `%2' to force the file association uninstallation.")
 };
+
+QString PgModelerCliApp::getFileAssociationMsg(const QString &msg_tmpl)
+{
+	return UtilsNs::pgmTr(msg_tmpl).arg(GlobalAttributes::DbModelExt, Force);
+}
 
 std::map<QString, bool> PgModelerCliApp::long_opts {
 	{ Input, true }, { Output, true }, { InputDb, true },
@@ -2609,10 +2614,10 @@ void PgModelerCliApp::handleLinuxMimeDatabase(bool uninstall, bool system_wide, 
 	{
 		//When installing, check if the necessary file exists. If exists, raises an error and abort.
 		if(!uninstall && QFileInfo::exists(files[i]) && !force)
-			throw Exception(MsgFileAssociated, ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+			throw Exception(getFileAssociationMsg(MsgFileAssociated), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		if(uninstall && !QFileInfo::exists(files[i]) && !force)
-			throw Exception(MsgNoFileAssociation, ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+			throw Exception(getFileAssociationMsg(MsgNoFileAssociation), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	if(!uninstall && !system_wide)
@@ -2730,12 +2735,12 @@ void PgModelerCliApp::handleWindowsMimeDatabase(bool uninstall, bool system_wide
 	if(uninstall && !force &&
 		 (dbm_ext.value("Default").toString().isEmpty() ||
 			sch_ext.value("Default").toString().isEmpty()))
-		throw Exception(MsgNoFileAssociation, ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+		throw Exception(getFileAssociationMsg(MsgNoFileAssociation), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(!uninstall && !force &&
 		 (!dbm_ext.value("Default").toString().isEmpty() ||
 			!sch_ext.value("Default").toString().isEmpty()))
-		throw Exception(MsgFileAssociated, ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
+		throw Exception(getFileAssociationMsg(MsgFileAssociated), ErrorCode::Custom,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(!uninstall)
 	{
