@@ -4175,8 +4175,8 @@ void ModelWidget::protectObject()
 					if(!msgbox.isCustomOptionChecked())
 					{
 						msgbox.setCustomOptionText("Apply to all other selected schemas");
-						msgbox.show(QString(QT_TR_NOOP("Do you want to %1 the children of the schema <strong>%2</strong> too?"))
-												.arg(protect ? QT_TR_NOOP("protect") : QT_TR_NOOP("unprotect")).arg(object->getName()),
+						msgbox.show(tr("Do you want to %1 the children of the schema <strong>%2</strong> too?")
+												.arg(protect ? tr("protect") : tr("unprotect")).arg(object->getName()),
 												Messagebox::Confirm, Messagebox::YesNoButtons);
 					}
 

@@ -24,6 +24,7 @@
 #include "globalattributes.h"
 #include "pgsqlversions.h"
 #include "exception.h"
+#include "utilsns.h"
 
 QStringList Connection::notices;
 
@@ -249,7 +250,7 @@ void Connection::connect()
 			throw Exception(ErrorCode::ConnectionAlreadyStablished, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 		QTextStream err(stderr);
-		err << QT_TR_NOOP("ERROR: trying to open an already established connection.") << Qt::endl
+		err << UtilsNs::pgmTr(PGM_TR2("Global", "ERROR: trying to open an already established connection.")) << Qt::endl
 				<< "Conn. info: [ " << connection_str << "]" << Qt::endl;
 		
 		this->close();
