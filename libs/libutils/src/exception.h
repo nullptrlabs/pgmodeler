@@ -29,6 +29,7 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
+#include <QCoreApplication>
 #include "utilsglobal.h"
 #include <QObject>
 #include <vector>
@@ -322,6 +323,9 @@ enum class ErrorCode: unsigned {
 };
 
 class __libutils Exception {
+	//! \brief Gives the class its own tr(), so the texts it translates are in the context Exception
+	Q_DECLARE_TR_FUNCTIONS(Exception)
+
 	private:
 		static constexpr unsigned ErrorCount=272;
 
