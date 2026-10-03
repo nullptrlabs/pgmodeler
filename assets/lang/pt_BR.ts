@@ -13,11 +13,11 @@
     </message>
     <message>
         <source>0.0.0</source>
-        <translation type="unfinished"></translation>
+        <translation>0.0.0</translation>
     </message>
     <message>
         <source>(BUILD_NUM)</source>
-        <translation type="unfinished"></translation>
+        <translation>(BUILD_NUM)</translation>
     </message>
     <message>
         <source>Create, edit and verify the syntax of files written in pgModeler&apos;s schema micro-language. You can also tweak the tool&apos;s syntax highlighting settings to be used by the main GUI application.</source>
@@ -29,54 +29,54 @@
     </message>
     <message>
         <source>pgModeler is proudly a Brazilian software!</source>
-        <translation type="unfinished"></translation>
+        <translation>O pgModeler é um software orgulhosamente brasileiro!</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Raphael Araújo e Silva &amp;lt;&lt;a href=&quot;mailto:raphael@pgmodeler.com.br&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;raphael@pgmodeler.io&lt;/span&gt;&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Raphael Araújo e Silva &amp;lt;&lt;a href=&quot;mailto:raphael@pgmodeler.com.br&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;raphael@pgmodeler.io&lt;/span&gt;&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
     <name>AboutWidget</name>
     <message>
         <source>About pgModeler</source>
-        <translation type="unfinished"></translation>
+        <translation>Sobre o pgModeler</translation>
     </message>
     <message>
         <source>Version info</source>
-        <translation type="unfinished"></translation>
+        <translation>Informações da versão</translation>
     </message>
     <message>
         <source>Hide this widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar este widget</translation>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <source>Build</source>
-        <translation type="unfinished"></translation>
+        <translation>Build</translation>
     </message>
     <message>
         <source>(BUILD_NUM)</source>
-        <translation type="unfinished"></translation>
+        <translation>(BUILD_NUM)</translation>
     </message>
     <message>
         <source>0.0.0</source>
-        <translation type="unfinished"></translation>
+        <translation>0.0.0</translation>
     </message>
     <message>
         <source>Number</source>
-        <translation type="unfinished"></translation>
+        <translation>Número</translation>
     </message>
     <message>
         <source>System </source>
-        <translation type="unfinished"></translation>
+        <translation>Sistema </translation>
     </message>
     <message>
         <source>(OS_TYPE)</source>
@@ -84,7 +84,7 @@
     </message>
     <message>
         <source>About the project</source>
-        <translation type="unfinished"></translation>
+        <translation>Sobre o projeto</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;PostgreSQL Database Modeler &lt;/span&gt;is an open-source, cross-platform database modeling tool tailored specifically for PostgreSQL. It integrates traditional entity–relationship modeling with PostgreSQL-specific features implemented as extensions to the SQL standard. The project aims to serve as a reference database design tool within the PostgreSQL FOSS ecosystem.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -107,7 +107,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Proudly a Brazilian software developed by &lt;br/&gt;**Nullptr Labs Software e Tecnologia LTDA**</source>
-        <translation type="unfinished"></translation>
+        <translation>Software orgulhosamente brasileiro desenvolvido pela &lt;br/&gt;**Nullptr Labs Software e Tecnologia LTDA**</translation>
     </message>
 </context>
 <context>
@@ -130,15 +130,15 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Initial condition</source>
-        <translation type="unfinished"></translation>
+        <translation>Condição inicial</translation>
     </message>
     <message>
         <source>Inputs</source>
-        <translation type="unfinished"></translation>
+        <translation>Entradas</translation>
     </message>
     <message>
         <source>State</source>
-        <translation type="unfinished"></translation>
+        <translation>Estado</translation>
     </message>
     <message>
         <source>Input data type</source>
@@ -153,39 +153,39 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <name>AppearanceConfigWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Interface &amp;&amp; Code</source>
-        <translation type="unfinished"></translation>
+        <translation>Interface &amp;&amp; Código</translation>
     </message>
     <message>
         <source>Interface settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Configurações da interface</translation>
     </message>
     <message>
         <source>Icons size</source>
-        <translation type="unfinished"></translation>
+        <translation>Tamanho dos ícones</translation>
     </message>
     <message>
         <source>Big</source>
-        <translation type="unfinished"></translation>
+        <translation>Grande</translation>
     </message>
     <message>
         <source>Medium</source>
-        <translation type="unfinished"></translation>
+        <translation>Médio</translation>
     </message>
     <message>
         <source>Small</source>
-        <translation type="unfinished"></translation>
+        <translation>Pequeno</translation>
     </message>
     <message>
         <source>&lt;p&gt;Defines a custom UI scale factor. This factor is applied when drawing widgets and fonts. Requires restarting pgModeler when in use.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Define um fator de escala personalizado da interface. Esse fator é aplicado ao desenhar widgets e fontes. Requer reiniciar o pgModeler quando utilizado.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scale </source>
-        <translation type="unfinished"></translation>
+        <translation>Escala </translation>
     </message>
     <message>
         <source>Theme</source>
@@ -193,43 +193,43 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Custom font family</source>
-        <translation type="unfinished"></translation>
+        <translation>Família de fonte personalizada</translation>
     </message>
     <message>
         <source>Font size</source>
-        <translation type="unfinished"></translation>
+        <translation>Tamanho da fonte</translation>
     </message>
     <message>
         <source> pt</source>
-        <translation type="unfinished"></translation>
+        <translation> pt</translation>
     </message>
     <message>
         <source>Code style</source>
-        <translation type="unfinished"></translation>
+        <translation>Estilo do código</translation>
     </message>
     <message>
         <source>Font family</source>
-        <translation type="unfinished"></translation>
+        <translation>Família da fonte</translation>
     </message>
     <message>
         <source>Tab width</source>
-        <translation type="unfinished"></translation>
+        <translation>Largura da tabulação</translation>
     </message>
     <message>
         <source>Elements colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Cores dos elementos</translation>
     </message>
     <message>
         <source>Highlight focused lines</source>
-        <translation type="unfinished"></translation>
+        <translation>Destacar linhas com foco</translation>
     </message>
     <message>
         <source>Show line numbers</source>
-        <translation type="unfinished"></translation>
+        <translation>Exibir números de linha</translation>
     </message>
     <message>
         <source>Code style preview</source>
-        <translation type="unfinished"></translation>
+        <translation>Pré-visualização do estilo do código</translation>
     </message>
     <message>
         <source>Canvas &amp;&amp; Objects</source>
@@ -241,7 +241,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Minimum opacity </source>
-        <translation type="unfinished"></translation>
+        <translation>Opacidade mínima </translation>
     </message>
     <message>
         <source>&lt;p&gt;Defines the minimum opacity percentage applied to the objects when using the fade out feature. A zero opacity causes the object to be completely hidden not being possible to interact with it in the canvas area.&lt;/p&gt;</source>
@@ -249,7 +249,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%</source>
-        <translation type="unfinished"></translation>
+        <translation>%</translation>
     </message>
     <message>
         <source>Grid size</source>
@@ -265,11 +265,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Square</source>
-        <translation type="unfinished"></translation>
+        <translation>Quadrado</translation>
     </message>
     <message>
         <source>Dot</source>
-        <translation type="unfinished"></translation>
+        <translation>Ponto</translation>
     </message>
     <message>
         <source>Canvas color</source>
@@ -281,7 +281,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Expansion factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Fator de expansão</translation>
     </message>
     <message>
         <source>&lt;p&gt;The expansion factor is the number of times the current page dimension (width and height) is used to expand the canvas geometry to a certain direction (top, left, bottom, or right). The page dimension can be adjusted in the printing options.&lt;/p&gt;</source>
@@ -309,11 +309,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Element</source>
-        <translation type="unfinished"></translation>
+        <translation>Elemento</translation>
     </message>
     <message>
         <source>Global: Font style</source>
-        <translation type="unfinished"></translation>
+        <translation>Global: Estilo da fonte</translation>
     </message>
     <message>
         <source>Global: Constraints descriptor</source>
@@ -329,11 +329,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Global: Position hint text</source>
-        <translation type="unfinished"></translation>
+        <translation>Global: Texto da dica de posição</translation>
     </message>
     <message>
         <source>Global: Position hint box</source>
-        <translation type="unfinished"></translation>
+        <translation>Global: Caixa da dica de posição</translation>
     </message>
     <message>
         <source>Global: Objects type</source>
@@ -341,11 +341,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Global: Lock arc</source>
-        <translation type="unfinished"></translation>
+        <translation>Global: Arco de bloqueio</translation>
     </message>
     <message>
         <source>Global: Lock body</source>
-        <translation type="unfinished"></translation>
+        <translation>Global: Corpo do bloqueio</translation>
     </message>
     <message>
         <source>Table: Schema name</source>
@@ -573,31 +573,31 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Global: Cutoff marker text</source>
-        <translation type="unfinished"></translation>
+        <translation>Global: Texto do marcador de corte</translation>
     </message>
     <message>
         <source>Global: Cutoff marker box</source>
-        <translation type="unfinished"></translation>
+        <translation>Global: Caixa do marcador de corte</translation>
     </message>
     <message>
         <source>Element color(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor(es) do elemento</translation>
     </message>
     <message>
         <source>Font size / style</source>
-        <translation type="unfinished"></translation>
+        <translation>Tamanho / estilo da fonte</translation>
     </message>
     <message>
         <source>Bold</source>
-        <translation type="unfinished"></translation>
+        <translation>Negrito</translation>
     </message>
     <message>
         <source>Italic</source>
-        <translation type="unfinished"></translation>
+        <translation>Itálico</translation>
     </message>
     <message>
         <source>Underline</source>
-        <translation type="unfinished"></translation>
+        <translation>Sublinhado</translation>
     </message>
     <message>
         <source>Define a custom color for the grid lines</source>
@@ -613,23 +613,23 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Line numbers&apos; font color</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor da fonte dos números de linha</translation>
     </message>
     <message>
         <source>Line numbers&apos; background color</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor de fundo dos números de linha</translation>
     </message>
     <message>
         <source>Line numbers&apos; highlight font color</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor da fonte de destaque dos números de linha</translation>
     </message>
     <message>
         <source>Highlighted line color</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor da linha destacada</translation>
     </message>
     <message>
         <source>System default</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão do sistema</translation>
     </message>
     <message>
         <source>A theme based on current system color settings</source>
@@ -672,52 +672,52 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Toggle attributes pagination</source>
-        <translation type="unfinished"></translation>
+        <translation>Alternar paginação de atributos</translation>
     </message>
 </context>
 <context>
     <name>BaseConfigWidget</name>
     <message>
         <source>A backup of the previous settings was saved into &lt;strong&gt;%1&lt;/strong&gt;!</source>
-        <translation type="unfinished"></translation>
+        <translation>Um backup das configurações anteriores foi salvo em &lt;strong&gt;%1&lt;/strong&gt;!</translation>
     </message>
 </context>
 <context>
     <name>BaseForm</name>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Diálogo</translation>
     </message>
     <message>
         <source>&amp;Apply</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Aplicar</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Cancelar</translation>
     </message>
     <message>
         <source>&amp;Ok</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ok</translation>
     </message>
     <message>
         <source>&amp;Close</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Fechar</translation>
     </message>
     <message>
         <source>Some fields in the form were modified! Do you really want to close and discard changes?</source>
-        <translation type="unfinished"></translation>
+        <translation>Alguns campos do formulário foram modificados! Deseja realmente fechar e descartar as alterações?</translation>
     </message>
     <message>
         <source>%1 properties</source>
-        <translation type="unfinished"></translation>
+        <translation>Propriedades de %1</translation>
     </message>
 </context>
 <context>
     <name>BaseFunctionWidget</name>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Language</source>
@@ -737,19 +737,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Definition</source>
-        <translation type="unfinished"></translation>
+        <translation>Definição</translation>
     </message>
     <message>
         <source>Dynamic Library</source>
-        <translation type="unfinished"></translation>
+        <translation>Biblioteca dinâmica</translation>
     </message>
     <message>
         <source>Symbol</source>
-        <translation type="unfinished"></translation>
+        <translation>Símbolo</translation>
     </message>
     <message>
         <source>Library</source>
-        <translation type="unfinished"></translation>
+        <translation>Biblioteca</translation>
     </message>
     <message>
         <source>Source code</source>
@@ -757,11 +757,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Configuration</source>
-        <translation type="unfinished"></translation>
+        <translation>Configuração</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <source>Type</source>
@@ -769,7 +769,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo</translation>
     </message>
     <message>
         <source>Default Value</source>
@@ -781,7 +781,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor</translation>
     </message>
 </context>
 <context>
@@ -951,14 +951,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <name>BaseObjectView</name>
     <message>
         <source>SQL off</source>
-        <translation type="unfinished"></translation>
+        <translation>SQL desativado</translation>
     </message>
 </context>
 <context>
     <name>BaseObjectWidget</name>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <source>This is the name of the object in the PostgreSQL database.</source>
@@ -995,7 +995,7 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Disable SQL code</source>
-        <translation type="unfinished"></translation>
+        <translation>Desativar código SQL</translation>
     </message>
     <message>
         <source>Collation</source>
@@ -1007,7 +1007,7 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Custom SQL</source>
-        <translation type="unfinished"></translation>
+        <translation>SQL personalizado</translation>
     </message>
     <message>
         <source>Owner</source>
@@ -1015,11 +1015,11 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>icone</source>
-        <translation type="unfinished"></translation>
+        <translation>icone</translation>
     </message>
     <message>
         <source>ID:</source>
-        <translation type="unfinished"></translation>
+        <translation>ID:</translation>
     </message>
     <message>
         <source>&lt;p&gt;This is a more friendly name for the object. When displaying the model in compact view this is the name shown for the object instead of its real name. If this field is empty the real name will be displayed anyway.&lt;/p&gt;</source>
@@ -1031,33 +1031,35 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Required field. Leaving this empty will raise errors!</source>
-        <translation type="unfinished"></translation>
+        <translation>Campo obrigatório. Deixá-lo vazio causará erros!</translation>
     </message>
     <message>
         <source>General</source>
-        <translation type="unfinished"></translation>
+        <translation>Geral</translation>
     </message>
     <message>
         <source>Associations</source>
-        <translation type="unfinished"></translation>
+        <translation>Associações</translation>
     </message>
     <message>
         <source>SQL preview</source>
-        <translation type="unfinished"></translation>
+        <translation>Pré-visualização do SQL</translation>
     </message>
     <message>
         <source>** Failed to load the syntax highlight configuration! ** 
 
  %1</source>
-        <translation type="unfinished"></translation>
+        <translation>** Falha ao carregar a configuração de realce de sintaxe! ** 
+
+ %1</translation>
     </message>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Value(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor(es)</translation>
     </message>
 </context>
 <context>
@@ -1092,7 +1094,7 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Cópia</translation>
     </message>
 </context>
 <context>
@@ -1107,15 +1109,15 @@ This will disable the code of all child and referrer objects.</source>
     <name>BugReportForm</name>
     <message>
         <source>Bug report</source>
-        <translation type="unfinished"></translation>
+        <translation>Relatório de bug</translation>
     </message>
     <message>
         <source>Create</source>
-        <translation type="unfinished"></translation>
+        <translation>Criar</translation>
     </message>
     <message>
         <source>&amp;Close</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Fechar</translation>
     </message>
     <message>
         <source>Use the form below to generate a complete bug report. Please, try to be as clear as possible when describing the actions that can reproduce the bug. Additionally, it is important to attach a sample database model so that the bug can be quickly discovered and fixed!</source>
@@ -1123,19 +1125,19 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Report</source>
-        <translation type="unfinished"></translation>
+        <translation>Relatório</translation>
     </message>
     <message>
         <source>Issue details</source>
-        <translation type="unfinished"></translation>
+        <translation>Detalhes do problema</translation>
     </message>
     <message>
         <source>Output</source>
-        <translation type="unfinished"></translation>
+        <translation>Saída</translation>
     </message>
     <message>
         <source>You can also report this issue at any time in pgModeler&apos;s project repository on &lt;a href=&quot;https://github.com/pgmodeler/pgmodeler/issues&quot;&gt;GitHub&lt;/a&gt;. </source>
-        <translation type="unfinished"></translation>
+        <translation>Você também pode relatar este problema a qualquer momento no repositório do projeto pgModeler no &lt;a href=&quot;https://github.com/pgmodeler/pgmodeler/issues&quot;&gt;GitHub&lt;/a&gt;. </translation>
     </message>
     <message>
         <source>Database model</source>
@@ -1151,11 +1153,11 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Select report output folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecione a pasta de saída do relatório</translation>
     </message>
     <message>
         <source>Bug report successfuly generated! Please, send the file &lt;strong&gt;&lt;a href=&apos;file://%1&apos;&gt;%2&lt;a/&gt;&lt;/strong&gt; to &lt;em&gt;%3&lt;/em&gt; in order be analyzed. Thank you for the collaboration!</source>
-        <translation type="unfinished"></translation>
+        <translation>Relatório de bug gerado com sucesso! Por favor, envie o arquivo &lt;strong&gt;&lt;a href=&apos;file://%1&apos;&gt;%2&lt;a/&gt;&lt;/strong&gt; para &lt;em&gt;%3&lt;/em&gt; para que seja analisado. Obrigado pela colaboração!</translation>
     </message>
     <message>
         <source>Load model</source>
@@ -1167,7 +1169,7 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>All files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os arquivos (*.*)</translation>
     </message>
 </context>
 <context>
@@ -1178,7 +1180,7 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Input / Output</source>
-        <translation type="unfinished"></translation>
+        <translation>Entrada / Saída</translation>
     </message>
     <message>
         <source>Cast function</source>
@@ -1194,22 +1196,22 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Implict</source>
-        <translation type="unfinished"></translation>
+        <translation>Implícito</translation>
     </message>
     <message>
         <source>Explict</source>
-        <translation type="unfinished"></translation>
+        <translation>Explícito</translation>
     </message>
     <message>
         <source>Assignment</source>
-        <translation type="unfinished"></translation>
+        <translation>Atribuição</translation>
     </message>
 </context>
 <context>
     <name>ChangelogWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Toggles the saving of the changelog to database model file.</source>
@@ -1225,11 +1227,11 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Inspect</source>
-        <translation type="unfinished"></translation>
+        <translation>Inspecionar</translation>
     </message>
     <message>
         <source>Shift+Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+Del</translation>
     </message>
     <message>
         <source>Clears the entire changelog.</source>
@@ -1237,27 +1239,27 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar</translation>
     </message>
     <message>
         <source>Hide this widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar este widget</translation>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <source>Last change: &lt;strong&gt;2020-06-13 14:25:00.555&lt;/strong&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Última alteração: &lt;strong&gt;2020-06-13 14:25:00.555&lt;/strong&gt;</translation>
     </message>
     <message>
         <source>First change: &lt;strong&gt;2020-06-13 14:25:00.555&lt;/strong&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Primeira alteração: &lt;strong&gt;2020-06-13 14:25:00.555&lt;/strong&gt;</translation>
     </message>
     <message>
         <source>The total number of changelog entries</source>
@@ -1265,7 +1267,7 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>0</source>
-        <translation type="unfinished"></translation>
+        <translation>0</translation>
     </message>
     <message>
         <source>The number of object creation entries</source>
@@ -1281,11 +1283,11 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Last change: &lt;strong&gt;%1&lt;/strong&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Última alteração: &lt;strong&gt;%1&lt;/strong&gt;</translation>
     </message>
     <message>
         <source>First change: &lt;strong&gt;%1&lt;/strong&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Primeira alteração: &lt;strong&gt;%1&lt;/strong&gt;</translation>
     </message>
     <message>
         <source>&lt;strong&gt;ATTENTION:&lt;/strong&gt; All the changelog records made until today will be lost and the filtering by date of modification in partial diff will be unavailable! Do you want to proceed?</source>
@@ -1293,7 +1295,7 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Date</source>
-        <translation type="unfinished"></translation>
+        <translation>Data</translation>
     </message>
     <message>
         <source>Object</source>
@@ -1305,34 +1307,34 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Action</source>
-        <translation type="unfinished"></translation>
+        <translation>Ação</translation>
     </message>
     <message>
         <source>Created</source>
-        <translation type="unfinished"></translation>
+        <translation>Criado</translation>
     </message>
     <message>
         <source>Deleted</source>
-        <translation type="unfinished"></translation>
+        <translation>Excluído</translation>
     </message>
     <message>
         <source>Updated</source>
-        <translation type="unfinished"></translation>
+        <translation>Atualizado</translation>
     </message>
 </context>
 <context>
     <name>CodeCompletionWidget</name>
     <message>
         <source>&amp;Always on top</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Sempre no topo</translation>
     </message>
     <message>
         <source>&lt;p&gt;The widget will be always displayed while typing. It can be closable only by ESC key or when focus changes to another widget.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;O widget será sempre exibido durante a digitação. Ele só pode ser fechado pela tecla ESC ou quando o foco passar para outro widget.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>SQL Keyword</source>
-        <translation type="unfinished"></translation>
+        <translation>Palavra-chave SQL</translation>
     </message>
 </context>
 <context>
@@ -1343,11 +1345,11 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>[obj_name]</source>
-        <translation type="unfinished"></translation>
+        <translation>[obj_name]</translation>
     </message>
     <message>
         <source>icon</source>
-        <translation type="unfinished"></translation>
+        <translation>icon</translation>
     </message>
     <message>
         <source>[obj_type]</source>
@@ -1355,15 +1357,15 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>[obj_id]</source>
-        <translation type="unfinished"></translation>
+        <translation>[obj_id]</translation>
     </message>
     <message>
         <source>PostgreSQL</source>
-        <translation type="unfinished"></translation>
+        <translation>PostgreSQL</translation>
     </message>
     <message>
         <source>Code display</source>
-        <translation type="unfinished"></translation>
+        <translation>Exibição do código</translation>
     </message>
     <message>
         <source>&lt;strong&gt;Original:&lt;/strong&gt; generates only the original SQL code of the selected object.&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;Dependencies:&lt;/strong&gt; generates the original code including all dependencies needed to properly create the selected  object. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;Children:&lt;/strong&gt; generates the original code including all children&apos;s SQL code. This option is used only for schemas, tables, and views.</source>
@@ -1371,23 +1373,23 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Original</source>
-        <translation type="unfinished"></translation>
+        <translation>Original</translation>
     </message>
     <message>
         <source>Original + depedencies&apos; SQL</source>
-        <translation type="unfinished"></translation>
+        <translation>Original + SQL das dependências</translation>
     </message>
     <message>
         <source>Original + children&apos;s SQL</source>
-        <translation type="unfinished"></translation>
+        <translation>Original + SQL dos filhos</translation>
     </message>
     <message>
         <source>SQL</source>
-        <translation type="unfinished"></translation>
+        <translation>SQL</translation>
     </message>
     <message>
         <source>XML</source>
-        <translation type="unfinished"></translation>
+        <translation>XML</translation>
     </message>
     <message>
         <source>-- SQL code unavailable for this type of object --</source>
@@ -1406,31 +1408,31 @@ This will disable the code of all child and referrer objects.</source>
     <name>CollationWidget</name>
     <message>
         <source>Basics</source>
-        <translation type="unfinished"></translation>
+        <translation>Básico</translation>
     </message>
     <message>
         <source>Locale</source>
-        <translation type="unfinished"></translation>
+        <translation>Localidade</translation>
     </message>
     <message>
         <source>Encoding</source>
-        <translation type="unfinished"></translation>
+        <translation>Codificação</translation>
     </message>
     <message>
         <source>Modifier</source>
-        <translation type="unfinished"></translation>
+        <translation>Modificador</translation>
     </message>
     <message>
         <source>Provider</source>
-        <translation type="unfinished"></translation>
+        <translation>Provedor</translation>
     </message>
     <message>
         <source>Deterministic</source>
-        <translation type="unfinished"></translation>
+        <translation>Determinístico</translation>
     </message>
     <message>
         <source>LC_COLLATE</source>
-        <translation type="unfinished"></translation>
+        <translation>LC_COLLATE</translation>
     </message>
     <message>
         <source>Language</source>
@@ -1438,34 +1440,34 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>LC_CTYPE</source>
-        <translation type="unfinished"></translation>
+        <translation>LC_CTYPE</translation>
     </message>
     <message>
         <source>Not defined</source>
-        <translation type="unfinished"></translation>
+        <translation>Não definido</translation>
     </message>
     <message>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão</translation>
     </message>
     <message>
         <source>&lt;p&gt;The modifier is any value specified after the character &lt;strong&gt;@&lt;/strong&gt;. For example: &lt;em&gt;en_US.utf8&lt;strong&gt;@modifier&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;O modificador é qualquer valor especificado após o caractere &lt;strong&gt;@&lt;/strong&gt;. Por exemplo: &lt;em&gt;en_US.utf8&lt;strong&gt;@modificador&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
     <name>ColorPickerWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Generate random color(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerar cor(es) aleatória(s)</translation>
     </message>
     <message>
         <source>Select color</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar cor</translation>
     </message>
 </context>
 <context>
@@ -1479,7 +1481,7 @@ This will disable the code of all child and referrer objects.</source>
     <name>ColumnPickerWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Column</source>
@@ -1498,11 +1500,11 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão</translation>
     </message>
     <message>
         <source>Generated</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerada</translation>
     </message>
     <message>
         <source>Sequence</source>
@@ -1529,7 +1531,7 @@ This will disable the code of all child and referrer objects.</source>
     <name>ConfigurationWidget</name>
     <message>
         <source>pgModeler settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Configurações do pgModeler</translation>
     </message>
     <message>
         <source>Snippets</source>
@@ -1537,7 +1539,7 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>General</source>
-        <translation type="unfinished"></translation>
+        <translation>Geral</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -1549,23 +1551,23 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Appearance</source>
-        <translation type="unfinished"></translation>
+        <translation>Aparência</translation>
     </message>
     <message>
         <source>Plug-ins</source>
-        <translation type="unfinished"></translation>
+        <translation>Plug-ins</translation>
     </message>
     <message>
         <source>Apply</source>
-        <translation type="unfinished"></translation>
+        <translation>Aplicar</translation>
     </message>
     <message>
         <source>Discard</source>
-        <translation type="unfinished"></translation>
+        <translation>Descartar</translation>
     </message>
     <message>
         <source>Defaults</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrões</translation>
     </message>
     <message>
         <source>Some configuration parameters were changed! How do you wish to proceed?</source>
@@ -1573,19 +1575,19 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Keep editing</source>
-        <translation type="unfinished"></translation>
+        <translation>Continuar editando</translation>
     </message>
     <message>
         <source>In some cases restore the default settings related to it may solve the problem. Would like to do that?</source>
-        <translation type="unfinished"></translation>
+        <translation>Em alguns casos, restaurar as configurações padrão relacionadas a isso pode resolver o problema. Deseja fazer isso?</translation>
     </message>
     <message>
         <source>Restore</source>
-        <translation type="unfinished"></translation>
+        <translation>Restaurar</translation>
     </message>
     <message>
         <source>Any modification made until now in the current section will be lost! Do you really want to restore default settings?</source>
-        <translation type="unfinished"></translation>
+        <translation>Qualquer modificação feita até agora na seção atual será perdida! Deseja realmente restaurar as configurações padrão?</translation>
     </message>
 </context>
 <context>
@@ -1604,7 +1606,7 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Cancel editing</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar edição</translation>
     </message>
     <message>
         <source>Duplicate the selected connection</source>
@@ -1620,15 +1622,15 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Test</source>
-        <translation type="unfinished"></translation>
+        <translation>Testar</translation>
     </message>
     <message>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation type="unfinished"></translation>
+        <translation>Atualizar</translation>
     </message>
     <message>
         <source>Basic parameters</source>
@@ -1660,11 +1662,11 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Timeout</source>
-        <translation type="unfinished"></translation>
+        <translation>Tempo limite</translation>
     </message>
     <message>
         <source>Others</source>
-        <translation type="unfinished"></translation>
+        <translation>Outros</translation>
     </message>
     <message>
         <source>When successfully connecting to the database the current user will be switched to the one specified in this field via &lt;strong&gt;SET ROLE [role_name]&lt;/strong&gt;.</source>
@@ -1672,7 +1674,7 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Username</source>
-        <translation type="unfinished"></translation>
+        <translation>Usuário</translation>
     </message>
     <message>
         <source>Database</source>
@@ -1680,15 +1682,15 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Senha</translation>
     </message>
     <message>
         <source> second(s)</source>
-        <translation type="unfinished"></translation>
+        <translation> segundo(s)</translation>
     </message>
     <message>
         <source>Host / Port</source>
-        <translation type="unfinished"></translation>
+        <translation>Host / Porta</translation>
     </message>
     <message>
         <source>Set role</source>
@@ -1700,7 +1702,7 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Default for</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão para</translation>
     </message>
     <message>
         <source>Automatically browses the named database when using this connection to manage databases on &lt;strong&gt;Manage&lt;/strong&gt; view.</source>
@@ -1708,7 +1710,7 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Auto browse</source>
-        <translation type="unfinished"></translation>
+        <translation>Navegar automaticamente</translation>
     </message>
     <message>
         <source>Security parameters</source>
@@ -1716,59 +1718,59 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>SSL mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo SSL</translation>
     </message>
     <message>
         <source>Disable</source>
-        <translation type="unfinished"></translation>
+        <translation>Desabilitar</translation>
     </message>
     <message>
         <source>Allow</source>
-        <translation type="unfinished"></translation>
+        <translation>Permitir</translation>
     </message>
     <message>
         <source>Require</source>
-        <translation type="unfinished"></translation>
+        <translation>Exigir</translation>
     </message>
     <message>
         <source>AC verification</source>
-        <translation type="unfinished"></translation>
+        <translation>Verificação de CA</translation>
     </message>
     <message>
         <source>Full verification</source>
-        <translation type="unfinished"></translation>
+        <translation>Verificação completa</translation>
     </message>
     <message>
         <source>Client certificate</source>
-        <translation type="unfinished"></translation>
+        <translation>Certificado do cliente</translation>
     </message>
     <message>
         <source>~/.postgresql/postgresql.crt</source>
-        <translation type="unfinished"></translation>
+        <translation>~/.postgresql/postgresql.crt</translation>
     </message>
     <message>
         <source>Client key</source>
-        <translation type="unfinished"></translation>
+        <translation>Chave do cliente</translation>
     </message>
     <message>
         <source>~/.postgresql/postgresql.key</source>
-        <translation type="unfinished"></translation>
+        <translation>~/.postgresql/postgresql.key</translation>
     </message>
     <message>
         <source>Root certificate</source>
-        <translation type="unfinished"></translation>
+        <translation>Certificado raiz</translation>
     </message>
     <message>
         <source>~/.postgresql/root.crt</source>
-        <translation type="unfinished"></translation>
+        <translation>~/.postgresql/root.crt</translation>
     </message>
     <message>
         <source>Revoked certs</source>
-        <translation type="unfinished"></translation>
+        <translation>Certificados revogados</translation>
     </message>
     <message>
         <source>~/.postgresql/root.crl</source>
-        <translation type="unfinished"></translation>
+        <translation>~/.postgresql/root.crl</translation>
     </message>
     <message>
         <source>Kerberos server</source>
@@ -1776,7 +1778,7 @@ This will disable the code of all child and referrer objects.</source>
     </message>
     <message>
         <source>Force GSSAPI</source>
-        <translation type="unfinished"></translation>
+        <translation>Forçar GSSAPI</translation>
     </message>
     <message>
         <source>Connection successfully established!
@@ -1810,7 +1812,7 @@ Encoding: `%4&apos;</source>
     <name>ConstraintWidget</name>
     <message>
         <source>Fill factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Fator de preenchimento</translation>
     </message>
     <message>
         <source>Match</source>
@@ -1822,19 +1824,19 @@ Encoding: `%4&apos;</source>
     </message>
     <message>
         <source>Indexing</source>
-        <translation type="unfinished"></translation>
+        <translation>Indexação</translation>
     </message>
     <message>
         <source>Temporal key</source>
-        <translation type="unfinished"></translation>
+        <translation>Chave temporal</translation>
     </message>
     <message>
         <source>Nulls not distinct</source>
-        <translation type="unfinished"></translation>
+        <translation>Nulos não distintos</translation>
     </message>
     <message>
         <source>No inherit</source>
-        <translation type="unfinished"></translation>
+        <translation>Não herdar</translation>
     </message>
     <message>
         <source>Type</source>
@@ -1866,22 +1868,22 @@ Encoding: `%4&apos;</source>
     </message>
     <message>
         <source>Exclude elements</source>
-        <translation type="unfinished"></translation>
+        <translation>Elementos de exclusão</translation>
     </message>
     <message>
         <source>Expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão</translation>
     </message>
 </context>
 <context>
     <name>ConversionWidget</name>
     <message>
         <source>Source encoding</source>
-        <translation type="unfinished"></translation>
+        <translation>Codificação de origem</translation>
     </message>
     <message>
         <source>Target encoding</source>
-        <translation type="unfinished"></translation>
+        <translation>Codificação de destino</translation>
     </message>
     <message>
         <source>Default conversion</source>
@@ -1900,27 +1902,27 @@ Encoding: `%4&apos;</source>
     </message>
     <message>
         <source>Stack trace</source>
-        <translation type="unfinished"></translation>
+        <translation>Rastreamento de pilha</translation>
     </message>
     <message>
         <source>Input</source>
-        <translation type="unfinished"></translation>
+        <translation>Entrada</translation>
     </message>
     <message>
         <source>Select bug report file</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar arquivo de relatório de bug</translation>
     </message>
     <message>
         <source>pgModeler bug report (*.bug)</source>
-        <translation type="unfinished"></translation>
+        <translation>Relatório de bug do pgModeler (*.bug)</translation>
     </message>
     <message>
         <source>All files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os arquivos (*.*)</translation>
     </message>
     <message>
         <source>Load report file for analysis</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar arquivo de relatório para análise</translation>
     </message>
     <message>
         <source>Save the attached model file on the filesystem</source>
@@ -1936,11 +1938,11 @@ Encoding: `%4&apos;</source>
     </message>
     <message>
         <source>Bug report analysis mode activated.</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo de análise de relatório de bug ativado.</translation>
     </message>
     <message>
         <source>Oh no! pgModeler just crashed!</source>
-        <translation type="unfinished"></translation>
+        <translation>Ah, não! O pgModeler acabou de travar!</translation>
     </message>
     <message>
         <source>We apologize for what happened! It is clear that a nasty bug caused that. Please, fill out the form below describing your actions that somehow caused the unexpected closing. This will help us to investigate the causes and provide the proper fix for the problem.</source>
@@ -1970,43 +1972,43 @@ Encoding: `%4&apos;</source>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Load CSV</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar CSV</translation>
     </message>
     <message>
         <source>CSV File</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo CSV</translation>
     </message>
     <message>
         <source>Separator </source>
-        <translation type="unfinished"></translation>
+        <translation>Separador </translation>
     </message>
     <message>
         <source>Semicolon (;)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ponto e vírgula (;)</translation>
     </message>
     <message>
         <source>Comma (,)</source>
-        <translation type="unfinished"></translation>
+        <translation>Vírgula (,)</translation>
     </message>
     <message>
         <source>Space</source>
-        <translation type="unfinished"></translation>
+        <translation>Espaço</translation>
     </message>
     <message>
         <source>Tabulation</source>
-        <translation type="unfinished"></translation>
+        <translation>Tabulação</translation>
     </message>
     <message>
         <source>Other</source>
-        <translation type="unfinished"></translation>
+        <translation>Outro</translation>
     </message>
     <message>
         <source>;</source>
-        <translation type="unfinished"></translation>
+        <translation>;</translation>
     </message>
     <message>
         <source>Text delimiter</source>
@@ -2014,7 +2016,7 @@ Encoding: `%4&apos;</source>
     </message>
     <message>
         <source>&quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>&quot;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Use the first row as column names in the CSV file. By unchecking this option the first row is used as data.&lt;/p&gt;</source>
@@ -2026,22 +2028,22 @@ Encoding: `%4&apos;</source>
     </message>
     <message>
         <source>Load</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar</translation>
     </message>
     <message>
         <source>Load CSV file</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar arquivo CSV</translation>
     </message>
 </context>
 <context>
     <name>CustomSQLWidget</name>
     <message>
         <source>Add custom SQL code</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar código SQL personalizado</translation>
     </message>
     <message>
         <source>SQL code</source>
-        <translation type="unfinished"></translation>
+        <translation>Código SQL</translation>
     </message>
     <message>
         <source>Puts an SELECT command template at current cursor position.</source>
@@ -2049,7 +2051,7 @@ Encoding: `%4&apos;</source>
     </message>
     <message>
         <source>SELECT</source>
-        <translation type="unfinished"></translation>
+        <translation>SELECT</translation>
     </message>
     <message>
         <source>Puts an INSERT command template at current cursor position.</source>
@@ -2057,7 +2059,7 @@ Encoding: `%4&apos;</source>
     </message>
     <message>
         <source>INSERT</source>
-        <translation type="unfinished"></translation>
+        <translation>INSERT</translation>
     </message>
     <message>
         <source>Puts an UPDATE command template at current cursor position.</source>
@@ -2065,7 +2067,7 @@ Encoding: `%4&apos;</source>
     </message>
     <message>
         <source>UPDATE</source>
-        <translation type="unfinished"></translation>
+        <translation>UPDATE</translation>
     </message>
     <message>
         <source>Puts an DELETE command template at current cursor position.</source>
@@ -2073,15 +2075,15 @@ Encoding: `%4&apos;</source>
     </message>
     <message>
         <source>DELETE</source>
-        <translation type="unfinished"></translation>
+        <translation>DELETE</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar</translation>
     </message>
     <message>
         <source>Append SQL</source>
-        <translation type="unfinished"></translation>
+        <translation>Anexar SQL</translation>
     </message>
     <message>
         <source>Append the SQL code at the very end of model definition.
@@ -2094,7 +2096,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Prepend SQL</source>
-        <translation type="unfinished"></translation>
+        <translation>Preceder SQL</translation>
     </message>
     <message>
         <source>Prepend at beginning of model definition</source>
@@ -2106,7 +2108,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Generic INSERT</source>
-        <translation type="unfinished"></translation>
+        <translation>INSERT genérico</translation>
     </message>
     <message>
         <source>Include serial columns</source>
@@ -2118,7 +2120,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Generic SELECT</source>
-        <translation type="unfinished"></translation>
+        <translation>SELECT genérico</translation>
     </message>
     <message>
         <source>Table SELECT</source>
@@ -2126,7 +2128,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Generic UPDATE</source>
-        <translation type="unfinished"></translation>
+        <translation>UPDATE genérico</translation>
     </message>
     <message>
         <source>Table UPDATE</source>
@@ -2134,7 +2136,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Generic DELETE</source>
-        <translation type="unfinished"></translation>
+        <translation>DELETE genérico</translation>
     </message>
     <message>
         <source>Table DELETE</source>
@@ -2145,31 +2147,31 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     <name>CustomTableWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Add Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar item</translation>
     </message>
     <message>
         <source>Ins</source>
-        <translation type="unfinished"></translation>
+        <translation>Ins</translation>
     </message>
     <message>
         <source>Remove Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Remover item</translation>
     </message>
     <message>
         <source>Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Del</translation>
     </message>
     <message>
         <source>Remove All</source>
-        <translation type="unfinished"></translation>
+        <translation>Remover tudo</translation>
     </message>
     <message>
         <source>Shift+Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+Del</translation>
     </message>
     <message>
         <source>Duplicate item</source>
@@ -2177,55 +2179,55 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Ctrl+D</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+D</translation>
     </message>
     <message>
         <source>Edit Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar item</translation>
     </message>
     <message>
         <source>Space</source>
-        <translation type="unfinished"></translation>
+        <translation>Espaço</translation>
     </message>
     <message>
         <source>Update Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Atualizar item</translation>
     </message>
     <message>
         <source>Alt+R</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+R</translation>
     </message>
     <message>
         <source>Move Up</source>
-        <translation type="unfinished"></translation>
+        <translation>Mover para cima</translation>
     </message>
     <message>
         <source>Ctrl+Up</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Up</translation>
     </message>
     <message>
         <source>Move Down</source>
-        <translation type="unfinished"></translation>
+        <translation>Mover para baixo</translation>
     </message>
     <message>
         <source>Ctrl+Down</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Down</translation>
     </message>
     <message>
         <source>Move to start</source>
-        <translation type="unfinished"></translation>
+        <translation>Mover para o início</translation>
     </message>
     <message>
         <source>Ctrl+Home</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Home</translation>
     </message>
     <message>
         <source>Move to end</source>
-        <translation type="unfinished"></translation>
+        <translation>Mover para o fim</translation>
     </message>
     <message>
         <source>Ctrl+End, Ctrl+S</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+End, Ctrl+S</translation>
     </message>
     <message>
         <source>Resize columns to fit contents</source>
@@ -2233,25 +2235,25 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Are you sure you want to remove the selected item(s)?</source>
-        <translation type="unfinished"></translation>
+        <translation>Tem certeza de que deseja remover o(s) item(ns) selecionado(s)?</translation>
     </message>
     <message>
         <source>Are you sure you want to remove all the items?</source>
-        <translation type="unfinished"></translation>
+        <translation>Tem certeza de que deseja remover todos os itens?</translation>
     </message>
 </context>
 <context>
     <name>CutoffItem</name>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Rels. cruzados: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>&lt;p&gt;Duplicate this grid using the same filtering options in the new instance.&lt;/p&gt;</source>
@@ -2259,11 +2261,11 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Ctrl+Shift+D</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+D</translation>
     </message>
     <message>
         <source>public</source>
-        <translation type="unfinished"></translation>
+        <translation>public</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The total number of rows in the table.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -2271,23 +2273,23 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>0 row(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>0 linha(s)</translation>
     </message>
     <message>
         <source>Number of rows marked to be added</source>
-        <translation type="unfinished"></translation>
+        <translation>Número de linhas marcadas para adição</translation>
     </message>
     <message>
         <source>0</source>
-        <translation type="unfinished"></translation>
+        <translation>0</translation>
     </message>
     <message>
         <source>Number of rows marked to be changed</source>
-        <translation type="unfinished"></translation>
+        <translation>Número de linhas marcadas para alteração</translation>
     </message>
     <message>
         <source>Number of rows marked to be deleted</source>
-        <translation type="unfinished"></translation>
+        <translation>Número de linhas marcadas para exclusão</translation>
     </message>
     <message>
         <source>&lt;p&gt;Discard conflicting rows during INSERT operations without aborting the current transaction.&lt;/p&gt;</source>
@@ -2295,7 +2297,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Ignore conflicting rows</source>
-        <translation type="unfinished"></translation>
+        <translation>Ignorar linhas conflitantes</translation>
     </message>
     <message>
         <source>Filter</source>
@@ -2303,11 +2305,11 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão</translation>
     </message>
     <message>
         <source>Order / Limit</source>
-        <translation type="unfinished"></translation>
+        <translation>Ordem / Limite</translation>
     </message>
     <message>
         <source>Column</source>
@@ -2315,19 +2317,19 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>ASC</source>
-        <translation type="unfinished"></translation>
+        <translation>ASC</translation>
     </message>
     <message>
         <source>DESC</source>
-        <translation type="unfinished"></translation>
+        <translation>DESC</translation>
     </message>
     <message>
         <source>Add Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar item</translation>
     </message>
     <message>
         <source>Remove Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Remover item</translation>
     </message>
     <message>
         <source>Clear the order by columns list</source>
@@ -2335,19 +2337,19 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Move selected item up</source>
-        <translation type="unfinished"></translation>
+        <translation>Mover o item selecionado para cima</translation>
     </message>
     <message>
         <source>Move selected item down</source>
-        <translation type="unfinished"></translation>
+        <translation>Mover o item selecionado para baixo</translation>
     </message>
     <message>
         <source>Limit results to</source>
-        <translation type="unfinished"></translation>
+        <translation>Limitar resultados a</translation>
     </message>
     <message>
         <source>row(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>linha(s)</translation>
     </message>
     <message>
         <source>Columns</source>
@@ -2355,63 +2357,63 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Select all</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar tudo</translation>
     </message>
     <message>
         <source>Clear all</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar tudo</translation>
     </message>
     <message>
         <source>Copy as text</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar como texto</translation>
     </message>
     <message>
         <source>Copy as CSV</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar como CSV</translation>
     </message>
     <message>
         <source>Save as...</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar como...</translation>
     </message>
     <message>
         <source>Text file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de texto</translation>
     </message>
     <message>
         <source>CSV file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo CSV</translation>
     </message>
     <message>
         <source>Paste as text</source>
-        <translation type="unfinished"></translation>
+        <translation>Colar como texto</translation>
     </message>
     <message>
         <source>Paste as CSV</source>
-        <translation type="unfinished"></translation>
+        <translation>Colar como CSV</translation>
     </message>
     <message>
         <source>Add row(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar linha(s)</translation>
     </message>
     <message>
         <source>Add empty rows</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar linhas vazias</translation>
     </message>
     <message>
         <source>Delete row(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Excluir linha(s)</translation>
     </message>
     <message>
         <source>Mark the selected rows to be deleted</source>
-        <translation type="unfinished"></translation>
+        <translation>Marcar as linhas selecionadas para exclusão</translation>
     </message>
     <message>
         <source>Edit cells</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar células</translation>
     </message>
     <message>
         <source>Change the values of all selected cells at once</source>
-        <translation type="unfinished"></translation>
+        <translation>Alterar os valores de todas as células selecionadas de uma vez</translation>
     </message>
     <message>
         <source>Duplicate row(s)</source>
@@ -2423,7 +2425,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Clear cell(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar célula(s)</translation>
     </message>
     <message>
         <source>Clears the items selected on the grid</source>
@@ -2443,15 +2445,15 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Row(s) returned: &lt;strong&gt;%1&lt;/strong&gt; in &lt;em&gt;&lt;strong&gt;%2&lt;/strong&gt;&lt;/em&gt; </source>
-        <translation type="unfinished"></translation>
+        <translation>Linha(s) retornada(s): &lt;strong&gt;%1&lt;/strong&gt; em &lt;em&gt;&lt;strong&gt;%2&lt;/strong&gt;&lt;/em&gt; </translation>
     </message>
     <message>
         <source>&lt;em&gt;(Limit: &lt;strong&gt;%1&lt;/strong&gt; rows)&lt;/em&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;em&gt;(Limite: &lt;strong&gt;%1&lt;/strong&gt; linhas)&lt;/em&gt;</translation>
     </message>
     <message>
         <source>none</source>
-        <translation type="unfinished"></translation>
+        <translation>nenhum</translation>
     </message>
     <message>
         <source>The table does not have a primary key! Updates and deletes will be performed by considering all columns as primary key. &lt;strong&gt;WARNING:&lt;/strong&gt; these operations can affect more than one row.</source>
@@ -2463,7 +2465,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>(none)</source>
-        <translation type="unfinished"></translation>
+        <translation>(nenhum)</translation>
     </message>
     <message>
         <source>Referrer tables</source>
@@ -2471,47 +2473,47 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>This row is marked to be %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Esta linha está marcada para ser %1</translation>
     </message>
     <message>
         <source>deleted</source>
-        <translation type="unfinished"></translation>
+        <translation>excluída</translation>
     </message>
     <message>
         <source>updated</source>
-        <translation type="unfinished"></translation>
+        <translation>atualizada</translation>
     </message>
     <message>
         <source>inserted</source>
-        <translation type="unfinished"></translation>
+        <translation>inserida</translation>
     </message>
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Once commited its not possible to undo the changes! Proceed with saving?</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;strong&gt;ATENÇÃO:&lt;/strong&gt; Depois de efetivadas, não é possível desfazer as alterações! Prosseguir com o salvamento?</translation>
     </message>
     <message>
         <source>delete</source>
-        <translation type="unfinished"></translation>
+        <translation>excluir</translation>
     </message>
     <message>
         <source>update</source>
-        <translation type="unfinished"></translation>
+        <translation>atualizar</translation>
     </message>
     <message>
         <source>insert</source>
-        <translation type="unfinished"></translation>
+        <translation>inserir</translation>
     </message>
     <message>
         <source>Selected items</source>
-        <translation type="unfinished"></translation>
+        <translation>Itens selecionados</translation>
     </message>
     <message>
         <source>Paste items</source>
-        <translation type="unfinished"></translation>
+        <translation>Colar itens</translation>
     </message>
     <message>
         <source>Clear items</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar itens</translation>
     </message>
     <message>
         <source>Browse tables</source>
@@ -2519,50 +2521,50 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Save file</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar arquivo</translation>
     </message>
     <message>
         <source>CSV file (*.csv)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo CSV (*.csv)</translation>
     </message>
     <message>
         <source>Text file (*.txt)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de texto (*.txt)</translation>
     </message>
 </context>
 <context>
     <name>DataHandlingForm</name>
     <message>
         <source>Data handling</source>
-        <translation type="unfinished"></translation>
+        <translation>Manipulação de dados</translation>
     </message>
     <message>
         <source>Refresh listing</source>
-        <translation type="unfinished"></translation>
+        <translation>Atualizar listagem</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Atualizar</translation>
     </message>
     <message>
         <source>F5</source>
-        <translation type="unfinished"></translation>
+        <translation>F5</translation>
     </message>
     <message>
         <source>Edit rows</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar linhas</translation>
     </message>
     <message>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar</translation>
     </message>
     <message>
         <source>Copy / save the selected items</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar / salvar os itens selecionados</translation>
     </message>
     <message>
         <source>Selection</source>
-        <translation type="unfinished"></translation>
+        <translation>Seleção</translation>
     </message>
     <message>
         <source>Export results to a file</source>
@@ -2574,7 +2576,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Ctrl+X</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+X</translation>
     </message>
     <message>
         <source>Paste items on the grid</source>
@@ -2582,7 +2584,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Paste</source>
-        <translation type="unfinished"></translation>
+        <translation>Colar</translation>
     </message>
     <message>
         <source>Truncate the browsed table</source>
@@ -2594,15 +2596,15 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Open a new data manipulation window</source>
-        <translation type="unfinished"></translation>
+        <translation>Abrir uma nova janela de manipulação de dados</translation>
     </message>
     <message>
         <source>New </source>
-        <translation type="unfinished"></translation>
+        <translation>Nova </translation>
     </message>
     <message>
         <source>Ctrl+N</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+N</translation>
     </message>
     <message>
         <source>Browse referenced tables</source>
@@ -2610,19 +2612,19 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Browse</source>
-        <translation type="unfinished"></translation>
+        <translation>Navegar</translation>
     </message>
     <message>
         <source>Undo modifications</source>
-        <translation type="unfinished"></translation>
+        <translation>Desfazer modificações</translation>
     </message>
     <message>
         <source>Undo</source>
-        <translation type="unfinished"></translation>
+        <translation>Desfazer</translation>
     </message>
     <message>
         <source>Ctrl+Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Z</translation>
     </message>
     <message>
         <source>Filter the result set</source>
@@ -2634,31 +2636,31 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Ctrl+F</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+F</translation>
     </message>
     <message>
         <source>Save changes</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar alterações</translation>
     </message>
     <message>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar</translation>
     </message>
     <message>
         <source>Ctrl+S</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+S</translation>
     </message>
     <message>
         <source>Add new rows from a CSV file</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar novas linhas a partir de um arquivo CSV</translation>
     </message>
     <message>
         <source>Load CSV</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar CSV</translation>
     </message>
     <message>
         <source>Ctrl+L</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+L</translation>
     </message>
     <message>
         <source>Schema / Table</source>
@@ -2674,7 +2676,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Authenticated username</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome de usuário autenticado</translation>
     </message>
     <message>
         <source>Current working database/host</source>
@@ -2690,7 +2692,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>&amp;Close</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Fechar</translation>
     </message>
     <message>
         <source>** Failed to retrieve server info.</source>
@@ -2710,14 +2712,14 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Do you really want to close the data handling form?</source>
-        <translation type="unfinished"></translation>
+        <translation>Deseja realmente fechar o formulário de manipulação de dados?</translation>
     </message>
 </context>
 <context>
     <name>DatabaseExplorerWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Unsupported server version! The browsing may not work properly.</source>
@@ -2733,11 +2735,11 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Sort items alphabetically. When unchecked, items are sorted by OID.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ordena os itens alfabeticamente. Quando desmarcado, os itens são ordenados por OID.</translation>
     </message>
     <message>
         <source>Sort alphabetically</source>
-        <translation type="unfinished"></translation>
+        <translation>Ordenar alfabeticamente</translation>
     </message>
     <message>
         <source>Update the objects tree</source>
@@ -2745,7 +2747,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Open the grid to visualize or edit data</source>
@@ -2757,7 +2759,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Alt+G</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+G</translation>
     </message>
     <message>
         <source>Add a new SQL execution tab for the current database</source>
@@ -2765,7 +2767,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Ctrl+T</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+T</translation>
     </message>
     <message>
         <source>Drop this database</source>
@@ -2773,7 +2775,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Ctrl+Shift+Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+Del</translation>
     </message>
     <message>
         <source>Expands all items</source>
@@ -2789,19 +2791,19 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>By OID</source>
-        <translation type="unfinished"></translation>
+        <translation>Por OID</translation>
     </message>
     <message>
         <source>Attribute</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributo</translation>
     </message>
     <message>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor</translation>
     </message>
     <message>
         <source>Show raw attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Exibir atributos brutos</translation>
     </message>
     <message>
         <source>Show objects filter</source>
@@ -2841,11 +2843,11 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Reload properties</source>
-        <translation type="unfinished"></translation>
+        <translation>Recarregar propriedades</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation type="unfinished"></translation>
+        <translation>Atualizar</translation>
     </message>
     <message>
         <source>Rename</source>
@@ -2857,15 +2859,15 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
     <message>
         <source>Quick refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Atualização rápida</translation>
     </message>
     <message>
         <source>Full refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Atualização completa</translation>
     </message>
     <message>
         <source>relation</source>
-        <translation type="unfinished"></translation>
+        <translation>relação</translation>
     </message>
     <message>
         <source>Do you really want to drop the object &lt;strong&gt;%1&lt;/strong&gt; &lt;em&gt;(%2)&lt;/em&gt; in the %3?</source>
@@ -2926,11 +2928,11 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Creating `%1&apos; (%2), oid `%3&apos;...</source>
-        <translation type="unfinished"></translation>
+        <translation>Criando `%1&apos; (%2), oid `%3&apos;...</translation>
     </message>
     <message>
         <source>Trying to recreate `%1&apos; (%2), oid `%3&apos;...</source>
-        <translation type="unfinished"></translation>
+        <translation>Tentando recriar `%1&apos; (%2), oid `%3&apos;...</translation>
     </message>
     <message>
         <source>Import failed to recreate some objects in `%1&apos; tries.</source>
@@ -2938,7 +2940,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Creating `%1&apos; (%2)...</source>
-        <translation type="unfinished"></translation>
+        <translation>Criando `%1&apos; (%2)...</translation>
     </message>
     <message>
         <source>Creating permissions of `%1&apos; (%2)...</source>
@@ -2989,7 +2991,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Configurações</translation>
     </message>
     <message>
         <source>Connection</source>
@@ -2997,7 +2999,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>&lt;p&gt;Create all imported objects in the current working model instead of creating a new one. This option implies in ignoring any import error.&lt;/p&gt;</source>
@@ -3029,7 +3031,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Random positions with</source>
-        <translation type="unfinished"></translation>
+        <translation>Posições aleatórias com</translation>
     </message>
     <message>
         <source>&lt;p&gt;Determines the amount of space used to scatter the tables in the canvas increasing the distance between them.&lt;/p&gt;</source>
@@ -3037,19 +3039,19 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>minimum</source>
-        <translation type="unfinished"></translation>
+        <translation>mínima</translation>
     </message>
     <message>
         <source>medium</source>
-        <translation type="unfinished"></translation>
+        <translation>média</translation>
     </message>
     <message>
         <source>maximum</source>
-        <translation type="unfinished"></translation>
+        <translation>máxima</translation>
     </message>
     <message>
         <source>scattering</source>
-        <translation type="unfinished"></translation>
+        <translation>dispersão</translation>
     </message>
     <message>
         <source>&lt;p&gt;Resolve some of the object&apos;s dependencies by querying the catalog when a needed object does not exist on the loaded set. In some cases it is necessary to combine this option with others below. This option does not apply to database level objects like role, tablespace and language as well for data types, extensions.&lt;/p&gt;</source>
@@ -3057,7 +3059,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Automatically resolve dependencies</source>
-        <translation type="unfinished"></translation>
+        <translation>Resolver dependências automaticamente</translation>
     </message>
     <message>
         <source>&lt;p&gt;Enables the import of system built-in objects. It is recommended to select only those objects that are directly referenced by the ones to be imported. WARNING: Trying to import a huge set of system objects can bloat the resultant model or even crash pgModeler due to memory/cpu overuse.&lt;/p&gt;</source>
@@ -3085,11 +3087,11 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Debug mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo de depuração</translation>
     </message>
     <message>
         <source>Segmentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Segmentação</translation>
     </message>
     <message>
         <source>Determines the model&apos;s segmentation mode. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;None:&lt;/strong&gt; All objects are created on a single scene (canvas). This is the classic behavior. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;By schema:&lt;/strong&gt; Each schema defines a new scene (canvas) where tables, views, and foreign tables are routed according to their parent schemas. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;By threshold:&lt;/strong&gt; Whenever the number of tables, views, or foreign tables reaches a multiple of the defined threshold, a new scene (canvas) is created and new objects are routed to it. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; Schemas&apos; visual representations are disabled when the model is segmented.</source>
@@ -3097,7 +3099,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhuma</translation>
     </message>
     <message>
         <source>By schema</source>
@@ -3105,7 +3107,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>By threshold</source>
-        <translation type="unfinished"></translation>
+        <translation>Por limite</translation>
     </message>
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
@@ -3129,7 +3131,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Clear object selection</source>
@@ -3157,19 +3159,19 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>By OID</source>
-        <translation type="unfinished"></translation>
+        <translation>Por OID</translation>
     </message>
     <message>
         <source>Output</source>
-        <translation type="unfinished"></translation>
+        <translation>Saída</translation>
     </message>
     <message>
         <source>Progress label...</source>
-        <translation type="unfinished"></translation>
+        <translation>Rótulo de progresso...</translation>
     </message>
     <message>
         <source>Debug</source>
-        <translation type="unfinished"></translation>
+        <translation>Depuração</translation>
     </message>
     <message>
         <source> Import</source>
@@ -3177,7 +3179,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <source>&lt;strong&gt;ATTENTION:&lt;/strong&gt; You are about to import objects to the current working model! This action will cause irreversible changes to it even in case of critical errors during the process. Do you want to proceed?</source>
@@ -3185,7 +3187,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>&lt;strong&gt;Low verbosity is set:&lt;/strong&gt; only key informations and errors will be displayed.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;strong&gt;Baixa verbosidade ativada:&lt;/strong&gt; apenas as informações principais e os erros serão exibidos.</translation>
     </message>
     <message>
         <source>The selected database seems to have a huge amount of objects! Trying to import such database can take minutes or even hours and, in extreme cases, crash the application. Please, consider using the &lt;strong&gt;Filter&lt;/strong&gt; tab in order to refine the set of objects to be imported. Do you really want to proceed?</source>
@@ -3193,15 +3195,15 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Importing process aborted!</source>
-        <translation type="unfinished"></translation>
+        <translation>Processo de importação abortado!</translation>
     </message>
     <message>
         <source>Importing process canceled by user!</source>
-        <translation type="unfinished"></translation>
+        <translation>Processo de importação cancelado pelo usuário!</translation>
     </message>
     <message>
         <source>Importing process sucessfuly ended!</source>
-        <translation type="unfinished"></translation>
+        <translation>Processo de importação concluído com sucesso!</translation>
     </message>
     <message>
         <source>No databases found</source>
@@ -3244,7 +3246,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Loading: `%1&apos; (%2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregando: `%1&apos; (%2)</translation>
     </message>
     <message>
         <source>Validating relationships...</source>
@@ -3270,15 +3272,15 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Generating %1 code: `%2&apos; (%3)</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerando código %1: `%2&apos; (%3)</translation>
     </message>
     <message>
         <source>Saving prepended SQL code to file `%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvando o código SQL precedente no arquivo `%1&apos;.</translation>
     </message>
     <message>
         <source>Saving appended SQL code to file `%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvando o código SQL anexado no arquivo `%1&apos;.</translation>
     </message>
     <message>
         <source>Saving SQL of shell types to file `%1&apos;.</source>
@@ -3286,19 +3288,19 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Generating SQL of `%1&apos; (%2).</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerando o SQL de `%1&apos; (%2).</translation>
     </message>
     <message>
         <source>Saving SQL of `%1&apos; (%2) to file `%3&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvando o SQL de `%1&apos; (%2) no arquivo `%3&apos;.</translation>
     </message>
     <message>
         <source>Saving session options file `%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvando o arquivo de opções da sessão `%1&apos;.</translation>
     </message>
     <message>
         <source>Saving SQL file `%1&apos; .</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvando o arquivo SQL `%1&apos; .</translation>
     </message>
     <message>
         <source>Saving drop commands file `%1&apos;.</source>
@@ -3330,11 +3332,11 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Merging</source>
-        <translation type="unfinished"></translation>
+        <translation>Mesclando</translation>
     </message>
     <message>
         <source>Ignoring</source>
-        <translation type="unfinished"></translation>
+        <translation>Ignorando</translation>
     </message>
     <message>
         <source>Loading metadata for object `%1&apos; (%2)</source>
@@ -3357,7 +3359,7 @@ Ref. column(s): %2</source>
     <name>DatabaseWidget</name>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Connection(s)</source>
@@ -3365,7 +3367,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>LC_CTYPE</source>
-        <translation type="unfinished"></translation>
+        <translation>LC_CTYPE</translation>
     </message>
     <message>
         <source>Model author</source>
@@ -3373,7 +3375,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>Allow connections</source>
@@ -3389,11 +3391,11 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>LC_COLLATE</source>
-        <translation type="unfinished"></translation>
+        <translation>LC_COLLATE</translation>
     </message>
     <message>
         <source>Encoding</source>
-        <translation type="unfinished"></translation>
+        <translation>Codificação</translation>
     </message>
     <message>
         <source>Template database</source>
@@ -3429,18 +3431,18 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão</translation>
     </message>
 </context>
 <context>
     <name>DebugOutputWidget</name>
     <message>
         <source>Text files (*.txt)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivos de texto (*.txt)</translation>
     </message>
     <message>
         <source>All files (*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os arquivos (*)</translation>
     </message>
 </context>
 <context>
@@ -3451,7 +3453,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Configurações</translation>
     </message>
     <message>
         <source>Diff mode</source>
@@ -3459,7 +3461,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>DB ➡ DB</source>
-        <translation type="unfinished"></translation>
+        <translation>BD ➡ BD</translation>
     </message>
     <message>
         <source>Model ➡ DB</source>
@@ -3479,7 +3481,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Ins</source>
-        <translation type="unfinished"></translation>
+        <translation>Ins</translation>
     </message>
     <message>
         <source>Edit preset name</source>
@@ -3487,7 +3489,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Ctrl+E</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+E</translation>
     </message>
     <message>
         <source>Save preset</source>
@@ -3495,7 +3497,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Ctrl+S</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+S</translation>
     </message>
     <message>
         <source>Cancel operation on the preset</source>
@@ -3503,7 +3505,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <source>Delete the selected preset</source>
@@ -3511,7 +3513,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Del</translation>
     </message>
     <message>
         <source>Restore the default presets</source>
@@ -3519,7 +3521,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Ctrl+R</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+R</translation>
     </message>
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; a model in &lt;strong&gt;invalidated&lt;/strong&gt; state is detected. It is strongly recommended that the diff operation be performed over &lt;strong&gt;validated&lt;/strong&gt; models to avoid code generation and/or deployment issues.</source>
@@ -3527,15 +3529,15 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Input</source>
-        <translation type="unfinished"></translation>
+        <translation>Entrada</translation>
     </message>
     <message>
         <source>Compare to</source>
-        <translation type="unfinished"></translation>
+        <translation>Comparar com</translation>
     </message>
     <message>
         <source>Code options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções de código</translation>
     </message>
     <message>
         <source>&lt;p&gt;Compares the model and the input database storing the diff in a SQL file for later usage.&lt;/p&gt;</source>
@@ -3543,7 +3545,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Store in SQL file</source>
-        <translation type="unfinished"></translation>
+        <translation>Armazenar em arquivo SQL</translation>
     </message>
     <message>
         <source>&lt;p&gt;Compares the model and the input database generating a diff and applying it directly to the latter. &lt;strong&gt;WARNING:&lt;/strong&gt; this mode causes irreversible changes on the database and in case of failure the original structure is not restored, so make sure to have a backup before proceeding.&lt;/p&gt;</source>
@@ -3559,7 +3561,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Use PostgreSQL</source>
-        <translation type="unfinished"></translation>
+        <translation>Usar PostgreSQL</translation>
     </message>
     <message>
         <source>Diff options</source>
@@ -3643,7 +3645,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Force re-creation (0)</source>
-        <translation type="unfinished"></translation>
+        <translation>Forçar recriação (0)</translation>
     </message>
     <message>
         <source>Import options</source>
@@ -3679,7 +3681,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Debug mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo de depuração</translation>
     </message>
     <message>
         <source>Export options</source>
@@ -3699,7 +3701,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Ignore duplicity errors</source>
-        <translation type="unfinished"></translation>
+        <translation>Ignorar erros de duplicidade</translation>
     </message>
     <message>
         <source>&lt;p&gt;This advanced option causes pgModeler to ignore extra errors by their numeric codes. These errors must be informed in the input below and separated by space. For the complete list of error codes check the PostgreSQL docs, section &lt;strong&gt; Appendix A. PostgreSQL Error Codes&lt;/strong&gt;. &lt;strong&gt;WARNING:&lt;/strong&gt; use this option with extreme care since it can interfere in final export result. &lt;strong&gt;NOTE:&lt;/strong&gt; this option disables the transactional mode.&lt;/p&gt;</source>
@@ -3707,7 +3709,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Ignore error codes</source>
-        <translation type="unfinished"></translation>
+        <translation>Ignorar códigos de erro</translation>
     </message>
     <message>
         <source>Partial diff filters</source>
@@ -3723,11 +3725,11 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>End date</source>
-        <translation type="unfinished"></translation>
+        <translation>Data final</translation>
     </message>
     <message>
         <source>yyyy-MM-dd HH:mm</source>
-        <translation type="unfinished"></translation>
+        <translation>yyyy-MM-dd HH:mm</translation>
     </message>
     <message>
         <source>Use the last change date of the changelog</source>
@@ -3735,7 +3737,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Start date</source>
-        <translation type="unfinished"></translation>
+        <translation>Data inicial</translation>
     </message>
     <message>
         <source>Use the first change date of the changelog</source>
@@ -3751,19 +3753,19 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Output</source>
-        <translation type="unfinished"></translation>
+        <translation>Saída</translation>
     </message>
     <message>
         <source>Changes:</source>
-        <translation type="unfinished"></translation>
+        <translation>Alterações:</translation>
     </message>
     <message>
         <source>Progress label...</source>
-        <translation type="unfinished"></translation>
+        <translation>Rótulo de progresso...</translation>
     </message>
     <message>
         <source>Step label...</source>
-        <translation type="unfinished"></translation>
+        <translation>Rótulo da etapa...</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Objects marked with an &lt;span style=&quot; font-weight:600;&quot;&gt;ALTER&lt;/span&gt; may not be effectively changed unless that the differences detected are in attributes that can be modified through ALTER commands otherwise no operation will be performed or, if the force recreation is checked, the object will be dropped and created again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -3775,7 +3777,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>0</source>
-        <translation type="unfinished"></translation>
+        <translation>0</translation>
     </message>
     <message>
         <source>Objects to be dropped</source>
@@ -3803,7 +3805,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Open in SQL Tool</source>
-        <translation type="unfinished"></translation>
+        <translation>Abrir na ferramenta SQL</translation>
     </message>
     <message>
         <source>Perform text search on the SQL code.</source>
@@ -3815,23 +3817,23 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Ctrl+F</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+F</translation>
     </message>
     <message>
         <source>Debug</source>
-        <translation type="unfinished"></translation>
+        <translation>Depuração</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <source>Generate</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerar</translation>
     </message>
     <message>
         <source>Return</source>
-        <translation type="unfinished"></translation>
+        <translation>Voltar</translation>
     </message>
     <message>
         <source>Save diff as</source>
@@ -3839,7 +3841,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Waiting process to start...</source>
-        <translation type="unfinished"></translation>
+        <translation>Aguardando o início do processo...</translation>
     </message>
     <message>
         <source>The options &lt;strong&gt;%1&lt;/strong&gt; and &lt;strong&gt;%2&lt;/strong&gt; are currently unchecked. This can lead to the generation of extra &lt;strong&gt;DROP&lt;/strong&gt; commands for objects not present in the filtered set used in the &lt;strong&gt;partial diff&lt;/strong&gt;. Take extra caution when applying the resulting diff! How do you want to proceed?</source>
@@ -3855,7 +3857,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>&lt;strong&gt;Low verbosity is set:&lt;/strong&gt; only key informations and errors will be displayed.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;strong&gt;Baixa verbosidade ativada:&lt;/strong&gt; apenas as informações principais e os erros serão exibidos.</translation>
     </message>
     <message>
         <source>Step %1/%2: Importing database &lt;strong&gt;%3&lt;/strong&gt;...</source>
@@ -3863,11 +3865,11 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Step %1/%2: Comparing &lt;strong&gt;%3&lt;/strong&gt; and &lt;strong&gt;%4&lt;/strong&gt;...</source>
-        <translation type="unfinished"></translation>
+        <translation>Etapa %1/%2: Comparando &lt;strong&gt;%3&lt;/strong&gt; e &lt;strong&gt;%4&lt;/strong&gt;...</translation>
     </message>
     <message>
         <source>Confirmation</source>
-        <translation type="unfinished"></translation>
+        <translation>Confirmação</translation>
     </message>
     <message>
         <source> &lt;strong&gt;WARNING:&lt;/strong&gt; The generated diff is ready to be exported! Once started this process will cause irreversible changes on the database. Do you really want to proceed?</source>
@@ -3899,15 +3901,15 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>No operations left.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhuma operação restante.</translation>
     </message>
     <message>
         <source>Operation cancelled by the user.</source>
-        <translation type="unfinished"></translation>
+        <translation>Operação cancelada pelo usuário.</translation>
     </message>
     <message>
         <source>Process aborted due to errors!</source>
-        <translation type="unfinished"></translation>
+        <translation>Processo abortado devido a erros!</translation>
     </message>
     <message>
         <source>-- No differences were detected between model and database. --</source>
@@ -3919,15 +3921,15 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>In some cases restore the default settings related to it may solve the problem. Would like to do that?</source>
-        <translation type="unfinished"></translation>
+        <translation>Em alguns casos, restaurar as configurações padrão relacionadas a isso pode resolver o problema. Deseja fazer isso?</translation>
     </message>
     <message>
         <source>Restore</source>
-        <translation type="unfinished"></translation>
+        <translation>Restaurar</translation>
     </message>
     <message>
         <source>Do you really want to restore the default settings?</source>
-        <translation type="unfinished"></translation>
+        <translation>Deseja realmente restaurar as configurações padrão?</translation>
     </message>
     <message>
         <source>Are you sure do you want to remove the selected diff preset?</source>
@@ -3950,34 +3952,34 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <source>Expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão</translation>
     </message>
 </context>
 <context>
     <name>DonateWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Do more with pgModeler Plus!</source>
-        <translation type="unfinished"></translation>
+        <translation>Faça mais com o pgModeler Plus!</translation>
     </message>
     <message>
         <source>Hide this widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar este widget</translation>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <source>While the **Community** version is the heart of our open-source engine, the **Plus** version is designed for **professional lifecycle** management. By upgrading, you get exclusive access to:
@@ -3997,26 +3999,26 @@ If you don&apos;t need the Plus features right now but still want to help keep t
     </message>
     <message>
         <source>Upgrade now!</source>
-        <translation type="unfinished"></translation>
+        <translation>Faça o upgrade agora!</translation>
     </message>
     <message>
         <source>Learn more</source>
-        <translation type="unfinished"></translation>
+        <translation>Saiba mais</translation>
     </message>
     <message>
         <source>I want to help!</source>
-        <translation type="unfinished"></translation>
+        <translation>Quero ajudar!</translation>
     </message>
     <message>
         <source>No, thanks!</source>
-        <translation type="unfinished"></translation>
+        <translation>Não, obrigado!</translation>
     </message>
 </context>
 <context>
     <name>ElementWidget</name>
     <message>
         <source>Element properties</source>
-        <translation type="unfinished"></translation>
+        <translation>Propriedades do elemento</translation>
     </message>
     <message>
         <source>Column</source>
@@ -4024,23 +4026,23 @@ If you don&apos;t need the Plus features right now but still want to help keep t
     </message>
     <message>
         <source>Sorting</source>
-        <translation type="unfinished"></translation>
+        <translation>Ordenação</translation>
     </message>
     <message>
         <source>Ascending</source>
-        <translation type="unfinished"></translation>
+        <translation>Crescente</translation>
     </message>
     <message>
         <source>Descending</source>
-        <translation type="unfinished"></translation>
+        <translation>Decrescente</translation>
     </message>
     <message>
         <source>Nulls first</source>
-        <translation type="unfinished"></translation>
+        <translation>Nulos primeiro</translation>
     </message>
     <message>
         <source>Expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão</translation>
     </message>
     <message>
         <source>Operator</source>
@@ -4060,7 +4062,7 @@ If you don&apos;t need the Plus features right now but still want to help keep t
     </message>
     <message>
         <source>Exclude element properties</source>
-        <translation type="unfinished"></translation>
+        <translation>Propriedades do elemento de exclusão</translation>
     </message>
     <message>
         <source>Partition key properties</source>
@@ -4071,7 +4073,7 @@ If you don&apos;t need the Plus features right now but still want to help keep t
     <name>ElementsTableWidget</name>
     <message>
         <source>Element</source>
-        <translation type="unfinished"></translation>
+        <translation>Elemento</translation>
     </message>
     <message>
         <source>Type</source>
@@ -4091,58 +4093,58 @@ If you don&apos;t need the Plus features right now but still want to help keep t
     </message>
     <message>
         <source>Sorting</source>
-        <translation type="unfinished"></translation>
+        <translation>Ordenação</translation>
     </message>
     <message>
         <source>Nulls</source>
-        <translation type="unfinished"></translation>
+        <translation>Nulos</translation>
     </message>
     <message>
         <source>Expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão</translation>
     </message>
     <message>
         <source>Ascending</source>
-        <translation type="unfinished"></translation>
+        <translation>Crescente</translation>
     </message>
     <message>
         <source>Descending</source>
-        <translation type="unfinished"></translation>
+        <translation>Decrescente</translation>
     </message>
     <message>
         <source>First</source>
-        <translation type="unfinished"></translation>
+        <translation>Primeiro</translation>
     </message>
     <message>
         <source>Last</source>
-        <translation type="unfinished"></translation>
+        <translation>Último</translation>
     </message>
     <message>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão</translation>
     </message>
     <message>
         <source>Nulls First</source>
-        <translation type="unfinished"></translation>
+        <translation>Nulos primeiro</translation>
     </message>
     <message>
         <source>Yes</source>
-        <translation type="unfinished"></translation>
+        <translation>Sim</translation>
     </message>
     <message>
         <source>No</source>
-        <translation type="unfinished"></translation>
+        <translation>Não</translation>
     </message>
 </context>
 <context>
     <name>EventTriggerWidget</name>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Event</source>
-        <translation type="unfinished"></translation>
+        <translation>Evento</translation>
     </message>
     <message>
         <source>Function</source>
@@ -4269,11 +4271,11 @@ If you don&apos;t need the Plus features right now but still want to help keep t
     </message>
     <message>
         <source>Assignment of a name that contains invalid characters!</source>
-        <translation type="unfinished"></translation>
+        <translation>Atribuição de um nome que contém caracteres inválidos!</translation>
     </message>
     <message>
         <source>Assignment of a name with length exceeding the maximum of 63 characters!</source>
-        <translation type="unfinished"></translation>
+        <translation>Atribuição de um nome com comprimento acima do máximo de 63 caracteres!</translation>
     </message>
     <message>
         <source>Assignment of schema object with invalid type!</source>
@@ -4489,7 +4491,7 @@ If you don&apos;t need the Plus features right now but still want to help keep t
     </message>
     <message>
         <source>Insertion of element that already exists in the element list!</source>
-        <translation type="unfinished"></translation>
+        <translation>Inserção de elemento que já existe na lista de elementos!</translation>
     </message>
     <message>
         <source>Reference to an element with an index that is out of the element list bounds!</source>
@@ -4573,7 +4575,7 @@ If you don&apos;t need the Plus features right now but still want to help keep t
     </message>
     <message>
         <source>Assignment of invalid maximum size to operation list!</source>
-        <translation type="unfinished"></translation>
+        <translation>Atribuição de tamanho máximo inválido à lista de operações!</translation>
     </message>
     <message>
         <source>Unable to write file or directory `%1&apos;! Make sure that the path exists and the user has write permissions over it!</source>
@@ -4581,7 +4583,7 @@ If you don&apos;t need the Plus features right now but still want to help keep t
     </message>
     <message>
         <source>Unable to write file `%1&apos; due to one or more errors in the definition generation process!</source>
-        <translation type="unfinished"></translation>
+        <translation>Não foi possível gravar o arquivo `%1&apos; devido a um ou mais erros no processo de geração da definição!</translation>
     </message>
     <message>
         <source>There is already a relationship between `%1&apos; (%2) and `%3&apos; (%4) in the model! When using generalization, copy and one-to-one relationships, there cannot be other relationships linked to the pair of tables.</source>
@@ -4677,15 +4679,15 @@ If you don&apos;t need the Plus features right now but still want to help keep t
     </message>
     <message>
         <source>The group `%1&apos; cannot be built in the groups declaration block (%2)!</source>
-        <translation type="unfinished"></translation>
+        <translation>O grupo `%1&apos; não pode ser construído no bloco de declaração de grupos (%2)!</translation>
     </message>
     <message>
         <source>The group `%1&apos; cannot be built without possessing child elements!</source>
-        <translation type="unfinished"></translation>
+        <translation>O grupo `%1&apos; não pode ser construído sem possuir elementos filhos!</translation>
     </message>
     <message>
         <source>The group `%1&apos; cannot be built once more because this was done in previous blocks!</source>
-        <translation type="unfinished"></translation>
+        <translation>O grupo `%1&apos; não pode ser construído novamente porque isso já foi feito em blocos anteriores!</translation>
     </message>
     <message>
         <source>Reference to a column of the objects table with invalid index!</source>
@@ -4713,11 +4715,11 @@ If you don&apos;t need the Plus features right now but still want to help keep t
     </message>
     <message>
         <source>Unable to load the configuration file `%1&apos;! Please check if the file exists in its folder and/or if it is not corrupted!</source>
-        <translation type="unfinished"></translation>
+        <translation>Não foi possível carregar o arquivo de configuração `%1&apos;! Verifique se o arquivo existe na pasta e/ou se não está corrompido!</translation>
     </message>
     <message>
         <source>Could not find the default settings file `%1&apos;! To restore default settings, check the file existence and try again!</source>
-        <translation type="unfinished"></translation>
+        <translation>Não foi possível encontrar o arquivo de configurações padrão `%1&apos;! Para restaurar as configurações padrão, verifique a existência do arquivo e tente novamente!</translation>
     </message>
     <message>
         <source>Could not load the plugin `%1&apos; from library `%2&apos;! Message returned by plugin manager: `%3&apos;</source>
@@ -4761,7 +4763,7 @@ If you don&apos;t need the Plus features right now but still want to help keep t
     </message>
     <message>
         <source>Assignment of empty XML buffer to parser!</source>
-        <translation type="unfinished"></translation>
+        <translation>Atribuição de buffer XML vazio ao parser!</translation>
     </message>
     <message>
         <source>Could not access file or directory `%1&apos;! Make sure that it exists or if the user has access permissions on it!</source>
@@ -4769,11 +4771,11 @@ If you don&apos;t need the Plus features right now but still want to help keep t
     </message>
     <message>
         <source>Assignment of empty DTD file name!</source>
-        <translation type="unfinished"></translation>
+        <translation>Atribuição de nome de arquivo DTD vazio!</translation>
     </message>
     <message>
         <source>Assignment of empty name to the DTD declaration!</source>
-        <translation type="unfinished"></translation>
+        <translation>Atribuição de nome vazio à declaração DTD!</translation>
     </message>
     <message>
         <source>Error while interpreting XML buffer at line %1 column %2.
@@ -4782,19 +4784,19 @@ Message generated by the parser: %3. %4</source>
     </message>
     <message>
         <source>Operation on unallocated element tree! It is necessary to load the XML parser buffer and interpret it so that the tree is generated!</source>
-        <translation type="unfinished"></translation>
+        <translation>Operação em árvore de elementos não alocada! É necessário carregar o buffer do parser XML e interpretá-lo para que a árvore seja gerada!</translation>
     </message>
     <message>
         <source>Could not load file `%1&apos;. The file appears to be inconsistent or one of its dependencies (DTD files) has errors or is missing!</source>
-        <translation type="unfinished"></translation>
+        <translation>Não foi possível carregar o arquivo `%1&apos;. O arquivo parece estar inconsistente ou uma de suas dependências (arquivos DTD) tem erros ou está ausente!</translation>
     </message>
     <message>
         <source>Operation with unallocated tree element!</source>
-        <translation type="unfinished"></translation>
+        <translation>Operação com elemento de árvore não alocado!</translation>
     </message>
     <message>
         <source>Operation with element that does not exist in the currently loaded element tree!</source>
-        <translation type="unfinished"></translation>
+        <translation>Operação com elemento que não existe na árvore de elementos atualmente carregada!</translation>
     </message>
     <message>
         <source>Assignment of a value to an invalid connection parameter!</source>
@@ -4819,11 +4821,11 @@ Message returned: `%1&apos;</source>
     </message>
     <message>
         <source>Assignment of non-allocated SQL command result!</source>
-        <translation type="unfinished"></translation>
+        <translation>Atribuição de resultado de comando SQL não alocado!</translation>
     </message>
     <message>
         <source>Unable to allocate the SQL command result because the DBMS response was not understood by the client!</source>
-        <translation type="unfinished"></translation>
+        <translation>Não foi possível alocar o resultado do comando SQL porque a resposta do SGBD não foi compreendida pelo cliente!</translation>
     </message>
     <message>
         <source>Unable to allocate command result for the SQL because the server has generated a fatal error!
@@ -4849,7 +4851,8 @@ Message returned by the DBMS: `%1&apos;</source>
     <message>
         <source>Could not execute the SQL command.
  Message returned: `%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Não foi possível executar o comando SQL.
+ Mensagem retornada: `%1&apos;</translation>
     </message>
     <message>
         <source>Invalid use of a view reference as whole SQL definition! The assigned reference must be an expression!</source>
@@ -4941,7 +4944,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Unsupported PostgreSQL version (%1) detected! Valid versions must be between %2 and %3.</source>
-        <translation type="unfinished"></translation>
+        <translation>Versão do PostgreSQL não suportada (%1) detectada! As versões válidas devem estar entre %2 e %3.</translation>
     </message>
     <message>
         <source>The validation process failed due to an error triggered by the validation helper. For more details about the error check the exception stack!</source>
@@ -4997,7 +5000,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Operation with an invalid element id `%1&apos;!</source>
-        <translation type="unfinished"></translation>
+        <translation>Operação com um id de elemento inválido `%1&apos;!</translation>
     </message>
     <message>
         <source>Reference to an invalid color id `%1&apos; for element `%2&apos;!</source>
@@ -5029,7 +5032,11 @@ Message returned by the DBMS: `%1&apos;</source>
  ** Returned error ** 
 
 %4</source>
-        <translation type="unfinished"></translation>
+        <translation>Não foi possível realizar a operação `%1&apos; em `%2&apos; usando os dados da linha `%3&apos;! Todas as alterações foram revertidas. 
+
+ ** Erro retornado ** 
+
+%4</translation>
     </message>
     <message>
         <source>Malformed unescaped value on row `%1&apos; column `%2&apos;!</source>
@@ -5177,15 +5184,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Invalid regexp pattern detected in syntax highlighting group `%1&apos; at file `%2&apos;! Error detected: `%3&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão de regexp inválido detectado no grupo de realce de sintaxe `%1&apos; no arquivo `%2&apos;! Erro detectado: `%3&apos;</translation>
     </message>
     <message>
         <source>Unsupported PostgreSQL version `%1&apos; detected! pgModeler supports only PostgreSQL 10 and above.</source>
-        <translation type="unfinished"></translation>
+        <translation>Versão `%1&apos; do PostgreSQL não suportada detectada! O pgModeler suporta apenas o PostgreSQL 10 e superior.</translation>
     </message>
     <message>
         <source>Invalid code generation mode `%1&apos; specified!</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo de geração de código `%1&apos; inválido especificado!</translation>
     </message>
     <message>
         <source>The characters for text delimiter, value separator, and line break in CSV document must be different from each other!</source>
@@ -5229,11 +5236,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>The group `%1&apos; contains an expression declared as both initial and final! An expression must be either initial or final, not both.</source>
-        <translation type="unfinished"></translation>
+        <translation>O grupo `%1&apos; contém uma expressão declarada como inicial e final! Uma expressão deve ser inicial ou final, não ambas.</translation>
     </message>
     <message>
         <source>The group `%1&apos; has been declared as persistent but contains initial and/or final expression(s)! Persistent groups must not declare initial or final expressions.</source>
-        <translation type="unfinished"></translation>
+        <translation>O grupo `%1&apos; foi declarado como persistente, mas contém expressão(ões) inicial(is) e/ou final(is)! Grupos persistentes não devem declarar expressões iniciais ou finais.</translation>
     </message>
     <message>
         <source>Invalid child object being assigned to extension `%1&apos;!</source>
@@ -5245,28 +5252,30 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Operation cancelled by the user!</source>
-        <translation type="unfinished"></translation>
+        <translation>Operação cancelada pelo usuário!</translation>
     </message>
     <message>
         <source>** Another %1 error(s) were suppressed due to stack trace size limits.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>** Mais %1 erro(s) foram suprimidos devido aos limites de tamanho da pilha de chamadas.
+
+</translation>
     </message>
 </context>
 <context>
     <name>ExtensionWidget</name>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Current version</source>
-        <translation type="unfinished"></translation>
+        <translation>Versão atual</translation>
     </message>
     <message>
         <source>Old version</source>
-        <translation type="unfinished"></translation>
+        <translation>Versão antiga</translation>
     </message>
     <message>
         <source>Data types</source>
@@ -5274,7 +5283,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <source>Schema</source>
@@ -5289,7 +5298,7 @@ Message returned by the DBMS: `%1&apos;</source>
     <name>FixToolsWidget</name>
     <message>
         <source>pgModeler settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Configurações do pgModeler</translation>
     </message>
     <message>
         <source>Model file</source>
@@ -5301,18 +5310,18 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <source>Run tool</source>
-        <translation type="unfinished"></translation>
+        <translation>Executar ferramenta</translation>
     </message>
 </context>
 <context>
     <name>ForeignDataWrapperWidget</name>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Handler function</source>
@@ -5324,7 +5333,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>The handler function must have the following signature:  &lt;strong&gt;fdw_handler&lt;/strong&gt; &lt;em&gt;function_name&lt;/em&gt;()</source>
@@ -5336,18 +5345,18 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Option</source>
-        <translation type="unfinished"></translation>
+        <translation>Opção</translation>
     </message>
     <message>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor</translation>
     </message>
 </context>
 <context>
     <name>ForeignServerWidget</name>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Foreign data wrapper</source>
@@ -5359,19 +5368,19 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Version</source>
-        <translation type="unfinished"></translation>
+        <translation>Versão</translation>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>Option</source>
-        <translation type="unfinished"></translation>
+        <translation>Opção</translation>
     </message>
     <message>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor</translation>
     </message>
 </context>
 <context>
@@ -5389,7 +5398,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Configurações</translation>
     </message>
     <message>
         <source>Behavior type</source>
@@ -5409,7 +5418,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Rows returned</source>
-        <translation type="unfinished"></translation>
+        <translation>Linhas retornadas</translation>
     </message>
     <message>
         <source>Leakproof</source>
@@ -5417,19 +5426,19 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Window</source>
-        <translation type="unfinished"></translation>
+        <translation>Janela</translation>
     </message>
     <message>
         <source>Return method</source>
-        <translation type="unfinished"></translation>
+        <translation>Método de retorno</translation>
     </message>
     <message>
         <source>Simple</source>
-        <translation type="unfinished"></translation>
+        <translation>Simples</translation>
     </message>
     <message>
         <source>Set</source>
-        <translation type="unfinished"></translation>
+        <translation>Conjunto</translation>
     </message>
     <message>
         <source>Table</source>
@@ -5452,11 +5461,11 @@ Message returned by the DBMS: `%1&apos;</source>
     <name>GeneralConfigWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>General</source>
-        <translation type="unfinished"></translation>
+        <translation>Geral</translation>
     </message>
     <message>
         <source>Source code editor</source>
@@ -5468,11 +5477,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Check updates</source>
-        <translation type="unfinished"></translation>
+        <translation>Verificar atualizações</translation>
     </message>
     <message>
         <source>All versions</source>
-        <translation type="unfinished"></translation>
+        <translation>Todas as versões</translation>
     </message>
     <message>
         <source>Stable and beta versions</source>
@@ -5484,15 +5493,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>&lt;p&gt;Reduces the verbosity by displaying only key info messages and errors. This option causes less rendering operations when displaying progress messages and, as a consequence, it makes processes run faster.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Reduz a verbosidade exibindo apenas mensagens de informação principais e erros. Esta opção causa menos operações de renderização ao exibir mensagens de progresso e, como consequência, faz os processos executarem mais rápido.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Low verbosity operations</source>
-        <translation type="unfinished"></translation>
+        <translation>Operações com baixa verbosidade</translation>
     </message>
     <message>
         <source>Configurations directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Diretório de configurações</translation>
     </message>
     <message>
         <source>Interface language</source>
@@ -5504,7 +5513,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Save dialog sizes</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar tamanhos dos diálogos</translation>
     </message>
     <message>
         <source>Reset the dialogs sizes and positions to their default values.</source>
@@ -5512,7 +5521,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Reset sizes</source>
-        <translation type="unfinished"></translation>
+        <translation>Redefinir tamanhos</translation>
     </message>
     <message>
         <source>&lt;p&gt;Reset alert statuses/choices regarding the unsaved models, the open SQL execution tabs, and the usage of the disambiguation convention for duplicated object names.&lt;/p&gt;</source>
@@ -5520,23 +5529,23 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Reset alerts</source>
-        <translation type="unfinished"></translation>
+        <translation>Redefinir alertas</translation>
     </message>
     <message>
         <source>Editor arguments</source>
-        <translation type="unfinished"></translation>
+        <translation>Argumentos do editor</translation>
     </message>
     <message>
         <source>SQL tool</source>
-        <translation type="unfinished"></translation>
+        <translation>Ferramenta SQL</translation>
     </message>
     <message>
         <source>Clear the entire SQL command history.</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar todo o histórico de comandos SQL.</translation>
     </message>
     <message>
         <source>Clear history</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar histórico</translation>
     </message>
     <message>
         <source>&lt;p&gt;In data manipulation form, long texts that exceed the truncation threshold will be displayed in an input form instead of opening an inline editor in the data grid.&lt;/p&gt;</source>
@@ -5544,7 +5553,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Disable inline editor for long texts</source>
-        <translation type="unfinished"></translation>
+        <translation>Desabilitar editor embutido para textos longos</translation>
     </message>
     <message>
         <source>&lt;p&gt;Toggles the hiding of empty object groups in the objects trees, providing a cleaner view of the database structure. This option affects both the database explorer widget and the database import widget. For this option to take effect, it is necessary to reload any populated database object tree.&lt;/p&gt;</source>
@@ -5560,7 +5569,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Enable SQL code completion</source>
-        <translation type="unfinished"></translation>
+        <translation>Habilitar autocompletar de código SQL</translation>
     </message>
     <message>
         <source>&lt;p&gt;pgModeler will try to connect to older server versions (below 10) in a minimum compatibility mode. &lt;strong&gt;WARNING:&lt;/strong&gt; this option may cause the diff and import processes to fail or produce unreliable results. Also, it can lead to data loss when handling table data. Enable this option at &lt;strong&gt;your own risk&lt;/strong&gt;!&lt;/p&gt;</source>
@@ -5572,7 +5581,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>SQL commands history maximum lines</source>
-        <translation type="unfinished"></translation>
+        <translation>Máximo de linhas do histórico de comandos SQL</translation>
     </message>
     <message>
         <source>&lt;p&gt;Toggles the automatic truncation of columns&apos; data in the results grid when exceeding a specified threshold. This improves performance when displaying/handling columns with lots of data.&lt;/p&gt;</source>
@@ -5588,19 +5597,19 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source> bytes</source>
-        <translation type="unfinished"></translation>
+        <translation> bytes</translation>
     </message>
     <message>
         <source>Design behavior</source>
-        <translation type="unfinished"></translation>
+        <translation>Comportamento do desenho</translation>
     </message>
     <message>
         <source>Operations history size</source>
-        <translation type="unfinished"></translation>
+        <translation>Tamanho do histórico de operações</translation>
     </message>
     <message>
         <source>&lt;p&gt;Defines the maximum amount of elements held in the operation history. Once reached the maximum number the history is automatically cleaned.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Define a quantidade máxima de elementos mantidos no histórico de operações. Ao atingir o número máximo, o histórico é limpo automaticamente.&lt;/p&gt;</translation>
     </message>
     <message>
         <source> objects</source>
@@ -5612,11 +5621,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Autosave interval</source>
-        <translation type="unfinished"></translation>
+        <translation>Intervalo de salvamento automático</translation>
     </message>
     <message>
         <source> minutes</source>
-        <translation type="unfinished"></translation>
+        <translation> minutos</translation>
     </message>
     <message>
         <source>&lt;p&gt;Triggers a dialog asking the user to validate the model before a save, export or diff operation.&lt;/p&gt;</source>
@@ -5740,7 +5749,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Disable render smoothness</source>
-        <translation type="unfinished"></translation>
+        <translation>Desabilitar suavização da renderização</translation>
     </message>
     <message>
         <source>&lt;p&gt;Disables the automatic object name quoting mechanism. This feature is &lt;strong&gt;experimental&lt;/strong&gt; and may lead to database model corruption. Use it at &lt;strong&gt;your own risk&lt;/strong&gt;.&lt;/p&gt;</source>
@@ -5748,11 +5757,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Disable automatic name quoting</source>
-        <translation type="unfinished"></translation>
+        <translation>Desabilitar aspas automáticas em nomes</translation>
     </message>
     <message>
         <source>Printing</source>
-        <translation type="unfinished"></translation>
+        <translation>Impressão</translation>
     </message>
     <message>
         <source>Custom page size</source>
@@ -5760,11 +5769,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Width</source>
-        <translation type="unfinished"></translation>
+        <translation>Largura</translation>
     </message>
     <message>
         <source>Height</source>
-        <translation type="unfinished"></translation>
+        <translation>Altura</translation>
     </message>
     <message>
         <source>Page margins</source>
@@ -5772,39 +5781,39 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Right margin</source>
-        <translation type="unfinished"></translation>
+        <translation>Margem direita</translation>
     </message>
     <message>
         <source>Right</source>
-        <translation type="unfinished"></translation>
+        <translation>Direita</translation>
     </message>
     <message>
         <source>Bottom</source>
-        <translation type="unfinished"></translation>
+        <translation>Inferior</translation>
     </message>
     <message>
         <source>Top</source>
-        <translation type="unfinished"></translation>
+        <translation>Superior</translation>
     </message>
     <message>
         <source>Bottom margin</source>
-        <translation type="unfinished"></translation>
+        <translation>Margem inferior</translation>
     </message>
     <message>
         <source>Left</source>
-        <translation type="unfinished"></translation>
+        <translation>Esquerda</translation>
     </message>
     <message>
         <source>Left margin</source>
-        <translation type="unfinished"></translation>
+        <translation>Margem esquerda</translation>
     </message>
     <message>
         <source>Top margin</source>
-        <translation type="unfinished"></translation>
+        <translation>Margem superior</translation>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>Print canvas grid</source>
@@ -5816,23 +5825,23 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Unity</source>
-        <translation type="unfinished"></translation>
+        <translation>Unidade</translation>
     </message>
     <message>
         <source>Milimeters</source>
-        <translation type="unfinished"></translation>
+        <translation>Milímetros</translation>
     </message>
     <message>
         <source>Pixels</source>
-        <translation type="unfinished"></translation>
+        <translation>Pixels</translation>
     </message>
     <message>
         <source>Inches</source>
-        <translation type="unfinished"></translation>
+        <translation>Polegadas</translation>
     </message>
     <message>
         <source>Centimeter</source>
-        <translation type="unfinished"></translation>
+        <translation>Centímetro</translation>
     </message>
     <message>
         <source>Page size</source>
@@ -5840,147 +5849,147 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>A0 (841 x 1189 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>A0 (841 x 1189 mm)</translation>
     </message>
     <message>
         <source>A1 (594 x 841 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>A1 (594 x 841 mm)</translation>
     </message>
     <message>
         <source>A2 (420 x 594 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>A2 (420 x 594 mm)</translation>
     </message>
     <message>
         <source>A3 (297 x 420 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>A3 (297 x 420 mm)</translation>
     </message>
     <message>
         <source>A4 (210 x 297 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>A4 (210 x 297 mm)</translation>
     </message>
     <message>
         <source>A5 (148 x 210 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>A5 (148 x 210 mm)</translation>
     </message>
     <message>
         <source>A6 (105 x 148 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>A6 (105 x 148 mm)</translation>
     </message>
     <message>
         <source>A7 (74 x 105 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>A7 (74 x 105 mm)</translation>
     </message>
     <message>
         <source>A8 (52 x 74 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>A8 (52 x 74 mm)</translation>
     </message>
     <message>
         <source>A9 (37 x 52 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>A9 (37 x 52 mm)</translation>
     </message>
     <message>
         <source>B0 (1030 x 1456 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>B0 (1030 x 1456 mm)</translation>
     </message>
     <message>
         <source>B1 (728 x 1030 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>B1 (728 x 1030 mm)</translation>
     </message>
     <message>
         <source>B10 (32 x 45 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>B10 (32 x 45 mm)</translation>
     </message>
     <message>
         <source>B2 (515 x 728 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>B2 (515 x 728 mm)</translation>
     </message>
     <message>
         <source>B3 (364 x 515 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>B3 (364 x 515 mm)</translation>
     </message>
     <message>
         <source>B4 (257 x 364 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>B4 (257 x 364 mm)</translation>
     </message>
     <message>
         <source>B5 (182 x 257 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>B5 (182 x 257 mm)</translation>
     </message>
     <message>
         <source>B6 (128 x 182 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>B6 (128 x 182 mm)</translation>
     </message>
     <message>
         <source>B7 (91 x 128 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>B7 (91 x 128 mm)</translation>
     </message>
     <message>
         <source>B8 (64 x 91 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>B8 (64 x 91 mm)</translation>
     </message>
     <message>
         <source>B9 (45 x 64 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>B9 (45 x 64 mm)</translation>
     </message>
     <message>
         <source>C5E (163 x 229 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>C5E (163 x 229 mm)</translation>
     </message>
     <message>
         <source>Comm10E (105 x 241 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>Comm10E (105 x 241 mm)</translation>
     </message>
     <message>
         <source>DLE (110 x 220 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>DLE (110 x 220 mm)</translation>
     </message>
     <message>
         <source>Executive (191 x 254 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>Executive (191 x 254 mm)</translation>
     </message>
     <message>
         <source>Folio (210 x 330 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>Folio (210 x 330 mm)</translation>
     </message>
     <message>
         <source>Ledger (432 x 279 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ledger (432 x 279 mm)</translation>
     </message>
     <message>
         <source>Legal (216 x 356 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>Legal (216 x 356 mm)</translation>
     </message>
     <message>
         <source>Letter (216 x 279 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>Letter (216 x 279 mm)</translation>
     </message>
     <message>
         <source>Tabloid (279 x 432 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>Tabloid (279 x 432 mm)</translation>
     </message>
     <message>
         <source>Custom</source>
-        <translation type="unfinished"></translation>
+        <translation>Personalizado</translation>
     </message>
     <message>
         <source>Orientation</source>
-        <translation type="unfinished"></translation>
+        <translation>Orientação</translation>
     </message>
     <message>
         <source>Landscape</source>
-        <translation type="unfinished"></translation>
+        <translation>Paisagem</translation>
     </message>
     <message>
         <source>Portrait</source>
-        <translation type="unfinished"></translation>
+        <translation>Retrato</translation>
     </message>
     <message>
         <source>pgModeler configurations directory for the current user</source>
-        <translation type="unfinished"></translation>
+        <translation>Diretório de configurações do pgModeler para o usuário atual</translation>
     </message>
     <message>
         <source>Select application</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar aplicativo</translation>
     </message>
     <message>
         <source>External source code editor application</source>
@@ -5988,11 +5997,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>System default</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão do sistema</translation>
     </message>
     <message>
         <source>Don&apos;t alert me again</source>
-        <translation type="unfinished"></translation>
+        <translation>Não me alertar novamente</translation>
     </message>
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Disabling automatic name quoting compromises core features of the tool and significantly increases the risk of database model corruption.										 Critical features such as export, import and diff operations may produce invalid or inconsistent results.										 This option is unsafe for general use and should remain disabled unless &lt;strong&gt;you fully understand the implications&lt;/strong&gt;.										 &lt;strong&gt;This configuration is dangerous. Use it entirely at your own risk.&lt;/strong&gt;</source>
@@ -6000,14 +6009,14 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>This action will reset all dialogs to their default size and positions on the screen! Do you really want to proceed?</source>
-        <translation type="unfinished"></translation>
+        <translation>Esta ação redefinirá todos os diálogos para o tamanho e a posição padrão na tela! Deseja realmente prosseguir?</translation>
     </message>
 </context>
 <context>
     <name>GenericSQLWidget</name>
     <message>
         <source>Definition</source>
-        <translation type="unfinished"></translation>
+        <translation>Definição</translation>
     </message>
     <message>
         <source>References</source>
@@ -6022,11 +6031,11 @@ Message returned by the DBMS: `%1&apos;</source>
     <name>Global</name>
     <message>
         <source>** pgmodeler-cli aborted due to critical error(s). **</source>
-        <translation type="unfinished"></translation>
+        <translation>** pgmodeler-cli abortado devido a erro(s) crítico(s). **</translation>
     </message>
     <message>
         <source>(untitled)</source>
-        <translation type="unfinished"></translation>
+        <translation>(sem título)</translation>
     </message>
     <message>
         <source>Database model files (*%1) are already associated with pgModeler! Use the option `%2&apos; to force the file association installation.</source>
@@ -6034,11 +6043,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>No file association exists between pgModeler and *%1 files! Use the option `%2&apos; to force the file association uninstallation.</source>
-        <translation type="unfinished"></translation>
+        <translation>Não existe associação de arquivos entre o pgModeler e arquivos *%1! Use a opção `%2&apos; para forçar a desinstalação da associação de arquivos.</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <source>Comment</source>
@@ -6102,7 +6111,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>ID</source>
-        <translation type="unfinished"></translation>
+        <translation>ID</translation>
     </message>
     <message>
         <source>Object</source>
@@ -6114,7 +6123,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Parent</source>
-        <translation type="unfinished"></translation>
+        <translation>Pai</translation>
     </message>
     <message>
         <source>Parent type</source>
@@ -6122,7 +6131,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>(not found, OID: %1)</source>
-        <translation type="unfinished"></translation>
+        <translation>(não encontrado, OID: %1)</translation>
     </message>
     <message>
         <source>Source code not generated! Press F7 or middle-click the item to load it.</source>
@@ -6138,7 +6147,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Alignment</source>
-        <translation type="unfinished"></translation>
+        <translation>Alinhamento</translation>
     </message>
     <message>
         <source>Analyze function</source>
@@ -6146,23 +6155,23 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Argument count</source>
-        <translation type="unfinished"></translation>
+        <translation>Quantidade de argumentos</translation>
     </message>
     <message>
         <source>Argument default count</source>
-        <translation type="unfinished"></translation>
+        <translation>Quantidade de argumentos padrão</translation>
     </message>
     <message>
         <source>Argument defaults</source>
-        <translation type="unfinished"></translation>
+        <translation>Valores padrão dos argumentos</translation>
     </message>
     <message>
         <source>Argument modes</source>
-        <translation type="unfinished"></translation>
+        <translation>Modos dos argumentos</translation>
     </message>
     <message>
         <source>Argument names</source>
-        <translation type="unfinished"></translation>
+        <translation>Nomes dos argumentos</translation>
     </message>
     <message>
         <source>Argument types</source>
@@ -6170,7 +6179,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Attribute</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributo</translation>
     </message>
     <message>
         <source>Behavior type</source>
@@ -6178,7 +6187,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>By value</source>
-        <translation type="unfinished"></translation>
+        <translation>Por valor</translation>
     </message>
     <message>
         <source>Cast type</source>
@@ -6186,11 +6195,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Category</source>
-        <translation type="unfinished"></translation>
+        <translation>Categoria</translation>
     </message>
     <message>
         <source>Collatable</source>
-        <translation type="unfinished"></translation>
+        <translation>Collatable</translation>
     </message>
     <message>
         <source>Collation</source>
@@ -6202,7 +6211,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Configuration</source>
-        <translation type="unfinished"></translation>
+        <translation>Configuração</translation>
     </message>
     <message>
         <source>Connection limit</source>
@@ -6222,11 +6231,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Current version</source>
-        <translation type="unfinished"></translation>
+        <translation>Versão atual</translation>
     </message>
     <message>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão</translation>
     </message>
     <message>
         <source>Default value</source>
@@ -6234,7 +6243,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Definition</source>
-        <translation type="unfinished"></translation>
+        <translation>Definição</translation>
     </message>
     <message>
         <source>Delimiter</source>
@@ -6246,31 +6255,31 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Dimension</source>
-        <translation type="unfinished"></translation>
+        <translation>Dimensão</translation>
     </message>
     <message>
         <source>Directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Diretório</translation>
     </message>
     <message>
         <source>Destination encoding</source>
-        <translation type="unfinished"></translation>
+        <translation>Codificação de destino</translation>
     </message>
     <message>
         <source>Element</source>
-        <translation type="unfinished"></translation>
+        <translation>Elemento</translation>
     </message>
     <message>
         <source>Encoding</source>
-        <translation type="unfinished"></translation>
+        <translation>Codificação</translation>
     </message>
     <message>
         <source>Encrypted</source>
-        <translation type="unfinished"></translation>
+        <translation>Criptografada</translation>
     </message>
     <message>
         <source>Labels</source>
-        <translation type="unfinished"></translation>
+        <translation>Rótulos</translation>
     </message>
     <message>
         <source>Execution cost</source>
@@ -6278,7 +6287,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão</translation>
     </message>
     <message>
         <source>Operator family</source>
@@ -6302,7 +6311,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Hashes</source>
-        <translation type="unfinished"></translation>
+        <translation>Hashes</translation>
     </message>
     <message>
         <source>Index type</source>
@@ -6310,11 +6319,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Inherit</source>
-        <translation type="unfinished"></translation>
+        <translation>Herdar</translation>
     </message>
     <message>
         <source>Initial condition</source>
-        <translation type="unfinished"></translation>
+        <translation>Condição inicial</translation>
     </message>
     <message>
         <source>Inline function</source>
@@ -6326,7 +6335,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Internal length</source>
-        <translation type="unfinished"></translation>
+        <translation>Comprimento interno</translation>
     </message>
     <message>
         <source>Interval type</source>
@@ -6346,15 +6355,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>LC COLLATE</source>
-        <translation type="unfinished"></translation>
+        <translation>LC COLLATE</translation>
     </message>
     <message>
         <source>LC CTYPE</source>
-        <translation type="unfinished"></translation>
+        <translation>LC CTYPE</translation>
     </message>
     <message>
         <source>Leak proof</source>
-        <translation type="unfinished"></translation>
+        <translation>Leak proof</translation>
     </message>
     <message>
         <source>Left type</source>
@@ -6362,19 +6371,19 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Length</source>
-        <translation type="unfinished"></translation>
+        <translation>Comprimento</translation>
     </message>
     <message>
         <source>Library</source>
-        <translation type="unfinished"></translation>
+        <translation>Biblioteca</translation>
     </message>
     <message>
         <source>Login allowed</source>
-        <translation type="unfinished"></translation>
+        <translation>Login permitido</translation>
     </message>
     <message>
         <source>Materialized</source>
-        <translation type="unfinished"></translation>
+        <translation>Materializada</translation>
     </message>
     <message>
         <source>Member roles</source>
@@ -6398,15 +6407,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>OID</source>
-        <translation type="unfinished"></translation>
+        <translation>OID</translation>
     </message>
     <message>
         <source>With OIDs</source>
-        <translation type="unfinished"></translation>
+        <translation>Com OIDs</translation>
     </message>
     <message>
         <source>Old version</source>
-        <translation type="unfinished"></translation>
+        <translation>Versão antiga</translation>
     </message>
     <message>
         <source>Operator</source>
@@ -6426,11 +6435,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Parents</source>
-        <translation type="unfinished"></translation>
+        <translation>Pais</translation>
     </message>
     <message>
         <source>Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Senha</translation>
     </message>
     <message>
         <source>Permissions</source>
@@ -6438,11 +6447,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Precision</source>
-        <translation type="unfinished"></translation>
+        <translation>Precisão</translation>
     </message>
     <message>
         <source>Preferred</source>
-        <translation type="unfinished"></translation>
+        <translation>Preferido</translation>
     </message>
     <message>
         <source>Range attributes</source>
@@ -6454,7 +6463,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Replication</source>
-        <translation type="unfinished"></translation>
+        <translation>Replicação</translation>
     </message>
     <message>
         <source>Restriction function</source>
@@ -6470,7 +6479,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Rows amount</source>
-        <translation type="unfinished"></translation>
+        <translation>Quantidade de linhas</translation>
     </message>
     <message>
         <source>Security type</source>
@@ -6490,7 +6499,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Source encoding</source>
-        <translation type="unfinished"></translation>
+        <translation>Codificação de origem</translation>
     </message>
     <message>
         <source>State type</source>
@@ -6498,11 +6507,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Storage</source>
-        <translation type="unfinished"></translation>
+        <translation>Armazenamento</translation>
     </message>
     <message>
         <source>Superuser</source>
-        <translation type="unfinished"></translation>
+        <translation>Superusuário</translation>
     </message>
     <message>
         <source>Type modifier input function</source>
@@ -6518,7 +6527,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Trusted</source>
-        <translation type="unfinished"></translation>
+        <translation>Confiável</translation>
     </message>
     <message>
         <source>Type attribute</source>
@@ -6530,7 +6539,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Unlogged</source>
-        <translation type="unfinished"></translation>
+        <translation>Unlogged</translation>
     </message>
     <message>
         <source>Validator function</source>
@@ -6538,7 +6547,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Validity</source>
-        <translation type="unfinished"></translation>
+        <translation>Validade</translation>
     </message>
     <message>
         <source>Window function</source>
@@ -6546,43 +6555,43 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>false</source>
-        <translation type="unfinished"></translation>
+        <translation>falso</translation>
     </message>
     <message>
         <source>true</source>
-        <translation type="unfinished"></translation>
+        <translation>verdadeiro</translation>
     </message>
     <message>
         <source>Cache value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor do cache</translation>
     </message>
     <message>
         <source>Cycle</source>
-        <translation type="unfinished"></translation>
+        <translation>Cíclica</translation>
     </message>
     <message>
         <source>Increment</source>
-        <translation type="unfinished"></translation>
+        <translation>Incremento</translation>
     </message>
     <message>
         <source>Maximum value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor máximo</translation>
     </message>
     <message>
         <source>Minimum value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor mínimo</translation>
     </message>
     <message>
         <source>Start value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor inicial</translation>
     </message>
     <message>
         <source>Last value</source>
-        <translation type="unfinished"></translation>
+        <translation>Último valor</translation>
     </message>
     <message>
         <source>Subtype</source>
-        <translation type="unfinished"></translation>
+        <translation>Subtipo</translation>
     </message>
     <message>
         <source>Operator class</source>
@@ -6602,15 +6611,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>For each row</source>
-        <translation type="unfinished"></translation>
+        <translation>Para cada linha</translation>
     </message>
     <message>
         <source>Firing</source>
-        <translation type="unfinished"></translation>
+        <translation>Disparo</translation>
     </message>
     <message>
         <source>On insert</source>
-        <translation type="unfinished"></translation>
+        <translation>Ao inserir</translation>
     </message>
     <message>
         <source>On delete</source>
@@ -6626,7 +6635,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Arguments</source>
-        <translation type="unfinished"></translation>
+        <translation>Argumentos</translation>
     </message>
     <message>
         <source>Table</source>
@@ -6642,27 +6651,27 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Condition</source>
-        <translation type="unfinished"></translation>
+        <translation>Condição</translation>
     </message>
     <message>
         <source>Deferment</source>
-        <translation type="unfinished"></translation>
+        <translation>Adiamento</translation>
     </message>
     <message>
         <source>Event</source>
-        <translation type="unfinished"></translation>
+        <translation>Evento</translation>
     </message>
     <message>
         <source>Execution mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo de execução</translation>
     </message>
     <message>
         <source>Commands</source>
-        <translation type="unfinished"></translation>
+        <translation>Comandos</translation>
     </message>
     <message>
         <source>Position</source>
-        <translation type="unfinished"></translation>
+        <translation>Posição</translation>
     </message>
     <message>
         <source>Comparison type</source>
@@ -6674,15 +6683,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Expressions</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressões</translation>
     </message>
     <message>
         <source>Fill factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Fator de preenchimento</translation>
     </message>
     <message>
         <source>No inherit</source>
-        <translation type="unfinished"></translation>
+        <translation>Não herdar</translation>
     </message>
     <message>
         <source>Operator classes</source>
@@ -6702,7 +6711,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Predicate</source>
-        <translation type="unfinished"></translation>
+        <translation>Predicado</translation>
     </message>
     <message>
         <source>Collations</source>
@@ -6710,35 +6719,35 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Inherited</source>
-        <translation type="unfinished"></translation>
+        <translation>Herdada</translation>
     </message>
     <message>
         <source>Client encoding</source>
-        <translation type="unfinished"></translation>
+        <translation>Codificação do cliente</translation>
     </message>
     <message>
         <source>Configuration file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de configuração</translation>
     </message>
     <message>
         <source>Data directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Diretório de dados</translation>
     </message>
     <message>
         <source>Dynamic library path</source>
-        <translation type="unfinished"></translation>
+        <translation>Caminho da biblioteca dinâmica</translation>
     </message>
     <message>
         <source>Dynamic shared memory</source>
-        <translation type="unfinished"></translation>
+        <translation>Memória compartilhada dinâmica</translation>
     </message>
     <message>
         <source>HBA file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo HBA</translation>
     </message>
     <message>
         <source>Listen addresses</source>
-        <translation type="unfinished"></translation>
+        <translation>Endereços de escuta</translation>
     </message>
     <message>
         <source>Maximum connections</source>
@@ -6746,7 +6755,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Listen port</source>
-        <translation type="unfinished"></translation>
+        <translation>Porta de escuta</translation>
     </message>
     <message>
         <source>Server encoding</source>
@@ -6754,23 +6763,23 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>SSL</source>
-        <translation type="unfinished"></translation>
+        <translation>SSL</translation>
     </message>
     <message>
         <source>SSL CA file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de CA do SSL</translation>
     </message>
     <message>
         <source>SSL certificate file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de certificado SSL</translation>
     </message>
     <message>
         <source>SSL CRL file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo CRL do SSL</translation>
     </message>
     <message>
         <source>SSL key file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de chave SSL</translation>
     </message>
     <message>
         <source>Server version</source>
@@ -6778,11 +6787,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ident file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo Ident</translation>
     </message>
     <message>
         <source>Password encryption</source>
-        <translation type="unfinished"></translation>
+        <translation>Criptografia de senha</translation>
     </message>
     <message>
         <source>Connection ID</source>
@@ -6798,7 +6807,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Referrers</source>
-        <translation type="unfinished"></translation>
+        <translation>Referenciadores</translation>
     </message>
     <message>
         <source>Identity</source>
@@ -6806,15 +6815,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Command</source>
-        <translation type="unfinished"></translation>
+        <translation>Comando</translation>
     </message>
     <message>
         <source>USING expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão USING</translation>
     </message>
     <message>
         <source>CHECK expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão CHECK</translation>
     </message>
     <message>
         <source>Roles</source>
@@ -6822,39 +6831,39 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>RLS enabled</source>
-        <translation type="unfinished"></translation>
+        <translation>RLS habilitado</translation>
     </message>
     <message>
         <source>RLS forced</source>
-        <translation type="unfinished"></translation>
+        <translation>RLS forçado</translation>
     </message>
     <message>
         <source>Last analyze</source>
-        <translation type="unfinished"></translation>
+        <translation>Última análise</translation>
     </message>
     <message>
         <source>Last autovacuum</source>
-        <translation type="unfinished"></translation>
+        <translation>Último autovacuum</translation>
     </message>
     <message>
         <source>Last vacuum</source>
-        <translation type="unfinished"></translation>
+        <translation>Último vacuum</translation>
     </message>
     <message>
         <source>Tuples deleted</source>
-        <translation type="unfinished"></translation>
+        <translation>Tuplas excluídas</translation>
     </message>
     <message>
         <source>Tuples updated</source>
-        <translation type="unfinished"></translation>
+        <translation>Tuplas atualizadas</translation>
     </message>
     <message>
         <source>Tuples inserted</source>
-        <translation type="unfinished"></translation>
+        <translation>Tuplas inseridas</translation>
     </message>
     <message>
         <source>Partitioned</source>
-        <translation type="unfinished"></translation>
+        <translation>Particionada</translation>
     </message>
     <message>
         <source>Partition of</source>
@@ -6866,7 +6875,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Dead rows amount</source>
-        <translation type="unfinished"></translation>
+        <translation>Quantidade de linhas mortas</translation>
     </message>
     <message>
         <source>Partition keys</source>
@@ -6878,7 +6887,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>Foreign data wrapper</source>
@@ -6890,7 +6899,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Bypass RLS</source>
-        <translation type="unfinished"></translation>
+        <translation>Bypass RLS</translation>
     </message>
     <message>
         <source>From SQL function</source>
@@ -6922,19 +6931,19 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Version</source>
-        <translation type="unfinished"></translation>
+        <translation>Versão</translation>
     </message>
     <message>
         <source>LC COLLATE modifier</source>
-        <translation type="unfinished"></translation>
+        <translation>Modificador de LC COLLATE</translation>
     </message>
     <message>
         <source>LC CTYPE modifier</source>
-        <translation type="unfinished"></translation>
+        <translation>Modificador de LC CTYPE</translation>
     </message>
     <message>
         <source>Provider</source>
-        <translation type="unfinished"></translation>
+        <translation>Provedor</translation>
     </message>
     <message>
         <source>Is extension type</source>
@@ -6946,7 +6955,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Nulls not distinct</source>
-        <translation type="unfinished"></translation>
+        <translation>Nulos não distintos</translation>
     </message>
     <message>
         <source>Constraints</source>
@@ -6954,7 +6963,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Deterministic</source>
-        <translation type="unfinished"></translation>
+        <translation>Determinístico</translation>
     </message>
     <message>
         <source>Type class</source>
@@ -6962,11 +6971,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Locale</source>
-        <translation type="unfinished"></translation>
+        <translation>Localidade</translation>
     </message>
     <message>
         <source>Force re-creation (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Forçar recriação (%1)</translation>
     </message>
     <message>
         <source>Invalid object: %1 (%2)</source>
@@ -6986,67 +6995,67 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>disabling</source>
-        <translation type="unfinished"></translation>
+        <translation>desativação</translation>
     </message>
     <message>
         <source>enabling</source>
-        <translation type="unfinished"></translation>
+        <translation>ativação</translation>
     </message>
     <message>
         <source>An additional of %1 error(s) were suppressed due to the stack trace size limit.</source>
-        <translation type="unfinished"></translation>
+        <translation>Mais %1 erro(s) foram suprimidos devido ao limite de tamanho do rastreamento de pilha.</translation>
     </message>
     <message>
         <source>Selection</source>
-        <translation type="unfinished"></translation>
+        <translation>Seleção</translation>
     </message>
     <message>
         <source>Copy as text</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar como texto</translation>
     </message>
     <message>
         <source>Copy as CSV</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar como CSV</translation>
     </message>
     <message>
         <source>Save as...</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar como...</translation>
     </message>
     <message>
         <source>Text file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de texto</translation>
     </message>
     <message>
         <source>CSV file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo CSV</translation>
     </message>
     <message>
         <source>Save file</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar arquivo</translation>
     </message>
     <message>
         <source>CSV file (*.csv)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo CSV (*.csv)</translation>
     </message>
     <message>
         <source>Text file (*.txt)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de texto (*.txt)</translation>
     </message>
     <message>
         <source>All files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os arquivos (*.*)</translation>
     </message>
     <message>
         <source>Select file...</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar arquivo...</translation>
     </message>
     <message>
         <source>Save file...</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar arquivo...</translation>
     </message>
     <message>
         <source>Load file...</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar arquivo...</translation>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
@@ -7078,39 +7087,39 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>[memory buffer]</source>
-        <translation type="unfinished"></translation>
+        <translation>[buffer de memória]</translation>
     </message>
     <message>
         <source>Expected a valid include statement in the form `%1 &quot;file.sch&quot;&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Esperava-se uma instrução de inclusão válida na forma `%1 &quot;file.sch&quot;&apos;.</translation>
     </message>
     <message>
         <source>Include file `%1&apos; not found.</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de inclusão `%1&apos; não encontrado.</translation>
     </message>
     <message>
         <source>The included file `%1&apos; contains one or more `%2&apos; statements. Nested file inclusion is not currently supported!</source>
-        <translation type="unfinished"></translation>
+        <translation>O arquivo incluído `%1&apos; contém uma ou mais instruções `%2&apos;. A inclusão aninhada de arquivos não é suportada atualmente!</translation>
     </message>
     <message>
         <source>Expected a valid attribute token enclosed by `%1%2&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Esperava-se um token de atributo válido delimitado por `%1%2&apos;.</translation>
     </message>
     <message>
         <source>Plain text expression is unbalanced or not properly enclosed by `%1%2&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>A expressão de texto simples está desbalanceada ou não está delimitada corretamente por `%1%2&apos;.</translation>
     </message>
     <message>
         <source>Expected a valid conditional instruction token starting with `%1&apos; and followed by at least one letter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Esperava-se um token de instrução condicional válido iniciado por `%1&apos; e seguido de pelo menos uma letra.</translation>
     </message>
     <message>
         <source>Expected a valid escaped character token starting with `%1&apos; and followed by a single character.</source>
-        <translation type="unfinished"></translation>
+        <translation>Esperava-se um token de caractere escapado válido iniciado por `%1&apos; e seguido de um único caractere.</translation>
     </message>
     <message>
         <source>Expected a valid metacharacter token starting with `%1&apos; and followed by at least one letter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Esperava-se um token de metacaractere válido iniciado por `%1&apos; e seguido de pelo menos uma letra.</translation>
     </message>
     <message>
         <source>Expected a valid operator token composed of at least two characters from the set `%1&apos;.</source>
@@ -7124,38 +7133,40 @@ Message returned by the DBMS: `%1&apos;</source>
         <source>Failed to parse the file `%1&apos; due to an error in the included file at line `%2&apos;. Error detected:
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Falha ao interpretar o arquivo `%1&apos; devido a um erro no arquivo incluído na linha `%2&apos;. Erro detectado:
+
+</translation>
     </message>
     <message>
         <source>XML file: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo XML: %1</translation>
     </message>
     <message>
         <source>DTD decl: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Declaração DTD: %1</translation>
     </message>
 </context>
 <context>
     <name>IndexWidget</name>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Indexing</source>
-        <translation type="unfinished"></translation>
+        <translation>Indexação</translation>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>Concurrent</source>
-        <translation type="unfinished"></translation>
+        <translation>Concorrente</translation>
     </message>
     <message>
         <source>Buffering</source>
-        <translation type="unfinished"></translation>
+        <translation>Buffering</translation>
     </message>
     <message>
         <source>Unique</source>
@@ -7163,23 +7174,23 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Fast update</source>
-        <translation type="unfinished"></translation>
+        <translation>Atualização rápida</translation>
     </message>
     <message>
         <source>Nulls not distinct</source>
-        <translation type="unfinished"></translation>
+        <translation>Nulos não distintos</translation>
     </message>
     <message>
         <source>Fill Factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Fator de preenchimento</translation>
     </message>
     <message>
         <source>Predicate</source>
-        <translation type="unfinished"></translation>
+        <translation>Predicado</translation>
     </message>
     <message>
         <source>Elements</source>
-        <translation type="unfinished"></translation>
+        <translation>Elementos</translation>
     </message>
     <message>
         <source>Include columns</source>
@@ -7209,7 +7220,7 @@ Message returned by the DBMS: `%1&apos;</source>
     <name>LayersConfigWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Add a new layer</source>
@@ -7217,11 +7228,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar</translation>
     </message>
     <message>
         <source>Ins</source>
-        <translation type="unfinished"></translation>
+        <translation>Ins</translation>
     </message>
     <message>
         <source>Remove the selected layer</source>
@@ -7229,11 +7240,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Excluir</translation>
     </message>
     <message>
         <source>Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Del</translation>
     </message>
     <message>
         <source>Remove all layers</source>
@@ -7241,27 +7252,27 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Delete all</source>
-        <translation type="unfinished"></translation>
+        <translation>Excluir tudo</translation>
     </message>
     <message>
         <source>Shift+Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+Del</translation>
     </message>
     <message>
         <source>Visibility</source>
-        <translation type="unfinished"></translation>
+        <translation>Visibilidade</translation>
     </message>
     <message>
         <source>Hide this widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar este widget</translation>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <source>Display layer rectangles</source>
@@ -7293,19 +7304,19 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Text color</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor do texto</translation>
     </message>
     <message>
         <source>Rect. color</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor do retângulo</translation>
     </message>
     <message>
         <source>Show all</source>
-        <translation type="unfinished"></translation>
+        <translation>Exibir todas</translation>
     </message>
     <message>
         <source>Hide all</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar todas</translation>
     </message>
     <message>
         <source>This action will delete all layers (except the default one), and the objects within them will be moved to the default layer. Do you want to proceed?</source>
@@ -7332,11 +7343,11 @@ Message returned by the DBMS: `%1&apos;</source>
     <name>LayersWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <source>Rename</source>
@@ -7344,7 +7355,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Apply</source>
-        <translation type="unfinished"></translation>
+        <translation>Aplicar</translation>
     </message>
     <message>
         <source>Set object(s) layer(s)</source>
@@ -7360,11 +7371,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar</translation>
     </message>
     <message>
         <source>Ins</source>
-        <translation type="unfinished"></translation>
+        <translation>Ins</translation>
     </message>
 </context>
 <context>
@@ -7383,27 +7394,27 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Email</source>
-        <translation type="unfinished"></translation>
+        <translation>E-mail</translation>
     </message>
     <message>
         <source>me@email.com</source>
-        <translation type="unfinished"></translation>
+        <translation>me@email.com</translation>
     </message>
     <message>
         <source>Token</source>
-        <translation type="unfinished"></translation>
+        <translation>Token</translation>
     </message>
     <message>
         <source>XXXXXXXXXX</source>
-        <translation type="unfinished"></translation>
+        <translation>XXXXXXXXXX</translation>
     </message>
     <message>
         <source>Validate</source>
-        <translation type="unfinished"></translation>
+        <translation>Validar</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <source>pgModeler Plus license details</source>
@@ -7411,7 +7422,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>* FATAL: pgModeler failed to initialize one of its main components!</source>
-        <translation type="unfinished"></translation>
+        <translation>* FATAL: o pgModeler falhou ao inicializar um de seus componentes principais!</translation>
     </message>
     <message>
         <source>The license could not be validated! The majority of features will remain locked until a valid license is provided.</source>
@@ -7499,23 +7510,23 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Validate now</source>
-        <translation type="unfinished"></translation>
+        <translation>Validar agora</translation>
     </message>
     <message>
         <source>This copy of pgModeler Plus is validated.</source>
-        <translation type="unfinished"></translation>
+        <translation>Esta cópia do pgModeler Plus está validada.</translation>
     </message>
     <message>
         <source>Hide this widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar este widget</translation>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <source>License activation date</source>
@@ -7539,7 +7550,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Unable to validate online. Offline usage period ends in &lt;strong&gt;%1 day(s)&lt;/strong&gt;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Não foi possível validar online. O período de uso offline termina em &lt;strong&gt;%1 dia(s)&lt;/strong&gt;.</translation>
     </message>
     <message>
         <source>Online validation required.</source>
@@ -7594,11 +7605,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Toggle the operation history widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Alternar o widget do histórico de operações</translation>
     </message>
     <message>
         <source>&amp;Operations</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Operações</translation>
     </message>
     <message>
         <source>Saving temporary models</source>
@@ -7606,15 +7617,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>&amp;File</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Arquivo</translation>
     </message>
     <message>
         <source>&amp;Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Editar</translation>
     </message>
     <message>
         <source>&amp;Help</source>
-        <translation type="unfinished"></translation>
+        <translation>A&amp;juda</translation>
     </message>
     <message>
         <source>Ca&amp;nvas</source>
@@ -7622,7 +7633,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Tools</source>
-        <translation type="unfinished"></translation>
+        <translation>Ferramentas</translation>
     </message>
     <message>
         <source>Model actions</source>
@@ -7630,7 +7641,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>New</source>
-        <translation type="unfinished"></translation>
+        <translation>Novo</translation>
     </message>
     <message>
         <source>New model</source>
@@ -7638,11 +7649,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+N</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+N</translation>
     </message>
     <message>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar</translation>
     </message>
     <message>
         <source>Save model</source>
@@ -7650,7 +7661,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+S</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+S</translation>
     </message>
     <message>
         <source>Zoom in</source>
@@ -7658,7 +7669,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+=</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+=</translation>
     </message>
     <message>
         <source>Zoom out</source>
@@ -7670,47 +7681,47 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+-</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+-</translation>
     </message>
     <message>
         <source>Load</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar</translation>
     </message>
     <message>
         <source>Ctrl+O</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+O</translation>
     </message>
     <message>
         <source>Save as</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar como</translation>
     </message>
     <message>
         <source>Ctrl+Shift+S</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+S</translation>
     </message>
     <message>
         <source>Exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Sair</translation>
     </message>
     <message>
         <source>Exit pgModeler</source>
-        <translation type="unfinished"></translation>
+        <translation>Sair do pgModeler</translation>
     </message>
     <message>
         <source>Ctrl+Q</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Q</translation>
     </message>
     <message>
         <source>About pgModeler</source>
-        <translation type="unfinished"></translation>
+        <translation>Sobre o pgModeler</translation>
     </message>
     <message>
         <source>F4</source>
-        <translation type="unfinished"></translation>
+        <translation>F4</translation>
     </message>
     <message>
         <source>Print</source>
-        <translation type="unfinished"></translation>
+        <translation>Imprimir</translation>
     </message>
     <message>
         <source>Print model</source>
@@ -7718,31 +7729,31 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+P</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+P</translation>
     </message>
     <message>
         <source>Undo</source>
-        <translation type="unfinished"></translation>
+        <translation>Desfazer</translation>
     </message>
     <message>
         <source>Undo operation</source>
-        <translation type="unfinished"></translation>
+        <translation>Desfazer operação</translation>
     </message>
     <message>
         <source>Ctrl+Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Z</translation>
     </message>
     <message>
         <source>Redo</source>
-        <translation type="unfinished"></translation>
+        <translation>Refazer</translation>
     </message>
     <message>
         <source>Redo operation</source>
-        <translation type="unfinished"></translation>
+        <translation>Refazer operação</translation>
     </message>
     <message>
         <source>Ctrl+Y</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Y</translation>
     </message>
     <message>
         <source>Export</source>
@@ -7754,7 +7765,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+Shift+E</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+E</translation>
     </message>
     <message>
         <source>Show grid</source>
@@ -7762,11 +7773,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+G</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+G</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>Fechar</translation>
     </message>
     <message>
         <source>Close current model</source>
@@ -7774,7 +7785,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+W</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+W</translation>
     </message>
     <message>
         <source>Normal zoom</source>
@@ -7782,7 +7793,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+0</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+0</translation>
     </message>
     <message>
         <source>Align to grid</source>
@@ -7794,7 +7805,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+H</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+H</translation>
     </message>
     <message>
         <source>Show delimiters</source>
@@ -7806,23 +7817,23 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+L</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+L</translation>
     </message>
     <message>
         <source>Configure</source>
-        <translation type="unfinished"></translation>
+        <translation>Configurar</translation>
     </message>
     <message>
         <source>Edit pgModeler settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar as configurações do pgModeler</translation>
     </message>
     <message>
         <source>F12</source>
-        <translation type="unfinished"></translation>
+        <translation>F12</translation>
     </message>
     <message>
         <source>Save all</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar tudo</translation>
     </message>
     <message>
         <source>Overview</source>
@@ -7834,11 +7845,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>F10</source>
-        <translation type="unfinished"></translation>
+        <translation>F10</translation>
     </message>
     <message>
         <source>Support</source>
-        <translation type="unfinished"></translation>
+        <translation>Suporte</translation>
     </message>
     <message>
         <source>Access the support page</source>
@@ -7846,7 +7857,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>F1</source>
-        <translation type="unfinished"></translation>
+        <translation>F1</translation>
     </message>
     <message>
         <source>New object</source>
@@ -7854,23 +7865,23 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Restore Session</source>
-        <translation type="unfinished"></translation>
+        <translation>Restaurar sessão</translation>
     </message>
     <message>
         <source>New version found!</source>
-        <translation type="unfinished"></translation>
+        <translation>Nova versão encontrada!</translation>
     </message>
     <message>
         <source>Update for the current version is available on project&apos;s site</source>
-        <translation type="unfinished"></translation>
+        <translation>Uma atualização para a versão atual está disponível no site do projeto</translation>
     </message>
     <message>
         <source>Check for update</source>
-        <translation type="unfinished"></translation>
+        <translation>Verificar atualização</translation>
     </message>
     <message>
         <source>Show expanded</source>
-        <translation type="unfinished"></translation>
+        <translation>Exibir expandido</translation>
     </message>
     <message>
         <source>Expands the main menu bar in classical mode</source>
@@ -7878,35 +7889,35 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+Shift+M</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+M</translation>
     </message>
     <message>
         <source>Hide main menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar menu principal</translation>
     </message>
     <message>
         <source>Hides the main menu bar and put the action on a separated action</source>
-        <translation type="unfinished"></translation>
+        <translation>Oculta a barra de menu principal e coloca a ação em uma ação separada</translation>
     </message>
     <message>
         <source>Ctrl+Shift+H</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+H</translation>
     </message>
     <message>
         <source>Welcome</source>
-        <translation type="unfinished"></translation>
+        <translation>Boas-vindas</translation>
     </message>
     <message>
         <source>Welcome screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Tela de boas-vindas</translation>
     </message>
     <message>
         <source>Shift+W</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+W</translation>
     </message>
     <message>
         <source>Design</source>
-        <translation type="unfinished"></translation>
+        <translation>Design</translation>
     </message>
     <message>
         <source>Design database models</source>
@@ -7914,23 +7925,23 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Shift+D</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+D</translation>
     </message>
     <message>
         <source>Bug report</source>
-        <translation type="unfinished"></translation>
+        <translation>Relatório de bug</translation>
     </message>
     <message>
         <source>Report a bug</source>
-        <translation type="unfinished"></translation>
+        <translation>Relatar um bug</translation>
     </message>
     <message>
         <source>Donate</source>
-        <translation type="unfinished"></translation>
+        <translation>Doar</translation>
     </message>
     <message>
         <source>Help pgModeler by donating!</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajude o pgModeler fazendo uma doação!</translation>
     </message>
     <message>
         <source>Compact view</source>
@@ -7942,15 +7953,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Magnifier</source>
-        <translation type="unfinished"></translation>
+        <translation>Lupa</translation>
     </message>
     <message>
         <source>Toggles the magnifier tool</source>
-        <translation type="unfinished"></translation>
+        <translation>Alterna a ferramenta de lupa</translation>
     </message>
     <message>
         <source>F9</source>
-        <translation type="unfinished"></translation>
+        <translation>F9</translation>
     </message>
     <message>
         <source>Lock delimiters</source>
@@ -7962,7 +7973,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+K</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+K</translation>
     </message>
     <message>
         <source>Fix</source>
@@ -7974,19 +7985,19 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Clear menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar menu</translation>
     </message>
     <message>
         <source>Missing files only</source>
-        <translation type="unfinished"></translation>
+        <translation>Somente arquivos ausentes</translation>
     </message>
     <message>
         <source>All files</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os arquivos</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"></translation>
+        <translation>Mais</translation>
     </message>
     <message>
         <source>Additional actions over the model</source>
@@ -8018,7 +8029,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Reset geometry</source>
-        <translation type="unfinished"></translation>
+        <translation>Redefinir geometria</translation>
     </message>
     <message>
         <source>Expand canvas</source>
@@ -8034,15 +8045,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Hierarchical</source>
-        <translation type="unfinished"></translation>
+        <translation>Hierárquico</translation>
     </message>
     <message>
         <source>Scattered</source>
-        <translation type="unfinished"></translation>
+        <translation>Disperso</translation>
     </message>
     <message>
         <source>Main menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Menu principal</translation>
     </message>
     <message>
         <source>Recent models</source>
@@ -8054,35 +8065,35 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Failed to initialize one or more components of the UI due to corrupted or incompatible configuration files. Running the CLI tool to restore the default settings may solve this issue. How do you want to proceed?</source>
-        <translation type="unfinished"></translation>
+        <translation>Falha ao inicializar um ou mais componentes da interface devido a arquivos de configuração corrompidos ou incompatíveis. Executar a ferramenta CLI para restaurar as configurações padrão pode resolver esse problema. Como deseja prosseguir?</translation>
     </message>
     <message>
         <source>Restore</source>
-        <translation type="unfinished"></translation>
+        <translation>Restaurar</translation>
     </message>
     <message>
         <source>Abort</source>
-        <translation type="unfinished"></translation>
+        <translation>Abortar</translation>
     </message>
     <message>
         <source>The CLI failed to restore the configuration files! 										 The command executed was: &lt;br/&gt;&lt;br/&gt; &lt;strong&gt;%1&lt;/strong&gt; 										 &lt;br/&gt;&lt;br/&gt; Error(s) returned: &lt;br/&gt;&lt;br/&gt;&lt;em&gt;%2&lt;/em&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>A CLI falhou ao restaurar os arquivos de configuração! 										 O comando executado foi: &lt;br/&gt;&lt;br/&gt; &lt;strong&gt;%1&lt;/strong&gt; 										 &lt;br/&gt;&lt;br/&gt; Erro(s) retornado(s): &lt;br/&gt;&lt;br/&gt;&lt;em&gt;%2&lt;/em&gt;</translation>
     </message>
     <message>
         <source>The default settings were successfully restored! pgModeler will be restarted now so the configuration files can be correctly loaded.</source>
-        <translation type="unfinished"></translation>
+        <translation>As configurações padrão foram restauradas com sucesso! O pgModeler será reiniciado agora para que os arquivos de configuração sejam carregados corretamente.</translation>
     </message>
     <message>
         <source>Plug-ins</source>
-        <translation type="unfinished"></translation>
+        <translation>Plug-ins</translation>
     </message>
     <message>
         <source>Access the loaded plug-ins settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Acessar as configurações dos plug-ins carregados</translation>
     </message>
     <message>
         <source>Always close without alerting me next time.</source>
-        <translation type="unfinished"></translation>
+        <translation>Sempre fechar sem me alertar na próxima vez.</translation>
     </message>
     <message>
         <source>Unsaved model(s)</source>
@@ -8094,7 +8105,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source> (not accessible)</source>
-        <translation type="unfinished"></translation>
+        <translation> (inacessível)</translation>
     </message>
     <message>
         <source>Could not reload the model because the validation process found errors that must be resolved.</source>
@@ -8106,7 +8117,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Confirmation</source>
-        <translation type="unfinished"></translation>
+        <translation>Confirmação</translation>
     </message>
     <message>
         <source> &lt;strong&gt;WARNING:&lt;/strong&gt; The model &lt;strong&gt;%1&lt;/strong&gt; has not been validated since the last modification! It&apos;s recommended to validate it before save in order to create a consistent model otherwise the generated file will be broken demanding manual fixes to be loadable again!</source>
@@ -8114,15 +8125,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Validate</source>
-        <translation type="unfinished"></translation>
+        <translation>Validar</translation>
     </message>
     <message>
         <source>Save anyway</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar mesmo assim</translation>
     </message>
     <message>
         <source>Save &apos;%1&apos; as...</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar &apos;%1&apos; como...</translation>
     </message>
     <message>
         <source>Database model (*%1)</source>
@@ -8154,15 +8165,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>New settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Novas configurações</translation>
     </message>
     <message>
         <source>Defaults</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrões</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <source>Load model</source>
@@ -8170,7 +8181,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>All files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os arquivos (*.*)</translation>
     </message>
     <message>
         <source>Could not load the database model file `%1&apos;! Check the error stack to see details. You can try to fix it in order to make it loadable again.</source>
@@ -8182,11 +8193,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>(no samples found)</source>
-        <translation type="unfinished"></translation>
+        <translation>(nenhum exemplo encontrado)</translation>
     </message>
     <message>
         <source>save</source>
-        <translation type="unfinished"></translation>
+        <translation>salvamento</translation>
     </message>
     <message>
         <source>export</source>
@@ -8198,7 +8209,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Executing pending &lt;strong&gt;%1&lt;/strong&gt; operation...</source>
-        <translation type="unfinished"></translation>
+        <translation>Executando a operação pendente de &lt;strong&gt;%1&lt;/strong&gt;...</translation>
     </message>
     <message>
         <source>Rearranging objects on the canvas is an irreversible operation.</source>
@@ -8206,11 +8217,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source> Would like to proceed?</source>
-        <translation type="unfinished"></translation>
+        <translation> Deseja prosseguir?</translation>
     </message>
     <message>
         <source> How the rearrangement should be applied?</source>
-        <translation type="unfinished"></translation>
+        <translation> Como o rearranjo deve ser aplicado?</translation>
     </message>
     <message>
         <source>This scene only</source>
@@ -8229,75 +8240,75 @@ Message returned by the DBMS: `%1&apos;</source>
     <name>Messagebox</name>
     <message>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Diálogo</translation>
     </message>
     <message>
         <source>&amp;No</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Não</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <source>&amp;Yes</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Sim</translation>
     </message>
     <message>
         <source>Stack trace</source>
-        <translation type="unfinished"></translation>
+        <translation>Rastreamento de pilha</translation>
     </message>
     <message>
         <source>msg</source>
-        <translation type="unfinished"></translation>
+        <translation>msg</translation>
     </message>
     <message>
         <source>Stack info</source>
-        <translation type="unfinished"></translation>
+        <translation>Informações da pilha</translation>
     </message>
     <message>
         <source>Exceptions</source>
-        <translation type="unfinished"></translation>
+        <translation>Exceções</translation>
     </message>
     <message>
         <source>Extra info</source>
-        <translation type="unfinished"></translation>
+        <translation>Informações extras</translation>
     </message>
     <message>
         <source>Plain text</source>
-        <translation type="unfinished"></translation>
+        <translation>Texto simples</translation>
     </message>
     <message>
         <source>&amp;Close</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Fechar</translation>
     </message>
     <message>
         <source>&amp;Ok</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ok</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Cancelar</translation>
     </message>
     <message>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Erro</translation>
     </message>
     <message>
         <source>Information</source>
-        <translation type="unfinished"></translation>
+        <translation>Informação</translation>
     </message>
     <message>
         <source>Alert</source>
-        <translation type="unfinished"></translation>
+        <translation>Alerta</translation>
     </message>
     <message>
         <source>Confirmation</source>
-        <translation type="unfinished"></translation>
+        <translation>Confirmação</translation>
     </message>
     <message>
         <source>Success</source>
-        <translation type="unfinished"></translation>
+        <translation>Sucesso</translation>
     </message>
 </context>
 <context>
@@ -8308,43 +8319,43 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Configurações</translation>
     </message>
     <message>
         <source>Operation</source>
-        <translation type="unfinished"></translation>
+        <translation>Operação</translation>
     </message>
     <message>
         <source>Extract and restore</source>
-        <translation type="unfinished"></translation>
+        <translation>Extrair e restaurar</translation>
     </message>
     <message>
         <source>Extract only</source>
-        <translation type="unfinished"></translation>
+        <translation>Somente extrair</translation>
     </message>
     <message>
         <source>Restore a backup</source>
-        <translation type="unfinished"></translation>
+        <translation>Restaurar um backup</translation>
     </message>
     <message>
         <source>Extract from</source>
-        <translation type="unfinished"></translation>
+        <translation>Extrair de</translation>
     </message>
     <message>
         <source>Apply to</source>
-        <translation type="unfinished"></translation>
+        <translation>Aplicar a</translation>
     </message>
     <message>
         <source>Backup file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de backup</translation>
     </message>
     <message>
         <source>Progress label...</source>
-        <translation type="unfinished"></translation>
+        <translation>Rótulo de progresso...</translation>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>&lt;p&gt;Textboxes, tags, and generic SQL objects from the metadata file will be merged into the ones that already exist in the database model.&lt;/p&gt;</source>
@@ -8356,11 +8367,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Select all</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar tudo</translation>
     </message>
     <message>
         <source>Clear all</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar tudo</translation>
     </message>
     <message>
         <source>&lt;p&gt;Handles the objects&apos; aliases  in the metadata file. Only for graphical objects and table&apos;s children objects.&lt;/p&gt;</source>
@@ -8464,7 +8475,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Custom SQL commands</source>
-        <translation type="unfinished"></translation>
+        <translation>Comandos SQL personalizados</translation>
     </message>
     <message>
         <source>&lt;p&gt;Save tags to the output file when extracting metadata. When loading the file, the tags are recreated and duplicated ones are ignored.&lt;/p&gt;</source>
@@ -8480,7 +8491,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Select backup file</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar arquivo de backup</translation>
     </message>
     <message>
         <source>Applying the contents of a metadata file to a database model is an irreversible operation! Do you want to proceed?</source>
@@ -8508,11 +8519,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Save backup file</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar arquivo de backup</translation>
     </message>
     <message>
         <source>Load backup file</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar arquivo de backup</translation>
     </message>
 </context>
 <context>
@@ -8534,15 +8545,15 @@ Message returned by the DBMS: `%1&apos;</source>
     <name>ModelExportHelper</name>
     <message>
         <source>Generating SQL code for PostgreSQL `%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerando código SQL para o PostgreSQL `%1&apos;</translation>
     </message>
     <message>
         <source>SQL file `%1&apos; successfully written.</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo SQL `%1&apos; gravado com sucesso.</translation>
     </message>
     <message>
         <source>SQL files successfully written in `%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivos SQL gravados com sucesso em `%1&apos;.</translation>
     </message>
     <message>
         <source>Rendering objects to page %1/%2.</source>
@@ -8550,7 +8561,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Output image `%1&apos; successfully written.</source>
-        <translation type="unfinished"></translation>
+        <translation>Imagem de saída `%1&apos; gravada com sucesso.</translation>
     </message>
     <message>
         <source>Exporting model to SVG file.</source>
@@ -8562,11 +8573,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>SVG file generated by pgModeler</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo SVG gerado pelo pgModeler</translation>
     </message>
     <message>
         <source>Output file `%1&apos; successfully written.</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de saída `%1&apos; gravado com sucesso.</translation>
     </message>
     <message>
         <source>Starting export to DBMS.</source>
@@ -8574,7 +8585,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>PostgreSQL version detection overridden. Using version `%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Detecção da versão do PostgreSQL substituída. Usando a versão `%1&apos;.</translation>
     </message>
     <message>
         <source>PostgreSQL `%1&apos; server detected.</source>
@@ -8594,7 +8605,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ignoring the following error code(s): `%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ignorando o(s) seguinte(s) código(s) de erro: `%1&apos;.</translation>
     </message>
     <message>
         <source>Trying to drop database `%1&apos;.</source>
@@ -8602,7 +8613,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Simulation mode activated.</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo de simulação ativado.</translation>
     </message>
     <message>
         <source>Creating object `%1&apos; (%2)</source>
@@ -8638,7 +8649,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Renaming `%1&apos; (%2) to `%3&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Renomeando `%1&apos; (%2) para `%3&apos;</translation>
     </message>
     <message>
         <source>Dropping object `%1&apos; (%2)</source>
@@ -8650,11 +8661,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Running auxiliary `%1&apos; command...</source>
-        <translation type="unfinished"></translation>
+        <translation>Executando o comando auxiliar `%1&apos;...</translation>
     </message>
     <message>
         <source>Running auxiliary command.</source>
-        <translation type="unfinished"></translation>
+        <translation>Executando comando auxiliar.</translation>
     </message>
     <message>
         <source>Starting transaction.</source>
@@ -8662,15 +8673,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Rolling back changes.</source>
-        <translation type="unfinished"></translation>
+        <translation>Revertendo as alterações.</translation>
     </message>
     <message>
         <source>Committing changes.</source>
-        <translation type="unfinished"></translation>
+        <translation>Confirmando as alterações.</translation>
     </message>
     <message>
         <source>Failed to roll back changes!</source>
-        <translation type="unfinished"></translation>
+        <translation>Falha ao reverter as alterações!</translation>
     </message>
 </context>
 <context>
@@ -8681,7 +8692,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Configurações</translation>
     </message>
     <message>
         <source>Input model</source>
@@ -8705,15 +8716,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ignore error codes</source>
-        <translation type="unfinished"></translation>
+        <translation>Ignorar códigos de erro</translation>
     </message>
     <message>
         <source>PostgreSQL version in which the SQL code should be generated. It is recommended to select this option only when the version of the DBMS, somehow, is not identifiable or if you need to generate a specific version of SQL code for test purposes.</source>
-        <translation type="unfinished"></translation>
+        <translation>Versão do PostgreSQL na qual o código SQL deve ser gerado. Recomenda-se selecionar esta opção apenas quando a versão do SGBD, por algum motivo, não for identificável ou se você precisar gerar uma versão específica de código SQL para fins de teste.</translation>
     </message>
     <message>
         <source>PostgreSQL</source>
-        <translation type="unfinished"></translation>
+        <translation>PostgreSQL</translation>
     </message>
     <message>
         <source>&lt;p&gt;If &lt;strong&gt;Database&lt;/strong&gt; is checked pgModeler will destroy the database if already exists on the server. When &lt;strong&gt;Objects&lt;/strong&gt; is checked pgModeler will execute the DROP command attached to SQL-enabled objects. &lt;strong&gt;WARNING:&lt;/strong&gt; this option leads to data loss so make sure to have a backup before exporting.&lt;/p&gt;</source>
@@ -8745,7 +8756,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ignore duplicity</source>
-        <translation type="unfinished"></translation>
+        <translation>Ignorar duplicidade</translation>
     </message>
     <message>
         <source>&lt;p&gt;Run the generated commands in a single transaction block. In case of errors, all changes are rolled back. &lt;strong&gt;NOTE:&lt;/strong&gt; This option has no effect for roles, tablespace and database DDL commands.&lt;/p&gt;</source>
@@ -8757,27 +8768,27 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>SQL file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo SQL</translation>
     </message>
     <message>
         <source>Format</source>
-        <translation type="unfinished"></translation>
+        <translation>Formato</translation>
     </message>
     <message>
         <source>Standalone</source>
-        <translation type="unfinished"></translation>
+        <translation>Independente</translation>
     </message>
     <message>
         <source>Split</source>
-        <translation type="unfinished"></translation>
+        <translation>Dividido</translation>
     </message>
     <message>
         <source>PostgreSQL version in which the SQL code should be generated</source>
-        <translation type="unfinished"></translation>
+        <translation>Versão do PostgreSQL na qual o código SQL deve ser gerado</translation>
     </message>
     <message>
         <source>Code generation mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo de geração de código</translation>
     </message>
     <message>
         <source>&lt;p&gt;&lt;strong&gt;Original:&lt;/strong&gt; generates only the original SQL code for each object. The files will be named in such a way to reflect the correct creation order of the objects.&lt;br/&gt;&lt;br/&gt;
@@ -8791,15 +8802,15 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Original</source>
-        <translation type="unfinished"></translation>
+        <translation>Original</translation>
     </message>
     <message>
         <source>Original + depedencies&apos; SQL</source>
-        <translation type="unfinished"></translation>
+        <translation>Original + SQL das dependências</translation>
     </message>
     <message>
         <source>Original + children&apos;s SQL</source>
-        <translation type="unfinished"></translation>
+        <translation>Original + SQL dos filhos</translation>
     </message>
     <message>
         <source>Group by object type</source>
@@ -8815,19 +8826,19 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Output</source>
-        <translation type="unfinished"></translation>
+        <translation>Saída</translation>
     </message>
     <message>
         <source>Graphics file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo gráfico</translation>
     </message>
     <message>
         <source>PNG</source>
-        <translation type="unfinished"></translation>
+        <translation>PNG</translation>
     </message>
     <message>
         <source>SVG</source>
-        <translation type="unfinished"></translation>
+        <translation>SVG</translation>
     </message>
     <message>
         <source>Zoom</source>
@@ -8855,7 +8866,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Override background</source>
-        <translation type="unfinished"></translation>
+        <translation>Substituir o fundo</translation>
     </message>
     <message>
         <source>Data dictionary</source>
@@ -8869,11 +8880,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>HTML</source>
-        <translation type="unfinished"></translation>
+        <translation>HTML</translation>
     </message>
     <message>
         <source>MD</source>
-        <translation type="unfinished"></translation>
+        <translation>MD</translation>
     </message>
     <message>
         <source>&lt;strong&gt;Standalone:&lt;/strong&gt; pgModeler will generate a single file containing the data dictionaries of all tables in the database model. 
@@ -8891,11 +8902,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Progress label...</source>
-        <translation type="unfinished"></translation>
+        <translation>Rótulo de progresso...</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <source>Export</source>
@@ -8927,7 +8938,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Warning</source>
-        <translation type="unfinished"></translation>
+        <translation>Aviso</translation>
     </message>
     <message>
         <source>Initializing model export...</source>
@@ -8935,23 +8946,23 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>&lt;strong&gt;Low verbosity is set:&lt;/strong&gt; only key informations and errors will be displayed.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;strong&gt;Baixa verbosidade ativada:&lt;/strong&gt; apenas as informações principais e os erros serão exibidos.</translation>
     </message>
     <message>
         <source>Saving file &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvando o arquivo &apos;%1&apos;</translation>
     </message>
     <message>
         <source>Exporting process aborted!</source>
-        <translation type="unfinished"></translation>
+        <translation>Processo de exportação abortado!</translation>
     </message>
     <message>
         <source>Exporting process canceled by user!</source>
-        <translation type="unfinished"></translation>
+        <translation>Processo de exportação cancelado pelo usuário!</translation>
     </message>
     <message>
         <source>Exporting process sucessfully ended!</source>
-        <translation type="unfinished"></translation>
+        <translation>Processo de exportação concluído com sucesso!</translation>
     </message>
 </context>
 <context>
@@ -8970,11 +8981,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Output file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de saída</translation>
     </message>
     <message>
         <source>pgmodeler-cli</source>
-        <translation type="unfinished"></translation>
+        <translation>pgmodeler-cli</translation>
     </message>
     <message>
         <source>In some cases the fix process will fail to restore certain objects in the model demanding manual fixes by changing the file in a text editor. &lt;strong&gt;NOTE:&lt;/strong&gt; relationships may lost their graphical configuration like custom points and line color.</source>
@@ -8982,11 +8993,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Input file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de entrada</translation>
     </message>
     <message>
         <source>&lt;p&gt;Generate a filename/path based on the input filename and appeding the suffix &lt;strong&gt;_fixed_YYYYMMDD_hhmmss&lt;/strong&gt;&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Gera um nome/caminho de arquivo com base no nome do arquivo de entrada, acrescentando o sufixo &lt;strong&gt;_fixed_YYYYMMDD_hhmmss&lt;/strong&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Database model (*%1)</source>
@@ -8994,38 +9005,38 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Select input file</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar arquivo de entrada</translation>
     </message>
     <message>
         <source>Select output file</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar arquivo de saída</translation>
     </message>
     <message>
         <source>pgModeler command line tool (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ferramenta de linha de comando do pgModeler (%1)</translation>
     </message>
     <message>
         <source>Select pgmodeler-cli executable</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar o executável do pgmodeler-cli</translation>
     </message>
     <message>
         <source>Waiting for the process to start...</source>
-        <translation type="unfinished"></translation>
+        <translation>Aguardando o início do processo...</translation>
     </message>
     <message>
         <source>** Process cancelled by the user!</source>
-        <translation type="unfinished"></translation>
+        <translation>** Processo cancelado pelo usuário!</translation>
     </message>
     <message>
         <source>** Executed command was:</source>
-        <translation type="unfinished"></translation>
+        <translation>** O comando executado foi:</translation>
     </message>
 </context>
 <context>
     <name>ModelNavigationWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Previous model</source>
@@ -9033,7 +9044,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+Left</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Left</translation>
     </message>
     <message>
         <source>Next model</source>
@@ -9041,7 +9052,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Ctrl+Right</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Right</translation>
     </message>
     <message>
         <source>Close model</source>
@@ -9049,11 +9060,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Alt+C</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+C</translation>
     </message>
     <message>
         <source>(Model not saved yet)</source>
@@ -9072,27 +9083,27 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Hide this widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar este widget</translation>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <source>Select</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar</translation>
     </message>
     <message>
         <source>Return</source>
-        <translation type="unfinished"></translation>
+        <translation>Voltar</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <source>Objects view configuration</source>
@@ -9108,7 +9119,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>1</source>
-        <translation type="unfinished"></translation>
+        <translation>1</translation>
     </message>
     <message>
         <source>Filter</source>
@@ -9116,7 +9127,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>By ID</source>
-        <translation type="unfinished"></translation>
+        <translation>Por ID</translation>
     </message>
     <message>
         <source>Visible object types</source>
@@ -9124,7 +9135,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>New</source>
-        <translation type="unfinished"></translation>
+        <translation>Novo</translation>
     </message>
 </context>
 <context>
@@ -9163,30 +9174,30 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>File</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo</translation>
     </message>
     <message>
         <source>Modified</source>
-        <translation type="unfinished"></translation>
+        <translation>Modificado</translation>
     </message>
     <message>
         <source>Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Tamanho</translation>
     </message>
     <message>
         <source>&amp;Restore</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Restaurar</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Cancelar</translation>
     </message>
 </context>
 <context>
     <name>ModelSelectorWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>No models found</source>
@@ -9209,22 +9220,22 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Operation canceled by the user.</source>
-        <translation type="unfinished"></translation>
+        <translation>Operação cancelada pelo usuário.</translation>
     </message>
 </context>
 <context>
     <name>ModelValidationWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Va&amp;lidate</source>
-        <translation type="unfinished"></translation>
+        <translation>Va&amp;lidar</translation>
     </message>
     <message>
         <source>Try to resolve the reported issues.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tentar resolver os problemas reportados.</translation>
     </message>
     <message>
         <source>Apply fixes</source>
@@ -9236,11 +9247,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <source>Change the creation order for two objects by swapping their ids</source>
@@ -9248,7 +9259,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Swap ids</source>
-        <translation type="unfinished"></translation>
+        <translation>Trocar ids</translation>
     </message>
     <message>
         <source>Try to apply a fix on the selected validation info.</source>
@@ -9256,7 +9267,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>Handles the validation output</source>
@@ -9264,15 +9275,15 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Output</source>
-        <translation type="unfinished"></translation>
+        <translation>Saída</translation>
     </message>
     <message>
         <source>Hide this widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar este widget</translation>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>&lt;p&gt;Enables the validation of SQL code in DBMS. This process requires the use of a pre-configured connection. SQL validation will occur only in the last step (when all objects were validated) or when there are no warnings.&lt;/p&gt;</source>
@@ -9300,11 +9311,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>PostgreSQL</source>
-        <translation type="unfinished"></translation>
+        <translation>PostgreSQL</translation>
     </message>
     <message>
         <source>PostgreSQL version</source>
-        <translation type="unfinished"></translation>
+        <translation>Versão do PostgreSQL</translation>
     </message>
     <message>
         <source>Warnings: does not prevents model to be saved.</source>
@@ -9312,7 +9323,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>0</source>
-        <translation type="unfinished"></translation>
+        <translation>0</translation>
     </message>
     <message>
         <source>Errors: model will not be saved while there are validation errors.</source>
@@ -9320,15 +9331,15 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Copy as text</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar como texto</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar</translation>
     </message>
     <message>
         <source>Autodetect</source>
-        <translation type="unfinished"></translation>
+        <translation>Detectar automaticamente</translation>
     </message>
     <message>
         <source>The object &lt;strong&gt;%1&lt;/strong&gt; &lt;em&gt;(%2)&lt;/em&gt; [id: %3] is being referenced by &lt;strong&gt;%4&lt;/strong&gt; object(s) before its creation.</source>
@@ -9427,15 +9438,15 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     <name>ModelWidget</name>
     <message>
         <source>Edit data</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar dados</translation>
     </message>
     <message>
         <source>Source</source>
-        <translation type="unfinished"></translation>
+        <translation>Código-fonte</translation>
     </message>
     <message>
         <source>Alt+S</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+S</translation>
     </message>
     <message>
         <source>Show object source code</source>
@@ -9443,11 +9454,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Properties</source>
-        <translation type="unfinished"></translation>
+        <translation>Propriedades</translation>
     </message>
     <message>
         <source>Space</source>
-        <translation type="unfinished"></translation>
+        <translation>Espaço</translation>
     </message>
     <message>
         <source>Edit the object properties</source>
@@ -9467,11 +9478,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Excluir</translation>
     </message>
     <message>
         <source>Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Del</translation>
     </message>
     <message>
         <source>Del. cascade</source>
@@ -9479,11 +9490,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Shift+Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+Del</translation>
     </message>
     <message>
         <source>Select all</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar tudo</translation>
     </message>
     <message>
         <source>Selects all the graphical objects in the model</source>
@@ -9491,55 +9502,55 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Convert</source>
-        <translation type="unfinished"></translation>
+        <translation>Converter</translation>
     </message>
     <message>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar</translation>
     </message>
     <message>
         <source>Selected only</source>
-        <translation type="unfinished"></translation>
+        <translation>Somente os selecionados</translation>
     </message>
     <message>
         <source>Ctrl+C</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+C</translation>
     </message>
     <message>
         <source>Sel. + dependencies</source>
-        <translation type="unfinished"></translation>
+        <translation>Sel. + dependências</translation>
     </message>
     <message>
         <source>Ctrl+Shift+C</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+C</translation>
     </message>
     <message>
         <source>Paste</source>
-        <translation type="unfinished"></translation>
+        <translation>Colar</translation>
     </message>
     <message>
         <source>Ctrl+V</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+V</translation>
     </message>
     <message>
         <source>Cut</source>
-        <translation type="unfinished"></translation>
+        <translation>Recortar</translation>
     </message>
     <message>
         <source>Ctrl+X</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+X</translation>
     </message>
     <message>
         <source>Ctrl+Shift+X</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+X</translation>
     </message>
     <message>
         <source>Associations</source>
-        <translation type="unfinished"></translation>
+        <translation>Associações</translation>
     </message>
     <message>
         <source>New</source>
-        <translation type="unfinished"></translation>
+        <translation>Novo</translation>
     </message>
     <message>
         <source>Add a new object in the model</source>
@@ -9547,7 +9558,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Quick</source>
-        <translation type="unfinished"></translation>
+        <translation>Rápido</translation>
     </message>
     <message>
         <source>Quick action for the selected object</source>
@@ -9559,7 +9570,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>F2</source>
-        <translation type="unfinished"></translation>
+        <translation>F2</translation>
     </message>
     <message>
         <source>Quick rename the object</source>
@@ -9587,7 +9598,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Ctrl+E</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+E</translation>
     </message>
     <message>
         <source>Change owner</source>
@@ -9595,7 +9606,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Select children</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar filhos</translation>
     </message>
     <message>
         <source>Select tagged</source>
@@ -9623,7 +9634,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Select</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar</translation>
     </message>
     <message>
         <source>Open relationship</source>
@@ -9631,11 +9642,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Custom SQL</source>
-        <translation type="unfinished"></translation>
+        <translation>SQL personalizado</translation>
     </message>
     <message>
         <source>Alt+Q</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+Q</translation>
     </message>
     <message>
         <source>Convert to sequence</source>
@@ -9643,19 +9654,19 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Convert to serial</source>
-        <translation type="unfinished"></translation>
+        <translation>Converter para serial</translation>
     </message>
     <message>
         <source>Remove points</source>
-        <translation type="unfinished"></translation>
+        <translation>Remover pontos</translation>
     </message>
     <message>
         <source>Enable SQL</source>
-        <translation type="unfinished"></translation>
+        <translation>Habilitar SQL</translation>
     </message>
     <message>
         <source>Disable SQL</source>
-        <translation type="unfinished"></translation>
+        <translation>Desabilitar SQL</translation>
     </message>
     <message>
         <source>Duplicate</source>
@@ -9663,19 +9674,19 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Ctrl+D</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+D</translation>
     </message>
     <message>
         <source>Pagination</source>
-        <translation type="unfinished"></translation>
+        <translation>Paginação</translation>
     </message>
     <message>
         <source>Enable</source>
-        <translation type="unfinished"></translation>
+        <translation>Habilitar</translation>
     </message>
     <message>
         <source>Disable</source>
-        <translation type="unfinished"></translation>
+        <translation>Desabilitar</translation>
     </message>
     <message>
         <source>Jump to table</source>
@@ -9687,15 +9698,15 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Not collapsed</source>
-        <translation type="unfinished"></translation>
+        <translation>Não recolhido</translation>
     </message>
     <message>
         <source>Extended attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos estendidos</translation>
     </message>
     <message>
         <source>All attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os atributos</translation>
     </message>
     <message>
         <source>Schemas rectangles</source>
@@ -9703,23 +9714,23 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Show</source>
-        <translation type="unfinished"></translation>
+        <translation>Exibir</translation>
     </message>
     <message>
         <source>Hide</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar</translation>
     </message>
     <message>
         <source>Fade in/out</source>
-        <translation type="unfinished"></translation>
+        <translation>Esmaecer / realçar</translation>
     </message>
     <message>
         <source>Fade in</source>
-        <translation type="unfinished"></translation>
+        <translation>Realçar</translation>
     </message>
     <message>
         <source>Fade out</source>
-        <translation type="unfinished"></translation>
+        <translation>Esmaecer</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -9735,7 +9746,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Swap ids</source>
-        <translation type="unfinished"></translation>
+        <translation>Trocar ids</translation>
     </message>
     <message>
         <source>Edit the objects creation order by swapping their ids</source>
@@ -9743,23 +9754,23 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Break line</source>
-        <translation type="unfinished"></translation>
+        <translation>Quebrar linha</translation>
     </message>
     <message>
         <source>90° (vertical)</source>
-        <translation type="unfinished"></translation>
+        <translation>90° (vertical)</translation>
     </message>
     <message>
         <source>90° (horizontal)</source>
-        <translation type="unfinished"></translation>
+        <translation>90° (horizontal)</translation>
     </message>
     <message>
         <source>90° + 90° (vertical)</source>
-        <translation type="unfinished"></translation>
+        <translation>90° + 90° (vertical)</translation>
     </message>
     <message>
         <source>90° + 90° (horizontal)</source>
-        <translation type="unfinished"></translation>
+        <translation>90° + 90° (horizontal)</translation>
     </message>
     <message>
         <source>Database object</source>
@@ -9795,19 +9806,19 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Ctrl+A</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+A</translation>
     </message>
     <message>
         <source>Stacking</source>
-        <translation type="unfinished"></translation>
+        <translation>Empilhamento</translation>
     </message>
     <message>
         <source>Send to back</source>
-        <translation type="unfinished"></translation>
+        <translation>Enviar para trás</translation>
     </message>
     <message>
         <source>Bring to front</source>
-        <translation type="unfinished"></translation>
+        <translation>Trazer para a frente</translation>
     </message>
     <message>
         <source>Foreign tables</source>
@@ -9827,7 +9838,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Don&apos;t ask to save and reload again.</source>
-        <translation type="unfinished"></translation>
+        <translation>Não perguntar para salvar e recarregar novamente.</translation>
     </message>
     <message>
         <source>Changing the segmentation mode takes effect only after saving and reloading the model. Do you want to proceed?</source>
@@ -9907,7 +9918,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Generating XML for: `%1&apos; (%2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerando XML de: `%1&apos; (%2)</translation>
     </message>
     <message>
         <source>Pasting object: `%1&apos; (%2)</source>
@@ -9943,7 +9954,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhum</translation>
     </message>
     <message>
         <source>Source code</source>
@@ -9955,18 +9966,18 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>&amp;Swap ids</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Trocar ids</translation>
     </message>
     <message>
         <source>&amp;Close</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Fechar</translation>
     </message>
 </context>
 <context>
     <name>ModelsDiffHelper</name>
     <message>
         <source>(unrecognized id)</source>
-        <translation type="unfinished"></translation>
+        <translation>(id não reconhecido)</translation>
     </message>
     <message>
         <source>Object type id: %1</source>
@@ -9990,7 +10001,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>No differences detected.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhuma diferença detectada.</translation>
     </message>
     <message>
         <source>Preparing diff code...</source>
@@ -10001,7 +10012,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     <name>NewObjectOverlayWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Database objects</source>
@@ -10025,7 +10036,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>A</source>
-        <translation type="unfinished"></translation>
+        <translation>A</translation>
     </message>
     <message>
         <source>Language</source>
@@ -10181,7 +10192,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Cópia</translation>
     </message>
     <message>
         <source>Partitioning</source>
@@ -10189,182 +10200,182 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>G</source>
-        <translation type="unfinished"></translation>
+        <translation>G</translation>
     </message>
     <message>
         <source>K</source>
-        <translation type="unfinished"></translation>
+        <translation>K</translation>
     </message>
     <message>
         <source>H</source>
-        <translation type="unfinished"></translation>
+        <translation>H</translation>
     </message>
     <message>
         <source>J</source>
-        <translation type="unfinished"></translation>
+        <translation>J</translation>
     </message>
     <message>
         <source>D</source>
-        <translation type="unfinished"></translation>
+        <translation>D</translation>
     </message>
     <message>
         <source>E</source>
-        <translation type="unfinished"></translation>
+        <translation>E</translation>
     </message>
     <message>
         <source>F</source>
-        <translation type="unfinished"></translation>
+        <translation>F</translation>
     </message>
     <message>
         <source>L</source>
-        <translation type="unfinished"></translation>
+        <translation>L</translation>
     </message>
     <message>
         <source>O</source>
-        <translation type="unfinished"></translation>
+        <translation>O</translation>
     </message>
     <message>
         <source>U</source>
-        <translation type="unfinished"></translation>
+        <translation>U</translation>
     </message>
     <message>
         <source>I</source>
-        <translation type="unfinished"></translation>
+        <translation>I</translation>
     </message>
     <message>
         <source>R</source>
-        <translation type="unfinished"></translation>
+        <translation>R</translation>
     </message>
     <message>
         <source>S</source>
-        <translation type="unfinished"></translation>
+        <translation>S</translation>
     </message>
     <message>
         <source>Q</source>
-        <translation type="unfinished"></translation>
+        <translation>Q</translation>
     </message>
     <message>
         <source>T</source>
-        <translation type="unfinished"></translation>
+        <translation>T</translation>
     </message>
     <message>
         <source>P</source>
-        <translation type="unfinished"></translation>
+        <translation>P</translation>
     </message>
     <message>
         <source>M</source>
-        <translation type="unfinished"></translation>
+        <translation>M</translation>
     </message>
     <message>
         <source>Y</source>
-        <translation type="unfinished"></translation>
+        <translation>Y</translation>
     </message>
     <message>
         <source>W</source>
-        <translation type="unfinished"></translation>
+        <translation>W</translation>
     </message>
     <message>
         <source>9</source>
-        <translation type="unfinished"></translation>
+        <translation>9</translation>
     </message>
     <message>
         <source>Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Z</translation>
     </message>
     <message>
         <source>X</source>
-        <translation type="unfinished"></translation>
+        <translation>X</translation>
     </message>
     <message>
         <source>C</source>
-        <translation type="unfinished"></translation>
+        <translation>C</translation>
     </message>
     <message>
         <source>V</source>
-        <translation type="unfinished"></translation>
+        <translation>V</translation>
     </message>
     <message>
         <source>B</source>
-        <translation type="unfinished"></translation>
+        <translation>B</translation>
     </message>
     <message>
         <source>8</source>
-        <translation type="unfinished"></translation>
+        <translation>8</translation>
     </message>
     <message>
         <source>7</source>
-        <translation type="unfinished"></translation>
+        <translation>7</translation>
     </message>
     <message>
         <source>6</source>
-        <translation type="unfinished"></translation>
+        <translation>6</translation>
     </message>
     <message>
         <source>5</source>
-        <translation type="unfinished"></translation>
+        <translation>5</translation>
     </message>
     <message>
         <source>4</source>
-        <translation type="unfinished"></translation>
+        <translation>4</translation>
     </message>
     <message>
         <source>3</source>
-        <translation type="unfinished"></translation>
+        <translation>3</translation>
     </message>
     <message>
         <source>2</source>
-        <translation type="unfinished"></translation>
+        <translation>2</translation>
     </message>
     <message>
         <source>1</source>
-        <translation type="unfinished"></translation>
+        <translation>1</translation>
     </message>
     <message>
         <source>0</source>
-        <translation type="unfinished"></translation>
+        <translation>0</translation>
     </message>
 </context>
 <context>
     <name>NumberedTextEditor</name>
     <message>
         <source>SQL file (*.sql)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo SQL (*.sql)</translation>
     </message>
     <message>
         <source>All files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os arquivos (*.*)</translation>
     </message>
     <message>
         <source>Load</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar</translation>
     </message>
     <message>
         <source>Load text from an external file (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar texto de um arquivo externo (%1)</translation>
     </message>
     <message>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar</translation>
     </message>
     <message>
         <source>Save the text to a file (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar o texto em um arquivo (%1)</translation>
     </message>
     <message>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar</translation>
     </message>
     <message>
         <source>Copy a text to the clipboard (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar um texto para a área de transferência (%1)</translation>
     </message>
     <message>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar</translation>
     </message>
     <message>
         <source>Edit the text in the defined external editor (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar o texto no editor externo definido (%1)</translation>
     </message>
     <message>
         <source>Search</source>
@@ -10376,51 +10387,51 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Wrap</source>
-        <translation type="unfinished"></translation>
+        <translation>Quebrar</translation>
     </message>
     <message>
         <source>Toggles the word wrap (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Alterna a quebra de linha (%1)</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar</translation>
     </message>
     <message>
         <source>Clears the entire text</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpa todo o texto</translation>
     </message>
     <message>
         <source>Paste code</source>
-        <translation type="unfinished"></translation>
+        <translation>Colar código</translation>
     </message>
     <message>
         <source>Upper case</source>
-        <translation type="unfinished"></translation>
+        <translation>Maiúsculas</translation>
     </message>
     <message>
         <source>Lower case</source>
-        <translation type="unfinished"></translation>
+        <translation>Minúsculas</translation>
     </message>
     <message>
         <source>Ident right</source>
-        <translation type="unfinished"></translation>
+        <translation>Indentar à direita</translation>
     </message>
     <message>
         <source>Ident left</source>
-        <translation type="unfinished"></translation>
+        <translation>Indentar à esquerda</translation>
     </message>
     <message>
         <source>Load file</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar arquivo</translation>
     </message>
     <message>
         <source>Save file</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar arquivo</translation>
     </message>
     <message>
         <source>The editor &lt;strong&gt;%1&lt;/strong&gt; (pid: %2) is running.</source>
-        <translation type="unfinished"></translation>
+        <translation>O editor &lt;strong&gt;%1&lt;/strong&gt; (pid: %2) está em execução.</translation>
     </message>
     <message>
         <source>Failed to run the source code editor &lt;strong&gt;%1&lt;/strong&gt;! Make to sure that the application path points to a valid executable and the current user has permission to run the application. Error message returned: &lt;strong&gt;%2&lt;/strong&gt;</source>
@@ -10435,11 +10446,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>[obj_name]</source>
-        <translation type="unfinished"></translation>
+        <translation>[obj_name]</translation>
     </message>
     <message>
         <source>icon</source>
-        <translation type="unfinished"></translation>
+        <translation>icon</translation>
     </message>
     <message>
         <source>[obj_type]</source>
@@ -10447,7 +10458,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>[obj_id]</source>
-        <translation type="unfinished"></translation>
+        <translation>[obj_id]</translation>
     </message>
     <message>
         <source>This object does not exist anymore. The dependencies and references listing is disabled.</source>
@@ -10482,7 +10493,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     <name>ObjectRenameWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Duplicated object name detected! Please, specify a new one or click &lt;strong&gt;Ignore&lt;/strong&gt; to use the default convention for name disambiguation.</source>
@@ -10490,15 +10501,15 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>&lt;p&gt;Use the default name disambiguation convention the next time a name conflict is detected.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Usar a convenção padrão de desambiguação de nomes na próxima vez que um conflito de nomes for detectado.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Always use the default</source>
-        <translation type="unfinished"></translation>
+        <translation>Sempre usar o padrão</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <source>Rename</source>
@@ -10506,7 +10517,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Apply</source>
-        <translation type="unfinished"></translation>
+        <translation>Aplicar</translation>
     </message>
     <message>
         <source>Rename ... to</source>
@@ -10522,7 +10533,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Ignore</source>
-        <translation type="unfinished"></translation>
+        <translation>Ignorar</translation>
     </message>
     <message>
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to rename multiple objects at once! This operation may cause irreversible changes to other objects not necessarily selected. Do you really want to proceed?</source>
@@ -10533,11 +10544,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     <name>ObjectSearchWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Pattern</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão</translation>
     </message>
     <message>
         <source>Search</source>
@@ -10545,7 +10556,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Return, Enter</source>
-        <translation type="unfinished"></translation>
+        <translation>Return, Enter</translation>
     </message>
     <message>
         <source>Defines the search filter</source>
@@ -10561,7 +10572,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar</translation>
     </message>
     <message>
         <source>(Un)selects the graphical objects in the results grid</source>
@@ -10569,7 +10580,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Select</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar</translation>
     </message>
     <message>
         <source>Fades outs all the graphical objects in the results grid (or those not listed). The current fade in/out state of all objects is modified.</source>
@@ -10577,23 +10588,23 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Fade out</source>
-        <translation type="unfinished"></translation>
+        <translation>Esmaecer</translation>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Hide this widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar este widget</translation>
     </message>
     <message>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <source>Regular expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão regular</translation>
     </message>
     <message>
         <source>Exact match</source>
@@ -10601,7 +10612,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Case sensitive</source>
-        <translation type="unfinished"></translation>
+        <translation>Diferenciar maiúsculas de minúsculas</translation>
     </message>
     <message>
         <source>Search field</source>
@@ -10609,11 +10620,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Listed</source>
-        <translation type="unfinished"></translation>
+        <translation>Listados</translation>
     </message>
     <message>
         <source>Not listed</source>
-        <translation type="unfinished"></translation>
+        <translation>Não listados</translation>
     </message>
     <message>
         <source>Found &lt;strong&gt;%1&lt;/strong&gt; object(s).</source>
@@ -10628,7 +10639,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     <name>ObjectSelectorWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Select Object</source>
@@ -10636,15 +10647,15 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Clear field</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar campo</translation>
     </message>
     <message>
         <source>icon</source>
-        <translation type="unfinished"></translation>
+        <translation>icon</translation>
     </message>
     <message>
         <source>#00</source>
-        <translation type="unfinished"></translation>
+        <translation>#00</translation>
     </message>
     <message>
         <source>&lt;strong&gt;ID:&lt;/strong&gt; %1&lt;br/&gt;&lt;strong&gt;Type:&lt;/strong&gt; %2</source>
@@ -10652,14 +10663,14 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Select %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar %1</translation>
     </message>
 </context>
 <context>
     <name>ObjectTypesListWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Clear object selection</source>
@@ -10667,7 +10678,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Uncheck all</source>
-        <translation type="unfinished"></translation>
+        <translation>Desmarcar tudo</translation>
     </message>
     <message>
         <source>Select all objects</source>
@@ -10675,14 +10686,14 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Check all</source>
-        <translation type="unfinished"></translation>
+        <translation>Marcar tudo</translation>
     </message>
 </context>
 <context>
     <name>ObjectsFilterWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Add a new filter</source>
@@ -10690,11 +10701,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar</translation>
     </message>
     <message>
         <source>Ins</source>
-        <translation type="unfinished"></translation>
+        <translation>Ins</translation>
     </message>
     <message>
         <source>Clear all the configured filters</source>
@@ -10702,15 +10713,15 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Clear all</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar tudo</translation>
     </message>
     <message>
         <source>Shift+Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+Del</translation>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>Apply configured filter(s)</source>
@@ -10718,11 +10729,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Apply</source>
-        <translation type="unfinished"></translation>
+        <translation>Aplicar</translation>
     </message>
     <message>
         <source>F5</source>
-        <translation type="unfinished"></translation>
+        <translation>F5</translation>
     </message>
     <message>
         <source>Object</source>
@@ -10730,11 +10741,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Pattern</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão</translation>
     </message>
     <message>
         <source>Matching</source>
-        <translation type="unfinished"></translation>
+        <translation>Correspondência</translation>
     </message>
     <message>
         <source>Using a pattern in &lt;strong&gt;%1&lt;/strong&gt; mode where no wildcard character &lt;strong&gt;%2&lt;/strong&gt; is present has the same effect as performing an exact match search on the names or signatures.</source>
@@ -10742,7 +10753,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Only matching</source>
-        <translation type="unfinished"></translation>
+        <translation>Somente correspondentes</translation>
     </message>
     <message>
         <source>Match by signature</source>
@@ -10750,7 +10761,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Forced filtering</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtragem forçada</translation>
     </message>
     <message>
         <source>Any object</source>
@@ -10758,11 +10769,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Wildcard</source>
-        <translation type="unfinished"></translation>
+        <translation>Curinga</translation>
     </message>
     <message>
         <source>Regexp</source>
-        <translation type="unfinished"></translation>
+        <translation>Regexp</translation>
     </message>
     <message>
         <source>Remove filter</source>
@@ -10773,71 +10784,71 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     <name>OperationListWidget</name>
     <message>
         <source>Executed Operations</source>
-        <translation type="unfinished"></translation>
+        <translation>Operações executadas</translation>
     </message>
     <message>
         <source>Operations history</source>
-        <translation type="unfinished"></translation>
+        <translation>Histórico de operações</translation>
     </message>
     <message>
         <source>Hide this widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar este widget</translation>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <source>Total number of operations.</source>
-        <translation type="unfinished"></translation>
+        <translation>Número total de operações.</translation>
     </message>
     <message>
         <source>0</source>
-        <translation type="unfinished"></translation>
+        <translation>0</translation>
     </message>
     <message>
         <source>Current history position.</source>
-        <translation type="unfinished"></translation>
+        <translation>Posição atual no histórico.</translation>
     </message>
     <message>
         <source>Delete operation history</source>
-        <translation type="unfinished"></translation>
+        <translation>Excluir histórico de operações</translation>
     </message>
     <message>
         <source>Undo</source>
-        <translation type="unfinished"></translation>
+        <translation>Desfazer</translation>
     </message>
     <message>
         <source>Redo</source>
-        <translation type="unfinished"></translation>
+        <translation>Refazer</translation>
     </message>
     <message>
         <source>1</source>
-        <translation type="unfinished"></translation>
+        <translation>1</translation>
     </message>
     <message>
         <source>created</source>
-        <translation type="unfinished"></translation>
+        <translation>criado</translation>
     </message>
     <message>
         <source>removed</source>
-        <translation type="unfinished"></translation>
+        <translation>removido</translation>
     </message>
     <message>
         <source>modified</source>
-        <translation type="unfinished"></translation>
+        <translation>modificado</translation>
     </message>
     <message>
         <source>moved</source>
-        <translation type="unfinished"></translation>
+        <translation>movido</translation>
     </message>
     <message>
         <source>Deleting the executed operations history is an irreversible action. Do you want to continue?</source>
-        <translation type="unfinished"></translation>
+        <translation>A exclusão do histórico de operações executadas é uma ação irreversível. Deseja continuar?</translation>
     </message>
 </context>
 <context>
@@ -10848,15 +10859,15 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Indexing</source>
-        <translation type="unfinished"></translation>
+        <translation>Indexação</translation>
     </message>
     <message>
         <source>Default class</source>
-        <translation type="unfinished"></translation>
+        <translation>Classe padrão</translation>
     </message>
     <message>
         <source>Elements</source>
-        <translation type="unfinished"></translation>
+        <translation>Elementos</translation>
     </message>
     <message>
         <source>Element type</source>
@@ -10872,11 +10883,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Storage</source>
-        <translation type="unfinished"></translation>
+        <translation>Armazenamento</translation>
     </message>
     <message>
         <source>Support</source>
-        <translation type="unfinished"></translation>
+        <translation>Suporte</translation>
     </message>
     <message>
         <source>Storage Type</source>
@@ -10892,7 +10903,7 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Support / Strategy</source>
-        <translation type="unfinished"></translation>
+        <translation>Suporte / Estratégia</translation>
     </message>
     <message>
         <source>Operator Family</source>
@@ -10900,14 +10911,14 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Strategy</source>
-        <translation type="unfinished"></translation>
+        <translation>Estratégia</translation>
     </message>
 </context>
 <context>
     <name>OperatorFamilyWidget</name>
     <message>
         <source>Indexing</source>
-        <translation type="unfinished"></translation>
+        <translation>Indexação</translation>
     </message>
 </context>
 <context>
@@ -10922,15 +10933,15 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>HASHES</source>
-        <translation type="unfinished"></translation>
+        <translation>HASHES</translation>
     </message>
     <message>
         <source>Arguments</source>
-        <translation type="unfinished"></translation>
+        <translation>Argumentos</translation>
     </message>
     <message>
         <source>Advanced</source>
-        <translation type="unfinished"></translation>
+        <translation>Avançado</translation>
     </message>
     <message>
         <source>Join function</source>
@@ -10965,78 +10976,78 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo</translation>
     </message>
     <message>
         <source>IN</source>
-        <translation type="unfinished"></translation>
+        <translation>IN</translation>
     </message>
     <message>
         <source>OUT</source>
-        <translation type="unfinished"></translation>
+        <translation>OUT</translation>
     </message>
     <message>
         <source>VARIADIC</source>
-        <translation type="unfinished"></translation>
+        <translation>VARIADIC</translation>
     </message>
 </context>
 <context>
     <name>PathSelectorWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Clear field</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar campo</translation>
     </message>
     <message>
         <source>Select file</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar arquivo</translation>
     </message>
     <message>
         <source>No such file or directory!</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo ou diretório inexistente!</translation>
     </message>
     <message>
         <source>Open in file manager</source>
-        <translation type="unfinished"></translation>
+        <translation>Abrir no gerenciador de arquivos</translation>
     </message>
     <message>
         <source>An absolute path to a directory must be provided!</source>
-        <translation type="unfinished"></translation>
+        <translation>Um caminho absoluto para um diretório deve ser fornecido!</translation>
     </message>
     <message>
         <source>An absolute path to a file must be provided!</source>
-        <translation type="unfinished"></translation>
+        <translation>Um caminho absoluto para um arquivo deve ser fornecido!</translation>
     </message>
     <message>
         <source>The provided path is not a file!</source>
-        <translation type="unfinished"></translation>
+        <translation>O caminho fornecido não é um arquivo!</translation>
     </message>
     <message>
         <source>The provided path is not a directory!</source>
-        <translation type="unfinished"></translation>
+        <translation>O caminho fornecido não é um diretório!</translation>
     </message>
     <message>
         <source>No such directory!</source>
-        <translation type="unfinished"></translation>
+        <translation>Diretório inexistente!</translation>
     </message>
     <message>
         <source>No such file!</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo inexistente!</translation>
     </message>
     <message>
         <source>The selected directory is not valid!</source>
-        <translation type="unfinished"></translation>
+        <translation>O diretório selecionado não é válido!</translation>
     </message>
     <message>
         <source>The selected file is not valid!</source>
-        <translation type="unfinished"></translation>
+        <translation>O arquivo selecionado não é válido!</translation>
     </message>
     <message>
         <source>The selected file is not executable!</source>
-        <translation type="unfinished"></translation>
+        <translation>O arquivo selecionado não é executável!</translation>
     </message>
 </context>
 <context>
@@ -11099,15 +11110,15 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>Cancel Operation</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar operação</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <source>Id</source>
-        <translation type="unfinished"></translation>
+        <translation>Id</translation>
     </message>
     <message>
         <source>-- No permissions defined for the specified object!</source>
@@ -11118,38 +11129,38 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     <name>PgModelerApp</name>
     <message>
         <source>Unknown exception caught!</source>
-        <translation type="unfinished"></translation>
+        <translation>Exceção desconhecida capturada!</translation>
     </message>
 </context>
 <context>
     <name>PgModelerCliApp</name>
     <message>
         <source>Unrecognized option `%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Opção `%1&apos; não reconhecida.</translation>
     </message>
     <message>
         <source>No value specified for option `%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhum valor especificado para a opção `%1&apos;.</translation>
     </message>
     <message>
         <source>Option `%1&apos; does not accept values.</source>
-        <translation type="unfinished"></translation>
+        <translation>A opção `%1&apos; não aceita valores.</translation>
     </message>
     <message>
         <source>Flushing used memory...</source>
-        <translation type="unfinished"></translation>
+        <translation>Liberando a memória utilizada...</translation>
     </message>
     <message>
         <source>Done!</source>
-        <translation type="unfinished"></translation>
+        <translation>Concluído!</translation>
     </message>
     <message>
         <source>Attempting to retrieve the value of an unknown parsed option `%1&apos;!</source>
-        <translation type="unfinished"></translation>
+        <translation>Tentativa de obter o valor de uma opção analisada desconhecida `%1&apos;!</translation>
     </message>
     <message>
         <source>Attempting to set the value of an unknown parsed option `%1&apos;!</source>
-        <translation type="unfinished"></translation>
+        <translation>Tentativa de definir o valor de uma opção analisada desconhecida `%1&apos;!</translation>
     </message>
     <message>
         <source>Connection aliased as &apos;%1&apos; was not found in the configuration file.</source>
@@ -11157,11 +11168,11 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>pgModeler %1 command line interface.</source>
-        <translation type="unfinished"></translation>
+        <translation>Interface de linha de comando do pgModeler %1.</translation>
     </message>
     <message>
         <source>Version </source>
-        <translation type="unfinished"></translation>
+        <translation>Versão </translation>
     </message>
     <message>
         <source>PostgreSQL Database Modeler Project - pgmodeler.io</source>
@@ -11169,28 +11180,29 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
     <message>
         <source>(c) Copyright 2006-%1 Raphael Araújo e Silva &lt;raphael@pgmodeler.io&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>(c) Copyright 2006-%1 Raphael Araújo e Silva &lt;raphael@pgmodeler.io&gt;</translation>
     </message>
     <message>
         <source>    Development, maintenance and commercial distribution by:</source>
-        <translation type="unfinished"></translation>
+        <translation>    Desenvolvimento, manutenção e distribuição comercial por:</translation>
     </message>
     <message>
         <source>    Nullptr Labs Software e Tecnologia LTDA &lt;contact@nullptrlabs.io&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>    Nullptr Labs Software e Tecnologia LTDA &lt;contact@nullptrlabs.io&gt;</translation>
     </message>
     <message>
         <source>This tool provides a command-line interface for the main operations
 available in GUI. All available options are described below.</source>
-        <translation type="unfinished"></translation>
+        <translation>Esta ferramenta fornece uma interface de linha de comando para as principais operações
+disponíveis na GUI. Todas as opções disponíveis estão descritas abaixo.</translation>
     </message>
     <message>
         <source>Usage: pgmodeler-cli [OPTIONS]</source>
-        <translation type="unfinished"></translation>
+        <translation>Uso: pgmodeler-cli [OPÇÕES]</translation>
     </message>
     <message>
         <source>Operation mode options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções do modo de operação</translation>
     </message>
     <message>
         <source>Exports the input model to SQL script file(s).</source>
@@ -11230,23 +11242,23 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Creates pgModeler&apos;s configuration folder and files. Stored in the user&apos;s local storage.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cria a pasta e os arquivos de configuração do pgModeler. Armazenados no diretório local do usuário.</translation>
     </message>
     <message>
         <source>Handles the DBM file association to pgModeler binaries. Available actions: [%1 | %2].</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerencia a associação de arquivos DBM aos binários do pgModeler. Ações disponíveis: [%1 | %2].</translation>
     </message>
     <message>
         <source>Shows this help menu.</source>
-        <translation type="unfinished"></translation>
+        <translation>Exibe este menu de ajuda.</translation>
     </message>
     <message>
         <source>Prints the version info and exit.</source>
-        <translation type="unfinished"></translation>
+        <translation>Imprime as informações de versão e sai.</translation>
     </message>
     <message>
         <source>General options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções gerais</translation>
     </message>
     <message>
         <source>Input model file (%1). Required for export and model fix operations.</source>
@@ -11262,7 +11274,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Forces PostgreSQL syntax to the specified version when generating SQL code. Version format: [major].[minor], e.g., %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Força a sintaxe do PostgreSQL para a versão especificada ao gerar código SQL. Formato da versão: [major].[minor], p. ex., %1.</translation>
     </message>
     <message>
         <source>Disables E&apos;&apos; escape-string syntax on COMMENT ON statements during export. All comments are written in the common string syntax.</source>
@@ -11270,7 +11282,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Silent execution. Only critical messages and errors are displayed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Execução silenciosa. Somente mensagens críticas e erros são exibidos.</translation>
     </message>
     <message>
         <source>SQL file export options</source>
@@ -11326,7 +11338,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Data dictionaries are generated in separate files. Placed inside the specified output directory.</source>
-        <translation type="unfinished"></translation>
+        <translation>Os dicionários de dados são gerados em arquivos separados. Colocados dentro do diretório de saída especificado.</translation>
     </message>
     <message>
         <source>Avoids generating the navigation index. Used to navigate through the data dictionary.</source>
@@ -11346,7 +11358,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Ignores additional errors by their error codes. Provide comma-separated alphanumeric codes.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ignora erros adicionais pelos seus códigos de erro. Informe códigos alfanuméricos separados por vírgula.</translation>
     </message>
     <message>
         <source>Drops the database before executing the export process.</source>
@@ -11382,19 +11394,19 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>PostgreSQL host on which the task will operate.</source>
-        <translation type="unfinished"></translation>
+        <translation>Host do PostgreSQL no qual a tarefa irá operar.</translation>
     </message>
     <message>
         <source>PostgreSQL host listening port.</source>
-        <translation type="unfinished"></translation>
+        <translation>Porta de escuta do host do PostgreSQL.</translation>
     </message>
     <message>
         <source>PostgreSQL username.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome de usuário do PostgreSQL.</translation>
     </message>
     <message>
         <source>PostgreSQL user password.</source>
-        <translation type="unfinished"></translation>
+        <translation>Senha do usuário do PostgreSQL.</translation>
     </message>
     <message>
         <source>Connection&apos;s initial database.</source>
@@ -11538,11 +11550,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>File association options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções de associação de arquivos</translation>
     </message>
     <message>
         <source>Applies DBM file association system-wide instead of for the current user only.</source>
-        <translation type="unfinished"></translation>
+        <translation>Aplica a associação de arquivos DBM em todo o sistema em vez de apenas para o usuário atual.</translation>
     </message>
     <message>
         <source>Forces MIME type installation or uninstallation.</source>
@@ -11550,15 +11562,15 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Config files creation options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções de criação de arquivos de configuração</translation>
     </message>
     <message>
         <source>Copies only missing configuration files to the user&apos;s local storage.</source>
-        <translation type="unfinished"></translation>
+        <translation>Copia apenas os arquivos de configuração ausentes para o diretório local do usuário.</translation>
     </message>
     <message>
         <source>Forces recreation of all configuration files and backs up current settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Força a recriação de todos os arquivos de configuração e faz backup das configurações atuais.</translation>
     </message>
     <message>
         <source>Plugins options</source>
@@ -11574,12 +11586,13 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>%1 options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções de %1</translation>
     </message>
     <message>
         <source>** When exporting to SQL file in split mode, if none of the options %1, %2, 
    and %3 are specified, the generated files will be named to reflect the correct order.</source>
-        <translation type="unfinished"></translation>
+        <translation>** Ao exportar para arquivo SQL no modo dividido, se nenhuma das opções %1, %2, 
+   e %3 for especificada, os arquivos gerados serão nomeados de forma a refletir a ordem correta.</translation>
     </message>
     <message>
         <source>** The FILTER value in the %1 option has the form type:pattern:mode. </source>
@@ -11599,7 +11612,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>   * The `mode&apos; section defines how the pattern matching is performed. It accepts two values:</source>
-        <translation type="unfinished"></translation>
+        <translation>   * A seção `mode&apos; define como a correspondência de padrões é feita. Aceita dois valores:</translation>
     </message>
     <message>
         <source>     &gt; `%1&apos; treats the pattern as a wildcard string when matching object names.</source>
@@ -11617,7 +11630,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>     &gt; %1</source>
-        <translation type="unfinished"></translation>
+        <translation>     &gt; %1</translation>
     </message>
     <message>
         <source>     &gt; Use the special keyword `%1&apos; to include all child objects.</source>
@@ -11625,7 +11638,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>   * NOTE: All comparisons during filtering are case-insensitive.</source>
-        <translation type="unfinished"></translation>
+        <translation>   * NOTA: Todas as comparações durante a filtragem não diferenciam maiúsculas de minúsculas.</translation>
     </message>
     <message>
         <source>     Using filtering options may import additional objects due to automatic dependency resolution.</source>
@@ -11646,7 +11659,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>   * The options %1 and %2 accept ISO8601 date/time format: `yyyy-MM-dd hh:mm:ss&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>   * As opções %1 e %2 aceitam o formato de data/hora ISO8601: `yyyy-MM-dd hh:mm:ss&apos;.</translation>
     </message>
     <message>
         <source>** When diffing between two databases (%1 and %2), you can specify separate connections/aliases.</source>
@@ -11670,7 +11683,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>**          Execute pgmodeler-cli with `%1&apos; for detailed error information.</source>
-        <translation type="unfinished"></translation>
+        <translation>**          Execute o pgmodeler-cli com `%1&apos; para obter informações detalhadas do erro.</translation>
     </message>
     <message>
         <source>There are no connections configured.</source>
@@ -11682,11 +11695,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>No operation mode was specified!</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhum modo de operação foi especificado!</translation>
     </message>
     <message>
         <source>Multiple operation modes were specified!</source>
-        <translation type="unfinished"></translation>
+        <translation>Vários modos de operação foram especificados!</translation>
     </message>
     <message>
         <source>Multiple export modes were specified!</source>
@@ -11694,7 +11707,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>No input file was specified!</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhum arquivo de entrada foi especificado!</translation>
     </message>
     <message>
         <source>No input database was specified!</source>
@@ -11702,23 +11715,23 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Invalid segmentation mode specified!</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo de segmentação inválido especificado!</translation>
     </message>
     <message>
         <source>The option `%1&apos; must be used only with `%2 %3&apos;!</source>
-        <translation type="unfinished"></translation>
+        <translation>A opção `%1&apos; deve ser usada apenas com `%2 %3&apos;!</translation>
     </message>
     <message>
         <source>Invalid value specified for option `%1&apos;!</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor inválido especificado para a opção `%1&apos;!</translation>
     </message>
     <message>
         <source>No output file was specified!</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhum arquivo de saída foi especificado!</translation>
     </message>
     <message>
         <source>The input file must be different from the output file!</source>
-        <translation type="unfinished"></translation>
+        <translation>O arquivo de entrada deve ser diferente do arquivo de saída!</translation>
     </message>
     <message>
         <source>Incomplete connection information!</source>
@@ -11726,11 +11739,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>The option `%1&apos; must be used only with `%2&apos; when exporting to DBMS!</source>
-        <translation type="unfinished"></translation>
+        <translation>A opção `%1&apos; deve ser usada apenas com `%2&apos; ao exportar para o SGBD!</translation>
     </message>
     <message>
         <source>The options `%1&apos; and `%2&apos; cannot be used together when exporting to DBMS!</source>
-        <translation type="unfinished"></translation>
+        <translation>As opções `%1&apos; e `%2&apos; não podem ser usadas juntas ao exportar para o SGBD!</translation>
     </message>
     <message>
         <source>The options `%1&apos; and `%2&apos; cannot be used in transactional export mode. Use `%3&apos; to enable these options!</source>
@@ -11746,15 +11759,15 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>The options `%1&apos; and `%2&apos; cannot be used together when handling configuration files!</source>
-        <translation type="unfinished"></translation>
+        <translation>As opções `%1&apos; e `%2&apos; não podem ser usadas juntas ao manipular arquivos de configuração!</translation>
     </message>
     <message>
         <source>The options `%1&apos;, `%2&apos;, and `%3&apos; must be used together with the split mode option `%4&apos;!</source>
-        <translation type="unfinished"></translation>
+        <translation>As opções `%1&apos;, `%2&apos; e `%3&apos; devem ser usadas junto com a opção de modo dividido `%4&apos;!</translation>
     </message>
     <message>
         <source>The options `%1&apos;, `%2&apos;, and `%3&apos; cannot be used simultaneously!</source>
-        <translation type="unfinished"></translation>
+        <translation>As opções `%1&apos;, `%2&apos; e `%3&apos; não podem ser usadas simultaneamente!</translation>
     </message>
     <message>
         <source>No input file or database was specified!</source>
@@ -11778,7 +11791,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>The option `%1&apos; cannot be used together with `%2&apos;!</source>
-        <translation type="unfinished"></translation>
+        <translation>A opção `%1&apos; não pode ser usada junto com `%2&apos;!</translation>
     </message>
     <message>
         <source>No output file for the diff code was specified!</source>
@@ -11798,11 +11811,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Invalid date format `%1&apos; in option `%2&apos;!</source>
-        <translation type="unfinished"></translation>
+        <translation>Formato de data `%1&apos; inválido na opção `%2&apos;!</translation>
     </message>
     <message>
         <source>The option `%1&apos; is not accepted by the operation mode `%2&apos;!</source>
-        <translation type="unfinished"></translation>
+        <translation>A opção `%1&apos; não é aceita pelo modo de operação `%2&apos;!</translation>
     </message>
     <message>
         <source>** Error code `%1&apos; found and ignored. Proceeding with export.</source>
@@ -11810,7 +11823,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>** Command: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>** Comando: %1</translation>
     </message>
     <message>
         <source>Extracting object XML definitions...</source>
@@ -11870,7 +11883,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>** Entry: `%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>** Entrada: `%1&apos;.</translation>
     </message>
     <message>
         <source>Starting model fix operation...</source>
@@ -11878,7 +11891,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Loading input file: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregando arquivo de entrada: %1</translation>
     </message>
     <message>
         <source>Fixed model file: %1</source>
@@ -11902,7 +11915,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Errors logged in file: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Erros registrados no arquivo: %1</translation>
     </message>
     <message>
         <source>Starting model export operation...</source>
@@ -11910,19 +11923,19 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Exporting to PNG image: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Exportando para imagem PNG: %1</translation>
     </message>
     <message>
         <source>Exporting to SVG file: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Exportando para arquivo SVG: %1</translation>
     </message>
     <message>
         <source>Exporting to SQL script file: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Exportando para script SQL: %1</translation>
     </message>
     <message>
         <source>Exporting to output directory: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Exportando para o diretório de saída: %1</translation>
     </message>
     <message>
         <source>Exporting to data dictionary: %1</source>
@@ -11930,7 +11943,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Exporting to DBMS: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Exportando para o SGBD: %1</translation>
     </message>
     <message>
         <source>Export operation completed successfully!
@@ -11960,32 +11973,33 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Creating configuration files...</source>
-        <translation type="unfinished"></translation>
+        <translation>Criando arquivos de configuração...</translation>
     </message>
     <message>
         <source>Destination path: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Caminho de destino: %1</translation>
     </message>
     <message>
         <source>Configuration files already exist!</source>
-        <translation type="unfinished"></translation>
+        <translation>Os arquivos de configuração já existem!</translation>
     </message>
     <message>
         <source>Configuration files already exist! Creating backup...</source>
-        <translation type="unfinished"></translation>
+        <translation>Os arquivos de configuração já existem! Criando backup...</translation>
     </message>
     <message>
         <source>Backup path: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Caminho do backup: %1</translation>
     </message>
     <message>
         <source>Failed to create backup of configuration files!</source>
-        <translation type="unfinished"></translation>
+        <translation>Falha ao criar o backup dos arquivos de configuração!</translation>
     </message>
     <message>
         <source>Configuration files created successfully!
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivos de configuração criados com sucesso!
+</translation>
     </message>
     <message>
         <source>The plugin contains a list of options that are malformed or conflict with pgmodeler-cli default options!</source>
@@ -12017,7 +12031,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Plug-in id: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Id do plug-in: %1</translation>
     </message>
     <message>
         <source>Starting database import operation...</source>
@@ -12087,7 +12101,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>No differences detected.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhuma diferença detectada.</translation>
     </message>
     <message>
         <source>Saving diff to file `%1&apos;</source>
@@ -12103,11 +12117,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>yes</source>
-        <translation type="unfinished"></translation>
+        <translation>sim</translation>
     </message>
     <message>
         <source>no</source>
-        <translation type="unfinished"></translation>
+        <translation>não</translation>
     </message>
     <message>
         <source>Diff code not applied to server.</source>
@@ -12131,11 +12145,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Version info</source>
-        <translation type="unfinished"></translation>
+        <translation>Informações da versão</translation>
     </message>
     <message>
         <source>Description</source>
-        <translation type="unfinished"></translation>
+        <translation>Descrição</translation>
     </message>
     <message>
         <source>Attempting to post-initialize a plugin without initializing the application&apos;s main window!</source>
@@ -12146,18 +12160,18 @@ available in GUI. All available options are described below.</source>
     <name>PgModelerPlugin</name>
     <message>
         <source>&lt;strong&gt;Version&lt;/strong&gt; %1</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;strong&gt;Versão&lt;/strong&gt; %1</translation>
     </message>
     <message>
         <source>&lt;strong&gt;Author&lt;/strong&gt; %1</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;strong&gt;Autor&lt;/strong&gt; %1</translation>
     </message>
 </context>
 <context>
     <name>PgSQLTypeWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Data type</source>
@@ -12169,51 +12183,51 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>With timezone</source>
-        <translation type="unfinished"></translation>
+        <translation>Com fuso horário</translation>
     </message>
     <message>
         <source>Length</source>
-        <translation type="unfinished"></translation>
+        <translation>Comprimento</translation>
     </message>
     <message>
         <source>Precision</source>
-        <translation type="unfinished"></translation>
+        <translation>Precisão</translation>
     </message>
     <message>
         <source>Dimension</source>
-        <translation type="unfinished"></translation>
+        <translation>Dimensão</translation>
     </message>
     <message>
         <source>Interval</source>
-        <translation type="unfinished"></translation>
+        <translation>Interval</translation>
     </message>
     <message>
         <source>Spatial</source>
-        <translation type="unfinished"></translation>
+        <translation>Espacial</translation>
     </message>
     <message>
         <source>SRID</source>
-        <translation type="unfinished"></translation>
+        <translation>SRID</translation>
     </message>
     <message>
         <source>Variation</source>
-        <translation type="unfinished"></translation>
+        <translation>Variação</translation>
     </message>
     <message>
         <source>Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Z</translation>
     </message>
     <message>
         <source>M</source>
-        <translation type="unfinished"></translation>
+        <translation>M</translation>
     </message>
     <message>
         <source>Format</source>
-        <translation type="unfinished"></translation>
+        <translation>Formato</translation>
     </message>
     <message>
         <source>NONE</source>
-        <translation type="unfinished"></translation>
+        <translation>NONE</translation>
     </message>
 </context>
 <context>
@@ -12222,22 +12236,24 @@ available in GUI. All available options are described below.</source>
         <source>/* Failed to create initial data commands!
 
 %1 */</source>
-        <translation type="unfinished"></translation>
+        <translation>/* Falha ao criar os comandos de dados iniciais!
+
+%1 */</translation>
     </message>
 </context>
 <context>
     <name>PluginsConfigWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Plug-ins root directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Diretório raiz dos plug-ins</translation>
     </message>
     <message>
         <source>Loaded plug-ins</source>
-        <translation type="unfinished"></translation>
+        <translation>Plug-ins carregados</translation>
     </message>
     <message>
         <source>pgModeler plugins directory</source>
@@ -12249,38 +12265,38 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Version</source>
-        <translation type="unfinished"></translation>
+        <translation>Versão</translation>
     </message>
     <message>
         <source>Library</source>
-        <translation type="unfinished"></translation>
+        <translation>Biblioteca</translation>
     </message>
     <message>
         <source>One or more plug-ins failed to initialize and were discarded! Please, check the error stack for more details.</source>
-        <translation type="unfinished"></translation>
+        <translation>Um ou mais plug-ins falharam ao inicializar e foram descartados! Verifique a pilha de erros para mais detalhes.</translation>
     </message>
     <message>
         <source>One or more plug-ins failed to perform post initialization operations! Please, check the error stack for more details.</source>
-        <translation type="unfinished"></translation>
+        <translation>Um ou mais plug-ins falharam ao executar as operações de pós-inicialização! Verifique a pilha de erros para mais detalhes.</translation>
     </message>
 </context>
 <context>
     <name>PolicyWidget</name>
     <message>
         <source>Command</source>
-        <translation type="unfinished"></translation>
+        <translation>Comando</translation>
     </message>
     <message>
         <source>Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo</translation>
     </message>
     <message>
         <source>Restrictive</source>
-        <translation type="unfinished"></translation>
+        <translation>Restritiva</translation>
     </message>
     <message>
         <source>Permissive</source>
-        <translation type="unfinished"></translation>
+        <translation>Permissiva</translation>
     </message>
     <message>
         <source>Roles</source>
@@ -12288,19 +12304,19 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Expressions</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressões</translation>
     </message>
     <message>
         <source>USING</source>
-        <translation type="unfinished"></translation>
+        <translation>USING</translation>
     </message>
     <message>
         <source>CHECK</source>
-        <translation type="unfinished"></translation>
+        <translation>CHECK</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
 </context>
 <context>
@@ -12345,14 +12361,14 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>%1 (line: %2)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 (linha: %2)</translation>
     </message>
 </context>
 <context>
     <name>ReferencesWidget</name>
     <message>
         <source>Ref. name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome ref.</translation>
     </message>
     <message>
         <source>Object</source>
@@ -12404,7 +12420,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Format name</source>
-        <translation type="unfinished"></translation>
+        <translation>Formatar nome</translation>
     </message>
     <message>
         <source>Use column(s)</source>
@@ -12412,18 +12428,18 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Yes</source>
-        <translation type="unfinished"></translation>
+        <translation>Sim</translation>
     </message>
     <message>
         <source>No</source>
-        <translation type="unfinished"></translation>
+        <translation>Não</translation>
     </message>
 </context>
 <context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Connection mode</source>
@@ -12435,7 +12451,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Crow&apos;s foot notation</source>
-        <translation type="unfinished"></translation>
+        <translation>Notação pé de galinha</translation>
     </message>
     <message>
         <source>This mode is available only for &lt;strong&gt;one-to-one&lt;/strong&gt;, &lt;strong&gt;one-to-many&lt;/strong&gt; and &lt;strong&gt;fk relationships&lt;/strong&gt; but provides a better semantics when linking tables by placing the lines on the exact point where the relationship occurs. It implies the usage of the classical ER notation.</source>
@@ -12483,7 +12499,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Name patterns</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrões de nomes</translation>
     </message>
     <message>
         <source>Pattern for columns generated based upon target table&apos;s pk (n-n).</source>
@@ -12547,18 +12563,18 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão</translation>
     </message>
     <message>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhum</translation>
     </message>
 </context>
 <context>
     <name>RelationshipWidget</name>
     <message>
         <source>General</source>
-        <translation type="unfinished"></translation>
+        <translation>Geral</translation>
     </message>
     <message>
         <source>Table 1</source>
@@ -12566,7 +12582,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Required</source>
-        <translation type="unfinished"></translation>
+        <translation>Obrigatório</translation>
     </message>
     <message>
         <source>Table 2</source>
@@ -12582,7 +12598,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Bounding expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão de limite</translation>
     </message>
     <message>
         <source>Partitioning type:</source>
@@ -12590,7 +12606,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>NONE</source>
-        <translation type="unfinished"></translation>
+        <translation>NONE</translation>
     </message>
     <message>
         <source>&lt;p&gt;Default partitions are only supported on &lt;strong&gt;PostgreSQL 11+&lt;/strong&gt;. Using this option and exporting the code to PostgreSQL 10 syntax errors will be raised.&lt;/p&gt;</source>
@@ -12606,15 +12622,15 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Generate expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerar expressão</translation>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>Custom line color</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor de linha personalizada</translation>
     </message>
     <message>
         <source>&lt;p&gt;The receiver&apos;s primary key will be composed of the generated foreign key columns.&lt;/p&gt;</source>
@@ -12622,7 +12638,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Identifier</source>
-        <translation type="unfinished"></translation>
+        <translation>Identificador</translation>
     </message>
     <message>
         <source>&lt;p&gt;Instead of creating a multi-valued primary key with the generated foreign keys columns a single column is created and used as primary key.&lt;/p&gt;</source>
@@ -12634,11 +12650,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Configurações</translation>
     </message>
     <message>
         <source>Copy options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções de cópia</translation>
     </message>
     <message>
         <source>INDEXES</source>
@@ -12650,15 +12666,15 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>INCLUDING</source>
-        <translation type="unfinished"></translation>
+        <translation>INCLUDING</translation>
     </message>
     <message>
         <source>DEFAULTS</source>
-        <translation type="unfinished"></translation>
+        <translation>DEFAULTS</translation>
     </message>
     <message>
         <source>EXCLUDING</source>
-        <translation type="unfinished"></translation>
+        <translation>EXCLUDING</translation>
     </message>
     <message>
         <source>CONSTRAINTS</source>
@@ -12666,19 +12682,19 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Use defaults</source>
-        <translation type="unfinished"></translation>
+        <translation>Usar padrões</translation>
     </message>
     <message>
         <source>ALL</source>
-        <translation type="unfinished"></translation>
+        <translation>ALL</translation>
     </message>
     <message>
         <source>STORAGE</source>
-        <translation type="unfinished"></translation>
+        <translation>STORAGE</translation>
     </message>
     <message>
         <source>STATISTICS</source>
-        <translation type="unfinished"></translation>
+        <translation>STATISTICS</translation>
     </message>
     <message>
         <source>IDENTITY</source>
@@ -12706,15 +12722,15 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Use the values defined on settings dialogs for the fields below</source>
-        <translation type="unfinished"></translation>
+        <translation>Usar os valores definidos nos diálogos de configurações para os campos abaixo</translation>
     </message>
     <message>
         <source>Use global settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Usar configurações globais</translation>
     </message>
     <message>
         <source>Name patterns</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrões de nomes</translation>
     </message>
     <message>
         <source>&lt;p&gt;Pattern for columns generated based upon reference table&apos;s pk (1-1 and 1-n) or based upon source table&apos;s pk (n-n).&lt;/p&gt;</source>
@@ -12774,11 +12790,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Use the values defined in settings dialogs for the fields below</source>
-        <translation type="unfinished"></translation>
+        <translation>Usar os valores definidos nos diálogos de configurações para os campos abaixo</translation>
     </message>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Constraints</source>
@@ -12790,11 +12806,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Advanced</source>
-        <translation type="unfinished"></translation>
+        <translation>Avançado</translation>
     </message>
     <message>
         <source>Attribute</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributo</translation>
     </message>
     <message>
         <source>Type</source>
@@ -12806,7 +12822,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <source>Use the special primary key if you want to create a primary key containing generated columns in the receiver table. &lt;strong&gt;NOTE:&lt;/strong&gt; if this is a new relationship, it&apos;s mandatory to finish its creation and reopen this dialog to create the special primary key.</source>
@@ -12818,11 +12834,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão</translation>
     </message>
     <message>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhum</translation>
     </message>
     <message>
         <source>Referrer view</source>
@@ -12897,11 +12913,11 @@ available in GUI. All available options are described below.</source>
     <name>RoleWidget</name>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Senha</translation>
     </message>
     <message>
         <source>Connections</source>
@@ -12909,11 +12925,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>Superuser</source>
-        <translation type="unfinished"></translation>
+        <translation>Superusuário</translation>
     </message>
     <message>
         <source>Inherit permissions</source>
@@ -12921,11 +12937,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Bypass RLS</source>
-        <translation type="unfinished"></translation>
+        <translation>Bypass RLS</translation>
     </message>
     <message>
         <source>Can login</source>
-        <translation type="unfinished"></translation>
+        <translation>Pode fazer login</translation>
     </message>
     <message>
         <source>Can create role</source>
@@ -12937,27 +12953,27 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Can use replication</source>
-        <translation type="unfinished"></translation>
+        <translation>Pode usar replicação</translation>
     </message>
     <message>
         <source>Validity</source>
-        <translation type="unfinished"></translation>
+        <translation>Validade</translation>
     </message>
     <message>
         <source>yyyy-MM-dd hh:mm:ss</source>
-        <translation type="unfinished"></translation>
+        <translation>yyyy-MM-dd hh:mm:ss</translation>
     </message>
     <message>
         <source>Members</source>
-        <translation type="unfinished"></translation>
+        <translation>Membros</translation>
     </message>
     <message>
         <source>Admin option</source>
-        <translation type="unfinished"></translation>
+        <translation>Opção de administrador</translation>
     </message>
     <message>
         <source>Member of</source>
-        <translation type="unfinished"></translation>
+        <translation>Membro de</translation>
     </message>
     <message>
         <source>Assigning &lt;strong&gt;&lt;em&gt;-1&lt;/em&gt;&lt;/strong&gt; to &lt;strong&gt;&lt;em&gt;Connections&lt;/em&gt;&lt;/strong&gt; creates a role without connection limit.&lt;br/&gt;											Unchecking &lt;strong&gt;&lt;em&gt;Validity&lt;/em&gt;&lt;/strong&gt; creates an role that never expires.</source>
@@ -12972,7 +12988,7 @@ available in GUI. All available options are described below.</source>
     <name>RuleWidget</name>
     <message>
         <source>Event</source>
-        <translation type="unfinished"></translation>
+        <translation>Evento</translation>
     </message>
     <message>
         <source>Execution type</source>
@@ -12980,73 +12996,73 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Conditional expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão condicional</translation>
     </message>
     <message>
         <source>SQL commands</source>
-        <translation type="unfinished"></translation>
+        <translation>Comandos SQL</translation>
     </message>
     <message>
         <source>SQL command</source>
-        <translation type="unfinished"></translation>
+        <translation>Comando SQL</translation>
     </message>
 </context>
 <context>
     <name>SQLExecutionHelper</name>
     <message>
         <source>Command execution aborted by the user! Results discarded.</source>
-        <translation type="unfinished"></translation>
+        <translation>Execução do comando abortada pelo usuário! Resultados descartados.</translation>
     </message>
 </context>
 <context>
     <name>SQLExecutionWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Run the specified SQL command</source>
-        <translation type="unfinished"></translation>
+        <translation>Executar o comando SQL especificado</translation>
     </message>
     <message>
         <source>Run</source>
-        <translation type="unfinished"></translation>
+        <translation>Executar</translation>
     </message>
     <message>
         <source>F5</source>
-        <translation type="unfinished"></translation>
+        <translation>F5</translation>
     </message>
     <message>
         <source>Cancel the execution of the current SQL command</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar a execução do comando SQL atual</translation>
     </message>
     <message>
         <source>Stop</source>
-        <translation type="unfinished"></translation>
+        <translation>Parar</translation>
     </message>
     <message>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <source>Handle external SQL script</source>
-        <translation type="unfinished"></translation>
+        <translation>Manipular script SQL externo</translation>
     </message>
     <message>
         <source>Script</source>
-        <translation type="unfinished"></translation>
+        <translation>Script</translation>
     </message>
     <message>
         <source>Alt+F</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+F</translation>
     </message>
     <message>
         <source>Code</source>
-        <translation type="unfinished"></translation>
+        <translation>Código</translation>
     </message>
     <message>
         <source>Results</source>
-        <translation type="unfinished"></translation>
+        <translation>Resultados</translation>
     </message>
     <message>
         <source>Clear the SQL input field and results grid</source>
@@ -13054,27 +13070,27 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar</translation>
     </message>
     <message>
         <source>Ctrl+Backspace</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Backspace</translation>
     </message>
     <message>
         <source>Toggles the output pane</source>
-        <translation type="unfinished"></translation>
+        <translation>Alterna o painel de saída</translation>
     </message>
     <message>
         <source>Output</source>
-        <translation type="unfinished"></translation>
+        <translation>Saída</translation>
     </message>
     <message>
         <source>Alt+O</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+O</translation>
     </message>
     <message>
         <source>Authenticated username</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome de usuário autenticado</translation>
     </message>
     <message>
         <source>Current working database/host</source>
@@ -13090,55 +13106,55 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Close the current SQL script</source>
-        <translation type="unfinished"></translation>
+        <translation>Fechar o script SQL atual</translation>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>SQL script currently handled</source>
-        <translation type="unfinished"></translation>
+        <translation>Script SQL atualmente manipulado</translation>
     </message>
     <message>
         <source>(not saved)</source>
-        <translation type="unfinished"></translation>
+        <translation>(não salvo)</translation>
     </message>
     <message>
         <source>Case sensitive</source>
-        <translation type="unfinished"></translation>
+        <translation>Diferenciar maiúsculas de minúsculas</translation>
     </message>
     <message>
         <source>Regular expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão regular</translation>
     </message>
     <message>
         <source>Whole words</source>
-        <translation type="unfinished"></translation>
+        <translation>Palavras inteiras</translation>
     </message>
     <message>
         <source>Hide this widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar este widget</translation>
     </message>
     <message>
         <source>Messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Mensagens</translation>
     </message>
     <message>
         <source>History</source>
-        <translation type="unfinished"></translation>
+        <translation>Histórico</translation>
     </message>
     <message>
         <source>Load</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar</translation>
     </message>
     <message>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar</translation>
     </message>
     <message>
         <source>Save as</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar como</translation>
     </message>
     <message>
         <source>Search</source>
@@ -13146,7 +13162,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Word wrap</source>
-        <translation type="unfinished"></translation>
+        <translation>Quebra de linha</translation>
     </message>
     <message>
         <source>Snippets</source>
@@ -13162,11 +13178,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Text file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de texto</translation>
     </message>
     <message>
         <source>CSV file</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo CSV</translation>
     </message>
     <message>
         <source>Command executed. Building results grid...</source>
@@ -13174,7 +13190,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Select all</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionar tudo</translation>
     </message>
     <message>
         <source>Adjust columns</source>
@@ -13182,11 +13198,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Adjust rows</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajustar linhas</translation>
     </message>
     <message>
         <source>Don&apos;t ask me again</source>
-        <translation type="unfinished"></translation>
+        <translation>Não perguntar novamente</translation>
     </message>
     <message>
         <source>Resizing rows or columns in a heavily populated data grid is an expensive operation and may cause the UI to freeze for several minutes. Do you want to proceed?</source>
@@ -13198,71 +13214,71 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>No results retrieved or changes done due to the error above! Run the command again.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhum resultado obtido nem alteração feita devido ao erro acima! Execute o comando novamente.</translation>
     </message>
     <message>
         <source>Messages (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Mensagens (%1)</translation>
     </message>
     <message>
         <source>Results (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Resultados (%1)</translation>
     </message>
     <message>
         <source>[%1]: SQL command successfully executed in &lt;em&gt;&lt;strong&gt;%2&lt;/strong&gt;&lt;/em&gt;. &lt;em&gt;%3 &lt;strong&gt;%4&lt;/strong&gt;&lt;/em&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>[%1]: Comando SQL executado com sucesso em &lt;em&gt;&lt;strong&gt;%2&lt;/strong&gt;&lt;/em&gt;. &lt;em&gt;%3 &lt;strong&gt;%4&lt;/strong&gt;&lt;/em&gt;</translation>
     </message>
     <message>
         <source>Rows affected</source>
-        <translation type="unfinished"></translation>
+        <translation>Linhas afetadas</translation>
     </message>
     <message>
         <source>Rows retrieved</source>
-        <translation type="unfinished"></translation>
+        <translation>Linhas recuperadas</translation>
     </message>
     <message>
         <source>Executed at</source>
-        <translation type="unfinished"></translation>
+        <translation>Executado em</translation>
     </message>
     <message>
         <source>Command failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Falha no comando</translation>
     </message>
     <message>
         <source>Rows:</source>
-        <translation type="unfinished"></translation>
+        <translation>Linhas:</translation>
     </message>
     <message>
         <source>[%1]: SQL command is running...</source>
-        <translation type="unfinished"></translation>
+        <translation>[%1]: O comando SQL está em execução...</translation>
     </message>
     <message>
         <source>Save SQL commands</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar comandos SQL</translation>
     </message>
     <message>
         <source>SQL file (*.sql)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo SQL (*.sql)</translation>
     </message>
     <message>
         <source>All files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os arquivos (*.*)</translation>
     </message>
     <message>
         <source>Load SQL commands</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar comandos SQL</translation>
     </message>
     <message>
         <source>Save file</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar arquivo</translation>
     </message>
     <message>
         <source>CSV file (*.csv)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo CSV (*.csv)</translation>
     </message>
     <message>
         <source>Text file (*.txt</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de texto (*.txt</translation>
     </message>
     <message>
         <source>The SQL input field and the results grid will be cleared! Want to proceed?</source>
@@ -13274,15 +13290,15 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Clear history</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar histórico</translation>
     </message>
     <message>
         <source>Save history</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar histórico</translation>
     </message>
     <message>
         <source>Reload history</source>
-        <translation type="unfinished"></translation>
+        <translation>Recarregar histórico</translation>
     </message>
     <message>
         <source>Search in history</source>
@@ -13301,7 +13317,7 @@ available in GUI. All available options are described below.</source>
     <name>SQLToolWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Database explorer</source>
@@ -13313,7 +13329,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Update the database list</source>
@@ -13325,11 +13341,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Alt+R</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+R</translation>
     </message>
     <message>
         <source>Toggle the display of source code pane</source>
@@ -13341,7 +13357,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>SQL execution</source>
-        <translation type="unfinished"></translation>
+        <translation>Execução de SQL</translation>
     </message>
     <message>
         <source>Delete this database</source>
@@ -13353,7 +13369,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Warning</source>
-        <translation type="unfinished"></translation>
+        <translation>Aviso</translation>
     </message>
     <message>
         <source>&lt;strong&gt;ATTENTION:&lt;/strong&gt; Disconnect from all databases will close any opened tab in this view! Do you really want to proceed?</source>
@@ -13369,7 +13385,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>The SQL execution panel contains a typed command! Do you really want to close it?</source>
-        <translation type="unfinished"></translation>
+        <translation>O painel de execução de SQL contém um comando digitado! Deseja realmente fechá-lo?</translation>
     </message>
     <message>
         <source>Forced database drop</source>
@@ -13388,7 +13404,7 @@ available in GUI. All available options are described below.</source>
     <name>SceneInfoWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Currently selected object(s)</source>
@@ -13400,7 +13416,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhuma</translation>
     </message>
     <message>
         <source>By schema</source>
@@ -13408,7 +13424,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>By threshold</source>
-        <translation type="unfinished"></translation>
+        <translation>Por limite</translation>
     </message>
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
@@ -13436,7 +13452,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>99999, 99999</source>
-        <translation type="unfinished"></translation>
+        <translation>99999, 99999</translation>
     </message>
     <message>
         <source>Current zoom factor</source>
@@ -13444,11 +13460,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>500%</source>
-        <translation type="unfinished"></translation>
+        <translation>500%</translation>
     </message>
     <message>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation>-</translation>
     </message>
     <message>
         <source>Dimensions of the selected object(s)</source>
@@ -13456,7 +13472,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Selected: &lt;strong&gt;%1&lt;/strong&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecionados: &lt;strong&gt;%1&lt;/strong&gt;</translation>
     </message>
 </context>
 <context>
@@ -13467,23 +13483,23 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Syntax file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de sintaxe:</translation>
     </message>
     <message>
         <source>Save &amp;&amp; apply</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar &amp;&amp; aplicar</translation>
     </message>
     <message>
         <source>Apply only</source>
-        <translation type="unfinished"></translation>
+        <translation>Somente aplicar</translation>
     </message>
     <message>
         <source>Reload</source>
-        <translation type="unfinished"></translation>
+        <translation>Recarregar</translation>
     </message>
     <message>
         <source>The syntax settings below have changed. Click &lt;strong&gt;Save &amp; apply&lt;/strong&gt; to persit the modifications to config file and apply them; &lt;strong&gt;Apply only&lt;/strong&gt; to use the modified settings on-the-fly on the current editor without save the changes to the configuration file; or &lt;strong&gt;Reload&lt;/strong&gt; to load the file again from the last time that it was saved. &lt;strong&gt;NOTE:&lt;/strong&gt; switching to another editor tab will cause all modifications below to be lost.</source>
-        <translation type="unfinished"></translation>
+        <translation>As configurações de sintaxe abaixo foram alteradas. Clique em &lt;strong&gt;Salvar &amp; aplicar&lt;/strong&gt; para persistir as modificações no arquivo de configuração e aplicá-las; em &lt;strong&gt;Somente aplicar&lt;/strong&gt; para usar as configurações modificadas imediatamente no editor atual sem salvar as alterações no arquivo de configuração; ou em &lt;strong&gt;Recarregar&lt;/strong&gt; para carregar novamente o arquivo da última vez em que foi salvo. &lt;strong&gt;NOTA:&lt;/strong&gt; alternar para outra aba de editor fará com que todas as modificações abaixo sejam perdidas.</translation>
     </message>
     <message>
         <source>&lt;p&gt;Instead of loading the configuration file at user&apos;s local storage, loads the template one inside the pgModeler&apos;s installation folder.&lt;/p&gt;</source>
@@ -13495,103 +13511,103 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>XML</source>
-        <translation type="unfinished"></translation>
+        <translation>XML</translation>
     </message>
     <message>
         <source>DTD</source>
-        <translation type="unfinished"></translation>
+        <translation>DTD</translation>
     </message>
     <message>
         <source>Choose the syntax highlighting mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Escolha o modo de realce de sintaxe</translation>
     </message>
     <message>
         <source>Syntax</source>
-        <translation type="unfinished"></translation>
+        <translation>Sintaxe</translation>
     </message>
     <message>
         <source>Close all</source>
-        <translation type="unfinished"></translation>
+        <translation>Fechar todos</translation>
     </message>
     <message>
         <source>Save changes to another file</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar as alterações em outro arquivo</translation>
     </message>
     <message>
         <source>Save as</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar como</translation>
     </message>
     <message>
         <source>Save all</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar todos</translation>
     </message>
     <message>
         <source>Open a new editor</source>
-        <translation type="unfinished"></translation>
+        <translation>Abrir um novo editor</translation>
     </message>
     <message>
         <source>New </source>
-        <translation type="unfinished"></translation>
+        <translation>Novo </translation>
     </message>
     <message>
         <source>Ctrl+N</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+N</translation>
     </message>
     <message>
         <source>Exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Sair</translation>
     </message>
     <message>
         <source>Save changes</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar alterações</translation>
     </message>
     <message>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar</translation>
     </message>
     <message>
         <source>Ctrl+S</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+S</translation>
     </message>
     <message>
         <source>Load files</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar arquivos</translation>
     </message>
     <message>
         <source>Load</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar</translation>
     </message>
     <message>
         <source>Ctrl+L</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+L</translation>
     </message>
     <message>
         <source>Apply identation to all open editors</source>
-        <translation type="unfinished"></translation>
+        <translation>Aplicar indentação a todos os editores abertos</translation>
     </message>
     <message>
         <source>Indent all</source>
-        <translation type="unfinished"></translation>
+        <translation>Indentar todos</translation>
     </message>
     <message>
         <source>About</source>
-        <translation type="unfinished"></translation>
+        <translation>Sobre</translation>
     </message>
     <message>
         <source>F1</source>
-        <translation type="unfinished"></translation>
+        <translation>F1</translation>
     </message>
     <message>
         <source>Syntax highlight config file (*%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de configuração de realce de sintaxe (*%1)</translation>
     </message>
     <message>
         <source>There are modified files! Do you want to exit without saving them?</source>
-        <translation type="unfinished"></translation>
+        <translation>Há arquivos modificados! Deseja sair sem salvá-los?</translation>
     </message>
     <message>
         <source>There are modified files! Do you want to close them without save?</source>
-        <translation type="unfinished"></translation>
+        <translation>Há arquivos modificados! Deseja fechá-los sem salvar?</translation>
     </message>
     <message>
         <source>Schema file (*%1)</source>
@@ -13603,7 +13619,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>pgModeler config file (*%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de configuração do pgModeler (*%1)</translation>
     </message>
     <message>
         <source>Objects metadata file (*%1)</source>
@@ -13611,31 +13627,31 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>SQL script file (*.sql)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo de script SQL (*.sql)</translation>
     </message>
     <message>
         <source>XML file (*.xml)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo XML (*.xml)</translation>
     </message>
     <message>
         <source>DTD file (*.dtd)</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo DTD (*.dtd)</translation>
     </message>
     <message>
         <source>All files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os arquivos (*.*)</translation>
     </message>
     <message>
         <source>All supported files (*%1 *%2 *%3 *%4 *.sql *.xml *.dtd)</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos os arquivos suportados (*%1 *%2 *%3 *%4 *.sql *.xml *.dtd)</translation>
     </message>
     <message>
         <source>Save file</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar arquivo</translation>
     </message>
     <message>
         <source>Load file</source>
-        <translation type="unfinished"></translation>
+        <translation>Carregar arquivo</translation>
     </message>
     <message>
         <source>The source code was modified! Do you really want to close it without save?</source>
@@ -13646,19 +13662,19 @@ available in GUI. All available options are described below.</source>
     <name>SchemaWidget</name>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Fill color</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor de preenchimento</translation>
     </message>
     <message>
         <source>Name color</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor do nome</translation>
     </message>
     <message>
         <source>Show rectangle</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar retângulo</translation>
     </message>
     <message>
         <source>&lt;p&gt;Schema rectangle is disabled when the model is segmented in multiple scenes&lt;/p&gt;</source>
@@ -13669,7 +13685,7 @@ available in GUI. All available options are described below.</source>
     <name>SearchReplaceWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Search</source>
@@ -13677,59 +13693,59 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Find previous</source>
-        <translation type="unfinished"></translation>
+        <translation>Localizar anterior</translation>
     </message>
     <message>
         <source>Shift+F3</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+F3</translation>
     </message>
     <message>
         <source>Find next</source>
-        <translation type="unfinished"></translation>
+        <translation>Localizar próximo</translation>
     </message>
     <message>
         <source>F3</source>
-        <translation type="unfinished"></translation>
+        <translation>F3</translation>
     </message>
     <message>
         <source>Case sensitive</source>
-        <translation type="unfinished"></translation>
+        <translation>Diferenciar maiúsculas de minúsculas</translation>
     </message>
     <message>
         <source>Regular expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão regular</translation>
     </message>
     <message>
         <source>Whole words</source>
-        <translation type="unfinished"></translation>
+        <translation>Palavras inteiras</translation>
     </message>
     <message>
         <source>Hide this widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar este widget</translation>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Replace</source>
-        <translation type="unfinished"></translation>
+        <translation>Substituir</translation>
     </message>
     <message>
         <source>Replace one occurrence</source>
-        <translation type="unfinished"></translation>
+        <translation>Substituir uma ocorrência</translation>
     </message>
     <message>
         <source>Replace all occurrences</source>
-        <translation type="unfinished"></translation>
+        <translation>Substituir todas as ocorrências</translation>
     </message>
     <message>
         <source>Replace all</source>
-        <translation type="unfinished"></translation>
+        <translation>Substituir todas</translation>
     </message>
     <message>
         <source>Replace the selection and find the next one</source>
-        <translation type="unfinished"></translation>
+        <translation>Substituir a seleção e localizar a próxima</translation>
     </message>
     <message>
         <source>Replace &amp;&amp; search</source>
@@ -13737,15 +13753,15 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Replacements made: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Substituições feitas: %1</translation>
     </message>
     <message>
         <source>No replacements made!</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhuma substituição feita!</translation>
     </message>
     <message>
         <source>No occurrences found!</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhuma ocorrência encontrada!</translation>
     </message>
     <message>
         <source>The search returned to the starting point!</source>
@@ -13760,23 +13776,23 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Start</source>
-        <translation type="unfinished"></translation>
+        <translation>Início</translation>
     </message>
     <message>
         <source>Minimum</source>
-        <translation type="unfinished"></translation>
+        <translation>Mínimo</translation>
     </message>
     <message>
         <source>Maximum</source>
-        <translation type="unfinished"></translation>
+        <translation>Máximo</translation>
     </message>
     <message>
         <source>Cache</source>
-        <translation type="unfinished"></translation>
+        <translation>Cache</translation>
     </message>
     <message>
         <source>Increment</source>
-        <translation type="unfinished"></translation>
+        <translation>Incremento</translation>
     </message>
     <message>
         <source>Owner column</source>
@@ -13788,7 +13804,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>User defined</source>
-        <translation type="unfinished"></translation>
+        <translation>Definido pelo usuário</translation>
     </message>
 </context>
 <context>
@@ -13799,7 +13815,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <source>This is the name of the object in the PostgreSQL database.</source>
@@ -13826,7 +13842,7 @@ available in GUI. All available options are described below.</source>
     <name>SnippetsConfigWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Snippets</source>
@@ -13838,7 +13854,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Cancel edition</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar edição</translation>
     </message>
     <message>
         <source>Edit selected snippet</source>
@@ -13854,7 +13870,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Shift+Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+Del</translation>
     </message>
     <message>
         <source>Snippet properties</source>
@@ -13866,15 +13882,15 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Applies to</source>
-        <translation type="unfinished"></translation>
+        <translation>Aplica-se a</translation>
     </message>
     <message>
         <source>Label</source>
-        <translation type="unfinished"></translation>
+        <translation>Rótulo</translation>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>Parsable or dynamic snippets are written in the &lt;strong&gt;schema micro language&lt;/strong&gt; syntax. When using a parsable snippet the attributes surrounded in &lt;strong&gt;{}&lt;/strong&gt; will be replaced by the selected object&apos;s matching attributes.</source>
@@ -13882,7 +13898,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Is parsable</source>
-        <translation type="unfinished"></translation>
+        <translation>É analisável</translation>
     </message>
     <message>
         <source>When handling parsable snippets empty attributes will be replaced by a value in the format &lt;strong&gt;{attribute}&lt;/strong&gt;. Note that this option can affect the semantics of the resulting snippet.</source>
@@ -13898,7 +13914,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Parse</source>
-        <translation type="unfinished"></translation>
+        <translation>Analisar</translation>
     </message>
     <message>
         <source>Add the snippet as a new one</source>
@@ -13906,7 +13922,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar</translation>
     </message>
     <message>
         <source>Replaces the current snippet&apos;s code by the code below</source>
@@ -13914,11 +13930,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Update</source>
-        <translation type="unfinished"></translation>
+        <translation>Atualizar</translation>
     </message>
     <message>
         <source>General purpose</source>
-        <translation type="unfinished"></translation>
+        <translation>Uso geral</translation>
     </message>
     <message>
         <source>All snippets</source>
@@ -13936,7 +13952,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Invalid ID pattern detected &lt;strong&gt;%1&lt;/strong&gt;. This one must start with at leat one letter and be composed by letters, numbers and/or underscore!</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão de ID inválido detectado &lt;strong&gt;%1&lt;/strong&gt;. Este deve começar com ao menos uma letra e ser composto por letras, números e/ou sublinhado!</translation>
     </message>
     <message>
         <source>Empty label for snippet &lt;strong&gt;%1&lt;/strong&gt;. Please, specify a value for it!</source>
@@ -13960,14 +13976,14 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>General</source>
-        <translation type="unfinished"></translation>
+        <translation>Geral</translation>
     </message>
 </context>
 <context>
     <name>SourceEditorWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>Validate the syntax of the schema file</source>
@@ -13975,23 +13991,23 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Validate</source>
-        <translation type="unfinished"></translation>
+        <translation>Validar</translation>
     </message>
     <message>
         <source>F5</source>
-        <translation type="unfinished"></translation>
+        <translation>F5</translation>
     </message>
     <message>
         <source>Apply custom indentation to the code</source>
-        <translation type="unfinished"></translation>
+        <translation>Aplicar indentação personalizada ao código</translation>
     </message>
     <message>
         <source>Indent</source>
-        <translation type="unfinished"></translation>
+        <translation>Indentar</translation>
     </message>
     <message>
         <source>Ctrl+I</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+I</translation>
     </message>
     <message>
         <source>Toggles the comments in the current selection</source>
@@ -14003,15 +14019,15 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Ctrl+/</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+/</translation>
     </message>
     <message>
         <source>Convert metacharacters to escaped and vice-versa</source>
-        <translation type="unfinished"></translation>
+        <translation>Converter metacaracteres para escapados e vice-versa</translation>
     </message>
     <message>
         <source>Metachars</source>
-        <translation type="unfinished"></translation>
+        <translation>Metacaracteres</translation>
     </message>
     <message>
         <source>Search</source>
@@ -14019,23 +14035,23 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Ctrl+F</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+F</translation>
     </message>
     <message>
         <source>Break inline ifs</source>
-        <translation type="unfinished"></translation>
+        <translation>Quebrar ifs em linha</translation>
     </message>
     <message>
         <source>Metachar to escaped</source>
-        <translation type="unfinished"></translation>
+        <translation>Metacaractere para escapado</translation>
     </message>
     <message>
         <source>Escaped to metachar</source>
-        <translation type="unfinished"></translation>
+        <translation>Escapado para metacaractere</translation>
     </message>
     <message>
         <source>No lexical or syntactical errors found.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhum erro léxico ou sintático encontrado.</translation>
     </message>
 </context>
 <context>
@@ -14046,19 +14062,19 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Create</source>
-        <translation type="unfinished"></translation>
+        <translation>Criar</translation>
     </message>
     <message>
         <source>Swap the values of the fields</source>
-        <translation type="unfinished"></translation>
+        <translation>Trocar os valores dos campos</translation>
     </message>
     <message>
         <source>Swap values</source>
-        <translation type="unfinished"></translation>
+        <translation>Trocar valores</translation>
     </message>
     <message>
         <source>Before</source>
-        <translation type="unfinished"></translation>
+        <translation>Antes</translation>
     </message>
     <message>
         <source>Defines the search filter</source>
@@ -14089,7 +14105,7 @@ available in GUI. All available options are described below.</source>
     <name>SyntaxHighlighter</name>
     <message>
         <source>Pattern: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Padrão: %1</translation>
     </message>
 </context>
 <context>
@@ -14111,23 +14127,23 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar</translation>
     </message>
     <message>
         <source>Ctrl+C</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+C</translation>
     </message>
     <message>
         <source>Add empty rows</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar linhas vazias</translation>
     </message>
     <message>
         <source>Add row</source>
-        <translation type="unfinished"></translation>
+        <translation>Adicionar linha</translation>
     </message>
     <message>
         <source>Ins</source>
-        <translation type="unfinished"></translation>
+        <translation>Ins</translation>
     </message>
     <message>
         <source>Delete the selected columns</source>
@@ -14139,7 +14155,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Ctrl+Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Del</translation>
     </message>
     <message>
         <source>Paste items on the grid</source>
@@ -14147,11 +14163,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Paste</source>
-        <translation type="unfinished"></translation>
+        <translation>Colar</translation>
     </message>
     <message>
         <source>Ctrl+V</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+V</translation>
     </message>
     <message>
         <source>Fills the grid using a CSV file</source>
@@ -14179,19 +14195,19 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Ctrl+D</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+D</translation>
     </message>
     <message>
         <source>Change the values of all selected cells at once</source>
-        <translation type="unfinished"></translation>
+        <translation>Alterar os valores de todas as células selecionadas de uma só vez</translation>
     </message>
     <message>
         <source>Bulk data edit</source>
-        <translation type="unfinished"></translation>
+        <translation>Edição de dados em massa</translation>
     </message>
     <message>
         <source>Ctrl+E</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+E</translation>
     </message>
     <message>
         <source>Remove all columns (and rows) from the grid</source>
@@ -14203,19 +14219,19 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Ctrl+Shift+Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+Del</translation>
     </message>
     <message>
         <source>Delete the selected rows</source>
-        <translation type="unfinished"></translation>
+        <translation>Excluir as linhas selecionadas</translation>
     </message>
     <message>
         <source>Delete rows</source>
-        <translation type="unfinished"></translation>
+        <translation>Excluir linhas</translation>
     </message>
     <message>
         <source>Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Del</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Empty values are assumed as &lt;span style=&quot; font-weight:600;&quot;&gt;DEFAULT&lt;/span&gt;. To use special values like &lt;span style=&quot; font-weight:600;&quot;&gt;NULL&lt;/span&gt;, a function call like &lt;span style=&quot; font-weight:600;&quot;&gt;now()&lt;/span&gt; or a specific data escaping, enclose values in two slashes, e.g., &lt;span style=&quot; font-weight:600;&quot;&gt;/value/&lt;/span&gt;. To use a slash as part of the value prepend the backslash character, e.g., &lt;span style=&quot; font-weight:600;&quot;&gt;\/&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -14227,11 +14243,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Delete all rows</source>
-        <translation type="unfinished"></translation>
+        <translation>Excluir todas as linhas</translation>
     </message>
     <message>
         <source>Shift+Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+Del</translation>
     </message>
     <message>
         <source>Deleting columns is an irreversible action! Are you sure you want to proceed?</source>
@@ -14239,7 +14255,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Removing all rows is an irreversible action! Are you sure you want to proceed?</source>
-        <translation type="unfinished"></translation>
+        <translation>A remoção de todas as linhas é uma ação irreversível! Tem certeza de que deseja prosseguir?</translation>
     </message>
     <message>
         <source>Removing all columns is an irreversible action! Are you sure you want to proceed?</source>
@@ -14255,7 +14271,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Save CSV to file...</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar CSV em arquivo...</translation>
     </message>
     <message>
         <source>Duplicated column</source>
@@ -14284,7 +14300,7 @@ available in GUI. All available options are described below.</source>
     <name>TableView</name>
     <message>
         <source>Partitioned</source>
-        <translation type="unfinished"></translation>
+        <translation>Particionada</translation>
     </message>
     <message>
         <source>Partition</source>
@@ -14295,7 +14311,7 @@ available in GUI. All available options are described below.</source>
     <name>TableWidget</name>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>Generate ALTER for columns / constraints</source>
@@ -14319,11 +14335,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Unlogged</source>
-        <translation type="unfinished"></translation>
+        <translation>Unlogged</translation>
     </message>
     <message>
         <source>With OID</source>
-        <translation type="unfinished"></translation>
+        <translation>With OID</translation>
     </message>
     <message>
         <source>Columns</source>
@@ -14347,7 +14363,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Policies</source>
-        <translation type="unfinished"></translation>
+        <translation>Políticas</translation>
     </message>
     <message>
         <source>Partition keys</source>
@@ -14363,7 +14379,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Edit data</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar dados</translation>
     </message>
     <message>
         <source>Define initial data for the table</source>
@@ -14371,7 +14387,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <source>Schema</source>
@@ -14383,15 +14399,15 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Option</source>
-        <translation type="unfinished"></translation>
+        <translation>Opção</translation>
     </message>
     <message>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor</translation>
     </message>
     <message>
         <source>PK</source>
-        <translation type="unfinished"></translation>
+        <translation>PK</translation>
     </message>
     <message>
         <source>Default Value</source>
@@ -14399,7 +14415,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Attribute(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributo(s)</translation>
     </message>
     <message>
         <source>Alias</source>
@@ -14431,39 +14447,39 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Firing</source>
-        <translation type="unfinished"></translation>
+        <translation>Disparo</translation>
     </message>
     <message>
         <source>Events</source>
-        <translation type="unfinished"></translation>
+        <translation>Eventos</translation>
     </message>
     <message>
         <source>Execution</source>
-        <translation type="unfinished"></translation>
+        <translation>Execução</translation>
     </message>
     <message>
         <source>Event</source>
-        <translation type="unfinished"></translation>
+        <translation>Evento</translation>
     </message>
     <message>
         <source>Indexing</source>
-        <translation type="unfinished"></translation>
+        <translation>Indexação</translation>
     </message>
     <message>
         <source>Command</source>
-        <translation type="unfinished"></translation>
+        <translation>Comando</translation>
     </message>
     <message>
         <source>Permissive</source>
-        <translation type="unfinished"></translation>
+        <translation>Permissiva</translation>
     </message>
     <message>
         <source>USING expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão USING</translation>
     </message>
     <message>
         <source>CHECK expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressão CHECK</translation>
     </message>
     <message>
         <source>Roles</source>
@@ -14471,19 +14487,19 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhum</translation>
     </message>
     <message>
         <source>Parent</source>
-        <translation type="unfinished"></translation>
+        <translation>Pai</translation>
     </message>
     <message>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Cópia</translation>
     </message>
     <message>
         <source>Partitioned</source>
-        <translation type="unfinished"></translation>
+        <translation>Particionada</translation>
     </message>
     <message>
         <source>Partition</source>
@@ -14491,11 +14507,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Yes</source>
-        <translation type="unfinished"></translation>
+        <translation>Sim</translation>
     </message>
     <message>
         <source>No</source>
-        <translation type="unfinished"></translation>
+        <translation>Não</translation>
     </message>
     <message>
         <source>The primary key of the table was removed, do you want to uncheck the columns marked as &lt;strong&gt;PK&lt;/strong&gt; in the &lt;strong&gt;Columns&lt;/strong&gt; tab in order to avoid the primary key being created again?</source>
@@ -14506,14 +14522,14 @@ available in GUI. All available options are described below.</source>
     <name>TablespaceWidget</name>
     <message>
         <source>Directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Diretório</translation>
     </message>
 </context>
 <context>
     <name>TagWidget</name>
     <message>
         <source>Toggler buttons body</source>
-        <translation type="unfinished"></translation>
+        <translation>Corpo dos botões de alternância</translation>
     </message>
     <message>
         <source>Table body</source>
@@ -14529,7 +14545,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Toggler buttons</source>
-        <translation type="unfinished"></translation>
+        <translation>Botões de alternância</translation>
     </message>
     <message>
         <source>Schema name</source>
@@ -14541,72 +14557,72 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Cores</translation>
     </message>
 </context>
 <context>
     <name>TaskProgressWidget</name>
     <message>
         <source>Executing tasks</source>
-        <translation type="unfinished"></translation>
+        <translation>Executando tarefas</translation>
     </message>
     <message>
         <source>Waiting for task to start...</source>
-        <translation type="unfinished"></translation>
+        <translation>Aguardando o início da tarefa...</translation>
     </message>
     <message>
         <source>Cancel operation</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar operação</translation>
     </message>
     <message>
         <source>Cancelling...</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelando...</translation>
     </message>
     <message>
         <source>Waiting task to start...</source>
-        <translation type="unfinished"></translation>
+        <translation>Aguardando o início da tarefa...</translation>
     </message>
 </context>
 <context>
     <name>TextboxWidget</name>
     <message>
         <source>Font size</source>
-        <translation type="unfinished"></translation>
+        <translation>Tamanho da fonte</translation>
     </message>
     <message>
         <source> pt</source>
-        <translation type="unfinished"></translation>
+        <translation> pt</translation>
     </message>
     <message>
         <source>Text color</source>
-        <translation type="unfinished"></translation>
+        <translation>Cor do texto</translation>
     </message>
     <message>
         <source>Text style</source>
-        <translation type="unfinished"></translation>
+        <translation>Estilo do texto</translation>
     </message>
     <message>
         <source>Bold</source>
-        <translation type="unfinished"></translation>
+        <translation>Negrito</translation>
     </message>
     <message>
         <source>Italic</source>
-        <translation type="unfinished"></translation>
+        <translation>Itálico</translation>
     </message>
     <message>
         <source>Underline</source>
-        <translation type="unfinished"></translation>
+        <translation>Sublinhado</translation>
     </message>
     <message>
         <source>Text</source>
-        <translation type="unfinished"></translation>
+        <translation>Texto</translation>
     </message>
 </context>
 <context>
     <name>TransformWidget</name>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Language</source>
@@ -14614,11 +14630,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>From SQL</source>
-        <translation type="unfinished"></translation>
+        <translation>From SQL</translation>
     </message>
     <message>
         <source>To SQL</source>
-        <translation type="unfinished"></translation>
+        <translation>To SQL</translation>
     </message>
 </context>
 <context>
@@ -14676,15 +14692,15 @@ available in GUI. All available options are described below.</source>
     <name>TriggerWidget</name>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Excution</source>
-        <translation type="unfinished"></translation>
+        <translation>Execução</translation>
     </message>
     <message>
         <source>For each row</source>
-        <translation type="unfinished"></translation>
+        <translation>Para cada linha</translation>
     </message>
     <message>
         <source>Constraint trigger</source>
@@ -14696,19 +14712,19 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Events</source>
-        <translation type="unfinished"></translation>
+        <translation>Eventos</translation>
     </message>
     <message>
         <source>INSERT</source>
-        <translation type="unfinished"></translation>
+        <translation>INSERT</translation>
     </message>
     <message>
         <source>DELETE</source>
-        <translation type="unfinished"></translation>
+        <translation>DELETE</translation>
     </message>
     <message>
         <source>UPDATE</source>
-        <translation type="unfinished"></translation>
+        <translation>UPDATE</translation>
     </message>
     <message>
         <source>TRUNCATE</source>
@@ -14720,19 +14736,19 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>OLD</source>
-        <translation type="unfinished"></translation>
+        <translation>OLD</translation>
     </message>
     <message>
         <source>NEW</source>
-        <translation type="unfinished"></translation>
+        <translation>NEW</translation>
     </message>
     <message>
         <source>Arguments</source>
-        <translation type="unfinished"></translation>
+        <translation>Argumentos</translation>
     </message>
     <message>
         <source>Argument</source>
-        <translation type="unfinished"></translation>
+        <translation>Argumento</translation>
     </message>
     <message>
         <source>Columns</source>
@@ -14752,18 +14768,18 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Condition</source>
-        <translation type="unfinished"></translation>
+        <translation>Condição</translation>
     </message>
 </context>
 <context>
     <name>TypeWidget</name>
     <message>
         <source>Configuration</source>
-        <translation type="unfinished"></translation>
+        <translation>Configuração</translation>
     </message>
     <message>
         <source>Base</source>
-        <translation type="unfinished"></translation>
+        <translation>Base</translation>
     </message>
     <message>
         <source>Composite</source>
@@ -14775,7 +14791,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Rage</source>
-        <translation type="unfinished"></translation>
+        <translation>Intervalo</translation>
     </message>
     <message>
         <source>Functions</source>
@@ -14811,51 +14827,51 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Atributos</translation>
     </message>
     <message>
         <source>Category</source>
-        <translation type="unfinished"></translation>
+        <translation>Categoria</translation>
     </message>
     <message>
         <source>Internal length</source>
-        <translation type="unfinished"></translation>
+        <translation>Comprimento interno</translation>
     </message>
     <message>
         <source>Alignment</source>
-        <translation type="unfinished"></translation>
+        <translation>Alinhamento</translation>
     </message>
     <message>
         <source>integer</source>
-        <translation type="unfinished"></translation>
+        <translation>integer</translation>
     </message>
     <message>
         <source>char</source>
-        <translation type="unfinished"></translation>
+        <translation>char</translation>
     </message>
     <message>
         <source>smallint</source>
-        <translation type="unfinished"></translation>
+        <translation>smallint</translation>
     </message>
     <message>
         <source>double precision</source>
-        <translation type="unfinished"></translation>
+        <translation>double precision</translation>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>By value</source>
-        <translation type="unfinished"></translation>
+        <translation>Por valor</translation>
     </message>
     <message>
         <source>Preferred</source>
-        <translation type="unfinished"></translation>
+        <translation>Preferido</translation>
     </message>
     <message>
         <source>Collatable</source>
-        <translation type="unfinished"></translation>
+        <translation>Collatable</translation>
     </message>
     <message>
         <source>Default value</source>
@@ -14863,7 +14879,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Storage</source>
-        <translation type="unfinished"></translation>
+        <translation>Armazenamento</translation>
     </message>
     <message>
         <source>Delimiter</source>
@@ -14871,7 +14887,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <source>Collation</source>
@@ -14907,38 +14923,38 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Subtype</source>
-        <translation type="unfinished"></translation>
+        <translation>Subtipo</translation>
     </message>
 </context>
 <context>
     <name>UpdateNotifierWidget</name>
     <message>
         <source>Update Notifier</source>
-        <translation type="unfinished"></translation>
+        <translation>Notificador de atualizações</translation>
     </message>
     <message>
         <source>Hide this widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar este widget</translation>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <source>Update info</source>
-        <translation type="unfinished"></translation>
+        <translation>Informações da atualização</translation>
     </message>
     <message>
         <source>0.0.0</source>
-        <translation type="unfinished"></translation>
+        <translation>0.0.0</translation>
     </message>
     <message>
         <source>&lt;p&gt;Redirects to the blog post detailing this release.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Redireciona para a postagem do blog que detalha esta versão.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Blog post</source>
-        <translation type="unfinished"></translation>
+        <translation>Postagem do blog</translation>
     </message>
     <message>
         <source>Redirects to the purchase page.</source>
@@ -14946,7 +14962,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Get binaries</source>
-        <translation type="unfinished"></translation>
+        <translation>Obter binários</translation>
     </message>
     <message>
         <source>Redirects to the source code repository at GitHub.</source>
@@ -14954,19 +14970,19 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Get source</source>
-        <translation type="unfinished"></translation>
+        <translation>Obter código-fonte</translation>
     </message>
     <message>
         <source>mmm dd, yyyy</source>
-        <translation type="unfinished"></translation>
+        <translation>mmm dd, yyyy</translation>
     </message>
     <message>
         <source>New version</source>
-        <translation type="unfinished"></translation>
+        <translation>Nova versão</translation>
     </message>
     <message>
         <source>Released on</source>
-        <translation type="unfinished"></translation>
+        <translation>Lançada em</translation>
     </message>
     <message>
         <source>Changelog</source>
@@ -14974,7 +14990,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Failed to check updates</source>
-        <translation type="unfinished"></translation>
+        <translation>Falha ao verificar atualizações</translation>
     </message>
     <message>
         <source>The update notifier failed to check for new versions! Please, verify your internet connectivity and try again! Connection error returned: &lt;em&gt;%1&lt;/em&gt; - &lt;strong&gt;%2&lt;/strong&gt;.</source>
@@ -14982,15 +14998,15 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>No updates found</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenhuma atualização encontrada</translation>
     </message>
     <message>
         <source>You are running the most recent pgModeler version! No update needed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Você está executando a versão mais recente do pgModeler! Nenhuma atualização necessária.</translation>
     </message>
     <message>
         <source>The update notifier failed to check for new versions! A HTTP status code was returned: &lt;strong&gt;%1&lt;/strong&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>O notificador de atualizações falhou ao verificar novas versões! Um código de status HTTP foi retornado: &lt;strong&gt;%1&lt;/strong&gt;</translation>
     </message>
 </context>
 <context>
@@ -15001,15 +15017,15 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opções</translation>
     </message>
     <message>
         <source>Option</source>
-        <translation type="unfinished"></translation>
+        <translation>Opção</translation>
     </message>
     <message>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor</translation>
     </message>
 </context>
 <context>
@@ -15020,19 +15036,19 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Ordinary</source>
-        <translation type="unfinished"></translation>
+        <translation>Comum</translation>
     </message>
     <message>
         <source>Recursive</source>
-        <translation type="unfinished"></translation>
+        <translation>Recursiva</translation>
     </message>
     <message>
         <source>Materialized</source>
-        <translation type="unfinished"></translation>
+        <translation>Materializada</translation>
     </message>
     <message>
         <source>No data</source>
-        <translation type="unfinished"></translation>
+        <translation>Sem dados</translation>
     </message>
     <message>
         <source>Security</source>
@@ -15040,11 +15056,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Barrier</source>
-        <translation type="unfinished"></translation>
+        <translation>Barrier</translation>
     </message>
     <message>
         <source>Invoker</source>
-        <translation type="unfinished"></translation>
+        <translation>Invoker</translation>
     </message>
     <message>
         <source>Tag</source>
@@ -15052,7 +15068,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Definition</source>
-        <translation type="unfinished"></translation>
+        <translation>Definição</translation>
     </message>
     <message>
         <source>Unnecessary semicolon(s) found at the end of the definition command! They will be ignored when generating the view&apos;s SQL code.</source>
@@ -15060,7 +15076,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Code</source>
-        <translation type="unfinished"></translation>
+        <translation>Código</translation>
     </message>
     <message>
         <source>References</source>
@@ -15068,7 +15084,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>SQL preview</source>
-        <translation type="unfinished"></translation>
+        <translation>Prévia do SQL</translation>
     </message>
     <message>
         <source>Columns</source>
@@ -15088,11 +15104,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>No check</source>
-        <translation type="unfinished"></translation>
+        <translation>Sem verificação</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <source>Refer. Table</source>
@@ -15100,11 +15116,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Firing</source>
-        <translation type="unfinished"></translation>
+        <translation>Disparo</translation>
     </message>
     <message>
         <source>Events</source>
-        <translation type="unfinished"></translation>
+        <translation>Eventos</translation>
     </message>
     <message>
         <source>Alias</source>
@@ -15116,22 +15132,22 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Indexing</source>
-        <translation type="unfinished"></translation>
+        <translation>Indexação</translation>
     </message>
     <message>
         <source>Execution</source>
-        <translation type="unfinished"></translation>
+        <translation>Execução</translation>
     </message>
     <message>
         <source>Event</source>
-        <translation type="unfinished"></translation>
+        <translation>Evento</translation>
     </message>
 </context>
 <context>
     <name>WelcomeWidget</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <source>New model</source>
@@ -15151,11 +15167,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Last session</source>
-        <translation type="unfinished"></translation>
+        <translation>Última sessão</translation>
     </message>
     <message>
         <source>Support</source>
-        <translation type="unfinished"></translation>
+        <translation>Suporte</translation>
     </message>
 </context>
 </TS>
