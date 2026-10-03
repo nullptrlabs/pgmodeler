@@ -2337,7 +2337,7 @@ void MainWindow::executePendingOperation(bool valid_error)
 									 GuiUtilsNs::getIcon("export"), GuiUtilsNs::getIcon("diff") };
 
 	GuiUtilsNs::createOutputTreeItem(model_valid_wgt->output_trw,
-																	 tr("Executing pending <strong>%1</strong> operation...").arg(op_names[pending_op]),
+																	 tr("Executing pending <strong>%1</strong> operation...").arg(tr(op_names[pending_op].toUtf8().constData())),
 																	 op_icons[pending_op]);
 
 	if(pending_op == PendingSaveOp || pending_op == PendingSaveAsOp)

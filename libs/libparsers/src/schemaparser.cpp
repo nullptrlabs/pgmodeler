@@ -179,7 +179,7 @@ void SchemaParser::loadBuffer(const QString &buf)
 	restartParser();
 
 	if(filename.isEmpty())
-		filename = QT_TR_NOOP("[memory buffer]");
+		filename = UtilsNs::pgmTr(PGM_TR2("Global", "[memory buffer]"));
 
 	if(!search_path.isEmpty())
 		QDir::setCurrent(search_path);
@@ -259,7 +259,7 @@ bool SchemaParser::parseInclude(const QString &include_ln, QString &src_buf, qin
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvalidSyntax)
 										.arg(filename).arg(getCurrentLine()).arg(getCurrentColumn()) + " " +
-										QString(QT_TR_NOOP("Expected a valid include statement in the form `%1 \"file.sch\"'.")).arg(TokenInclude),
+										UtilsNs::pgmTr(PGM_TR2("Global", "Expected a valid include statement in the form `%1 \"file.sch\"'.")).arg(TokenInclude),
 										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
@@ -278,7 +278,7 @@ bool SchemaParser::parseInclude(const QString &include_ln, QString &src_buf, qin
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvalidInclude)
 										.arg(filename).arg(getCurrentLine()).arg(getCurrentColumn()) + " " +
-										QString(QT_TR_NOOP("Include file `%1' not found.")).arg(fi.absoluteFilePath()),
+										UtilsNs::pgmTr(PGM_TR2("Global", "Include file `%1' not found.")).arg(fi.absoluteFilePath()),
 										ErrorCode::InvalidInclude, PGM_FUNC, PGM_FILE, PGM_LINE,
 										nullptr, fi.absoluteFilePath());
 	}
@@ -298,7 +298,7 @@ bool SchemaParser::parseInclude(const QString &include_ln, QString &src_buf, qin
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::InvalidInclude)
 											.arg(filename).arg(getCurrentLine()).arg(getCurrentColumn()) + " " +
-											QString(QT_TR_NOOP("The included file `%1' contains one or more `%2' statements. Nested file inclusion is not currently supported!")).arg(fi.absoluteFilePath(), TokenInclude),
+											UtilsNs::pgmTr(PGM_TR2("Global", "The included file `%1' contains one or more `%2' statements. Nested file inclusion is not currently supported!")).arg(fi.absoluteFilePath(), TokenInclude),
 											ErrorCode::InvalidInclude, PGM_FUNC, PGM_FILE, PGM_LINE,
 											nullptr, fi.absoluteFilePath());
 		}
@@ -413,7 +413,7 @@ QString SchemaParser::getAttribute(bool &found_conv_to_xml)
 	if(error)
 	{
 		throw Exception(getParseError(ErrorCode::InvalidSyntax,
-										QString(QT_TR_NOOP("Expected a valid attribute token enclosed by `%1%2'."))
+										UtilsNs::pgmTr(PGM_TR2("Global", "Expected a valid attribute token enclosed by `%1%2'."))
 										.arg(CharStartAttribute).arg(CharEndAttribute)),
 										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
@@ -531,7 +531,7 @@ QString SchemaParser::getPlainText()
 		line = start_line;
 
 		throw Exception(getParseError(ErrorCode::InvalidSyntax,
-										QString(QT_TR_NOOP("Plain text expression is unbalanced or not properly enclosed by `%1%2'."))
+										UtilsNs::pgmTr(PGM_TR2("Global", "Plain text expression is unbalanced or not properly enclosed by `%1%2'."))
 										.arg(CharStartPlainText).arg(CharEndPlainText)),
 										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
@@ -572,7 +572,7 @@ QString SchemaParser::getConditional()
 	if(error)
 	{
 		throw Exception(getParseError(ErrorCode::InvalidSyntax,
-										QString(QT_TR_NOOP("Expected a valid conditional instruction token starting with `%1' and followed by at least one letter.")).arg(CharStartConditional)),
+										UtilsNs::pgmTr(PGM_TR2("Global", "Expected a valid conditional instruction token starting with `%1' and followed by at least one letter.")).arg(CharStartConditional)),
 										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
@@ -646,9 +646,9 @@ QString SchemaParser::getMetaOrEscapedToken(bool is_escaped)
 		QString extra_msg;
 
 		if(is_escaped)
-			extra_msg = QString(QT_TR_NOOP("Expected a valid escaped character token starting with `%1' and followed by a single character.")).arg(start_chr);
+			extra_msg = UtilsNs::pgmTr(PGM_TR2("Global", "Expected a valid escaped character token starting with `%1' and followed by a single character.")).arg(start_chr);
 		else
-			extra_msg = QString(QT_TR_NOOP("Expected a valid metacharacter token starting with `%1' and followed by at least one letter.")).arg(start_chr);
+			extra_msg = UtilsNs::pgmTr(PGM_TR2("Global", "Expected a valid metacharacter token starting with `%1' and followed by at least one letter.")).arg(start_chr);
 
 		throw Exception(getParseError(ErrorCode::InvalidSyntax, extra_msg),
 										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
@@ -785,7 +785,7 @@ bool SchemaParser::evaluateComparisonExpr()
 					else
 					{
 						error = true;
-						extra_error_msg = QString(QT_TR_NOOP("Expected a valid operator token composed of at least two characters from the set `%1'.")).arg(valid_op_chrs);
+						extra_error_msg = UtilsNs::pgmTr(PGM_TR2("Global", "Expected a valid operator token composed of at least two characters from the set `%1'.")).arg(valid_op_chrs);
 					}
 				}
 				else
@@ -800,7 +800,7 @@ bool SchemaParser::evaluateComparisonExpr()
 	}
 
 	if(error && !end_eval && extra_error_msg.isEmpty())
-		extra_error_msg = QString(QT_TR_NOOP("Expected a valid comparison expression `%1 [attribute] [operator] [value] %2'.")).arg(CharStartCompExpr).arg(CharEndCompExpr);
+		extra_error_msg = UtilsNs::pgmTr(PGM_TR2("Global", "Expected a valid comparison expression `%1 [attribute] [operator] [value] %2'.")).arg(CharStartCompExpr).arg(CharEndCompExpr);
 
 	if(error)
 	{

@@ -138,7 +138,7 @@ Operation::OperationInfo Operation::getOperationInfo() const
 {
 	OperType oper_type = OperType::NoOperation;
 	ObjectType obj_type = ObjectType::BaseObject;
-	QString obj_name = QT_TR_NOOP("(invalid object)");
+	QString obj_name = UtilsNs::pgmTr(PGM_TR2("Global", "(invalid object)"));
 
 	if(isOperationValid())
 	{
