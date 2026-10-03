@@ -20,6 +20,7 @@
 */
 
 #include "mainwindow.h"
+#include "utilsns.h"
 #include "guiutilsns.h"
 #include "tools/bugreportform.h"
 #include "tools/modelfixwidget.h"
@@ -32,7 +33,7 @@ int MainWindow::ToolsActionsCount {0};
 bool MainWindow::confirm_validation {true};
 QMap<MainWindow::MWViewsId, QAction *> MainWindow::view_actions {};
 
-const QString MainWindow::TmplWindowTitle { QT_TR_NOOP("pgModeler %1 - PostgreSQL Database Modeler %2") };
+const QString MainWindow::TmplWindowTitle { PGM_TR2("Global", "pgModeler %1 - PostgreSQL Database Modeler %2") };
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {	
@@ -43,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 
 void MainWindow::initMainWindow()
 {
-	window_title = TmplWindowTitle.arg("Community", GlobalAttributes::PgModelerVersion);
+	window_title = UtilsNs::pgmTr(TmplWindowTitle).arg("Community", GlobalAttributes::PgModelerVersion);
 	recent_models_menu = new QMenu(this);
 	recent_models_menu->setObjectName("recent_models_menu");
 
