@@ -6037,6 +6037,957 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
 </context>
 <context>
+    <name>Global</name>
+    <message>
+        <source>** pgmodeler-cli aborted due to critical error(s). **</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>(untitled)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Database model files (*%1) are already associated with pgModeler! Use the option `%2&apos; to force the file association installation.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No file association exists between pgModeler and *%1 files! Use the option `%2&apos; to force the file association uninstallation.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Comment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Signature</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Schema</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Owner</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tablespace</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Data type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Return type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Source table</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Destination table</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Related foreign key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Source column(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Referenced column(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type id: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type name: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>pgModeler %1 - PostgreSQL Database Modeler %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Object</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Parent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Parent type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>(not found, OID: %1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Source code not generated! Press F7 or middle-click the item to load it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>-- Source code unavailable for this kind of object --</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Administrative roles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Alignment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Analyze function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Argument count</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Argument default count</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Argument defaults</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Argument modes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Argument names</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Argument types</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Attribute</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Behavior type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>By value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cast type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Category</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Collatable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Collation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Commutator operator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Configuration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Connection limit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Constraint</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Create database</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Create role</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Current version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Definition</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delimiter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Destination type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dimension</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Destination encoding</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Element</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Encoding</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Encrypted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Labels</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Execution cost</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Expression</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Operator family</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Final function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Function type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Handler function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Hashes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Index type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Inherit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Initial condition</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Inline function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Input function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Internal length</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Interval type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>I/O cast</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Join function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>LC COLLATE</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>LC CTYPE</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Leak proof</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Left type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Length</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Login allowed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Materialized</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Member roles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merges</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Negator operator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not null</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Object type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>With OIDs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Old version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Operator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Operator function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Output function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Owner column</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Parents</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Permissions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Precision</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Preferred</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Range attributes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Receive function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Replication</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Restriction function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Returns SETOF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Right type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rows amount</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Security type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Send function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sort operator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Source type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Source encoding</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>State type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Storage</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Superuser</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type modifier input function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type modifier output function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Transition function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Trusted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type attribute</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Types</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unlogged</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Validator function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Validity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Window function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>false</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>true</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cache value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cycle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Increment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Maximum value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Minimum value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Start value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Last value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Subtype</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Operator class</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Canonical function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Subtype difference function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deferrable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>For each row</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Firing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>On insert</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>On delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>On update</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>On truncate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Arguments</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Trigger function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Columns</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Condition</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deferment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Event</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Execution mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Commands</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Position</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Comparison type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Referenced columns</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Expressions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fill factor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No inherit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Operator classes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Operators</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Referenced table</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unique</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Predicate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Collations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Inherited</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Client encoding</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Configuration file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Data directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dynamic library path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dynamic shared memory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HBA file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Listen addresses</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Maximum connections</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Listen port</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server encoding</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SSL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SSL CA file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SSL certificate file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SSL CRL file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SSL key file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ident file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Password encryption</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Connection ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server PID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server protocol</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Referrers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Identity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Command</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>USING expression</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>CHECK expression</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Roles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>RLS enabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>RLS forced</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Last analyze</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Last autovacuum</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Last vacuum</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tuples deleted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tuples updated</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tuples inserted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Partitioned</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Partition of</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Partition bound expression</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dead rows amount</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Partition keys</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Partitioning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Foreign data wrapper</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bypass RLS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>From SQL function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>To SQL function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Transform types</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Configuration parameters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Is template</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Template database</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Allows connection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>LC COLLATE modifier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>LC CTYPE modifier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Is extension type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Referenced tables</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Nulls not distinct</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Constraints</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deterministic</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type class</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Locale</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Force re-creation (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>GuiUtilsNs</name>
     <message>
         <source>Do you want to apply the &lt;strong&gt;SQL %1 status&lt;/strong&gt; to the object&apos;s references as well? This will prevent issues when exporting or validating the model.</source>
