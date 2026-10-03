@@ -28,6 +28,7 @@
 #ifndef TABLE_H
 #define TABLE_H
 
+#include <QCoreApplication>
 #include "index.h"
 #include "rule.h"
 #include "policy.h"
@@ -35,6 +36,9 @@
 #include <QStringList>
 
 class __libcore Table: public PhysicalTable {
+	//! \brief Gives the class its own tr(), so the texts it translates are in the context Table
+	Q_DECLARE_TR_FUNCTIONS(Table)
+
 	private:
 		//! \brief Stores the indexes
 		std::vector<TableObject *> indexes;
