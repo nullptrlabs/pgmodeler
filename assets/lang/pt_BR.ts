@@ -1589,13 +1589,6 @@ This will disable the code of all child and referrer objects.</source>
     </message>
 </context>
 <context>
-    <name>Connection</name>
-    <message>
-        <source>ERROR: trying to open an already established connection.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>ConnectionsConfigWidget</name>
     <message>
         <source>Edit database connections</source>
@@ -5262,17 +5255,6 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
 </context>
 <context>
-    <name>Extension</name>
-    <message>
-        <source>Invalid object: %1 (%2)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Invalid object type: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>ExtensionWidget</name>
     <message>
         <source>Attributes</source>
@@ -6986,9 +6968,18 @@ Message returned by the DBMS: `%1&apos;</source>
         <source>Force re-creation (%1)</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>GuiUtilsNs</name>
+    <message>
+        <source>Invalid object: %1 (%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid object type: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>(invalid object)</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Do you want to apply the &lt;strong&gt;SQL %1 status&lt;/strong&gt; to the object&apos;s references as well? This will prevent issues when exporting or validating the model.</source>
         <translation type="unfinished"></translation>
@@ -7055,6 +7046,92 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Load file...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>License error code: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>License file found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A license file from a previous version of pgModeler was detected. Would you like to migrate it and skip registering this copy?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ERROR: trying to open an already established connection.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[memory buffer]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Expected a valid include statement in the form `%1 &quot;file.sch&quot;&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Include file `%1&apos; not found.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The included file `%1&apos; contains one or more `%2&apos; statements. Nested file inclusion is not currently supported!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Expected a valid attribute token enclosed by `%1%2&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Plain text expression is unbalanced or not properly enclosed by `%1%2&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Expected a valid conditional instruction token starting with `%1&apos; and followed by at least one letter.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Expected a valid escaped character token starting with `%1&apos; and followed by a single character.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Expected a valid metacharacter token starting with `%1&apos; and followed by at least one letter.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Expected a valid operator token composed of at least two characters from the set `%1&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Expected a valid comparison expression `%1 [attribute] [operator] [value] %2&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to parse the file `%1&apos; due to an error in the included file at line `%2&apos;. Error detected:
+
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>XML file: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>DTD decl: %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7411,33 +7488,6 @@ Message returned by the DBMS: `%1&apos;</source>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>LicenseCheckNs</name>
-    <message>
-        <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>License error code: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>License file found</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>A license file from a previous version of pgModeler was detected. Would you like to migrate it and skip registering this copy?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -10720,13 +10770,6 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     </message>
 </context>
 <context>
-    <name>Operation</name>
-    <message>
-        <source>(invalid object)</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>OperationListWidget</name>
     <message>
         <source>Executed Operations</source>
@@ -13600,59 +13643,6 @@ available in GUI. All available options are described below.</source>
     </message>
 </context>
 <context>
-    <name>SchemaParser</name>
-    <message>
-        <source>[memory buffer]</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Expected a valid include statement in the form `%1 &quot;file.sch&quot;&apos;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Include file `%1&apos; not found.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The included file `%1&apos; contains one or more `%2&apos; statements. Nested file inclusion is not currently supported!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Expected a valid attribute token enclosed by `%1%2&apos;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Plain text expression is unbalanced or not properly enclosed by `%1%2&apos;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Expected a valid conditional instruction token starting with `%1&apos; and followed by at least one letter.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Expected a valid escaped character token starting with `%1&apos; and followed by a single character.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Expected a valid metacharacter token starting with `%1&apos; and followed by at least one letter.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Expected a valid operator token composed of at least two characters from the set `%1&apos;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Expected a valid comparison expression `%1 [attribute] [operator] [value] %2&apos;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Failed to parse the file `%1&apos; due to an error in the included file at line `%2&apos;. Error detected:
-
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>SchemaWidget</name>
     <message>
         <source>Attributes</source>
@@ -15165,17 +15155,6 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Support</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>XmlParser</name>
-    <message>
-        <source>XML file: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>DTD decl: %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
