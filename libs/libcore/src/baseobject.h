@@ -28,6 +28,7 @@
 #ifndef BASE_OBJECT_H
 #define BASE_OBJECT_H
 
+#include <QCoreApplication>
 #include "coreglobal.h"
 #include "attributes.h"
 #include "globalattributes.h"
@@ -90,6 +91,9 @@ enum class ObjectType: unsigned {
 Q_DECLARE_METATYPE(ObjectType)
 
 class __libcore BaseObject {
+	//! \brief Gives the class its own tr(), so the texts it translates are in the context BaseObject
+	Q_DECLARE_TR_FUNCTIONS(BaseObject)
+
 	private:
 		//! \brief Current PostgreSQL version used in SQL code generation
 		static QString pgsql_ver;
