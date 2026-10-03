@@ -112,6 +112,16 @@ namespace UtilsNs {
 		return input.read(max_len);
 	}
 
+	QString pgmTr(const char *text)
+	{
+		return QCoreApplication::translate(TrContext, text);
+	}
+
+	QString pgmTr(const QString &text)
+	{
+		return pgmTr(text.toUtf8().constData());
+	}
+
 	QString convertToXmlEntities(QString value)
 	{
 		/* If the extracted value has one of the expected special chars
