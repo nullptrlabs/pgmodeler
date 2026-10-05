@@ -456,10 +456,14 @@ void Connection::executeDMLCommand(const QString &sql, ResultSet &result)
 	//Raise an error in case the command sql execution is not sucessful
 	if(strlen(PQerrorMessage(connection))>0)
 	{
+		QString field = QString(PQresultErrorField(sql_res, PG_DIAG_SQLSTATE));
+
+		// The result of a failed command is not handed to the result set, so it must be freed here
+		PQclear(sql_res);
+
 		throw Exception(Exception::getErrorMessage(ErrorCode::SQLCommandNotExecuted)
 						.arg(PQerrorMessage(connection)),
-						ErrorCode::SQLCommandNotExecuted, PGM_FUNC, PGM_FILE, PGM_LINE, nullptr,
-						QString(PQresultErrorField(sql_res, PG_DIAG_SQLSTATE)));
+						ErrorCode::SQLCommandNotExecuted, PGM_FUNC, PGM_FILE, PGM_LINE, nullptr, field);
 	}
 
 	// Initializes the result set with the PG result instance.

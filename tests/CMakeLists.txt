@@ -40,4 +40,9 @@ add_subdirectory(src/csvparsertest)
 add_subdirectory(src/modelwidgettest)
 add_subdirectory(src/messageboxtest)
 add_subdirectory(src/uilanguagetest)
+
+# The SQL execution tool is part of the private core
+if(BUILD_PRIV_CODE)
+    add_subdirectory(src/sqlexecleaktest)
+endif()
 add_subdirectory(src/clitest)
