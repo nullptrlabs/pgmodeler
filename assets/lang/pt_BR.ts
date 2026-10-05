@@ -11056,6 +11056,25 @@ O tamanho solicitado %1 x %2 era muito grande e não havia memória suficiente p
     </message>
 </context>
 <context>
+    <name>PasswordInputWidget</name>
+    <message>
+        <source>pgModeler Password Input</source>
+        <translation>Entrada de senha do pgModeler</translation>
+    </message>
+    <message>
+        <source>output</source>
+        <translation>saída</translation>
+    </message>
+    <message>
+        <source>Confirm</source>
+        <translation>Confirmar</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Cancelar</translation>
+    </message>
+</context>
+<context>
     <name>PathSelectorWidget</name>
     <message>
         <source>Form</source>
