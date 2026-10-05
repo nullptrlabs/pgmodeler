@@ -1330,6 +1330,10 @@ Isso desabilitará o código de todos os objetos filhos e referenciadores.</tran
         <source>Updated</source>
         <translation>Atualizado</translation>
     </message>
+    <message>
+        <source>Changelog entries</source>
+        <translation>Entradas do registro de alterações</translation>
+    </message>
 </context>
 <context>
     <name>CodeCompletionWidget</name>
