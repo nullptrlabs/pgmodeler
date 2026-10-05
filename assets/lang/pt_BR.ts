@@ -12428,6 +12428,18 @@ disponíveis na GUI. Todas as opções disponíveis estão descritas abaixo.</tr
 <context>
     <name>PrivMainWindow</name>
     <message>
+        <source>Manage</source>
+        <translation>Gerenciar</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Importar</translation>
+    </message>
+    <message>
+        <source>Diff</source>
+        <translation>Comparar</translation>
+    </message>
+    <message>
         <source>Manage live databases</source>
         <translation>Gerenciar bancos de dados em operação</translation>
     </message>

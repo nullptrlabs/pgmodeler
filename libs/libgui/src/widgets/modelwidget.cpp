@@ -628,7 +628,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	addAction(act);
 	fade_in_all_menu.insertSeparator(act);
 	connect(act, &QAction::triggered, this, &ModelWidget::fadeObjectsIn);
-	fade_in_all_menu.menuAction()->setText("Fade in");
+	fade_in_all_menu.menuAction()->setText(tr("Fade in"));
 	fade_in_all_menu.menuAction()->setIcon(GuiUtilsNs::getIcon("fadein"));
 
 	act = fade_out_all_menu.addAction(tr("All objects"));
@@ -636,7 +636,7 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	addAction(act);
 	fade_out_all_menu.insertSeparator(act);
 	connect(act, &QAction::triggered, this, &ModelWidget::fadeObjectsOut);
-	fade_out_all_menu.menuAction()->setText("Fade out");
+	fade_out_all_menu.menuAction()->setText(tr("Fade out"));
 	fade_out_all_menu.menuAction()->setIcon(GuiUtilsNs::getIcon("fadeout"));
 
 	connect(action_send_to_back, &QAction::triggered, this, &ModelWidget::sendToBack);
