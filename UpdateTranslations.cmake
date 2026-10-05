@@ -14,8 +14,9 @@
 #   PGM_PRIV_PLUGINS_DIR             folder of the private plugins (optional in the source tree)
 #   PGM_TS_LANG                      list of language codes in the form xx or xx_XX (e.g. pt_BR, fr_FR);
 #                                    the code is also the base name of the .ts files:
-#   - the main dictionary is assets/lang/<lang>.ts and gathers the applications, the libraries and the
-#     private core code (if it exists);
+#   - the main dictionary is assets/lang/<lang>.ts and gathers the applications, the libraries, the
+#     private core code (if it exists) and the executables of the private plugins folder, i.e., the
+#     folders that are not plugins (like pgmodeler-pi), since they load the main dictionary;
 #   - each plugin in the private plugins folder (if it exists) has its own dictionary in
 #     <plugin>/lang/<lang>.ts and gathers the plugin's folder plus the src folder of the private plugins,
 #     which is compiled into every plugin.
@@ -44,8 +45,9 @@ get_filename_component(PGM_SOURCE_DIR "${PGM_SOURCE_DIR}" ABSOLUTE)
 # The texts marked with PGM_TR2 are recognized as an alias of QT_TRANSLATE_NOOP
 set(_ALIAS "QT_TRANSLATE_NOOP+=PGM_TR2")
 
-# Plugins that are not translated: the plugin template and any folder that is not a loadable plugin
-# (the ones that don't call pgm_install_plugin, e.g. the pgmodeler-pi executable, or have no CMakeLists.txt)
+# Folders of the private plugins that don't have a dictionary of their own: the plugin template and any
+# folder that is not a loadable plugin (the ones that don't call pgm_install_plugin, e.g. the pgmodeler-pi
+# executable, or have no CMakeLists.txt). The executables (pgm_add_executable) are part of the main dictionary
 set(_EXCLUDED_PLUGINS templateplugin)
 
 function(pgm_run_lupdate TS_FILE LOCATIONS LANG)
@@ -79,6 +81,25 @@ foreach(_LANG ${PGM_TS_LANG})
 
     if(EXISTS ${PGM_SOURCE_DIR}/${PGM_PRIV_CORE_DIR})
         list(APPEND _MAIN_DIRS ${PGM_PRIV_CORE_DIR})
+    endif()
+
+    # The executables in the private plugins folder load the main dictionary, so their texts are gathered in it
+    if(EXISTS ${PGM_SOURCE_DIR}/${PGM_PRIV_PLUGINS_DIR})
+        file(GLOB _PRIV_DIRS LIST_DIRECTORIES true RELATIVE ${PGM_SOURCE_DIR}/${PGM_PRIV_PLUGINS_DIR}
+             ${PGM_SOURCE_DIR}/${PGM_PRIV_PLUGINS_DIR}/*)
+        list(SORT _PRIV_DIRS)
+
+        foreach(_DIR ${_PRIV_DIRS})
+            set(_CMAKELISTS ${PGM_SOURCE_DIR}/${PGM_PRIV_PLUGINS_DIR}/${_DIR}/CMakeLists.txt)
+
+            if(NOT _DIR IN_LIST _EXCLUDED_PLUGINS AND EXISTS ${_CMAKELISTS})
+                file(READ ${_CMAKELISTS} _CONTENTS)
+
+                if(_CONTENTS MATCHES "pgm_add_executable\\(")
+                    list(APPEND _MAIN_DIRS ${PGM_PRIV_PLUGINS_DIR}/${_DIR})
+                endif()
+            endif()
+        endforeach()
     endif()
 
     # The file locations are omitted in the main dictionary because it lives in the public repository
