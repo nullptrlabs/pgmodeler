@@ -90,6 +90,8 @@ const QString GlobalAttributes::DbModelExt {".dbm"};
 const QString GlobalAttributes::DbModelBkpExt {".dbk"};
 const QString GlobalAttributes::ObjMetadataExt {".omf"};
 const QString GlobalAttributes::DirSeparator {"/"};
+const QString GlobalAttributes::UiLanguageParam {"ui-language"};
+const QString GlobalAttributes::OriginalUiLanguage {"en_US"};
 const QString GlobalAttributes::ResourcesDir {"res"};
 const QString GlobalAttributes::ConfigurationsDir {"conf"};
 const QString GlobalAttributes::DefaultConfsDir {"defaults"};

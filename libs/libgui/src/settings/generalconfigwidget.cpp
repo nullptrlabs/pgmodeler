@@ -140,6 +140,13 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 													 "*.qm", QDir::Name, QDir::AllEntries | QDir::NoDotAndDotDot).entryList();
 
 	langs.replaceInStrings(".qm", "");
+
+	/* English (US) is the language of the original texts of the UI, so it has no dictionary. It's always
+	 * available and, when selected, no translation is loaded (see Application::loadTranslation()), which is
+	 * different from "System default" that uses the dictionary of the system's language, if there is one */
+	langs.removeAll(GlobalAttributes::OriginalUiLanguage);
+	langs.prepend(GlobalAttributes::OriginalUiLanguage);
+
 	ui_language_cmb->addItem(tr("System default"));
 	QString native_lang;
 

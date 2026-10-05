@@ -61,7 +61,10 @@ Application::Application(int &argc, char **argv) : QApplication(argc,argv)
 
 void Application::loadTranslation(const QString &lang_id, const QString &directory)
 {
-	if(lang_id.isEmpty() || !QFileInfo::exists(directory + GlobalAttributes::DirSeparator + lang_id + ".qm"))
+	/* The original UI texts are in English (US), so no dictionary is loaded for it even if
+	 * there is a file with that name. This is how the user can force the original texts */
+	if(lang_id.isEmpty() || lang_id == GlobalAttributes::OriginalUiLanguage ||
+		 !QFileInfo::exists(GlobalAttributes::getPath(directory, lang_id + ".qm")))
 		return;
 
 	QTranslator *translator = new QTranslator(this);
@@ -121,6 +124,21 @@ void Application::loadCustomFonts(const QString &def_font, double def_size)
 		setProperty(UtilsNs::OrigFontProp, font());
 }
 
+QString Application::getUiLanguage()
+{
+	QString lang_id = GlobalAttributes::getConfigParamFromFile(GlobalAttributes::UiLanguageParam, GlobalAttributes::GeneralConf);
+
+	if(lang_id.isEmpty())
+		lang_id = QLocale::system().name();
+
+	return lang_id;
+}
+
+void Application::loadTranslations(bool incl_plugins_tr)
+{
+	loadTranslations(getUiLanguage(), incl_plugins_tr);
+}
+
 void Application::loadTranslations(const QString &lang_id, bool incl_plugins_tr)
 {
 	// Loading the main UI translations
@@ -129,24 +147,13 @@ void Application::loadTranslations(const QString &lang_id, bool incl_plugins_tr)
 	// Trying to load the plugins translations
 	if(incl_plugins_tr)
 	{
-		QStringList dir_list = QDir(GlobalAttributes::getPluginsPath() +
-																GlobalAttributes::DirSeparator,
+		QStringList dir_list = QDir(GlobalAttributes::getPluginsPath(),
 																"*", QDir::Name, QDir::AllDirs | QDir::NoDotAndDotDot).entryList();
 
-		QString plugin_name, plugin_lang_dir;
-
-		while(!dir_list.isEmpty())
+		for(auto &plugin_name : dir_list)
 		{
-			plugin_name = dir_list.front();
-			dir_list.pop_front();
-
-			//Configure the path to "lang" subdir at current plugin directory
-			plugin_lang_dir = GlobalAttributes::getPluginsPath() +
-											GlobalAttributes::DirSeparator + plugin_name +
-											GlobalAttributes::DirSeparator + "lang" +
-											GlobalAttributes::DirSeparator;
-
-			loadTranslation(lang_id, plugin_lang_dir);
+			//The dictionaries are in the "lang" subdir at current plugin directory
+			loadTranslation(lang_id, GlobalAttributes::getPath(GlobalAttributes::getPluginsPath(), plugin_name, "lang"));
 		}
 	}
 }

@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
 		GlobalAttributes::init(argv[0], false);
 		PgModelerCliApp pgmodeler_cli(argc, argv);
-		pgmodeler_cli.loadTranslations(QLocale::system().name(), true);
+		pgmodeler_cli.loadTranslations(true);
 
 		//Executes the cli
 		return pgmodeler_cli.exec();
