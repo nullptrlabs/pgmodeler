@@ -4466,9 +4466,15 @@ void ModelWidget::pasteObjects(bool duplicate_mode)
 						}
 						else
 						{
+							/* When duplicating and the name was not changed by the user, the object itself must be
+							 * considered in the name conflict check so the duplicate gets its final name right now.
+							 * Otherwise the XML of the duplicated table would have the original name and the XML of its
+							 * children would be pointing to the original table instead of the new one, which is only
+							 * renamed after being created */
 							object->setName(CoreUtilsNs::generateUniqueName(object,
 																															*db_model->getObjectList(object->getObjectType()),
-																															true, "_cp", true, discard_input_obj));
+																															true, "_cp", true,
+																															discard_input_obj && (!duplicate_mode || new_name != orig_names[object])));
 						}
 					}
 				}
