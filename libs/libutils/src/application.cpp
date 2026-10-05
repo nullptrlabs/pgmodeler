@@ -78,7 +78,7 @@ void Application::loadTranslation(const QString &lang_id, const QString &directo
 	/* Tries to load the ui translation according to the system's locale,
 	 * and in case of success install it in the application */
 	if(!translator->load(lang_id, directory) || !installTranslator(translator))
-		delete(translator);
+		delete translator;
 }
 
 void Application::loadCustomFonts(const QString &def_font_attr, const QString &def_size_attr)
