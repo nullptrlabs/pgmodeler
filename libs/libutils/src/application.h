@@ -55,7 +55,8 @@ class __libutils Application: public QApplication {
 		/*! \brief Loads the translation file by its id (e.g. pt_BR, en_US, etc) in the provided directory.
 		 * By default, the files are searched in the pgModeler's default lang files location.
 		 * In case of success installs a translator object in the application.
-		 * Nothing is loaded for GlobalAttributes::OriginalUiLanguage (en_US), the language of the original texts */
+		 * Nothing is loaded for GlobalAttributes::OriginalUiLanguage (en_US), the language of the original texts.
+		 * If there is no dictionary for the language with region (es_MX) the one of the language (es) is used */
 		void loadTranslation(const QString &lang_id, const QString &directory);
 
 		/*! \brief Loads the application's custom fonts (stored in .qrc file)
