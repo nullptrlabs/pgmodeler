@@ -54,7 +54,8 @@ class __libutils Application: public QApplication {
 
 		/*! \brief Loads the translation file by its id (e.g. pt_BR, en_US, etc) in the provided directory.
 		 * By default, the files are searched in the pgModeler's default lang files location.
-		 * In case of success installs a translator object in the application */
+		 * In case of success installs a translator object in the application.
+		 * Nothing is loaded for GlobalAttributes::OriginalUiLanguage (en_US), the language of the original texts */
 		void loadTranslation(const QString &lang_id, const QString &directory);
 
 		/*! \brief Loads the application's custom fonts (stored in .qrc file)
@@ -65,8 +66,16 @@ class __libutils Application: public QApplication {
 	public:
 		Application(int & argc, char ** argv);
 
+		/*! \brief Returns the id of the language (e.g. pt_BR) the UI must use. The main GUI executable (pgmodeler) rules
+		 * the language: the one configured in its general settings is returned and, when none is configured,
+		 * the system's language. All the other executables must use this so they follow the main one. */
+		static QString getUiLanguage();
+
 		//! \brief Loads both UI translations and addition translations provided by plugins (incl_plugins_tr = true)
 		void loadTranslations(const QString &lang_id, bool incl_plugins_tr);
+
+		//! \brief Same as above but using the language returned by getUiLanguage()
+		void loadTranslations(bool incl_plugins_tr);
 
 		void loadCustomFonts(const QString &def_font_attr, const QString &def_size_attr);
 
