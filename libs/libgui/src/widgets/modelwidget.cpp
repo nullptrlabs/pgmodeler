@@ -4641,6 +4641,12 @@ void ModelWidget::pasteObjects(bool duplicate_mode)
 						obj_added = true;
 					}
 
+					/* Constraints, triggers, indexes, rules, and policies are inserted in the parent
+					 * table by DatabaseModel::createXXX() itself, so they must not be deleted here.
+					 * The strict search compares pointers instead of names */
+					if(!obj_added && tab_obj->getParentTable())
+						obj_added = tab_obj->getParentTable()->getObjectIndex(tab_obj, true) >= 0;
+
 					//Updates the fk relationships if the constraint is a foreign-key
 					if(constr && constr->getConstraintType() == ConstraintType::ForeignKey)
 						db_model->updateTableFKRelationships(dynamic_cast<Table *>(tab_obj->getParentTable()));

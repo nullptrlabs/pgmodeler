@@ -23,6 +23,8 @@
 #include <QTimer>
 #include <QGraphicsSceneMouseEvent>
 #include "modelwidget.h"
+#include "generalconfigwidget.h"
+#include "objectrenamewidget.h"
 #include "crossscenerelswidget.h"
 #include "baseform.h"
 #include "databasemodel.h"
@@ -30,6 +32,10 @@
 #include "table.h"
 #include "column.h"
 #include "constraint.h"
+#include "trigger.h"
+#include "index.h"
+#include "function.h"
+#include "defaultlanguages.h"
 #include "relationship.h"
 #include "relationshipview.h"
 #include "textbox.h"
@@ -107,6 +113,9 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void cutoffRelationshipsWidgetListsAndRefreshesRelationships();
 		void crossSceneRelsWidgetIgnoresStaleRelationship();
 		void crossSceneRelsWidgetSurvivesItsTableBeingRemoved();
+		void duplicatingATableKeepsItsPastedChildrenOwnedByTheNewTable();
+		void duplicatingATableRegistersItsPastedChildrenOnTheOperationList();
+		void pastingTableChildrenOntoAnotherTableKeepsThem();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -3809,6 +3818,311 @@ void ModelWidgetTest::closingModelWidgetDestroysItsDatabaseModel()
 		delete removed_table;
 
 		QVERIFY2(destroyed, "deleting the model widget must destroy the database model it owns");
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Makes ModelWidget::pasteObjects() ask the user for a new name (through the
+ObjectRenameWidget dialog) for each pasted/duplicated object, which is what happens by default.
+In duplicate mode this is also what makes the pasted children refer to the new table. */
+static void askForNewNamesOnPaste()
+{
+	GeneralConfigWidget::appendConfigurationSection(Attributes::Configuration,
+																									 {{ Attributes::UseDefDisambiguation, Attributes::False }});
+}
+
+/*! \brief Plays the user on the modal dialogs shown while objects are pasted: appends "_dup" to
+the name proposed by the ObjectRenameWidget and applies it, accepting any other dialog as is. */
+static void startAnsweringPasteDialogs(QTimer &poll_timer)
+{
+	poll_timer.setInterval(20);
+
+	QObject::connect(&poll_timer, &QTimer::timeout, [](){
+		QDialog *dlg = qobject_cast<QDialog *>(qApp->activeModalWidget());
+		ObjectRenameWidget *rename_wgt = qobject_cast<ObjectRenameWidget *>(dlg);
+
+		if(rename_wgt)
+		{
+			rename_wgt->new_name_edt->setText(rename_wgt->new_name_edt->text() + "_dup");
+			rename_wgt->apply_btn->click();
+		}
+		else if(dlg)
+			dlg->accept();
+	});
+
+	poll_timer.start();
+}
+
+/*! \brief Builds, in the database model of model_wgt, a table that has a primary key, a
+foreign key (to a second table), an index and a trigger, i.e., every kind of table object that
+DatabaseModel::createXXX() inserts in the parent table on its own. Returns the table with the
+children and its referenced table through the out parameter. */
+static Table *createTableWithAllChildren(DatabaseModel *db_model, const QString &name, Table *&ref_table)
+{
+	Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+
+	ref_table = new Table;
+	ref_table->setName(name + "_ref");
+	ref_table->setSchema(schema_pub);
+
+	Column *col = new Column;
+	col->setName("id");
+	col->setType(PgSqlType("serial"));
+	ref_table->addColumn(col);
+
+	Constraint *constr = new Constraint;
+	constr->setName(name + "_ref_pk");
+	constr->setConstraintType(ConstraintType::PrimaryKey);
+	constr->addColumn(ref_table->getColumn("id"), Constraint::SourceCols);
+	ref_table->addConstraint(constr);
+
+	Table *table = new Table;
+	table->setName(name);
+	table->setSchema(schema_pub);
+
+	col = new Column;
+	col->setName("id");
+	col->setType(PgSqlType("serial"));
+	table->addColumn(col);
+
+	col = new Column;
+	col->setName("ref_id");
+	col->setType(PgSqlType("integer"));
+	table->addColumn(col);
+
+	constr = new Constraint;
+	constr->setName(name + "_pk");
+	constr->setConstraintType(ConstraintType::PrimaryKey);
+	constr->addColumn(table->getColumn("id"), Constraint::SourceCols);
+	table->addConstraint(constr);
+
+	constr = new Constraint;
+	constr->setName(name + "_fk");
+	constr->setConstraintType(ConstraintType::ForeignKey);
+	constr->addColumn(table->getColumn("ref_id"), Constraint::SourceCols);
+	constr->addColumn(ref_table->getColumn("id"), Constraint::ReferencedCols);
+	constr->setReferencedTable(ref_table);
+	table->addConstraint(constr);
+
+	Index *idx = new Index;
+	idx->setName(name + "_idx");
+	idx->addIndexElement(table->getColumn("ref_id"), nullptr, nullptr, false, true, false);
+	table->addObject(idx);
+
+	Function *func = db_model->getObject(name + "_trg_func()", ObjectType::Function) ?
+									 dynamic_cast<Function *>(db_model->getObject(name + "_trg_func()", ObjectType::Function)) : nullptr;
+
+	if(!func)
+	{
+		func = new Function;
+		func->setName(name + "_trg_func");
+		func->setSchema(schema_pub);
+		func->setLanguage(db_model->getObject(DefaultLanguages::PlPgsql, ObjectType::Language));
+		func->setReturnType(PgSqlType("trigger"));
+		func->setFunctionSource("BEGIN RETURN NEW; END;");
+		db_model->addFunction(func);
+	}
+
+	Trigger *trigger = new Trigger;
+	trigger->setName(name + "_trg");
+	trigger->setFunction(func);
+	trigger->setEvent(EventType::OnInsert, true);
+	trigger->setExecutePerRow(true);
+	table->addObject(trigger);
+
+	db_model->addTable(ref_table);
+	db_model->addTable(table);
+
+	return table;
+}
+
+/*! \brief The table objects pasted from XML (constraints, triggers, indexes, rules, and
+policies) are already inserted in the parent table by DatabaseModel::createXXX(). ModelWidget::
+pasteObjects() used to delete them anyway (heap-use-after-free: the table kept dangling
+pointers, which setCodeInvalidated() read as soon as another object was added to the table).
+Duplicating a table is the real-world scenario that triggers it; this test fails under ASAN
+if the bug comes back. */
+void ModelWidgetTest::duplicatingATableKeepsItsPastedChildrenOwnedByTheNewTable()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+		Table *ref_table = nullptr;
+
+		askForNewNamesOnPaste();
+		db_model->createSystemObjects(true);
+		Table *table = createTableWithAllChildren(db_model, "table_a", ref_table);
+
+		QCOMPARE(db_model->getObjectList(ObjectType::Table)->size(), static_cast<size_t>(2));
+
+		//Auto-accepts the dialogs shown while the table is being duplicated (e.g. object renaming)
+		QTimer poll_timer;
+
+		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+															 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(table)));
+
+		startAnsweringPasteDialogs(poll_timer);
+		QMetaObject::invokeMethod(&model_wgt, "duplicateObject", Qt::DirectConnection);
+		poll_timer.stop();
+
+		QCOMPARE(db_model->getObjectList(ObjectType::Table)->size(), static_cast<size_t>(3));
+
+		Table *dup_table = nullptr;
+
+		for(auto &obj : *db_model->getObjectList(ObjectType::Table))
+		{
+			if(obj != table && obj != ref_table)
+				dup_table = dynamic_cast<Table *>(obj);
+		}
+
+		QVERIFY2(dup_table != nullptr, "the duplicated table must exist in the model");
+
+		//The names typed by the user are used as they are (no suffix is appended to them)
+		QCOMPARE(dup_table->getName(), QString("table_a_dup"));
+		QVERIFY(dup_table->getObject("table_a_trg_dup", ObjectType::Trigger) != nullptr);
+		QVERIFY(dup_table->getObject("table_a_idx_dup", ObjectType::Index) != nullptr);
+
+		for(auto type : { ObjectType::Constraint, ObjectType::Trigger, ObjectType::Index })
+		{
+			for(auto &tab_obj : *dup_table->getObjectList(type))
+			{
+				QVERIFY2(tab_obj->getParentTable() == dup_table,
+								 qPrintable(QString("%1 `%2' must belong to the duplicated table").arg(tab_obj->getTypeName(), tab_obj->getName())));
+
+				//Strict search: pointer identity, not names
+				QVERIFY2(dup_table->getObjectIndex(tab_obj, true) >= 0,
+								 qPrintable(QString("%1 `%2' must be reachable through the duplicated table").arg(tab_obj->getTypeName(), tab_obj->getName())));
+			}
+		}
+
+		//PK (from the table's own XML) + FK
+		QCOMPARE(dup_table->getObjectList(ObjectType::Constraint)->size(), static_cast<size_t>(2));
+		QCOMPARE(dup_table->getObjectList(ObjectType::Trigger)->size(), static_cast<size_t>(1));
+		QCOMPARE(dup_table->getObjectList(ObjectType::Index)->size(), static_cast<size_t>(1));
+
+		/* Walks over every child of the duplicated table. With the bug, this read the freed
+		 * trigger/index/foreign key (ASAN heap-use-after-free) */
+		dup_table->setCodeInvalidated(true);
+		dup_table->getSourceCode(SchemaParser::SqlCode);
+		dup_table->getSourceCode(SchemaParser::XmlCode);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief The objects created from the pasted XML must also be registered on the operation
+list (so the paste can be undone). Before the fix they were deleted instead, so no operation
+was registered for the triggers, indexes and foreign keys. */
+void ModelWidgetTest::duplicatingATableRegistersItsPastedChildrenOnTheOperationList()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+		OperationList *op_list = model_wgt.getOperationList();
+		Table *ref_table = nullptr;
+
+		askForNewNamesOnPaste();
+		db_model->createSystemObjects(true);
+		Table *table = createTableWithAllChildren(db_model, "table_a", ref_table);
+
+		op_list->removeOperations();
+
+		QTimer poll_timer;
+
+		QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+															 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(table)));
+
+		startAnsweringPasteDialogs(poll_timer);
+		QMetaObject::invokeMethod(&model_wgt, "duplicateObject", Qt::DirectConnection);
+		poll_timer.stop();
+
+		/* The table itself plus its trigger, index, and foreign key (the primary key
+		 * is created along with the table) */
+		QVERIFY2(op_list->getCurrentSize() >= 4,
+						 qPrintable(QString("expected at least 4 registered operations but got %1").arg(op_list->getCurrentSize())));
+
+		QVERIFY(op_list->isUndoAvailable());
+		op_list->undoOperation();
+
+		QCOMPARE(db_model->getObjectList(ObjectType::Table)->size(), static_cast<size_t>(2));
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Copying table objects and pasting them over another table follows the same code path
+(createXXX() inserts the pasted object in the receiver table) and used to leave the receiver with
+dangling pointers too. */
+void ModelWidgetTest::pastingTableChildrenOntoAnotherTableKeepsThem()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+		Table *ref_table = nullptr;
+
+		askForNewNamesOnPaste();
+		db_model->createSystemObjects(true);
+		Table *src_table = createTableWithAllChildren(db_model, "table_src", ref_table);
+
+		Schema *schema_pub = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		Table *dst_table = new Table;
+		dst_table->setName("table_dst");
+		dst_table->setSchema(schema_pub);
+
+		for(auto &col_name : { "id", "ref_id" })
+		{
+			Column *col = new Column;
+			col->setName(col_name);
+			col->setType(PgSqlType(QString(col_name) == "id" ? "serial" : "integer"));
+			dst_table->addColumn(col);
+		}
+
+		db_model->addTable(dst_table);
+
+		QTimer poll_timer;
+
+		startAnsweringPasteDialogs(poll_timer);
+
+		for(auto type : { ObjectType::Trigger, ObjectType::Index })
+		{
+			BaseObject *tab_obj = src_table->getObjectList(type)->front();
+
+			QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+																 Q_ARG(BaseObject *, tab_obj));
+			QMetaObject::invokeMethod(&model_wgt, "copyObjects", Qt::DirectConnection,
+																 Q_ARG(bool, false), Q_ARG(bool, false));
+
+			QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+																 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(dst_table)));
+			QMetaObject::invokeMethod(&model_wgt, "pasteObjects", Qt::DirectConnection, Q_ARG(bool, false));
+		}
+
+		poll_timer.stop();
+
+		QCOMPARE(dst_table->getObjectList(ObjectType::Trigger)->size(), static_cast<size_t>(1));
+		QCOMPARE(dst_table->getObjectList(ObjectType::Index)->size(), static_cast<size_t>(1));
+
+		for(auto type : { ObjectType::Trigger, ObjectType::Index })
+		{
+			TableObject *pasted = dst_table->getObjectList(type)->front();
+
+			QVERIFY(pasted->getParentTable() == dst_table);
+			QVERIFY(dst_table->getObjectIndex(pasted, true) >= 0);
+		}
+
+		//Reads every child of the receiver table (ASAN reports it if any of them was freed)
+		dst_table->setCodeInvalidated(true);
+		dst_table->getSourceCode(SchemaParser::SqlCode);
 	}
 	catch(Exception &e)
 	{
