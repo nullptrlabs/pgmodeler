@@ -63,8 +63,14 @@ void Application::loadTranslation(const QString &lang_id, const QString &directo
 {
 	/* The original UI texts are in English (US), so no dictionary is loaded for it even if
 	 * there is a file with that name. This is how the user can force the original texts */
-	if(lang_id.isEmpty() || lang_id == GlobalAttributes::OriginalUiLanguage ||
-		 !QFileInfo::exists(GlobalAttributes::getPath(directory, lang_id + ".qm")))
+	if(lang_id.isEmpty() || lang_id == GlobalAttributes::OriginalUiLanguage)
+		return;
+
+	/* The dictionary can be specific to a region (e.g. pt_BR) or generic to the language (e.g. es), so a language
+	 * with a region that has no dictionary of its own (e.g. es_MX) uses the generic one (es). The fallback itself
+	 * is done by QTranslator::load() below, here we only check if there is a file to be loaded. */
+	if(!QFileInfo::exists(GlobalAttributes::getPath(directory, lang_id + ".qm")) &&
+		 !QFileInfo::exists(GlobalAttributes::getPath(directory, lang_id.section('_', 0, 0) + ".qm")))
 		return;
 
 	QTranslator *translator = new QTranslator(this);
