@@ -116,6 +116,9 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void duplicatingATableKeepsItsPastedChildrenOwnedByTheNewTable();
 		void duplicatingATableRegistersItsPastedChildrenOnTheOperationList();
 		void pastingTableChildrenOntoAnotherTableKeepsThem();
+		void duplicatingATableWithDefaultNameDisambiguationCopiesAllItsChildren();
+		void duplicatingTheSameTableTwiceWithDefaultNameDisambiguation();
+		void duplicatingNonTableObjectsStillGetsAUniqueName();
 };
 
 void ModelWidgetTest::schemaAndItsTablesShareTheSameScene()
@@ -3834,6 +3837,15 @@ static void askForNewNamesOnPaste()
 																									 {{ Attributes::UseDefDisambiguation, Attributes::False }});
 }
 
+/*! \brief Makes ModelWidget::pasteObjects() use the default disambiguation convention for
+duplicated names (the "Ignore" option of the ObjectRenameWidget dialog) instead of asking the
+user for a new name. No dialog is shown in this mode. */
+static void useDefaultNameDisambiguation()
+{
+	GeneralConfigWidget::appendConfigurationSection(Attributes::Configuration,
+																									 {{ Attributes::UseDefDisambiguation, Attributes::True }});
+}
+
 /*! \brief Plays the user on the modal dialogs shown while objects are pasted: appends "_dup" to
 the name proposed by the ObjectRenameWidget and applies it, accepting any other dialog as is. */
 static void startAnsweringPasteDialogs(QTimer &poll_timer)
@@ -4123,6 +4135,168 @@ void ModelWidgetTest::pastingTableChildrenOntoAnotherTableKeepsThem()
 		//Reads every child of the receiver table (ASAN reports it if any of them was freed)
 		dst_table->setCodeInvalidated(true);
 		dst_table->getSourceCode(SchemaParser::SqlCode);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Selects the table in model_wgt and duplicates it through the real "Duplicate" action
+code path, returning the table that was added to the model (nullptr if there is none). */
+static Table *duplicateTable(ModelWidget &model_wgt, Table *table)
+{
+	DatabaseModel *db_model = model_wgt.getDatabaseModel();
+	std::vector<BaseObject *> prev_tables = *db_model->getObjectList(ObjectType::Table);
+	Table *dup_table = nullptr;
+
+	QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+														 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(table)));
+	QMetaObject::invokeMethod(&model_wgt, "duplicateObject", Qt::DirectConnection);
+
+	for(auto &obj : *db_model->getObjectList(ObjectType::Table))
+	{
+		if(std::find(prev_tables.begin(), prev_tables.end(), obj) == prev_tables.end())
+			dup_table = dynamic_cast<Table *>(obj);
+	}
+
+	return dup_table;
+}
+
+/*! \brief Checks that the table has exactly the objects createTableWithAllChildren() creates
+(PK + FK, one index, and one trigger), all of them owned by it. */
+static void verifyTableHasAllChildren(Table *tab)
+{
+	QCOMPARE(tab->getObjectList(ObjectType::Constraint)->size(), static_cast<size_t>(2));
+	QCOMPARE(tab->getObjectList(ObjectType::Trigger)->size(), static_cast<size_t>(1));
+	QCOMPARE(tab->getObjectList(ObjectType::Index)->size(), static_cast<size_t>(1));
+
+	for(auto type : { ObjectType::Constraint, ObjectType::Trigger, ObjectType::Index })
+	{
+		for(auto &tab_obj : *tab->getObjectList(type))
+		{
+			QVERIFY2(tab_obj->getParentTable() == tab && tab->getObjectIndex(tab_obj, true) >= 0,
+							 qPrintable(QString("%1 `%2' must be owned by table `%3'").arg(tab_obj->getTypeName(), tab_obj->getName(), tab->getName())));
+		}
+	}
+}
+
+/*! \brief With the default name disambiguation (no dialog, i.e., the user doesn't type new names)
+the duplicated table must be just as complete as with the manual one. It used to come out with only
+columns and primary key: the XML of the children referred to the original table's name, because the
+duplicate was only renamed after being created, so they were silently rejected as duplicates of the
+original table's own objects. */
+void ModelWidgetTest::duplicatingATableWithDefaultNameDisambiguationCopiesAllItsChildren()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+		Table *ref_table = nullptr;
+
+		useDefaultNameDisambiguation();
+		db_model->createSystemObjects(true);
+		Table *table = createTableWithAllChildren(db_model, "table_a", ref_table);
+
+		QTimer poll_timer;
+		startAnsweringPasteDialogs(poll_timer);
+		Table *dup_table = duplicateTable(model_wgt, table);
+		poll_timer.stop();
+
+		QVERIFY2(dup_table != nullptr, "the duplicated table must exist in the model");
+		QCOMPARE(dup_table->getName(), QString("table_a_cp"));
+		QCOMPARE(table->getName(), QString("table_a"));
+
+		//The original is untouched and the duplicate is complete
+		verifyTableHasAllChildren(table);
+		verifyTableHasAllChildren(dup_table);
+
+		QVERIFY(dup_table->getObject("table_a_pk", ObjectType::Constraint) != nullptr);
+		QVERIFY(dup_table->getObject("table_a_fk", ObjectType::Constraint) != nullptr);
+		QVERIFY(dup_table->getObject("table_a_idx", ObjectType::Index) != nullptr);
+		QVERIFY(dup_table->getObject("table_a_trg", ObjectType::Trigger) != nullptr);
+
+		dup_table->setCodeInvalidated(true);
+		dup_table->getSourceCode(SchemaParser::SqlCode);
+		dup_table->getSourceCode(SchemaParser::XmlCode);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Each duplication must get its own unique name and own its children; the second
+one must not stack its children on the first duplicate or on the original. */
+void ModelWidgetTest::duplicatingTheSameTableTwiceWithDefaultNameDisambiguation()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+		Table *ref_table = nullptr;
+
+		useDefaultNameDisambiguation();
+		db_model->createSystemObjects(true);
+		Table *table = createTableWithAllChildren(db_model, "table_a", ref_table);
+
+		QTimer poll_timer;
+		startAnsweringPasteDialogs(poll_timer);
+		Table *dup_1 = duplicateTable(model_wgt, table);
+		Table *dup_2 = duplicateTable(model_wgt, table);
+		poll_timer.stop();
+
+		QVERIFY(dup_1 != nullptr && dup_2 != nullptr);
+		QVERIFY(dup_1 != dup_2);
+		QVERIFY2(dup_1->getName() != dup_2->getName(), "each duplicate must have its own name");
+
+		verifyTableHasAllChildren(table);
+		verifyTableHasAllChildren(dup_1);
+		verifyTableHasAllChildren(dup_2);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Objects without children (a schema here) must keep getting their own unique name when
+duplicated, with the default disambiguation as well as with the manual one. */
+void ModelWidgetTest::duplicatingNonTableObjectsStillGetsAUniqueName()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->createSystemObjects(true);
+
+		Schema *schema = new Schema;
+		schema->setName("schema_x");
+		db_model->addSchema(schema);
+
+		QTimer poll_timer;
+
+		for(bool use_defaults : { true, false })
+		{
+			if(use_defaults)
+				useDefaultNameDisambiguation();
+			else
+				askForNewNamesOnPaste();
+
+			startAnsweringPasteDialogs(poll_timer);
+
+			QMetaObject::invokeMethod(&model_wgt, "configurePopupMenu", Qt::DirectConnection,
+																 Q_ARG(BaseObject *, dynamic_cast<BaseObject *>(schema)));
+			QMetaObject::invokeMethod(&model_wgt, "duplicateObject", Qt::DirectConnection);
+			poll_timer.stop();
+			poll_timer.disconnect();
+		}
+
+		//schema_x_cp (default) and schema_x_dup (typed name, in manual mode); the original is kept
+		QVERIFY(db_model->getObject("schema_x", ObjectType::Schema) == schema);
+		QVERIFY(db_model->getObject("schema_x_cp", ObjectType::Schema) != nullptr);
+		QVERIFY(db_model->getObject("schema_x_dup", ObjectType::Schema) != nullptr);
 	}
 	catch(Exception &e)
 	{
