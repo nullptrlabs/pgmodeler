@@ -5556,8 +5556,8 @@ Tietokannan hallintajärjestelmän palauttama viesti: `%1&apos;</translation>
         <translation>Käyttöliittymän kieli</translation>
     </message>
     <message>
-        <source>Overrides the default user interface language defined by the system. Requires restarting the program. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are third party collaborations thus any typo or mistake should be reported directly to their respective maintainers.</source>
-        <translation>Ohittaa järjestelmän määrittämän oletuskielen käyttöliittymälle. Vaatii ohjelman uudelleenkäynnistyksen. &lt;strong&gt;HUOMAA:&lt;/strong&gt; käyttöliittymän käännökset ovat kolmansien osapuolten tekemiä, joten kirjoitusvirheistä ja muista virheistä tulee ilmoittaa suoraan niiden ylläpitäjille.</translation>
+        <source>Overrides the default user interface language defined by the system. Requires restarting the application. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are AI-generated and have not yet been revised by a human, so typos or mistakes can be reported through the project&apos;s support channels.</source>
+        <translation>Ohittaa järjestelmän määrittämän oletuskielen käyttöliittymälle. Vaatii sovelluksen uudelleenkäynnistyksen. &lt;strong&gt;HUOMAA:&lt;/strong&gt; käyttöliittymän käännökset on tuottanut tekoäly, eikä ihminen ole vielä tarkistanut niitä, joten kirjoitusvirheistä ja muista virheistä voi ilmoittaa projektin tukikanavien kautta.</translation>
     </message>
     <message>
         <source>Save dialog sizes</source>

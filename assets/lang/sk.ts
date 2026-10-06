@@ -5556,8 +5556,8 @@ Správa vrátená DBMS: `%1&apos;</translation>
         <translation>Jazyk rozhrania</translation>
     </message>
     <message>
-        <source>Overrides the default user interface language defined by the system. Requires restarting the program. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are third party collaborations thus any typo or mistake should be reported directly to their respective maintainers.</source>
-        <translation>Prepíše predvolený jazyk používateľského rozhrania definovaný systémom. Vyžaduje reštart programu. &lt;strong&gt;POZNÁMKA:&lt;/strong&gt; preklady rozhrania sú príspevky tretích strán, preto je potrebné prípadné preklepy a chyby hlásiť priamo ich príslušným správcom.</translation>
+        <source>Overrides the default user interface language defined by the system. Requires restarting the application. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are AI-generated and have not yet been revised by a human, so typos or mistakes can be reported through the project&apos;s support channels.</source>
+        <translation>Prepíše predvolený jazyk používateľského rozhrania definovaný systémom. Vyžaduje reštart aplikácie. &lt;strong&gt;POZNÁMKA:&lt;/strong&gt; preklady rozhrania sú generované AI a zatiaľ ich nekontroloval človek, preto možno preklepy a chyby hlásiť prostredníctvom podporných kanálov projektu.</translation>
     </message>
     <message>
         <source>Save dialog sizes</source>

@@ -5556,8 +5556,8 @@ Meddelande som returnerats av DBMS:en: `%1&apos;</translation>
         <translation>Gränssnittsspråk</translation>
     </message>
     <message>
-        <source>Overrides the default user interface language defined by the system. Requires restarting the program. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are third party collaborations thus any typo or mistake should be reported directly to their respective maintainers.</source>
-        <translation>Åsidosätter det standardspråk för användargränssnittet som systemet har definierat. Kräver att programmet startas om. &lt;strong&gt;OBS!&lt;/strong&gt; översättningarna av gränssnittet är bidrag från tredje part, så eventuella stavfel eller fel bör rapporteras direkt till respektive underhållare.</translation>
+        <source>Overrides the default user interface language defined by the system. Requires restarting the application. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are AI-generated and have not yet been revised by a human, so typos or mistakes can be reported through the project&apos;s support channels.</source>
+        <translation>Åsidosätter det standardspråk för användargränssnittet som systemet har definierat. Kräver att programmet startas om. &lt;strong&gt;OBS!&lt;/strong&gt; översättningarna av gränssnittet är genererade av AI och har ännu inte granskats av en människa, så stavfel eller fel kan rapporteras via projektets supportkanaler.</translation>
     </message>
     <message>
         <source>Save dialog sizes</source>

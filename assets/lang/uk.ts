@@ -5556,8 +5556,8 @@ Message returned by the DBMS: `%1&apos;</source>
         <translation>Мова інтерфейсу</translation>
     </message>
     <message>
-        <source>Overrides the default user interface language defined by the system. Requires restarting the program. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are third party collaborations thus any typo or mistake should be reported directly to their respective maintainers.</source>
-        <translation>Перевизначає мову інтерфейсу користувача, задану системою. Потрібен перезапуск програми. &lt;strong&gt;ПРИМІТКА:&lt;/strong&gt; переклади інтерфейсу виконані сторонніми учасниками, тому про будь-які описки та помилки слід повідомляти безпосередньо їхнім супровідникам.</translation>
+        <source>Overrides the default user interface language defined by the system. Requires restarting the application. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are AI-generated and have not yet been revised by a human, so typos or mistakes can be reported through the project&apos;s support channels.</source>
+        <translation>Перевизначає мову інтерфейсу користувача, задану системою. Потрібен перезапуск застосунку. &lt;strong&gt;ПРИМІТКА:&lt;/strong&gt; переклади інтерфейсу згенеровано ШІ, і їх ще не перевірила людина, тому про описки та помилки можна повідомляти через канали підтримки проєкту.</translation>
     </message>
     <message>
         <source>Save dialog sizes</source>
