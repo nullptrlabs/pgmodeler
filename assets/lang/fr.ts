@@ -5556,8 +5556,8 @@ Message renvoyé par le SGBD : `%1&apos;</translation>
         <translation>Langue de l&apos;interface</translation>
     </message>
     <message>
-        <source>Overrides the default user interface language defined by the system. Requires restarting the program. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are third party collaborations thus any typo or mistake should be reported directly to their respective maintainers.</source>
-        <translation>Remplace la langue de l&apos;interface définie par le système. Nécessite de redémarrer le programme. &lt;strong&gt;REMARQUE :&lt;/strong&gt; les traductions de l&apos;interface sont des contributions de tiers ; toute coquille ou erreur doit donc être signalée directement à leurs mainteneurs respectifs.</translation>
+        <source>Overrides the default user interface language defined by the system. Requires restarting the application. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are AI-generated and have not yet been revised by a human, so typos or mistakes can be reported through the project&apos;s support channels.</source>
+        <translation>Remplace la langue de l&apos;interface définie par le système. Nécessite de redémarrer l&apos;application. &lt;strong&gt;REMARQUE :&lt;/strong&gt; les traductions de l&apos;interface sont générées par IA et n&apos;ont pas encore été relues par un humain ; les coquilles ou erreurs peuvent donc être signalées via les canaux d&apos;assistance du projet.</translation>
     </message>
     <message>
         <source>Save dialog sizes</source>

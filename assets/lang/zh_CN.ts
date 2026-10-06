@@ -5556,8 +5556,8 @@ DBMS 返回的消息：`%1&apos;</translation>
         <translation>界面语言</translation>
     </message>
     <message>
-        <source>Overrides the default user interface language defined by the system. Requires restarting the program. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are third party collaborations thus any typo or mistake should be reported directly to their respective maintainers.</source>
-        <translation>覆盖系统定义的默认用户界面语言。需要重新启动程序。&lt;strong&gt;注意：&lt;/strong&gt;界面翻译由第三方协作提供，因此任何拼写错误或其他错误都应直接报告给各自的维护者。</translation>
+        <source>Overrides the default user interface language defined by the system. Requires restarting the application. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are AI-generated and have not yet been revised by a human, so typos or mistakes can be reported through the project&apos;s support channels.</source>
+        <translation>覆盖系统定义的默认用户界面语言。需要重新启动应用程序。&lt;strong&gt;注意：&lt;/strong&gt;界面翻译由 AI 生成，尚未经过人工审校，因此如发现拼写错误或其他错误，可通过项目的支持渠道反馈。</translation>
     </message>
     <message>
         <source>Save dialog sizes</source>

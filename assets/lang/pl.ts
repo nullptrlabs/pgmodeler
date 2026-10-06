@@ -5556,8 +5556,8 @@ Komunikat zwrócony przez SZBD: `%1&apos;</translation>
         <translation>Język interfejsu</translation>
     </message>
     <message>
-        <source>Overrides the default user interface language defined by the system. Requires restarting the program. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are third party collaborations thus any typo or mistake should be reported directly to their respective maintainers.</source>
-        <translation>Zastępuje domyślny język interfejsu użytkownika zdefiniowany przez system. Wymaga ponownego uruchomienia programu. &lt;strong&gt;UWAGA:&lt;/strong&gt; tłumaczenia interfejsu są dziełem osób trzecich, dlatego wszelkie literówki i błędy należy zgłaszać bezpośrednio ich opiekunom.</translation>
+        <source>Overrides the default user interface language defined by the system. Requires restarting the application. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are AI-generated and have not yet been revised by a human, so typos or mistakes can be reported through the project&apos;s support channels.</source>
+        <translation>Zastępuje domyślny język interfejsu użytkownika zdefiniowany przez system. Wymaga ponownego uruchomienia aplikacji. &lt;strong&gt;UWAGA:&lt;/strong&gt; tłumaczenia interfejsu zostały wygenerowane przez AI i nie zostały jeszcze sprawdzone przez człowieka, dlatego literówki i błędy można zgłaszać przez kanały wsparcia projektu.</translation>
     </message>
     <message>
         <source>Save dialog sizes</source>

@@ -5556,8 +5556,8 @@ DBMS가 반환한 메시지: `%1&apos;</translation>
         <translation>인터페이스 언어</translation>
     </message>
     <message>
-        <source>Overrides the default user interface language defined by the system. Requires restarting the program. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are third party collaborations thus any typo or mistake should be reported directly to their respective maintainers.</source>
-        <translation>시스템에서 정의한 기본 사용자 인터페이스 언어를 대체합니다. 프로그램을 다시 시작해야 합니다. &lt;strong&gt;참고:&lt;/strong&gt; UI 번역은 제3자의 기여이므로 오타나 오류는 해당 관리자에게 직접 알려 주십시오.</translation>
+        <source>Overrides the default user interface language defined by the system. Requires restarting the application. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are AI-generated and have not yet been revised by a human, so typos or mistakes can be reported through the project&apos;s support channels.</source>
+        <translation>시스템에서 정의한 기본 사용자 인터페이스 언어를 대체합니다. 애플리케이션을 다시 시작해야 합니다. &lt;strong&gt;참고:&lt;/strong&gt; UI 번역은 AI가 생성했으며 아직 사람이 검토하지 않았으므로 오타나 오류는 프로젝트 지원 채널을 통해 알려 주십시오.</translation>
     </message>
     <message>
         <source>Save dialog sizes</source>

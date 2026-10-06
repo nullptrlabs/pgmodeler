@@ -5556,8 +5556,8 @@ Door het DBMS geretourneerd bericht: `%1&apos;</translation>
         <translation>Interfacetaal</translation>
     </message>
     <message>
-        <source>Overrides the default user interface language defined by the system. Requires restarting the program. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are third party collaborations thus any typo or mistake should be reported directly to their respective maintainers.</source>
-        <translation>Overschrijft de door het systeem gedefinieerde taal van de gebruikersinterface. Vereist een herstart van het programma. &lt;strong&gt;OPMERKING:&lt;/strong&gt; de vertalingen van de interface zijn bijdragen van derden; typefouten of fouten moeten daarom rechtstreeks aan de betreffende beheerders worden gemeld.</translation>
+        <source>Overrides the default user interface language defined by the system. Requires restarting the application. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are AI-generated and have not yet been revised by a human, so typos or mistakes can be reported through the project&apos;s support channels.</source>
+        <translation>Overschrijft de door het systeem gedefinieerde taal van de gebruikersinterface. Vereist een herstart van de toepassing. &lt;strong&gt;OPMERKING:&lt;/strong&gt; de vertalingen van de interface zijn door AI gegenereerd en nog niet door een mens nagekeken; typefouten of fouten kunnen daarom via de ondersteuningskanalen van het project worden gemeld.</translation>
     </message>
     <message>
         <source>Save dialog sizes</source>

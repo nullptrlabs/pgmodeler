@@ -5556,8 +5556,8 @@ Vom DBMS zurückgegebene Meldung: `%1&apos;</translation>
         <translation>Oberflächensprache</translation>
     </message>
     <message>
-        <source>Overrides the default user interface language defined by the system. Requires restarting the program. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are third party collaborations thus any typo or mistake should be reported directly to their respective maintainers.</source>
-        <translation>Überschreibt die vom System vorgegebene Sprache der Benutzeroberfläche. Erfordert einen Neustart des Programms. &lt;strong&gt;HINWEIS:&lt;/strong&gt; Die Übersetzungen der Oberfläche stammen von Dritten; Tippfehler oder Fehler sollten daher direkt den jeweiligen Betreuern gemeldet werden.</translation>
+        <source>Overrides the default user interface language defined by the system. Requires restarting the application. &lt;strong&gt;NOTE:&lt;/strong&gt; UI translations are AI-generated and have not yet been revised by a human, so typos or mistakes can be reported through the project&apos;s support channels.</source>
+        <translation>Überschreibt die vom System vorgegebene Sprache der Benutzeroberfläche. Erfordert einen Neustart der Anwendung. &lt;strong&gt;HINWEIS:&lt;/strong&gt; Die Übersetzungen der Oberfläche wurden von einer KI erstellt und noch nicht von einem Menschen überprüft; Tippfehler oder Fehler können daher über die Support-Kanäle des Projekts gemeldet werden.</translation>
     </message>
     <message>
         <source>Save dialog sizes</source>
