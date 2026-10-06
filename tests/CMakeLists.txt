@@ -40,9 +40,9 @@ add_subdirectory(src/csvparsertest)
 add_subdirectory(src/modelwidgettest)
 add_subdirectory(src/messageboxtest)
 add_subdirectory(src/uilanguagetest)
+add_subdirectory(src/clitest)
 
-# The SQL execution tool is part of the private core
-if(BUILD_PRIV_CODE)
+# The SQL execution tool is part of the private core. Its leak checks need the LeakSanitizer runtime (USE_ADDR_SANITIZER)
+if(BUILD_PRIV_CODE AND USE_ADDR_SANITIZER)
     add_subdirectory(src/sqlexecleaktest)
 endif()
-add_subdirectory(src/clitest)
