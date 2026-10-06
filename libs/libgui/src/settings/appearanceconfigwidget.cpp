@@ -133,7 +133,9 @@ AppearanceConfigWidget::AppearanceConfigWidget(QWidget *parent) : BaseConfigWidg
 			/* 61 */ Attributes::ForeignTableExtBody,
 			/* 62 */ Attributes::ForeignTableTitle,
 			/* 63 */ Attributes::ForeignTableTogglerButtons,
-			/* 64 */ Attributes::ForeignTableTogglerBody };
+			/* 64 */ Attributes::ForeignTableTogglerBody,
+			/* 65 */ Attributes::CutoffMarker,
+			/* 66 */ Attributes::CutoffMarker };
 
 	int i = 0, count = element_cmb->count();
 
@@ -141,7 +143,7 @@ AppearanceConfigWidget::AppearanceConfigWidget(QWidget *parent) : BaseConfigWidg
 	std::vector<int> obj_conf_ids { 2, 3, 5, 7, 8, 11, 12, 13, 14, 15,
 																	17, 19, 21, 23, 25, 28, 29, 30,
 																	34, 35, 36, 37, 39, 43, 45, 47, 49,
-																	50, 52, 54, 56, 57, 60, 61, 62, 63, 64 };
+																	50, 52, 54, 56, 57, 60, 61, 62, 63, 64, 66 };
 
 	conf_items.resize(count);
 

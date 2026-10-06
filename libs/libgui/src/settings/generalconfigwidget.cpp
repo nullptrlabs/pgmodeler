@@ -140,6 +140,13 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 													 "*.qm", QDir::Name, QDir::AllEntries | QDir::NoDotAndDotDot).entryList();
 
 	langs.replaceInStrings(".qm", "");
+
+	/* English (US) is the language of the original texts of the UI, so it has no dictionary. It's always
+	 * available and, when selected, no translation is loaded (see Application::loadTranslation()), which is
+	 * different from "System default" that uses the dictionary of the system's language, if there is one */
+	langs.removeAll(GlobalAttributes::OriginalUiLanguage);
+	langs.prepend(GlobalAttributes::OriginalUiLanguage);
+
 	ui_language_cmb->addItem(tr("System default"));
 	QString native_lang;
 
@@ -229,7 +236,8 @@ void GeneralConfigWidget::showEvent(QShowEvent *)
 																			 config_params[Attributes::Configuration][Attributes::UseDefDisambiguation] == Attributes::True ||
 																			 config_params[Attributes::Configuration][Attributes::AlertApplyMetadata] == Attributes::False ||
 																			 config_params[Attributes::Configuration][Attributes::AlertDisableQuoting] != Attributes::True ||
-																			 config_params[Attributes::Configuration][Attributes::AlertResizeRowsCols] == Attributes::False);
+																			 config_params[Attributes::Configuration][Attributes::AlertResizeRowsCols] == Attributes::False ||
+																			 config_params[Attributes::Configuration][Attributes::AlertSaveReloadModel] != Attributes::True);
 
 }
 
@@ -241,6 +249,7 @@ void GeneralConfigWidget::resetAlertChoices()
 	config_params[Attributes::Configuration][Attributes::AlertApplyMetadata] = Attributes::True;
 	config_params[Attributes::Configuration][Attributes::AlertDisableQuoting] = Attributes::True;
 	config_params[Attributes::Configuration][Attributes::AlertResizeRowsCols] = Attributes::True;
+	config_params[Attributes::Configuration][Attributes::AlertSaveReloadModel] = Attributes::True;
 	reset_alerts_choices_btn->setEnabled(false);
 }
 
@@ -262,7 +271,8 @@ void GeneralConfigWidget::loadConfiguration()
 			 !config_params[Attributes::Configuration].count(Attributes::UseDefDisambiguation) ||
 			 !config_params[Attributes::Configuration].count(Attributes::AlertApplyMetadata) ||
 			 !config_params[Attributes::Configuration].count(Attributes::AlertDisableQuoting) ||
-			 !config_params[Attributes::Configuration].count(Attributes::AlertResizeRowsCols))
+			 !config_params[Attributes::Configuration].count(Attributes::AlertResizeRowsCols) ||
+			 !config_params[Attributes::Configuration].count(Attributes::AlertSaveReloadModel))
 			resetAlertChoices();
 
 		oplist_size_spb->setValue((config_params[Attributes::Configuration][Attributes::OpListSize]).toUInt());

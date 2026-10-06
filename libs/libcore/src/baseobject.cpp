@@ -20,6 +20,7 @@
 */
 
 #include "baseobject.h"
+#include "utilsns.h"
 #include "coreutilsns.h"
 #include "exception.h"
 #include <QApplication>
@@ -83,19 +84,19 @@ const QString BaseObject::obj_type_names[ObjectTypeCount] {
 };
 
 const attribs_map BaseObject::search_attribs_i18n {
-	{ Attributes::Name, QT_TR_NOOP("Name") },
-	{ Attributes::Comment, QT_TR_NOOP("Comment") },
-	{ Attributes::Signature, QT_TR_NOOP("Signature") },
-	{ Attributes::Schema, QT_TR_NOOP("Schema") },
-	{ Attributes::Owner, QT_TR_NOOP("Owner") },
-	{ Attributes::Tablespace, QT_TR_NOOP("Tablespace") },
-	{ Attributes::Type, QT_TR_NOOP("Data type") },
-	{ Attributes::ReturnType, QT_TR_NOOP("Return type") },
-	{ Attributes::SrcTable, QT_TR_NOOP("Source table") },
-	{ Attributes::DstTable, QT_TR_NOOP("Destination table") },
-	{ Attributes::RelatedForeignKey, QT_TR_NOOP("Related foreign key") },
-	{ Attributes::SrcColumns, QT_TR_NOOP("Source column(s)") },
-	{ Attributes::RefColumns, QT_TR_NOOP("Referenced column(s)") }
+	{ Attributes::Name, PGM_TR2("Global", "Name") },
+	{ Attributes::Comment, PGM_TR2("Global", "Comment") },
+	{ Attributes::Signature, PGM_TR2("Global", "Signature") },
+	{ Attributes::Schema, PGM_TR2("Global", "Schema") },
+	{ Attributes::Owner, PGM_TR2("Global", "Owner") },
+	{ Attributes::Tablespace, PGM_TR2("Global", "Tablespace") },
+	{ Attributes::Type, PGM_TR2("Global", "Data type") },
+	{ Attributes::ReturnType, PGM_TR2("Global", "Return type") },
+	{ Attributes::SrcTable, PGM_TR2("Global", "Source table") },
+	{ Attributes::DstTable, PGM_TR2("Global", "Destination table") },
+	{ Attributes::RelatedForeignKey, PGM_TR2("Global", "Related foreign key") },
+	{ Attributes::SrcColumns, PGM_TR2("Global", "Source column(s)") },
+	{ Attributes::RefColumns, PGM_TR2("Global", "Referenced column(s)") }
 };
 
 const QStringList BaseObject::search_attribs_names {
@@ -1253,7 +1254,8 @@ QString BaseObject::getSearchAttributeI18N(const QString &search_attr)
 	if(!search_attribs_i18n.count(search_attr))
 		return "";
 
-	return search_attribs_i18n.at(search_attr);
+	// The texts are only marked for translation where they are declared (PGM_TR2), so they are translated here
+	return UtilsNs::pgmTr(search_attribs_i18n.at(search_attr));
 }
 
 QStringList BaseObject::getSearchAttributesNames()
@@ -1566,8 +1568,7 @@ std::vector<BaseObject *> BaseObject::getLinkedObjects(ObjLinkType lnk_type, boo
 		if(!excl_types.empty())
 			linked_objs = CoreUtilsNs::filterObjectsByType(linked_objs, excl_types);
 	}
-
-	if(!excl_types.empty())
+	else if(!excl_types.empty())
 		linked_objs = CoreUtilsNs::filterObjectsByType(*obj_list, excl_types);
 	else
 		linked_objs = *obj_list;

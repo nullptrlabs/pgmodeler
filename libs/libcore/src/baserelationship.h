@@ -29,12 +29,16 @@
 #ifndef BASE_RELATIONSHIP_H
 #define BASE_RELATIONSHIP_H
 
+#include <QCoreApplication>
 #include "textbox.h"
 #include "constraint.h"
 #include <cmath>
 #include <QColor>
 
 class __libcore BaseRelationship: public BaseGraphicObject  {
+	//! \brief Gives the class its own tr(), so the texts it translates are in the context BaseRelationship
+	Q_DECLARE_TR_FUNCTIONS(BaseRelationship)
+
 	public:
 		//! \brief Constants used to assign the type to relationship
 		enum RelType: unsigned {

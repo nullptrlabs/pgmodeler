@@ -6,6 +6,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 include(BuildConfs)
 include(DefaultPaths)
+include(TranslationConfs)
 include(BuildNumDate)
 include(PrintSummary)
 include(InstallAssets)

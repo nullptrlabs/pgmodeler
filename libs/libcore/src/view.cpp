@@ -405,7 +405,9 @@ QString View::getSourceCode(SchemaParser::CodeType def_type)
 			attributes[Attributes::Columns] += col.getXmlCode();
 
 		setPositionAttribute();
+		setPositionAttribute(cutoff_pos, Attributes::CutoffPos, Attributes::Cutoff);
 		setFadedOutAttribute();
+		setSceneIndexAttribute();
 
 		attributes[Attributes::Definition] = sql_definition;
 		attributes[Attributes::ZValue] = QString::number(z_value);

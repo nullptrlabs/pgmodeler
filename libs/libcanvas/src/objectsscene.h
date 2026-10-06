@@ -182,6 +182,12 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		void clearTablesChildrenSelection();
 
+		/*! \brief Detaches item from this scene (disconnects its signals, removes it from Qt's
+		 * internal item list) without marking it for deletion -- called by removeItem() right
+		 * before the item is queued for deletion. Returns the item cast to BaseObjectView, or
+		 * nullptr if it isn't one */
+		BaseObjectView *detachItem(QGraphicsItem *item);
+
 		void selectObjectsInLayers(const QList<unsigned int> &layers_idxs);
 
 	protected:
@@ -442,6 +448,9 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		//! \brief Signal emitted when the user double-click a object
 		void s_objectDoubleClicked(BaseGraphicObject *objeto);
 
+		//! \brief Signal emitted when the user double-clicks a cut-off marker. Carries the table the marker is attached to
+		void s_cutoffDoubleClicked(BaseTable *table);
+
 		//! \brief Signal emitted when a object is selected
 		void s_objectSelected(BaseGraphicObject *objeto, bool selecionado);
 
@@ -450,6 +459,9 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		//! \brief Signal emitted when a blank area of the canvas is pressed
 		void s_scenePressed(Qt::MouseButtons);
+
+		//! \brief Signal emitted when a click on this scene resets its own selection (empty area, or a plain click replacing a previous selection)
+		void s_selectionResetTriggered();
 
 		//! \brief Signal emitted when the active layers change
 		void s_activeLayersChanged();

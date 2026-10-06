@@ -59,6 +59,7 @@
 {spc} [alert-disable-quoting="] {alert-disable-quoting} ["] \n
 {spc} [alert-resize-rows-cols="] {alert-resize-rows-cols} ["] \n
 {spc} [use-def-disambiguation="] {use-def-disambiguation} ["] \n
+{spc} [alert-save-reload-model="] {alert-save-reload-model} ["] \n
 {spc} [hide-objects-sel-info="] %if {hide-objects-sel-info} %then true %else false %end ["] \n
 {spc} [hide-cur-pos-zoom-info="] %if {hide-cur-pos-zoom-info} %then true %else false %end ["] \n
 {spc} [hide-empty-obj-groups="] %if {hide-empty-obj-groups} %then true %else false %end ["] \n

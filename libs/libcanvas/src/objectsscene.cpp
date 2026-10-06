@@ -25,6 +25,7 @@
 #include "graphicalview.h"
 #include "tableview.h"
 #include "schemaview.h"
+#include "cutoffitem.h"
 #include "databasemodel.h"
 #include "customuistyle.h"
 #include <QScrollBar>
@@ -928,6 +929,15 @@ void ObjectsScene::showRelationshipLine(bool value, const QPointF &p_start)
 				flags=QGraphicsItem::ItemIsSelectable |
 					  QGraphicsItem::ItemSendsGeometryChanges;
 		}
+		/* Cut-off markers aren't BaseObjectView-derived so they fall through the check above
+		 * and would otherwise permanently lose ItemIsMovable (setFlags() below replaces the
+		 * whole flag set) the first time a relationship is drawn interactively anywhere in the
+		 * scene, since this loop touches every item, not just the ones involved in the new
+		 * relationship */
+		else if(dynamic_cast<CutoffItem *>(items.front()) && !value)
+			flags=QGraphicsItem::ItemIsMovable |
+				  QGraphicsItem::ItemIsSelectable |
+				  QGraphicsItem::ItemSendsGeometryChanges;
 
 		items.front()->setFlags(flags);
 		items.pop_front();
@@ -1051,33 +1061,48 @@ void ObjectsScene::addItem(QGraphicsItem *item, bool blink_new)
 		updateLayerRects();
 }
 
+BaseObjectView *ObjectsScene::detachItem(QGraphicsItem *item)
+{
+	if(!item)
+		return nullptr;
+
+	BaseObjectView *obj_view=dynamic_cast<BaseObjectView *>(item);
+	RelationshipView *rel=dynamic_cast<RelationshipView *>(item);
+
+	if(rel)
+		rel->disconnectTables();
+
+	item->setVisible(false);
+	item->setActive(false);
+	QGraphicsScene::removeItem(item);
+
+	if(obj_view)
+	{
+		BaseObject *obj = obj_view->getUnderlyingObject();
+
+		if(BaseTable::isBaseTable(obj->getObjectType()) ||
+			 obj->getObjectType() == ObjectType::Textbox)
+			updateLayerRects();
+
+		disconnect(obj_view, nullptr, this, nullptr);
+		disconnect(obj_view, nullptr, dynamic_cast<BaseGraphicObject*>(obj_view->getUnderlyingObject()), nullptr);
+		disconnect(dynamic_cast<BaseGraphicObject*>(obj_view->getUnderlyingObject()), nullptr, obj_view, nullptr);
+	}
+
+	return obj_view;
+}
+
 void ObjectsScene::removeItem(QGraphicsItem *item)
 {
-	if(item)
+	BaseObjectView *obj_view = detachItem(item);
+
+	if(obj_view)
 	{
-		BaseObjectView *obj_view=dynamic_cast<BaseObjectView *>(item);
-		RelationshipView *rel=dynamic_cast<RelationshipView *>(item);
-
-		if(rel)
-			rel->disconnectTables();
-
-		item->setVisible(false);
-		item->setActive(false);
-		QGraphicsScene::removeItem(item);
-
-		if(obj_view)
-		{
-			BaseObject *obj = obj_view->getUnderlyingObject();
-
-			if(BaseTable::isBaseTable(obj->getObjectType()) ||
-				 obj->getObjectType() == ObjectType::Textbox)
-				updateLayerRects();
-
-			disconnect(obj_view, nullptr, this, nullptr);
-			disconnect(obj_view, nullptr, dynamic_cast<BaseGraphicObject*>(obj_view->getUnderlyingObject()), nullptr);
-			disconnect(dynamic_cast<BaseGraphicObject*>(obj_view->getUnderlyingObject()), nullptr, obj_view, nullptr);
-			removed_objs.push_back(obj_view);
-		}
+		/* This item is genuinely being discarded (queued in removed_objs, only actually deleted
+		 * once this scene itself is destroyed) -- its model object may well outlive that, so its
+		 * back-reference must be cleared now, not whenever the view eventually gets deleted */
+		obj_view->detachFromObject();
+		removed_objs.push_back(obj_view);
 	}
 }
 
@@ -1100,10 +1125,14 @@ void ObjectsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 	if(this->selectedItems().size()==1 && event->buttons()==Qt::LeftButton && !rel_line->isVisible())
 	{
 		//Gets the selected graphical object
-		BaseObjectView *obj=dynamic_cast<BaseObjectView *>(this->selectedItems().at(0));
+		QGraphicsItem *sel_item = this->selectedItems().at(0);
+		BaseObjectView *obj=dynamic_cast<BaseObjectView *>(sel_item);
+		CutoffItem *cutoff = dynamic_cast<CutoffItem *>(sel_item);
 
 		if(obj)
 			emit s_objectDoubleClicked(dynamic_cast<BaseGraphicObject *>(obj->getUnderlyingObject()));
+		else if(cutoff)
+			emit s_cutoffDoubleClicked(cutoff->getTable());
 	}
 	else
 		//Emit a signal indicating that no object was selected
@@ -1126,6 +1155,19 @@ void ObjectsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 	if(rel_line->isVisible())
 		event->setModifiers(Qt::ControlModifier);
 
+	/* A click resets the whole (now cross-scene) selection when it's the kind of click that would
+	 * replace or clear a selection: an empty-area click, or a plain click (no Ctrl/Shift) on an
+	 * item that isn't already part of the selection. This must NOT be gated on is_deselection (or
+	 * on anything else derived from this scene's own selectedItems()) -- the whole point is to
+	 * reach scenes that have nothing selected locally at all (selection lives in some OTHER scene),
+	 * where a local-only check would never see anything to reset and silently leave it behind. A
+	 * plain click on an ALREADY selected item is excluded on purpose: that's how dragging an
+	 * existing multi-selection starts, and must not clear it */
+	bool resets_selection =
+			(!item && (event->buttons()==Qt::LeftButton || event->buttons()==Qt::RightButton)) ||
+			(event->buttons()==Qt::LeftButton && item && !item->isSelected() &&
+			 (event->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) == 0);
+
 	if(is_deselection)
 		this->blockItemsSignals(true);
 
@@ -1142,6 +1184,9 @@ void ObjectsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		this->blockItemsSignals(false);
 		emit s_objectSelected(nullptr, false);
 	}
+
+	if(resets_selection)
+		emit s_selectionResetTriggered();
 
 	if(event->buttons()==Qt::LeftButton)
 	{
@@ -1452,10 +1497,12 @@ void ObjectsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 					QList<QGraphicsItem *> items=this->selectedItems();
 					BaseObjectView *obj_view=nullptr;
 
-					for(QGraphicsItem *item : items)
+					for(auto &item : items)
 					{
 						obj_view=dynamic_cast<BaseObjectView *>(item);
-						obj_view->togglePlaceholder(true);
+
+						if(obj_view)
+							obj_view->togglePlaceholder(true);
 					}
 				}
 
@@ -1569,11 +1616,16 @@ void ObjectsScene::finishObjectsMove(const QPointF &pnt_end)
 				{
 					base_rel=dynamic_cast<BaseRelationship *>(rel);
 
+					// Cross-scene relationships have no RelationshipView -- nothing to move
+					RelationshipView *base_rel_view = dynamic_cast<RelationshipView *>(base_rel->getOverlyingObject());
+
+					if(!base_rel_view)
+						continue;
+
 					/* If the relationship contains points and it is not selected then it will be included on the list
 						 in order to move their custom line points */
-					if(!dynamic_cast<RelationshipView *>(base_rel->getOverlyingObject())->isSelected() &&
-							!base_rel->getPoints().empty())
-						rel_list.push_back(dynamic_cast<QGraphicsItem *>(base_rel->getOverlyingObject()));
+					if(!base_rel_view->isSelected() && !base_rel->getPoints().empty())
+						rel_list.push_back(base_rel_view);
 				}
 
 				QList<BaseObjectView *> list = sch_view->getChildren();

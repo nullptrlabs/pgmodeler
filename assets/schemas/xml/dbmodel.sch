@@ -26,7 +26,15 @@ $br $tb
 
 [ show-sys-schemas-rects=] "{show-sys-schemas-rects}"
 
-%if {last-position} %or {last-position} %or {scene-rect} %then
+[ seg-mode=] "{seg-mode}"
+
+[ seg-threshold=] "{seg-threshold}"
+
+%if {seg-obj-count} %then
+	[ seg-obj-count=] "{seg-obj-count}"
+%end
+
+%if {last-position} %or {last-zoom} %or {scene-rect} %or {last-scene} %then
 	$br $tb
 
 	%if {last-position} %then
@@ -39,7 +47,11 @@ $br $tb
 
 	%if {scene-rect} %then
 		[ scene-rect=] "{scene-rect}"
-	%end	
+	%end
+
+	%if {last-scene} %then
+		[ last-scene=] "{last-scene}"
+	%end
 %end
 
 %if {default-schema} %or {default-owner} %then
@@ -90,6 +102,7 @@ $br $tb
 %end
 
 > $br
+%if {scenes} %then {scenes} %end
 %if {objects} %then {objects} %end
 %if {permission} %then {permission} %end
 %if {changelog} %then {changelog} %end

@@ -22,6 +22,7 @@
 #include "basetableview.h"
 #include "schema.h"
 #include "utilsns.h"
+#include <QGraphicsScene>
 
 bool BaseTableView::hide_ext_attribs {false};
 bool BaseTableView::hide_tags {false};
@@ -33,6 +34,7 @@ BaseTableView::BaseTableView(BaseTable *base_tab) : BaseObjectView(base_tab)
 		throw Exception(ErrorCode::AsgNotAllocattedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	pending_geom_update = false;
+	cutoff_item = nullptr;
 	body=new RoundedRectItem;
 	body->setRoundedCorners(RoundedRectItem::BottomLeftCorner | RoundedRectItem::BottomRightCorner);
 
@@ -102,6 +104,7 @@ BaseTableView::~BaseTableView()
 	delete title;
 	delete columns;
 	delete tag_item;
+	delete cutoff_item;
 }
 
 void BaseTableView::setHideExtAttributes(bool value)
@@ -319,6 +322,49 @@ void BaseTableView::removeConnectedRelationship(BaseRelationship *base_rel)
 	connected_rels.erase(std::find(connected_rels.begin(), connected_rels.end(), base_rel));
 }
 
+void BaseTableView::addExternalRelationship(BaseRelationship *base_rel)
+{
+	BaseTable *tab = dynamic_cast<BaseTable *>(getUnderlyingObject());
+
+	if(!base_rel ||
+		 (base_rel &&
+			base_rel->getTable(BaseRelationship::SrcTable) != tab &&
+			base_rel->getTable(BaseRelationship::DstTable) != tab))
+		return;
+
+	external_rels.append(base_rel);
+
+	if(!cutoff_item)
+	{
+		cutoff_item = new CutoffItem(this);
+
+		if(this->scene())
+			this->scene()->addItem(cutoff_item);
+	}
+
+	cutoff_item->addRelationship(base_rel);
+}
+
+void BaseTableView::removeExternalRelationship(BaseRelationship *base_rel)
+{
+	external_rels.removeOne(base_rel);
+
+	if(cutoff_item)
+	{
+		cutoff_item->removeRelationship(base_rel);
+
+		if(cutoff_item->getRelationshipsCount() == 0)
+		{
+			delete cutoff_item;
+			cutoff_item = nullptr;
+
+			/* Discarding any custom position: if a new cutoff marker is created later for
+			 * this table, it starts back at the default anchor instead of an old offset */
+			dynamic_cast<BaseTable *>(getUnderlyingObject())->resetCutoffPosition();
+		}
+	}
+}
+
 int BaseTableView::getConnectedRelationshipIndex(BaseRelationship *base_rel, bool only_self_rels)
 {
 	std::vector<BaseRelationship *>::iterator itr;
@@ -502,6 +548,22 @@ int BaseTableView::getConnectRelsCount()
 	return connected_rels.size();
 }
 
+int BaseTableView::getExternalRelsCount()
+{
+	return external_rels.size();
+}
+
+QList<BaseRelationship *> BaseTableView::getExternalRelationships()
+{
+	return external_rels;
+}
+
+QPointF BaseTableView::getCutoffAnchorPoint()
+{
+	return this->mapToScene(QPointF(title->pos().x() + title->boundingRect().width(),
+																	 title->pos().y() + (title->boundingRect().height() / 2)));
+}
+
 void BaseTableView::requestRelationshipsUpdate()
 {
 	emit s_relUpdateRequest();
@@ -629,6 +691,11 @@ void BaseTableView::configureCurrentPage(BaseTable::TableSection section_id, uns
 	dynamic_cast<BaseTable *>(this->getUnderlyingObject())->setCurrentPage(section_id, page);
 	finishGeometryUpdate();
 	emit s_currentPageChanged();
+}
+
+CutoffItem *BaseTableView::getCutoffItem()
+{
+	return cutoff_item;
 }
 
 void BaseTableView::selectRelationships()

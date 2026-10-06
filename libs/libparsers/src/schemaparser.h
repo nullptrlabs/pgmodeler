@@ -34,6 +34,7 @@
 #include <QTextStream>
 #include "attribsmap.h"
 #include "exception.h"
+#include "utilsns.h"
 #include <QRegularExpression>
 
 class __libparsers SchemaParser {
@@ -217,7 +218,7 @@ class __libparsers SchemaParser {
 
 			if(is_incl_error)
 			{
-				msg = QString(QT_TR_NOOP("Failed to parse the file `%1' due to an error in the included file at line `%2'. Error detected:\n\n"))
+				msg = UtilsNs::pgmTr(PGM_TR2("Global", "Failed to parse the file `%1' due to an error in the included file at line `%2'. Error detected:\n\n"))
 									.arg(filename).arg(incl_line + 1);
 			}
 

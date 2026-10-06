@@ -26,7 +26,7 @@
 
 const QString GlobalAttributes::PgModelerVersion {
 	/** Base version number **/
-	QString("2.0.0")
+	QString("2.1.0-alpha")
 
 /* Appending the snapshot build number to the version number
  * when the external variable SNAPSHOT_BUILD is defined */
@@ -90,6 +90,8 @@ const QString GlobalAttributes::DbModelExt {".dbm"};
 const QString GlobalAttributes::DbModelBkpExt {".dbk"};
 const QString GlobalAttributes::ObjMetadataExt {".omf"};
 const QString GlobalAttributes::DirSeparator {"/"};
+const QString GlobalAttributes::UiLanguageParam {"ui-language"};
+const QString GlobalAttributes::OriginalUiLanguage {"en_US"};
 const QString GlobalAttributes::ResourcesDir {"res"};
 const QString GlobalAttributes::ConfigurationsDir {"conf"};
 const QString GlobalAttributes::DefaultConfsDir {"defaults"};

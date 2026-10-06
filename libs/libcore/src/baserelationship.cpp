@@ -347,51 +347,65 @@ bool BaseRelationship::isSelfRelationship()
 
 void BaseRelationship::setRelationshipAttributes()
 {
-	unsigned count, i;
-	QString str_aux,
-			label_attribs[3]={ Attributes::SrcLabel,
-							   Attributes::DstLabel,
-							   Attributes::NameLabel};
-
-	attributes[Attributes::Type]=getRelTypeAttribute();
-	attributes[Attributes::SrcRequired]=(src_mandatory ? Attributes::True : "");
-	attributes[Attributes::DstRequired]=(dst_mandatory ? Attributes::True : "");
-
-	if(src_table)
-		attributes[Attributes::SrcTable]=src_table->getName(true);
-
-	if(dst_table)
-		attributes[Attributes::DstTable]=dst_table->getName(true);
-
-
-	count=points.size();
-	for(i=0; i < count; i++)
+	try
 	{
-		attributes[Attributes::XPos]=QString("%1").arg(points[i].x());
-		attributes[Attributes::YPos]=QString("%1").arg(points[i].y());
-		str_aux+=schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
-	}
-	attributes[Attributes::Points]=str_aux;
+		attributes[Attributes::Type] = getRelTypeAttribute();
+		attributes[Attributes::SrcRequired] = (src_mandatory ? Attributes::True : "");
+		attributes[Attributes::DstRequired] = (dst_mandatory ? Attributes::True : "");
 
-	str_aux="";
-	for(i=0; i < 3; i++)
-	{
-		if(!std::isnan(lables_dist[i].x()))
+		if(src_table)
+			attributes[Attributes::SrcTable] = src_table->getName(true);
+
+		if(dst_table)
+			attributes[Attributes::DstTable] = dst_table->getName(true);
+
+		attributes[Attributes::Points] = "";
+		for(auto &pnt : points)
 		{
-			attributes[Attributes::XPos]=QString("%1").arg(lables_dist[i].x());
-			attributes[Attributes::YPos]=QString("%1").arg(lables_dist[i].y());
-			attributes[Attributes::Position]=schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
-			attributes[Attributes::RefType]=label_attribs[i];
-			str_aux+=schparser.getSourceCode(Attributes::Label, attributes, SchemaParser::XmlCode);
+			attributes[Attributes::Id] = "";
+			attributes[Attributes::XPos] = QString("%1").arg(pnt.x());
+			attributes[Attributes::YPos] = QString("%1").arg(pnt.y());
+			attributes[Attributes::Points] +=
+					schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
 		}
+
+		QStringList label_attribs {
+			Attributes::SrcLabel,
+			Attributes::DstLabel,
+			Attributes::NameLabel
+		};
+
+		unsigned lbl_idx = 0;
+		attributes[Attributes::LabelsPos] = "";
+
+		for(auto &lbl_dist : lables_dist)
+		{
+			if(!std::isnan(lbl_dist.x()))
+			{
+				attributes[Attributes::Id] = "";
+				attributes[Attributes::XPos] = QString("%1").arg(lbl_dist.x());
+				attributes[Attributes::YPos] = QString("%1").arg(lbl_dist.y());
+				attributes[Attributes::Position] =
+						schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
+
+				attributes[Attributes::RefType] = label_attribs[lbl_idx];
+				attributes[Attributes::LabelsPos] +=
+						schparser.getSourceCode(Attributes::Label, attributes, SchemaParser::XmlCode);
+			}
+
+			lbl_idx++;
+		}
+
+		attributes[Attributes::CustomColor] = (custom_color != Qt::transparent ? custom_color.name() : "");
+		attributes[Attributes::ReferenceFk] = (reference_fk ? reference_fk->getName() : "");
+
+		setFadedOutAttribute();
+		setLayersAttribute();
 	}
-
-	attributes[Attributes::LabelsPos]=str_aux;
-	attributes[Attributes::CustomColor]=(custom_color!=Qt::transparent ? custom_color.name() : "");
-	attributes[Attributes::ReferenceFk]=(reference_fk ? reference_fk->getName() : "");
-
-	setFadedOutAttribute();
-	setLayersAttribute();
+	catch(Exception &e)
+	{
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+	}
 }
 
 QString BaseRelationship::getCachedCode(unsigned def_type)

@@ -34,7 +34,7 @@
 #include <QActionGroup>
 #include <QTemporaryFile>
 
-const QString SchemaEditorForm::UntitledFile { QT_TR_NOOP("(untitled)") };
+const QString SchemaEditorForm::UntitledFile { PGM_TR2("Global", "(untitled)") };
 
 SchemaEditorForm::SchemaEditorForm(QWidget *parent) : QWidget(parent)
 {
@@ -514,7 +514,7 @@ void SchemaEditorForm::addEditorTab(const QString &filename)
 		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 
-	editors_tbw->addTab(editor_wgt, filename.isEmpty() ? UntitledFile : fi.fileName());
+	editors_tbw->addTab(editor_wgt, filename.isEmpty() ? UtilsNs::pgmTr(UntitledFile) : fi.fileName());
 	editors_tbw->setTabToolTip(editors_tbw->count() - 1, filename.isEmpty() ? "" : fi.absoluteFilePath());
 	editors_tbw->setCurrentIndex(editors_tbw->count() - 1);
 	save_as_tb->setEnabled(true);

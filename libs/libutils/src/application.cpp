@@ -61,7 +61,16 @@ Application::Application(int &argc, char **argv) : QApplication(argc,argv)
 
 void Application::loadTranslation(const QString &lang_id, const QString &directory)
 {
-	if(lang_id.isEmpty() || !QFileInfo::exists(directory + GlobalAttributes::DirSeparator + lang_id + ".qm"))
+	/* The original UI texts are in English (US), so no dictionary is loaded for it even if
+	 * there is a file with that name. This is how the user can force the original texts */
+	if(lang_id.isEmpty() || lang_id == GlobalAttributes::OriginalUiLanguage)
+		return;
+
+	/* The dictionary can be specific to a region (e.g. pt_BR) or generic to the language (e.g. es), so a language
+	 * with a region that has no dictionary of its own (e.g. es_MX) uses the generic one (es). The fallback itself
+	 * is done by QTranslator::load() below, here we only check if there is a file to be loaded. */
+	if(!QFileInfo::exists(GlobalAttributes::getPath(directory, lang_id + ".qm")) &&
+		 !QFileInfo::exists(GlobalAttributes::getPath(directory, lang_id.section('_', 0, 0) + ".qm")))
 		return;
 
 	QTranslator *translator = new QTranslator(this);
@@ -69,7 +78,7 @@ void Application::loadTranslation(const QString &lang_id, const QString &directo
 	/* Tries to load the ui translation according to the system's locale,
 	 * and in case of success install it in the application */
 	if(!translator->load(lang_id, directory) || !installTranslator(translator))
-		delete(translator);
+		delete translator;
 }
 
 void Application::loadCustomFonts(const QString &def_font_attr, const QString &def_size_attr)
@@ -121,6 +130,21 @@ void Application::loadCustomFonts(const QString &def_font, double def_size)
 		setProperty(UtilsNs::OrigFontProp, font());
 }
 
+QString Application::getUiLanguage()
+{
+	QString lang_id = GlobalAttributes::getConfigParamFromFile(GlobalAttributes::UiLanguageParam, GlobalAttributes::GeneralConf);
+
+	if(lang_id.isEmpty())
+		lang_id = QLocale::system().name();
+
+	return lang_id;
+}
+
+void Application::loadTranslations(bool incl_plugins_tr)
+{
+	loadTranslations(getUiLanguage(), incl_plugins_tr);
+}
+
 void Application::loadTranslations(const QString &lang_id, bool incl_plugins_tr)
 {
 	// Loading the main UI translations
@@ -129,24 +153,13 @@ void Application::loadTranslations(const QString &lang_id, bool incl_plugins_tr)
 	// Trying to load the plugins translations
 	if(incl_plugins_tr)
 	{
-		QStringList dir_list = QDir(GlobalAttributes::getPluginsPath() +
-																GlobalAttributes::DirSeparator,
+		QStringList dir_list = QDir(GlobalAttributes::getPluginsPath(),
 																"*", QDir::Name, QDir::AllDirs | QDir::NoDotAndDotDot).entryList();
 
-		QString plugin_name, plugin_lang_dir;
-
-		while(!dir_list.isEmpty())
+		for(auto &plugin_name : dir_list)
 		{
-			plugin_name = dir_list.front();
-			dir_list.pop_front();
-
-			//Configure the path to "lang" subdir at current plugin directory
-			plugin_lang_dir = GlobalAttributes::getPluginsPath() +
-											GlobalAttributes::DirSeparator + plugin_name +
-											GlobalAttributes::DirSeparator + "lang" +
-											GlobalAttributes::DirSeparator;
-
-			loadTranslation(lang_id, plugin_lang_dir);
+			//The dictionaries are in the "lang" subdir at current plugin directory
+			loadTranslation(lang_id, GlobalAttributes::getPath(GlobalAttributes::getPluginsPath(), plugin_name, "lang"));
 		}
 	}
 }

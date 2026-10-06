@@ -27,11 +27,15 @@
 #ifndef FOREIGN_TABLE_H
 #define FOREIGN_TABLE_H
 
+#include <QCoreApplication>
 #include "physicaltable.h"
 #include "foreignobject.h"
 #include "foreignserver.h"
 
 class __libcore ForeignTable: public PhysicalTable, public ForeignObject {
+	//! \brief Gives the class its own tr(), so the texts it translates are in the context ForeignTable
+	Q_DECLARE_TR_FUNCTIONS(ForeignTable)
+
 	private:
 		//! \brief The foreign server in which the foreign table resides
 		ForeignServer *foreign_server;

@@ -23,6 +23,8 @@
 #include "utilsns.h"
 #include "coreutilsns.h"
 #include "tableobject.h"
+#include "doublenan.h"
+#include <cmath>
 
 bool BaseTable::geom_changes_ignored { false };
 
@@ -37,8 +39,10 @@ BaseTable::BaseTable()
 	attributes[Attributes::AttribsPage]="";
 	attributes[Attributes::ExtAttribsPage]="";
 	attributes[Attributes::ZValue]="";
+	attributes[Attributes::CutoffPos]="";
 	pagination_enabled = false;
 	collapse_mode = CollapseMode::NotCollapsed;
+	cutoff_pos = QPointF(DNaN, DNaN);
 	resetCurrentPages();
 }
 
@@ -192,6 +196,22 @@ void BaseTable::setPosition(const QPointF &pos)
 {
 	BaseGraphicObject::setPosition(pos);
 	resetHashCode();
+}
+
+void BaseTable::setCutoffPosition(const QPointF &pos)
+{
+	cutoff_pos = pos;
+	setCodeInvalidated(true);
+}
+
+QPointF BaseTable::getCutoffPosition()
+{
+	return cutoff_pos;
+}
+
+void BaseTable::resetCutoffPosition()
+{
+	setCutoffPosition(QPointF(DNaN, DNaN));
 }
 
 std::vector<BaseObject *> BaseTable::getDependencies(bool inc_indirect_deps, const std::vector<ObjectType> &excl_types, bool rem_duplicates)

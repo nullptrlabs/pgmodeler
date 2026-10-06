@@ -31,9 +31,24 @@
 #include "utilsglobal.h"
 #include <QString>
 #include <QCryptographicHash>
+#include <QCoreApplication>
+
+/*! \brief Marks a text, written as a literal, to be extracted by lupdate in the translation context
+ * ctx. It expands to the literal itself, nothing is translated here: the translation is done where the
+ * text is used, by UtilsNs::pgmTr(). It's meant to texts that can't call tr() where they are declared,
+ * like static members (initialized before the translator is installed). The context is always
+ * UtilsNs::TrContext, so a text is written as PGM_TR2("Global", "Text").
+ *
+ * IMPORTANT: lupdate only knows this macro as an alias of QT_TRANSLATE_NOOP, so it must be run with
+ * the option -tr-function-alias "QT_TRANSLATE_NOOP+=PGM_TR2". The context must be a literal at the
+ * macro call, lupdate doesn't expand macros so it can't be hidden inside this one. */
+#define PGM_TR2(ctx, text) QT_TRANSLATE_NOOP(ctx, text)
 
 namespace UtilsNs {
-	static constexpr char OrigFontProp[] { "original-font" };
+	static constexpr char OrigFontProp[] { "original-font" },
+
+	//! \brief The translation context shared by all the texts marked with PGM_TR2 and translated by pgmTr()
+	TrContext[] { "Global" };
 
 	inline const QString EntityAmp("&amp;"),
 	EntityLt("&lt;"),
@@ -81,6 +96,13 @@ namespace UtilsNs {
 	__libutils QByteArray loadFile(const QString &filename, qint64 max_len = 0);
 
 	__libutils QString getTemporaryFilePath(const QString &abs_filepath_tmpl);
+
+	/*! \brief Translates the text in the context TrContext, the one used by PGM_TR2. Texts not found
+	 * in the loaded translations are returned as they are */
+	__libutils QString pgmTr(const char *text);
+
+	//! \brief Convenience version of pgmTr() for texts stored in a QString (e.g. static members marked with PGM_TR2)
+	__libutils QString pgmTr(const QString &text);
 
 	//! \brief Converts any chars (operators) < > " to the respective XML entities.
 	__libutils QString convertToXmlEntities(const QString value);
