@@ -9744,6 +9744,7 @@ void DatabaseModel::saveObjectsMetadata(const QString &filename, MetaAttrOptions
 					attribs[Attributes::PrependedSql]=schparser.getSourceCode(GlobalAttributes::getSchemaFilePath(GlobalAttributes::XMLSchemaDir,	QString(Attributes::PrependedSql).remove(QChar('-'))),
 																																				attribs);
 
+							aux_attribs[Attributes::Id]="";
 			}
 
 			/* The object's metadata code will be generated only if one of the key attributes
