@@ -61,6 +61,7 @@ DatabaseModel::DatabaseModel()
 	last_scene=0;
 	scene_seg_mode=saved_seg_mode=NoSegmentation;
 	seg_threshold=saved_seg_threshold=DefaultSegThreshold;
+	hide_rels=saved_hide_rels=false;
 	loading_model=discard_scene_idx=invalidated=append_at_eod=prepend_at_bod=false;
 	attributes[Attributes::Encoding]="";
 	attributes[Attributes::TemplateDb]="";
@@ -3503,7 +3504,8 @@ void DatabaseModel::configureDatabase(attribs_map &attribs)
 
 void DatabaseModel::loadModel(const QString &filename, bool override_seg_mode,
 															 SegmentationMode ovr_seg_mode, unsigned ovr_seg_threshold,
-															 bool discard_scene_idx, std::function<bool()> is_canceled)
+															 bool discard_scene_idx, std::function<bool()> is_canceled,
+															 bool force_hide_rels)
 {
 	if(filename.isEmpty())
 		return;
@@ -3590,6 +3592,8 @@ void DatabaseModel::loadModel(const QString &filename, bool override_seg_mode,
 
 		saved_seg_mode = scene_seg_mode;
 		saved_seg_threshold = seg_threshold;
+
+		hide_rels = saved_hide_rels = (force_hide_rels || attribs[Attributes::HideRels] == Attributes::True);
 
 		/* No "active vs. saved" split here -- focusing a scene is an ordinary runtime action, unlike
 		 * the mode/threshold above, so whatever is read becomes the active value right away */
@@ -4141,6 +4145,26 @@ void DatabaseModel::setSavedSegThreshold(unsigned value)
 unsigned DatabaseModel::getSavedSegThreshold()
 {
 	return saved_seg_threshold;
+}
+
+void DatabaseModel::setHideRelationships(bool value)
+{
+	hide_rels=value;
+}
+
+bool DatabaseModel::isHideRelationships()
+{
+	return hide_rels;
+}
+
+void DatabaseModel::setSavedHideRelationships(bool value)
+{
+	saved_hide_rels=value;
+}
+
+bool DatabaseModel::isSavedHideRelationships()
+{
+	return saved_hide_rels;
 }
 
 Role *DatabaseModel::createRole()
@@ -8122,6 +8146,9 @@ void DatabaseModel::setDatabaseModelAttributes(attribs_map &attribs, SchemaParse
 			attribs[Attributes::SegMode] = QString::number(saved_seg_mode);
 			attribs[Attributes::SegThreshold] = QString::number(saved_seg_threshold);
 
+			//Only written when enabled, keeping the file format unchanged for the usual case
+			attribs[Attributes::HideRels] = saved_hide_rels ? Attributes::True : "";
+
 			/* Table/View/ForeignTable count backing the scene distribution saved below (the <scenes>
 			 * element) -- only meaningful in threshold-segmentation mode, where that distribution comes
 			 * from replaying this count against seg-threshold, not from anything derivable from the
@@ -9717,6 +9744,7 @@ void DatabaseModel::saveObjectsMetadata(const QString &filename, MetaAttrOptions
 						pnt=rel->getLabelDistance(static_cast<BaseRelationship::LabelId>(id));
 						if(!std::isnan(pnt.x()) && !std::isnan(pnt.y()))
 						{
+							aux_attribs[Attributes::Id]="";
 							aux_attribs[Attributes::XPos]=QString::number(pnt.x());
 							aux_attribs[Attributes::YPos]=QString::number(pnt.y());
 							aux_attribs[Attributes::RefType]=labels_attrs[id];
@@ -9744,7 +9772,6 @@ void DatabaseModel::saveObjectsMetadata(const QString &filename, MetaAttrOptions
 					attribs[Attributes::PrependedSql]=schparser.getSourceCode(GlobalAttributes::getSchemaFilePath(GlobalAttributes::XMLSchemaDir,	QString(Attributes::PrependedSql).remove(QChar('-'))),
 																																				attribs);
 
-							aux_attribs[Attributes::Id]="";
 			}
 
 			/* The object's metadata code will be generated only if one of the key attributes

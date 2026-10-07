@@ -64,7 +64,6 @@ RelMarkerItem::RelMarkerItem(BaseTableView *table)
 	connect(table, &BaseTableView::s_relUpdateRequest, this, &RelMarkerItem::updatePosition);
 	connect(table, &BaseTableView::s_objectDimensionChanged, this, &RelMarkerItem::updatePosition);
 
-	updateLabel();
 	updatePosition();
 }
 
@@ -73,29 +72,66 @@ BaseTable *RelMarkerItem::getTable()
 	return dynamic_cast<BaseTable *>(table->getUnderlyingObject());
 }
 
-void RelMarkerItem::addRelationship(BaseRelationship *rel)
+void RelMarkerItem::addRelationship(BaseRelationship *rel, bool hidden)
 {
-	if(!rel || rels.contains(rel))
+	if(!rel || rels.contains(rel) || hidden_rels.contains(rel))
 		return;
 
-	rels.append(rel);
-	updateLabel();
+	if(hidden)
+		hidden_rels.append(rel);
+	else
+		rels.append(rel);
+
+	scheduleLabelUpdate();
 }
 
 void RelMarkerItem::removeRelationship(BaseRelationship *rel)
 {
-	rels.removeOne(rel);
-	updateLabel();
+	if(rels.removeOne(rel) || hidden_rels.removeOne(rel))
+		scheduleLabelUpdate();
 }
 
-int RelMarkerItem::getRelationshipsCount()
+bool RelMarkerItem::isEmpty()
+{
+	return rels.isEmpty() && hidden_rels.isEmpty();
+}
+
+int RelMarkerItem::getCrossRelsCount()
 {
 	return rels.size();
 }
 
-QList<BaseRelationship *> RelMarkerItem::getRelationships()
+int RelMarkerItem::getHiddenRelsCount()
+{
+	return hidden_rels.size();
+}
+
+QList<BaseRelationship *> RelMarkerItem::getCrossRelationships()
 {
 	return rels;
+}
+
+QList<BaseRelationship *> RelMarkerItem::getHiddenRelationships()
+{
+	return hidden_rels;
+}
+
+void RelMarkerItem::scheduleLabelUpdate()
+{
+	if(label_update_pending)
+		return;
+
+	label_update_pending = true;
+
+	/* Updating the label is costly (text layout and box resize) and a table gets all of its
+	 * relationships registered in a row, so the update is queued to run once, after the whole burst.
+	 * The queued call also runs outside of any paint or geometry query, where the item's size can be
+	 * changed safely (prepareGeometryChange() is not allowed there), and is dropped by Qt if this
+	 * item is destroyed before it runs */
+	QMetaObject::invokeMethod(this, [this](){
+		label_update_pending = false;
+		updateLabel();
+	}, Qt::QueuedConnection);
 }
 
 void RelMarkerItem::updateLabel()
@@ -107,7 +143,15 @@ void RelMarkerItem::updateLabel()
 	char_fmt.setFontPointSize(char_fmt.font().pointSizeF() * 0.90);
 
 	label->setFont(char_fmt.font());
-	label->setHtml(tr("Cross rels.: <b>%1</b>").arg(rels.size()));
+	QStringList lines;
+
+	if(!hidden_rels.isEmpty())
+		lines.append(tr("Relationships: <b>%1</b>").arg(hidden_rels.size()));
+
+	if(!rels.isEmpty())
+		lines.append(tr("Cross rels.: <b>%1</b>").arg(rels.size()));
+
+	label->setHtml(lines.join("<br/>"));
 	label->setTextColor(char_fmt.foreground().color());
 
 	QSizeF box_size = label->getTextBoundingRect().size() +

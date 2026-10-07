@@ -22,7 +22,8 @@
 /**
 \ingroup libgui
 \class TableRelsWidget
-\brief Lists the relationships of a table whose other end lives in a different scene, along with the table on that end
+\brief Lists the relationships of a table that are represented by its relationship marker, along with the table on the other end: those
+of the table's own scene (first tab) and those whose other end lives in a different scene (second tab)
 */
 
 #ifndef TABLE_RELS_WIDGET_H
@@ -35,31 +36,43 @@
 #include "basetable.h"
 #include "baserelationship.h"
 #include <QWidget>
+#include <QTabWidget>
 
 class __libgui TableRelsWidget: public QWidget {
 	Q_OBJECT
 
 	private:
-		//! \brief Read-only selector showing the table whose cross-scene relationships are listed
+		//! \brief Read-only selector showing the table whose relationships are listed
 		ObjectSelectorWidget *table_sel;
 
-		//! \brief Grid listing one cross-scene relationship per row (the relationship is the row's data)
-		CustomTableWidget *rels_tab;
+		QTabWidget *rels_tbw;
 
-		//! \brief Table whose cross-scene relationships are listed
+		//! \brief Grid listing one relationship of the table's own scene per row (the relationship is the row's data)
+		CustomTableWidget *hidden_rels_tab;
+
+		//! \brief Grid listing one cross-scene relationship per row (the relationship is the row's data)
+		CustomTableWidget *cross_rels_tab;
+
+		//! \brief Table whose relationships are listed
 		BaseTable *table;
 
 		//! \brief Model that owns the table and the relationships
 		DatabaseModel *model;
 
+		//! \brief Creates a grid with the relationship/type/related table columns, wired to s_relationshipActivated
+		CustomTableWidget *createRelsGrid();
+
+		//! \brief Fills a grid with one row per relationship
+		void fillRelsGrid(CustomTableWidget *grid, const QList<BaseRelationship *> &rels);
+
 	public:
 		explicit TableRelsWidget(QWidget *parent = nullptr);
 
-		//! \brief Configures the widget to list the cross-scene relationships of the specified table
+		//! \brief Configures the widget to list the relationships of the specified table
 		void setAttributes(DatabaseModel *model, BaseTable *table);
 
 	public slots:
-		//! \brief Reloads the grid from the table's current cross-scene relationships
+		//! \brief Reloads the grids from the table's current relationships
 		void updateRelationships();
 
 	signals:

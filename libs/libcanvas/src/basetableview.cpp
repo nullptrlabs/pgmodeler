@@ -322,7 +322,7 @@ void BaseTableView::removeConnectedRelationship(BaseRelationship *base_rel)
 	connected_rels.erase(std::find(connected_rels.begin(), connected_rels.end(), base_rel));
 }
 
-void BaseTableView::addExternalRelationship(BaseRelationship *base_rel)
+void BaseTableView::addMarkedRelationship(BaseRelationship *base_rel, bool hidden)
 {
 	BaseTable *tab = dynamic_cast<BaseTable *>(getUnderlyingObject());
 
@@ -332,7 +332,13 @@ void BaseTableView::addExternalRelationship(BaseRelationship *base_rel)
 			base_rel->getTable(BaseRelationship::DstTable) != tab))
 		return;
 
-	external_rels.append(base_rel);
+	QList<BaseRelationship *> &rels = hidden ? hidden_rels : external_rels;
+
+	// A self-relationship is routed once per side, both landing on this same view
+	if(rels.contains(base_rel))
+		return;
+
+	rels.append(base_rel);
 
 	if(!rel_marker_item)
 	{
@@ -342,18 +348,19 @@ void BaseTableView::addExternalRelationship(BaseRelationship *base_rel)
 			this->scene()->addItem(rel_marker_item);
 	}
 
-	rel_marker_item->addRelationship(base_rel);
+	rel_marker_item->addRelationship(base_rel, hidden);
 }
 
-void BaseTableView::removeExternalRelationship(BaseRelationship *base_rel)
+void BaseTableView::removeMarkedRelationship(BaseRelationship *base_rel)
 {
 	external_rels.removeOne(base_rel);
+	hidden_rels.removeOne(base_rel);
 
 	if(rel_marker_item)
 	{
 		rel_marker_item->removeRelationship(base_rel);
 
-		if(rel_marker_item->getRelationshipsCount() == 0)
+		if(rel_marker_item->isEmpty())
 		{
 			delete rel_marker_item;
 			rel_marker_item = nullptr;
@@ -556,6 +563,16 @@ int BaseTableView::getExternalRelsCount()
 QList<BaseRelationship *> BaseTableView::getExternalRelationships()
 {
 	return external_rels;
+}
+
+int BaseTableView::getHiddenRelsCount()
+{
+	return hidden_rels.size();
+}
+
+QList<BaseRelationship *> BaseTableView::getHiddenRelationships()
+{
+	return hidden_rels;
 }
 
 QPointF BaseTableView::getRelMarkerAnchorPoint()

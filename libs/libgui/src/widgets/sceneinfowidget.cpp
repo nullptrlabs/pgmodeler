@@ -31,7 +31,8 @@ SceneInfoWidget::SceneInfoWidget(QWidget *parent): QWidget(parent)
 	CustomUiStyle::setStyleHint(CustomUiStyle::TabBarFrmHint,
 															{ cursor_pos_info_frm, separator_ln,
 																obj_sel_info_frm, separator_ln2,
-																separator_ln3, seg_mode_frm });
+																separator_ln3, separator_ln4,
+																seg_mode_frm });
 
 	GuiUtilsNs::configureWidgetsFont({ scenes_cmb, seg_modes_cmb, threshold_spb,
 																		 mouse_pos_info_lbl, zoom_info_lbl, sel_obj_count_lbl,
@@ -56,6 +57,11 @@ SceneInfoWidget::SceneInfoWidget(QWidget *parent): QWidget(parent)
 		emit s_thresholdSelected(static_cast<unsigned>(threshold_spb->value()));
 	});
 
+	// The button is checked while the relationships are visible, the opposite of the model's option
+	connect(toggle_rels_tb, &QToolButton::toggled, this, [this](bool visible) {
+		emit s_hideRelationshipsToggled(!visible);
+	});
+
 	connect(next_tb, &QToolButton::clicked, this, [this](){
 		scenes_cmb->setCurrentIndex(scenes_cmb->currentIndex() + 1);
 		emit s_activeSceneSelected(scenes_cmb->currentIndex());
@@ -77,6 +83,13 @@ void SceneInfoWidget::updateScenesCombo(const QStringList &names, int active_idx
 	scenes_cmb->setCurrentIndex(active_idx);
 	scenes_cmb->blockSignals(false);
 	enableNavigationButtons();
+}
+
+void SceneInfoWidget::updateHideRelationships(bool hide)
+{
+	toggle_rels_tb->blockSignals(true);
+	toggle_rels_tb->setChecked(!hide);
+	toggle_rels_tb->blockSignals(false);
 }
 
 void SceneInfoWidget::updateSegmentationInfo(DatabaseModel::SegmentationMode mode, unsigned threshold)

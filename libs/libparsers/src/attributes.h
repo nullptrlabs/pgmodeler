@@ -342,6 +342,7 @@ extern __libparsers const QString
 	HideObjectsSelInfo,
 	HideObjShadows,
 	HideRelName,
+	HideRels,
 	HideSchNameUserTypes,
 	HideTableTags,
 	Highlight,

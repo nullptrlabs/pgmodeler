@@ -57,7 +57,12 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		 * being represented instead by a relationship marker on each side. */
 		QList<BaseRelationship *> external_rels;
 
-		//! \brief Marker representing external_rels on the canvas. Null while external_rels is empty
+		/*! \brief Stores the references to the relationships that connect this table to a table
+		 * placed in the same scene but are not drawn because the model hides its relationships.
+		 * Like external_rels, they have no RelationshipView and are represented by the marker. */
+		QList<BaseRelationship *> hidden_rels;
+
+		//! \brief Marker representing external_rels and hidden_rels on the canvas. Null while both are empty
 		RelMarkerItem *rel_marker_item;
 
 	protected:		
@@ -113,9 +118,12 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		 * If 'only_self_rels' is true then only self relationship are searched */
 		int getConnectedRelationshipIndex(BaseRelationship *base_rel, bool only_self_rels = false);
 
-		void addExternalRelationship(BaseRelationship *base_rel);
+		/*! \brief Registers a relationship that is not drawn and shows it in the relationship marker.
+		 * The relationship is kept as hidden (partner in the same scene) or external (partner in another scene) */
+		void addMarkedRelationship(BaseRelationship *base_rel, bool hidden);
 
-		void removeExternalRelationship(BaseRelationship *base_rel);
+		//! \brief Removes a relationship registered by addMarkedRelationship(), whichever kind it was
+		void removeMarkedRelationship(BaseRelationship *base_rel);
 
 		//! \brief Configures the tag object when the source object has one.
 		void configureTag();
@@ -181,6 +189,12 @@ class __libcanvas BaseTableView: public BaseObjectView {
 
 		//! \brief Returns the list of relationships that connect this table to a table placed in a different scene
 		QList<BaseRelationship *> getExternalRelationships();
+
+		//! \brief Returns the current count of hidden (same scene, not drawn) relationships
+		int getHiddenRelsCount();
+
+		//! \brief Returns the list of relationships that connect this table to a table of the same scene but are not drawn
+		QList<BaseRelationship *> getHiddenRelationships();
 
 		/*! \brief Returns, in scene coordinates, the point the relationship marker's line attaches to
 		 * (title's right edge, vertically centered on the title) */

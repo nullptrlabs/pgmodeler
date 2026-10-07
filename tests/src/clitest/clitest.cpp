@@ -63,6 +63,7 @@ class CliTest: public QObject, public PgModelerUnitTest {
 		void fixedModelKeepsSchemaSegmentation();
 		void fixedModelKeepsThresholdSegmentation();
 		void fixedModelKeepsOtherHeaderAttributes();
+		void fixedModelKeepsTheHideRelationshipsOption();
 		void fixingModelWithoutSegmentationKeepsItUnsegmented();
 		void objectsAfterIdCommentsAreNotDiscarded();
 };
@@ -244,6 +245,35 @@ void CliTest::fixedModelKeepsOtherHeaderAttributes()
 		QVERIFY2(out_attrs.contains(attr), attr);
 		QCOMPARE(out_attrs[attr], in_attrs[attr]);
 	}
+}
+
+void CliTest::fixedModelKeepsTheHideRelationshipsOption()
+{
+	// The option is only written to the file when enabled, so a model that doesn't use it must stay without the attribute
+	QString plain_input = fixtureFile("segmented_by_schema.dbm");
+	FIX_MODEL(plain_fixed, plain_input, "plain_fixed.dbm");
+
+	QVERIFY(!headerAttributes(plain_fixed).contains("hide-rels"));
+
+	QFile file(plain_input);
+	QVERIFY(file.open(QIODevice::ReadOnly));
+
+	QString xml = QString::fromUtf8(file.readAll());
+	file.close();
+
+	QVERIFY(xml.contains(" seg-mode=\"1\""));
+	xml.replace(" seg-mode=\"1\"", " seg-mode=\"1\" hide-rels=\"true\"");
+
+	QString hide_input = tmp_dir.filePath("hide_rels.dbm");
+	QFile out_file(hide_input);
+
+	QVERIFY(out_file.open(QIODevice::WriteOnly));
+	out_file.write(xml.toUtf8());
+	out_file.close();
+
+	FIX_MODEL(hide_fixed, hide_input, "hide_fixed.dbm");
+
+	QCOMPARE(headerAttributes(hide_fixed)["hide-rels"], QString("true"));
 }
 
 void CliTest::fixingModelWithoutSegmentationKeepsItUnsegmented()

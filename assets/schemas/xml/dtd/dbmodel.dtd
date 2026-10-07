@@ -100,6 +100,7 @@
 <!ATTLIST dbmodel scene-rect CDATA #IMPLIED>
 <!ATTLIST dbmodel seg-mode CDATA #IMPLIED>
 <!ATTLIST dbmodel seg-threshold CDATA #IMPLIED>
+<!ATTLIST dbmodel hide-rels (false|true) #IMPLIED>
 <!ATTLIST dbmodel seg-obj-count CDATA #IMPLIED>
 <!ATTLIST dbmodel last-scene CDATA #IMPLIED>
 <!ATTLIST dbmodel default-schema CDATA #IMPLIED>

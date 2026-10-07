@@ -28,31 +28,54 @@ TableRelsWidget::TableRelsWidget(QWidget *parent): QWidget(parent)
 	table = nullptr;
 	model = nullptr;
 
-	setWindowTitle(tr("Cross-scene relationships"));
+	setWindowTitle(tr("Table relationships"));
 
 	table_sel = new ObjectSelectorWidget({ ObjectType::Table, ObjectType::View, ObjectType::ForeignTable }, this);
 	table_sel->setReadOnly(true);
 
-	rels_tab = new CustomTableWidget(CustomTableWidget::NoButtons, false, this);
-	rels_tab->setColumnCount(3);
-	rels_tab->setHeaderLabel(tr("Relationship"), 0);
-	rels_tab->setHeaderIcon(GuiUtilsNs::getIcon("relationship"), 0);
-	rels_tab->setHeaderLabel(tr("Type"), 1);
-	rels_tab->setHeaderLabel(tr("Related table"), 2);
-	rels_tab->setHeaderIcon(GuiUtilsNs::getIcon("table"), 2);
-	rels_tab->setHeaderVisible(Qt::Vertical, true);
+	hidden_rels_tab = createRelsGrid();
+	hidden_rels_tab->setObjectName("hidden_rels_tab");
+
+	cross_rels_tab = createRelsGrid();
+	cross_rels_tab->setObjectName("cross_rels_tab");
+
+	rels_tbw = new QTabWidget(this);
+
+	// Each grid sits in its own page so it gets a margin inside the tab
+	for(auto &[grid, title] : QList<QPair<CustomTableWidget *, QString>> {
+			{ hidden_rels_tab, tr("Relationships") }, { cross_rels_tab, tr("Cross rels.") } })
+	{
+		QWidget *page = new QWidget;
+		QVBoxLayout *page_lt = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargin, GuiUtilsNs::LtSpacing, page);
+
+		page_lt->addWidget(grid);
+		rels_tbw->addTab(page, GuiUtilsNs::getIcon("relationship"), title);
+	}
 
 	QVBoxLayout *layout = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargin, GuiUtilsNs::LtSpacing, this);
 	layout->addWidget(table_sel);
-	layout->addWidget(rels_tab);
+	layout->addWidget(rels_tbw);
 
 	setMinimumSize(640, 320);
+}
 
-	connect(rels_tab, &CustomTableWidget::s_cellDoubleClicked, this, [this](int row, int){
-		BaseRelationship *rel = reinterpret_cast<BaseRelationship *>(rels_tab->getRowData(row).value<void *>());
+CustomTableWidget *TableRelsWidget::createRelsGrid()
+{
+	CustomTableWidget *grid = new CustomTableWidget(CustomTableWidget::NoButtons, false, this);
+
+	grid->setColumnCount(3);
+	grid->setHeaderLabel(tr("Relationship"), 0);
+	grid->setHeaderIcon(GuiUtilsNs::getIcon("relationship"), 0);
+	grid->setHeaderLabel(tr("Type"), 1);
+	grid->setHeaderLabel(tr("Related table"), 2);
+	grid->setHeaderIcon(GuiUtilsNs::getIcon("table"), 2);
+	grid->setHeaderVisible(Qt::Vertical, true);
+
+	connect(grid, &CustomTableWidget::s_cellDoubleClicked, this, [this, grid](int row, int){
+		BaseRelationship *rel = reinterpret_cast<BaseRelationship *>(grid->getRowData(row).value<void *>());
 
 		/* The row may be stale: an earlier edition can cascade into removing this relationship or
-		 * one of its tables. In that case the grid is refreshed instead of activating the row */
+		 * one of its tables. In that case the grids are refreshed instead of activating the row */
 		if(model->getObjectIndex(rel) >= 0 &&
 			 model->getObjectIndex(rel->getTable(BaseRelationship::SrcTable)) >= 0 &&
 			 model->getObjectIndex(rel->getTable(BaseRelationship::DstTable)) >= 0)
@@ -60,6 +83,8 @@ TableRelsWidget::TableRelsWidget(QWidget *parent): QWidget(parent)
 		else
 			updateRelationships();
 	});
+
+	return grid;
 }
 
 void TableRelsWidget::setAttributes(DatabaseModel *model, BaseTable *table)
@@ -70,12 +95,37 @@ void TableRelsWidget::setAttributes(DatabaseModel *model, BaseTable *table)
 	updateRelationships();
 }
 
+void TableRelsWidget::fillRelsGrid(CustomTableWidget *grid, const QList<BaseRelationship *> &rels)
+{
+	grid->blockSignals(true);
+	grid->removeRows();
+
+	for(auto &rel : rels)
+	{
+		BaseTable *other_tab = rel->getTable(BaseRelationship::SrcTable) == table ?
+														 rel->getTable(BaseRelationship::DstTable) :
+														 rel->getTable(BaseRelationship::SrcTable);
+		int row = grid->addRow();
+
+		grid->setCellText(rel->getName(), row, 0);
+		grid->setCellIcon(GuiUtilsNs::getIcon(rel->getRelTypeAttribute().replace("rel", "relationship")), row, 0);
+		grid->setCellText(rel->getRelationshipTypeName(), row, 1);
+		grid->setCellText(other_tab->getSignature(true), row, 2);
+		grid->setCellIcon(GuiUtilsNs::getIcon(other_tab->getSchemaName()), row, 2);
+		grid->setRowData(QVariant::fromValue<void *>(rel), row);
+	}
+
+	grid->clearSelection();
+	grid->blockSignals(false);
+	grid->resizeContents();
+}
+
 void TableRelsWidget::updateRelationships()
 {
 	/* The relationships are read from the table's current view every time instead of being
-	 * cached, since that view (and its list) can be replaced while the user edits a relationship */
+	 * cached, since that view (and its lists) can be replaced while the user edits a relationship */
 	BaseTableView *tab_view = nullptr;
-	QList<BaseRelationship *> rels;
+	QList<BaseRelationship *> hidden_rels, cross_rels;
 
 	/* The table itself may be gone from the model (a cascade deletion triggered by a relationship
 	 * edition), so it's only dereferenced after confirming it's still there */
@@ -88,27 +138,11 @@ void TableRelsWidget::updateRelationships()
 		tab_view = dynamic_cast<BaseTableView *>(table->getOverlyingObject());
 
 	if(tab_view)
-		rels = tab_view->getExternalRelationships();
-
-	rels_tab->blockSignals(true);
-	rels_tab->removeRows();
-
-	for(auto &rel : rels)
 	{
-		BaseTable *other_tab = rel->getTable(BaseRelationship::SrcTable) == table ?
-														 rel->getTable(BaseRelationship::DstTable) :
-														 rel->getTable(BaseRelationship::SrcTable);
-		int row = rels_tab->addRow();
-
-		rels_tab->setCellText(rel->getName(), row, 0);
-		rels_tab->setCellIcon(GuiUtilsNs::getIcon(rel->getRelTypeAttribute().replace("rel", "relationship")), row, 0);
-		rels_tab->setCellText(rel->getRelationshipTypeName(), row, 1);
-		rels_tab->setCellText(other_tab->getSignature(true), row, 2);
-		rels_tab->setCellIcon(GuiUtilsNs::getIcon(other_tab->getSchemaName()), row, 2);
-		rels_tab->setRowData(QVariant::fromValue<void *>(rel), row);
+		hidden_rels = tab_view->getHiddenRelationships();
+		cross_rels = tab_view->getExternalRelationships();
 	}
 
-	rels_tab->clearSelection();
-	rels_tab->blockSignals(false);
-	rels_tab->resizeContents();
+	fillRelsGrid(hidden_rels_tab, hidden_rels);
+	fillRelsGrid(cross_rels_tab, cross_rels);
 }
