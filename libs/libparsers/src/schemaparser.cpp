@@ -30,6 +30,8 @@ const QRegularExpression SchemaParser::AttribRegExp {
 	QRegularExpression::CaseInsensitiveOption
 };
 
+QHash<QString, SchemaParser::CachedFile> SchemaParser::file_cache;
+
 const QChar SchemaParser::CharComment {'#'};
 const QChar SchemaParser::CharLineEnd {'\n'};
 const QChar SchemaParser::CharSpace {' '};
@@ -334,10 +336,27 @@ void SchemaParser::loadFile(const QString &filename)
 
 	try
 	{
-		QString buf(UtilsNs::loadFile(filename));
-		setSearchPath(QFileInfo(filename).absolutePath());
-		loadBuffer(buf);
-		SchemaParser::filename = filename;
+		QString cache_key = QFileInfo(filename).absoluteFilePath();
+		auto cache_itr = file_cache.find(cache_key);
+
+		if(cache_itr != file_cache.constEnd())
+		{
+			/* The file (and whatever it @includes) was already loaded and processed by this or another
+			 * instance, so we just reuse that result instead of hitting the disk and reprocessing it again */
+			restartParser();
+			setSearchPath(QFileInfo(filename).absolutePath());
+			buffer = cache_itr->buffer;
+			include_infos = cache_itr->include_infos;
+			SchemaParser::filename = filename;
+		}
+		else
+		{
+			QString buf(UtilsNs::loadFile(filename));
+			setSearchPath(QFileInfo(filename).absolutePath());
+			loadBuffer(buf);
+			SchemaParser::filename = filename;
+			file_cache[cache_key] = CachedFile { buffer, include_infos };
+		}
 	}
 	catch(Exception &e)
 	{
