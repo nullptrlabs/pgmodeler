@@ -347,6 +347,11 @@ void MainWindow::configureMenusActionsWidgets()
 		btn->setProperty("view_btn", true);
 	}
 
+	/* Monitoring the layout requests of the tools toolbar so the buttons
+	 * width can be adjusted every time an action is added/removed/hidden
+	 * or a button's size hint changes (font, stylesheet, text, etc) */
+	tools_acts_tb->installEventFilter(this);
+
 	ToolsActionsCount = tools_acts_tb->actions().size();
 	QList<QAction *> actions = model_acts_tb->actions();
 	actions.append(tools_acts_tb->actions());
@@ -880,6 +885,14 @@ void MainWindow::showEvent(QShowEvent *event)
 {
 	if(!event->spontaneous())
 		startOtherTimers();
+}
+
+bool MainWindow::eventFilter(QObject *object, QEvent *event)
+{
+	if(object == tools_acts_tb && event->type() == QEvent::LayoutRequest)
+		adjustToolsButtonsWidth();
+
+	return QMainWindow::eventFilter(object, event);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -1624,6 +1637,29 @@ void MainWindow::removeModelActions()
 		tools_acts_tb->removeAction(act_list.back());
 		act_list.pop_back();
 	}
+}
+
+void MainWindow::adjustToolsButtonsWidth()
+{
+	QList<QToolButton *> btns;
+	QToolButton *btn = nullptr;
+	int max_w = 0;
+
+	for(auto &act : tools_acts_tb->actions())
+	{
+		btn = qobject_cast<QToolButton *>(tools_acts_tb->widgetForAction(act));
+
+		if(!btn || !act->isVisible())
+			continue;
+
+		btns.append(btn);
+		max_w = qMax(max_w, btn->sizeHint().width());
+	}
+
+	/* Forcing all the buttons in the tools toolbar to have
+	 * the same width as the widest one */
+	for(auto &tool_btn : btns)
+		tool_btn->setMinimumWidth(max_w);
 }
 
 bool MainWindow::closeModel(int model_id, bool confirm)

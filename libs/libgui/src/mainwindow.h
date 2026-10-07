@@ -196,6 +196,7 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		void resizeEvent(QResizeEvent *) override;
 
 		void showEvent(QShowEvent *) override;
+		bool eventFilter(QObject *object, QEvent *event) override;
 
 		void setBottomFloatingWidgetPos(QWidget *widget, QAbstractButton *btn);
 
@@ -396,6 +397,10 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		void toggleAboutWidget(bool show);
 		void toggleDonateWidget(bool show);
 		void removeModelActions();
+
+		//! \brief Makes all the buttons in the tools toolbar have the same width as the widest one
+		void adjustToolsButtonsWidth();
+
 		void changeCurrentView(bool checked);
 		void reportBug();
 		void removeOperations();
