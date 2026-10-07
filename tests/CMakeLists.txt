@@ -46,3 +46,8 @@ add_subdirectory(src/clitest)
 if(BUILD_PRIV_CODE AND USE_ADDR_SANITIZER)
     add_subdirectory(src/sqlexecleaktest)
 endif()
+
+# PrivCodeCompletionWidget is part of the private core
+if(BUILD_PRIV_CODE)
+    add_subdirectory(src/privcodecompletiontest)
+endif()
