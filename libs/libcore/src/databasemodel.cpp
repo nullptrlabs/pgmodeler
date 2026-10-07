@@ -3982,11 +3982,11 @@ void DatabaseModel::setBasicAttributes(BaseObject *object)
 					{
 						QPointF pos(attribs[Attributes::XPos].toDouble(), attribs[Attributes::YPos].toDouble());
 
-						// A "cutoff" id marks this <position> as the cut-off marker's, not the object's own
-						if(attribs[Attributes::Id]==Attributes::Cutoff)
+						// A "relationship marker" id marks this <position> as the relationship marker's, not the object's own
+						if(attribs[Attributes::Id]==Attributes::RelMarker)
 						{
 							if(BaseTable::isBaseTable(obj_type_aux))
-								dynamic_cast<BaseTable *>(object)->setCutoffPosition(pos);
+								dynamic_cast<BaseTable *>(object)->setRelMarkerPosition(pos);
 						}
 						else
 							dynamic_cast<BaseGraphicObject *>(object)->setPosition(pos);

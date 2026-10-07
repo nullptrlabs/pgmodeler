@@ -1970,7 +1970,7 @@ Kódování: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
+    <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
         <translation>Vztahy mezi scénami</translation>
@@ -2264,7 +2264,7 @@ Pokud je volba vypnuta, SQL se připojí na konec příkazu CREATE DATABASE.</tr
     </message>
 </context>
 <context>
-    <name>CutoffItem</name>
+    <name>RelMarkerItem</name>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Vztahy mezi scénami: &lt;b&gt;%1&lt;/b&gt;</translation>

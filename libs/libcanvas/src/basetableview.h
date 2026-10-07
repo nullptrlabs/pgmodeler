@@ -38,7 +38,7 @@
 #include "baserelationship.h"
 #include "textpolygonitem.h"
 #include "attributestoggleritem.h"
-#include "cutoffitem.h"
+#include "relmarkeritem.h"
 
 class __libcanvas BaseTableView: public BaseObjectView {
 	Q_OBJECT
@@ -54,11 +54,11 @@ class __libcanvas BaseTableView: public BaseObjectView {
 
 		/*! \brief Stores the references to the relationships that connect this table to a table
 		 * placed in a different scene. These relationships have no RelationshipView of their own,
-		 * being represented instead by a cut-off marker on each side. */
+		 * being represented instead by a relationship marker on each side. */
 		QList<BaseRelationship *> external_rels;
 
 		//! \brief Marker representing external_rels on the canvas. Null while external_rels is empty
-		CutoffItem *cutoff_item;
+		RelMarkerItem *rel_marker_item;
 
 	protected:		
 		//! \brief Stores the selected child objects in order to retrieve them in ObjectScene/ModelWidget
@@ -182,12 +182,12 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		//! \brief Returns the list of relationships that connect this table to a table placed in a different scene
 		QList<BaseRelationship *> getExternalRelationships();
 
-		/*! \brief Returns, in scene coordinates, the point the cut-off marker's line attaches to
+		/*! \brief Returns, in scene coordinates, the point the relationship marker's line attaches to
 		 * (title's right edge, vertically centered on the title) */
-		QPointF getCutoffAnchorPoint();
+		QPointF getRelMarkerAnchorPoint();
 
-		//! \brief Returns the cut-off marker currently attached to this table, or nullptr if it has none
-		CutoffItem *getCutoffItem();
+		//! \brief Returns the relationship marker currently attached to this table, or nullptr if it has none
+		RelMarkerItem *getRelMarkerItem();
 
 		//! \brief This method just emits the signal to indicate that the relationships attached must be updated
 		void requestRelationshipsUpdate();

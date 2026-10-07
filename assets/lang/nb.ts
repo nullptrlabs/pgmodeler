@@ -1970,7 +1970,7 @@ Koding: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
+    <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
         <translation>Relasjoner på tvers av scener</translation>
@@ -2264,7 +2264,7 @@ Hvis alternativet er slått av, legges SQL til på slutten av kommandoen CREATE 
     </message>
 </context>
 <context>
-    <name>CutoffItem</name>
+    <name>RelMarkerItem</name>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Relasjoner på tvers av scener: &lt;b&gt;%1&lt;/b&gt;</translation>

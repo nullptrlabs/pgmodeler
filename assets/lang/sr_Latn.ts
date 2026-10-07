@@ -1970,7 +1970,7 @@ Kodiranje: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
+    <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
         <translation>Odnosi između scena</translation>
@@ -2264,7 +2264,7 @@ Ako se ovo isključi, SQL će biti dodat na kraj komande CREATE DATABASE.</trans
     </message>
 </context>
 <context>
-    <name>CutoffItem</name>
+    <name>RelMarkerItem</name>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Unakr. odnosi: &lt;b&gt;%1&lt;/b&gt;</translation>

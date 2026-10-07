@@ -19,17 +19,17 @@
 # Also, you can get the complete GNU General Public License at <http://www.gnu.org/licenses/>
 */
 
-#include "cutoffitem.h"
+#include "relmarkeritem.h"
 #include "basetableview.h"
 #include "objectsscene.h"
 #include <cmath>
 
-CutoffItem::CutoffItem(BaseTableView *table)
+RelMarkerItem::RelMarkerItem(BaseTableView *table)
 {
 	this->table = table;
 
 	line = new QGraphicsLineItem;
-	line->setPen(BaseObjectView::getBorderStyle(Attributes::CutoffMarker));
+	line->setPen(BaseObjectView::getBorderStyle(Attributes::RelMarker));
 	this->addToGroup(line);
 
 	label_bg = new RoundedRectItem;
@@ -51,7 +51,7 @@ CutoffItem::CutoffItem(BaseTableView *table)
 
 	/* Without this flag, QGraphicsItem::setPos() takes a fast path that applies the position
 	 * directly and never calls itemChange() -- itemChange(ItemPositionHasChanged) below (which
-	 * persists a user drag into the table's cutoff position) would silently never run */
+	 * persists a user drag into the table's relationship marker position) would silently never run */
 	this->setFlag(QGraphicsItem::ItemSendsGeometryChanges);
 
 	this->setZValue(-50);
@@ -60,20 +60,20 @@ CutoffItem::CutoffItem(BaseTableView *table)
 	 * cost-driven reason to pick only one signal depending on placeholder mode -- connecting
 	 * to all three keeps the marker correct regardless of how the table's position was last
 	 * committed (live move, drag-release with grid alignment, or a resize) */
-	connect(table, &BaseTableView::s_objectMoved, this, &CutoffItem::updatePosition);
-	connect(table, &BaseTableView::s_relUpdateRequest, this, &CutoffItem::updatePosition);
-	connect(table, &BaseTableView::s_objectDimensionChanged, this, &CutoffItem::updatePosition);
+	connect(table, &BaseTableView::s_objectMoved, this, &RelMarkerItem::updatePosition);
+	connect(table, &BaseTableView::s_relUpdateRequest, this, &RelMarkerItem::updatePosition);
+	connect(table, &BaseTableView::s_objectDimensionChanged, this, &RelMarkerItem::updatePosition);
 
 	updateLabel();
 	updatePosition();
 }
 
-BaseTable *CutoffItem::getTable()
+BaseTable *RelMarkerItem::getTable()
 {
 	return dynamic_cast<BaseTable *>(table->getUnderlyingObject());
 }
 
-void CutoffItem::addRelationship(BaseRelationship *rel)
+void RelMarkerItem::addRelationship(BaseRelationship *rel)
 {
 	if(!rel || rels.contains(rel))
 		return;
@@ -82,28 +82,28 @@ void CutoffItem::addRelationship(BaseRelationship *rel)
 	updateLabel();
 }
 
-void CutoffItem::removeRelationship(BaseRelationship *rel)
+void RelMarkerItem::removeRelationship(BaseRelationship *rel)
 {
 	rels.removeOne(rel);
 	updateLabel();
 }
 
-int CutoffItem::getRelationshipsCount()
+int RelMarkerItem::getRelationshipsCount()
 {
 	return rels.size();
 }
 
-QList<BaseRelationship *> CutoffItem::getRelationships()
+QList<BaseRelationship *> RelMarkerItem::getRelationships()
 {
 	return rels;
 }
 
-void CutoffItem::updateLabel()
+void RelMarkerItem::updateLabel()
 {
 	// The relationship count can change label_bg's size, which changes boundingRect()'s result
 	prepareGeometryChange();
 
-	QTextCharFormat char_fmt = BaseObjectView::getFontStyle(Attributes::CutoffMarker);
+	QTextCharFormat char_fmt = BaseObjectView::getFontStyle(Attributes::RelMarker);
 	char_fmt.setFontPointSize(char_fmt.font().pointSizeF() * 0.90);
 
 	label->setFont(char_fmt.font());
@@ -118,9 +118,9 @@ void CutoffItem::updateLabel()
 	label->setPolygon(box_rect);
 
 	label_bg->setRect(box_rect);
-	label_bg->setBrush(BaseObjectView::getFillStyle(Attributes::CutoffMarker));
+	label_bg->setBrush(BaseObjectView::getFillStyle(Attributes::RelMarker));
 
-	QPen pen = BaseObjectView::getBorderStyle(Attributes::CutoffMarker);
+	QPen pen = BaseObjectView::getBorderStyle(Attributes::RelMarker);
 	pen.setWidthF(BaseObjectView::ObjectBorderWidth * BaseObjectView::getScreenDpiFactor());
 	label_bg->setPen(pen);
 	label->setTextPos(BaseObjectView::HorizSpacing * 0.75, BaseObjectView::VertSpacing * 0.75);
@@ -129,7 +129,7 @@ void CutoffItem::updateLabel()
 	updateLine();
 }
 
-void CutoffItem::updateLabelPosition()
+void RelMarkerItem::updateLabelPosition()
 {
 	prepareGeometryChange();
 
@@ -143,14 +143,14 @@ void CutoffItem::updateLabelPosition()
 	configureObjectSelection();
 }
 
-QPointF CutoffItem::getClosestTablePoint(const QPointF &pos) const
+QPointF RelMarkerItem::getClosestTablePoint(const QPointF &pos) const
 {
 	QRectF tab_rect = table->sceneBoundingRect();
 	return { qBound(tab_rect.left(), pos.x(), tab_rect.right()),
 					 qBound(tab_rect.top(), pos.y(), tab_rect.bottom()) };
 }
 
-QPointF CutoffItem::getNearestEdgeNormal(const QPointF &pos) const
+QPointF RelMarkerItem::getNearestEdgeNormal(const QPointF &pos) const
 {
 	QRectF tab_rect = table->sceneBoundingRect();
 	double dist_left = pos.x() - tab_rect.left(),
@@ -171,7 +171,7 @@ QPointF CutoffItem::getNearestEdgeNormal(const QPointF &pos) const
 	return { 0, 1 };
 }
 
-QPointF CutoffItem::getOutwardDirection() const
+QPointF RelMarkerItem::getOutwardDirection() const
 {
 	QRectF tab_rect = table->sceneBoundingRect();
 	QPointF pos = this->pos();
@@ -188,7 +188,7 @@ QPointF CutoffItem::getOutwardDirection() const
 	return dir / len;
 }
 
-QPointF CutoffItem::clampToTableOrbit(const QPointF &new_pos) const
+QPointF RelMarkerItem::clampToTableOrbit(const QPointF &new_pos) const
 {
 	QRectF tab_rect = table->sceneBoundingRect();
 
@@ -218,7 +218,7 @@ QPointF CutoffItem::clampToTableOrbit(const QPointF &new_pos) const
 	return new_pos;
 }
 
-void CutoffItem::updateLine()
+void RelMarkerItem::updateLine()
 {
 	QPointF table_center = table->sceneBoundingRect().center(),
 					box_center = label_bg->pos() + QPointF(label_bg->boundingRect().width() / 2,
@@ -231,7 +231,7 @@ void CutoffItem::updateLine()
 	line->setPen(pen);
 }
 
-void CutoffItem::configureObjectSelection()
+void RelMarkerItem::configureObjectSelection()
 {
 	obj_selection->setRect(label_bg->boundingRect());
 	obj_selection->setPos(label_bg->pos());
@@ -240,14 +240,14 @@ void CutoffItem::configureObjectSelection()
 	obj_selection->setPen(BaseObjectView::getBorderStyle(Attributes::ObjSelection));
 }
 
-void CutoffItem::configureLineSelection(bool selected)
+void RelMarkerItem::configureLineSelection(bool selected)
 {
 	QPen pen = line->pen();
 
 	if(selected)
 	{
 		QColor sel_color = BaseObjectView::getBorderStyle(Attributes::ObjSelection).color(),
-				line_color = BaseObjectView::getBorderStyle(Attributes::CutoffMarker).color(),
+				line_color = BaseObjectView::getBorderStyle(Attributes::RelMarker).color(),
 				color;
 
 		color.setRedF((sel_color.redF() + line_color.redF()) / 2.0);
@@ -258,13 +258,13 @@ void CutoffItem::configureLineSelection(bool selected)
 		pen.setColor(color);
 	}
 	else
-		pen.setColor(BaseObjectView::getBorderStyle(Attributes::CutoffMarker).color());
+		pen.setColor(BaseObjectView::getBorderStyle(Attributes::RelMarker).color());
 
 	pen.setWidthF(getLinePenWidth());
 	line->setPen(pen);
 }
 
-QVariant CutoffItem::itemChange(GraphicsItemChange change, const QVariant &value)
+QVariant RelMarkerItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
 	if(change == ItemSelectedHasChanged)
 	{
@@ -273,23 +273,23 @@ QVariant CutoffItem::itemChange(GraphicsItemChange change, const QVariant &value
 
 		if(value.toBool())
 		{
-			/* A cutoff marker's selection is exclusive: selecting one must clear every other
-			 * selected item -- another cutoff or a regular object -- in this scene, and (reusing the
+			/* A relationship marker's selection is exclusive: selecting one must clear every other
+			 * selected item -- another relationship marker or a regular object -- in this scene, and (reusing the
 			 * same cross-scene reset mechanism a plain click already triggers) every other scene too.
 			 * A plain click already gets this for free from Qt's own click handling, but Ctrl+click
 			 * and rubber-band selection don't reset anything by design, so without this they could
 			 * still produce a mixed selection, which is exactly what must never happen */
-			ObjectsScene *cutoff_scene = dynamic_cast<ObjectsScene *>(this->scene());
+			ObjectsScene *rel_marker_scene = dynamic_cast<ObjectsScene *>(this->scene());
 
-			if(cutoff_scene)
+			if(rel_marker_scene)
 			{
-				for(auto &item : cutoff_scene->selectedItems())
+				for(auto &item : rel_marker_scene->selectedItems())
 				{
 					if(item != this)
 						item->setSelected(false);
 				}
 
-				emit cutoff_scene->s_selectionResetTriggered();
+				emit rel_marker_scene->s_selectionResetTriggered();
 			}
 		}
 	}
@@ -307,30 +307,30 @@ QVariant CutoffItem::itemChange(GraphicsItemChange change, const QVariant &value
 		updateLabelPosition();
 		updateLine();
 
-		/* Only an actual user drag should persist a new cutoff_pos -- updatePosition()'s own
+		/* Only an actual user drag should persist a new rel_marker_pos -- updatePosition()'s own
 		 * setPos() calls (construction, or the table moving/resizing) are restoring/following, not
 		 * choosing a new position, and must not feed back into the model (see restoring_position's
 		 * comment in the header for why that matters) */
 		if(!restoring_position)
 		{
 			BaseTable *base_tab = dynamic_cast<BaseTable *>(table->getUnderlyingObject());
-			base_tab->setCutoffPosition(this->pos() - table->getCutoffAnchorPoint());
+			base_tab->setRelMarkerPosition(this->pos() - table->getRelMarkerAnchorPoint());
 		}
 	}
 
 	return QGraphicsItemGroup::itemChange(change, value);
 }
 
-void CutoffItem::updatePosition()
+void RelMarkerItem::updatePosition()
 {
 	BaseTable *base_tab = dynamic_cast<BaseTable *>(table->getUnderlyingObject());
-	QPointF offset = base_tab->getCutoffPosition();
+	QPointF offset = base_tab->getRelMarkerPosition();
 
 	if(std::isnan(offset.x()))
 		offset = QPointF(0, 0);
 
 	restoring_position = true;
-	this->setPos(table->getCutoffAnchorPoint() + offset);
+	this->setPos(table->getRelMarkerAnchorPoint() + offset);
 	restoring_position = false;
 
 	/* Covers a pure resize, where the table's rect changes but this item's pos() doesn't --
@@ -340,7 +340,7 @@ void CutoffItem::updatePosition()
 	updateLine();
 }
 
-void CutoffItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void RelMarkerItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
 	/* Same workaround as RelationshipView::paint(): QGraphicsItemGroup::paint() draws an
 	 * artifact rectangle around its (often stale) itemsBoundingRect whenever the group is
@@ -352,13 +352,13 @@ void CutoffItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 	painter->restore();
 }
 
-QRectF CutoffItem::boundingRect() const
+QRectF RelMarkerItem::boundingRect() const
 {
 	return line->boundingRect().translated(line->pos()) |
 				 label_bg->boundingRect().translated(label_bg->pos());
 }
 
-double CutoffItem::getLinePenWidth()
+double RelMarkerItem::getLinePenWidth()
 {
 	// Adjusting the line thickness according to the screen dpi
 	if(BaseObjectView::getScreenDpiFactor() > 1)

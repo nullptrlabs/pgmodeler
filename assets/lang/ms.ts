@@ -1970,7 +1970,7 @@ Pengekodan: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
+    <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
         <translation>Hubungan merentas adegan</translation>
@@ -2264,7 +2264,7 @@ Jika dinyahtanda, SQL akan ditambah pada hujung arahan CREATE DATABASE.</transla
     </message>
 </context>
 <context>
-    <name>CutoffItem</name>
+    <name>RelMarkerItem</name>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Hubungan merentas: &lt;b&gt;%1&lt;/b&gt;</translation>

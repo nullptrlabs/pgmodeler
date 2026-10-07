@@ -1970,7 +1970,7 @@ Kodowanie: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
+    <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
         <translation>Relacje między scenami</translation>
@@ -2264,7 +2264,7 @@ Gdy opcja jest wyłączona, SQL zostanie dołączony na końcu polecenia CREATE 
     </message>
 </context>
 <context>
-    <name>CutoffItem</name>
+    <name>RelMarkerItem</name>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Relacje między scenami: &lt;b&gt;%1&lt;/b&gt;</translation>

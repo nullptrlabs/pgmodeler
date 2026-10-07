@@ -1970,7 +1970,7 @@ Codifica: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
+    <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
         <translation>Relazioni tra scene</translation>
@@ -2264,7 +2264,7 @@ Se l&apos;opzione è disattivata, l&apos;SQL verrà aggiunto alla fine del coman
     </message>
 </context>
 <context>
-    <name>CutoffItem</name>
+    <name>RelMarkerItem</name>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Relazioni tra scene: &lt;b&gt;%1&lt;/b&gt;</translation>

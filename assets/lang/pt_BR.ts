@@ -1970,7 +1970,7 @@ Codificação: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
+    <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
         <translation>Relacionamentos de cenas cruzadas</translation>
@@ -2264,7 +2264,7 @@ Desmarcar isto fará com que o SQL seja anexado ao final do comando CREATE DATAB
     </message>
 </context>
 <context>
-    <name>CutoffItem</name>
+    <name>RelMarkerItem</name>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Rels. cruzados: &lt;b&gt;%1&lt;/b&gt;</translation>

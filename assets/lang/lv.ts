@@ -1970,7 +1970,7 @@ Kodējums: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
+    <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
         <translation>Attiecības starp ainām</translation>
@@ -2264,7 +2264,7 @@ Ja šī opcija ir noņemta, SQL tiks pievienots komandas CREATE DATABASE beigās
     </message>
 </context>
 <context>
-    <name>CutoffItem</name>
+    <name>RelMarkerItem</name>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Starpainu attiec.: &lt;b&gt;%1&lt;/b&gt;</translation>

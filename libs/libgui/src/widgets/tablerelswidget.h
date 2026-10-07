@@ -21,12 +21,12 @@
 
 /**
 \ingroup libgui
-\class CrossSceneRelsWidget
+\class TableRelsWidget
 \brief Lists the relationships of a table whose other end lives in a different scene, along with the table on that end
 */
 
-#ifndef CROSS_SCENE_RELS_WIDGET_H
-#define CROSS_SCENE_RELS_WIDGET_H
+#ifndef TABLE_RELS_WIDGET_H
+#define TABLE_RELS_WIDGET_H
 
 #include "guiglobal.h"
 #include "customtablewidget.h"
@@ -36,7 +36,7 @@
 #include "baserelationship.h"
 #include <QWidget>
 
-class __libgui CrossSceneRelsWidget: public QWidget {
+class __libgui TableRelsWidget: public QWidget {
 	Q_OBJECT
 
 	private:
@@ -53,7 +53,7 @@ class __libgui CrossSceneRelsWidget: public QWidget {
 		DatabaseModel *model;
 
 	public:
-		explicit CrossSceneRelsWidget(QWidget *parent = nullptr);
+		explicit TableRelsWidget(QWidget *parent = nullptr);
 
 		//! \brief Configures the widget to list the cross-scene relationships of the specified table
 		void setAttributes(DatabaseModel *model, BaseTable *table);
