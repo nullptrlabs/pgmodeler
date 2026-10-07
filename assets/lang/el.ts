@@ -1970,25 +1970,6 @@ PID: `%1&apos;
     </message>
 </context>
 <context>
-    <name>TableRelsWidget</name>
-    <message>
-        <source>Cross-scene relationships</source>
-        <translation>Σχέσεις μεταξύ σκηνών</translation>
-    </message>
-    <message>
-        <source>Relationship</source>
-        <translation>Σχέση</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation>Τύπος</translation>
-    </message>
-    <message>
-        <source>Related table</source>
-        <translation>Σχετικός πίνακας</translation>
-    </message>
-</context>
-<context>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
@@ -2261,13 +2242,6 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     <message>
         <source>Are you sure you want to remove all the items?</source>
         <translation>Θέλετε σίγουρα να αφαιρέσετε όλα τα στοιχεία;</translation>
-    </message>
-</context>
-<context>
-    <name>RelMarkerItem</name>
-    <message>
-        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>Σχέσεις μεταξύ σκηνών: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -9905,6 +9879,10 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
         <translation>Προεπιλεγμένη σκηνή</translation>
     </message>
     <message>
+        <source>Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?</source>
+        <translation>Η αλλαγή της ορατότητας των σχέσεων τίθεται σε ισχύ μόνο μετά την αποθήκευση και επαναφόρτωση του μοντέλου. Θέλετε να συνεχίσετε;</translation>
+    </message>
+    <message>
         <source>Don&apos;t ask to save and reload again.</source>
         <translation>Να μην ερωτηθώ ξανά για αποθήκευση και επαναφόρτωση.</translation>
     </message>
@@ -9927,6 +9905,10 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Converting a &lt;strong&gt;one-to-one&lt;/strong&gt; or &lt;strong&gt;one-to-many&lt;/strong&gt; relationship can lead to unreversible changes or break other relationships in the linking chain! Do you want to proceed?</source>
         <translation>&lt;strong&gt;ΠΡΟΕΙΔΟΠΟΙΗΣΗ:&lt;/strong&gt; η μετατροπή μιας σχέσης &lt;strong&gt;ένα-προς-ένα&lt;/strong&gt; ή &lt;strong&gt;ένα-προς-πολλά&lt;/strong&gt; μπορεί να οδηγήσει σε μη αναστρέψιμες αλλαγές ή να καταστρέψει άλλες σχέσεις στην αλυσίδα σύνδεσης! Θέλετε να συνεχίσετε;</translation>
+    </message>
+    <message>
+        <source>This model has &lt;strong&gt;%1&lt;/strong&gt; relationships. Drawing that many relationships makes the diagram hard to read and slow to handle. Load it hiding the relationships instead? Each table&apos;s relationship marker keeps listing them (double-click the marker to see the list).</source>
+        <translation>Αυτό το μοντέλο περιέχει &lt;strong&gt;%1&lt;/strong&gt; σχέσεις. Η σχεδίαση τόσο πολλών σχέσεων δυσκολεύει την ανάγνωση του διαγράμματος και επιβραδύνει τον χειρισμό του. Θέλετε να φορτωθεί με κρυμμένες τις σχέσεις; Ο δείκτης σχέσεων κάθε πίνακα εξακολουθεί να τις απαριθμεί (κάντε διπλό κλικ στον δείκτη για να δείτε τη λίστα).</translation>
     </message>
     <message>
         <source>This model concentrates &lt;strong&gt;%1%&lt;/strong&gt; of its &lt;strong&gt;%2&lt;/strong&gt; tables/views/foreign tables in a single schema &lt;strong&gt;%3&lt;/strong&gt;. Segmenting the canvas by schema wouldn&apos;t distribute much of that load into separate scenes. Load it with threshold-based segmentation instead?</source>
@@ -12543,6 +12525,17 @@ available in GUI. All available options are described below.</source>
     </message>
 </context>
 <context>
+    <name>RelMarkerItem</name>
+    <message>
+        <source>Relationships: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Σχέσεις: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Σχέσεις μεταξύ σκηνών: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -13514,6 +13507,10 @@ available in GUI. All available options are described below.</source>
         <translation>Φόρμα</translation>
     </message>
     <message>
+        <source>&lt;p&gt;Toggles the visibility of the relationships between tables of the same scene. When they are not visible, they are represented by the relationship marker of each table, whose details are shown by double-clicking it. Hiding the relationships is intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Εναλλάσσει την ορατότητα των σχέσεων μεταξύ πινάκων της ίδιας σκηνής. Όταν δεν είναι ορατές, αναπαρίστανται από τον δείκτη σχέσεων κάθε πίνακα, του οποίου οι λεπτομέρειες εμφανίζονται με διπλό κλικ. Η απόκρυψη των σχέσεων προορίζεται για μεγάλα μοντέλα, στα οποία οι σχεδιασμένες σχέσεις χάνουν τον σκοπό τους.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;ΣΗΜΕΙΩΣΗ:&lt;/strong&gt; Η αλλαγή τίθεται σε ισχύ μόνο μετά την αποθήκευση και επαναφόρτωση του μοντέλου.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Currently selected object(s)</source>
         <translation>Τα αντικείμενα που είναι επιλεγμένα αυτή τη στιγμή</translation>
     </message>
@@ -13536,6 +13533,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Όριο κατάτμησης. Ο αριθμός πινάκων, προβολών ή εξωτερικών πινάκων που δημιουργούνται πριν δημιουργηθεί νέα σκηνή και δρομολογηθούν σε αυτήν τα νέα αντικείμενα.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;Αποκρύπτει τις σχέσεις μεταξύ πινάκων της ίδιας σκηνής. Αναπαρίστανται από τον δείκτη σχέσεων κάθε πίνακα, του οποίου οι λεπτομέρειες εμφανίζονται με διπλό κλικ. Προορίζεται για μεγάλα μοντέλα, στα οποία οι σχεδιασμένες σχέσεις χάνουν τον σκοπό τους.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;ΣΗΜΕΙΩΣΗ:&lt;/strong&gt; Η αλλαγή τίθεται σε ισχύ μόνο μετά την αποθήκευση και επαναφόρτωση του μοντέλου.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14406,6 +14407,37 @@ available in GUI. All available options are described below.</source>
 %3 Type: %4</source>
         <translation>`%1&apos; (%2)
 %3 Τύπος: %4</translation>
+    </message>
+</context>
+<context>
+    <name>TableRelsWidget</name>
+    <message>
+        <source>Cross-scene relationships</source>
+        <translation type="vanished">Σχέσεις μεταξύ σκηνών</translation>
+    </message>
+    <message>
+        <source>Table relationships</source>
+        <translation>Σχέσεις του πίνακα</translation>
+    </message>
+    <message>
+        <source>Relationships</source>
+        <translation>Σχέσεις</translation>
+    </message>
+    <message>
+        <source>Cross rels.</source>
+        <translation>Σχέσεις μεταξύ σκηνών</translation>
+    </message>
+    <message>
+        <source>Relationship</source>
+        <translation>Σχέση</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Τύπος</translation>
+    </message>
+    <message>
+        <source>Related table</source>
+        <translation>Σχετικός πίνακας</translation>
     </message>
 </context>
 <context>

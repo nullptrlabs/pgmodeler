@@ -1970,25 +1970,6 @@ Pengekodan: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>TableRelsWidget</name>
-    <message>
-        <source>Cross-scene relationships</source>
-        <translation>Hubungan merentas adegan</translation>
-    </message>
-    <message>
-        <source>Relationship</source>
-        <translation>Hubungan</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation>Jenis</translation>
-    </message>
-    <message>
-        <source>Related table</source>
-        <translation>Jadual berkaitan</translation>
-    </message>
-</context>
-<context>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
@@ -2261,13 +2242,6 @@ Jika dinyahtanda, SQL akan ditambah pada hujung arahan CREATE DATABASE.</transla
     <message>
         <source>Are you sure you want to remove all the items?</source>
         <translation>Adakah anda pasti mahu membuang semua item?</translation>
-    </message>
-</context>
-<context>
-    <name>RelMarkerItem</name>
-    <message>
-        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>Hubungan merentas: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -9905,6 +9879,10 @@ Saiz yang diminta %1 x %2 terlalu besar dan tiada memori yang mencukupi untuk di
         <translation>Adegan lalai</translation>
     </message>
     <message>
+        <source>Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?</source>
+        <translation>Menukar keterlihatan hubungan hanya berkesan selepas menyimpan dan memuat semula model. Adakah anda ingin meneruskan?</translation>
+    </message>
+    <message>
         <source>Don&apos;t ask to save and reload again.</source>
         <translation>Jangan tanya lagi untuk menyimpan dan memuat semula.</translation>
     </message>
@@ -9927,6 +9905,10 @@ Saiz yang diminta %1 x %2 terlalu besar dan tiada memori yang mencukupi untuk di
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Converting a &lt;strong&gt;one-to-one&lt;/strong&gt; or &lt;strong&gt;one-to-many&lt;/strong&gt; relationship can lead to unreversible changes or break other relationships in the linking chain! Do you want to proceed?</source>
         <translation>&lt;strong&gt;AMARAN:&lt;/strong&gt; menukar hubungan &lt;strong&gt;satu-ke-satu&lt;/strong&gt; atau &lt;strong&gt;satu-ke-banyak&lt;/strong&gt; boleh menyebabkan perubahan yang tidak boleh dipulihkan atau merosakkan hubungan lain dalam rantaian pautan! Adakah anda ingin meneruskan?</translation>
+    </message>
+    <message>
+        <source>This model has &lt;strong&gt;%1&lt;/strong&gt; relationships. Drawing that many relationships makes the diagram hard to read and slow to handle. Load it hiding the relationships instead? Each table&apos;s relationship marker keeps listing them (double-click the marker to see the list).</source>
+        <translation>Model ini mempunyai &lt;strong&gt;%1&lt;/strong&gt; hubungan. Melukis begitu banyak hubungan menjadikan rajah sukar dibaca dan perlahan dikendalikan. Adakah anda ingin memuatkannya dengan hubungan disembunyikan? Penanda hubungan bagi setiap jadual terus menyenaraikannya (klik dua kali penanda untuk melihat senarai).</translation>
     </message>
     <message>
         <source>This model concentrates &lt;strong&gt;%1%&lt;/strong&gt; of its &lt;strong&gt;%2&lt;/strong&gt; tables/views/foreign tables in a single schema &lt;strong&gt;%3&lt;/strong&gt;. Segmenting the canvas by schema wouldn&apos;t distribute much of that load into separate scenes. Load it with threshold-based segmentation instead?</source>
@@ -12543,6 +12525,17 @@ yang terdapat dalam GUI. Semua pilihan yang tersedia diterangkan di bawah.</tran
     </message>
 </context>
 <context>
+    <name>RelMarkerItem</name>
+    <message>
+        <source>Relationships: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Hubungan: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Hubungan merentas: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -13514,6 +13507,10 @@ yang terdapat dalam GUI. Semua pilihan yang tersedia diterangkan di bawah.</tran
         <translation>Borang</translation>
     </message>
     <message>
+        <source>&lt;p&gt;Toggles the visibility of the relationships between tables of the same scene. When they are not visible, they are represented by the relationship marker of each table, whose details are shown by double-clicking it. Hiding the relationships is intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Menogol keterlihatan hubungan antara jadual dalam adegan yang sama. Apabila tidak kelihatan, hubungan tersebut diwakili oleh penanda hubungan bagi setiap jadual, yang butirannya dipaparkan dengan mengklik dua kali penanda itu. Menyembunyikan hubungan ditujukan untuk model besar, yang hubungan terlukisnya kehilangan tujuan.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTA:&lt;/strong&gt; Perubahan hanya berkesan selepas menyimpan dan memuat semula model.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Currently selected object(s)</source>
         <translation>Objek yang dipilih sekarang</translation>
     </message>
@@ -13536,6 +13533,10 @@ yang terdapat dalam GUI. Semua pilihan yang tersedia diterangkan di bawah.</tran
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Ambang segmentasi. Bilangan jadual, paparan atau jadual asing yang dicipta sebelum adegan baharu dicipta dan objek baharu disalurkan ke situ.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;Menyembunyikan hubungan antara jadual dalam adegan yang sama. Hubungan tersebut diwakili oleh penanda hubungan bagi setiap jadual, yang butirannya dipaparkan dengan mengklik dua kali penanda itu. Ditujukan untuk model besar, yang hubungan terlukisnya kehilangan tujuan.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTA:&lt;/strong&gt; Perubahan hanya berkesan selepas menyimpan dan memuat semula model.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14406,6 +14407,37 @@ yang terdapat dalam GUI. Semua pilihan yang tersedia diterangkan di bawah.</tran
 %3 Type: %4</source>
         <translation>`%1&apos; (%2)
 %3 Jenis: %4</translation>
+    </message>
+</context>
+<context>
+    <name>TableRelsWidget</name>
+    <message>
+        <source>Cross-scene relationships</source>
+        <translation type="vanished">Hubungan merentas adegan</translation>
+    </message>
+    <message>
+        <source>Table relationships</source>
+        <translation>Hubungan jadual</translation>
+    </message>
+    <message>
+        <source>Relationships</source>
+        <translation>Hubungan</translation>
+    </message>
+    <message>
+        <source>Cross rels.</source>
+        <translation>Hubungan merentas</translation>
+    </message>
+    <message>
+        <source>Relationship</source>
+        <translation>Hubungan</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Jenis</translation>
+    </message>
+    <message>
+        <source>Related table</source>
+        <translation>Jadual berkaitan</translation>
     </message>
 </context>
 <context>

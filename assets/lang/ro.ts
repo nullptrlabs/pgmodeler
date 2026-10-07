@@ -1970,25 +1970,6 @@ Codificare: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>TableRelsWidget</name>
-    <message>
-        <source>Cross-scene relationships</source>
-        <translation>Relații între scene</translation>
-    </message>
-    <message>
-        <source>Relationship</source>
-        <translation>Relație</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation>Tip</translation>
-    </message>
-    <message>
-        <source>Related table</source>
-        <translation>Tabel asociat</translation>
-    </message>
-</context>
-<context>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
@@ -2261,13 +2242,6 @@ Dacă se debifează, SQL-ul va fi adăugat la sfârșitul comenzii CREATE DATABA
     <message>
         <source>Are you sure you want to remove all the items?</source>
         <translation>Sigur doriți să eliminați toate elementele?</translation>
-    </message>
-</context>
-<context>
-    <name>RelMarkerItem</name>
-    <message>
-        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>Rel. încrucișate: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -9905,6 +9879,10 @@ Dimensiunea cerută %1 x %2 a fost prea mare și nu a existat suficientă memori
         <translation>Scena implicită</translation>
     </message>
     <message>
+        <source>Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?</source>
+        <translation>Modificarea vizibilității relațiilor are efect doar după salvarea și reîncărcarea modelului. Doriți să continuați?</translation>
+    </message>
+    <message>
         <source>Don&apos;t ask to save and reload again.</source>
         <translation>Nu mai întreba despre salvare și reîncărcare.</translation>
     </message>
@@ -9927,6 +9905,10 @@ Dimensiunea cerută %1 x %2 a fost prea mare și nu a existat suficientă memori
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Converting a &lt;strong&gt;one-to-one&lt;/strong&gt; or &lt;strong&gt;one-to-many&lt;/strong&gt; relationship can lead to unreversible changes or break other relationships in the linking chain! Do you want to proceed?</source>
         <translation>&lt;strong&gt;AVERTISMENT:&lt;/strong&gt; convertirea unei relații &lt;strong&gt;unu-la-unu&lt;/strong&gt; sau &lt;strong&gt;unu-la-mulți&lt;/strong&gt; poate duce la modificări ireversibile sau poate strica alte relații din lanțul de legătură! Doriți să continuați?</translation>
+    </message>
+    <message>
+        <source>This model has &lt;strong&gt;%1&lt;/strong&gt; relationships. Drawing that many relationships makes the diagram hard to read and slow to handle. Load it hiding the relationships instead? Each table&apos;s relationship marker keeps listing them (double-click the marker to see the list).</source>
+        <translation>Numărul de relații din acest model: &lt;strong&gt;%1&lt;/strong&gt;. Desenarea unui număr atât de mare de relații îngreunează citirea diagramei și încetinește lucrul cu ea. Doriți să încărcați modelul cu relațiile ascunse? Marcajul de relații al fiecărui tabel le listează în continuare (faceți dublu clic pe marcaj pentru a vedea lista).</translation>
     </message>
     <message>
         <source>This model concentrates &lt;strong&gt;%1%&lt;/strong&gt; of its &lt;strong&gt;%2&lt;/strong&gt; tables/views/foreign tables in a single schema &lt;strong&gt;%3&lt;/strong&gt;. Segmenting the canvas by schema wouldn&apos;t distribute much of that load into separate scenes. Load it with threshold-based segmentation instead?</source>
@@ -12543,6 +12525,17 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
     </message>
 </context>
 <context>
+    <name>RelMarkerItem</name>
+    <message>
+        <source>Relationships: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Relații: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Rel. încrucișate: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -13514,6 +13507,10 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
         <translation>Formular</translation>
     </message>
     <message>
+        <source>&lt;p&gt;Toggles the visibility of the relationships between tables of the same scene. When they are not visible, they are represented by the relationship marker of each table, whose details are shown by double-clicking it. Hiding the relationships is intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Comută vizibilitatea relațiilor dintre tabelele aceleiași scene. Când nu sunt vizibile, ele sunt reprezentate prin marcajul de relații al fiecărui tabel, ale cărui detalii se afișează prin dublu clic. Ascunderea relațiilor este destinată modelelor mari, în care relațiile desenate își pierd rostul.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTĂ:&lt;/strong&gt; Modificarea are efect doar după salvarea și reîncărcarea modelului.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Currently selected object(s)</source>
         <translation>Obiectele selectate în prezent</translation>
     </message>
@@ -13536,6 +13533,10 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Pragul de segmentare. Numărul de tabele, vizualizări sau tabele externe create înainte de a fi creată o scenă nouă și de a fi direcționate noile obiecte către ea.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;Ascunde relațiile dintre tabelele aceleiași scene. Acestea sunt reprezentate prin marcajul de relații al fiecărui tabel, ale cărui detalii se afișează prin dublu clic. Destinat modelelor mari, în care relațiile desenate își pierd rostul.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTĂ:&lt;/strong&gt; Modificarea are efect doar după salvarea și reîncărcarea modelului.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14406,6 +14407,37 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
 %3 Type: %4</source>
         <translation>`%1&apos; (%2)
 %3 Tip: %4</translation>
+    </message>
+</context>
+<context>
+    <name>TableRelsWidget</name>
+    <message>
+        <source>Cross-scene relationships</source>
+        <translation type="vanished">Relații între scene</translation>
+    </message>
+    <message>
+        <source>Table relationships</source>
+        <translation>Relațiile tabelului</translation>
+    </message>
+    <message>
+        <source>Relationships</source>
+        <translation>Relații</translation>
+    </message>
+    <message>
+        <source>Cross rels.</source>
+        <translation>Rel. încrucișate</translation>
+    </message>
+    <message>
+        <source>Relationship</source>
+        <translation>Relație</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Tip</translation>
+    </message>
+    <message>
+        <source>Related table</source>
+        <translation>Tabel asociat</translation>
     </message>
 </context>
 <context>

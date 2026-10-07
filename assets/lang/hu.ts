@@ -1970,25 +1970,6 @@ Kódolás: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>TableRelsWidget</name>
-    <message>
-        <source>Cross-scene relationships</source>
-        <translation>Jelenetek közötti kapcsolatok</translation>
-    </message>
-    <message>
-        <source>Relationship</source>
-        <translation>Kapcsolat</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation>Típus</translation>
-    </message>
-    <message>
-        <source>Related table</source>
-        <translation>Kapcsolódó tábla</translation>
-    </message>
-</context>
-<context>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
@@ -2261,13 +2242,6 @@ Ha ez nincs bejelölve, az SQL a CREATE DATABASE parancs végéhez kerül.</tran
     <message>
         <source>Are you sure you want to remove all the items?</source>
         <translation>Biztosan el szeretné távolítani az összes elemet?</translation>
-    </message>
-</context>
-<context>
-    <name>RelMarkerItem</name>
-    <message>
-        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>Kereszt-kapcs.: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -9905,6 +9879,10 @@ A kért %1 x %2 méret túl nagy volt, és nem volt elég memória a lefoglalás
         <translation>Alapértelmezett jelenet</translation>
     </message>
     <message>
+        <source>Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?</source>
+        <translation>A kapcsolatok láthatóságának módosítása csak a modell mentése és újratöltése után lép érvénybe. Folytatni szeretné?</translation>
+    </message>
+    <message>
         <source>Don&apos;t ask to save and reload again.</source>
         <translation>Ne kérdezzen rá többé a mentésre és az újratöltésre.</translation>
     </message>
@@ -9927,6 +9905,10 @@ A kért %1 x %2 méret túl nagy volt, és nem volt elég memória a lefoglalás
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Converting a &lt;strong&gt;one-to-one&lt;/strong&gt; or &lt;strong&gt;one-to-many&lt;/strong&gt; relationship can lead to unreversible changes or break other relationships in the linking chain! Do you want to proceed?</source>
         <translation>&lt;strong&gt;FIGYELEM:&lt;/strong&gt; az &lt;strong&gt;egy-az-egyhez&lt;/strong&gt; vagy &lt;strong&gt;egy-a-többhöz&lt;/strong&gt; kapcsolat átalakítása visszafordíthatatlan változásokhoz vezethet, vagy megszakíthat más kapcsolatokat a láncban! Folytatni szeretné?</translation>
+    </message>
+    <message>
+        <source>This model has &lt;strong&gt;%1&lt;/strong&gt; relationships. Drawing that many relationships makes the diagram hard to read and slow to handle. Load it hiding the relationships instead? Each table&apos;s relationship marker keeps listing them (double-click the marker to see the list).</source>
+        <translation>Ez a modell &lt;strong&gt;%1&lt;/strong&gt; kapcsolatot tartalmaz. Ennyi kapcsolat megrajzolása nehezen olvashatóvá és lassúvá teszi a diagramot. Inkább elrejtett kapcsolatokkal szeretné betölteni? Az egyes táblák kapcsolatjelölője továbbra is felsorolja őket (a lista megtekintéséhez kattintson duplán a jelölőre).</translation>
     </message>
     <message>
         <source>This model concentrates &lt;strong&gt;%1%&lt;/strong&gt; of its &lt;strong&gt;%2&lt;/strong&gt; tables/views/foreign tables in a single schema &lt;strong&gt;%3&lt;/strong&gt;. Segmenting the canvas by schema wouldn&apos;t distribute much of that load into separate scenes. Load it with threshold-based segmentation instead?</source>
@@ -12543,6 +12525,17 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
     </message>
 </context>
 <context>
+    <name>RelMarkerItem</name>
+    <message>
+        <source>Relationships: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Kapcsolatok: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Kereszt-kapcs.: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -13514,6 +13507,10 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
         <translation>Űrlap</translation>
     </message>
     <message>
+        <source>&lt;p&gt;Toggles the visibility of the relationships between tables of the same scene. When they are not visible, they are represented by the relationship marker of each table, whose details are shown by double-clicking it. Hiding the relationships is intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Átkapcsolja az azonos jelenetben lévő táblák közötti kapcsolatok láthatóságát. Ha nem láthatók, az egyes táblák kapcsolatjelölője képviseli őket, amelynek részletei dupla kattintással jeleníthetők meg. A kapcsolatok elrejtése nagy modellekhez ajánlott, amelyekben a megrajzolt kapcsolatok elvesztik értelmüket.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;MEGJEGYZÉS:&lt;/strong&gt; A módosítás csak a modell mentése és újratöltése után lép érvénybe.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Currently selected object(s)</source>
         <translation>Jelenleg kijelölt objektumok</translation>
     </message>
@@ -13536,6 +13533,10 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Szegmentálási küszöb. A létrehozott táblák, nézetek vagy külső táblák száma, mielőtt új jelenet jönne létre, és az új objektumok oda kerülnének.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;Elrejti az azonos jelenetben lévő táblák közötti kapcsolatokat. Ezeket az egyes táblák kapcsolatjelölője képviseli, amelynek részletei dupla kattintással jeleníthetők meg. Nagy modellekhez ajánlott, amelyekben a megrajzolt kapcsolatok elvesztik értelmüket.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;MEGJEGYZÉS:&lt;/strong&gt; A módosítás csak a modell mentése és újratöltése után lép érvénybe.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14406,6 +14407,37 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
 %3 Type: %4</source>
         <translation>`%1&apos; (%2)
 %3 Típus: %4</translation>
+    </message>
+</context>
+<context>
+    <name>TableRelsWidget</name>
+    <message>
+        <source>Cross-scene relationships</source>
+        <translation type="vanished">Jelenetek közötti kapcsolatok</translation>
+    </message>
+    <message>
+        <source>Table relationships</source>
+        <translation>A tábla kapcsolatai</translation>
+    </message>
+    <message>
+        <source>Relationships</source>
+        <translation>Kapcsolatok</translation>
+    </message>
+    <message>
+        <source>Cross rels.</source>
+        <translation>Kereszt-kapcs.</translation>
+    </message>
+    <message>
+        <source>Relationship</source>
+        <translation>Kapcsolat</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Típus</translation>
+    </message>
+    <message>
+        <source>Related table</source>
+        <translation>Kapcsolódó tábla</translation>
     </message>
 </context>
 <context>

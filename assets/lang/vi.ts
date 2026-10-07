@@ -1970,25 +1970,6 @@ Mã hóa: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>TableRelsWidget</name>
-    <message>
-        <source>Cross-scene relationships</source>
-        <translation>Quan hệ giữa các cảnh</translation>
-    </message>
-    <message>
-        <source>Relationship</source>
-        <translation>Quan hệ</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation>Kiểu</translation>
-    </message>
-    <message>
-        <source>Related table</source>
-        <translation>Bảng liên quan</translation>
-    </message>
-</context>
-<context>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
@@ -2261,13 +2242,6 @@ Nếu bỏ chọn, SQL sẽ được thêm vào cuối lệnh CREATE DATABASE.</
     <message>
         <source>Are you sure you want to remove all the items?</source>
         <translation>Bạn có chắc chắn muốn xóa tất cả các mục không?</translation>
-    </message>
-</context>
-<context>
-    <name>RelMarkerItem</name>
-    <message>
-        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>Quan hệ chéo: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -9905,6 +9879,10 @@ Kích thước yêu cầu %1 x %2 quá lớn và không đủ bộ nhớ để c
         <translation>Cảnh mặc định</translation>
     </message>
     <message>
+        <source>Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?</source>
+        <translation>Việc thay đổi hiển thị của các quan hệ chỉ có hiệu lực sau khi lưu và tải lại mô hình. Bạn có muốn tiếp tục không?</translation>
+    </message>
+    <message>
         <source>Don&apos;t ask to save and reload again.</source>
         <translation>Không hỏi lại về việc lưu và tải lại.</translation>
     </message>
@@ -9927,6 +9905,10 @@ Kích thước yêu cầu %1 x %2 quá lớn và không đủ bộ nhớ để c
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Converting a &lt;strong&gt;one-to-one&lt;/strong&gt; or &lt;strong&gt;one-to-many&lt;/strong&gt; relationship can lead to unreversible changes or break other relationships in the linking chain! Do you want to proceed?</source>
         <translation>&lt;strong&gt;CẢNH BÁO:&lt;/strong&gt; việc chuyển quan hệ &lt;strong&gt;một-một&lt;/strong&gt; hoặc &lt;strong&gt;một-nhiều&lt;/strong&gt; có thể dẫn đến các thay đổi không thể hoàn tác hoặc làm hỏng các quan hệ khác trong chuỗi liên kết! Bạn có muốn tiếp tục không?</translation>
+    </message>
+    <message>
+        <source>This model has &lt;strong&gt;%1&lt;/strong&gt; relationships. Drawing that many relationships makes the diagram hard to read and slow to handle. Load it hiding the relationships instead? Each table&apos;s relationship marker keeps listing them (double-click the marker to see the list).</source>
+        <translation>Mô hình này có &lt;strong&gt;%1&lt;/strong&gt; quan hệ. Vẽ quá nhiều quan hệ khiến sơ đồ khó đọc và thao tác chậm. Bạn có muốn tải mô hình với các quan hệ được ẩn không? Điểm đánh dấu quan hệ của mỗi bảng vẫn liệt kê chúng (nhấp đúp vào điểm đánh dấu để xem danh sách).</translation>
     </message>
     <message>
         <source>This model concentrates &lt;strong&gt;%1%&lt;/strong&gt; of its &lt;strong&gt;%2&lt;/strong&gt; tables/views/foreign tables in a single schema &lt;strong&gt;%3&lt;/strong&gt;. Segmenting the canvas by schema wouldn&apos;t distribute much of that load into separate scenes. Load it with threshold-based segmentation instead?</source>
@@ -12543,6 +12525,17 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
     </message>
 </context>
 <context>
+    <name>RelMarkerItem</name>
+    <message>
+        <source>Relationships: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Quan hệ: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Quan hệ chéo: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -13514,6 +13507,10 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
         <translation>Biểu mẫu</translation>
     </message>
     <message>
+        <source>&lt;p&gt;Toggles the visibility of the relationships between tables of the same scene. When they are not visible, they are represented by the relationship marker of each table, whose details are shown by double-clicking it. Hiding the relationships is intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Bật/tắt hiển thị các quan hệ giữa các bảng trong cùng một cảnh. Khi không hiển thị, các quan hệ này được biểu diễn bằng điểm đánh dấu quan hệ của mỗi bảng, chi tiết hiển thị khi nhấp đúp vào điểm đánh dấu. Việc ẩn quan hệ dành cho các mô hình lớn, nơi các quan hệ được vẽ không còn ý nghĩa.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;LƯU Ý:&lt;/strong&gt; Thay đổi chỉ có hiệu lực sau khi lưu và tải lại mô hình.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Currently selected object(s)</source>
         <translation>Các đối tượng đang được chọn</translation>
     </message>
@@ -13536,6 +13533,10 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Ngưỡng phân đoạn. Số bảng, khung nhìn hoặc bảng ngoài được tạo trước khi một cảnh mới được tạo và các đối tượng mới được định tuyến tới đó.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;Ẩn các quan hệ giữa các bảng trong cùng một cảnh. Các quan hệ này được biểu diễn bằng điểm đánh dấu quan hệ của mỗi bảng, chi tiết hiển thị khi nhấp đúp vào điểm đánh dấu. Dành cho các mô hình lớn, nơi các quan hệ được vẽ không còn ý nghĩa.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;LƯU Ý:&lt;/strong&gt; Thay đổi chỉ có hiệu lực sau khi lưu và tải lại mô hình.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14406,6 +14407,37 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
 %3 Type: %4</source>
         <translation>`%1&apos; (%2)
 %3 Loại: %4</translation>
+    </message>
+</context>
+<context>
+    <name>TableRelsWidget</name>
+    <message>
+        <source>Cross-scene relationships</source>
+        <translation type="vanished">Quan hệ giữa các cảnh</translation>
+    </message>
+    <message>
+        <source>Table relationships</source>
+        <translation>Quan hệ của bảng</translation>
+    </message>
+    <message>
+        <source>Relationships</source>
+        <translation>Quan hệ</translation>
+    </message>
+    <message>
+        <source>Cross rels.</source>
+        <translation>Quan hệ chéo</translation>
+    </message>
+    <message>
+        <source>Relationship</source>
+        <translation>Quan hệ</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Kiểu</translation>
+    </message>
+    <message>
+        <source>Related table</source>
+        <translation>Bảng liên quan</translation>
     </message>
 </context>
 <context>
