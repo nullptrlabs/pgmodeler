@@ -1251,15 +1251,25 @@ void ModelWidget::setPendingSegmentationMode(DatabaseModel::SegmentationMode mod
 {
 	db_model->setSavedSegmentationMode(mode);
 	setModified(true);
+	askSaveAndReload(tr("Changing the segmentation mode takes effect only after saving and reloading the model. Do you want to proceed?"));
+}
 
+void ModelWidget::setPendingHideRelationships(bool value)
+{
+	db_model->setSavedHideRelationships(value);
+	setModified(true);
+	askSaveAndReload(tr("Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?"));
+}
+
+void ModelWidget::askSaveAndReload(const QString &message)
+{
 	if(GeneralConfigWidget::getConfigurationParam(Attributes::Configuration,
 																								Attributes::AlertSaveReloadModel) == Attributes::True)
 	{
 		Messagebox msgbox;
 
 		msgbox.setCustomOptionText(tr("Don't ask to save and reload again."));
-		msgbox.show(tr("Changing the segmentation mode takes effect only after saving and reloading the model. Do you want to proceed?"),
-								Messagebox::Confirm, Messagebox::YesNoButtons);
+		msgbox.show(message, Messagebox::Confirm, Messagebox::YesNoButtons);
 
 		if(msgbox.isAccepted())
 			emit s_modelSaveReloadRequested();
@@ -1309,10 +1319,13 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 			ObjectsScene *src_scene = src_view ? dynamic_cast<ObjectsScene *>(src_view->scene()) : nullptr,
 									 *dst_scene = dst_view ? dynamic_cast<ObjectsScene *>(dst_view->scene()) : nullptr;
 
-			/* Tables in the same scene get a regular RelationshipView. Tables in different scenes
-			get no RelationshipView at all -- the relationship is registered as an external
-			connection on each table instead, so BaseTableView can draw its own relationship marker */
-			if(src_scene && src_scene == dst_scene)
+			bool same_scene = (src_scene && src_scene == dst_scene);
+
+			/* Tables in the same scene get a regular RelationshipView, unless the model hides its
+			relationships. Otherwise (tables in different scenes, or the relationship hidden) the
+			relationship gets no RelationshipView at all -- it is registered on each table instead,
+			so BaseTableView can show it in its relationship marker */
+			if(same_scene && !db_model->isHideRelationships())
 			{
 				item = new RelationshipView(rel);
 				target_scene = src_scene;
@@ -1320,10 +1333,10 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 			else
 			{
 				if(src_view)
-					src_view->addExternalRelationship(rel);
+					src_view->addMarkedRelationship(rel, same_scene);
 
 				if(dst_view)
-					dst_view->addExternalRelationship(rel);
+					dst_view->addMarkedRelationship(rel, same_scene);
 			}
 		}
 		break;
@@ -1587,10 +1600,10 @@ void ModelWidget::handleObjectRemoval(BaseObject *object)
 										 *dst_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::DstTable)->getOverlyingObject());
 
 			if(src_view)
-				src_view->removeExternalRelationship(rel);
+				src_view->removeMarkedRelationship(rel);
 
 			if(dst_view)
-				dst_view->removeExternalRelationship(rel);
+				dst_view->removeMarkedRelationship(rel);
 		}
 
 		if(graph_obj->getObjectType() == ObjectType::Schema)
@@ -2448,7 +2461,15 @@ ModelWidget::AlternateSegMode ModelWidget::getAlternateSegMode(const QString &fi
 
 			elem_name = xmlparser.getElementName();
 
-			if(!BaseTable::isBaseTable(BaseObject::getObjectType(elem_name)))
+			ObjectType elem_type = BaseObject::getObjectType(elem_name);
+
+			if(elem_type == ObjectType::Relationship || elem_type == ObjectType::BaseRelationship)
+			{
+				suggestion.total_rels++;
+				continue;
+			}
+
+			if(!BaseTable::isBaseTable(elem_type))
 				continue;
 
 			// Table/view/foreigntable elements reference their schema via a <schema name=".."/> child
@@ -2504,11 +2525,24 @@ ModelWidget::AlternateSegMode ModelWidget::getAlternateSegMode(const QString &fi
 
 ModelWidget::AlternateSegMode ModelWidget::checkAlternateSegmentation(const QString &filename)
 {
-	AlternateSegMode alt_seg_mode = getAlternateSegMode(filename);
+	AlternateSegMode alt_seg_mode = getAlternateSegMode(filename),
+			result;
 
-	if(!alt_seg_mode.isValid())
-		return {};
+	if(alt_seg_mode.isValid() && confirmAlternateSegMode(alt_seg_mode))
+		result = alt_seg_mode;
 
+	if(alt_seg_mode.suggestsHideRels() &&
+		 Messagebox::isAccepted(Messagebox::confirm(
+				 tr("This model has <strong>%1</strong> relationships. Drawing that many relationships makes the diagram "
+						"hard to read and slow to handle. Load it hiding the relationships instead? Each table's relationship "
+						"marker keeps listing them (double-click the marker to see the list).").arg(alt_seg_mode.total_rels))))
+		result.hide_rels = true;
+
+	return result;
+}
+
+bool ModelWidget::confirmAlternateSegMode(const AlternateSegMode &alt_seg_mode)
+{
 	double pct = (100.0 * alt_seg_mode.max_schema_objs) / alt_seg_mode.total_objs;
 	QString msg;
 
@@ -2533,10 +2567,7 @@ ModelWidget::AlternateSegMode ModelWidget::checkAlternateSegmentation(const QStr
 							 QString::number(pct, 'f', 0));
 	}
 
-	if(Messagebox::isAccepted(Messagebox::confirm(msg)))
-		return alt_seg_mode;
-
-	return {};
+	return Messagebox::isAccepted(Messagebox::confirm(msg));
 }
 
 bool ModelWidget::needsThresholdRebucketing(const QString &filename)
@@ -2631,7 +2662,8 @@ void ModelWidget::loadModel(const QString &filename, bool check_alt_seg_mode)
 												alt_seg_mode.isValid(), alt_seg_mode.mode,
 												DatabaseModel::DefaultSegThreshold,
 												rebucketed,
-												[&task_prog_wgt](){ return task_prog_wgt.wasCanceled(); });
+												[&task_prog_wgt](){ return task_prog_wgt.wasCanceled(); },
+												alt_seg_mode.hide_rels);
 
 		blink_new_objs = curr_blink_objs;
 
@@ -3410,20 +3442,22 @@ void ModelWidget::routeRelationship(BaseRelationship *rel)
 	ObjectsScene *src_scene = src_view ? dynamic_cast<ObjectsScene *>(src_view->scene()) : nullptr,
 							 *dst_scene = dst_view ? dynamic_cast<ObjectsScene *>(dst_view->scene()) : nullptr;
 
+	bool same_scene = (src_scene && src_scene == dst_scene);
+
 	/* Same routing rule as handleObjectAddition()'s Relationship case (kept as a separate, small
 	 * duplication instead of extracting a shared method -- that choke point already carries a lot
 	 * of surrounding side effects, e.g. blink_new_objs/setModified/emit s_objectAdded, that a mere
-	 * re-route shouldn't trigger): same scene now -> real RelationshipView; different scenes -> no
-	 * view, register as an external (cut-off) connection on both tables instead */
-	if(src_scene && src_scene == dst_scene)
+	 * re-route shouldn't trigger): same scene now -> real RelationshipView, unless the model hides
+	 * its relationships; otherwise no view, register the relationship in the marker of both tables */
+	if(same_scene && !db_model->isHideRelationships())
 		src_scene->addItem(new RelationshipView(rel));
 	else
 	{
 		if(src_view)
-			src_view->addExternalRelationship(rel);
+			src_view->addMarkedRelationship(rel, same_scene);
 
 		if(dst_view)
-			dst_view->addExternalRelationship(rel);
+			dst_view->addMarkedRelationship(rel, same_scene);
 	}
 }
 
@@ -3439,7 +3473,7 @@ void ModelWidget::relocateObjectView(BaseGraphicObject *graph_obj, ObjectsScene 
 	 * before old_view is discarded, or this table's relationships would be silently lost instead
 	 * of re-routed */
 	std::vector<BaseRelationship *> rels = old_view->connected_rels;
-	QList<BaseRelationship *> ext_rels = old_view->getExternalRelationships();
+	QList<BaseRelationship *> ext_rels = old_view->getExternalRelationships() + old_view->getHiddenRelationships();
 
 	/* Detach every relationship from this table BEFORE its view is destroyed:
 	 * - A same-scene relationship's RelationshipView must be removed here, not after -- removing
@@ -3466,9 +3500,9 @@ void ModelWidget::relocateObjectView(BaseGraphicObject *graph_obj, ObjectsScene 
 		BaseTableView *partner_view = dynamic_cast<BaseTableView *>(getRelationshipPartner(rel, tab)->getOverlyingObject());
 
 		if(partner_view && partner_view != old_view)
-			partner_view->removeExternalRelationship(rel);
+			partner_view->removeMarkedRelationship(rel);
 
-		old_view->removeExternalRelationship(rel);
+		old_view->removeMarkedRelationship(rel);
 	}
 
 	old_scene->removeItem(old_view);
@@ -5982,8 +6016,16 @@ void ModelWidget::configureBasicActions(BaseObject *obj)
 				new_object_menu.addAction(actions_new_objects[ObjectType::Relationship]);
 
 			popup_menu.insertAction(action_quick_actions, action_new_object);
-			popup_menu.addAction(action_sel_table_rels);
-			action_sel_table_rels->setData(QVariant::fromValue<void *>(obj));
+
+			/* Only drawn relationships can be selected: those hidden or whose partner is in another
+			 * scene are represented by the relationship marker, which has its own dialog */
+			BaseTableView *tab_view = dynamic_cast<BaseTableView *>(dynamic_cast<BaseTable *>(obj)->getOverlyingObject());
+
+			if(tab_view && tab_view->getConnectRelsCount() > 0)
+			{
+				popup_menu.addAction(action_sel_table_rels);
+				action_sel_table_rels->setData(QVariant::fromValue<void *>(obj));
+			}
 		}
 		else if(obj_type==ObjectType::Relationship || obj_type==ObjectType::BaseRelationship)
 		{

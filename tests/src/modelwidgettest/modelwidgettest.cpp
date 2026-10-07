@@ -26,6 +26,8 @@
 #include "generalconfigwidget.h"
 #include "objectrenamewidget.h"
 #include "tablerelswidget.h"
+#include "sceneinfowidget.h"
+#include "utilsns.h"
 #include "baseform.h"
 #include "databasemodel.h"
 #include "schema.h"
@@ -113,6 +115,14 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void tableRelsWidgetListsAndRefreshesRelationships();
 		void crossSceneRelsWidgetIgnoresStaleRelationship();
 		void crossSceneRelsWidgetSurvivesItsTableBeingRemoved();
+		void hiddenRelationshipsAreRoutedToTheRelMarker();
+		void selfRelationshipIsHiddenOnlyOnce();
+		void hiddenAndCrossSceneRelationshipsAreCountedSeparately();
+		void relocatingATableReclassifiesItsHiddenRelationships();
+		void hideRelationshipsOptionSurvivesSaveAndReload();
+		void forcingHideRelationshipsOnLoadOverridesTheFile();
+		void toggleRelsButtonIsCheckedWhileRelationshipsAreVisible();
+		void tableRelsWidgetSeparatesHiddenAndCrossRelationships();
 		void duplicatingATableKeepsItsPastedChildrenOwnedByTheNewTable();
 		void duplicatingATableRegistersItsPastedChildrenOnTheOperationList();
 		void pastingTableChildrenOntoAnotherTableKeepsThem();
@@ -1011,8 +1021,8 @@ void ModelWidgetTest::thresholdModeCrossSceneRelationshipGetsRelMarkerMarkers()
 
 		QVERIFY(table_a_view->getRelMarkerItem() != nullptr);
 		QVERIFY(table_b_view->getRelMarkerItem() != nullptr);
-		QCOMPARE(table_a_view->getRelMarkerItem()->getRelationshipsCount(), 1);
-		QCOMPARE(table_b_view->getRelMarkerItem()->getRelationshipsCount(), 1);
+		QCOMPARE(table_a_view->getRelMarkerItem()->getCrossRelsCount(), 1);
+		QCOMPARE(table_b_view->getRelMarkerItem()->getCrossRelsCount(), 1);
 	}
 	catch(Exception &e)
 	{
@@ -3552,6 +3562,9 @@ void ModelWidgetTest::doubleClickingARelMarkerEmitsItsTable()
 		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
 		QVERIFY(table_a_view->getRelMarkerItem() != nullptr);
 
+		//The marker's label (so its hit area) is refreshed once control returns to the event loop
+		QCoreApplication::processEvents();
+
 		ObjectsScene *scn = model_wgt.getSceneForObject(table_a);
 		QSignalSpy table_spy(scn, &ObjectsScene::s_relMarkerDoubleClicked),
 							 obj_spy(scn, &ObjectsScene::s_objectDoubleClicked);
@@ -3652,7 +3665,7 @@ void ModelWidgetTest::tableRelsWidgetListsAndRefreshesRelationships()
 		TableRelsWidget table_rels_wgt;
 		table_rels_wgt.setAttributes(db_model, table_a);
 
-		CustomTableWidget *rels_tab = table_rels_wgt.findChild<CustomTableWidget *>();
+		CustomTableWidget *rels_tab = table_rels_wgt.findChild<CustomTableWidget *>("cross_rels_tab");
 		ObjectSelectorWidget *table_sel = table_rels_wgt.findChild<ObjectSelectorWidget *>();
 
 		QVERIFY(table_sel != nullptr);
@@ -3738,7 +3751,7 @@ void ModelWidgetTest::crossSceneRelsWidgetIgnoresStaleRelationship()
 		TableRelsWidget cross_wgt;
 		cross_wgt.setAttributes(db_model, table_a);
 
-		CustomTableWidget *rels_tab = cross_wgt.findChild<CustomTableWidget *>();
+		CustomTableWidget *rels_tab = cross_wgt.findChild<CustomTableWidget *>("cross_rels_tab");
 		QCOMPARE(rels_tab->getRowCount(), 1u);
 
 		//The relationship is removed behind the grid's back, so its row is now stale
@@ -3771,7 +3784,7 @@ void ModelWidgetTest::crossSceneRelsWidgetSurvivesItsTableBeingRemoved()
 		TableRelsWidget cross_wgt;
 		cross_wgt.setAttributes(db_model, table_a);
 
-		CustomTableWidget *rels_tab = cross_wgt.findChild<CustomTableWidget *>();
+		CustomTableWidget *rels_tab = cross_wgt.findChild<CustomTableWidget *>("cross_rels_tab");
 		ObjectSelectorWidget *table_sel = cross_wgt.findChild<ObjectSelectorWidget *>();
 		QCOMPARE(rels_tab->getRowCount(), 1u);
 
@@ -4297,6 +4310,420 @@ void ModelWidgetTest::duplicatingNonTableObjectsStillGetsAUniqueName()
 		QVERIFY(db_model->getObject("schema_x", ObjectType::Schema) == schema);
 		QVERIFY(db_model->getObject("schema_x_cp", ObjectType::Schema) != nullptr);
 		QVERIFY(db_model->getObject("schema_x_dup", ObjectType::Schema) != nullptr);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Creates a table with an "id" primary key named name in schema, so it can be the "1" side of a relationship */
+static Table *createTableWithPk(DatabaseModel *db_model, const QString &name, Schema *schema)
+{
+	Table *table = new Table;
+
+	table->setName(name);
+	table->setSchema(schema);
+
+	Column *col = new Column;
+	col->setName("id");
+	col->setType(PgSqlType("serial"));
+	table->addColumn(col);
+
+	Constraint *pk = new Constraint;
+	pk->setName(name + "_pk");
+	pk->setConstraintType(ConstraintType::PrimaryKey);
+	pk->addColumn(table->getColumn("id"), Constraint::SourceCols);
+	table->addConstraint(pk);
+
+	db_model->addTable(table);
+	return table;
+}
+
+/*! \brief With the hide relationships option on, a relationship between tables of the same scene gets no
+RelationshipView: it's listed (as hidden) by the relationship marker of both tables. Removing it clears them */
+void ModelWidgetTest::hiddenRelationshipsAreRoutedToTheRelMarker()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setHideRelationships(true);
+		db_model->createSystemObjects(true);
+
+		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		Table *table_a = createTableWithPk(db_model, "table_a", public_sch),
+					*table_b = createTableWithPk(db_model, "table_b", public_sch);
+		Relationship *rel = new Relationship(BaseRelationship::Relationship1n, table_a, table_b);
+
+		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject()),
+									*table_b_view = dynamic_cast<BaseTableView *>(table_b->getOverlyingObject());
+
+		//A table without relationships has no marker at all
+		QVERIFY(table_a_view->getRelMarkerItem() == nullptr);
+
+		db_model->addRelationship(rel);
+
+		QVERIFY2(rel->getOverlyingObject() == nullptr, "a hidden relationship must not get a RelationshipView");
+
+		for(auto &view : { table_a_view, table_b_view })
+		{
+			QCOMPARE(view->getHiddenRelsCount(), 1);
+			QCOMPARE(view->getExternalRelsCount(), 0);
+			QVERIFY(view->getRelMarkerItem() != nullptr);
+			QCOMPARE(view->getRelMarkerItem()->getHiddenRelsCount(), 1);
+			QCOMPARE(view->getRelMarkerItem()->getCrossRelsCount(), 0);
+		}
+
+		db_model->removeRelationship(rel);
+
+		for(auto &view : { table_a_view, table_b_view })
+		{
+			QCOMPARE(view->getHiddenRelsCount(), 0);
+			QVERIFY(view->getRelMarkerItem() == nullptr);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief A self-relationship is routed once per side, both landing on the same table view: it must be
+registered, and counted, only once */
+void ModelWidgetTest::selfRelationshipIsHiddenOnlyOnce()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setHideRelationships(true);
+		db_model->createSystemObjects(true);
+
+		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		Table *table_a = createTableWithPk(db_model, "table_a", public_sch);
+		Relationship *rel = new Relationship(BaseRelationship::Relationship1n, table_a, table_a);
+
+		db_model->addRelationship(rel);
+
+		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
+
+		QVERIFY(rel->getOverlyingObject() == nullptr);
+		QCOMPARE(table_a_view->getHiddenRelsCount(), 1);
+		QVERIFY(table_a_view->getRelMarkerItem() != nullptr);
+		QCOMPARE(table_a_view->getRelMarkerItem()->getHiddenRelsCount(), 1);
+
+		db_model->removeRelationship(rel);
+		QVERIFY(table_a_view->getRelMarkerItem() == nullptr);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Builds a schema-segmented model with the hide relationships option on: table_a and table_c live
+in schema_a, table_b in schema_b. The relationship a-c is hidden, a-b is cross-scene */
+static void buildHiddenAndCrossModel(ModelWidget &model_wgt, Table *&table_a, Table *&table_b, Table *&table_c,
+																		 Relationship *&rel_ac, Relationship *&rel_ab)
+{
+	DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+	db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+	db_model->setHideRelationships(true);
+	db_model->createSystemObjects(true);
+
+	Schema *schema_a = new Schema, *schema_b = new Schema;
+
+	schema_a->setName("schema_a");
+	schema_b->setName("schema_b");
+	db_model->addSchema(schema_a);
+	db_model->addSchema(schema_b);
+
+	table_a = createTableWithPk(db_model, "table_a", schema_a);
+	table_b = createTableWithPk(db_model, "table_b", schema_b);
+	table_c = createTableWithPk(db_model, "table_c", schema_a);
+
+	rel_ac = new Relationship(BaseRelationship::Relationship1n, table_a, table_c);
+	db_model->addRelationship(rel_ac);
+
+	rel_ab = new Relationship(BaseRelationship::Relationship1n, table_a, table_b);
+	db_model->addRelationship(rel_ab);
+}
+
+void ModelWidgetTest::hiddenAndCrossSceneRelationshipsAreCountedSeparately()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+		Table *table_a = nullptr, *table_b = nullptr, *table_c = nullptr;
+		Relationship *rel_ac = nullptr, *rel_ab = nullptr;
+
+		buildHiddenAndCrossModel(model_wgt, table_a, table_b, table_c, rel_ac, rel_ab);
+
+		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject()),
+									*table_b_view = dynamic_cast<BaseTableView *>(table_b->getOverlyingObject()),
+									*table_c_view = dynamic_cast<BaseTableView *>(table_c->getOverlyingObject());
+
+		QVERIFY(rel_ac->getOverlyingObject() == nullptr);
+		QVERIFY(rel_ab->getOverlyingObject() == nullptr);
+
+		QCOMPARE(table_a_view->getHiddenRelationships(), QList<BaseRelationship *>({ rel_ac }));
+		QCOMPARE(table_a_view->getExternalRelationships(), QList<BaseRelationship *>({ rel_ab }));
+		QCOMPARE(table_a_view->getRelMarkerItem()->getHiddenRelsCount(), 1);
+		QCOMPARE(table_a_view->getRelMarkerItem()->getCrossRelsCount(), 1);
+
+		//The marker label is refreshed once control returns to the event loop
+		QCoreApplication::processEvents();
+		QVERIFY(table_a_view->getRelMarkerItem()->boundingRect().height() > 0);
+
+		QCOMPARE(table_c_view->getHiddenRelsCount(), 1);
+		QCOMPARE(table_c_view->getExternalRelsCount(), 0);
+		QCOMPARE(table_b_view->getHiddenRelsCount(), 0);
+		QCOMPARE(table_b_view->getExternalRelsCount(), 1);
+
+		//Removing a hidden relationship leaves the cross-scene one alone
+		db_model->removeRelationship(rel_ac);
+		QCOMPARE(table_a_view->getRelMarkerItem()->getHiddenRelsCount(), 0);
+		QCOMPARE(table_a_view->getRelMarkerItem()->getCrossRelsCount(), 1);
+		QVERIFY(table_c_view->getRelMarkerItem() == nullptr);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void ModelWidgetTest::relocatingATableReclassifiesItsHiddenRelationships()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		Table *table_a = nullptr, *table_b = nullptr, *table_c = nullptr;
+		Relationship *rel_ac = nullptr, *rel_ab = nullptr;
+
+		buildHiddenAndCrossModel(model_wgt, table_a, table_b, table_c, rel_ac, rel_ab);
+
+		//table_b joins its partners' scene: a-b stops being cross-scene and becomes hidden too
+		model_wgt.relocateObjectView(table_b, model_wgt.getSceneForObject(table_a));
+
+		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject()),
+									*table_b_view = dynamic_cast<BaseTableView *>(table_b->getOverlyingObject());
+
+		QVERIFY(rel_ab->getOverlyingObject() == nullptr);
+		QCOMPARE(table_a_view->getHiddenRelsCount(), 2);
+		QCOMPARE(table_a_view->getExternalRelsCount(), 0);
+		QCOMPARE(table_b_view->getHiddenRelsCount(), 1);
+		QCOMPARE(table_b_view->getExternalRelsCount(), 0);
+		QVERIFY(table_b_view->getRelMarkerItem() != nullptr);
+
+		//table_c leaves: a-c turns cross-scene, a-b stays hidden
+		model_wgt.relocateObjectView(table_c, model_wgt.getSchemaScene(dynamic_cast<Schema *>(model_wgt.getDatabaseModel()->getObject("schema_b", ObjectType::Schema))));
+
+		table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
+
+		QCOMPARE(table_a_view->getHiddenRelationships(), QList<BaseRelationship *>({ rel_ab }));
+		QCOMPARE(table_a_view->getExternalRelationships(), QList<BaseRelationship *>({ rel_ac }));
+		QCOMPARE(table_a_view->getRelMarkerItem()->getHiddenRelsCount(), 1);
+		QCOMPARE(table_a_view->getRelMarkerItem()->getCrossRelsCount(), 1);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief The option is written to the file only when enabled, taking effect on the next load, and the
+active value (hide_rels) only follows the saved one after the reload */
+void ModelWidgetTest::hideRelationshipsOptionSurvivesSaveAndReload()
+{
+	QString tmp_on = QDir::temp().absoluteFilePath("modelwidgettest_hide_rels_on.dbm"),
+					tmp_off = QDir::temp().absoluteFilePath("modelwidgettest_hide_rels_off.dbm");
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(true);
+
+			Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+			Table *table_a = createTableWithPk(db_model, "table_a", public_sch),
+						*table_b = createTableWithPk(db_model, "table_b", public_sch);
+
+			db_model->addRelationship(new Relationship(BaseRelationship::Relationship1n, table_a, table_b));
+
+			//Pending change: the current session still draws the relationship
+			model_wgt.setPendingHideRelationships(true);
+			QVERIFY(!db_model->isHideRelationships());
+			QVERIFY(db_model->isSavedHideRelationships());
+			QVERIFY(dynamic_cast<BaseTableView *>(table_a->getOverlyingObject())->getRelMarkerItem() == nullptr);
+
+			model_wgt.saveModel(tmp_on);
+
+			model_wgt.setPendingHideRelationships(false);
+			model_wgt.saveModel(tmp_off);
+		}
+
+		QVERIFY(!UtilsNs::loadFile(tmp_off).contains("hide-rels"));
+		QVERIFY(UtilsNs::loadFile(tmp_on).contains("hide-rels=\"true\""));
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_on);
+
+			QVERIFY(db_model->isHideRelationships());
+			QVERIFY(db_model->isSavedHideRelationships());
+
+			Table *table_a = dynamic_cast<Table *>(db_model->getObject("table_a", ObjectType::Table));
+			BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
+
+			QCOMPARE(table_a_view->getHiddenRelsCount(), 1);
+			QVERIFY(table_a_view->getHiddenRelationships().first()->getOverlyingObject() == nullptr);
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_off);
+
+			QVERIFY(!db_model->isHideRelationships());
+
+			Table *table_a = dynamic_cast<Table *>(db_model->getObject("table_a", ObjectType::Table));
+			BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
+
+			QCOMPARE(table_a_view->getHiddenRelsCount(), 0);
+			QVERIFY(table_a_view->getRelMarkerItem() == nullptr);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_on);
+		QFile::remove(tmp_off);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_on);
+	QFile::remove(tmp_off);
+}
+
+/*! \brief Accepting the hide relationships suggestion (checkAlternateSegmentation()) loads a file that
+doesn't ask for it with the relationships hidden, and the override becomes the saved value too */
+void ModelWidgetTest::forcingHideRelationshipsOnLoadOverridesTheFile()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_force_hide_rels.dbm");
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(true);
+
+			Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+			Table *table_a = createTableWithPk(db_model, "table_a", public_sch),
+						*table_b = createTableWithPk(db_model, "table_b", public_sch);
+
+			db_model->addRelationship(new Relationship(BaseRelationship::Relationship1n, table_a, table_b));
+			model_wgt.saveModel(tmp_file);
+		}
+
+		DatabaseModel plain_model;
+		plain_model.createSystemObjects(false);
+		plain_model.loadModel(tmp_file);
+		QVERIFY(!plain_model.isHideRelationships());
+		QVERIFY(!plain_model.isSavedHideRelationships());
+
+		DatabaseModel forced_model;
+		forced_model.createSystemObjects(false);
+		forced_model.loadModel(tmp_file, false, DatabaseModel::NoSegmentation, 0, false, nullptr, true);
+		QVERIFY(forced_model.isHideRelationships());
+		QVERIFY(forced_model.isSavedHideRelationships());
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
+}
+
+/*! \brief The toggle button is checked while the relationships are visible, i.e., it is the inverse of the
+hide relationships option the signal and the update method carry */
+void ModelWidgetTest::toggleRelsButtonIsCheckedWhileRelationshipsAreVisible()
+{
+	SceneInfoWidget scene_info_wgt;
+	QSignalSpy spy(&scene_info_wgt, &SceneInfoWidget::s_hideRelationshipsToggled);
+
+	//Default state: relationships visible
+	QVERIFY(scene_info_wgt.toggle_rels_tb->isChecked());
+
+	//Reflecting the model's option never emits the signal
+	scene_info_wgt.updateHideRelationships(true);
+	QVERIFY(!scene_info_wgt.toggle_rels_tb->isChecked());
+	scene_info_wgt.updateHideRelationships(false);
+	QVERIFY(scene_info_wgt.toggle_rels_tb->isChecked());
+	QCOMPARE(spy.count(), 0);
+
+	//Unchecking the button asks to hide the relationships, checking it again asks to show them
+	scene_info_wgt.toggle_rels_tb->setChecked(false);
+	QCOMPARE(spy.count(), 1);
+	QCOMPARE(spy.at(0).at(0).toBool(), true);
+
+	scene_info_wgt.toggle_rels_tb->setChecked(true);
+	QCOMPARE(spy.count(), 2);
+	QCOMPARE(spy.at(1).at(0).toBool(), false);
+}
+
+void ModelWidgetTest::tableRelsWidgetSeparatesHiddenAndCrossRelationships()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		Table *table_a = nullptr, *table_b = nullptr, *table_c = nullptr;
+		Relationship *rel_ac = nullptr, *rel_ab = nullptr;
+
+		buildHiddenAndCrossModel(model_wgt, table_a, table_b, table_c, rel_ac, rel_ab);
+
+		TableRelsWidget table_rels_wgt;
+		table_rels_wgt.setAttributes(model_wgt.getDatabaseModel(), table_a);
+
+		CustomTableWidget *hidden_tab = table_rels_wgt.findChild<CustomTableWidget *>("hidden_rels_tab"),
+											*cross_tab = table_rels_wgt.findChild<CustomTableWidget *>("cross_rels_tab");
+		QTabWidget *tabs = table_rels_wgt.findChild<QTabWidget *>();
+
+		QVERIFY(hidden_tab != nullptr && cross_tab != nullptr && tabs != nullptr);
+
+		//Relationships first, cross rels. second
+		QCOMPARE(tabs->count(), 2);
+		QVERIFY(tabs->widget(0)->isAncestorOf(hidden_tab));
+		QVERIFY(tabs->widget(1)->isAncestorOf(cross_tab));
+		QCOMPARE(tabs->currentIndex(), 0);
+
+		QCOMPARE(hidden_tab->getRowCount(), 1u);
+		QCOMPARE(hidden_tab->getCellText(0, 0), rel_ac->getName());
+		QCOMPARE(hidden_tab->getCellText(0, 2), table_c->getSignature(true));
+
+		QCOMPARE(cross_tab->getRowCount(), 1u);
+		QCOMPARE(cross_tab->getCellText(0, 0), rel_ab->getName());
+		QCOMPARE(cross_tab->getCellText(0, 2), table_b->getSignature(true));
+
+		//Double-clicking a row of the first tab activates that relationship too
+		QSignalSpy rel_spy(&table_rels_wgt, &TableRelsWidget::s_relationshipActivated);
+		emit hidden_tab->s_cellDoubleClicked(0, 0);
+		QCOMPARE(rel_spy.count(), 1);
+		QCOMPARE(rel_spy.at(0).at(0).value<BaseRelationship *>(), rel_ac);
 	}
 	catch(Exception &e)
 	{

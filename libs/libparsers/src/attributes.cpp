@@ -329,6 +329,7 @@ namespace Attributes {
 	HideObjectsSelInfo("hide-objects-sel-info"),
 	HideObjShadows("hide-obj-shadows"),
 	HideRelName("hide-rel-name"),
+	HideRels("hide-rels"),
 	HideSchNameUserTypes("hide-schema-names-of-types"),
 	HideTableTags("hide-table-tags"),
 	Highlight("highlight"),

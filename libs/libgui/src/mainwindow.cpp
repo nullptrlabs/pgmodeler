@@ -1513,6 +1513,7 @@ void MainWindow::setCurrentModel(int idx)
 		connect(scene_info_wgt, &SceneInfoWidget::s_activeSceneSelected, current_model, &ModelWidget::setActiveScene, Qt::UniqueConnection);
 		connect(scene_info_wgt, &SceneInfoWidget::s_segmentationModeSelected, current_model, &ModelWidget::setPendingSegmentationMode, Qt::UniqueConnection);
 		connect(scene_info_wgt, &SceneInfoWidget::s_thresholdSelected, current_model, &ModelWidget::setPendingSceneThreshold, Qt::UniqueConnection);
+		connect(scene_info_wgt, &SceneInfoWidget::s_hideRelationshipsToggled, current_model, &ModelWidget::setPendingHideRelationships, Qt::UniqueConnection);
 
 		connect(current_model, &ModelWidget::s_newLayerRequested, this, &MainWindow::addNewLayer);
 		connect(current_model, &ModelWidget::s_objectsLayerChanged, layers_cfg_wgt, &LayersConfigWidget::updateRelsVisibility);
@@ -1545,6 +1546,7 @@ void MainWindow::setCurrentModel(int idx)
 		scene_info_wgt->updateScenesCombo(current_model->getSceneNames(), current_model->getActiveSceneIndex());
 		scene_info_wgt->updateSegmentationInfo(current_model->getDatabaseModel()->getSavedSegmentationMode(),
 																						current_model->getDatabaseModel()->getSavedSegThreshold());
+		scene_info_wgt->updateHideRelationships(current_model->getDatabaseModel()->isSavedHideRelationships());
 		current_model->emitSceneInteracted();
 
 		ObjectsScene::setLockDelimiterScale(action_lock_delim->isChecked(),

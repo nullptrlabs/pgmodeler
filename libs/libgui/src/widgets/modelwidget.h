@@ -144,6 +144,9 @@ class __libgui ModelWidget: public QWidget {
 		 * -- provisional value, to be calibrated later */
 		static constexpr double ConcentrationSuggestThreshold = 0.8;
 
+		//! \brief Minimum number of relationships in a model file for getAlternateSegMode() to suggest hiding them
+		static constexpr unsigned HideRelsSuggestThreshold = 2000;
+
 		//! \brief Result of a lightweight, pre-load scan of a model file for getAlternateSegMode()
 		struct AlternateSegMode {
 			//! \brief The suggested mode: SegBySchema or SegByThreshold, NoSegmentation when isValid() is false
@@ -157,6 +160,18 @@ class __libgui ModelWidget: public QWidget {
 
 			//! \brief Name of that most populated schema
 			QString max_schema_name;
+
+			//! \brief Total relationship count (relationships and basic relationships) found in the file
+			unsigned total_rels = 0;
+
+			//! \brief True when the user accepted hiding the relationships (see checkAlternateSegmentation())
+			bool hide_rels = false;
+
+			//! \brief True when the relationship count is large enough for a hide relationships suggestion
+			bool suggestsHideRels() const
+			{
+				return total_rels >= HideRelsSuggestThreshold;
+			}
 
 			//! \brief True when this instance carries an actual, checked alternate segmentation mode
 			bool isValid() const
@@ -175,10 +190,14 @@ class __libgui ModelWidget: public QWidget {
 		 * file or any DatabaseModel instance */
 		static AlternateSegMode getAlternateSegMode(const QString &filename);
 
-		/*! \brief Runs getAlternateSegMode() against filename and, if it comes back valid, prompts
-		 * the user to confirm switching to it. Returns the confirmed mode, or a default-constructed
-		 * (invalid) AlternateSegMode when there's nothing to suggest or the user declines */
+		/*! \brief Runs getAlternateSegMode() against filename and prompts the user to confirm what it
+		 * suggests: first the alternate segmentation mode (when valid), then hiding the relationships
+		 * (when the file has many). Returns the confirmed ones: mode (invalid when there's nothing to
+		 * suggest or the user declines) and hide_rels */
 		AlternateSegMode checkAlternateSegmentation(const QString &filename);
+
+		//! \brief Asks the user to confirm loading the model with the segmentation mode alt_seg_mode suggests
+		bool confirmAlternateSegMode(const AlternateSegMode &alt_seg_mode);
 
 		/*! \brief Lightweight, pre-load scan of filename's root attributes (no DTD validation, no
 		 * object instantiation) to tell whether its saved scene distribution is still consistent
@@ -378,11 +397,16 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Builds the graphical item representing graph_obj (Table, ForeignTable, View or Textbox), or nullptr for any other type
 		QGraphicsItem *createGraphicItem(BaseGraphicObject *graph_obj);
 
-		/*! \brief Creates rel's RelationshipView if both its tables currently share a scene, or
-		 * registers it as an external (cut-off) connection on both otherwise -- same rule as
-		 * handleObjectAddition()'s Relationship case, reading each table's scene fresh every time
-		 * it's called. Used to re-route a relationship after one of its tables was relocated */
+		/*! \brief Creates rel's RelationshipView if both its tables currently share a scene and the
+		 * model doesn't hide its relationships, or registers it in the relationship marker of both
+		 * tables otherwise -- same rule as handleObjectAddition()'s Relationship case, reading each
+		 * table's scene fresh every time it's called. Used to re-route a relationship after one of
+		 * its tables was relocated */
 		void routeRelationship(BaseRelationship *rel);
+
+		/*! \brief Asks the user to save and reload the model so a pending change takes effect, unless
+		 * the user opted out of this question. Emits s_modelSaveReloadRequested() when accepted */
+		void askSaveAndReload(const QString &message);
 
 		/*! \brief Reacts to OperationList::s_operationExecuted, connected once in the constructor --
 		 * covers undo/redo of Operation::ObjModified, which restores the object's previous schema or
@@ -713,7 +737,7 @@ class __libgui ModelWidget: public QWidget {
 		//! \brief Handles the signals that indicates the object was double clicked on the scene
 		void handleObjectDoubleClick(BaseGraphicObject *object);
 
-		//! \brief Shows the list of cross-scene relationships of the table a double-clicked relationship marker belongs to
+		//! \brief Shows the relationships (hidden and cross-scene) of the table a double-clicked relationship marker belongs to
 		void showTableRelationships(BaseTable *table);
 
 		//! \brief Configures the popup menu specific for the passed object
@@ -892,6 +916,11 @@ class __libgui ModelWidget: public QWidget {
 		 * live routing this session (see DatabaseModel::setSavedSegThreshold()) -- just marks the
 		 * model modified */
 		void setPendingSceneThreshold(unsigned value);
+
+		/*! \brief Sets the hide relationships option to be persisted on the next save. Doesn't affect
+		 * live routing this session (see DatabaseModel::setSavedHideRelationships()) -- just marks the
+		 * model modified */
+		void setPendingHideRelationships(bool value);
 
 		/*! \brief Loads filename into this widget's model. When check_alt_seg_mode is true and the
 		 * file has no segmentation mode of its own saved yet, checkAlternateSegmentation() is run

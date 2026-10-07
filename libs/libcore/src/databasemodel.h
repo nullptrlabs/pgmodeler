@@ -312,6 +312,13 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		 * affect seg_threshold -- a threshold change only takes effect after the model is reloaded */
 		unsigned saved_seg_threshold;
 
+		//! \brief Indicates that, in the current session, the relationships between tables of the same scene are not drawn
+		bool hide_rels;
+
+		/*! \brief Value of hide_rels to be written to the file on the next save. Editing this does not
+		 * affect hide_rels -- the change takes effect only after the model is reloaded */
+		bool saved_hide_rels;
+
 		/*! \brief Index (within the ObjectsScene collection, in creation order) of the scene that was
 		 * focused when the model was last saved -- unlike scene_seg_mode/seg_threshold, this has no
 		 * "active vs. saved" split: focusing a different scene is an ordinary runtime action, not one
@@ -499,28 +506,20 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Returns an object from the model using its index and type
 		BaseObject *getObject(unsigned obj_idx, ObjectType obj_type);
 
-		/*! \brief Loads a database model from a file. In case of loading errors
-		the objects in the model will not be destroyed automatically. The user need to call
-		destroyObjects() or delete the entire model.
-		When override_seg_mode is true, ovr_seg_mode/ovr_seg_threshold are used as the active
-		segmentation mode/threshold for this load instead of whatever is saved in the file -- so
-		routing during this same load already reflects them, without requiring a save+reload
-		round-trip. The overridden values still become the new "saved" ones, same as loading them
-		normally from the file would.
-		When discard_scene_idx is true, every loaded Table/View/ForeignTable's own saved scene index
-		is left at its default (-1) instead of being restored from the file -- used when the caller
-		already determined that index is stale (see ModelWidget::needsThresholdRebucketing()), so
-		threshold-segmentation routing re-derives scene placement from scratch during this load
-		instead of trusting a distribution that no longer matches the active threshold.
-		is_canceled, when provided, is polled once per object loaded (right after each s_objectLoaded
-		emission) -- it returning true aborts the load by throwing an Exception with
-		ErrorCode::OperationCancelled, leaving the model exactly as far along as it got (the caller is
-		expected to discard it, same as it already would for any other load failure). Left as a plain
-		std::function instead of a GUI-facing type to keep this class free of a libgui dependency; see
-		ModelWidget::loadModel() for how the GUI side supplies it */
+		/*! \brief Loads a database model from a file. On errors the objects already created are not
+		destroyed: the caller must call destroyObjects() or delete the model.
+		- override_seg_mode: ovr_seg_mode/ovr_seg_threshold replace the file's segmentation values
+		(they also become the saved ones).
+		- discard_scene_idx: ignores the scene index saved in each table/view/foreign table, so the
+		scene placement is derived again from scratch.
+		- is_canceled: polled after each loaded object; returning true aborts the load by throwing an
+		Exception with ErrorCode::OperationCancelled.
+		- force_hide_rels: hides the relationships even if the file doesn't ask for it (it also becomes
+		the saved value). */
 		void loadModel(const QString &filename, bool override_seg_mode = false,
 										SegmentationMode ovr_seg_mode = NoSegmentation, unsigned ovr_seg_threshold = 0,
-										bool discard_scene_idx = false, std::function<bool()> is_canceled = nullptr);
+										bool discard_scene_idx = false, std::function<bool()> is_canceled = nullptr,
+										bool force_hide_rels = false);
 
 		//! \brief Sets the database encoding
 		void setEncoding(EncodingType encod);
@@ -962,6 +961,13 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Defines the segmentation threshold to be persisted on the next save (takes effect only after a reload)
 		void setSavedSegThreshold(unsigned value);
 		unsigned getSavedSegThreshold();
+
+		void setHideRelationships(bool value);
+		bool isHideRelationships();
+
+		//! \brief Defines the hide relationships flag to be persisted on the next save (takes effect only after a reload)
+		void setSavedHideRelationships(bool value);
+		bool isSavedHideRelationships();
 
 		/*! \brief This method exposes the XML parser for the outside world. In order to create objects from xml code inside the current
 		 database model you need first get the parser (through this method), populate the parser with the desired XML and then call
