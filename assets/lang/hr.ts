@@ -1970,25 +1970,6 @@ Kodiranje: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>TableRelsWidget</name>
-    <message>
-        <source>Cross-scene relationships</source>
-        <translation>Odnosi između scena</translation>
-    </message>
-    <message>
-        <source>Relationship</source>
-        <translation>Odnos</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation>Tip</translation>
-    </message>
-    <message>
-        <source>Related table</source>
-        <translation>Povezana tablica</translation>
-    </message>
-</context>
-<context>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
@@ -2261,13 +2242,6 @@ Ako se ovo isključi, SQL će biti dodan na kraj naredbe CREATE DATABASE.</trans
     <message>
         <source>Are you sure you want to remove all the items?</source>
         <translation>Jeste li sigurni da želite ukloniti sve stavke?</translation>
-    </message>
-</context>
-<context>
-    <name>RelMarkerItem</name>
-    <message>
-        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>Međuscenski odnosi: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -9905,6 +9879,10 @@ Traženi je format %1 x %2 bio prevelik i nije bilo dovoljno memorije za njegovu
         <translation>Zadana scena</translation>
     </message>
     <message>
+        <source>Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?</source>
+        <translation>Promjena vidljivosti odnosa stupa na snagu tek nakon spremanja i ponovnog učitavanja modela. Želite li nastaviti?</translation>
+    </message>
+    <message>
         <source>Don&apos;t ask to save and reload again.</source>
         <translation>Ne pitaj ponovno za spremanje i ponovno učitavanje.</translation>
     </message>
@@ -9927,6 +9905,10 @@ Traženi je format %1 x %2 bio prevelik i nije bilo dovoljno memorije za njegovu
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Converting a &lt;strong&gt;one-to-one&lt;/strong&gt; or &lt;strong&gt;one-to-many&lt;/strong&gt; relationship can lead to unreversible changes or break other relationships in the linking chain! Do you want to proceed?</source>
         <translation>&lt;strong&gt;UPOZORENJE:&lt;/strong&gt; pretvaranje odnosa &lt;strong&gt;jedan-prema-jedan&lt;/strong&gt; ili &lt;strong&gt;jedan-prema-više&lt;/strong&gt; može dovesti do nepovratnih promjena ili prekinuti druge odnose u lancu povezivanja! Želite li nastaviti?</translation>
+    </message>
+    <message>
+        <source>This model has &lt;strong&gt;%1&lt;/strong&gt; relationships. Drawing that many relationships makes the diagram hard to read and slow to handle. Load it hiding the relationships instead? Each table&apos;s relationship marker keeps listing them (double-click the marker to see the list).</source>
+        <translation>Broj odnosa u ovom modelu: &lt;strong&gt;%1&lt;/strong&gt;. Crtanje toliko odnosa otežava čitanje dijagrama i usporava rad s njim. Želite li model učitati sa skrivenim odnosima? Oznaka odnosa svake tablice i dalje ih navodi (dvaput kliknite oznaku da biste vidjeli popis).</translation>
     </message>
     <message>
         <source>This model concentrates &lt;strong&gt;%1%&lt;/strong&gt; of its &lt;strong&gt;%2&lt;/strong&gt; tables/views/foreign tables in a single schema &lt;strong&gt;%3&lt;/strong&gt;. Segmenting the canvas by schema wouldn&apos;t distribute much of that load into separate scenes. Load it with threshold-based segmentation instead?</source>
@@ -12543,6 +12525,17 @@ dostupne u grafičkom sučelju. Sve dostupne opcije opisane su u nastavku.</tran
     </message>
 </context>
 <context>
+    <name>RelMarkerItem</name>
+    <message>
+        <source>Relationships: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Odnosi: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Međuscenski odnosi: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -13514,6 +13507,10 @@ dostupne u grafičkom sučelju. Sve dostupne opcije opisane su u nastavku.</tran
         <translation>Obrazac</translation>
     </message>
     <message>
+        <source>&lt;p&gt;Toggles the visibility of the relationships between tables of the same scene. When they are not visible, they are represented by the relationship marker of each table, whose details are shown by double-clicking it. Hiding the relationships is intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Prebacuje vidljivost odnosa između tablica iste scene. Kada nisu vidljivi, predstavljeni su oznakom odnosa svake tablice, čiji se detalji prikazuju dvostrukim klikom. Skrivanje odnosa namijenjeno je velikim modelima u kojima nacrtani odnosi gube svrhu.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NAPOMENA:&lt;/strong&gt; Promjena stupa na snagu tek nakon spremanja i ponovnog učitavanja modela.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Currently selected object(s)</source>
         <translation>Trenutačno odabrani objekti</translation>
     </message>
@@ -13536,6 +13533,10 @@ dostupne u grafičkom sučelju. Sve dostupne opcije opisane su u nastavku.</tran
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Prag segmentiranja. Broj izrađenih tablica, pogleda ili vanjskih tablica prije nego se izradi nova scena i novi objekti usmjere na nju.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;Skriva odnose između tablica iste scene. Predstavljeni su oznakom odnosa svake tablice, čiji se detalji prikazuju dvostrukim klikom. Namijenjeno velikim modelima u kojima nacrtani odnosi gube svrhu.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NAPOMENA:&lt;/strong&gt; Promjena stupa na snagu tek nakon spremanja i ponovnog učitavanja modela.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14406,6 +14407,37 @@ dostupne u grafičkom sučelju. Sve dostupne opcije opisane su u nastavku.</tran
 %3 Type: %4</source>
         <translation>`%1&apos; (%2)
 %3 Tip: %4</translation>
+    </message>
+</context>
+<context>
+    <name>TableRelsWidget</name>
+    <message>
+        <source>Cross-scene relationships</source>
+        <translation type="vanished">Odnosi između scena</translation>
+    </message>
+    <message>
+        <source>Table relationships</source>
+        <translation>Odnosi tablice</translation>
+    </message>
+    <message>
+        <source>Relationships</source>
+        <translation>Odnosi</translation>
+    </message>
+    <message>
+        <source>Cross rels.</source>
+        <translation>Međuscenski odnosi</translation>
+    </message>
+    <message>
+        <source>Relationship</source>
+        <translation>Odnos</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Tip</translation>
+    </message>
+    <message>
+        <source>Related table</source>
+        <translation>Povezana tablica</translation>
     </message>
 </context>
 <context>

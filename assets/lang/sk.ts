@@ -1970,25 +1970,6 @@ Kódovanie: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>TableRelsWidget</name>
-    <message>
-        <source>Cross-scene relationships</source>
-        <translation>Vzťahy medzi scénami</translation>
-    </message>
-    <message>
-        <source>Relationship</source>
-        <translation>Vzťah</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation>Typ</translation>
-    </message>
-    <message>
-        <source>Related table</source>
-        <translation>Súvisiaca tabuľka</translation>
-    </message>
-</context>
-<context>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
@@ -2261,13 +2242,6 @@ Ak je voľba vypnutá, SQL sa pripojí na koniec príkazu CREATE DATABASE.</tran
     <message>
         <source>Are you sure you want to remove all the items?</source>
         <translation>Naozaj chcete odstrániť všetky položky?</translation>
-    </message>
-</context>
-<context>
-    <name>RelMarkerItem</name>
-    <message>
-        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>Vzťahy medzi scénami: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -9905,6 +9879,10 @@ Požadovaná veľkosť %1 x %2 bola príliš veľká a nebolo dosť pamäte na j
         <translation>Predvolená scéna</translation>
     </message>
     <message>
+        <source>Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?</source>
+        <translation>Zmena viditeľnosti vzťahov sa prejaví až po uložení a opätovnom načítaní modelu. Chcete pokračovať?</translation>
+    </message>
+    <message>
         <source>Don&apos;t ask to save and reload again.</source>
         <translation>Nabudúce sa nepýtať na uloženie a opätovné načítanie.</translation>
     </message>
@@ -9927,6 +9905,10 @@ Požadovaná veľkosť %1 x %2 bola príliš veľká a nebolo dosť pamäte na j
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Converting a &lt;strong&gt;one-to-one&lt;/strong&gt; or &lt;strong&gt;one-to-many&lt;/strong&gt; relationship can lead to unreversible changes or break other relationships in the linking chain! Do you want to proceed?</source>
         <translation>&lt;strong&gt;VAROVANIE:&lt;/strong&gt; Prevod vzťahu &lt;strong&gt;1:1&lt;/strong&gt; alebo &lt;strong&gt;1:N&lt;/strong&gt; môže viesť k nezvratným zmenám alebo narušiť iné vzťahy v reťazci prepojenia. Chcete pokračovať?</translation>
+    </message>
+    <message>
+        <source>This model has &lt;strong&gt;%1&lt;/strong&gt; relationships. Drawing that many relationships makes the diagram hard to read and slow to handle. Load it hiding the relationships instead? Each table&apos;s relationship marker keeps listing them (double-click the marker to see the list).</source>
+        <translation>Počet vzťahov v tomto modeli: &lt;strong&gt;%1&lt;/strong&gt;. Vykreslenie takého množstva vzťahov zhoršuje čitateľnosť diagramu a spomaľuje prácu s ním. Chcete model načítať so skrytými vzťahmi? Značka vzťahov každej tabuľky ich naďalej vypisuje (dvojitým kliknutím na značku zobrazíte zoznam).</translation>
     </message>
     <message>
         <source>This model concentrates &lt;strong&gt;%1%&lt;/strong&gt; of its &lt;strong&gt;%2&lt;/strong&gt; tables/views/foreign tables in a single schema &lt;strong&gt;%3&lt;/strong&gt;. Segmenting the canvas by schema wouldn&apos;t distribute much of that load into separate scenes. Load it with threshold-based segmentation instead?</source>
@@ -12543,6 +12525,17 @@ dostupné v GUI. Všetky dostupné voľby sú popísané nižšie.</translation>
     </message>
 </context>
 <context>
+    <name>RelMarkerItem</name>
+    <message>
+        <source>Relationships: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Vzťahy: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Vzťahy medzi scénami: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -13514,6 +13507,10 @@ dostupné v GUI. Všetky dostupné voľby sú popísané nižšie.</translation>
         <translation>Formulár</translation>
     </message>
     <message>
+        <source>&lt;p&gt;Toggles the visibility of the relationships between tables of the same scene. When they are not visible, they are represented by the relationship marker of each table, whose details are shown by double-clicking it. Hiding the relationships is intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Prepína viditeľnosť vzťahov medzi tabuľkami tej istej scény. Ak nie sú viditeľné, zastupuje ich značka vzťahov každej tabuľky, ktorej podrobnosti sa zobrazia dvojitým kliknutím. Skrytie vzťahov je určené pre veľké modely, v ktorých vykreslené vzťahy strácajú zmysel.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;POZNÁMKA:&lt;/strong&gt; Zmena sa prejaví až po uložení a opätovnom načítaní modelu.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Currently selected object(s)</source>
         <translation>Aktuálne vybrané objekty</translation>
     </message>
@@ -13536,6 +13533,10 @@ dostupné v GUI. Všetky dostupné voľby sú popísané nižšie.</translation>
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Prahová hodnota segmentácie. Počet tabuliek, pohľadov alebo externých tabuliek vytvorených pred vytvorením novej scény, na ktorú sa smerujú nové objekty.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;Skryje vzťahy medzi tabuľkami tej istej scény. Zastupuje ich značka vzťahov každej tabuľky, ktorej podrobnosti sa zobrazia dvojitým kliknutím. Určené pre veľké modely, v ktorých vykreslené vzťahy strácajú zmysel.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;POZNÁMKA:&lt;/strong&gt; Zmena sa prejaví až po uložení a opätovnom načítaní modelu.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14406,6 +14407,37 @@ dostupné v GUI. Všetky dostupné voľby sú popísané nižšie.</translation>
 %3 Type: %4</source>
         <translation>`%1&apos; (%2)
 %3 Typ: %4</translation>
+    </message>
+</context>
+<context>
+    <name>TableRelsWidget</name>
+    <message>
+        <source>Cross-scene relationships</source>
+        <translation type="vanished">Vzťahy medzi scénami</translation>
+    </message>
+    <message>
+        <source>Table relationships</source>
+        <translation>Vzťahy tabuľky</translation>
+    </message>
+    <message>
+        <source>Relationships</source>
+        <translation>Vzťahy</translation>
+    </message>
+    <message>
+        <source>Cross rels.</source>
+        <translation>Vzťahy medzi scénami</translation>
+    </message>
+    <message>
+        <source>Relationship</source>
+        <translation>Vzťah</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Typ</translation>
+    </message>
+    <message>
+        <source>Related table</source>
+        <translation>Súvisiaca tabuľka</translation>
     </message>
 </context>
 <context>

@@ -1970,25 +1970,6 @@ Codifica: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>TableRelsWidget</name>
-    <message>
-        <source>Cross-scene relationships</source>
-        <translation>Relazioni tra scene</translation>
-    </message>
-    <message>
-        <source>Relationship</source>
-        <translation>Relazione</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation>Tipo</translation>
-    </message>
-    <message>
-        <source>Related table</source>
-        <translation>Tabella correlata</translation>
-    </message>
-</context>
-<context>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
@@ -2261,13 +2242,6 @@ Se l&apos;opzione è disattivata, l&apos;SQL verrà aggiunto alla fine del coman
     <message>
         <source>Are you sure you want to remove all the items?</source>
         <translation>Si desidera davvero rimuovere tutti gli elementi?</translation>
-    </message>
-</context>
-<context>
-    <name>RelMarkerItem</name>
-    <message>
-        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>Relazioni tra scene: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -9905,6 +9879,10 @@ La dimensione richiesta %1 x %2 era troppo grande e la memoria non era sufficien
         <translation>Scena predefinita</translation>
     </message>
     <message>
+        <source>Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?</source>
+        <translation>La modifica della visibilità delle relazioni ha effetto solo dopo aver salvato e ricaricato il modello. Procedere?</translation>
+    </message>
+    <message>
         <source>Don&apos;t ask to save and reload again.</source>
         <translation>Non chiedere più di salvare e ricaricare.</translation>
     </message>
@@ -9927,6 +9905,10 @@ La dimensione richiesta %1 x %2 era troppo grande e la memoria non era sufficien
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Converting a &lt;strong&gt;one-to-one&lt;/strong&gt; or &lt;strong&gt;one-to-many&lt;/strong&gt; relationship can lead to unreversible changes or break other relationships in the linking chain! Do you want to proceed?</source>
         <translation>&lt;strong&gt;ATTENZIONE:&lt;/strong&gt; la conversione di una relazione &lt;strong&gt;uno-a-uno&lt;/strong&gt; o &lt;strong&gt;uno-a-molti&lt;/strong&gt; può causare modifiche irreversibili o compromettere altre relazioni nella catena di collegamento. Procedere?</translation>
+    </message>
+    <message>
+        <source>This model has &lt;strong&gt;%1&lt;/strong&gt; relationships. Drawing that many relationships makes the diagram hard to read and slow to handle. Load it hiding the relationships instead? Each table&apos;s relationship marker keeps listing them (double-click the marker to see the list).</source>
+        <translation>Questo modello contiene &lt;strong&gt;%1&lt;/strong&gt; relazioni. Disegnare così tante relazioni rende il diagramma difficile da leggere e lento da gestire. Caricarlo nascondendo le relazioni? Il marcatore delle relazioni di ogni tabella continua a elencarle (fare doppio clic sul marcatore per vedere l&apos;elenco).</translation>
     </message>
     <message>
         <source>This model concentrates &lt;strong&gt;%1%&lt;/strong&gt; of its &lt;strong&gt;%2&lt;/strong&gt; tables/views/foreign tables in a single schema &lt;strong&gt;%3&lt;/strong&gt;. Segmenting the canvas by schema wouldn&apos;t distribute much of that load into separate scenes. Load it with threshold-based segmentation instead?</source>
@@ -12543,6 +12525,17 @@ disponibili nella GUI. Tutte le opzioni disponibili sono descritte di seguito.</
     </message>
 </context>
 <context>
+    <name>RelMarkerItem</name>
+    <message>
+        <source>Relationships: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Relazioni: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Relazioni tra scene: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -13514,6 +13507,10 @@ disponibili nella GUI. Tutte le opzioni disponibili sono descritte di seguito.</
         <translation>Modulo</translation>
     </message>
     <message>
+        <source>&lt;p&gt;Toggles the visibility of the relationships between tables of the same scene. When they are not visible, they are represented by the relationship marker of each table, whose details are shown by double-clicking it. Hiding the relationships is intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Attiva o disattiva la visibilità delle relazioni tra tabelle della stessa scena. Quando non sono visibili, sono rappresentate dal marcatore delle relazioni di ogni tabella, i cui dettagli si visualizzano con un doppio clic. Nascondere le relazioni è pensato per modelli di grandi dimensioni, in cui le relazioni disegnate perdono la loro utilità.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTA:&lt;/strong&gt; La modifica ha effetto solo dopo aver salvato e ricaricato il modello.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Currently selected object(s)</source>
         <translation>Oggetti attualmente selezionati</translation>
     </message>
@@ -13536,6 +13533,10 @@ disponibili nella GUI. Tutte le opzioni disponibili sono descritte di seguito.</
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Soglia di segmentazione. Il numero di tabelle, viste o tabelle esterne create prima che venga creata una nuova scena a cui instradare i nuovi oggetti.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;Nasconde le relazioni tra tabelle della stessa scena. Sono rappresentate dal marcatore delle relazioni di ogni tabella, i cui dettagli si visualizzano con un doppio clic. Pensato per modelli di grandi dimensioni, in cui le relazioni disegnate perdono la loro utilità.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTA:&lt;/strong&gt; La modifica ha effetto solo dopo aver salvato e ricaricato il modello.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14406,6 +14407,37 @@ disponibili nella GUI. Tutte le opzioni disponibili sono descritte di seguito.</
 %3 Type: %4</source>
         <translation>`%1&apos; (%2)
 %3 Tipo: %4</translation>
+    </message>
+</context>
+<context>
+    <name>TableRelsWidget</name>
+    <message>
+        <source>Cross-scene relationships</source>
+        <translation type="vanished">Relazioni tra scene</translation>
+    </message>
+    <message>
+        <source>Table relationships</source>
+        <translation>Relazioni della tabella</translation>
+    </message>
+    <message>
+        <source>Relationships</source>
+        <translation>Relazioni</translation>
+    </message>
+    <message>
+        <source>Cross rels.</source>
+        <translation>Relazioni tra scene</translation>
+    </message>
+    <message>
+        <source>Relationship</source>
+        <translation>Relazione</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Tipo</translation>
+    </message>
+    <message>
+        <source>Related table</source>
+        <translation>Tabella correlata</translation>
     </message>
 </context>
 <context>
