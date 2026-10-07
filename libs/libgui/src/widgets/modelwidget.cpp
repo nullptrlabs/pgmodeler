@@ -57,7 +57,7 @@
 #include "dbobjects/eventtriggerwidget.h"
 #include "guiutilsns.h"
 #include "swapobjectsidswidget.h"
-#include "crossscenerelswidget.h"
+#include "tablerelswidget.h"
 #include "dbobjects/genericsqlwidget.h"
 #include "dbobjects/policywidget.h"
 #include "tabledatawidget.h"
@@ -68,7 +68,7 @@
 #include "dbobjects/transformwidget.h"
 #include "dbobjects/procedurewidget.h"
 #include "coreutilsns.h"
-#include "cutoffitem.h"
+#include "relmarkeritem.h"
 #include "graphicalview.h"
 #include "relationshipview.h"
 #include "schemaview.h"
@@ -1115,7 +1115,7 @@ ObjectsScene *ModelWidget::addScene(bool auto_activate)
 	});
 	connect(new_scene, &ObjectsScene::s_objectModified, this,  &ModelWidget::handleObjectModification);
 	connect(new_scene, &ObjectsScene::s_objectDoubleClicked, this,  &ModelWidget::handleObjectDoubleClick);
-	connect(new_scene, &ObjectsScene::s_cutoffDoubleClicked, this,  &ModelWidget::showCutoffRelationships);
+	connect(new_scene, &ObjectsScene::s_relMarkerDoubleClicked, this,  &ModelWidget::showTableRelationships);
 
 	connect(new_scene, &ObjectsScene::s_objectSelected, this,  &ModelWidget::configureObjectSelection, Qt::QueuedConnection);
 	connect(new_scene, qOverload<BaseObject *>(&ObjectsScene::s_popupMenuRequested), this, qOverload<BaseObject *>(&ModelWidget::configurePopupMenu), Qt::QueuedConnection);
@@ -1311,7 +1311,7 @@ void ModelWidget::handleObjectAddition(BaseObject *object)
 
 			/* Tables in the same scene get a regular RelationshipView. Tables in different scenes
 			get no RelationshipView at all -- the relationship is registered as an external
-			connection on each table instead, so BaseTableView can draw its own cut-off marker */
+			connection on each table instead, so BaseTableView can draw its own relationship marker */
 			if(src_scene && src_scene == dst_scene)
 			{
 				item = new RelationshipView(rel);
@@ -1581,7 +1581,7 @@ void ModelWidget::handleObjectRemoval(BaseObject *object)
 		else if(graph_obj->getObjectType() == ObjectType::Relationship ||
 						graph_obj->getObjectType() == ObjectType::BaseRelationship)
 		{
-			// Cross-scene relationship: no RelationshipView, just clear the cut-off markers
+			// Cross-scene relationship: no RelationshipView, just clear the relationship markers
 			BaseRelationship *rel = dynamic_cast<BaseRelationship *>(graph_obj);
 			BaseTableView *src_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::SrcTable)->getOverlyingObject()),
 										 *dst_view = dynamic_cast<BaseTableView *>(rel->getTable(BaseRelationship::DstTable)->getOverlyingObject());
@@ -1622,26 +1622,26 @@ void ModelWidget::handleObjectDoubleClick(BaseGraphicObject *object)
 		this->showObjectForm(ObjectType::Database, db_model);
 }
 
-void ModelWidget::showCutoffRelationships(BaseTable *table)
+void ModelWidget::showTableRelationships(BaseTable *table)
 {
 	if(!table)
 		return;
 
 	BaseForm base_form(this);
-	CrossSceneRelsWidget *cross_scene_rels_wgt = new CrossSceneRelsWidget;
+	TableRelsWidget *table_rels_wgt = new TableRelsWidget;
 
-	cross_scene_rels_wgt->setAttributes(db_model, table);
-	base_form.setMainWidget(cross_scene_rels_wgt);
+	table_rels_wgt->setAttributes(db_model, table);
+	base_form.setMainWidget(table_rels_wgt);
 	base_form.setButtonConfiguration(Messagebox::CloseButton);
 
-	connect(cross_scene_rels_wgt, &CrossSceneRelsWidget::s_relationshipActivated, this, [this, cross_scene_rels_wgt](BaseRelationship *rel){
+	connect(table_rels_wgt, &TableRelsWidget::s_relationshipActivated, this, [this, table_rels_wgt](BaseRelationship *rel){
 		showObjectForm(rel->getObjectType(), rel);
-		cross_scene_rels_wgt->updateRelationships();
+		table_rels_wgt->updateRelationships();
 	});
 
-	GeneralConfigWidget::restoreWidgetGeometry(&base_form, cross_scene_rels_wgt->metaObject()->className());
+	GeneralConfigWidget::restoreWidgetGeometry(&base_form, table_rels_wgt->metaObject()->className());
 	base_form.exec();
-	GeneralConfigWidget::saveWidgetGeometry(&base_form, cross_scene_rels_wgt->metaObject()->className());
+	GeneralConfigWidget::saveWidgetGeometry(&base_form, table_rels_wgt->metaObject()->className());
 }
 
 void ModelWidget::handleObjectsMovement(ObjectsScene *src_scene, bool end_moviment)
@@ -1884,22 +1884,22 @@ void ModelWidget::configureObjectSelection()
 		itr++;
 	}
 
-	/* Cutoff marker selection is exclusive with regular object selection (see CutoffItem::
-	 * itemChange(), which handles the opposite direction). A cutoff can only ever be selected in
+	/* RelMarker marker selection is exclusive with regular object selection (see RelMarkerItem::
+	 * itemChange(), which handles the opposite direction). A relationship marker can only ever be selected in
 	 * whichever scene was active at the time of the click, and it can outlive that scene losing
 	 * focus (selection now spans every scene, unchanged by setActiveScene()) -- so a table/
 	 * relationship/etc. picked up here, in any scene, still needs this sweep across every scene to
-	 * catch a cutoff left selected elsewhere */
+	 * catch a relationship marker left selected elsewhere */
 	if(!selected_objects.empty())
 	{
 		for(auto &scn : scenes)
 		{
 			for(auto &sel_item : scn->selectedItems())
 			{
-				CutoffItem *cutoff = dynamic_cast<CutoffItem *>(sel_item);
+				RelMarkerItem *rel_marker = dynamic_cast<RelMarkerItem *>(sel_item);
 
-				if(cutoff)
-					cutoff->setSelected(false);
+				if(rel_marker)
+					rel_marker->setSelected(false);
 			}
 		}
 	}
@@ -2635,12 +2635,12 @@ void ModelWidget::loadModel(const QString &filename, bool check_alt_seg_mode)
 
 		blink_new_objs = curr_blink_objs;
 
-		/* Any cut-off marker attached while its table's box was still stuck at its pre-configuration
+		/* Any relationship marker attached while its table's box was still stuck at its pre-configuration
 		 * 0x0 default (updates are globally disabled for the whole duration of a bulk load, so this
 		 * is a real possibility, not just a theoretical one) never gets a chance to reposition itself
 		 * against the table's real geometry -- DatabaseModel::loadModel()'s final setObjectsModified()
 		 * pass does give every table its final size, but deliberately suppresses the very signals
-		 * CutoffItem listens for while doing so (see BaseTable::isGeomChangesIgnored()). Refresh them
+		 * RelMarkerItem listens for while doing so (see BaseTable::isGeomChangesIgnored()). Refresh them
 		 * all explicitly, now that every table's box is settled.
 		 * Note: getObjectList() (every object of the type, unfiltered), not getObjects() (which
 		 * defaults to filtering by schema==nullptr, i.e. only schema-less objects -- never what's
@@ -2652,8 +2652,8 @@ void ModelWidget::loadModel(const QString &filename, bool check_alt_seg_mode)
 				BaseTableView *tab_view =
 						dynamic_cast<BaseTableView *>(dynamic_cast<BaseGraphicObject *>(obj)->getOverlyingObject());
 
-				if(tab_view && tab_view->getCutoffItem())
-					tab_view->getCutoffItem()->updatePosition();
+				if(tab_view && tab_view->getRelMarkerItem())
+					tab_view->getRelMarkerItem()->updatePosition();
 			}
 		}
 
@@ -3446,7 +3446,7 @@ void ModelWidget::relocateObjectView(BaseGraphicObject *graph_obj, ObjectsScene 
 	 *   it calls disconnectTables(), which dereferences both tables[] pointers. Doing this once
 	 *   old_view is already gone would leave a dangling pointer the instant the view is touched.
 	 * - A cross-scene relationship has no view -- drop it from both tables' external list. Doing
-	 *   this on old_view's own side too (not just the partner's) matters: its cut-off marker is a
+	 *   this on old_view's own side too (not just the partner's) matters: its relationship marker is a
 	 *   standalone QGraphicsItem added directly to old_scene, not a Qt child of old_view, so
 	 *   removing/discarding old_view below never touches it on its own -- left alone, it stays
 	 *   orphaned, still rendered in old_scene, for as long as that scene lives */
@@ -7122,7 +7122,7 @@ QRectF ModelWidget::rearrangeTablesHierarchically(ObjectsScene *target_scene, Ba
 			else
 				curr_tab = nullptr;
 
-			/* A cross-scene partner has no RelationshipView here (cut-off marker instead) -- treat it
+			/* A cross-scene partner has no RelationshipView here (relationship marker instead) -- treat it
 			 * as not connected, this scene's hierarchy shouldn't reach into another scene's tables */
 			if(curr_tab && getSceneForObject(curr_tab) != target_scene)
 				curr_tab = nullptr;

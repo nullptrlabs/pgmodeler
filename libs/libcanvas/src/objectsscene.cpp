@@ -25,7 +25,7 @@
 #include "graphicalview.h"
 #include "tableview.h"
 #include "schemaview.h"
-#include "cutoffitem.h"
+#include "relmarkeritem.h"
 #include "databasemodel.h"
 #include "customuistyle.h"
 #include <QScrollBar>
@@ -929,12 +929,12 @@ void ObjectsScene::showRelationshipLine(bool value, const QPointF &p_start)
 				flags=QGraphicsItem::ItemIsSelectable |
 					  QGraphicsItem::ItemSendsGeometryChanges;
 		}
-		/* Cut-off markers aren't BaseObjectView-derived so they fall through the check above
+		/* Relationship markers aren't BaseObjectView-derived so they fall through the check above
 		 * and would otherwise permanently lose ItemIsMovable (setFlags() below replaces the
 		 * whole flag set) the first time a relationship is drawn interactively anywhere in the
 		 * scene, since this loop touches every item, not just the ones involved in the new
 		 * relationship */
-		else if(dynamic_cast<CutoffItem *>(items.front()) && !value)
+		else if(dynamic_cast<RelMarkerItem *>(items.front()) && !value)
 			flags=QGraphicsItem::ItemIsMovable |
 				  QGraphicsItem::ItemIsSelectable |
 				  QGraphicsItem::ItemSendsGeometryChanges;
@@ -1127,12 +1127,12 @@ void ObjectsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 		//Gets the selected graphical object
 		QGraphicsItem *sel_item = this->selectedItems().at(0);
 		BaseObjectView *obj=dynamic_cast<BaseObjectView *>(sel_item);
-		CutoffItem *cutoff = dynamic_cast<CutoffItem *>(sel_item);
+		RelMarkerItem *rel_marker = dynamic_cast<RelMarkerItem *>(sel_item);
 
 		if(obj)
 			emit s_objectDoubleClicked(dynamic_cast<BaseGraphicObject *>(obj->getUnderlyingObject()));
-		else if(cutoff)
-			emit s_cutoffDoubleClicked(cutoff->getTable());
+		else if(rel_marker)
+			emit s_relMarkerDoubleClicked(rel_marker->getTable());
 	}
 	else
 		//Emit a signal indicating that no object was selected

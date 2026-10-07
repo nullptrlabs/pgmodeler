@@ -1970,7 +1970,7 @@ PID: `%1&apos;
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
+    <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
         <translation>ความสัมพันธ์ข้ามฉาก</translation>
@@ -2264,7 +2264,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
 </context>
 <context>
-    <name>CutoffItem</name>
+    <name>RelMarkerItem</name>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>ความสัมพันธ์ข้าม: &lt;b&gt;%1&lt;/b&gt;</translation>

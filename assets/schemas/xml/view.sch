@@ -32,7 +32,7 @@
 %if {prepended-sql} %then {prepended-sql} %end
 
 {position}
-%if {cutoff-pos} %then {cutoff-pos} %end
+%if {rel-marker-pos} %then {rel-marker-pos} %end
 
 %if {references} %then {references} %end
 

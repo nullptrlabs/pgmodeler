@@ -19,11 +19,11 @@
 # Also, you can get the complete GNU General Public License at <http://www.gnu.org/licenses/>
 */
 
-#include "crossscenerelswidget.h"
+#include "tablerelswidget.h"
 #include "basetableview.h"
 #include "guiutilsns.h"
 
-CrossSceneRelsWidget::CrossSceneRelsWidget(QWidget *parent): QWidget(parent)
+TableRelsWidget::TableRelsWidget(QWidget *parent): QWidget(parent)
 {
 	table = nullptr;
 	model = nullptr;
@@ -62,7 +62,7 @@ CrossSceneRelsWidget::CrossSceneRelsWidget(QWidget *parent): QWidget(parent)
 	});
 }
 
-void CrossSceneRelsWidget::setAttributes(DatabaseModel *model, BaseTable *table)
+void TableRelsWidget::setAttributes(DatabaseModel *model, BaseTable *table)
 {
 	this->model = model;
 	this->table = table;
@@ -70,7 +70,7 @@ void CrossSceneRelsWidget::setAttributes(DatabaseModel *model, BaseTable *table)
 	updateRelationships();
 }
 
-void CrossSceneRelsWidget::updateRelationships()
+void TableRelsWidget::updateRelationships()
 {
 	/* The relationships are read from the table's current view every time instead of being
 	 * cached, since that view (and its list) can be replaced while the user edits a relationship */

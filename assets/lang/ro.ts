@@ -1970,7 +1970,7 @@ Codificare: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
+    <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
         <translation>Relații între scene</translation>
@@ -2264,7 +2264,7 @@ Dacă se debifează, SQL-ul va fi adăugat la sfârșitul comenzii CREATE DATABA
     </message>
 </context>
 <context>
-    <name>CutoffItem</name>
+    <name>RelMarkerItem</name>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Rel. încrucișate: &lt;b&gt;%1&lt;/b&gt;</translation>

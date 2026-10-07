@@ -1970,7 +1970,7 @@ Kodierung: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
+    <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
         <translation>Szenenübergreifende Beziehungen</translation>
@@ -2264,7 +2264,7 @@ Ist die Option deaktiviert, wird der SQL-Code am Ende des CREATE-DATABASE-Befehl
     </message>
 </context>
 <context>
-    <name>CutoffItem</name>
+    <name>RelMarkerItem</name>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Szenenübergreifende Beziehungen: &lt;b&gt;%1&lt;/b&gt;</translation>

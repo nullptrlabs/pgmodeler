@@ -134,8 +134,8 @@ AppearanceConfigWidget::AppearanceConfigWidget(QWidget *parent) : BaseConfigWidg
 			/* 62 */ Attributes::ForeignTableTitle,
 			/* 63 */ Attributes::ForeignTableTogglerButtons,
 			/* 64 */ Attributes::ForeignTableTogglerBody,
-			/* 65 */ Attributes::CutoffMarker,
-			/* 66 */ Attributes::CutoffMarker };
+			/* 65 */ Attributes::RelMarker,
+			/* 66 */ Attributes::RelMarker };
 
 	int i = 0, count = element_cmb->count();
 

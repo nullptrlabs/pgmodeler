@@ -34,7 +34,7 @@ BaseTableView::BaseTableView(BaseTable *base_tab) : BaseObjectView(base_tab)
 		throw Exception(ErrorCode::AsgNotAllocattedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	pending_geom_update = false;
-	cutoff_item = nullptr;
+	rel_marker_item = nullptr;
 	body=new RoundedRectItem;
 	body->setRoundedCorners(RoundedRectItem::BottomLeftCorner | RoundedRectItem::BottomRightCorner);
 
@@ -104,7 +104,7 @@ BaseTableView::~BaseTableView()
 	delete title;
 	delete columns;
 	delete tag_item;
-	delete cutoff_item;
+	delete rel_marker_item;
 }
 
 void BaseTableView::setHideExtAttributes(bool value)
@@ -334,33 +334,33 @@ void BaseTableView::addExternalRelationship(BaseRelationship *base_rel)
 
 	external_rels.append(base_rel);
 
-	if(!cutoff_item)
+	if(!rel_marker_item)
 	{
-		cutoff_item = new CutoffItem(this);
+		rel_marker_item = new RelMarkerItem(this);
 
 		if(this->scene())
-			this->scene()->addItem(cutoff_item);
+			this->scene()->addItem(rel_marker_item);
 	}
 
-	cutoff_item->addRelationship(base_rel);
+	rel_marker_item->addRelationship(base_rel);
 }
 
 void BaseTableView::removeExternalRelationship(BaseRelationship *base_rel)
 {
 	external_rels.removeOne(base_rel);
 
-	if(cutoff_item)
+	if(rel_marker_item)
 	{
-		cutoff_item->removeRelationship(base_rel);
+		rel_marker_item->removeRelationship(base_rel);
 
-		if(cutoff_item->getRelationshipsCount() == 0)
+		if(rel_marker_item->getRelationshipsCount() == 0)
 		{
-			delete cutoff_item;
-			cutoff_item = nullptr;
+			delete rel_marker_item;
+			rel_marker_item = nullptr;
 
-			/* Discarding any custom position: if a new cutoff marker is created later for
+			/* Discarding any custom position: if a new relationship marker is created later for
 			 * this table, it starts back at the default anchor instead of an old offset */
-			dynamic_cast<BaseTable *>(getUnderlyingObject())->resetCutoffPosition();
+			dynamic_cast<BaseTable *>(getUnderlyingObject())->resetRelMarkerPosition();
 		}
 	}
 }
@@ -558,7 +558,7 @@ QList<BaseRelationship *> BaseTableView::getExternalRelationships()
 	return external_rels;
 }
 
-QPointF BaseTableView::getCutoffAnchorPoint()
+QPointF BaseTableView::getRelMarkerAnchorPoint()
 {
 	return this->mapToScene(QPointF(title->pos().x() + title->boundingRect().width(),
 																	 title->pos().y() + (title->boundingRect().height() / 2)));
@@ -693,9 +693,9 @@ void BaseTableView::configureCurrentPage(BaseTable::TableSection section_id, uns
 	emit s_currentPageChanged();
 }
 
-CutoffItem *BaseTableView::getCutoffItem()
+RelMarkerItem *BaseTableView::getRelMarkerItem()
 {
-	return cutoff_item;
+	return rel_marker_item;
 }
 
 void BaseTableView::selectRelationships()

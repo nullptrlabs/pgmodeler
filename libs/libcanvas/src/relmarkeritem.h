@@ -21,12 +21,12 @@
 
 /**
 \ingroup libcanvas
-\class CutoffItem
+\class RelMarkerItem
 \brief Marks a table as having relationships whose other end lives in a different scene
 */
 
-#ifndef CUTOFF_ITEM_H
-#define CUTOFF_ITEM_H
+#ifndef REL_MARKER_ITEM_H
+#define REL_MARKER_ITEM_H
 
 #include "canvasglobal.h"
 #include "baserelationship.h"
@@ -38,7 +38,7 @@
 
 class BaseTableView;
 
-class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
+class __libcanvas RelMarkerItem: public QObject, public QGraphicsItemGroup {
 	Q_OBJECT
 
 	private:
@@ -66,7 +66,7 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 		/*! \brief True while updatePosition() is repositioning this item on its own (construction,
 		 * or the table moving/resizing) -- itemChange(ItemPositionHasChanged) checks this to tell
 		 * that kind of move apart from an actual user drag, so it only ever persists a new
-		 * cutoff_pos in response to the latter. Without this, restoring a saved position (itself
+		 * rel_marker_pos in response to the latter. Without this, restoring a saved position (itself
 		 * done via setPos(), which re-enters itemChange() like any other move) could get clamped
 		 * against transient table geometry -- not yet settled this early in a model load -- and
 		 * that transient, over-clamped position would silently overwrite the correct one that was
@@ -113,7 +113,7 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 		QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
 	public:
-		CutoffItem(BaseTableView *table);
+		RelMarkerItem(BaseTableView *table);
 
 		//! \brief Returns the table this marker is attached to
 		BaseTable *getTable();

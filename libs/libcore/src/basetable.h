@@ -58,9 +58,9 @@ class __libcore BaseTable: public BaseGraphicObject {
 
 		QString hash_code;
 
-		/*! \brief Cut-off marker position offset, relative to its default anchor point.
+		/*! \brief Relationship marker position offset, relative to its default anchor point.
 		 * A NaN point means no custom position was set -- the marker uses the default anchor */
-		QPointF cutoff_pos;
+		QPointF rel_marker_pos;
 
 	public:
 		enum TableSection: unsigned {
@@ -178,14 +178,14 @@ class __libcore BaseTable: public BaseGraphicObject {
 
 		void setPosition(const QPointF &pos) override;
 
-		/*! \brief Defines the cut-off marker's position offset relative to its default anchor
+		/*! \brief Defines the relationship marker's position offset relative to its default anchor
 		 * point. Pass an invalid (NaN) point to clear a previously set custom position */
-		void setCutoffPosition(const QPointF &pos);
+		void setRelMarkerPosition(const QPointF &pos);
 
-		QPointF getCutoffPosition();
+		QPointF getRelMarkerPosition();
 
-		//! \brief Clears any custom cut-off marker position, reverting it to the default anchor
-		void resetCutoffPosition();
+		//! \brief Clears any custom relationship marker position, reverting it to the default anchor
+		void resetRelMarkerPosition();
 
 		void updateDependencies() override = 0;
 

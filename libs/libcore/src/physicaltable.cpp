@@ -1434,7 +1434,7 @@ void PhysicalTable::setTableAttributes(SchemaParser::CodeType def_type, bool inc
 	{
 		setRelObjectsIndexesAttribute();
 		setPositionAttribute();
-		setPositionAttribute(cutoff_pos, Attributes::CutoffPos, Attributes::Cutoff);
+		setPositionAttribute(rel_marker_pos, Attributes::RelMarkerPos, Attributes::RelMarker);
 		setFadedOutAttribute();
 		setLayersAttribute();
 		setSceneIndexAttribute();

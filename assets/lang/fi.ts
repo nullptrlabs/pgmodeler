@@ -1970,7 +1970,7 @@ Merkistökoodaus: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
+    <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
         <translation>Kohtausten väliset suhteet</translation>
@@ -2264,7 +2264,7 @@ Jos asetus ei ole valittuna, SQL lisätään CREATE DATABASE -komennon loppuun.<
     </message>
 </context>
 <context>
-    <name>CutoffItem</name>
+    <name>RelMarkerItem</name>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Kohtausten väliset suhteet: &lt;b&gt;%1&lt;/b&gt;</translation>
