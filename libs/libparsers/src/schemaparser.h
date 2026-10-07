@@ -36,6 +36,7 @@
 #include "exception.h"
 #include "utilsns.h"
 #include <QRegularExpression>
+#include <QHash>
 
 class __libparsers SchemaParser {
 	private:
@@ -63,6 +64,19 @@ class __libparsers SchemaParser {
 		 *  in the buffer. This is used to report syntax/semantic errors at the
 		 *  correct location */
 		std::vector<IncludeInfo> include_infos;
+
+		/*! \brief Stores the already processed buffer and include infos of a schema file, that is,
+		 *  with its @include statements resolved and comments stripped, exactly as left by loadBuffer().
+		 *  This is what's shared between schema files already parsed by this or any other instance (see loadFile()) */
+		struct CachedFile {
+			QStringList buffer;
+			std::vector<IncludeInfo> include_infos;
+		};
+
+		/*! \brief Caches the schema files already loaded by any instance of this class, keyed by the
+		 *  file's absolute path. This avoids reading and reprocessing (comment stripping, @include resolution)
+		 *  a schema file more than once per execution, since these files don't change while the app is running */
+		static QHash<QString, CachedFile> file_cache;
 
 		/*! \brief Indicates that the parser should ignore unknown
 		 attributes avoiding raising exceptions */

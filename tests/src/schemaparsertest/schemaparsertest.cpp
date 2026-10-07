@@ -20,6 +20,7 @@
 */
 
 #include <QtTest/QtTest>
+#include <QTemporaryDir>
 #include "schemaparser.h"
 #include "exception.h"
 
@@ -38,6 +39,8 @@ class SchemaParserTest: public QObject {
 		void testConvertMetaCharsCorrectly();
 		void testConvertEscapedCharsCorrectly();
 		void testConvertEscapedPlainTextCharsInPlaintextExpr();
+		void testLoadFileCachesBufferAcrossInstances();
+		void testLoadFileReportsIncludeFileAndLineOnCacheHit();
 };
 
 
@@ -284,6 +287,105 @@ void SchemaParserTest::testConvertAttribsToXmlEntitiesInCondExpr()
 	{
 		QFAIL(e.getExceptionsText().toStdString().c_str());
 	}
+}
+
+void SchemaParserTest::testLoadFileCachesBufferAcrossInstances()
+{
+	QTemporaryDir dir;
+	QVERIFY(dir.isValid());
+
+	QString file_path = dir.filePath("cache_test.sch");
+	attribs_map attribs;
+	QFile file(file_path);
+
+	QVERIFY(file.open(QFile::WriteOnly | QFile::Truncate));
+	file.write("first-version\n");
+	file.close();
+
+	try
+	{
+		SchemaParser schparser1;
+		schparser1.loadFile(file_path);
+		QCOMPARE(schparser1.getSourceCode(attribs), QString("first-version"));
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	/* Changing the file on disk: if loadFile() is really reusing the buffer cached on the first
+	 * load, a second instance loading the same path must still see the old content, since the
+	 * cache is never invalidated by a change made after the process started */
+	QVERIFY(file.open(QFile::WriteOnly | QFile::Truncate));
+	file.write("second-version\n");
+	file.close();
+
+	try
+	{
+		SchemaParser schparser2;
+		schparser2.loadFile(file_path);
+		QCOMPARE(schparser2.getSourceCode(attribs), QString("first-version"));
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void SchemaParserTest::testLoadFileReportsIncludeFileAndLineOnCacheHit()
+{
+	QTemporaryDir dir;
+	QVERIFY(dir.isValid());
+
+	QString main_path = dir.filePath("main_include_test.sch"),
+			included_path = dir.filePath("included_include_test.sch");
+	attribs_map attribs;
+	QFile included_file(included_path), main_file(main_path);
+
+	QVERIFY(included_file.open(QFile::WriteOnly | QFile::Truncate));
+	// The reference to an attribute that's never defined raises ErrorCode::UnkownAttribute
+	included_file.write("line one\n{totally_unknown_attrib}\n");
+	included_file.close();
+
+	QVERIFY(main_file.open(QFile::WriteOnly | QFile::Truncate));
+	main_file.write(QString("@include \"%1\"\n").arg(included_path).toUtf8());
+	main_file.close();
+
+	QString first_msg, second_msg;
+
+	// First load of the main file: goes through the full parsing and @include resolution (cache miss)
+	try
+	{
+		SchemaParser schparser1;
+		schparser1.loadFile(main_path);
+		schparser1.getSourceCode(attribs);
+		QFAIL("Expected an UnkownAttribute exception to be raised but none was");
+	}
+	catch(Exception &e)
+	{
+		QCOMPARE(e.getErrorCode(), ErrorCode::UnkownAttribute);
+		first_msg = e.getErrorMessage();
+	}
+
+	// Second load of the exact same main file by another instance: must hit the cache populated above
+	try
+	{
+		SchemaParser schparser2;
+		schparser2.loadFile(main_path);
+		schparser2.getSourceCode(attribs);
+		QFAIL("Expected an UnkownAttribute exception to be raised but none was");
+	}
+	catch(Exception &e)
+	{
+		QCOMPARE(e.getErrorCode(), ErrorCode::UnkownAttribute);
+		second_msg = e.getErrorMessage();
+	}
+
+	// The error must point to the included file, not the top-level one nor a "[memory buffer]" placeholder
+	QVERIFY(first_msg.contains(included_path));
+
+	// The cache must not change the reported file/line/column in any way
+	QCOMPARE(first_msg, second_msg);
 }
 
 QTEST_MAIN(SchemaParserTest)
