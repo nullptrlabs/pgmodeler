@@ -86,8 +86,9 @@ class __libparsers SchemaParser {
 		 attributes avoiding raising exceptions */
 		bool ignore_empty_atribs;
 
-		//! \brief RegExp used to validate attribute names
-		static const QRegularExpression AttribRegExp;
+		/*! \brief Returns whether the name is a valid attribute name, that is, it starts with an ASCII letter
+		 * and the remaining characters are ASCII letters, digits, hyphens or underscores */
+		static bool isValidAttributeName(const QString &name);
 
 		//! \brief Get an attribute name from the buffer on the current position
 		QString getAttribute(bool &found_conv_to_xml);
