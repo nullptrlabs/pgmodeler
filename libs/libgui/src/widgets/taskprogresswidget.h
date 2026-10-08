@@ -49,6 +49,9 @@ class __libgui TaskProgressWidget: public QDialog, public Ui::TaskProgressWidget
 		 * right after setCancelable(true) */
 		bool cancelable;
 
+	protected:
+		bool eventFilter(QObject *object, QEvent *event) override;
+
 	public:
 		TaskProgressWidget(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::Widget);
 
