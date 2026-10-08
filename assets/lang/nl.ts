@@ -14420,6 +14420,10 @@ die in de GUI beschikbaar zijn. Alle beschikbare opties worden hieronder beschre
         <translation>Relaties van de tabel</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Tabel:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Relaties</translation>
     </message>
@@ -14438,6 +14442,10 @@ die in de GUI beschikbaar zijn. Alle beschikbare opties worden hieronder beschre
     <message>
         <source>Related table</source>
         <translation>Gerelateerde tabel</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Relaties van %1</translation>
     </message>
 </context>
 <context>

@@ -14420,6 +14420,10 @@ bir komut satırı arayüzü sağlar. Kullanılabilir tüm seçenekler aşağıd
         <translation>Tablonun ilişkileri</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Tablo:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>İlişkiler</translation>
     </message>
@@ -14438,6 +14442,10 @@ bir komut satırı arayüzü sağlar. Kullanılabilir tüm seçenekler aşağıd
     <message>
         <source>Related table</source>
         <translation>İlişkili tablo</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>%1 ilişkileri</translation>
     </message>
 </context>
 <context>

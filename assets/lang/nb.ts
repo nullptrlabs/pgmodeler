@@ -14420,6 +14420,10 @@ som er tilgjengelige i det grafiske brukergrensesnittet. Alle tilgjengelige alte
         <translation>Tabellens relasjoner</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Tabell:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Relasjoner</translation>
     </message>
@@ -14438,6 +14442,10 @@ som er tilgjengelige i det grafiske brukergrensesnittet. Alle tilgjengelige alte
     <message>
         <source>Related table</source>
         <translation>Relatert tabell</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Relasjoner for %1</translation>
     </message>
 </context>
 <context>

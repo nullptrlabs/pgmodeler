@@ -14420,6 +14420,10 @@ available in GUI. All available options are described below.</source>
         <translation>表的关系</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>表：</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>关系</translation>
     </message>
@@ -14438,6 +14442,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Related table</source>
         <translation>相关表</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>%1 的关系</translation>
     </message>
 </context>
 <context>

@@ -14420,6 +14420,10 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
         <translation>Relațiile tabelului</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Tabel:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Relații</translation>
     </message>
@@ -14438,6 +14442,10 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
     <message>
         <source>Related table</source>
         <translation>Tabel asociat</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Relații: %1</translation>
     </message>
 </context>
 <context>

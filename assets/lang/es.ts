@@ -14420,6 +14420,10 @@ disponibles en la GUI. A continuación se describen todas las opciones disponibl
         <translation>Relaciones de la tabla</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Tabla:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Relaciones</translation>
     </message>
@@ -14438,6 +14442,10 @@ disponibles en la GUI. A continuación se describen todas las opciones disponibl
     <message>
         <source>Related table</source>
         <translation>Tabla relacionada</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Relaciones de %1</translation>
     </message>
 </context>
 <context>

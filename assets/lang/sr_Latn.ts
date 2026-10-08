@@ -14420,6 +14420,10 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
         <translation>Odnosi tabele</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Tabela:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Odnosi</translation>
     </message>
@@ -14438,6 +14442,10 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     <message>
         <source>Related table</source>
         <translation>Povezana tabela</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Odnosi: %1</translation>
     </message>
 </context>
 <context>

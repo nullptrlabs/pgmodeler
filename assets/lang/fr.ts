@@ -14420,6 +14420,10 @@ disponibles dans l&apos;interface graphique. Toutes les options disponibles sont
         <translation>Relations de la table</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Table :</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Relations</translation>
     </message>
@@ -14438,6 +14442,10 @@ disponibles dans l&apos;interface graphique. Toutes les options disponibles sont
     <message>
         <source>Related table</source>
         <translation>Table liée</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Relations de %1</translation>
     </message>
 </context>
 <context>

@@ -14420,6 +14420,10 @@ käytettävissä oleville tärkeimmille toiminnoille. Kaikki käytettävissä ol
         <translation>Taulukon suhteet</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Taulukko:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Suhteet</translation>
     </message>
@@ -14438,6 +14442,10 @@ käytettävissä oleville tärkeimmille toiminnoille. Kaikki käytettävissä ol
     <message>
         <source>Related table</source>
         <translation>Liittyvä taulukko</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Kohteen %1 suhteet</translation>
     </message>
 </context>
 <context>

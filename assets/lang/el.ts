@@ -14420,6 +14420,10 @@ available in GUI. All available options are described below.</source>
         <translation>Σχέσεις του πίνακα</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Πίνακας:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Σχέσεις</translation>
     </message>
@@ -14438,6 +14442,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Related table</source>
         <translation>Σχετικός πίνακας</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Σχέσεις του %1</translation>
     </message>
 </context>
 <context>

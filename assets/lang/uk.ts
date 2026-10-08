@@ -14420,6 +14420,10 @@ available in GUI. All available options are described below.</source>
         <translation>Зв&apos;язки таблиці</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Таблиця:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Зв&apos;язки</translation>
     </message>
@@ -14438,6 +14442,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Related table</source>
         <translation>Пов&apos;язана таблиця</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Зв&apos;язки: %1</translation>
     </message>
 </context>
 <context>

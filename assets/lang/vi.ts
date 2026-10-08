@@ -14420,6 +14420,10 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
         <translation>Quan hệ của bảng</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Bảng:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Quan hệ</translation>
     </message>
@@ -14438,6 +14442,10 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
     <message>
         <source>Related table</source>
         <translation>Bảng liên quan</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Quan hệ của %1</translation>
     </message>
 </context>
 <context>
