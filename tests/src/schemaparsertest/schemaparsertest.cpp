@@ -69,7 +69,8 @@ class SchemaParserTest: public QObject, public PgModelerUnitTest {
 		void testIncludeErrors_data();
 		void testIncludeErrors();
 		void testErrorInsideIncludeReportsIncludeFileAndRelativeLine();
-		void testErrorAfterIncludeReportsMainFileLine();
+		void testErrorPositionsWithSeveralIncludes_data();
+		void testErrorPositionsWithSeveralIncludes();
 		void testGetSourceCodeFromFileSetsPgSqlVersion();
 		void testGetSourceCodeByObjectNameUsesTheSchemasFolders();
 		void testGetSourceCodeOfMissingSchemaRaises();
@@ -753,30 +754,79 @@ void SchemaParserTest::testErrorInsideIncludeReportsIncludeFileAndRelativeLine()
 	}
 }
 
-void SchemaParserTest::testErrorAfterIncludeReportsMainFileLine()
+void SchemaParserTest::testErrorPositionsWithSeveralIncludes_data()
 {
+	QTest::addColumn<QString>("main_contents");
+	QTest::addColumn<int>("error_code");
+	QTest::addColumn<QString>("error_file");	// empty: the main file
+	QTest::addColumn<int>("error_line");			// line in error_file
+	QTest::addColumn<int>("include_line");		// line of the @include statement in the main file when the error is inside an include
+
+	// inc_a has 2 lines, inc_b has 3 lines (the last one without a line break), inc_bad has an unknown attribute in its 2nd line
+	QTest::newRow("line right after an include") << "@include \"inc_a\"\n{unknown_attr}\n" << static_cast<int>(ErrorCode::UnkownAttribute) << "" << 2 << 0;
+	QTest::newRow("line after an include") << "@include \"inc_a\"\nz\n{unknown_attr}\n" << static_cast<int>(ErrorCode::UnkownAttribute) << "" << 3 << 0;
+	QTest::newRow("line after two includes") << "@include \"inc_a\"\n@include \"inc_b\"\nz\n{unknown_attr}\n" << static_cast<int>(ErrorCode::UnkownAttribute) << "" << 4 << 0;
+	QTest::newRow("line between two includes") << "@include \"inc_a\"\n{unknown_attr}\n@include \"inc_b\"\n" << static_cast<int>(ErrorCode::UnkownAttribute) << "" << 2 << 0;
+	QTest::newRow("line before an include") << "a\n{unknown_attr}\n@include \"inc_a\"\n" << static_cast<int>(ErrorCode::UnkownAttribute) << "" << 2 << 0;
+	QTest::newRow("inside the first include") << "a\n@include \"inc_bad\"\nz\n" << static_cast<int>(ErrorCode::UnkownAttribute) << "inc_bad" << 2 << 2;
+	QTest::newRow("inside an include after other includes") << "@include \"inc_a\"\n@include \"inc_b\"\nz\n@include \"inc_bad\"\n" << static_cast<int>(ErrorCode::UnkownAttribute) << "inc_bad" << 2 << 4;
+	QTest::newRow("line after the include with an error is not reached") << "@include \"inc_bad\"\n{unknown_attr}\n" << static_cast<int>(ErrorCode::UnkownAttribute) << "inc_bad" << 2 << 1;
+	QTest::newRow("syntax error after includes") << "@include \"inc_a\"\n@include \"inc_b\"\n%foo\n" << static_cast<int>(ErrorCode::InvalidInstruction) << "" << 3 << 0;
+	QTest::newRow("malformed include after includes") << "@include \"inc_a\"\n@include \"inc_b\"\nz\n@include nothing\n" << static_cast<int>(ErrorCode::InvalidSyntax) << "" << 4 << 0;
+	QTest::newRow("missing include after includes") << "@include \"inc_a\"\n\n@include \"inc_missing\"\n" << static_cast<int>(ErrorCode::InvalidInclude) << "" << 3 << 0;
+}
+
+void SchemaParserTest::testErrorPositionsWithSeveralIncludes()
+{
+	QFETCH(QString, main_contents);
+	QFETCH(int, error_code);
+	QFETCH(QString, error_file);
+	QFETCH(int, error_line);
+	QFETCH(int, include_line);
+
 	QTemporaryDir dir;
 	QVERIFY(dir.isValid());
 
-	writeSchemaFile(dir.filePath("inc_after_inc.sch"), "x\ny\n");
-	QString main = writeSchemaFile(dir.filePath("inc_after_main.sch"), "@include \"inc_after_inc\"\nz\n{unknown_attr}\n");
+	writeSchemaFile(dir.filePath("inc_a.sch"), "a1\na2\n");
+	writeSchemaFile(dir.filePath("inc_b.sch"), "b1\nb2\nb3");
+	writeSchemaFile(dir.filePath("inc_bad.sch"), "ok\n{unknown_attr}\n");
+	QString main = writeSchemaFile(dir.filePath("inc_pos_several.sch"), main_contents);
 	attribs_map attribs;
-	SchemaParser schparser;
 
-	try
+	/* Runs twice: the first goes through the full load and the second through the cache,
+	 * which must report exactly the same */
+	for(int i = 0; i < 2; i++)
 	{
-		schparser.loadFile(main);
-		schparser.getSourceCode(attribs);
-		QFAIL("Expected an UnkownAttribute exception but none was raised");
-	}
-	catch(Exception &e)
-	{
-		QCOMPARE(e.getErrorCode(), ErrorCode::UnkownAttribute);
-		QVERIFY2(e.getErrorMessage().contains(main), qPrintable(e.getErrorMessage()));
+		SchemaParser schparser;
 
-		/* KNOWN ISSUE: the lines of the main file that come after an @include are reported shifted by the number of
-		 * lines of the included file (plus the blank line appended to it). The correct line is 3 */
-		QVERIFY2(e.getErrorMessage().contains("line 5,"), qPrintable(e.getErrorMessage()));
+		try
+		{
+			schparser.loadFile(main);
+			schparser.getSourceCode(attribs);
+			QFAIL("Expected an exception but none was raised");
+		}
+		catch(Exception &e)
+		{
+			QString msg = e.getErrorMessage();
+			QCOMPARE(static_cast<int>(e.getErrorCode()), error_code);
+
+			if(error_file.isEmpty())
+			{
+				QVERIFY2(msg.contains(main), qPrintable(msg));
+				QVERIFY2(msg.contains(QString("line %1,").arg(error_line)), qPrintable(msg));
+				QCOMPARE(schparser.getCurrentLine(), error_line);
+			}
+			else
+			{
+				QString inc_file = dir.filePath(error_file + ".sch");
+				QVERIFY2(msg.contains(inc_file), qPrintable(msg));
+				QVERIFY2(msg.contains(QString("line %1,").arg(error_line)), qPrintable(msg));
+
+				// The main file is mentioned with the line of the @include statement
+				QVERIFY2(msg.contains(QString("at line `%1'").arg(include_line)), qPrintable(msg));
+				QCOMPARE(schparser.getCurrentLine(), include_line);
+			}
+		}
 	}
 }
 
