@@ -58,6 +58,8 @@ class SchemaParserTest: public QObject, public PgModelerUnitTest {
 		void testConvertEscapedPlainTextCharsInPlaintextExpr();
 		void testLoadFileCachesBufferAcrossInstances();
 		void testLoadFileReportsIncludeFileAndLineOnCacheHit();
+		void testAttributeNames_data();
+		void testAttributeNames();
 		void testConvertToXmlEntities_data();
 		void testConvertToXmlEntities();
 		void testIncludeInsertsTheIncludedFile();
@@ -529,6 +531,67 @@ QString SchemaParserTest::writeSchemaFile(const QString &path, const QString &co
 	}
 
 	return path;
+}
+
+void SchemaParserTest::testAttributeNames_data()
+{
+	QTest::addColumn<QString>("name");
+	QTest::addColumn<bool>("valid");
+
+	QTest::newRow("lowercase") << "name" << true;
+	QTest::newRow("uppercase") << "NAME" << true;
+	QTest::newRow("single letter") << "a" << true;
+	QTest::newRow("hyphen, digits and underscore") << "a-b_c1-2_3" << true;
+	QTest::newRow("ends with hyphen") << "a-" << true;
+	QTest::newRow("starts with digit") << "1a" << false;
+	QTest::newRow("starts with hyphen") << "-a" << false;
+	QTest::newRow("starts with underscore") << "_a" << false;
+	QTest::newRow("dot") << "a.b" << false;
+	QTest::newRow("accented letter") << QString::fromUtf8("a\u00e9") << false;
+	QTest::newRow("arabic-indic digit") << QString::fromUtf8("a\u0663") << false;
+	// These two only matched the former case insensitive regular expression because of the Unicode case folding
+	QTest::newRow("kelvin sign") << QString::fromUtf8("\u212Abc") << false;
+	QTest::newRow("kelvin sign after the first char") << QString::fromUtf8("a\u212A") << false;
+	QTest::newRow("long s") << QString::fromUtf8("\u017Fabc") << false;
+	QTest::newRow("long name") << QString("a").repeated(300) << true;
+	QTest::newRow("long invalid name") << QString("a").repeated(300) + "!" << false;
+}
+
+void SchemaParserTest::testAttributeNames()
+{
+	QFETCH(QString, name);
+	QFETCH(bool, valid);
+
+	SchemaParser schparser;
+	attribs_map attribs { { name, "value" } };
+
+	try
+	{
+		schparser.loadBuffer(QString("{%1}").arg(name));
+		QString output = schparser.getSourceCode(attribs);
+
+		QVERIFY2(valid, "An invalid attribute name was accepted");
+		QCOMPARE(output, QString("value"));
+	}
+	catch(Exception &e)
+	{
+		QVERIFY2(!valid, qPrintable(e.getErrorMessage()));
+		QVERIFY(e.getErrorCode() == ErrorCode::InvalidAttribute || e.getErrorCode() == ErrorCode::InvalidSyntax);
+		schparser.restartParser();
+	}
+
+	// The same rule applies to the name defined by %set
+	try
+	{
+		schparser.loadBuffer(QString("%set {%1} v").arg(name));
+		schparser.getSourceCode(attribs_map());
+		QVERIFY2(valid, "An invalid attribute name was accepted by %set");
+	}
+	catch(Exception &e)
+	{
+		QVERIFY2(!valid, qPrintable(e.getErrorMessage()));
+		schparser.restartParser();
+	}
 }
 
 void SchemaParserTest::testConvertToXmlEntities_data()

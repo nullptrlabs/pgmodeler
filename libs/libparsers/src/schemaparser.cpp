@@ -25,11 +25,6 @@
 #include "pgsqlversions.h"
 #include "globalattributes.h"
 
-const QRegularExpression SchemaParser::AttribRegExp {
-	QRegularExpression::anchoredPattern("^([a-z])([a-z]*|(\\d)*|(\\-)*|(_)*)+"),
-	QRegularExpression::CaseInsensitiveOption
-};
-
 QHash<QString, SchemaParser::CachedFile> SchemaParser::file_cache;
 
 const QChar SchemaParser::CharComment {'#'};
@@ -86,6 +81,29 @@ const QRegularExpression SchemaParser::TokenIncludeRegexp { "^\\s*" +
 																													 TokenInclude +
 																													 "\\s+([\"])((.*)?)\\1\\s*$",
 																													 QRegularExpression::MultilineOption };
+
+bool SchemaParser::isValidAttributeName(const QString &name)
+{
+	if(name.isEmpty())
+		return false;
+
+	// The name starts with an ASCII letter and continues with ASCII letters, digits, hyphens or underscores
+	QChar chr = name[0];
+
+	if(!((chr >= 'a' && chr <= 'z') || (chr >= 'A' && chr <= 'Z')))
+		return false;
+
+	for(qsizetype i = 1; i < name.size(); i++)
+	{
+		chr = name[i];
+
+		if(!((chr >= 'a' && chr <= 'z') || (chr >= 'A' && chr <= 'Z') ||
+				 (chr >= '0' && chr <= '9') || chr == '-' || chr == '_'))
+			return false;
+	}
+
+	return true;
+}
 
 SchemaParser::SchemaParser()
 {
@@ -437,7 +455,7 @@ QString SchemaParser::getAttribute(bool &found_conv_to_xml)
 										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
-	if(!AttribRegExp.match(atrib).hasMatch())
+	if(!isValidAttributeName(atrib))
 	{
 		throw Exception(getParseError(ErrorCode::InvalidAttribute),
 										ErrorCode::InvalidAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
@@ -928,7 +946,7 @@ void SchemaParser::defineAttribute()
 		attrib = (use_val_as_name ? attributes[new_attrib] : new_attrib);
 
 		//Checking if the attribute has a valid name
-		if(!AttribRegExp.match(attrib).hasMatch())
+		if(!isValidAttributeName(attrib))
 		{
 			throw Exception(getParseError(ErrorCode::InvalidAttribute),
 											ErrorCode::InvalidAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
@@ -974,7 +992,7 @@ void SchemaParser::unsetAttribute()
 													 ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 
-				if(!AttribRegExp.match(attrib).hasMatch())
+				if(!isValidAttributeName(attrib))
 				{
 					throw Exception(getParseError(ErrorCode::InvalidAttribute, "", attrib),
 													 ErrorCode::InvalidAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
