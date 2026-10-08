@@ -902,7 +902,14 @@ void SchemaParser::defineAttribute()
 			}
 			else
 			{
-				value += getWord();
+				QString word = getWord();
+
+				/* A closing token that doesn't belong to a %set value (e.g. a stray ] or }) makes getWord() return an empty
+				 * text without moving the cursor, which would loop forever, so it's treated as a syntax error */
+				if(word.isEmpty())
+					error = true;
+
+				value += word;
 			}
 
 			//If the attribute name was not extracted yet returns a error
@@ -1189,7 +1196,7 @@ QString SchemaParser::convertEscapedCharacter(const QString &escaped)
 	};
 
 	/* Special case for escaped \* which returns the special
-	 * character UtilsNs::DataSeparator (•) */
+	 * character UtilsNs::DataSeparator (·) */
 	if(escaped == "*")
 		return UtilsNs::DataSeparator;
 
