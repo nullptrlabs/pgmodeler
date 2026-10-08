@@ -1,6 +1,57 @@
 Changelog
 ---------
 
+v2.0.0
+------
+*Release date: October 30, 2026*
+
+* [New] Added multi-scene support: a model's canvas can now be segmented into multiple scenes, either one per schema or by an object-count threshold, keeping the editor responsive on databases with thousands of tables. See `DatabaseModel::SegmentationMode`, the new per-scene API in `ModelWidget` (`getScene()`/`getScenes()`, `setActiveScene()`, `s_activeSceneChanged`), and the new `SceneInfoWidget` for switching between scenes, with previous/next navigation buttons.
+* [New] A table that has a relationship to a table in a different scene now shows a marker (`RelMarkerItem`) instead of a relationship line crossing scenes; double-clicking it opens `TableRelsWidget`, a read-only, sortable grid listing those cross-scene relationships (and, when enabled, the table's own hidden relationships), with double-click navigation to the relationship or the related table.
+* [New] Added an option to hide the relationships between tables of the same scene as well, representing them through the same marker. Available when segmenting a model in the GUI, when importing a database (`DatabaseImportWidget`'s "Hide relationships" option), and in `pgmodeler-cli --import-db` (`--hide-rels`/`-hr`).
+* [New] `pgmodeler-cli --import-db` gained `--seg-mode`/`--seg-threshold` to segment a model right from the database import, matching the GUI's reverse-engineering form.
+* [New] Opening a model whose objects are concentrated in very few scenes now prompts to switch segmentation mode.
+* [New] `pgmodeler-cli`'s model fix (`--fix-model`/`--fix-sdbm`) now preserves a model's segmentation data (mode, threshold, per-scene rects, last active scene) instead of discarding it.
+* [New] Added menu actions to create a tag or a layer directly from one or more selected schemas.
+* [New] Added the `update_ts` CMake target to regenerate the UI translation sources (`.ts`) from the source code.
+* [New] Added UI translations for all supported languages, including Brazilian Portuguese (pt_BR), generated with AI assistance; human review of these translations is still pending.
+* [Change] Selection, the Object Search Widget, and Layers operations now operate across every scene (or follow the clicked object's own scene) instead of assuming a single canvas.
+* [Change] The "Rearrange objects" menu is now scoped to the active scene instead of the whole model.
+* [Change] PNG/SVG export now produces one image per scene instead of a single image of the whole model.
+* [Change] Every private executable now follows the configured UI language instead of only the main GUI.
+* [Change] Validating the database form (`BaseObjectWidget`) now only regenerates the `CREATE DATABASE` SQL instead of the whole model's SQL, eliminating a multi-second stall on large models when applying database-level changes.
+* [Change] `SchemaParser` now caches a schema file's already-processed content (comments stripped, `@include` resolved) keyed by its path, instead of re-reading and reprocessing it on every use; `Catalog`'s own ad hoc query cache was replaced by this central one.
+* [Change] Indexed `DatabaseModel::getObject()` by name and signature, avoiding a linear scan for lookups that don't need the fallback.
+* [Change] Reduced redundant layer/scene refresh work during large model loads.
+* [Change] Debounced relationship redraw during batched table/model updates.
+* [Change] Bounded background grid/page delimiter rendering to the exposed area.
+* [Change] Dropped antialiasing while the scene is being panned/zoomed/dragged.
+* [Change] Dropped antialiasing when painting relationship curves at low zoom.
+* [Change] `BezierCurveItem`'s click-detection stroke is now computed lazily.
+* [Change] Avoided a needless re-render cascade when propagating protected state.
+* [Change] Self-relationship loop corners are now rounded when curved lines are enabled.
+* [Change] Tools toolbar buttons now share the width of the widest one.
+* [Fix] Fixed SQL code completion (SQL Tool) losing track of which statement the cursor is in when the buffer has more than one statement, causing it to use the wrong table/command context or list unrelated keywords as implicit table aliases.
+* [Fix] Fixed a table's graphical item, cross-scene relationship classification, position, and relationship marker not consistently following it when it changes schema or scene.
+* [Fix] Fixed cascade schema deletion missing transitively-referenced child objects due to a discarded result in `BaseObject::getLinkedObjects()`.
+* [Fix] Fixed segmentation threshold changes not taking effect after saving and reloading a model.
+* [Fix] Fixed objects being left outside their scene's rectangle after threshold rebucketing.
+* [Fix] Fixed `pg_catalog`/`public` leaking into the scene name, or auto-activating, outside schema segmentation.
+* [Fix] Fixed `--fix-sdbm` discarding almost every object of a split model saved with ID comments.
+* [Fix] Fixed `DatabaseModel` not being destroyed together with its `ModelWidget`, leaking memory on every model close.
+* [Fix] Fixed a use-after-free when pasting or duplicating table objects.
+* [Fix] Fixed a `PGresult` leak in `Connection::executeDMLCommand` on failed commands.
+* [Fix] Fixed missing self-relationship geometry in `configureBoundingRect()`.
+* [Fix] Fixed a leak of `RelationshipView`'s optional-cardinality crow's foot circle.
+* [Fix] Gave `Element` a virtual destructor, fixing undefined behavior on polymorphic delete.
+* [Fix] Fixed `BaseObjectView::mousePressEvent()` leaking its synthetic `QGraphicsSceneMouseEvent`.
+* [Fix] Fixed `BaseObjectView::fade()` reentering while its `QTimeLine` was already running.
+* [Fix] Fixed `TaskProgressWidget` not restoring the cursor when a task is canceled.
+* [Fix] Fixed `Messagebox` size not fitting the message text and the buttons.
+* [Fix] Fixed the code completion list being emptied while filtering live database items.
+* [Fix] Fixed an unescaped value in default column values in the HTML data dictionary.
+* [Fix] Duplicating a table now copies its children with the default name disambiguation.
+* [Fix] Disabled the scene info panel and the plugins dock area while a model is being validated, preventing operations that the running validation pass wouldn't account for.
+
 v2.0.0-beta1
 ------
 *Release date: September 14, 2026*
