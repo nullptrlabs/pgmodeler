@@ -37,6 +37,7 @@
 #include "utilsns.h"
 #include <QRegularExpression>
 #include <QHash>
+#include <QReadWriteLock>
 
 class __libparsers SchemaParser {
 	private:
@@ -80,6 +81,9 @@ class __libparsers SchemaParser {
 		 *  file's absolute path. This avoids reading and reprocessing (comment stripping, @include resolution)
 		 *  a schema file more than once per execution, since these files don't change while the app is running */
 		static QHash<QString, CachedFile> file_cache;
+
+		//! \brief Protects file_cache, since schema files are loaded from more than one thread
+		static QReadWriteLock file_cache_lock;
 
 		/*! \brief Indicates that the parser should ignore unknown
 		 attributes avoiding raising exceptions */

@@ -22,6 +22,8 @@
 #include <QtTest/QtTest>
 #include <QTemporaryDir>
 #include <QRegularExpression>
+#include <QThread>
+#include <atomic>
 #include "schemaparser.h"
 #include "attributes.h"
 #include "exception.h"
@@ -79,6 +81,7 @@ class SchemaParserTest: public QObject, public PgModelerUnitTest {
 		void testLoadFileOfMissingFileRaises();
 		void testCachedLoadProducesTheSameOutputAsTheFirstLoad();
 		void testRelativeFileNamesAreResolvedAgainstTheCurrentDirectory();
+		void testFileCacheIsSafeToUseFromSeveralThreads();
 		void testBuffersPreprocessor_data();
 		void testBuffersPreprocessor();
 		void testBuffersPlainTexts_data();
@@ -1530,6 +1533,62 @@ void SchemaParserTest::testRelativeFileNamesAreResolvedAgainstTheCurrentDirector
 	QCOMPARE(output1, QString("from-dir1"));
 	QCOMPARE(output2, QString("from-dir2"));
 	QCOMPARE(output3, QString("from-dir1"));
+}
+
+void SchemaParserTest::testFileCacheIsSafeToUseFromSeveralThreads()
+{
+	QTemporaryDir dir;
+	QVERIFY(dir.isValid());
+
+	const int file_count = 40, thread_count = 8;
+	QStringList files;
+
+	for(int i = 0; i < file_count; i++)
+		files.append(writeSchemaFile(dir.filePath(QString("mt_file_%1.sch").arg(i)),
+																 QString("%if {a} %then [file%1:]{a} %else none %end\n").arg(i)));
+
+	// Every thread loads all files (in a different order) several times, so loads of the same file race with each other
+	std::atomic<int> failures { 0 };
+	QList<QThread *> threads;
+
+	for(int t = 0; t < thread_count; t++)
+	{
+		threads.append(QThread::create([&, t]() {
+			attribs_map attribs { { "a", "x" } };
+
+			for(int round = 0; round < 20; round++)
+			{
+				for(int i = 0; i < file_count; i++)
+				{
+					int idx = (i * (t + 1) + round) % file_count;
+
+					try
+					{
+						SchemaParser parser;
+						parser.loadFile(files[idx]);
+
+						if(parser.getSourceCode(attribs) != QString("file%1:x").arg(idx))
+							failures++;
+					}
+					catch(Exception &)
+					{
+						failures++;
+					}
+				}
+			}
+		}));
+	}
+
+	for(auto thread : threads)
+		thread->start();
+
+	for(auto thread : threads)
+	{
+		thread->wait();
+		delete thread;
+	}
+
+	QCOMPARE(failures.load(), 0);
 }
 
 QTEST_MAIN(SchemaParserTest)
