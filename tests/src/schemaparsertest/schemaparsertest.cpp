@@ -76,6 +76,7 @@ class SchemaParserTest: public QObject, public PgModelerUnitTest {
 		void testSetPgSQLVersion();
 		void testExtractAttributes();
 		void testFlagsAreResetAfterASuccessfulParsing();
+		void testFlagsAreResetAfterAFailedParsing();
 		void testParsingWithoutLoadedBufferReturnsEmptyText();
 		void testCurrentLineAndColumnPointToTheError();
 		void testLoadFileOfMissingFileRaises();
@@ -925,6 +926,59 @@ void SchemaParserTest::testFlagsAreResetAfterASuccessfulParsing()
 	catch(Exception &e)
 	{
 		QCOMPARE(e.getErrorCode(), ErrorCode::UnkownAttribute);
+		schparser.restartParser();
+	}
+}
+
+void SchemaParserTest::testFlagsAreResetAfterAFailedParsing()
+{
+	SchemaParser schparser;
+	attribs_map attribs;
+
+	schparser.ignoreUnkownAttributes(true);
+	schparser.ignoreEmptyAttributes(true);
+
+	// This parsing fails with a syntax error, not because of the flags
+	try
+	{
+		schparser.loadBuffer("a %foo b");
+		schparser.getSourceCode(attribs);
+		QFAIL("Expected an InvalidInstruction exception but none was raised");
+	}
+	catch(Exception &e)
+	{
+		QCOMPARE(e.getErrorCode(), ErrorCode::InvalidInstruction);
+
+		// The position of the error is still available to the caller until the parser is restarted
+		QCOMPARE(schparser.getCurrentLine(), 1);
+		QCOMPARE(schparser.getCurrentColumn(), 7);
+		schparser.restartParser();
+	}
+
+	// The flags must not leak to the next parsing of the same instance
+	try
+	{
+		schparser.loadBuffer("a{unknown}b");
+		schparser.getSourceCode(attribs);
+		QFAIL("Expected an UnkownAttribute exception but none was raised");
+	}
+	catch(Exception &e)
+	{
+		QCOMPARE(e.getErrorCode(), ErrorCode::UnkownAttribute);
+		schparser.restartParser();
+	}
+
+	attribs["empty"] = "";
+
+	try
+	{
+		schparser.loadBuffer("a{empty}b");
+		schparser.getSourceCode(attribs);
+		QFAIL("Expected an UndefinedAttributeValue exception but none was raised");
+	}
+	catch(Exception &e)
+	{
+		QCOMPARE(e.getErrorCode(), ErrorCode::UndefinedAttributeValue);
 		schparser.restartParser();
 	}
 }
