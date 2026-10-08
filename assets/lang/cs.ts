@@ -953,6 +953,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Základní vztah</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1112,10 @@ Tím se vypne kód všech podřízených a závislých objektů.</translation>
         <source>Copy</source>
         <translation>Kopie</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1226,33 @@ Tím se vypne kód všech podřízených a závislých objektů.</translation>
     <message>
         <source>Assignment</source>
         <translation>Přiřazení</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3273,14 @@ Odkazované sloupce: %2</translation>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>Toto je vestavěný objekt pgModeler. Pokud jej uživatel zaškrtne, bude ignorován.</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>Skrýt vztahy</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Skryje vztahy mezi tabulkami téže scény v importovaném modelu.</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3406,7 @@ Odkazované sloupce: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Demonstrační verze může vytvořit pouze `%1&apos; instancí každého typu objektu. Tento limit byl dosažen pro typ: `%2&apos;</translation>
+        <translation type="vanished">Demonstrační verze může vytvořit pouze `%1&apos; instancí každého typu objektu. Tento limit byl dosažen pro typ: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12260,10 @@ dostupné v GUI. Všechny dostupné volby jsou popsány níže.</translation>
         <translation>Operace porovnání byla úspěšně dokončena.
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Skryje vztahy mezi tabulkami téže scény v importovaném modelu.</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12584,33 @@ dostupné v GUI. Všechny dostupné volby jsou popsány níže.</translation>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Vztahy mezi scénami: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14421,7 +14499,7 @@ dostupné v GUI. Všechny dostupné volby jsou popsány níže.</translation>
     </message>
     <message>
         <source>Table:</source>
-        <translation>Tabulka:</translation>
+        <translation type="vanished">Tabulka:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14507,7 @@ dostupné v GUI. Všechny dostupné volby jsou popsány níže.</translation>
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>Vztahy mezi scénami</translation>
+        <translation type="vanished">Vztahy mezi scénami</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14524,14 @@ dostupné v GUI. Všechny dostupné volby jsou popsány níže.</translation>
     <message>
         <source>Relationships of %1</source>
         <translation>Vztahy: %1</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">Tabulka</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

@@ -953,6 +953,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Relacja podstawowa</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1112,10 @@ Wyłączy to kod wszystkich obiektów podrzędnych i zależnych.</translation>
         <source>Copy</source>
         <translation>Kopia</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1226,33 @@ Wyłączy to kod wszystkich obiektów podrzędnych i zależnych.</translation>
     <message>
         <source>Assignment</source>
         <translation>Przypisanie</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3273,14 @@ Kolumny wskazywane: %2</translation>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>To wbudowany obiekt pgModeler. Zostanie pominięty, jeśli użytkownik go zaznaczy.</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>Ukryj relacje</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Ukrywa relacje między tabelami tej samej sceny w zaimportowanym modelu.</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3406,7 @@ Kolumny wskazywane: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Wersja demonstracyjna może utworzyć tylko `%1&apos; instancji każdego typu obiektu. Osiągnięto ten limit dla typu: `%2&apos;</translation>
+        <translation type="vanished">Wersja demonstracyjna może utworzyć tylko `%1&apos; instancji każdego typu obiektu. Osiągnięto ten limit dla typu: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12260,10 @@ dostępnych w GUI. Wszystkie dostępne opcje opisano poniżej.</translation>
         <translation>Operacja porównania zakończyła się pomyślnie.
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Ukrywa relacje między tabelami tej samej sceny w zaimportowanym modelu.</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12584,33 @@ dostępnych w GUI. Wszystkie dostępne opcje opisano poniżej.</translation>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Relacje między scenami: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14421,7 +14499,7 @@ dostępnych w GUI. Wszystkie dostępne opcje opisano poniżej.</translation>
     </message>
     <message>
         <source>Table:</source>
-        <translation>Tabela:</translation>
+        <translation type="vanished">Tabela:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14507,7 @@ dostępnych w GUI. Wszystkie dostępne opcje opisano poniżej.</translation>
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>Relacje między scenami</translation>
+        <translation type="vanished">Relacje między scenami</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14524,14 @@ dostępnych w GUI. Wszystkie dostępne opcje opisano poniżej.</translation>
     <message>
         <source>Relationships of %1</source>
         <translation>Relacje: %1</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">Tabela</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

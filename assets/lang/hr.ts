@@ -953,6 +953,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Osnovni odnos</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1112,10 @@ Ovo će isključiti kod svih zavisnih i referencirajućih objekata.</translation
         <source>Copy</source>
         <translation>Kopija</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1226,33 @@ Ovo će isključiti kod svih zavisnih i referencirajućih objekata.</translation
     <message>
         <source>Assignment</source>
         <translation>Dodjela</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3273,14 @@ Referencirani stupac(i): %2</translation>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>Ovo je ugrađeni objekt programa pgModeler. Bit će zanemaren ako ga korisnik označi.</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>Sakrij odnose</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Skriva odnose između tablica iste scene u uvezenom modelu.</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3406,7 @@ Referencirani stupac(i): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Demonstracijska verzija može izraditi samo `%1&apos; instanci svakog tipa objekta! Dosegnuli ste ovo ograničenje za tip: `%2&apos;</translation>
+        <translation type="vanished">Demonstracijska verzija može izraditi samo `%1&apos; instanci svakog tipa objekta! Dosegnuli ste ovo ograničenje za tip: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12260,10 @@ dostupne u grafičkom sučelju. Sve dostupne opcije opisane su u nastavku.</tran
         <translation>Diff operacija uspješno je završena!
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Skriva odnose između tablica iste scene u uvezenom modelu.</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12584,33 @@ dostupne u grafičkom sučelju. Sve dostupne opcije opisane su u nastavku.</tran
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Međuscenski odnosi: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14421,7 +14499,7 @@ dostupne u grafičkom sučelju. Sve dostupne opcije opisane su u nastavku.</tran
     </message>
     <message>
         <source>Table:</source>
-        <translation>Tablica:</translation>
+        <translation type="vanished">Tablica:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14507,7 @@ dostupne u grafičkom sučelju. Sve dostupne opcije opisane su u nastavku.</tran
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>Međuscenski odnosi</translation>
+        <translation type="vanished">Međuscenski odnosi</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14524,14 @@ dostupne u grafičkom sučelju. Sve dostupne opcije opisane su u nastavku.</tran
     <message>
         <source>Relationships of %1</source>
         <translation>Odnosi: %1</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">Tablica</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

@@ -953,6 +953,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Базовая связь</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1112,10 @@ This will disable the code of all child and referrer objects.</source>
         <source>Copy</source>
         <translation>Копия</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1226,33 @@ This will disable the code of all child and referrer objects.</source>
     <message>
         <source>Assignment</source>
         <translation>Присваивание</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3273,14 @@ Ref. column(s): %2</source>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>Это встроенный объект pgModeler. Он будет проигнорирован, если пользователь его отметит.</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>Скрыть связи</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Скрывает связи между таблицами одной сцены в импортированной модели.</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3406,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Демонстрационная версия может создавать только `%1&apos; экземпляров каждого типа объектов. Этот предел достигнут для типа: `%2&apos;</translation>
+        <translation type="vanished">Демонстрационная версия может создавать только `%1&apos; экземпляров каждого типа объектов. Этот предел достигнут для типа: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12260,10 @@ available in GUI. All available options are described below.</source>
         <translation>Операция сравнения успешно завершена.
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Скрывает связи между таблицами одной сцены в импортированной модели.</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12584,33 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Связи между сценами: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14421,7 +14499,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Table:</source>
-        <translation>Таблица:</translation>
+        <translation type="vanished">Таблица:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14507,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>Связи между сценами</translation>
+        <translation type="vanished">Связи между сценами</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14524,14 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Relationships of %1</source>
         <translation>Связи: %1</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">Таблица</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
