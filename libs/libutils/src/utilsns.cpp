@@ -124,9 +124,23 @@ namespace UtilsNs {
 
 	QString convertToXmlEntities(QString value)
 	{
+		bool has_special_chr = false;
+
 		/* If the extracted value has one of the expected special chars
-		 * in order to perform the replacemnt to xml entities */
-		if(value.contains(QRegularExpression("(&|\\<|\\>|\")")))
+		 * in order to perform the replacemnt to xml entities. This is a plain scan
+		 * because building a regular expression on each call is far more expensive
+		 * than the replacements themselves and this function is called for every &{attribute}
+		 * the schema parser finds */
+		for(const QChar &chr : std::as_const(value))
+		{
+			if(chr == '&' || chr == '<' || chr == '>' || chr == '"')
+			{
+				has_special_chr = true;
+				break;
+			}
+		}
+
+		if(has_special_chr)
 		{
 			if(!value.contains(UtilsNs::EntityQuot) && !value.contains(UtilsNs::EntityLt) &&
 				 !value.contains(UtilsNs::EntityGt) && !value.contains(UtilsNs::EntityAmp) &&

@@ -26,6 +26,7 @@
 #include "attributes.h"
 #include "exception.h"
 #include "pgsqlversions.h"
+#include "utilsns.h"
 #include "pgmodelerunittest.h"
 
 class SchemaParserTest: public QObject, public PgModelerUnitTest {
@@ -57,6 +58,8 @@ class SchemaParserTest: public QObject, public PgModelerUnitTest {
 		void testConvertEscapedPlainTextCharsInPlaintextExpr();
 		void testLoadFileCachesBufferAcrossInstances();
 		void testLoadFileReportsIncludeFileAndLineOnCacheHit();
+		void testConvertToXmlEntities_data();
+		void testConvertToXmlEntities();
 		void testIncludeInsertsTheIncludedFile();
 		void testIncludeIsNotProcessedInsideOpenPlainText();
 		void testIncludeErrors_data();
@@ -526,6 +529,37 @@ QString SchemaParserTest::writeSchemaFile(const QString &path, const QString &co
 	}
 
 	return path;
+}
+
+void SchemaParserTest::testConvertToXmlEntities_data()
+{
+	QTest::addColumn<QString>("value");
+	QTest::addColumn<QString>("expected");
+
+	QTest::newRow("empty") << "" << "";
+	QTest::newRow("plain") << "public.my_table" << "public.my_table";
+	QTest::newRow("non ascii") << "açaí · ção" << "açaí · ção";
+	QTest::newRow("backslash is not special") << "a\\<b" << "a\\&lt;b";
+	QTest::newRow("ampersand") << "a & b" << "a &amp; b";
+	QTest::newRow("less than") << "a < b" << "a &lt; b";
+	QTest::newRow("greater than") << "a > b" << "a &gt; b";
+	QTest::newRow("double quotes") << "say \"hi\"" << "say &quot;hi&quot;";
+	QTest::newRow("single quotes are kept") << "it's" << "it's";
+	QTest::newRow("all of them") << "<a href=\"x\">&</a>" << "&lt;a href=&quot;x&quot;&gt;&amp;&lt;/a&gt;";
+	QTest::newRow("only special chars") << "&<>\"" << "&amp;&lt;&gt;&quot;";
+	QTest::newRow("entity amp keeps bare ampersand") << "a &amp; b & c" << "a &amp; b & c";
+	QTest::newRow("entity quot keeps bare ampersand") << "&quot;x&quot; & \"" << "&quot;x&quot; & &quot;";
+	QTest::newRow("entity lt/gt/apos keep bare ampersand") << "&lt; &gt; &apos; & >" << "&lt; &gt; &apos; & &gt;";
+	QTest::newRow("entity with other specials") << "&amp; <" << "&amp; &lt;";
+	QTest::newRow("unknown entity gets escaped") << "&nbsp;" << "&amp;nbsp;";
+}
+
+void SchemaParserTest::testConvertToXmlEntities()
+{
+	QFETCH(QString, value);
+	QFETCH(QString, expected);
+
+	QCOMPARE(UtilsNs::convertToXmlEntities(value), expected);
 }
 
 void SchemaParserTest::testIncludeInsertsTheIncludedFile()
