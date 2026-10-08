@@ -78,6 +78,7 @@ class SchemaParserTest: public QObject, public PgModelerUnitTest {
 		void testCurrentLineAndColumnPointToTheError();
 		void testLoadFileOfMissingFileRaises();
 		void testCachedLoadProducesTheSameOutputAsTheFirstLoad();
+		void testRelativeFileNamesAreResolvedAgainstTheCurrentDirectory();
 		void testBuffersPreprocessor_data();
 		void testBuffersPreprocessor();
 		void testBuffersPlainTexts_data();
@@ -1489,6 +1490,46 @@ void SchemaParserTest::testBuffersMisc_data()
 void SchemaParserTest::testBuffersMisc()
 {
 	checkBuffer();
+}
+
+void SchemaParserTest::testRelativeFileNamesAreResolvedAgainstTheCurrentDirectory()
+{
+	QTemporaryDir dir1, dir2;
+	QVERIFY(dir1.isValid() && dir2.isValid());
+
+	writeSchemaFile(dir1.filePath("relative_name_test.sch"), "[from-dir1]\n");
+	writeSchemaFile(dir2.filePath("relative_name_test.sch"), "[from-dir2]\n");
+	QString orig_cwd = QDir::currentPath(), output1, output2, output3;
+	attribs_map attribs;
+
+	try
+	{
+		// The same relative name must reach a different file when the current directory changes
+		QDir::setCurrent(dir1.path());
+		SchemaParser p1;
+		p1.loadFile("relative_name_test.sch");
+		output1 = p1.getSourceCode(attribs);
+
+		QDir::setCurrent(dir2.path());
+		SchemaParser p2;
+		p2.loadFile("relative_name_test.sch");
+		output2 = p2.getSourceCode(attribs);
+
+		// And the same file reached by its absolute name is the one already cached
+		SchemaParser p3;
+		p3.loadFile(dir1.filePath("relative_name_test.sch"));
+		output3 = p3.getSourceCode(attribs);
+	}
+	catch(Exception &e)
+	{
+		QDir::setCurrent(orig_cwd);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QDir::setCurrent(orig_cwd);
+	QCOMPARE(output1, QString("from-dir1"));
+	QCOMPARE(output2, QString("from-dir2"));
+	QCOMPARE(output3, QString("from-dir1"));
 }
 
 QTEST_MAIN(SchemaParserTest)

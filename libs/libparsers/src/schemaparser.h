@@ -71,6 +71,9 @@ class __libparsers SchemaParser {
 		struct CachedFile {
 			QStringList buffer;
 			std::vector<IncludeInfo> include_infos;
+
+			//! \brief Absolute path of the folder of the file, which is the search path of its includes
+			QString search_path;
 		};
 
 		/*! \brief Caches the schema files already loaded by any instance of this class, keyed by the
