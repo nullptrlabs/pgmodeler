@@ -953,6 +953,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Quan hệ cơ bản</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1110,10 @@ Thao tác này sẽ vô hiệu hóa mã của tất cả đối tượng con và
         <source>Copy</source>
         <translation>Bản sao</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1224,27 @@ Thao tác này sẽ vô hiệu hóa mã của tất cả đối tượng con và
     <message>
         <source>Assignment</source>
         <translation>Gán</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3265,14 @@ Cột được tham chiếu: %2</translation>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>Đây là đối tượng dựng sẵn của pgModeler. Nó sẽ bị bỏ qua nếu người dùng chọn.</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>Ẩn quan hệ</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Ẩn các quan hệ giữa các bảng trong cùng một cảnh của mô hình đã nhập.</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3398,7 @@ Cột được tham chiếu: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Phiên bản trình diễn chỉ có thể tạo `%1&apos; thể hiện cho mỗi loại đối tượng! Bạn đã đạt giới hạn này cho loại: `%2&apos;</translation>
+        <translation type="vanished">Phiên bản trình diễn chỉ có thể tạo `%1&apos; thể hiện cho mỗi loại đối tượng! Bạn đã đạt giới hạn này cho loại: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12252,10 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
         <translation>Thao tác so sánh đã hoàn tất thành công!
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Ẩn các quan hệ giữa các bảng trong cùng một cảnh của mô hình đã nhập.</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12576,33 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Quan hệ chéo: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14421,7 +14491,7 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
     </message>
     <message>
         <source>Table:</source>
-        <translation>Bảng:</translation>
+        <translation type="vanished">Bảng:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14499,7 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>Quan hệ chéo</translation>
+        <translation type="vanished">Quan hệ chéo</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14516,14 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
     <message>
         <source>Relationships of %1</source>
         <translation>Quan hệ của %1</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">Bảng</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

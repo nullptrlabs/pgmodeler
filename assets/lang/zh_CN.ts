@@ -953,6 +953,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>基本关系</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1110,10 @@ This will disable the code of all child and referrer objects.</source>
         <source>Copy</source>
         <translation>副本</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1224,27 @@ This will disable the code of all child and referrer objects.</source>
     <message>
         <source>Assignment</source>
         <translation>赋值</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3265,14 @@ Ref. column(s): %2</source>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>这是 pgModeler 的内置对象。如果用户勾选它，将被忽略。</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>隐藏关系</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>隐藏导入的模型中同一场景内各表之间的关系。</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3398,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>演示版每种对象类型只能创建 `%1&apos; 个实例。类型 `%2&apos; 已达到此限制。</translation>
+        <translation type="vanished">演示版每种对象类型只能创建 `%1&apos; 个实例。类型 `%2&apos; 已达到此限制。</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12252,10 @@ available in GUI. All available options are described below.</source>
         <translation>差异操作已成功完成。
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>隐藏导入的模型中同一场景内各表之间的关系。</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12576,33 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>跨场景关系：&lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14421,7 +14491,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Table:</source>
-        <translation>表：</translation>
+        <translation type="vanished">表：</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14499,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>跨场景关系</translation>
+        <translation type="vanished">跨场景关系</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14516,14 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Relationships of %1</source>
         <translation>%1 的关系</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">表</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

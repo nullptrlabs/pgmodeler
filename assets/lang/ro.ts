@@ -953,6 +953,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Relație de bază</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1112,10 @@ Aceasta va dezactiva codul tuturor obiectelor copil și al celor care îl refer�
         <source>Copy</source>
         <translation>Copie</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1226,33 @@ Aceasta va dezactiva codul tuturor obiectelor copil și al celor care îl refer�
     <message>
         <source>Assignment</source>
         <translation>Atribuire</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3273,14 @@ Coloană(e) referențiată(e): %2</translation>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>Acesta este un obiect încorporat pgModeler. Va fi ignorat dacă este bifat de utilizator.</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>Ascunde relațiile</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Ascunde relațiile dintre tabelele aceleiași scene în modelul importat.</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3406,7 @@ Coloană(e) referențiată(e): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Versiunea demonstrativă poate crea doar `%1&apos; instanțe din fiecare tip de obiect! Ați atins această limită pentru tipul: `%2&apos;</translation>
+        <translation type="vanished">Versiunea demonstrativă poate crea doar `%1&apos; instanțe din fiecare tip de obiect! Ați atins această limită pentru tipul: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12260,10 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
         <translation>Operația diff s-a încheiat cu succes!
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Ascunde relațiile dintre tabelele aceleiași scene în modelul importat.</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12584,33 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Rel. încrucișate: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14421,7 +14499,7 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
     </message>
     <message>
         <source>Table:</source>
-        <translation>Tabel:</translation>
+        <translation type="vanished">Tabel:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14507,7 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>Rel. încrucișate</translation>
+        <translation type="vanished">Rel. încrucișate</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14524,14 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
     <message>
         <source>Relationships of %1</source>
         <translation>Relații: %1</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">Tabel</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

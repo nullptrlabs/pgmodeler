@@ -953,6 +953,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Perussuhde</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1111,10 @@ Tämä poistaa käytöstä kaikkien alaobjektien ja riippuvien objektien koodin.
         <source>Copy</source>
         <translation>Kopio</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1225,30 @@ Tämä poistaa käytöstä kaikkien alaobjektien ja riippuvien objektien koodin.
     <message>
         <source>Assignment</source>
         <translation>Sijoitus</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3269,14 @@ Viitatut sarakkeet: %2</translation>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>Tämä on pgModelerin sisäänrakennettu objekti. Se ohitetaan, jos käyttäjä valitsee sen.</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>Piilota suhteet</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Piilottaa saman kohtauksen taulukoiden väliset suhteet tuodussa mallissa.</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3402,7 @@ Viitatut sarakkeet: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Esittelyversio voi luoda vain `%1&apos; esiintymää kutakin objektityyppiä kohden. Tämä raja on saavutettu tyypille: `%2&apos;</translation>
+        <translation type="vanished">Esittelyversio voi luoda vain `%1&apos; esiintymää kutakin objektityyppiä kohden. Tämä raja on saavutettu tyypille: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12256,10 @@ käytettävissä oleville tärkeimmille toiminnoille. Kaikki käytettävissä ol
         <translation>Vertailutoiminto päättyi onnistuneesti.
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Piilottaa saman kohtauksen taulukoiden väliset suhteet tuodussa mallissa.</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12580,33 @@ käytettävissä oleville tärkeimmille toiminnoille. Kaikki käytettävissä ol
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Kohtausten väliset suhteet: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14421,7 +14495,7 @@ käytettävissä oleville tärkeimmille toiminnoille. Kaikki käytettävissä ol
     </message>
     <message>
         <source>Table:</source>
-        <translation>Taulukko:</translation>
+        <translation type="vanished">Taulukko:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14503,7 @@ käytettävissä oleville tärkeimmille toiminnoille. Kaikki käytettävissä ol
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>Kohtausten väliset suhteet</translation>
+        <translation type="vanished">Kohtausten väliset suhteet</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14520,14 @@ käytettävissä oleville tärkeimmille toiminnoille. Kaikki käytettävissä ol
     <message>
         <source>Relationships of %1</source>
         <translation>Kohteen %1 suhteet</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">Taulukko</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

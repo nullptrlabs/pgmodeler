@@ -953,6 +953,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Temel ilişki</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1110,10 @@ Bu, tüm alt nesnelerin ve başvuran nesnelerin kodunu devre dışı bırakır.<
         <source>Copy</source>
         <translation>Kopya</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1224,27 @@ Bu, tüm alt nesnelerin ve başvuran nesnelerin kodunu devre dışı bırakır.<
     <message>
         <source>Assignment</source>
         <translation>Atama</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3265,14 @@ Başvurulan sütun(lar): %2</translation>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>Bu, pgModeler&apos;ın yerleşik bir nesnesidir. Kullanıcı tarafından işaretlenirse yok sayılır.</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>İlişkileri gizle</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Aynı sahnedeki tablolar arasındaki ilişkileri içe aktarılan modelde gizler.</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3398,7 @@ Başvurulan sütun(lar): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Tanıtım sürümü her nesne türünden yalnızca `%1&apos; örnek oluşturabilir! Şu tür için bu sınıra ulaştınız: `%2&apos;</translation>
+        <translation type="vanished">Tanıtım sürümü her nesne türünden yalnızca `%1&apos; örnek oluşturabilir! Şu tür için bu sınıra ulaştınız: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12252,10 @@ bir komut satırı arayüzü sağlar. Kullanılabilir tüm seçenekler aşağıd
         <translation>Karşılaştırma işlemi başarıyla tamamlandı!
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Aynı sahnedeki tablolar arasındaki ilişkileri içe aktarılan modelde gizler.</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12576,33 @@ bir komut satırı arayüzü sağlar. Kullanılabilir tüm seçenekler aşağıd
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Sahneler arası ilişk.: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14421,7 +14491,7 @@ bir komut satırı arayüzü sağlar. Kullanılabilir tüm seçenekler aşağıd
     </message>
     <message>
         <source>Table:</source>
-        <translation>Tablo:</translation>
+        <translation type="vanished">Tablo:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14499,7 @@ bir komut satırı arayüzü sağlar. Kullanılabilir tüm seçenekler aşağıd
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>Sahneler arası ilişk.</translation>
+        <translation type="vanished">Sahneler arası ilişk.</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14516,14 @@ bir komut satırı arayüzü sağlar. Kullanılabilir tüm seçenekler aşağıd
     <message>
         <source>Relationships of %1</source>
         <translation>%1 ilişkileri</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">Tablo</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

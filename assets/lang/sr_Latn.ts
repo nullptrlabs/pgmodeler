@@ -953,6 +953,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Osnovni odnos</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1112,10 @@ Ovo će isključiti kod svih zavisnih i referencirajućih objekata.</translation
         <source>Copy</source>
         <translation>Kopija</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1226,33 @@ Ovo će isključiti kod svih zavisnih i referencirajućih objekata.</translation
     <message>
         <source>Assignment</source>
         <translation>Dodela</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3273,14 @@ Referencirana kolona(e): %2</translation>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>Ovo je ugrađeni objekat programa pgModeler. Biće zanemaren ako ga korisnik označi.</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>Sakrij odnose</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Skriva odnose između tabela iste scene u uvezenom modelu.</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3406,7 @@ Referencirana kolona(e): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Demonstraciona verzija može kreirati samo `%1&apos; instanci svakog tipa objekta! Dostigli ste ovo ograničenje za tip: `%2&apos;</translation>
+        <translation type="vanished">Demonstraciona verzija može kreirati samo `%1&apos; instanci svakog tipa objekta! Dostigli ste ovo ograničenje za tip: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12260,10 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
         <translation>Diff operacija je uspešno završena!
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Skriva odnose između tabela iste scene u uvezenom modelu.</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12584,33 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Unakr. odnosi: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -13536,7 +13614,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     </message>
     <message>
         <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Skriva odnose između tabela iste scene. Predstavljeni su oznakom odnosa svake tabele, čiji se detalji prikazuju dvostrukim klikom. Namenjeno velikim modelima u kojima nacrtani odnosi gube svrhu.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NAPOMENA:&lt;/strong&gt; Promena stupa na snagu tek nakon čuvanja i ponovnog učitavanja modela.&lt;/p&gt;</translation>
+        <translation type="vanished">&lt;p&gt;Skriva odnose između tabela iste scene. Predstavljeni su oznakom odnosa svake tabele, čiji se detalji prikazuju dvostrukim klikom. Namenjeno velikim modelima u kojima nacrtani odnosi gube svrhu.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NAPOMENA:&lt;/strong&gt; Promena stupa na snagu tek nakon čuvanja i ponovnog učitavanja modela.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14413,7 +14491,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
-        <translation>Odnosi između scena</translation>
+        <translation type="vanished">Odnosi između scena</translation>
     </message>
     <message>
         <source>Table relationships</source>
@@ -14421,7 +14499,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     </message>
     <message>
         <source>Table:</source>
-        <translation>Tabela:</translation>
+        <translation type="vanished">Tabela:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14507,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>Unakr. odnosi</translation>
+        <translation type="vanished">Unakr. odnosi</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14524,14 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     <message>
         <source>Relationships of %1</source>
         <translation>Odnosi: %1</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">Tabela</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

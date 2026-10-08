@@ -953,6 +953,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Grunnleggende relasjon</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1111,10 @@ Dette deaktiverer koden for alle underordnede og avhengige objekter.</translatio
         <source>Copy</source>
         <translation>Kopi</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1225,30 @@ Dette deaktiverer koden for alle underordnede og avhengige objekter.</translatio
     <message>
         <source>Assignment</source>
         <translation>Tilordning</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3269,14 @@ Referte kolonner: %2</translation>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>Dette er et innebygd objekt i pgModeler. Det ignoreres hvis brukeren velger det.</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>Skjul relasjoner</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Skjuler relasjonene mellom tabeller i samme scene i den importerte modellen.</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3402,7 @@ Referte kolonner: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Demoversjonen kan bare opprette `%1&apos; forekomster av hver objekttype. Denne grensen er nådd for typen: `%2&apos;</translation>
+        <translation type="vanished">Demoversjonen kan bare opprette `%1&apos; forekomster av hver objekttype. Denne grensen er nådd for typen: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12256,10 @@ som er tilgjengelige i det grafiske brukergrensesnittet. Alle tilgjengelige alte
         <translation>Sammenligningen ble fullført.
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Skjuler relasjonene mellom tabeller i samme scene i den importerte modellen.</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12580,33 @@ som er tilgjengelige i det grafiske brukergrensesnittet. Alle tilgjengelige alte
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Relasjoner på tvers av scener: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14421,7 +14495,7 @@ som er tilgjengelige i det grafiske brukergrensesnittet. Alle tilgjengelige alte
     </message>
     <message>
         <source>Table:</source>
-        <translation>Tabell:</translation>
+        <translation type="vanished">Tabell:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14503,7 @@ som er tilgjengelige i det grafiske brukergrensesnittet. Alle tilgjengelige alte
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>Relasjoner på tvers av scener</translation>
+        <translation type="vanished">Relasjoner på tvers av scener</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14520,14 @@ som er tilgjengelige i det grafiske brukergrensesnittet. Alle tilgjengelige alte
     <message>
         <source>Relationships of %1</source>
         <translation>Relasjoner for %1</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">Tabell</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

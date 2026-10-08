@@ -103,6 +103,7 @@ const QString PgModelerCliApp::SegMode {"--seg-mode"};
 const QString PgModelerCliApp::SegThreshold {"--seg-threshold"};
 const QString PgModelerCliApp::SegModeSchema {"schema"};
 const QString PgModelerCliApp::SegModeThreshold {"threshold"};
+const QString PgModelerCliApp::HideRels {"--hide-rels"};
 const QString PgModelerCliApp::PartialDiff {"--partial"};
 const QString PgModelerCliApp::Force {"--force"};
 const QString PgModelerCliApp::StartDate {"--start-date"};
@@ -174,7 +175,7 @@ std::map<QString, bool> PgModelerCliApp::long_opts {
 	{ DependenciesSql, false }, { ChildrenSql, false }, { GenDropScript, false },
 	{ GroupByType, false }, { CommentsAsAliases, false }, { IgnoreFaultyPlugins, false },
 	{ ListPlugins, false }, { Markdown, false }, { NonTransactional, false },
-	{ NoEscapeComments, false }, { SegMode, true }, { SegThreshold, true }
+	{ NoEscapeComments, false }, { SegMode, true }, { SegThreshold, true }, { HideRels, false }
 };
 
 attribs_map PgModelerCliApp::short_opts {
@@ -204,7 +205,7 @@ attribs_map PgModelerCliApp::short_opts {
 	{ GroupByType, "-gt" },	{ GenDropScript, "-gd" }, { CommentsAsAliases, "-cl" },
 	{ IgnoreFaultyPlugins, "-ip" }, { ListPlugins, "-lp" }, { Markdown, "-md" },
 	{ NonTransactional, "-nt" }, { NoEscapeComments, "-ne" },
-	{ SegMode, "-se" }, { SegThreshold, "-th" }
+	{ SegMode, "-se" }, { SegThreshold, "-th" }, { HideRels, "-hr" }
 };
 
 std::map<QString, QStringList> PgModelerCliApp::accepted_opts {
@@ -221,7 +222,8 @@ std::map<QString, QStringList> PgModelerCliApp::accepted_opts {
 	#ifdef PRIV_CODE_SYMBOLS
 		{{ ImportDb }, { InputDb, Output, IgnoreImportErrors, ImportSystemObjs, ImportExtensionObjs,
 											FilterObjects, OnlyMatching, MatchByName, ForceChildren, DebugMode, ConnAlias,
-											Host, Port, User, Passwd, InitialDb, CommentsAsAliases, SegMode, SegThreshold }},
+											Host, Port, User, Passwd, InitialDb, CommentsAsAliases, SegMode, SegThreshold,
+											HideRels }},
 
 		{{ Diff }, { Input, PgSqlVer, IgnoreDuplicates, IgnoreErrorCodes, CompareDb, CompareFile,
 								 PartialDiff, Force, StartDate, EndDate, SaveDiff, ApplyDiff, NoDiffPreview,
@@ -755,6 +757,7 @@ void PgModelerCliApp::showMenu()
 		menu_items.append(MenuItem(DebugMode, "", tr("Executes the import in debug mode. Prints all queries executed on the server.")));
 		menu_items.append(MenuItem(SegMode, "[MODE]", tr("Segments the imported model's canvas into multiple scenes. Available modes: [%1 | %2].").arg(SegModeSchema, SegModeThreshold)));
 		menu_items.append(MenuItem(SegThreshold, "[NUMBER]", tr("Number of tables/views/foreign tables per scene. Only for %1 %2.").arg(SegMode, SegModeThreshold)));
+		menu_items.append(MenuItem(HideRels, "", tr("Hides the relationships between tables of the same scene in the imported model.")));
 		menu_items.append(MenuItem());
 
 		// Diff options

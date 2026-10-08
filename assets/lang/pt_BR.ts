@@ -953,6 +953,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Relacionamento básico</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1111,10 @@ Isso desabilitará o código de todos os objetos filhos e referenciadores.</tran
         <source>Copy</source>
         <translation>Cópia</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1225,30 @@ Isso desabilitará o código de todos os objetos filhos e referenciadores.</tran
     <message>
         <source>Assignment</source>
         <translation>Atribuição</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3269,14 @@ Coluna(s) ref.: %2</translation>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>Este é um objeto interno do pgModeler. Ele será ignorado se marcado pelo usuário.</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>Ocultar relacionamentos</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Oculta os relacionamentos entre tabelas da mesma cena no modelo importado.</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3402,7 @@ Coluna(s) ref.: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>A versão de demonstração pode criar apenas `%1&apos; instâncias de cada tipo de objeto! Você atingiu esse limite para o tipo: `%2&apos;</translation>
+        <translation type="vanished">A versão de demonstração pode criar apenas `%1&apos; instâncias de cada tipo de objeto! Você atingiu esse limite para o tipo: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12256,10 @@ disponíveis na GUI. Todas as opções disponíveis estão descritas abaixo.</tr
         <translation>Operação de comparação concluída com sucesso!
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Oculta os relacionamentos entre tabelas da mesma cena no modelo importado.</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12580,33 @@ disponíveis na GUI. Todas as opções disponíveis estão descritas abaixo.</tr
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Rels. cruzados: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14421,7 +14495,7 @@ disponíveis na GUI. Todas as opções disponíveis estão descritas abaixo.</tr
     </message>
     <message>
         <source>Table:</source>
-        <translation>Tabela:</translation>
+        <translation type="vanished">Tabela:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14503,7 @@ disponíveis na GUI. Todas as opções disponíveis estão descritas abaixo.</tr
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>Rels. cruzados</translation>
+        <translation type="vanished">Rels. cruzados</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14520,14 @@ disponíveis na GUI. Todas as opções disponíveis estão descritas abaixo.</tr
     <message>
         <source>Relationships of %1</source>
         <translation>Relacionamentos de %1</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">Tabela</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

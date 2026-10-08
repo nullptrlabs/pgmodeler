@@ -953,6 +953,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>기본 관계</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1110,10 @@ This will disable the code of all child and referrer objects.</source>
         <source>Copy</source>
         <translation>복사</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1224,27 @@ This will disable the code of all child and referrer objects.</source>
     <message>
         <source>Assignment</source>
         <translation>할당</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3265,14 @@ Ref. column(s): %2</source>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>pgModeler 기본 제공 객체입니다. 사용자가 선택해도 무시됩니다.</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>관계 숨기기</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>가져온 모델에서 같은 장면에 있는 테이블 간의 관계를 숨깁니다.</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3398,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>데모 버전에서는 객체 유형마다 `%1&apos;개의 인스턴스만 만들 수 있습니다. 유형 `%2&apos;에서 이 제한에 도달했습니다.</translation>
+        <translation type="vanished">데모 버전에서는 객체 유형마다 `%1&apos;개의 인스턴스만 만들 수 있습니다. 유형 `%2&apos;에서 이 제한에 도달했습니다.</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12252,10 @@ available in GUI. All available options are described below.</source>
         <translation>비교 작업이 성공적으로 완료되었습니다.
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>가져온 모델에서 같은 장면에 있는 테이블 간의 관계를 숨깁니다.</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12576,33 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>장면 간 관계: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14421,7 +14491,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Table:</source>
-        <translation>테이블:</translation>
+        <translation type="vanished">테이블:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14499,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>장면 간 관계</translation>
+        <translation type="vanished">장면 간 관계</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14516,14 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Relationships of %1</source>
         <translation>%1의 관계</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">테이블</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

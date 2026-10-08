@@ -953,6 +953,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Alapkapcsolat</translation>
     </message>
+    <message numerus="yes">
+        <source>new_object</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1104,6 +1110,10 @@ Ez az összes gyermek- és hivatkozó objektum kódját is kikapcsolja.</transla
         <source>Copy</source>
         <translation>Másolat</translation>
     </message>
+    <message>
+        <source>rel_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1214,6 +1224,27 @@ Ez az összes gyermek- és hivatkozó objektum kódját is kikapcsolja.</transla
     <message>
         <source>Assignment</source>
         <translation>Értékadás</translation>
+    </message>
+</context>
+<context>
+    <name>Catalog</name>
+    <message numerus="yes">
+        <source>Object type: %1</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The catalog query returned more than one OID!</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Object type: server</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3234,6 +3265,14 @@ Hivatkozott oszlop(ok): %2</translation>
         <source>This is a pgModeler&apos;s built-in object. It will be ignored if checked by user.</source>
         <translation>Ez a pgModeler beépített objektuma. Figyelmen kívül marad, ha a felhasználó bejelöli.</translation>
     </message>
+    <message>
+        <source>Hide relationships</source>
+        <translation>Kapcsolatok elrejtése</translation>
+    </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Elrejti az azonos jelenetben lévő táblák közötti kapcsolatokat az importált modellben.</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseModel</name>
@@ -3359,7 +3398,7 @@ Hivatkozott oszlop(ok): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>A bemutató verzió objektumtípusonként csak `%1&apos; példányt hozhat létre! Elérte ezt a korlátot a következő típusnál: `%2&apos;</translation>
+        <translation type="vanished">A bemutató verzió objektumtípusonként csak `%1&apos; példányt hozhat létre! Elérte ezt a korlátot a következő típusnál: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -12213,6 +12252,10 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
         <translation>A diff művelet sikeresen befejeződött!
 </translation>
     </message>
+    <message>
+        <source>Hides the relationships between tables of the same scene in the imported model.</source>
+        <translation>Elrejti az azonos jelenetben lévő táblák közötti kapcsolatokat az importált modellben.</translation>
+    </message>
 </context>
 <context>
     <name>PgModelerGuiPlugin</name>
@@ -12533,6 +12576,33 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
     <message>
         <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Kereszt-kapcs.: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>Relationship</name>
+    <message>
+        <source>%1_has_one_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>many_%1_has_many_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_inherits_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_is_partition_of_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1_copies_%2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14421,7 +14491,7 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
     </message>
     <message>
         <source>Table:</source>
-        <translation>Tábla:</translation>
+        <translation type="vanished">Tábla:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14429,7 +14499,7 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>Kereszt-kapcs.</translation>
+        <translation type="vanished">Kereszt-kapcs.</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14446,6 +14516,14 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
     <message>
         <source>Relationships of %1</source>
         <translation>%1 kapcsolatai</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation type="unfinished">Tábla</translation>
+    </message>
+    <message>
+        <source>Cross relationships</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
