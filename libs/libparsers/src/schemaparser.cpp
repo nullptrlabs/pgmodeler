@@ -194,16 +194,12 @@ void SchemaParser::loadBuffer(const QString &buf)
 	QTextStream ts(&buf_aux);
 	bool open_plain_txt = false;
 	QChar prev_chr;
-	QString orig_cwd = QDir::currentPath();
 
 	// Prepares the parser to do new reading
 	restartParser();
 
 	if(filename.isEmpty())
 		filename = UtilsNs::pgmTr(PGM_TR2("Global", "[memory buffer]"));
-
-	if(!search_path.isEmpty())
-		QDir::setCurrent(search_path);
 
 	// While the input file doesn't reach the end
 	while(!ts.atEnd())
@@ -250,7 +246,6 @@ void SchemaParser::loadBuffer(const QString &buf)
 		}
 		catch(Exception &e)
 		{
-			QDir::setCurrent(orig_cwd);
 			throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 		}
 
@@ -285,7 +280,9 @@ bool SchemaParser::parseInclude(const QString &include_ln, QString &src_buf, qin
 										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
-	QDir dir;
+	/* The included file is looked up relative to the search path (an empty one means the current directory).
+	 * The current directory of the process is never changed because it is shared by all threads */
+	QDir dir(search_path);
 	QStringList texts = match.capturedTexts();
 	QString incl_file = dir.absoluteFilePath(texts.last());
 	QFileInfo fi(incl_file);
