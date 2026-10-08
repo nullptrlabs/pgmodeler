@@ -209,6 +209,7 @@ set(FORMS
     ui/widgets/modelnavigationwidget.ui
     ui/widgets/sceneinfowidget.ui
     ui/widgets/welcomewidget.ui
+    ui/widgets/tablerelswidget.ui
 		ui/widgets/objectassociationswidget.ui)
 
 set(RESOURCES res/resources.qrc)

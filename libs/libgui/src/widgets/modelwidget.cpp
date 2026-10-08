@@ -1647,8 +1647,15 @@ void ModelWidget::showTableRelationships(BaseTable *table)
 	base_form.setMainWidget(table_rels_wgt);
 	base_form.setButtonConfiguration(Messagebox::CloseButton);
 
-	connect(table_rels_wgt, &TableRelsWidget::s_relationshipActivated, this, [this, table_rels_wgt](BaseRelationship *rel){
-		showObjectForm(rel->getObjectType(), rel);
+	connect(table_rels_wgt, &TableRelsWidget::s_objectActivated, this, [this, table_rels_wgt](BaseObject *object){
+		BaseTable *tab = dynamic_cast<BaseTable *>(object);
+
+		// Tables are edited like when double-clicked in the canvas, relationships are not graphical items there
+		if(tab)
+			showObjectForm(tab->getObjectType(), tab, nullptr, tab->getPosition());
+		else
+			showObjectForm(object->getObjectType(), object);
+
 		table_rels_wgt->updateRelationships();
 	});
 

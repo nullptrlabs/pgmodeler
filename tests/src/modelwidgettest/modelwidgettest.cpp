@@ -20,6 +20,7 @@
 */
 
 #include <QtTest/QtTest>
+#include <QTableWidget>
 #include <QTimer>
 #include <QGraphicsSceneMouseEvent>
 #include "modelwidget.h"
@@ -123,6 +124,7 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void forcingHideRelationshipsOnLoadOverridesTheFile();
 		void toggleRelsButtonIsCheckedWhileRelationshipsAreVisible();
 		void tableRelsWidgetSeparatesHiddenAndCrossRelationships();
+		void tableRelsWidgetKeepsTheRelationshipOfEachRowWhenSorted();
 		void duplicatingATableKeepsItsPastedChildrenOwnedByTheNewTable();
 		void duplicatingATableRegistersItsPastedChildrenOnTheOperationList();
 		void pastingTableChildrenOntoAnotherTableKeepsThem();
@@ -3677,10 +3679,10 @@ void ModelWidgetTest::tableRelsWidgetListsAndRefreshesRelationships()
 		QCOMPARE(rels_tab->getCellText(0, 2), table_b->getSignature(true));
 
 		//Double-clicking a row asks for that relationship's edition
-		QSignalSpy rel_spy(&table_rels_wgt, &TableRelsWidget::s_relationshipActivated);
+		QSignalSpy rel_spy(&table_rels_wgt, &TableRelsWidget::s_objectActivated);
 		emit rels_tab->s_cellDoubleClicked(0, 0);
 		QCOMPARE(rel_spy.count(), 1);
-		QCOMPARE(rel_spy.at(0).at(0).value<BaseRelationship *>(), rel);
+		QCOMPARE(rel_spy.at(0).at(0).value<BaseObject *>(), rel);
 
 		//Once the relationship is gone, refreshing drops it from the grid
 		db_model->removeRelationship(rel);
@@ -3758,7 +3760,7 @@ void ModelWidgetTest::crossSceneRelsWidgetIgnoresStaleRelationship()
 		db_model->removeRelationship(rel);
 		delete rel;
 
-		QSignalSpy rel_spy(&cross_wgt, &TableRelsWidget::s_relationshipActivated);
+		QSignalSpy rel_spy(&cross_wgt, &TableRelsWidget::s_objectActivated);
 		emit rels_tab->s_cellDoubleClicked(0, 0);
 
 		QCOMPARE(rel_spy.count(), 0);
@@ -4719,11 +4721,75 @@ void ModelWidgetTest::tableRelsWidgetSeparatesHiddenAndCrossRelationships()
 		QCOMPARE(cross_tab->getCellText(0, 0), rel_ab->getName());
 		QCOMPARE(cross_tab->getCellText(0, 2), table_b->getSignature(true));
 
-		//Double-clicking a row of the first tab activates that relationship too
-		QSignalSpy rel_spy(&table_rels_wgt, &TableRelsWidget::s_relationshipActivated);
+		//Double-clicking the name or the type cell of a row of the first tab activates that relationship too
+		QSignalSpy obj_spy(&table_rels_wgt, &TableRelsWidget::s_objectActivated);
+
 		emit hidden_tab->s_cellDoubleClicked(0, 0);
-		QCOMPARE(rel_spy.count(), 1);
-		QCOMPARE(rel_spy.at(0).at(0).value<BaseRelationship *>(), rel_ac);
+		emit hidden_tab->s_cellDoubleClicked(0, 1);
+		QCOMPARE(obj_spy.count(), 2);
+		QCOMPARE(obj_spy.at(0).at(0).value<BaseObject *>(), rel_ac);
+		QCOMPARE(obj_spy.at(1).at(0).value<BaseObject *>(), rel_ac);
+
+		//The related table cell activates the table on the other end instead, in both tabs
+		emit hidden_tab->s_cellDoubleClicked(0, 2);
+		emit cross_tab->s_cellDoubleClicked(0, 2);
+		QCOMPARE(obj_spy.count(), 4);
+		QCOMPARE(obj_spy.at(2).at(0).value<BaseObject *>(), table_c);
+		QCOMPARE(obj_spy.at(3).at(0).value<BaseObject *>(), table_b);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief The grids of the relationships dialog are sortable: the relationship activated by a row must be
+the one shown in it, whatever the sorting is, and the window title names the table */
+void ModelWidgetTest::tableRelsWidgetKeepsTheRelationshipOfEachRowWhenSorted()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+		Table *table_a = nullptr, *table_b = nullptr, *table_c = nullptr;
+		Relationship *rel_ac = nullptr, *rel_ab = nullptr;
+
+		buildHiddenAndCrossModel(model_wgt, table_a, table_b, table_c, rel_ac, rel_ab);
+
+		Table *table_d = createTableWithPk(db_model, "table_d", dynamic_cast<Schema *>(table_a->getSchema()));
+		Relationship *rel_ad = new Relationship(BaseRelationship::Relationship1n, table_a, table_d);
+		db_model->addRelationship(rel_ad);
+
+		TableRelsWidget table_rels_wgt;
+		table_rels_wgt.setAttributes(db_model, table_a);
+
+		QVERIFY(table_rels_wgt.windowTitle().contains(table_a->getSignature(true)));
+
+		CustomTableWidget *hidden_tab = table_rels_wgt.findChild<CustomTableWidget *>("hidden_rels_tab");
+		QTableWidget *tbw = hidden_tab->findChild<QTableWidget *>();
+		QSignalSpy rel_spy(&table_rels_wgt, &TableRelsWidget::s_objectActivated);
+
+		QCOMPARE(hidden_tab->getRowCount(), 2u);
+		QVERIFY(tbw != nullptr);
+
+		for(auto order : { Qt::AscendingOrder, Qt::DescendingOrder })
+		{
+			tbw->sortByColumn(0, order);
+
+			for(unsigned row = 0; row < hidden_tab->getRowCount(); row++)
+			{
+				rel_spy.clear();
+				emit hidden_tab->s_cellDoubleClicked(row, 0);
+
+				QCOMPARE(rel_spy.count(), 1);
+				QCOMPARE(rel_spy.at(0).at(0).value<BaseObject *>()->getName(), hidden_tab->getCellText(row, 0));
+			}
+		}
+
+		//Descending: the relationship of table_d comes first
+		rel_spy.clear();
+		emit hidden_tab->s_cellDoubleClicked(0, 0);
+		QCOMPARE(rel_spy.at(0).at(0).value<BaseObject *>(), rel_ad);
 	}
 	catch(Exception &e)
 	{

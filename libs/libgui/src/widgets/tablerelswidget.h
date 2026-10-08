@@ -30,28 +30,34 @@ of the table's own scene (first tab) and those whose other end lives in a differ
 #define TABLE_RELS_WIDGET_H
 
 #include "guiglobal.h"
+#include "ui_tablerelswidget.h"
 #include "customtablewidget.h"
 #include "objectselectorwidget.h"
 #include "databasemodel.h"
 #include "basetable.h"
 #include "baserelationship.h"
-#include <QWidget>
-#include <QTabWidget>
+#include <QHash>
 
-class __libgui TableRelsWidget: public QWidget {
+class __libgui TableRelsWidget: public QWidget, public Ui::TableRelsWidget {
 	Q_OBJECT
 
 	private:
 		//! \brief Read-only selector showing the table whose relationships are listed
 		ObjectSelectorWidget *table_sel;
 
-		QTabWidget *rels_tbw;
-
-		//! \brief Grid listing one relationship of the table's own scene per row (the relationship is the row's data)
+		//! \brief Grid listing one relationship of the table's own scene per row
 		CustomTableWidget *hidden_rels_tab;
 
-		//! \brief Grid listing one cross-scene relationship per row (the relationship is the row's data)
+		//! \brief Grid listing one cross-scene relationship per row
 		CustomTableWidget *cross_rels_tab;
+
+		/*! \brief Relationship of each row of the grids, by the row's key (see getRowKey()). The grids are
+		 * sortable, which moves the rows without moving the data stored in their vertical headers, so the
+		 * relationship can't be kept as row data */
+		QHash<QString, BaseRelationship *> rels_rows;
+
+		//! \brief Key identifying the relationship of a grid's row: the contents of its name and type cells
+		QString getRowKey(CustomTableWidget *grid, unsigned row);
 
 		//! \brief Table whose relationships are listed
 		BaseTable *table;
@@ -59,10 +65,16 @@ class __libgui TableRelsWidget: public QWidget {
 		//! \brief Model that owns the table and the relationships
 		DatabaseModel *model;
 
-		//! \brief Creates a grid with the relationship/type/related table columns, wired to s_relationshipActivated
+		//! \brief Column of the grids showing the table on the other end of the relationship
+		static constexpr unsigned RelatedTableCol = 2;
+
+		//! \brief Returns the table on the other end of rel (the listed table itself in a self-relationship)
+		BaseTable *getRelatedTable(BaseRelationship *rel);
+
+		//! \brief Creates a grid with the relationship/type/related table columns, wired to s_objectActivated
 		CustomTableWidget *createRelsGrid();
 
-		//! \brief Fills a grid with one row per relationship
+		//! \brief Fills a grid with one sortable row per relationship
 		void fillRelsGrid(CustomTableWidget *grid, const QList<BaseRelationship *> &rels);
 
 	public:
@@ -76,8 +88,9 @@ class __libgui TableRelsWidget: public QWidget {
 		void updateRelationships();
 
 	signals:
-		//! \brief Emitted when the user double-clicks a relationship's row
-		void s_relationshipActivated(BaseRelationship *rel);
+		/*! \brief Emitted when the user double-clicks a cell of a relationship's row. The object is the
+		 * relationship, or the related table when the cell is the one showing it */
+		void s_objectActivated(BaseObject *object);
 };
 
 #endif
