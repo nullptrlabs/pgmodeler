@@ -261,11 +261,12 @@ void SchemaParser::loadBuffer(const QString &buf)
 
 bool SchemaParser::parseInclude(const QString &include_ln, QString &src_buf, qint64 curr_stream_pos)
 {
-	QRegularExpressionMatch match = TokenIncludeRegexp.match(include_ln);
-
-	// The line does't contain a well formed include statement
-	if(!match.hasMatch() && !include_ln.contains(TokenInclude))
+	/* Most of the lines don't have an include statement, so we avoid running the
+	 * regular expression on them: it can only match a line that contains the token */
+	if(!include_ln.contains(TokenInclude))
 		return false;
+
+	QRegularExpressionMatch match = TokenIncludeRegexp.match(include_ln);
 
 	/* Making the current line point to the last line of the actual buffer
 	 * and the column point to the last character of the @include "" statement (include_ln),
@@ -275,7 +276,7 @@ bool SchemaParser::parseInclude(const QString &include_ln, QString &src_buf, qin
 	column = include_ln.length() - 1;
 
 	// The line contains a malformed include statement
-	if(!match.hasMatch() && include_ln.contains(TokenInclude))
+	if(!match.hasMatch())
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvalidSyntax)
 										.arg(filename).arg(getCurrentLine()).arg(getCurrentColumn()) + " " +
@@ -354,7 +355,11 @@ void SchemaParser::loadFile(const QString &filename)
 
 	try
 	{
-		QString cache_key = QFileInfo(filename).absoluteFilePath();
+		/* The file name is used as the cache key as it is when it's already absolute, which saves two
+		 * QFileInfo instances on each load (the name of a file may be spelled in more than one way,
+		 * which only means the same file gets more than one entry). A relative name depends on the
+		 * current directory, so it is resolved first */
+		QString cache_key = QDir::isAbsolutePath(filename) ? filename : QFileInfo(filename).absoluteFilePath();
 		auto cache_itr = file_cache.find(cache_key);
 
 		if(cache_itr != file_cache.constEnd())
@@ -362,7 +367,7 @@ void SchemaParser::loadFile(const QString &filename)
 			/* The file (and whatever it @includes) was already loaded and processed by this or another
 			 * instance, so we just reuse that result instead of hitting the disk and reprocessing it again */
 			restartParser();
-			setSearchPath(QFileInfo(filename).absolutePath());
+			setSearchPath(cache_itr->search_path);
 			buffer = cache_itr->buffer;
 			include_infos = cache_itr->include_infos;
 			SchemaParser::filename = filename;
@@ -373,7 +378,7 @@ void SchemaParser::loadFile(const QString &filename)
 			setSearchPath(QFileInfo(filename).absolutePath());
 			loadBuffer(buf);
 			SchemaParser::filename = filename;
-			file_cache[cache_key] = CachedFile { buffer, include_infos };
+			file_cache[cache_key] = CachedFile { buffer, include_infos, search_path };
 		}
 	}
 	catch(Exception &e)
