@@ -300,6 +300,7 @@ class __libcli PgModelerCliApp: public Application {
 		SegThreshold,
 		SegModeSchema,
 		SegModeThreshold,
+		HideRels,
 		PartialDiff,
 		Force,
 		StartDate,
