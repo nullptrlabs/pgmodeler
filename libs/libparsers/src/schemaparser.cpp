@@ -26,6 +26,7 @@
 #include "globalattributes.h"
 
 QHash<QString, SchemaParser::CachedFile> SchemaParser::file_cache;
+QReadWriteLock SchemaParser::file_cache_lock;
 
 const QChar SchemaParser::CharComment {'#'};
 const QChar SchemaParser::CharLineEnd {'\n'};
@@ -360,16 +361,31 @@ void SchemaParser::loadFile(const QString &filename)
 		 * which only means the same file gets more than one entry). A relative name depends on the
 		 * current directory, so it is resolved first */
 		QString cache_key = QDir::isAbsolutePath(filename) ? filename : QFileInfo(filename).absoluteFilePath();
-		auto cache_itr = file_cache.find(cache_key);
+		CachedFile cached;
+		bool cache_hit = false;
 
-		if(cache_itr != file_cache.constEnd())
+		/* The parser is used from the threads of the export, validation, diff and import tools while the
+		 * main thread may be generating code too, so the cache is only touched under a lock. The entry is
+		 * copied (the lists inside it are implicitly shared) to be used after the lock is released */
+		{
+			QReadLocker locker(&file_cache_lock);
+			auto cache_itr = file_cache.constFind(cache_key);
+
+			if(cache_itr != file_cache.constEnd())
+			{
+				cached = *cache_itr;
+				cache_hit = true;
+			}
+		}
+
+		if(cache_hit)
 		{
 			/* The file (and whatever it @includes) was already loaded and processed by this or another
 			 * instance, so we just reuse that result instead of hitting the disk and reprocessing it again */
 			restartParser();
-			setSearchPath(cache_itr->search_path);
-			buffer = cache_itr->buffer;
-			include_infos = cache_itr->include_infos;
+			setSearchPath(cached.search_path);
+			buffer = cached.buffer;
+			include_infos = cached.include_infos;
 			SchemaParser::filename = filename;
 		}
 		else
@@ -378,7 +394,10 @@ void SchemaParser::loadFile(const QString &filename)
 			setSearchPath(QFileInfo(filename).absolutePath());
 			loadBuffer(buf);
 			SchemaParser::filename = filename;
-			file_cache[cache_key] = CachedFile { buffer, include_infos, search_path };
+
+			// Two threads may have loaded the same file at the same time, which is harmless since the result is the same
+			QWriteLocker locker(&file_cache_lock);
+			file_cache.insert(cache_key, CachedFile { buffer, include_infos, search_path });
 		}
 	}
 	catch(Exception &e)
