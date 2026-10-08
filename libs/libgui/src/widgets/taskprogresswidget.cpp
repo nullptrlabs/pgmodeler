@@ -42,6 +42,16 @@ TaskProgressWidget::TaskProgressWidget(QWidget *parent, Qt::WindowFlags f) : QDi
 
 	for(auto &obj_tp : obj_types)
 		addIcon(enum_t(obj_tp), GuiUtilsNs::getIcon(obj_tp));
+
+	handle_lbl->installEventFilter(this);
+}
+
+bool TaskProgressWidget::eventFilter(QObject *object, QEvent *event)
+{
+	if(object == handle_lbl && event->type() == QEvent::MouseMove)
+		GuiUtilsNs::moveFloatingWidget(this, handle_lbl, dynamic_cast<QMouseEvent *>(event));
+
+	return QDialog::eventFilter(object, event);
 }
 
 void TaskProgressWidget::setCancelable(bool value)

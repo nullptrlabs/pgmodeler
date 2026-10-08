@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>675</width>
-    <height>81</height>
+    <width>690</width>
+    <height>83</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -126,22 +126,6 @@
         <property name="spacing">
          <number>5</number>
         </property>
-        <item row="1" column="0" colspan="3">
-         <widget class="QProgressBar" name="progress_pb">
-          <property name="value">
-           <number>0</number>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-          <property name="invertedAppearance">
-           <bool>false</bool>
-          </property>
-          <property name="format">
-           <string notr="true">%p%</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
          <widget class="QLabel" name="text_lbl">
           <property name="sizePolicy">
@@ -193,6 +177,51 @@
            <number>0</number>
           </property>
          </widget>
+        </item>
+        <item row="1" column="0" colspan="3">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="spacing">
+           <number>5</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QProgressBar" name="progress_pb">
+            <property name="value">
+             <number>0</number>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignCenter</set>
+            </property>
+            <property name="invertedAppearance">
+             <bool>false</bool>
+            </property>
+            <property name="format">
+             <string notr="true">%p%</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="handle_lbl">
+            <property name="maximumSize">
+             <size>
+              <width>7</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>SizeAllCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item row="0" column="2">
          <widget class="QToolButton" name="cancel_btn">
