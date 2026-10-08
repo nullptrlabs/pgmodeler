@@ -486,7 +486,7 @@ QString SchemaParser::getAttribute(bool &found_conv_to_xml)
 
 	if(!isValidAttributeName(atrib))
 	{
-		throw Exception(getParseError(ErrorCode::InvalidAttribute),
+		throw Exception(getParseError(ErrorCode::InvalidAttribute, "", atrib),
 										ErrorCode::InvalidAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
@@ -982,7 +982,7 @@ void SchemaParser::defineAttribute()
 		//Checking if the attribute has a valid name
 		if(!isValidAttributeName(attrib))
 		{
-			throw Exception(getParseError(ErrorCode::InvalidAttribute),
+			throw Exception(getParseError(ErrorCode::InvalidAttribute, "", attrib),
 											ErrorCode::InvalidAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
 

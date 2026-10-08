@@ -149,6 +149,11 @@ class SchemaParserDiffTest: public QObject, public PgModelerUnitTest {
 			Outcome cur = run<SchemaParser>(file, buffer, search_path, setup),
 					ref = run<LegacySchemaParser>(file, buffer, search_path, setup);
 
+			/* KNOWN DIFFERENCE: the legacy message of InvalidAttribute had its arguments shifted (the attribute
+			 * name was missing) and the position can't even be read from it, so only the error code is compared */
+			if(!cur.ok && !ref.ok && cur.code == static_cast<int>(ErrorCode::InvalidAttribute) && ref.code == cur.code)
+				cur.message = ref.message;
+
 			compared++;
 			compared_ok += cur.ok ? 1 : 0;
 
