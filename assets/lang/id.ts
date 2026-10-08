@@ -14420,6 +14420,10 @@ yang tersedia di GUI. Semua opsi yang tersedia dijelaskan di bawah.</translation
         <translation>Hubungan tabel</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Tabel:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Hubungan</translation>
     </message>
@@ -14438,6 +14442,10 @@ yang tersedia di GUI. Semua opsi yang tersedia dijelaskan di bawah.</translation
     <message>
         <source>Related table</source>
         <translation>Tabel terkait</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Hubungan %1</translation>
     </message>
 </context>
 <context>

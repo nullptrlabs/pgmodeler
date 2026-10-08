@@ -14420,6 +14420,10 @@ dostupné v GUI. Všechny dostupné volby jsou popsány níže.</translation>
         <translation>Vztahy tabulky</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Tabulka:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Vztahy</translation>
     </message>
@@ -14438,6 +14442,10 @@ dostupné v GUI. Všechny dostupné volby jsou popsány níže.</translation>
     <message>
         <source>Related table</source>
         <translation>Související tabulka</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Vztahy: %1</translation>
     </message>
 </context>
 <context>

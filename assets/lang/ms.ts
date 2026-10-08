@@ -14420,6 +14420,10 @@ yang terdapat dalam GUI. Semua pilihan yang tersedia diterangkan di bawah.</tran
         <translation>Hubungan jadual</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Jadual:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Hubungan</translation>
     </message>
@@ -14438,6 +14442,10 @@ yang terdapat dalam GUI. Semua pilihan yang tersedia diterangkan di bawah.</tran
     <message>
         <source>Related table</source>
         <translation>Jadual berkaitan</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Hubungan %1</translation>
     </message>
 </context>
 <context>

@@ -14420,6 +14420,10 @@ som er tilgængelige i den grafiske brugerflade. Alle tilgængelige indstillinge
         <translation>Tabellens relationer</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Tabel:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Relationer</translation>
     </message>
@@ -14438,6 +14442,10 @@ som er tilgængelige i den grafiske brugerflade. Alle tilgængelige indstillinge
     <message>
         <source>Related table</source>
         <translation>Relateret tabel</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Relationer for %1</translation>
     </message>
 </context>
 <context>

@@ -14420,6 +14420,10 @@ available in GUI. All available options are described below.</source>
         <translation>테이블 관계</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>테이블:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>관계</translation>
     </message>
@@ -14438,6 +14442,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Related table</source>
         <translation>관련 테이블</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>%1의 관계</translation>
     </message>
 </context>
 <context>

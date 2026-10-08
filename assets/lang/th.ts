@@ -14420,6 +14420,10 @@ available in GUI. All available options are described below.</source>
         <translation>ความสัมพันธ์ของตาราง</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>ตาราง:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>ความสัมพันธ์</translation>
     </message>
@@ -14438,6 +14442,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Related table</source>
         <translation>ตารางที่เกี่ยวข้อง</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>ความสัมพันธ์ของ %1</translation>
     </message>
 </context>
 <context>

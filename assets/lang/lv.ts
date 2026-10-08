@@ -14420,6 +14420,10 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
         <translation>Tabulas attiecības</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Tabula:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Attiecības</translation>
     </message>
@@ -14438,6 +14442,10 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
     <message>
         <source>Related table</source>
         <translation>Saistītā tabula</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Attiecības: %1</translation>
     </message>
 </context>
 <context>

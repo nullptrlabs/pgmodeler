@@ -14420,6 +14420,10 @@ available in GUI. All available options are described below.</source>
         <translation>テーブルのリレーションシップ</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>テーブル:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>リレーションシップ</translation>
     </message>
@@ -14438,6 +14442,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Related table</source>
         <translation>関連テーブル</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>%1 のリレーションシップ</translation>
     </message>
 </context>
 <context>

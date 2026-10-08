@@ -14420,6 +14420,10 @@ ki so na voljo v grafičnem vmesniku. Vse razpoložljive možnosti so opisane sp
         <translation>Razmerja tabele</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Tabela:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Razmerja</translation>
     </message>
@@ -14438,6 +14442,10 @@ ki so na voljo v grafičnem vmesniku. Vse razpoložljive možnosti so opisane sp
     <message>
         <source>Related table</source>
         <translation>Povezana tabela</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Razmerja: %1</translation>
     </message>
 </context>
 <context>

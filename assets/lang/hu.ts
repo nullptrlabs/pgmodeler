@@ -14420,6 +14420,10 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
         <translation>A tábla kapcsolatai</translation>
     </message>
     <message>
+        <source>Table:</source>
+        <translation>Tábla:</translation>
+    </message>
+    <message>
         <source>Relationships</source>
         <translation>Kapcsolatok</translation>
     </message>
@@ -14438,6 +14442,10 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
     <message>
         <source>Related table</source>
         <translation>Kapcsolódó tábla</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>%1 kapcsolatai</translation>
     </message>
 </context>
 <context>
