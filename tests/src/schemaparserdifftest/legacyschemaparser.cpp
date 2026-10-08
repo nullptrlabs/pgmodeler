@@ -25,6 +25,25 @@
 #include "pgsqlversions.h"
 #include "globalattributes.h"
 
+/* Copy of UtilsNs::convertToXmlEntities() as it was before the performance work (it detected the special
+ * chars with a regular expression), so the reference implementation doesn't follow the changes in libutils */
+static QString legacyConvertToXmlEntities(QString value)
+{
+	if(value.contains(QRegularExpression("(&|\\<|\\>|\")")))
+	{
+		if(!value.contains(UtilsNs::EntityQuot) && !value.contains(UtilsNs::EntityLt) &&
+			 !value.contains(UtilsNs::EntityGt) && !value.contains(UtilsNs::EntityAmp) &&
+			 !value.contains(UtilsNs::EntityApos) && value.contains('&'))
+				value.replace('&', UtilsNs::EntityAmp);
+
+		value.replace('"', UtilsNs::EntityQuot);
+		value.replace('<', UtilsNs::EntityLt);
+		value.replace('>', UtilsNs::EntityGt);
+	}
+
+	return value;
+}
+
 const QRegularExpression LegacySchemaParser::AttribRegExp {
 	QRegularExpression::anchoredPattern("^([a-z])([a-z]*|(\\d)*|(\\-)*|(_)*)+"),
 	QRegularExpression::CaseInsensitiveOption
@@ -762,7 +781,7 @@ bool LegacySchemaParser::evaluateComparisonExpr()
 				{
 					QVariant left_val, right_val;
 					QString attr_val = to_xml_entity ?
-																 UtilsNs::convertToXmlEntities(attributes[attrib]) : attributes[attrib];
+																 legacyConvertToXmlEntities(attributes[attrib]) : attributes[attrib];
 
 					to_xml_entity = false;
 					value.remove(CharValueDelim);
@@ -878,7 +897,7 @@ void LegacySchemaParser::defineAttribute()
 														ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 					}
 
-					value += to_xml_entity ? UtilsNs::convertToXmlEntities(attributes[attrib]) : attributes[attrib];
+					value += to_xml_entity ? legacyConvertToXmlEntities(attributes[attrib]) : attributes[attrib];
 					to_xml_entity = false;
 				}
 			}
@@ -1385,7 +1404,7 @@ QString LegacySchemaParser::getSourceCode(const attribs_map &attribs)
 
 					/* If the parser is not in an if / else, concatenates the value of the attribute
 					 * directly in definition in sql */
-					object_def += to_xml_entity ? UtilsNs::convertToXmlEntities(attributes[atrib]) : attributes[atrib];
+					object_def += to_xml_entity ? legacyConvertToXmlEntities(attributes[atrib]) : attributes[atrib];
 					to_xml_entity = false;
 				}
 			}
@@ -1564,7 +1583,7 @@ QString LegacySchemaParser::getSourceCode(const attribs_map &attribs)
 									int pos = conv_entity ? 2 : 1;
 
 									atrib = word.mid(pos, word.size() - (pos + 1));
-									word = conv_entity ? UtilsNs::convertToXmlEntities(attributes[atrib]) : attributes[atrib];
+									word = conv_entity ? legacyConvertToXmlEntities(attributes[atrib]) : attributes[atrib];
 
 									/* If the attribute has no value set and parser must not ignore empty values
 									 * raises an exception */
