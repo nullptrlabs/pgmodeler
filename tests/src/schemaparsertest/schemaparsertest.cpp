@@ -82,6 +82,8 @@ class SchemaParserTest: public QObject, public PgModelerUnitTest {
 		void testCachedLoadProducesTheSameOutputAsTheFirstLoad();
 		void testRelativeFileNamesAreResolvedAgainstTheCurrentDirectory();
 		void testFileCacheIsSafeToUseFromSeveralThreads();
+		void testLoadingFilesDoesNotChangeTheCurrentDirectory();
+		void testIncludesAreResolvedFromTheFolderOfEachFileWhenLoadingFromSeveralThreads();
 		void testBuffersPreprocessor_data();
 		void testBuffersPreprocessor();
 		void testBuffersPlainTexts_data();
@@ -1575,6 +1577,126 @@ void SchemaParserTest::testFileCacheIsSafeToUseFromSeveralThreads()
 						failures++;
 					}
 				}
+			}
+		}));
+	}
+
+	for(auto thread : threads)
+		thread->start();
+
+	for(auto thread : threads)
+	{
+		thread->wait();
+		delete thread;
+	}
+
+	QCOMPARE(failures.load(), 0);
+}
+
+void SchemaParserTest::testLoadingFilesDoesNotChangeTheCurrentDirectory()
+{
+	QTemporaryDir dir, cwd_dir;
+	QVERIFY(dir.isValid() && cwd_dir.isValid());
+
+	writeSchemaFile(dir.filePath("cwd_inc.sch"), "[inc]\n");
+	QString main = writeSchemaFile(dir.filePath("cwd_main.sch"), "@include \"cwd_inc\"\n[main]\n"),
+			orig_cwd = QDir::currentPath();
+	attribs_map attribs;
+
+	QVERIFY(QDir::setCurrent(cwd_dir.path()));
+	QString cwd = QDir::currentPath();
+
+	try
+	{
+		// Cache miss, with an include that has to be found relative to the folder of the file
+		SchemaParser p1;
+		p1.loadFile(main);
+		QCOMPARE(p1.getSourceCode(attribs), QString("incmain"));
+		QCOMPARE(QDir::currentPath(), cwd);
+
+		// Cache hit
+		SchemaParser p2;
+		p2.loadFile(main);
+		QCOMPARE(p2.getSourceCode(attribs), QString("incmain"));
+		QCOMPARE(QDir::currentPath(), cwd);
+
+		// Buffer with a search path
+		SchemaParser p3;
+		p3.setSearchPath(dir.path());
+		p3.loadBuffer("@include \"cwd_inc\"\n[buffer]\n");
+		QCOMPARE(p3.getSourceCode(attribs), QString("incbuffer"));
+		QCOMPARE(QDir::currentPath(), cwd);
+
+		// A relative search path is relative to the current directory
+		QDir(cwd).mkdir("sub");
+		writeSchemaFile(cwd + "/sub/cwd_rel_inc.sch", "[rel]\n");
+		SchemaParser p4;
+		p4.setSearchPath("sub");
+		p4.loadBuffer("@include \"cwd_rel_inc\"\n");
+		QCOMPARE(p4.getSourceCode(attribs), QString("rel"));
+		QCOMPARE(QDir::currentPath(), cwd);
+
+		// A failed load doesn't change it either
+		SchemaParser p5;
+		p5.setSearchPath(dir.path());
+
+		try
+		{
+			p5.loadBuffer("@include \"does_not_exist\"\n");
+			QFAIL("Expected an InvalidInclude exception but none was raised");
+		}
+		catch(Exception &e)
+		{
+			QCOMPARE(e.getErrorCode(), ErrorCode::InvalidInclude);
+		}
+
+		QCOMPARE(QDir::currentPath(), cwd);
+	}
+	catch(Exception &e)
+	{
+		QDir::setCurrent(orig_cwd);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QDir::setCurrent(orig_cwd);
+}
+
+void SchemaParserTest::testIncludesAreResolvedFromTheFolderOfEachFileWhenLoadingFromSeveralThreads()
+{
+	QTemporaryDir dir;
+	QVERIFY(dir.isValid());
+
+	const int folder_count = 12;
+	QStringList mains;
+
+	// Each folder has an include with the same name but with a different content
+	for(int i = 0; i < folder_count; i++)
+	{
+		QString folder = dir.filePath(QString("mt_folder_%1").arg(i));
+		QVERIFY(QDir().mkpath(folder));
+		writeSchemaFile(folder + "/mt_inc.sch", QString("[inc%1]\n").arg(i));
+		mains.append(writeSchemaFile(folder + "/mt_main.sch", "@include \"mt_inc\"\n[main]\n"));
+	}
+
+	std::atomic<int> failures { 0 };
+	QList<QThread *> threads;
+
+	for(int i = 0; i < folder_count; i++)
+	{
+		threads.append(QThread::create([&, i]() {
+			attribs_map attribs;
+
+			try
+			{
+				SchemaParser parser;
+				parser.loadFile(mains[i]);
+
+				if(parser.getSourceCode(attribs) != QString("inc%1main").arg(i))
+					failures++;
+			}
+			catch(Exception &)
+			{
+				failures++;
 			}
 		}));
 	}
