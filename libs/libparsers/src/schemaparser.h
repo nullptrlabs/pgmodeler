@@ -300,7 +300,7 @@ class __libparsers SchemaParser {
 		TokenMetaHs, // $hs (hash/number sign '#')
 		TokenMetaPs, // $ps (percentage sign '%')
 		TokenMetaAt, // $at (at character '@')
-		TokenMetaDs, // $ds (special data separator character '•')
+		TokenMetaDs, // $ds (special data separator character '·')
 		TokenMetaAm, // $am (ampersand character '&')
 		TokenMetaBs, // $bs (backslash character '\')
 
