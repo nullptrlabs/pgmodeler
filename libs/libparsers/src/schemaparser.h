@@ -54,6 +54,12 @@ class __libparsers SchemaParser {
 							 stmt_length > 0;
 			}
 
+			//! \brief Number of lines of the buffer that come from the included file
+			int lineCount()
+			{
+				return end_line - start_line + 1;
+			}
+
 			bool contains(int line)
 			{
 				return isValid() &&
@@ -211,6 +217,23 @@ class __libparsers SchemaParser {
 		 *  files also have includes this method will raise an exception. This should be changed in the future. */
 		bool parseInclude(const QString &include_ln, QString &src_buf, qint64 curr_stream_pos);
 
+		/*! \brief Returns how many more lines than in the source file the buffer has before the buffer line
+		 * buffer_line. The @include statement is one line of the source file but it is replaced in the buffer by all
+		 * the lines of the included file, so the lines that come after an include must be moved back by this amount to
+		 * be reported at the place they have in the source file */
+		int getIncludedLinesBefore(int buffer_line)
+		{
+			int count = 0;
+
+			for(auto &info : include_infos)
+			{
+				if(info.end_line < buffer_line)
+					count += info.lineCount() - 1;
+			}
+
+			return count;
+		}
+
 		/*! \brief Returns a formatted error message used prior to an exception raising.
 		 * This method take into account if the error happened in the current schema file/buffer or
 		 * in a file included via @include. ATTENTION: this method changes the current line and column
@@ -219,7 +242,7 @@ class __libparsers SchemaParser {
 		template<typename ...ArgType>
 		QString getParseError(ErrorCode err_code, const QString &extra_msg = "", const ArgType & ...args)
 		{
-			int actual_line = line + 1, incl_line = 0, incl_stmt_len = 0;
+			int actual_line = line + 1 - getIncludedLinesBefore(line), incl_line = 0, incl_buf_line = 0, incl_stmt_len = 0;
 			QString file = filename, msg;
 			bool is_incl_error = false;
 
@@ -229,7 +252,8 @@ class __libparsers SchemaParser {
 			{
 				if(info.contains(line))
 				{
-					incl_line = info.start_line;
+					incl_buf_line = info.start_line;
+					incl_line = info.start_line - getIncludedLinesBefore(info.start_line);
 					actual_line = (line - info.start_line) + 1;
 					file = info.include_file;
 					incl_stmt_len = info.stmt_length;
@@ -260,7 +284,7 @@ class __libparsers SchemaParser {
 			if(is_incl_error)
 			{
 				column = incl_stmt_len - 1;
-				line = incl_line;
+				line = incl_buf_line;
 			}
 
 			return msg;

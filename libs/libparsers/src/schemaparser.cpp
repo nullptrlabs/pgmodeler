@@ -165,7 +165,8 @@ QStringList SchemaParser::extractAttributes()
 
 int SchemaParser::getCurrentLine()
 {
-	return line + 1;
+	// The line is an index of the buffer, which has more lines than the source file when it includes other files
+	return line + 1 - getIncludedLinesBefore(line);
 }
 
 int SchemaParser::getCurrentColumn()
@@ -327,10 +328,11 @@ bool SchemaParser::parseInclude(const QString &include_ln, QString &src_buf, qin
 		/* Registering the included buffer start and end lines based upon
 		 * the current number of lines in the main buffer where @include was found
 		 * and by counting the number of line breaks in the included buffer, this is
-		 * enough to know where the included buffer starts and ends */
+		 * enough to know where the included buffer starts and ends (each line break is
+		 * one line, so the last line is the start plus the number of lines minus one) */
 		include_infos.push_back(IncludeInfo { fi.absoluteFilePath(),
 																					static_cast<int>(buffer.size()),
-																					static_cast<int>(buffer.size() + incl_buf.count(QChar::LineFeed)),
+																					static_cast<int>(buffer.size() + incl_buf.count(QChar::LineFeed) - 1),
 																					static_cast<int>(include_ln.length()) });
 
 		/* Reset the line/column values so the parser can start the parsing of
@@ -389,8 +391,11 @@ void SchemaParser::loadFile(const QString &filename)
 		{
 			QString buf(UtilsNs::loadFile(filename));
 			setSearchPath(QFileInfo(filename).absolutePath());
-			loadBuffer(buf);
+
+			/* The name is set before loading the buffer so the errors found on it (e.g. in
+			 * an @include statement) mention the file instead of the memory buffer */
 			SchemaParser::filename = filename;
+			loadBuffer(buf);
 
 			// Two threads may have loaded the same file at the same time, which is harmless since the result is the same
 			QWriteLocker locker(&file_cache_lock);

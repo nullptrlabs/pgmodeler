@@ -154,6 +154,26 @@ class SchemaParserDiffTest: public QObject, public PgModelerUnitTest {
 			if(!cur.ok && !ref.ok && cur.code == static_cast<int>(ErrorCode::InvalidAttribute) && ref.code == cur.code)
 				cur.message = ref.message;
 
+			/* KNOWN DIFFERENCE: the legacy parser reported the lines that come after an @include shifted by the size of the
+			 * included file, attributed the first of them to the included file (and so added the "Failed to parse the file..."
+			 * prefix, with another column) and named the memory buffer instead of the file in the errors of the include
+			 * statements. For the failures of inputs that have includes the prefix, the file names and the positions are masked */
+			if(!cur.ok && !ref.ok && hasInclude(file, buffer))
+			{
+				static const QRegularExpression prefix_regexp("^Failed to parse the file .*? Error detected:\\s*", QRegularExpression::DotMatchesEverythingOption),
+						line_regexp("line `?\\d+"), column_regexp("column \\d+"), file_regexp("`[^`']*(\\.sch|\\[memory buffer\\])'");
+				cur.line = ref.line;
+				cur.column = ref.column;
+
+				for(Outcome *outcome : { &cur, &ref })
+				{
+					outcome->message.remove(prefix_regexp);
+					outcome->message.replace(line_regexp, "line N");
+					outcome->message.replace(column_regexp, "column N");
+					outcome->message.replace(file_regexp, "`FILE'");
+				}
+			}
+
 			compared++;
 			compared_ok += cur.ok ? 1 : 0;
 
@@ -165,6 +185,19 @@ class SchemaParserDiffTest: public QObject, public PgModelerUnitTest {
 			}
 			else if(!(cur == ref))
 				mismatches.append("...");
+		}
+
+		bool hasInclude(const QString &file, const QString &buffer)
+		{
+			static QHash<QString, bool> cache;
+
+			if(file.isEmpty())
+				return buffer.contains("@include");
+
+			if(!cache.contains(file))
+				cache[file] = readFile(file).contains("@include");
+
+			return cache[file];
 		}
 
 		void checkNoMismatches()
