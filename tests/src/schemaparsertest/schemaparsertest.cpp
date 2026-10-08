@@ -583,6 +583,11 @@ void SchemaParserTest::testAttributeNames()
 	{
 		QVERIFY2(!valid, qPrintable(e.getErrorMessage()));
 		QVERIFY(e.getErrorCode() == ErrorCode::InvalidAttribute || e.getErrorCode() == ErrorCode::InvalidSyntax);
+
+		// The message of an invalid name must tell which name it is and where it was found
+		if(e.getErrorCode() == ErrorCode::InvalidAttribute)
+			QVERIFY2(e.getErrorMessage().contains(QString("`%1'").arg(name)) && e.getErrorMessage().contains("line 1, column"), qPrintable(e.getErrorMessage()));
+
 		schparser.restartParser();
 	}
 
@@ -1082,12 +1087,12 @@ void SchemaParserTest::testBuffersAttributes_data()
 	QTest::newRow("unknownIgnoredButEmptyRaises") << QString("x{zz}y") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << true << false << QString() << static_cast<int>(ErrorCode::UndefinedAttributeValue) << 1 << 6;
 	QTest::newRow("emptyRaises") << QString("{e}") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString() << static_cast<int>(ErrorCode::UndefinedAttributeValue) << 1 << 4;
 	QTest::newRow("emptyIgnored") << QString("x{e}y") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << true << QString("xy") << -1 << 0 << 0;
-	QTest::newRow("invalidNameStartsWithDigit") << QString("{1a}") << QStringList{ "1a=v" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << -1 << -1;
-	QTest::newRow("invalidNameStartsWithHyphen") << QString("{-a}") << QStringList{ "-a=v" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << -1 << -1;
-	QTest::newRow("invalidNameStartsWithUnderscore") << QString("{_a}") << QStringList{ "_a=v" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << -1 << -1;
+	QTest::newRow("invalidNameStartsWithDigit") << QString("{1a}") << QStringList{ "1a=v" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << 1 << 5;
+	QTest::newRow("invalidNameStartsWithHyphen") << QString("{-a}") << QStringList{ "-a=v" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << 1 << 5;
+	QTest::newRow("invalidNameStartsWithUnderscore") << QString("{_a}") << QStringList{ "_a=v" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << 1 << 5;
 	QTest::newRow("invalidNameWithSpace") << QString("{a b}") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 1 << 3;
-	QTest::newRow("invalidNameWithDot") << QString("{a.b}") << QStringList{ "a.b=v" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << -1 << -1;
-	QTest::newRow("invalidNameNonAscii") << QString("{aé}") << QStringList{ "aé=v" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << -1 << -1;
+	QTest::newRow("invalidNameWithDot") << QString("{a.b}") << QStringList{ "a.b=v" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << 1 << 6;
+	QTest::newRow("invalidNameNonAscii") << QString("{aé}") << QStringList{ "aé=v" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << 1 << 5;
 	QTest::newRow("unclosedAtEndOfLine") << QString("{a") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 1 << 3;
 	QTest::newRow("unclosedFollowedBySpace") << QString("{a }") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 1 << 3;
 	QTest::newRow("emptyName") << QString("{}") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 1 << 3;
@@ -1433,12 +1438,12 @@ void SchemaParserTest::testBuffersSetUnset_data()
 	QTest::newRow("setEmptyValue") << QString("%set {x}\nok") << QStringList() << false << true << QString("ok") << -1 << 0 << 0;
 	QTest::newRow("setEmptyValueUsedRaises") << QString("%set {x}\n{x}") << QStringList() << false << false << QString() << static_cast<int>(ErrorCode::UndefinedAttributeValue) << 2 << 4;
 	QTest::newRow("setValueOf") << QString("%set @{n} hello\n{foo}") << QStringList{ "n=foo" } << false << false << QString("hello") << -1 << 0 << 0;
-	QTest::newRow("setValueOfUnknownRaises") << QString("%set @{n} hello\n{foo}") << QStringList() << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << -1 << -1;
-	QTest::newRow("setValueOfInvalidName") << QString("%set @{n} hello") << QStringList{ "n=1bad" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << -1 << -1;
-	QTest::newRow("setValueOfEmptyName") << QString("%set @{n} hello") << QStringList{ "n=" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << -1 << -1;
+	QTest::newRow("setValueOfUnknownRaises") << QString("%set @{n} hello\n{foo}") << QStringList() << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << 1 << 16;
+	QTest::newRow("setValueOfInvalidName") << QString("%set @{n} hello") << QStringList{ "n=1bad" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << 1 << 16;
+	QTest::newRow("setValueOfEmptyName") << QString("%set @{n} hello") << QStringList{ "n=" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << 1 << 16;
 	QTest::newRow("setValueOfTwice") << QString("%set @{n} @{m} hello") << QStringList{ "n=a1", "m=b1" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 1 << 11;
 	QTest::newRow("setAtNotBeforeAttr") << QString("%set @x hello") << QStringList() << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 1 << 7;
-	QTest::newRow("setInvalidName") << QString("%set {1a} hello") << QStringList() << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << -1 << -1;
+	QTest::newRow("setInvalidName") << QString("%set {1a} hello") << QStringList() << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << 1 << 10;
 	QTest::newRow("setNoName") << QString("%set\nfoo") << QStringList() << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 1 << 5;
 	QTest::newRow("setNameNotAttr") << QString("%set foo bar") << QStringList() << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 1 << 9;
 	QTest::newRow("setNameAsXml") << QString("%set &{x} v\n{x}") << QStringList() << false << false << QString("v") << -1 << 0 << 0;
@@ -1471,7 +1476,7 @@ void SchemaParserTest::testBuffersSetUnset_data()
 	QTest::newRow("unsetNoAttrRaises") << QString("%unset\nfoo") << QStringList() << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 1 << 7;
 	QTest::newRow("unsetWordRaises") << QString("%unset foo") << QStringList() << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 1 << 8;
 	QTest::newRow("unsetXmlAttrRaises") << QString("%unset &{a}") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 1 << 8;
-	QTest::newRow("unsetInvalidName") << QString("%unset {1a}") << QStringList{ "1a=x" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << -1 << -1;
+	QTest::newRow("unsetInvalidName") << QString("%unset {1a}") << QStringList{ "1a=x" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidAttribute) << 1 << 12;
 	QTest::newRow("unsetInFalseBranchIsSkipped") << QString("%if {e} %then\n%unset {a}\n%end\n{a}") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString("AA") << -1 << 0 << 0;
 	QTest::newRow("unsetInTrueBranchRuns") << QString("%if {a} %then\n%unset {a}\n%end\n[<]{a}[>]") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << true << QString("<>") << -1 << 0 << 0;
 	QTest::newRow("unsetOnSameLineAsText") << QString("%unset {a} text") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 1 << 12;
