@@ -262,7 +262,7 @@
           <widget class="Line" name="separator_ln3">
            <property name="minimumSize">
             <size>
-             <width>5</width>
+             <width>1</width>
              <height>0</height>
             </size>
            </property>

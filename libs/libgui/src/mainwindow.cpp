@@ -644,6 +644,13 @@ void MainWindow::connectSignalsToSlots()
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, model_objs_wgt, &ModelObjectsWidget::setDisabled);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, obj_finder_wgt, &ObjectSearchWidget::setDisabled);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, models_tbw, &QTabWidget::setDisabled);
+
+	/* scene_info_wgt (scene/segmentation switching) and side_widgets_stw (the dock area shared by
+	 * model objects/operations list and plugin widgets, see installPluginWidgets()) must also be
+	 * disabled: either one lets the user apply changes to the model while it's being validated,
+	 * which isn't accounted for by the validation pass already running */
+	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, scene_info_wgt, &SceneInfoWidget::setDisabled);
+	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, side_widgets_stw, &QStackedWidget::setDisabled);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, this, &MainWindow::stopSaveTimers);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, layers_btn, &QToolButton::setDisabled);
 	connect(model_valid_wgt, &ModelValidationWidget::s_validationInProgress, layers_cfg_wgt, &LayersConfigWidget::close);
