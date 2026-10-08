@@ -384,11 +384,12 @@ void SchemaParser::loadFile(const QString &filename)
 
 QString SchemaParser::getAttribute(bool &found_conv_to_xml)
 {
-	QString atrib, current_line;
+	QString atrib;
+	QStringView current_line;
 	bool start_attrib, end_attrib, error = false;
 
 	//Get the current line from the buffer
-	current_line = buffer[line];
+	current_line = std::as_const(buffer)[line];
 
 	/* Only start extracting an attribute if it starts with a { or &{
 		even if the current character is an attribute delimiter */
@@ -422,6 +423,8 @@ QString SchemaParser::getAttribute(bool &found_conv_to_xml)
 		//Unmarks the flag indicating end of attribute
 		end_attrib = false;
 
+		int start = column;
+
 		/* Attempt to extract an attribute until a space, end of line
 		 * or attribute is encountered */
 		while(column < current_line.size() &&
@@ -430,15 +433,20 @@ QString SchemaParser::getAttribute(bool &found_conv_to_xml)
 					current_line[column]!=CharTabulation &&
 					!end_attrib && !error)
 		{
-			if(current_line[column] != CharEndAttribute)
-				atrib += current_line[column];
-			else if(current_line[column] == CharEndAttribute && !atrib.isEmpty())
-				end_attrib = true;
-			else
-				error = true;
+			if(current_line[column] == CharEndAttribute)
+			{
+				// The closing brace ends the name, but it can't come before any character of it
+				if(column > start)
+					end_attrib = true;
+				else
+					error = true;
+			}
 
 			column++;
 		}
+
+		if(end_attrib)
+			atrib = current_line.mid(start, column - start - 1).toString();
 
 		/* If the attribute has been started but not finished
 		 * ie absence of the } in its statement (ie. {attr),
@@ -466,15 +474,17 @@ QString SchemaParser::getAttribute(bool &found_conv_to_xml)
 
 QString SchemaParser::getWord()
 {
-	QString word, current_line;
+	QString word;
 
 	//Gets the current line buffer
-	current_line = buffer[line];
+	QStringView current_line = std::as_const(buffer)[line];
 
 	/* Attempt to extract a word if the first character is not
 		a special character. */
 	if(!isSpecialCharacter(current_line[column]))
 	{
+		int start = column;
+
 		/* Extract the word while it is not end of line, space or
 		 * special character */
 		while(current_line[column] != CharLineEnd &&
@@ -482,9 +492,10 @@ QString SchemaParser::getWord()
 					current_line[column] != CharSpace &&
 					current_line[column] != CharTabulation)
 		{
-			word+=current_line[column];
 			column++;
 		}
+
+		word = current_line.mid(start, column - start).toString();
 	}
 
 	return word;
@@ -492,11 +503,10 @@ QString SchemaParser::getWord()
 
 QString SchemaParser::getPlainText()
 {
-	QString text, current_line;
+	QString text;
+	QStringView current_line = std::as_const(buffer)[line];
 	bool error = false;
 	int start_col = column, start_line = line;
-
-	current_line = buffer[line];
 
 	//Attempt to extract a pure text if the first character is a [
 	if(current_line[column] == CharStartPlainText)
@@ -548,7 +558,7 @@ QString SchemaParser::getPlainText()
 				column=0;
 
 				if(line < buffer.size())
-					current_line = buffer[line];
+					current_line = std::as_const(buffer)[line];
 			}
 			else
 				column++;
@@ -578,10 +588,9 @@ QString SchemaParser::getPlainText()
 
 QString SchemaParser::getConditional()
 {
-	QString conditional, current_line;
+	QString conditional;
+	QStringView current_line = std::as_const(buffer)[line];
 	bool error = false;
-
-	current_line = buffer[line];
 
 	//Will initiate extraction if a % is found
 	if(current_line[column] == CharStartConditional)
@@ -589,15 +598,18 @@ QString SchemaParser::getConditional()
 		// The next char should be the start of the conditional instruction name
 		column++;
 
+		int start = column;
+
 		/* Moves to the next character that is the beginning of
 		 the name of the conditional word */
 		while(current_line[column] != CharLineEnd &&
 					current_line[column] != CharSpace &&
 					current_line[column] != CharTabulation)
 		{
-			conditional += current_line[column];
 			column++;
 		}
+
+		conditional = current_line.mid(start, column - start).toString();
 
 		//If no word was extracted an error is raised
 		if(conditional.isEmpty())
@@ -644,11 +656,10 @@ QString SchemaParser::getEscapedCharacter()
 
 QString SchemaParser::getMetaOrEscapedToken(bool is_escaped)
 {
-	QString chr_token, current_line;
+	QString chr_token;
+	QStringView current_line = std::as_const(buffer)[line];
 	bool error = false;
 	QChar start_chr = is_escaped ? CharStartEscaped : CharStartMetachar;
-
-	current_line = buffer[line];
 
 	//Begins the extraction in case of a $ is found
 	if(current_line[column] == start_chr)
@@ -704,7 +715,8 @@ bool SchemaParser::isSpecialCharacter(const QChar &chr)
 
 bool SchemaParser::evaluateComparisonExpr()
 {
-	QString curr_line, attrib, value, oper, valid_op_chrs="=!<>fi", extra_error_msg;
+	QString attrib, value, oper, valid_op_chrs="=!<>fi", extra_error_msg;
+	QStringView curr_line;
 	bool error = false, end_eval = false, expr_is_true = true, to_xml_entity = false;
 	static QStringList opers = { TokenEqOper, TokenNeOper, TokenGtOper,
 															 TokenLtOper, TokenGtEqOper, TokenLtEqOper };
@@ -712,7 +724,7 @@ bool SchemaParser::evaluateComparisonExpr()
 
 	try
 	{
-		curr_line = buffer[line];
+		curr_line = std::as_const(buffer)[line];
 		column++;
 
 		while(!end_eval && !error)
@@ -850,7 +862,8 @@ bool SchemaParser::evaluateComparisonExpr()
 
 void SchemaParser::defineAttribute()
 {
-	QString curr_line = buffer[line], attrib, value, new_attrib;
+	QStringView curr_line = std::as_const(buffer)[line];
+	QString attrib, value, new_attrib;
 	bool error=false, end_def=false, use_val_as_name=false, to_xml_entity = false;
 	int curr_ln_idx = line;
 	QChar chr;
@@ -965,13 +978,14 @@ void SchemaParser::defineAttribute()
 
 void SchemaParser::unsetAttribute()
 {
-	QString curr_line, attrib;
+	QStringView curr_line;
+	QString attrib;
 	bool end_def=false, to_xml_entity = false;
 	QChar chr;
 
 	try
 	{
-		curr_line=buffer[line];
+		curr_line = std::as_const(buffer)[line];
 
 		while(!end_def)
 		{
@@ -1015,7 +1029,8 @@ void SchemaParser::unsetAttribute()
 }
 bool SchemaParser::evaluateExpression()
 {
-	QString current_line, cond, attrib, prev_cond;
+	QString cond, attrib, prev_cond;
+	QStringView current_line;
 	bool error = false, end_eval = false, expr_is_true = true,
 			attrib_true = true, comp_true = true, to_xml_entity = false;
 	unsigned attrib_count = 0, and_or_count = 0;
@@ -1023,7 +1038,7 @@ bool SchemaParser::evaluateExpression()
 
 	try
 	{
-		current_line = buffer[line];
+		current_line = std::as_const(buffer)[line];
 
 		while(!end_eval && !error)
 		{
@@ -1035,7 +1050,7 @@ bool SchemaParser::evaluateExpression()
 
 				if(line < buffer.size())
 				{
-					current_line = buffer[line];
+					current_line = std::as_const(buffer)[line];
 					column = 0;
 					ignoreBlankChars(current_line);
 				}
@@ -1156,7 +1171,7 @@ bool SchemaParser::evaluateExpression()
 	return expr_is_true;
 }
 
-void SchemaParser::ignoreBlankChars(const QString &line)
+void SchemaParser::ignoreBlankChars(QStringView line)
 {
 	while(column < line.size() &&
 				(line[column]==CharSpace ||
@@ -1298,7 +1313,7 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 
 		while(line < buffer.size())
 		{
-			chr = buffer[line][column];
+			chr = std::as_const(buffer)[line][column];
 
 			/* Increments the number of rows causing the parser
 			to get the next line buffer for analysis */
@@ -1310,7 +1325,7 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 			else if(chr == CharTabulation || chr == CharSpace)
 			{
 				//The parser will ignore the spaces that are not within pure texts
-				ignoreBlankChars(buffer[line]);
+				ignoreBlankChars(std::as_const(buffer)[line]);
 			}
 			//Metacharacter extraction
 			else if(chr == CharStartMetachar || chr == CharStartEscaped)
@@ -1459,7 +1474,7 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 					}
 					else
 					{
-						ignoreBlankChars(buffer[line]);
+						ignoreBlankChars(std::as_const(buffer)[line]);
 
 						/* When the %set instruction is ignored due to the fact of it being under a if expression evaluated as false
 						 * there's the need to create an empty representation of it in the set of attributes so in further expressions
