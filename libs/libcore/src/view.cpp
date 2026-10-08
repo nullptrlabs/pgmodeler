@@ -405,7 +405,7 @@ QString View::getSourceCode(SchemaParser::CodeType def_type)
 			attributes[Attributes::Columns] += col.getXmlCode();
 
 		setPositionAttribute();
-		setPositionAttribute(cutoff_pos, Attributes::CutoffPos, Attributes::Cutoff);
+		setPositionAttribute(rel_marker_pos, Attributes::RelMarkerPos, Attributes::RelMarker);
 		setFadedOutAttribute();
 		setSceneIndexAttribute();
 

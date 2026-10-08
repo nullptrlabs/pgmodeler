@@ -92,7 +92,7 @@ set(SOURCES
     src/widgets/csvloadwidget.cpp src/widgets/csvloadwidget.h
     src/widgets/customsqlwidget.cpp src/widgets/customsqlwidget.h
     src/widgets/customtablewidget.cpp src/widgets/customtablewidget.h
-    src/widgets/crossscenerelswidget.cpp src/widgets/crossscenerelswidget.h
+    src/widgets/tablerelswidget.cpp src/widgets/tablerelswidget.h
     src/widgets/debugoutputwidget.cpp src/widgets/debugoutputwidget.h
     src/widgets/donatewidget.cpp src/widgets/donatewidget.h
 		src/widgets/pathselectorwidget.cpp src/widgets/pathselectorwidget.h
@@ -209,6 +209,7 @@ set(FORMS
     ui/widgets/modelnavigationwidget.ui
     ui/widgets/sceneinfowidget.ui
     ui/widgets/welcomewidget.ui
+    ui/widgets/tablerelswidget.ui
 		ui/widgets/objectassociationswidget.ui)
 
 set(RESOURCES res/resources.qrc)

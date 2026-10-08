@@ -46,7 +46,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="public"/>
 	<role name="postgres"/>
 	<position x="121.429" y="712.857"/>
-	<position id="cutoff" x="0" y="0"/>
+	<position id="rel-marker" x="0" y="0"/>
 	<column name="id_a" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -65,7 +65,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="public"/>
 	<role name="postgres"/>
 	<position x="408.571" y="980"/>
-	<position id="cutoff" x="0" y="0"/>
+	<position id="rel-marker" x="0" y="0"/>
 	<column name="id_b" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -87,7 +87,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="schema_a"/>
 	<role name="postgres"/>
 	<position x="1580" y="1380"/>
-	<position id="cutoff" x="-17.7535" y="-10"/>
+	<position id="rel-marker" x="-17.7535" y="-10"/>
 	<column name="id_f" not-null="true">
 		<type name="bigserial" length="1"/>
 	</column>
@@ -100,7 +100,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="public"/>
 	<role name="postgres"/>
 	<position x="120" y="1240"/>
-	<position id="cutoff" x="0" y="0"/>
+	<position id="rel-marker" x="0" y="0"/>
 	<column name="id_c" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -122,14 +122,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="schema_a"/>
 	<role name="postgres"/>
 	<position x="1180" y="760"/>
-	<position id="cutoff" x="0" y="0"/>
+	<position id="rel-marker" x="0" y="0"/>
 </table>
 
 <table name="table_h" layers="0" scene="1" collapse-mode="2" max-obj-count="4" z-value="0">
 	<schema name="schema_a"/>
 	<role name="postgres"/>
 	<position x="1080" y="1240"/>
-	<position id="cutoff" x="0" y="0"/>
+	<position id="rel-marker" x="0" y="0"/>
 	<column name="id_h" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -152,7 +152,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<role name="postgres"/>
 	<tag name="red_tables"/>
 	<position x="120" y="380"/>
-	<position id="cutoff" x="0" y="0"/>
+	<position id="rel-marker" x="0" y="0"/>
 </table>
 
 <relationship name="table_a_has_many_table_d" type="rel1n" layers="0"
@@ -203,7 +203,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="schema_a"/>
 	<role name="postgres"/>
 	<position x="1641.43" y="1027.14"/>
-	<position id="cutoff" x="-230.211" y="-29.86"/>
+	<position id="rel-marker" x="-230.211" y="-29.86"/>
 </table>
 
 <relationship name="table_f_has_many_table_c" type="rel1n" layers="0"
@@ -254,7 +254,7 @@ END;]]> </definition>
 	<schema name="schema_b"/>
 	<role name="postgres"/>
 	<position x="1594.29" y="951.429"/>
-	<position id="cutoff" x="0" y="0"/>
+	<position id="rel-marker" x="0" y="0"/>
 	<reference object="public.table_a" type="table" ref-name="ta" ref-alias="_ta" use-signature="true" format-name="true" use-columns="true"/>
 	<reference object="schema_a.table_d" type="table" ref-name="td" ref-alias="_td" use-columns="true"/>
 	<simplecol name="expr" type="double precision"/>
@@ -352,7 +352,7 @@ mentioned tables, those objects weren't created by the user.]]> </comment>
 	<schema name="schema_a"/>
 	<role name="postgres"/>
 	<position x="1502.86" y="482.857"/>
-	<position id="cutoff" x="0" y="0"/>
+	<position id="rel-marker" x="0" y="0"/>
 	<reference object="public.table_b" type="table" ref-name="tb" ref-alias="_tb" use-signature="true" format-name="true" use-columns="true"/>
 	<reference object="schema_b.view_b" type="view" ref-name="va" ref-alias="_va" use-signature="true" format-name="true" use-columns="true"/>
 	<definition> <![CDATA[SELECT @{tb}.*, @{va}.* 

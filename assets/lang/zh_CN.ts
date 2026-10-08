@@ -1970,25 +1970,6 @@ PID：`%1&apos;
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
-    <message>
-        <source>Cross-scene relationships</source>
-        <translation>跨场景关系</translation>
-    </message>
-    <message>
-        <source>Relationship</source>
-        <translation>关系</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation>类型</translation>
-    </message>
-    <message>
-        <source>Related table</source>
-        <translation>相关表</translation>
-    </message>
-</context>
-<context>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
@@ -2261,13 +2242,6 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     <message>
         <source>Are you sure you want to remove all the items?</source>
         <translation>是否确实要移除所有项？</translation>
-    </message>
-</context>
-<context>
-    <name>CutoffItem</name>
-    <message>
-        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>跨场景关系：&lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -9905,6 +9879,10 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
         <translation>默认场景</translation>
     </message>
     <message>
+        <source>Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?</source>
+        <translation>更改关系的显示状态仅在保存并重新加载模型后生效。是否继续？</translation>
+    </message>
+    <message>
         <source>Don&apos;t ask to save and reload again.</source>
         <translation>不再询问是否保存并重新加载。</translation>
     </message>
@@ -9927,6 +9905,10 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Converting a &lt;strong&gt;one-to-one&lt;/strong&gt; or &lt;strong&gt;one-to-many&lt;/strong&gt; relationship can lead to unreversible changes or break other relationships in the linking chain! Do you want to proceed?</source>
         <translation>&lt;strong&gt;警告：&lt;/strong&gt;转换&lt;strong&gt;一对一&lt;/strong&gt;或&lt;strong&gt;一对多&lt;/strong&gt;关系可能导致不可逆的更改，或破坏链接链中的其他关系。是否继续？</translation>
+    </message>
+    <message>
+        <source>This model has &lt;strong&gt;%1&lt;/strong&gt; relationships. Drawing that many relationships makes the diagram hard to read and slow to handle. Load it hiding the relationships instead? Each table&apos;s relationship marker keeps listing them (double-click the marker to see the list).</source>
+        <translation>此模型包含 &lt;strong&gt;%1&lt;/strong&gt; 个关系。绘制如此多的关系会使图表难以阅读，操作也会变慢。是否改为隐藏关系后加载？每个表的关系标记仍会列出这些关系（双击标记即可查看列表）。</translation>
     </message>
     <message>
         <source>This model concentrates &lt;strong&gt;%1%&lt;/strong&gt; of its &lt;strong&gt;%2&lt;/strong&gt; tables/views/foreign tables in a single schema &lt;strong&gt;%3&lt;/strong&gt;. Segmenting the canvas by schema wouldn&apos;t distribute much of that load into separate scenes. Load it with threshold-based segmentation instead?</source>
@@ -12543,6 +12525,17 @@ available in GUI. All available options are described below.</source>
     </message>
 </context>
 <context>
+    <name>RelMarkerItem</name>
+    <message>
+        <source>Relationships: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>关系：&lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>跨场景关系：&lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -13514,6 +13507,10 @@ available in GUI. All available options are described below.</source>
         <translation>表单</translation>
     </message>
     <message>
+        <source>&lt;p&gt;Toggles the visibility of the relationships between tables of the same scene. When they are not visible, they are represented by the relationship marker of each table, whose details are shown by double-clicking it. Hiding the relationships is intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;切换同一场景中各表之间关系的可见性。不可见时，这些关系由每个表的关系标记表示，双击标记可查看详细信息。隐藏关系适用于大型模型，因为在大型模型中绘制的关系会失去意义。&lt;/p&gt;&lt;p&gt;&lt;strong&gt;注意：&lt;/strong&gt;此更改仅在保存并重新加载模型后生效。&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Currently selected object(s)</source>
         <translation>当前选中的对象</translation>
     </message>
@@ -13536,6 +13533,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;分段阈值。在创建新场景并将新对象分配到该场景之前所创建的表、视图或外部表的数量。&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;隐藏同一场景中各表之间的关系。这些关系由每个表的关系标记表示，双击标记可查看详细信息。适用于大型模型，因为在大型模型中绘制的关系会失去意义。&lt;/p&gt;&lt;p&gt;&lt;strong&gt;注意：&lt;/strong&gt;此更改仅在保存并重新加载模型后生效。&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14406,6 +14407,45 @@ available in GUI. All available options are described below.</source>
 %3 Type: %4</source>
         <translation>`%1&apos; (%2)
 %3 类型：%4</translation>
+    </message>
+</context>
+<context>
+    <name>TableRelsWidget</name>
+    <message>
+        <source>Cross-scene relationships</source>
+        <translation type="vanished">跨场景关系</translation>
+    </message>
+    <message>
+        <source>Table relationships</source>
+        <translation>表的关系</translation>
+    </message>
+    <message>
+        <source>Table:</source>
+        <translation>表：</translation>
+    </message>
+    <message>
+        <source>Relationships</source>
+        <translation>关系</translation>
+    </message>
+    <message>
+        <source>Cross rels.</source>
+        <translation>跨场景关系</translation>
+    </message>
+    <message>
+        <source>Relationship</source>
+        <translation>关系</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>类型</translation>
+    </message>
+    <message>
+        <source>Related table</source>
+        <translation>相关表</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>%1 的关系</translation>
     </message>
 </context>
 <context>

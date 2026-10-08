@@ -34,7 +34,7 @@ BaseTableView::BaseTableView(BaseTable *base_tab) : BaseObjectView(base_tab)
 		throw Exception(ErrorCode::AsgNotAllocattedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	pending_geom_update = false;
-	cutoff_item = nullptr;
+	rel_marker_item = nullptr;
 	body=new RoundedRectItem;
 	body->setRoundedCorners(RoundedRectItem::BottomLeftCorner | RoundedRectItem::BottomRightCorner);
 
@@ -104,7 +104,7 @@ BaseTableView::~BaseTableView()
 	delete title;
 	delete columns;
 	delete tag_item;
-	delete cutoff_item;
+	delete rel_marker_item;
 }
 
 void BaseTableView::setHideExtAttributes(bool value)
@@ -322,7 +322,7 @@ void BaseTableView::removeConnectedRelationship(BaseRelationship *base_rel)
 	connected_rels.erase(std::find(connected_rels.begin(), connected_rels.end(), base_rel));
 }
 
-void BaseTableView::addExternalRelationship(BaseRelationship *base_rel)
+void BaseTableView::addMarkedRelationship(BaseRelationship *base_rel, bool hidden)
 {
 	BaseTable *tab = dynamic_cast<BaseTable *>(getUnderlyingObject());
 
@@ -332,35 +332,42 @@ void BaseTableView::addExternalRelationship(BaseRelationship *base_rel)
 			base_rel->getTable(BaseRelationship::DstTable) != tab))
 		return;
 
-	external_rels.append(base_rel);
+	QList<BaseRelationship *> &rels = hidden ? hidden_rels : external_rels;
 
-	if(!cutoff_item)
+	// A self-relationship is routed once per side, both landing on this same view
+	if(rels.contains(base_rel))
+		return;
+
+	rels.append(base_rel);
+
+	if(!rel_marker_item)
 	{
-		cutoff_item = new CutoffItem(this);
+		rel_marker_item = new RelMarkerItem(this);
 
 		if(this->scene())
-			this->scene()->addItem(cutoff_item);
+			this->scene()->addItem(rel_marker_item);
 	}
 
-	cutoff_item->addRelationship(base_rel);
+	rel_marker_item->addRelationship(base_rel, hidden);
 }
 
-void BaseTableView::removeExternalRelationship(BaseRelationship *base_rel)
+void BaseTableView::removeMarkedRelationship(BaseRelationship *base_rel)
 {
 	external_rels.removeOne(base_rel);
+	hidden_rels.removeOne(base_rel);
 
-	if(cutoff_item)
+	if(rel_marker_item)
 	{
-		cutoff_item->removeRelationship(base_rel);
+		rel_marker_item->removeRelationship(base_rel);
 
-		if(cutoff_item->getRelationshipsCount() == 0)
+		if(rel_marker_item->isEmpty())
 		{
-			delete cutoff_item;
-			cutoff_item = nullptr;
+			delete rel_marker_item;
+			rel_marker_item = nullptr;
 
-			/* Discarding any custom position: if a new cutoff marker is created later for
+			/* Discarding any custom position: if a new relationship marker is created later for
 			 * this table, it starts back at the default anchor instead of an old offset */
-			dynamic_cast<BaseTable *>(getUnderlyingObject())->resetCutoffPosition();
+			dynamic_cast<BaseTable *>(getUnderlyingObject())->resetRelMarkerPosition();
 		}
 	}
 }
@@ -558,7 +565,17 @@ QList<BaseRelationship *> BaseTableView::getExternalRelationships()
 	return external_rels;
 }
 
-QPointF BaseTableView::getCutoffAnchorPoint()
+int BaseTableView::getHiddenRelsCount()
+{
+	return hidden_rels.size();
+}
+
+QList<BaseRelationship *> BaseTableView::getHiddenRelationships()
+{
+	return hidden_rels;
+}
+
+QPointF BaseTableView::getRelMarkerAnchorPoint()
 {
 	return this->mapToScene(QPointF(title->pos().x() + title->boundingRect().width(),
 																	 title->pos().y() + (title->boundingRect().height() / 2)));
@@ -693,9 +710,9 @@ void BaseTableView::configureCurrentPage(BaseTable::TableSection section_id, uns
 	emit s_currentPageChanged();
 }
 
-CutoffItem *BaseTableView::getCutoffItem()
+RelMarkerItem *BaseTableView::getRelMarkerItem()
 {
-	return cutoff_item;
+	return rel_marker_item;
 }
 
 void BaseTableView::selectRelationships()

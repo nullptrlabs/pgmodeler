@@ -21,12 +21,13 @@
 
 /**
 \ingroup libcanvas
-\class CutoffItem
-\brief Marks a table as having relationships whose other end lives in a different scene
+\class RelMarkerItem
+\brief Marks a table as having relationships that are not drawn: those whose other end lives in a
+different scene (cross-scene) and, when the model hides its relationships, those between tables of the same scene
 */
 
-#ifndef CUTOFF_ITEM_H
-#define CUTOFF_ITEM_H
+#ifndef REL_MARKER_ITEM_H
+#define REL_MARKER_ITEM_H
 
 #include "canvasglobal.h"
 #include "baserelationship.h"
@@ -38,7 +39,7 @@
 
 class BaseTableView;
 
-class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
+class __libcanvas RelMarkerItem: public QObject, public QGraphicsItemGroup {
 	Q_OBJECT
 
 	private:
@@ -51,6 +52,12 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 
 		//! \brief Relationships whose other table lives in a different scene than table
 		QList<BaseRelationship *> rels;
+
+		//! \brief Relationships whose other table lives in the same scene as table, not drawn due to the model's hide relationships option
+		QList<BaseRelationship *> hidden_rels;
+
+		//! \brief True while a deferred updateLabel() is queued, so a burst of additions/removals refreshes the label only once
+		bool label_update_pending = false;
 
 		QGraphicsLineItem *line;
 
@@ -66,15 +73,18 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 		/*! \brief True while updatePosition() is repositioning this item on its own (construction,
 		 * or the table moving/resizing) -- itemChange(ItemPositionHasChanged) checks this to tell
 		 * that kind of move apart from an actual user drag, so it only ever persists a new
-		 * cutoff_pos in response to the latter. Without this, restoring a saved position (itself
+		 * rel_marker_pos in response to the latter. Without this, restoring a saved position (itself
 		 * done via setPos(), which re-enters itemChange() like any other move) could get clamped
 		 * against transient table geometry -- not yet settled this early in a model load -- and
 		 * that transient, over-clamped position would silently overwrite the correct one that was
 		 * actually saved */
 		bool restoring_position = false;
 
-		//! \brief Refreshes the label text/size to reflect the current relationship count
+		//! \brief Refreshes the label text/size to reflect the current relationship counts
 		void updateLabel();
+
+		//! \brief Queues a single updateLabel() call to run once control returns to the event loop
+		void scheduleLabelUpdate();
 
 		/*! \brief Repositions the label box along the direction from the table's rect to this
 		 * item's current pos(), so the box always extends away from the table regardless of
@@ -113,18 +123,27 @@ class __libcanvas CutoffItem: public QObject, public QGraphicsItemGroup {
 		QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
 	public:
-		CutoffItem(BaseTableView *table);
+		RelMarkerItem(BaseTableView *table);
 
 		//! \brief Returns the table this marker is attached to
 		BaseTable *getTable();
 
-		void addRelationship(BaseRelationship *rel);
+		//! \brief Registers a relationship as hidden (same scene) or cross-scene. Ignores relationships already registered
+		void addRelationship(BaseRelationship *rel, bool hidden = false);
 
+		//! \brief Unregisters a relationship, whichever kind it was registered as
 		void removeRelationship(BaseRelationship *rel);
 
-		int getRelationshipsCount();
+		//! \brief Returns true when there is no relationship of any kind registered
+		bool isEmpty();
 
-		QList<BaseRelationship *> getRelationships();
+		int getCrossRelsCount();
+
+		int getHiddenRelsCount();
+
+		QList<BaseRelationship *> getCrossRelationships();
+
+		QList<BaseRelationship *> getHiddenRelationships();
 
 		void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 

@@ -1970,25 +1970,6 @@ Kodning: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
-    <message>
-        <source>Cross-scene relationships</source>
-        <translation>Relationer mellan scener</translation>
-    </message>
-    <message>
-        <source>Relationship</source>
-        <translation>Relation</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation>Typ</translation>
-    </message>
-    <message>
-        <source>Related table</source>
-        <translation>Relaterad tabell</translation>
-    </message>
-</context>
-<context>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
@@ -2261,13 +2242,6 @@ Om alternativet är avmarkerat läggs SQL till i slutet av kommandot CREATE DATA
     <message>
         <source>Are you sure you want to remove all the items?</source>
         <translation>Vill du verkligen ta bort alla objekt?</translation>
-    </message>
-</context>
-<context>
-    <name>CutoffItem</name>
-    <message>
-        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>Relationer mellan scener: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -9905,6 +9879,10 @@ Den begärda storleken %1 x %2 var för stor och det fanns inte tillräckligt me
         <translation>Standardscen</translation>
     </message>
     <message>
+        <source>Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?</source>
+        <translation>Ändringen av relationernas synlighet börjar gälla först när modellen har sparats och lästs in på nytt. Vill du fortsätta?</translation>
+    </message>
+    <message>
         <source>Don&apos;t ask to save and reload again.</source>
         <translation>Fråga inte igen om att spara och läsa in på nytt.</translation>
     </message>
@@ -9927,6 +9905,10 @@ Den begärda storleken %1 x %2 var för stor och det fanns inte tillräckligt me
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Converting a &lt;strong&gt;one-to-one&lt;/strong&gt; or &lt;strong&gt;one-to-many&lt;/strong&gt; relationship can lead to unreversible changes or break other relationships in the linking chain! Do you want to proceed?</source>
         <translation>&lt;strong&gt;VARNING:&lt;/strong&gt; Konvertering av en &lt;strong&gt;en-till-en&lt;/strong&gt;- eller &lt;strong&gt;en-till-många&lt;/strong&gt;-relation kan leda till oåterkalleliga ändringar eller förstöra andra relationer i länkkedjan. Vill du fortsätta?</translation>
+    </message>
+    <message>
+        <source>This model has &lt;strong&gt;%1&lt;/strong&gt; relationships. Drawing that many relationships makes the diagram hard to read and slow to handle. Load it hiding the relationships instead? Each table&apos;s relationship marker keeps listing them (double-click the marker to see the list).</source>
+        <translation>Den här modellen innehåller &lt;strong&gt;%1&lt;/strong&gt; relationer. Att rita så många relationer gör diagrammet svårläst och långsamt att arbeta med. Vill du läsa in den med dolda relationer? Varje tabells relationsmarkör listar dem fortfarande (dubbelklicka på markören för att visa listan).</translation>
     </message>
     <message>
         <source>This model concentrates &lt;strong&gt;%1%&lt;/strong&gt; of its &lt;strong&gt;%2&lt;/strong&gt; tables/views/foreign tables in a single schema &lt;strong&gt;%3&lt;/strong&gt;. Segmenting the canvas by schema wouldn&apos;t distribute much of that load into separate scenes. Load it with threshold-based segmentation instead?</source>
@@ -12543,6 +12525,17 @@ som finns i det grafiska användargränssnittet. Alla tillgängliga alternativ b
     </message>
 </context>
 <context>
+    <name>RelMarkerItem</name>
+    <message>
+        <source>Relationships: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Relationer: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Relationer mellan scener: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -13514,6 +13507,10 @@ som finns i det grafiska användargränssnittet. Alla tillgängliga alternativ b
         <translation>Formulär</translation>
     </message>
     <message>
+        <source>&lt;p&gt;Toggles the visibility of the relationships between tables of the same scene. When they are not visible, they are represented by the relationship marker of each table, whose details are shown by double-clicking it. Hiding the relationships is intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Växlar synligheten för relationerna mellan tabeller i samma scen. När de inte är synliga representeras de av varje tabells relationsmarkör, vars detaljer visas genom att dubbelklicka på den. Att dölja relationerna är avsett för stora modeller, där de ritade relationerna förlorar sitt syfte.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;OBS!&lt;/strong&gt; Ändringen börjar gälla först när modellen har sparats och lästs in på nytt.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Currently selected object(s)</source>
         <translation>Objekt som är markerade just nu</translation>
     </message>
@@ -13536,6 +13533,10 @@ som finns i det grafiska användargränssnittet. Alla tillgängliga alternativ b
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Segmenteringströskel. Antalet tabeller, vyer eller externa tabeller som skapas innan en ny scen skapas och nya objekt dirigeras dit.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;Döljer relationerna mellan tabeller i samma scen. De representeras av varje tabells relationsmarkör, vars detaljer visas genom att dubbelklicka på den. Avsedd för stora modeller, där de ritade relationerna förlorar sitt syfte.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;OBS!&lt;/strong&gt; Ändringen börjar gälla först när modellen har sparats och lästs in på nytt.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14406,6 +14407,45 @@ som finns i det grafiska användargränssnittet. Alla tillgängliga alternativ b
 %3 Type: %4</source>
         <translation>`%1&apos; (%2)
 %3 Typ: %4</translation>
+    </message>
+</context>
+<context>
+    <name>TableRelsWidget</name>
+    <message>
+        <source>Cross-scene relationships</source>
+        <translation type="vanished">Relationer mellan scener</translation>
+    </message>
+    <message>
+        <source>Table relationships</source>
+        <translation>Tabellens relationer</translation>
+    </message>
+    <message>
+        <source>Table:</source>
+        <translation>Tabell:</translation>
+    </message>
+    <message>
+        <source>Relationships</source>
+        <translation>Relationer</translation>
+    </message>
+    <message>
+        <source>Cross rels.</source>
+        <translation>Relationer mellan scener</translation>
+    </message>
+    <message>
+        <source>Relationship</source>
+        <translation>Relation</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Typ</translation>
+    </message>
+    <message>
+        <source>Related table</source>
+        <translation>Relaterad tabell</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Relationer för %1</translation>
     </message>
 </context>
 <context>

@@ -1676,6 +1676,10 @@ void PgModelerCliApp::restoreModelAttributes(const QString &dbm_tag)
 
 	input_model->setShowSysSchemasRects(getTagAttribute(dbm_tag, Attributes::ShowSysSchemasRects) == Attributes::True);
 
+	bool hide_rels = (getTagAttribute(dbm_tag, Attributes::HideRels) == Attributes::True);
+	input_model->setHideRelationships(hide_rels);
+	input_model->setSavedHideRelationships(hide_rels);
+
 	if(last_pos.size() >= 2)
 		input_model->setLastPosition(QPoint(last_pos[0].toInt(), last_pos[1].toInt()));
 

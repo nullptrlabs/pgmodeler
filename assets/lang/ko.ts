@@ -1970,25 +1970,6 @@ PID: `%1&apos;
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
-    <message>
-        <source>Cross-scene relationships</source>
-        <translation>장면 간 관계</translation>
-    </message>
-    <message>
-        <source>Relationship</source>
-        <translation>관계</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation>타입</translation>
-    </message>
-    <message>
-        <source>Related table</source>
-        <translation>관련 테이블</translation>
-    </message>
-</context>
-<context>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
@@ -2261,13 +2242,6 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     <message>
         <source>Are you sure you want to remove all the items?</source>
         <translation>모든 항목을 제거하시겠습니까?</translation>
-    </message>
-</context>
-<context>
-    <name>CutoffItem</name>
-    <message>
-        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>장면 간 관계: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -9905,6 +9879,10 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
         <translation>기본 장면</translation>
     </message>
     <message>
+        <source>Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?</source>
+        <translation>관계 표시 여부 변경은 모델을 저장하고 다시 불러온 후에만 적용됩니다. 계속하시겠습니까?</translation>
+    </message>
+    <message>
         <source>Don&apos;t ask to save and reload again.</source>
         <translation>저장 및 다시 불러오기 여부를 다시 묻지 않습니다.</translation>
     </message>
@@ -9927,6 +9905,10 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Converting a &lt;strong&gt;one-to-one&lt;/strong&gt; or &lt;strong&gt;one-to-many&lt;/strong&gt; relationship can lead to unreversible changes or break other relationships in the linking chain! Do you want to proceed?</source>
         <translation>&lt;strong&gt;경고:&lt;/strong&gt; &lt;strong&gt;일대일&lt;/strong&gt; 또는 &lt;strong&gt;일대다&lt;/strong&gt; 관계를 변환하면 되돌릴 수 없는 변경이 발생하거나 연결 체인의 다른 관계가 손상될 수 있습니다. 계속하시겠습니까?</translation>
+    </message>
+    <message>
+        <source>This model has &lt;strong&gt;%1&lt;/strong&gt; relationships. Drawing that many relationships makes the diagram hard to read and slow to handle. Load it hiding the relationships instead? Each table&apos;s relationship marker keeps listing them (double-click the marker to see the list).</source>
+        <translation>이 모델에는 관계가 &lt;strong&gt;%1&lt;/strong&gt;개 있습니다. 이렇게 많은 관계를 그리면 다이어그램을 읽기 어렵고 처리 속도도 느려집니다. 관계를 숨긴 상태로 불러오시겠습니까? 각 테이블의 관계 마커에서 계속 관계를 확인할 수 있습니다(마커를 두 번 클릭하면 목록이 표시됩니다).</translation>
     </message>
     <message>
         <source>This model concentrates &lt;strong&gt;%1%&lt;/strong&gt; of its &lt;strong&gt;%2&lt;/strong&gt; tables/views/foreign tables in a single schema &lt;strong&gt;%3&lt;/strong&gt;. Segmenting the canvas by schema wouldn&apos;t distribute much of that load into separate scenes. Load it with threshold-based segmentation instead?</source>
@@ -12543,6 +12525,17 @@ available in GUI. All available options are described below.</source>
     </message>
 </context>
 <context>
+    <name>RelMarkerItem</name>
+    <message>
+        <source>Relationships: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>관계: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>장면 간 관계: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -13514,6 +13507,10 @@ available in GUI. All available options are described below.</source>
         <translation>양식</translation>
     </message>
     <message>
+        <source>&lt;p&gt;Toggles the visibility of the relationships between tables of the same scene. When they are not visible, they are represented by the relationship marker of each table, whose details are shown by double-clicking it. Hiding the relationships is intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;같은 장면에 있는 테이블 간 관계의 표시 여부를 전환합니다. 표시되지 않을 때 관계는 각 테이블의 관계 마커로 표현되며, 마커를 두 번 클릭하면 자세한 내용이 표시됩니다. 관계 숨기기는 그려진 관계가 의미를 잃는 대규모 모델에 적합합니다.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;참고:&lt;/strong&gt; 변경 사항은 모델을 저장하고 다시 불러온 후에만 적용됩니다.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Currently selected object(s)</source>
         <translation>현재 선택된 객체</translation>
     </message>
@@ -13536,6 +13533,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;분할 임계값. 새 장면이 생성되고 새 객체가 그 장면으로 배치되기 전까지 생성되는 테이블, 뷰, 외부 테이블의 수입니다.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;같은 장면에 있는 테이블 간의 관계를 숨깁니다. 관계는 각 테이블의 관계 마커로 표현되며, 마커를 두 번 클릭하면 자세한 내용이 표시됩니다. 그려진 관계가 의미를 잃는 대규모 모델에 적합합니다.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;참고:&lt;/strong&gt; 변경 사항은 모델을 저장하고 다시 불러온 후에만 적용됩니다.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14406,6 +14407,45 @@ available in GUI. All available options are described below.</source>
 %3 Type: %4</source>
         <translation>`%1&apos; (%2)
 %3 유형: %4</translation>
+    </message>
+</context>
+<context>
+    <name>TableRelsWidget</name>
+    <message>
+        <source>Cross-scene relationships</source>
+        <translation type="vanished">장면 간 관계</translation>
+    </message>
+    <message>
+        <source>Table relationships</source>
+        <translation>테이블 관계</translation>
+    </message>
+    <message>
+        <source>Table:</source>
+        <translation>테이블:</translation>
+    </message>
+    <message>
+        <source>Relationships</source>
+        <translation>관계</translation>
+    </message>
+    <message>
+        <source>Cross rels.</source>
+        <translation>장면 간 관계</translation>
+    </message>
+    <message>
+        <source>Relationship</source>
+        <translation>관계</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>타입</translation>
+    </message>
+    <message>
+        <source>Related table</source>
+        <translation>관련 테이블</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>%1의 관계</translation>
     </message>
 </context>
 <context>

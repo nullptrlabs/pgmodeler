@@ -1970,25 +1970,6 @@ Kodējums: `%4&apos;</translation>
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
-    <message>
-        <source>Cross-scene relationships</source>
-        <translation>Attiecības starp ainām</translation>
-    </message>
-    <message>
-        <source>Relationship</source>
-        <translation>Attiecība</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation>Tips</translation>
-    </message>
-    <message>
-        <source>Related table</source>
-        <translation>Saistītā tabula</translation>
-    </message>
-</context>
-<context>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
@@ -2261,13 +2242,6 @@ Ja šī opcija ir noņemta, SQL tiks pievienots komandas CREATE DATABASE beigās
     <message>
         <source>Are you sure you want to remove all the items?</source>
         <translation>Vai tiešām vēlaties noņemt visus vienumus?</translation>
-    </message>
-</context>
-<context>
-    <name>CutoffItem</name>
-    <message>
-        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>Starpainu attiec.: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -9905,6 +9879,10 @@ Pieprasītais izmērs %1 x %2 bija pārāk liels, un nepietika atmiņas tā pie�
         <translation>Noklusējuma aina</translation>
     </message>
     <message>
+        <source>Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?</source>
+        <translation>Attiecību redzamības maiņa stājas spēkā tikai pēc modeļa saglabāšanas un atkārtotas ielādes. Vai vēlaties turpināt?</translation>
+    </message>
+    <message>
         <source>Don&apos;t ask to save and reload again.</source>
         <translation>Vairs nejautāt par saglabāšanu un atkārtotu ielādi.</translation>
     </message>
@@ -9927,6 +9905,10 @@ Pieprasītais izmērs %1 x %2 bija pārāk liels, un nepietika atmiņas tā pie�
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Converting a &lt;strong&gt;one-to-one&lt;/strong&gt; or &lt;strong&gt;one-to-many&lt;/strong&gt; relationship can lead to unreversible changes or break other relationships in the linking chain! Do you want to proceed?</source>
         <translation>&lt;strong&gt;BRĪDINĀJUMS:&lt;/strong&gt; &lt;strong&gt;viens pret vienu&lt;/strong&gt; vai &lt;strong&gt;viens pret daudziem&lt;/strong&gt; attiecību konvertēšana var izraisīt neatgriezeniskas izmaiņas vai sabojāt citas attiecības saistīšanas ķēdē! Vai vēlaties turpināt?</translation>
+    </message>
+    <message>
+        <source>This model has &lt;strong&gt;%1&lt;/strong&gt; relationships. Drawing that many relationships makes the diagram hard to read and slow to handle. Load it hiding the relationships instead? Each table&apos;s relationship marker keeps listing them (double-click the marker to see the list).</source>
+        <translation>Attiecību skaits šajā modelī: &lt;strong&gt;%1&lt;/strong&gt;. Tik daudzu attiecību zīmēšana apgrūtina diagrammas lasīšanu un palēnina darbu ar to. Vai vēlaties ielādēt modeli ar paslēptām attiecībām? Katras tabulas attiecību marķieris tās joprojām uzskaita (veiciet dubultklikšķi uz marķiera, lai skatītu sarakstu).</translation>
     </message>
     <message>
         <source>This model concentrates &lt;strong&gt;%1%&lt;/strong&gt; of its &lt;strong&gt;%2&lt;/strong&gt; tables/views/foreign tables in a single schema &lt;strong&gt;%3&lt;/strong&gt;. Segmenting the canvas by schema wouldn&apos;t distribute much of that load into separate scenes. Load it with threshold-based segmentation instead?</source>
@@ -12543,6 +12525,17 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
     </message>
 </context>
 <context>
+    <name>RelMarkerItem</name>
+    <message>
+        <source>Relationships: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Attiecības: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Starpainu attiec.: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -13514,6 +13507,10 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
         <translation>Veidlapa</translation>
     </message>
     <message>
+        <source>&lt;p&gt;Toggles the visibility of the relationships between tables of the same scene. When they are not visible, they are represented by the relationship marker of each table, whose details are shown by double-clicking it. Hiding the relationships is intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Pārslēdz attiecību redzamību starp vienas ainas tabulām. Kad attiecības nav redzamas, tās attēlo katras tabulas attiecību marķieris, kura informācija tiek rādīta ar dubultklikšķi. Attiecību paslēpšana paredzēta lieliem modeļiem, kuros uzzīmētās attiecības zaudē jēgu.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;PIEZĪME:&lt;/strong&gt; Izmaiņas stājas spēkā tikai pēc modeļa saglabāšanas un atkārtotas ielādes.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Currently selected object(s)</source>
         <translation>Pašlaik atlasītie objekti</translation>
     </message>
@@ -13536,6 +13533,10 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Segmentēšanas slieksnis. Izveidoto tabulu, skatu vai ārējo tabulu skaits, pirms tiek izveidota jauna aina un jaunie objekti tiek novirzīti uz to.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;Paslēpj attiecības starp vienas ainas tabulām. Tās attēlo katras tabulas attiecību marķieris, kura informācija tiek rādīta ar dubultklikšķi. Paredzēts lieliem modeļiem, kuros uzzīmētās attiecības zaudē jēgu.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;PIEZĪME:&lt;/strong&gt; Izmaiņas stājas spēkā tikai pēc modeļa saglabāšanas un atkārtotas ielādes.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14406,6 +14407,45 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
 %3 Type: %4</source>
         <translation>`%1&apos; (%2)
 %3 Tips: %4</translation>
+    </message>
+</context>
+<context>
+    <name>TableRelsWidget</name>
+    <message>
+        <source>Cross-scene relationships</source>
+        <translation type="vanished">Attiecības starp ainām</translation>
+    </message>
+    <message>
+        <source>Table relationships</source>
+        <translation>Tabulas attiecības</translation>
+    </message>
+    <message>
+        <source>Table:</source>
+        <translation>Tabula:</translation>
+    </message>
+    <message>
+        <source>Relationships</source>
+        <translation>Attiecības</translation>
+    </message>
+    <message>
+        <source>Cross rels.</source>
+        <translation>Starpainu attiec.</translation>
+    </message>
+    <message>
+        <source>Relationship</source>
+        <translation>Attiecība</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Tips</translation>
+    </message>
+    <message>
+        <source>Related table</source>
+        <translation>Saistītā tabula</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>Attiecības: %1</translation>
     </message>
 </context>
 <context>

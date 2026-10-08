@@ -51,6 +51,9 @@ class __libgui SceneInfoWidget: public QWidget, public Ui::SceneInfoWidget {
 		//! \brief Reflects mode/threshold on seg_modes_cmb/threshold_spb without emitting the selection signals
 		void updateSegmentationInfo(DatabaseModel::SegmentationMode mode, unsigned threshold);
 
+		//! \brief Reflects the hide relationships option on toggle_rels_tb (checked when the relationships are visible) without emitting s_hideRelationshipsToggled
+		void updateHideRelationships(bool value);
+
 	signals:
 		//! \brief Emitted when the user picks a different scene in scenes_cmb
 		void s_activeSceneSelected(int idx);
@@ -60,6 +63,9 @@ class __libgui SceneInfoWidget: public QWidget, public Ui::SceneInfoWidget {
 
 		//! \brief Emitted when the user commits a new value in threshold_spb
 		void s_thresholdSelected(unsigned value);
+
+		//! \brief Emitted when the user toggles toggle_rels_tb, carrying the new value of the hide relationships option
+		void s_hideRelationshipsToggled(bool value);
 
 	private slots:
 		void enableNavigationButtons();

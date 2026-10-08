@@ -30,6 +30,10 @@ $br $tb
 
 [ seg-threshold=] "{seg-threshold}"
 
+%if {hide-rels} %then
+	[ hide-rels=] "{hide-rels}"
+%end
+
 %if {seg-obj-count} %then
 	[ seg-obj-count=] "{seg-obj-count}"
 %end

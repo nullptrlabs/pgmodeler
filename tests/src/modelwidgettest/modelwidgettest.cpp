@@ -20,12 +20,15 @@
 */
 
 #include <QtTest/QtTest>
+#include <QTableWidget>
 #include <QTimer>
 #include <QGraphicsSceneMouseEvent>
 #include "modelwidget.h"
 #include "generalconfigwidget.h"
 #include "objectrenamewidget.h"
-#include "crossscenerelswidget.h"
+#include "tablerelswidget.h"
+#include "sceneinfowidget.h"
+#include "utilsns.h"
 #include "baseform.h"
 #include "databasemodel.h"
 #include "schema.h"
@@ -40,7 +43,7 @@
 #include "relationshipview.h"
 #include "textbox.h"
 #include "tableview.h"
-#include "cutoffitem.h"
+#include "relmarkeritem.h"
 #include "objectsscene.h"
 #include "operationlist.h"
 #include "basegraphicobject.h"
@@ -63,13 +66,13 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void differentSchemasGetDifferentScenes();
 		void discardingAndRecreatingRelationshipViewSurvivesModelClose();
 		void relocatingTablesTogetherPreservesTheirRelationship();
-		void relocatingTableIntoPartnersSceneClearsBothCutoffMarkers();
+		void relocatingTableIntoPartnersSceneClearsBothRelMarkerMarkers();
 		void undoRedoOfTablesMovedTogetherKeepsExactlyOneRelationshipView();
-		void undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedView();
+		void undoRedoOfTableWithTwoRelMarkerRelationshipsLeavesNoOrphanedView();
 		void thresholdModeOpensNewSceneAfterCrossingCount();
 		void thresholdModeSceneAssignmentSurvivesSaveAndReload();
 		void changingThresholdRebucketsScenesOnReload();
-		void thresholdModeCrossSceneRelationshipGetsCutoffMarkers();
+		void thresholdModeCrossSceneRelationshipGetsRelMarkerMarkers();
 		void thresholdModeDoesNotRebalanceEmptiedScenes();
 		void segmentedModesNeverCreateSchemaRectangles();
 		void pendingSegmentationChangesDoNotApplyUntilReload();
@@ -102,17 +105,26 @@ class ModelWidgetTest: public QObject, public PgModelerUnitTest {
 		void selectAllObjectsOfTypeSpansMultipleScenes();
 		void cancelingRelationshipCreationClearsLogicalSelectionToo();
 		void switchingSceneMidRelationshipLineToolCancelsIt();
-		void selectingACutoffClearsObjectSelectionAndOtherCutoffs();
-		void selectingARegularObjectClearsAnySelectedCutoff();
-		void cutoffMarkerCustomPositionSurvivesSaveAndReload();
+		void selectingARelMarkerClearsObjectSelectionAndOtherRelMarkers();
+		void selectingARegularObjectClearsAnySelectedRelMarker();
+		void relMarkerCustomPositionSurvivesSaveAndReload();
 		void loadModelCanBeCancelledMidLoad();
 		void taskProgressWidgetCancelButtonSurvivesShow();
 		void rearrangeAlgorithmsRespectSceneScopeInThresholdMode();
-		void doubleClickingACutoffEmitsItsTable();
+		void doubleClickingARelMarkerEmitsItsTable();
 		void closingModelWidgetDestroysItsDatabaseModel();
-		void cutoffRelationshipsWidgetListsAndRefreshesRelationships();
+		void tableRelsWidgetListsAndRefreshesRelationships();
 		void crossSceneRelsWidgetIgnoresStaleRelationship();
 		void crossSceneRelsWidgetSurvivesItsTableBeingRemoved();
+		void hiddenRelationshipsAreRoutedToTheRelMarker();
+		void selfRelationshipIsHiddenOnlyOnce();
+		void hiddenAndCrossSceneRelationshipsAreCountedSeparately();
+		void relocatingATableReclassifiesItsHiddenRelationships();
+		void hideRelationshipsOptionSurvivesSaveAndReload();
+		void forcingHideRelationshipsOnLoadOverridesTheFile();
+		void toggleRelsButtonIsCheckedWhileRelationshipsAreVisible();
+		void tableRelsWidgetSeparatesHiddenAndCrossRelationships();
+		void tableRelsWidgetKeepsTheRelationshipOfEachRowWhenSorted();
 		void duplicatingATableKeepsItsPastedChildrenOwnedByTheNewTable();
 		void duplicatingATableRegistersItsPastedChildrenOnTheOperationList();
 		void pastingTableChildrenOntoAnotherTableKeepsThem();
@@ -376,14 +388,14 @@ void ModelWidgetTest::relocatingTablesTogetherPreservesTheirRelationship()
 
 /*! \brief Regression test for a bug the user found manually: relocateObjectView() removed a
 relationship from the partner table's external list when it stopped being cross-scene, but never
-did the same on the *relocated* table's own old view -- its cut-off marker (a standalone
+did the same on the *relocated* table's own old view -- its relationship marker (a standalone
 QGraphicsItem added directly to the scene, not a Qt child of the table's item) was never a Qt child
 of anything removeObjectView() touched, so it stayed behind, still rendered in the table's old
 scene, for as long as that scene lived. Table A (schema A) and table B (schema B) start with a
-cross-scene relationship (external on both, a cut-off marker on each). Relocating table A into
-table B's scene turns the relationship into a real RelationshipView -- both cut-off markers must be
+cross-scene relationship (external on both, a relationship marker on each). Relocating table A into
+table B's scene turns the relationship into a real RelationshipView -- both relationship markers must be
 gone, and table A's old scene must have nothing left in it. */
-void ModelWidgetTest::relocatingTableIntoPartnersSceneClearsBothCutoffMarkers()
+void ModelWidgetTest::relocatingTableIntoPartnersSceneClearsBothRelMarkerMarkers()
 {
 	try
 	{
@@ -435,16 +447,16 @@ void ModelWidgetTest::relocatingTableIntoPartnersSceneClearsBothCutoffMarkers()
 		QVERIFY(scene_b != nullptr);
 		QVERIFY(scene_a != scene_b);
 
-		//Cross-scene at insertion time -- no RelationshipView, a cut-off marker on each table instead
+		//Cross-scene at insertion time -- no RelationshipView, a relationship marker on each table instead
 		QVERIFY(rel->getOverlyingObject() == nullptr);
 
 		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject()),
 									 *table_b_view = dynamic_cast<BaseTableView *>(table_b->getOverlyingObject());
 
-		QVERIFY(table_a_view->getCutoffItem() != nullptr);
-		QVERIFY(table_b_view->getCutoffItem() != nullptr);
-		QCOMPARE(table_a_view->getCutoffItem()->scene(), static_cast<QGraphicsScene *>(scene_a));
-		QCOMPARE(table_b_view->getCutoffItem()->scene(), static_cast<QGraphicsScene *>(scene_b));
+		QVERIFY(table_a_view->getRelMarkerItem() != nullptr);
+		QVERIFY(table_b_view->getRelMarkerItem() != nullptr);
+		QCOMPARE(table_a_view->getRelMarkerItem()->scene(), static_cast<QGraphicsScene *>(scene_a));
+		QCOMPARE(table_b_view->getRelMarkerItem()->scene(), static_cast<QGraphicsScene *>(scene_b));
 
 		model_wgt.relocateObjectView(table_a, scene_b);
 
@@ -455,18 +467,18 @@ void ModelWidgetTest::relocatingTableIntoPartnersSceneClearsBothCutoffMarkers()
 
 		table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
 
-		QVERIFY2(table_a_view->getCutoffItem() == nullptr, "table_a's new view still has a cut-off marker");
-		QVERIFY2(table_b_view->getCutoffItem() == nullptr, "table_b's cut-off marker was left behind");
+		QVERIFY2(table_a_view->getRelMarkerItem() == nullptr, "table_a's new view still has a relationship marker");
+		QVERIFY2(table_b_view->getRelMarkerItem() == nullptr, "table_b's relationship marker was left behind");
 
 		//scene_a still legitimately has schema_a's own SchemaView (this test never reassigns table_a's
 		//model-level schema) plus the usual scene infrastructure (rel_line, selection_rect...) -- what
-		//must NOT be there anymore is the orphaned CutoffItem
-		bool cutoff_left_in_old_scene = false;
+		//must NOT be there anymore is the orphaned RelMarkerItem
+		bool rel_marker_left_in_old_scene = false;
 
 		for(auto &item : scene_a->items())
-			cutoff_left_in_old_scene |= (dynamic_cast<CutoffItem *>(item) != nullptr);
+			rel_marker_left_in_old_scene |= (dynamic_cast<RelMarkerItem *>(item) != nullptr);
 
-		QVERIFY2(!cutoff_left_in_old_scene, "table_a's old scene still has the orphaned cut-off marker in it");
+		QVERIFY2(!rel_marker_left_in_old_scene, "table_a's old scene still has the orphaned relationship marker in it");
 	}
 	catch(Exception &e)
 	{
@@ -593,7 +605,7 @@ void ModelWidgetTest::undoRedoOfTablesMovedTogetherKeepsExactlyOneRelationshipVi
 }
 
 /*! \brief Regression test reproducing the user's exact manual repro for the leak in the attached ASan
-report: pick a table in schema "public" that has a cut-off marker representing two cross-scene
+report: pick a table in schema "public" that has a relationship marker representing two cross-scene
 relationships (both partners already living together in one other schema), move it there (both
 relationships become real RelationshipViews), undo (table back in public, both relationships demoted
 back to cut-off), then redo -- this last step is not something the user explicitly narrated doing,
@@ -602,7 +614,7 @@ here to match the proven repro rather than the literal narration. Unlike
 undoRedoOfTablesMovedTogetherKeepsExactlyOneRelationshipView() above, only the ONE table is
 registered/moved (matching moveToSchema() selecting a single table, not two chained together), and
 both of its relationships are cut-off (external) rather than one real one external. */
-void ModelWidgetTest::undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedView()
+void ModelWidgetTest::undoRedoOfTableWithTwoRelMarkerRelationshipsLeavesNoOrphanedView()
 {
 	try
 	{
@@ -663,13 +675,13 @@ void ModelWidgetTest::undoRedoOfTableWithTwoCutoffRelationshipsLeavesNoOrphanedV
 		QVERIFY(scene_dest != nullptr);
 		QVERIFY(scene_pub != scene_dest);
 
-		//Both cross-scene at insertion -- table_a's cut-off marker represents the two of them
+		//Both cross-scene at insertion -- table_a's relationship marker represents the two of them
 		QVERIFY(rel_ab->getOverlyingObject() == nullptr);
 		QVERIFY(rel_ac->getOverlyingObject() == nullptr);
 
 		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
 		QCOMPARE(table_a_view->getExternalRelsCount(), 2);
-		QVERIFY(table_a_view->getCutoffItem() != nullptr);
+		QVERIFY(table_a_view->getRelMarkerItem() != nullptr);
 
 		//Same call moveToSchema() makes for the single selected object
 		op_list->registerObject(table_a, Operation::ObjModified, -1);
@@ -949,8 +961,8 @@ void ModelWidgetTest::changingThresholdRebucketsScenesOnReload()
 
 /*! \brief A relationship between two tables that end up in different scenes purely because of
 threshold routing must behave exactly like a cross-scene relationship in schema-segmentation mode:
-no RelationshipView gets created, and each table draws its own cut-off marker instead. */
-void ModelWidgetTest::thresholdModeCrossSceneRelationshipGetsCutoffMarkers()
+no RelationshipView gets created, and each table draws its own relationship marker instead. */
+void ModelWidgetTest::thresholdModeCrossSceneRelationshipGetsRelMarkerMarkers()
 {
 	try
 	{
@@ -1009,10 +1021,10 @@ void ModelWidgetTest::thresholdModeCrossSceneRelationshipGetsCutoffMarkers()
 		QCOMPARE(table_a_view->getExternalRelsCount(), 1);
 		QCOMPARE(table_b_view->getExternalRelsCount(), 1);
 
-		QVERIFY(table_a_view->getCutoffItem() != nullptr);
-		QVERIFY(table_b_view->getCutoffItem() != nullptr);
-		QCOMPARE(table_a_view->getCutoffItem()->getRelationshipsCount(), 1);
-		QCOMPARE(table_b_view->getCutoffItem()->getRelationshipsCount(), 1);
+		QVERIFY(table_a_view->getRelMarkerItem() != nullptr);
+		QVERIFY(table_b_view->getRelMarkerItem() != nullptr);
+		QCOMPARE(table_a_view->getRelMarkerItem()->getCrossRelsCount(), 1);
+		QCOMPARE(table_b_view->getRelMarkerItem()->getCrossRelsCount(), 1);
 	}
 	catch(Exception &e)
 	{
@@ -1858,7 +1870,7 @@ void ModelWidgetTest::pgCatalogNeverNamesTheSceneOutsideOfSchemaSegmentation()
 
 /*! \brief Fase 4, subtarefa 4.1 -- dedicated regression test for cascade schema removal, covering
 the three points flagged in the plan's risk section together: a schema with cross-scene children
-(a relationship whose partner lives in another scene, so it's a cut-off marker rather than a real
+(a relationship whose partner lives in another scene, so it's a relationship marker rather than a real
 RelationshipView), removing the schema whose scene is the currently focused one (so
 ModelWidget::removeScene() has to switch the viewport away before the scene is destroyed), and a
 full undo of the whole cascade chain. Cascade removal itself is driven directly against
@@ -1908,7 +1920,7 @@ void ModelWidgetTest::cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroy
 		db_model->addTable(table_doomed);
 
 		//Cross-scene child of schema_doomed: table_pub stays in the public scene, so this relationship
-		//never gets a RelationshipView, only cut-off markers on both partners. table_pub is the "1"
+		//never gets a RelationshipView, only relationship markers on both partners. table_pub is the "1"
 		//side (it's the one with a primary key), table_doomed the "n" side.
 		Relationship *rel = new Relationship(BaseRelationship::Relationship1n, table_pub, table_doomed);
 		db_model->addRelationship(rel);
@@ -1927,7 +1939,7 @@ void ModelWidgetTest::cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroy
 
 		BaseTableView *table_pub_view = dynamic_cast<BaseTableView *>(table_pub->getOverlyingObject());
 		QCOMPARE(table_pub_view->getExternalRelsCount(), 1);
-		QVERIFY(table_pub_view->getCutoffItem() != nullptr);
+		QVERIFY(table_pub_view->getRelMarkerItem() != nullptr);
 
 		//Focus the scene about to be destroyed -- removeScene() must reroute the viewport away from it
 		int scene_doomed_idx = model_wgt.getScenes().indexOf(scene_doomed);
@@ -1959,9 +1971,9 @@ void ModelWidgetTest::cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroy
 		QVERIFY(!model_wgt.getScenes().contains(scene_doomed));
 		QCOMPARE(model_wgt.getScenes().at(model_wgt.getActiveSceneIndex()), scene_pub);
 
-		//The cut-off marker on table_pub must be gone too, since its only external relationship was removed
+		//The relationship marker on table_pub must be gone too, since its only external relationship was removed
 		QCOMPARE(table_pub_view->getExternalRelsCount(), 0);
-		QVERIFY(table_pub_view->getCutoffItem() == nullptr);
+		QVERIFY(table_pub_view->getRelMarkerItem() == nullptr);
 
 		//Undo the whole cascade chain in one call -- schema, then table, then relationship, in that order
 		op_list->undoOperation();
@@ -1978,10 +1990,10 @@ void ModelWidgetTest::cascadeRemovalOfFocusedSchemaWithCrossSceneChildrenDestroy
 		QVERIFY2(restored_scene != nullptr, "schema_doomed's scene must be recreated by undo, routed through the same handleObjectAddition() choke point as any other insertion");
 		QCOMPARE(model_wgt.getSceneForObject(restored_table), restored_scene);
 
-		//The relationship is back too, and still cross-scene -- back to a cut-off marker, not a real RelationshipView
-		QVERIFY2(rel->getOverlyingObject() == nullptr, "relationship must be back as a cut-off marker after undo, not a real RelationshipView");
+		//The relationship is back too, and still cross-scene -- back to a relationship marker, not a real RelationshipView
+		QVERIFY2(rel->getOverlyingObject() == nullptr, "relationship must be back as a relationship marker after undo, not a real RelationshipView");
 		QCOMPARE(table_pub_view->getExternalRelsCount(), 1);
-		QVERIFY(table_pub_view->getCutoffItem() != nullptr);
+		QVERIFY(table_pub_view->getRelMarkerItem() != nullptr);
 	}
 	catch(Exception &e)
 	{
@@ -3035,10 +3047,10 @@ void ModelWidgetTest::switchingSceneMidRelationshipLineToolCancelsIt()
 	}
 }
 
-/*! \brief User-requested invariant: a cutoff marker's selection must be exclusive -- selecting one
-must clear any regular object selection, and only one cutoff may be selected at a time (no mixed
-selection of tables/relationships/cutoffs). Covers CutoffItem::itemChange()'s side of the rule. */
-void ModelWidgetTest::selectingACutoffClearsObjectSelectionAndOtherCutoffs()
+/*! \brief User-requested invariant: a relationship marker's selection must be exclusive -- selecting one
+must clear any regular object selection, and only one rel_marker may be selected at a time (no mixed
+selection of tables/relationships/rel_markers). Covers RelMarkerItem::itemChange()'s side of the rule. */
+void ModelWidgetTest::selectingARelMarkerClearsObjectSelectionAndOtherRelMarkers()
 {
 	try
 	{
@@ -3090,32 +3102,32 @@ void ModelWidgetTest::selectingACutoffClearsObjectSelectionAndOtherCutoffs()
 		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject()),
 									 *table_b_view = dynamic_cast<BaseTableView *>(table_b->getOverlyingObject());
 
-		QVERIFY(table_a_view->getCutoffItem() != nullptr);
-		QVERIFY(table_b_view->getCutoffItem() != nullptr);
+		QVERIFY(table_a_view->getRelMarkerItem() != nullptr);
+		QVERIFY(table_b_view->getRelMarkerItem() != nullptr);
 
 		Table *filler_0 = dynamic_cast<Table *>(db_model->getObject("filler_0", ObjectType::Table));
 		BaseObjectView *filler_view = dynamic_cast<BaseObjectView *>(filler_0->getOverlyingObject());
 		QVERIFY(filler_view != nullptr);
 
-		//Selects a regular object first, in the same scene table_a's cutoff lives in
+		//Selects a regular object first, in the same scene table_a's relationship marker lives in
 		filler_view->setSelected(true);
 		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
 		QCOMPARE(model_wgt.getSelectedObjects().size(), size_t(1));
 
-		//Selects table_a's cutoff marker
-		table_a_view->getCutoffItem()->setSelected(true);
+		//Selects table_a's relationship marker
+		table_a_view->getRelMarkerItem()->setSelected(true);
 		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
 
-		QVERIFY2(!filler_view->isSelected(), "selecting a cutoff must clear the regular object selection");
+		QVERIFY2(!filler_view->isSelected(), "selecting a relationship marker must clear the regular object selection");
 		QVERIFY2(model_wgt.getSelectedObjects().empty(),
-						 "selecting a cutoff must clear ModelWidget::selected_objects too");
-		QVERIFY2(table_a_view->getCutoffItem()->isSelected(), "the clicked cutoff must remain selected");
+						 "selecting a relationship marker must clear ModelWidget::selected_objects too");
+		QVERIFY2(table_a_view->getRelMarkerItem()->isSelected(), "the clicked relationship marker must remain selected");
 
-		//Selects table_b's cutoff marker (a different scene) -- only one cutoff may stay selected
-		table_b_view->getCutoffItem()->setSelected(true);
+		//Selects table_b's relationship marker (a different scene) -- only one relationship marker may stay selected
+		table_b_view->getRelMarkerItem()->setSelected(true);
 
-		QVERIFY2(!table_a_view->getCutoffItem()->isSelected(), "selecting a second cutoff must deselect the first one");
-		QVERIFY2(table_b_view->getCutoffItem()->isSelected(), "the newly selected cutoff must remain selected");
+		QVERIFY2(!table_a_view->getRelMarkerItem()->isSelected(), "selecting a second relationship marker must deselect the first one");
+		QVERIFY2(table_b_view->getRelMarkerItem()->isSelected(), "the newly selected relationship marker must remain selected");
 	}
 	catch(Exception &e)
 	{
@@ -3124,10 +3136,10 @@ void ModelWidgetTest::selectingACutoffClearsObjectSelectionAndOtherCutoffs()
 }
 
 /*! \brief The opposite direction of the same invariant: selecting a regular object must clear any
-cutoff marker currently selected, even one sitting in a different scene (selection has spanned every
-scene since 4.4, so the cutoff can outlive the scene that held it losing focus). Covers
+relationship marker currently selected, even one sitting in a different scene (selection has spanned every
+scene since 4.4, so the rel_marker can outlive the scene that held it losing focus). Covers
 ModelWidget::configureObjectSelection()'s side of the rule. */
-void ModelWidgetTest::selectingARegularObjectClearsAnySelectedCutoff()
+void ModelWidgetTest::selectingARegularObjectClearsAnySelectedRelMarker()
 {
 	try
 	{
@@ -3178,18 +3190,18 @@ void ModelWidgetTest::selectingARegularObjectClearsAnySelectedCutoff()
 		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject()),
 									 *table_b_view = dynamic_cast<BaseTableView *>(table_b->getOverlyingObject());
 
-		QVERIFY(table_a_view->getCutoffItem() != nullptr);
+		QVERIFY(table_a_view->getRelMarkerItem() != nullptr);
 
-		table_a_view->getCutoffItem()->setSelected(true);
+		table_a_view->getRelMarkerItem()->setSelected(true);
 		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
-		QVERIFY(table_a_view->getCutoffItem()->isSelected());
+		QVERIFY(table_a_view->getRelMarkerItem()->isSelected());
 
-		//table_b lives in a different scene than table_a's cutoff
+		//table_b lives in a different scene than table_a's relationship marker
 		table_b_view->setSelected(true);
 		QMetaObject::invokeMethod(&model_wgt, "configureObjectSelection", Qt::DirectConnection);
 
-		QVERIFY2(!table_a_view->getCutoffItem()->isSelected(),
-						 "selecting a regular object in another scene must still clear a selected cutoff marker");
+		QVERIFY2(!table_a_view->getRelMarkerItem()->isSelected(),
+						 "selecting a regular object in another scene must still clear a selected relationship marker");
 		QCOMPARE(model_wgt.getSelectedObjects().size(), size_t(1));
 	}
 	catch(Exception &e)
@@ -3198,11 +3210,11 @@ void ModelWidgetTest::selectingARegularObjectClearsAnySelectedCutoff()
 	}
 }
 
-/*! \brief User-reported bug: dragging a cutoff marker to a custom position and saving the model
+/*! \brief User-reported bug: dragging a relationship marker to a custom position and saving the model
 doesn't restore that position on reload. */
-void ModelWidgetTest::cutoffMarkerCustomPositionSurvivesSaveAndReload()
+void ModelWidgetTest::relMarkerCustomPositionSurvivesSaveAndReload()
 {
-	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_cutoff_pos.dbm");
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_rel_marker_pos.dbm");
 
 	try
 	{
@@ -3254,12 +3266,12 @@ void ModelWidgetTest::cutoffMarkerCustomPositionSurvivesSaveAndReload()
 			db_model->addRelationship(rel);
 
 			BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
-			QVERIFY(table_a_view->getCutoffItem() != nullptr);
+			QVERIFY(table_a_view->getRelMarkerItem() != nullptr);
 
-			//Drags the cutoff marker to a custom position, same as a real drag would via itemChange(ItemPositionHasChanged)
-			QPointF custom_pos = table_a_view->getCutoffItem()->pos() + QPointF(40, -25);
-			table_a_view->getCutoffItem()->setPos(custom_pos);
-			saved_pos = table_a_view->getCutoffItem()->pos();
+			//Drags the relationship marker to a custom position, same as a real drag would via itemChange(ItemPositionHasChanged)
+			QPointF custom_pos = table_a_view->getRelMarkerItem()->pos() + QPointF(40, -25);
+			table_a_view->getRelMarkerItem()->setPos(custom_pos);
+			saved_pos = table_a_view->getRelMarkerItem()->pos();
 
 			model_wgt.saveModel(tmp_file);
 		}
@@ -3275,9 +3287,9 @@ void ModelWidgetTest::cutoffMarkerCustomPositionSurvivesSaveAndReload()
 			QVERIFY(table_a != nullptr);
 
 			BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
-			QVERIFY2(table_a_view->getCutoffItem() != nullptr, "table_a's cutoff marker must survive reload");
+			QVERIFY2(table_a_view->getRelMarkerItem() != nullptr, "table_a's relationship marker must survive reload");
 
-			QPointF reloaded_pos = table_a_view->getCutoffItem()->pos();
+			QPointF reloaded_pos = table_a_view->getRelMarkerItem()->pos();
 			bool close_enough = std::abs(reloaded_pos.x() - saved_pos.x()) < 1.0 &&
 													 std::abs(reloaded_pos.y() - saved_pos.y()) < 1.0;
 
@@ -3508,7 +3520,7 @@ void ModelWidgetTest::taskProgressWidgetCancelButtonSurvivesShow()
 	task_prog_wgt2.close();
 }
 
-void ModelWidgetTest::doubleClickingACutoffEmitsItsTable()
+void ModelWidgetTest::doubleClickingARelMarkerEmitsItsTable()
 {
 	try
 	{
@@ -3550,13 +3562,16 @@ void ModelWidgetTest::doubleClickingACutoffEmitsItsTable()
 		db_model->addRelationship(new Relationship(BaseRelationship::Relationship1n, table_a, table_b));
 
 		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
-		QVERIFY(table_a_view->getCutoffItem() != nullptr);
+		QVERIFY(table_a_view->getRelMarkerItem() != nullptr);
+
+		//The marker's label (so its hit area) is refreshed once control returns to the event loop
+		QCoreApplication::processEvents();
 
 		ObjectsScene *scn = model_wgt.getSceneForObject(table_a);
-		QSignalSpy table_spy(scn, &ObjectsScene::s_cutoffDoubleClicked),
+		QSignalSpy table_spy(scn, &ObjectsScene::s_relMarkerDoubleClicked),
 							 obj_spy(scn, &ObjectsScene::s_objectDoubleClicked);
 
-		table_a_view->getCutoffItem()->setSelected(true);
+		table_a_view->getRelMarkerItem()->setSelected(true);
 
 		QGraphicsSceneMouseEvent event(QEvent::GraphicsSceneMouseDoubleClick);
 		event.setButton(Qt::LeftButton);
@@ -3564,16 +3579,16 @@ void ModelWidgetTest::doubleClickingACutoffEmitsItsTable()
 
 		/* The marker's overall rect center can fall in a gap between its line and its label, so
 		 * the click lands on the center of the first child that actually resolves back to the marker */
-		CutoffItem *cutoff = table_a_view->getCutoffItem();
+		RelMarkerItem *rel_marker = table_a_view->getRelMarkerItem();
 		QPointF click_pos;
 
-		for(auto &child : cutoff->childItems())
+		for(auto &child : rel_marker->childItems())
 		{
 			QPointF pos = child->sceneBoundingRect().center();
 
 			QGraphicsItem *hit = scn->itemAt(pos, QTransform());
 
-			if(hit && (hit == cutoff || hit->group() == cutoff))
+			if(hit && (hit == rel_marker || hit->group() == rel_marker))
 			{
 				click_pos = pos;
 				break;
@@ -3595,7 +3610,7 @@ void ModelWidgetTest::doubleClickingACutoffEmitsItsTable()
 
 		QCoreApplication::sendEvent(scn, &event);
 
-		QVERIFY2(form_shown, "double-clicking a cutoff must open the cross-scene relationships form");
+		QVERIFY2(form_shown, "double-clicking a relationship marker must open the cross-scene relationships form");
 		QCOMPARE(table_spy.count(), 1);
 		QCOMPARE(table_spy.at(0).at(0).value<BaseTable *>(), table_a);
 		QCOMPARE(obj_spy.count(), 0);
@@ -3606,7 +3621,7 @@ void ModelWidgetTest::doubleClickingACutoffEmitsItsTable()
 	}
 }
 
-void ModelWidgetTest::cutoffRelationshipsWidgetListsAndRefreshesRelationships()
+void ModelWidgetTest::tableRelsWidgetListsAndRefreshesRelationships()
 {
 	try
 	{
@@ -3649,29 +3664,29 @@ void ModelWidgetTest::cutoffRelationshipsWidgetListsAndRefreshesRelationships()
 		Relationship *rel = new Relationship(BaseRelationship::Relationship1n, table_a, table_b);
 		db_model->addRelationship(rel);
 
-		CrossSceneRelsWidget cutoff_wgt;
-		cutoff_wgt.setAttributes(db_model, table_a);
+		TableRelsWidget table_rels_wgt;
+		table_rels_wgt.setAttributes(db_model, table_a);
 
-		CustomTableWidget *rels_tab = cutoff_wgt.findChild<CustomTableWidget *>();
-		ObjectSelectorWidget *table_sel = cutoff_wgt.findChild<ObjectSelectorWidget *>();
+		CustomTableWidget *rels_tab = table_rels_wgt.findChild<CustomTableWidget *>("cross_rels_tab");
+		ObjectSelectorWidget *table_sel = table_rels_wgt.findChild<ObjectSelectorWidget *>();
 
 		QVERIFY(table_sel != nullptr);
 		QCOMPARE(table_sel->getSelectedObject(), table_a);
-		QVERIFY(!cutoff_wgt.windowTitle().isEmpty());
+		QVERIFY(!table_rels_wgt.windowTitle().isEmpty());
 		QVERIFY(rels_tab != nullptr);
 		QCOMPARE(rels_tab->getRowCount(), 1u);
 		QCOMPARE(rels_tab->getCellText(0, 0), rel->getName());
 		QCOMPARE(rels_tab->getCellText(0, 2), table_b->getSignature(true));
 
 		//Double-clicking a row asks for that relationship's edition
-		QSignalSpy rel_spy(&cutoff_wgt, &CrossSceneRelsWidget::s_relationshipActivated);
+		QSignalSpy rel_spy(&table_rels_wgt, &TableRelsWidget::s_objectActivated);
 		emit rels_tab->s_cellDoubleClicked(0, 0);
 		QCOMPARE(rel_spy.count(), 1);
-		QCOMPARE(rel_spy.at(0).at(0).value<BaseRelationship *>(), rel);
+		QCOMPARE(rel_spy.at(0).at(0).value<BaseObject *>(), rel);
 
 		//Once the relationship is gone, refreshing drops it from the grid
 		db_model->removeRelationship(rel);
-		cutoff_wgt.updateRelationships();
+		table_rels_wgt.updateRelationships();
 		QCOMPARE(rels_tab->getRowCount(), 0u);
 	}
 	catch(Exception &e)
@@ -3681,7 +3696,7 @@ void ModelWidgetTest::cutoffRelationshipsWidgetListsAndRefreshesRelationships()
 }
 
 /*! \brief Builds a model where table_a and table_b live in different scenes (threshold mode)
-and are linked by rel, so table_a's cutoff marker lists rel */
+and are linked by rel, so table_a's relationship marker lists rel */
 static void buildCrossSceneModel(ModelWidget &model_wgt, Table *&table_a, Table *&table_b, Relationship *&rel)
 {
 	DatabaseModel *db_model = model_wgt.getDatabaseModel();
@@ -3735,17 +3750,17 @@ void ModelWidgetTest::crossSceneRelsWidgetIgnoresStaleRelationship()
 
 		buildCrossSceneModel(model_wgt, table_a, table_b, rel);
 
-		CrossSceneRelsWidget cross_wgt;
+		TableRelsWidget cross_wgt;
 		cross_wgt.setAttributes(db_model, table_a);
 
-		CustomTableWidget *rels_tab = cross_wgt.findChild<CustomTableWidget *>();
+		CustomTableWidget *rels_tab = cross_wgt.findChild<CustomTableWidget *>("cross_rels_tab");
 		QCOMPARE(rels_tab->getRowCount(), 1u);
 
 		//The relationship is removed behind the grid's back, so its row is now stale
 		db_model->removeRelationship(rel);
 		delete rel;
 
-		QSignalSpy rel_spy(&cross_wgt, &CrossSceneRelsWidget::s_relationshipActivated);
+		QSignalSpy rel_spy(&cross_wgt, &TableRelsWidget::s_objectActivated);
 		emit rels_tab->s_cellDoubleClicked(0, 0);
 
 		QCOMPARE(rel_spy.count(), 0);
@@ -3768,10 +3783,10 @@ void ModelWidgetTest::crossSceneRelsWidgetSurvivesItsTableBeingRemoved()
 
 		buildCrossSceneModel(model_wgt, table_a, table_b, rel);
 
-		CrossSceneRelsWidget cross_wgt;
+		TableRelsWidget cross_wgt;
 		cross_wgt.setAttributes(db_model, table_a);
 
-		CustomTableWidget *rels_tab = cross_wgt.findChild<CustomTableWidget *>();
+		CustomTableWidget *rels_tab = cross_wgt.findChild<CustomTableWidget *>("cross_rels_tab");
 		ObjectSelectorWidget *table_sel = cross_wgt.findChild<ObjectSelectorWidget *>();
 		QCOMPARE(rels_tab->getRowCount(), 1u);
 
@@ -4297,6 +4312,484 @@ void ModelWidgetTest::duplicatingNonTableObjectsStillGetsAUniqueName()
 		QVERIFY(db_model->getObject("schema_x", ObjectType::Schema) == schema);
 		QVERIFY(db_model->getObject("schema_x_cp", ObjectType::Schema) != nullptr);
 		QVERIFY(db_model->getObject("schema_x_dup", ObjectType::Schema) != nullptr);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Creates a table with an "id" primary key named name in schema, so it can be the "1" side of a relationship */
+static Table *createTableWithPk(DatabaseModel *db_model, const QString &name, Schema *schema)
+{
+	Table *table = new Table;
+
+	table->setName(name);
+	table->setSchema(schema);
+
+	Column *col = new Column;
+	col->setName("id");
+	col->setType(PgSqlType("serial"));
+	table->addColumn(col);
+
+	Constraint *pk = new Constraint;
+	pk->setName(name + "_pk");
+	pk->setConstraintType(ConstraintType::PrimaryKey);
+	pk->addColumn(table->getColumn("id"), Constraint::SourceCols);
+	table->addConstraint(pk);
+
+	db_model->addTable(table);
+	return table;
+}
+
+/*! \brief With the hide relationships option on, a relationship between tables of the same scene gets no
+RelationshipView: it's listed (as hidden) by the relationship marker of both tables. Removing it clears them */
+void ModelWidgetTest::hiddenRelationshipsAreRoutedToTheRelMarker()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setHideRelationships(true);
+		db_model->createSystemObjects(true);
+
+		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		Table *table_a = createTableWithPk(db_model, "table_a", public_sch),
+					*table_b = createTableWithPk(db_model, "table_b", public_sch);
+		Relationship *rel = new Relationship(BaseRelationship::Relationship1n, table_a, table_b);
+
+		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject()),
+									*table_b_view = dynamic_cast<BaseTableView *>(table_b->getOverlyingObject());
+
+		//A table without relationships has no marker at all
+		QVERIFY(table_a_view->getRelMarkerItem() == nullptr);
+
+		db_model->addRelationship(rel);
+
+		QVERIFY2(rel->getOverlyingObject() == nullptr, "a hidden relationship must not get a RelationshipView");
+
+		for(auto &view : { table_a_view, table_b_view })
+		{
+			QCOMPARE(view->getHiddenRelsCount(), 1);
+			QCOMPARE(view->getExternalRelsCount(), 0);
+			QVERIFY(view->getRelMarkerItem() != nullptr);
+			QCOMPARE(view->getRelMarkerItem()->getHiddenRelsCount(), 1);
+			QCOMPARE(view->getRelMarkerItem()->getCrossRelsCount(), 0);
+		}
+
+		db_model->removeRelationship(rel);
+
+		for(auto &view : { table_a_view, table_b_view })
+		{
+			QCOMPARE(view->getHiddenRelsCount(), 0);
+			QVERIFY(view->getRelMarkerItem() == nullptr);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief A self-relationship is routed once per side, both landing on the same table view: it must be
+registered, and counted, only once */
+void ModelWidgetTest::selfRelationshipIsHiddenOnlyOnce()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+		db_model->setHideRelationships(true);
+		db_model->createSystemObjects(true);
+
+		Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+		Table *table_a = createTableWithPk(db_model, "table_a", public_sch);
+		Relationship *rel = new Relationship(BaseRelationship::Relationship1n, table_a, table_a);
+
+		db_model->addRelationship(rel);
+
+		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
+
+		QVERIFY(rel->getOverlyingObject() == nullptr);
+		QCOMPARE(table_a_view->getHiddenRelsCount(), 1);
+		QVERIFY(table_a_view->getRelMarkerItem() != nullptr);
+		QCOMPARE(table_a_view->getRelMarkerItem()->getHiddenRelsCount(), 1);
+
+		db_model->removeRelationship(rel);
+		QVERIFY(table_a_view->getRelMarkerItem() == nullptr);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief Builds a schema-segmented model with the hide relationships option on: table_a and table_c live
+in schema_a, table_b in schema_b. The relationship a-c is hidden, a-b is cross-scene */
+static void buildHiddenAndCrossModel(ModelWidget &model_wgt, Table *&table_a, Table *&table_b, Table *&table_c,
+																		 Relationship *&rel_ac, Relationship *&rel_ab)
+{
+	DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+	db_model->setSegmentationMode(DatabaseModel::SegBySchema);
+	db_model->setHideRelationships(true);
+	db_model->createSystemObjects(true);
+
+	Schema *schema_a = new Schema, *schema_b = new Schema;
+
+	schema_a->setName("schema_a");
+	schema_b->setName("schema_b");
+	db_model->addSchema(schema_a);
+	db_model->addSchema(schema_b);
+
+	table_a = createTableWithPk(db_model, "table_a", schema_a);
+	table_b = createTableWithPk(db_model, "table_b", schema_b);
+	table_c = createTableWithPk(db_model, "table_c", schema_a);
+
+	rel_ac = new Relationship(BaseRelationship::Relationship1n, table_a, table_c);
+	db_model->addRelationship(rel_ac);
+
+	rel_ab = new Relationship(BaseRelationship::Relationship1n, table_a, table_b);
+	db_model->addRelationship(rel_ab);
+}
+
+void ModelWidgetTest::hiddenAndCrossSceneRelationshipsAreCountedSeparately()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+		Table *table_a = nullptr, *table_b = nullptr, *table_c = nullptr;
+		Relationship *rel_ac = nullptr, *rel_ab = nullptr;
+
+		buildHiddenAndCrossModel(model_wgt, table_a, table_b, table_c, rel_ac, rel_ab);
+
+		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject()),
+									*table_b_view = dynamic_cast<BaseTableView *>(table_b->getOverlyingObject()),
+									*table_c_view = dynamic_cast<BaseTableView *>(table_c->getOverlyingObject());
+
+		QVERIFY(rel_ac->getOverlyingObject() == nullptr);
+		QVERIFY(rel_ab->getOverlyingObject() == nullptr);
+
+		QCOMPARE(table_a_view->getHiddenRelationships(), QList<BaseRelationship *>({ rel_ac }));
+		QCOMPARE(table_a_view->getExternalRelationships(), QList<BaseRelationship *>({ rel_ab }));
+		QCOMPARE(table_a_view->getRelMarkerItem()->getHiddenRelsCount(), 1);
+		QCOMPARE(table_a_view->getRelMarkerItem()->getCrossRelsCount(), 1);
+
+		//The marker label is refreshed once control returns to the event loop
+		QCoreApplication::processEvents();
+		QVERIFY(table_a_view->getRelMarkerItem()->boundingRect().height() > 0);
+
+		QCOMPARE(table_c_view->getHiddenRelsCount(), 1);
+		QCOMPARE(table_c_view->getExternalRelsCount(), 0);
+		QCOMPARE(table_b_view->getHiddenRelsCount(), 0);
+		QCOMPARE(table_b_view->getExternalRelsCount(), 1);
+
+		//Removing a hidden relationship leaves the cross-scene one alone
+		db_model->removeRelationship(rel_ac);
+		QCOMPARE(table_a_view->getRelMarkerItem()->getHiddenRelsCount(), 0);
+		QCOMPARE(table_a_view->getRelMarkerItem()->getCrossRelsCount(), 1);
+		QVERIFY(table_c_view->getRelMarkerItem() == nullptr);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void ModelWidgetTest::relocatingATableReclassifiesItsHiddenRelationships()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		Table *table_a = nullptr, *table_b = nullptr, *table_c = nullptr;
+		Relationship *rel_ac = nullptr, *rel_ab = nullptr;
+
+		buildHiddenAndCrossModel(model_wgt, table_a, table_b, table_c, rel_ac, rel_ab);
+
+		//table_b joins its partners' scene: a-b stops being cross-scene and becomes hidden too
+		model_wgt.relocateObjectView(table_b, model_wgt.getSceneForObject(table_a));
+
+		BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject()),
+									*table_b_view = dynamic_cast<BaseTableView *>(table_b->getOverlyingObject());
+
+		QVERIFY(rel_ab->getOverlyingObject() == nullptr);
+		QCOMPARE(table_a_view->getHiddenRelsCount(), 2);
+		QCOMPARE(table_a_view->getExternalRelsCount(), 0);
+		QCOMPARE(table_b_view->getHiddenRelsCount(), 1);
+		QCOMPARE(table_b_view->getExternalRelsCount(), 0);
+		QVERIFY(table_b_view->getRelMarkerItem() != nullptr);
+
+		//table_c leaves: a-c turns cross-scene, a-b stays hidden
+		model_wgt.relocateObjectView(table_c, model_wgt.getSchemaScene(dynamic_cast<Schema *>(model_wgt.getDatabaseModel()->getObject("schema_b", ObjectType::Schema))));
+
+		table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
+
+		QCOMPARE(table_a_view->getHiddenRelationships(), QList<BaseRelationship *>({ rel_ab }));
+		QCOMPARE(table_a_view->getExternalRelationships(), QList<BaseRelationship *>({ rel_ac }));
+		QCOMPARE(table_a_view->getRelMarkerItem()->getHiddenRelsCount(), 1);
+		QCOMPARE(table_a_view->getRelMarkerItem()->getCrossRelsCount(), 1);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief The option is written to the file only when enabled, taking effect on the next load, and the
+active value (hide_rels) only follows the saved one after the reload */
+void ModelWidgetTest::hideRelationshipsOptionSurvivesSaveAndReload()
+{
+	QString tmp_on = QDir::temp().absoluteFilePath("modelwidgettest_hide_rels_on.dbm"),
+					tmp_off = QDir::temp().absoluteFilePath("modelwidgettest_hide_rels_off.dbm");
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(true);
+
+			Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+			Table *table_a = createTableWithPk(db_model, "table_a", public_sch),
+						*table_b = createTableWithPk(db_model, "table_b", public_sch);
+
+			db_model->addRelationship(new Relationship(BaseRelationship::Relationship1n, table_a, table_b));
+
+			//Pending change: the current session still draws the relationship
+			model_wgt.setPendingHideRelationships(true);
+			QVERIFY(!db_model->isHideRelationships());
+			QVERIFY(db_model->isSavedHideRelationships());
+			QVERIFY(dynamic_cast<BaseTableView *>(table_a->getOverlyingObject())->getRelMarkerItem() == nullptr);
+
+			model_wgt.saveModel(tmp_on);
+
+			model_wgt.setPendingHideRelationships(false);
+			model_wgt.saveModel(tmp_off);
+		}
+
+		QVERIFY(!UtilsNs::loadFile(tmp_off).contains("hide-rels"));
+		QVERIFY(UtilsNs::loadFile(tmp_on).contains("hide-rels=\"true\""));
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_on);
+
+			QVERIFY(db_model->isHideRelationships());
+			QVERIFY(db_model->isSavedHideRelationships());
+
+			Table *table_a = dynamic_cast<Table *>(db_model->getObject("table_a", ObjectType::Table));
+			BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
+
+			QCOMPARE(table_a_view->getHiddenRelsCount(), 1);
+			QVERIFY(table_a_view->getHiddenRelationships().first()->getOverlyingObject() == nullptr);
+		}
+
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(false);
+			model_wgt.loadModel(tmp_off);
+
+			QVERIFY(!db_model->isHideRelationships());
+
+			Table *table_a = dynamic_cast<Table *>(db_model->getObject("table_a", ObjectType::Table));
+			BaseTableView *table_a_view = dynamic_cast<BaseTableView *>(table_a->getOverlyingObject());
+
+			QCOMPARE(table_a_view->getHiddenRelsCount(), 0);
+			QVERIFY(table_a_view->getRelMarkerItem() == nullptr);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_on);
+		QFile::remove(tmp_off);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_on);
+	QFile::remove(tmp_off);
+}
+
+/*! \brief Accepting the hide relationships suggestion (checkAlternateSegmentation()) loads a file that
+doesn't ask for it with the relationships hidden, and the override becomes the saved value too */
+void ModelWidgetTest::forcingHideRelationshipsOnLoadOverridesTheFile()
+{
+	QString tmp_file = QDir::temp().absoluteFilePath("modelwidgettest_force_hide_rels.dbm");
+
+	try
+	{
+		{
+			ModelWidget model_wgt;
+			DatabaseModel *db_model = model_wgt.getDatabaseModel();
+
+			db_model->createSystemObjects(true);
+
+			Schema *public_sch = dynamic_cast<Schema *>(db_model->getObject("public", ObjectType::Schema));
+			Table *table_a = createTableWithPk(db_model, "table_a", public_sch),
+						*table_b = createTableWithPk(db_model, "table_b", public_sch);
+
+			db_model->addRelationship(new Relationship(BaseRelationship::Relationship1n, table_a, table_b));
+			model_wgt.saveModel(tmp_file);
+		}
+
+		DatabaseModel plain_model;
+		plain_model.createSystemObjects(false);
+		plain_model.loadModel(tmp_file);
+		QVERIFY(!plain_model.isHideRelationships());
+		QVERIFY(!plain_model.isSavedHideRelationships());
+
+		DatabaseModel forced_model;
+		forced_model.createSystemObjects(false);
+		forced_model.loadModel(tmp_file, false, DatabaseModel::NoSegmentation, 0, false, nullptr, true);
+		QVERIFY(forced_model.isHideRelationships());
+		QVERIFY(forced_model.isSavedHideRelationships());
+	}
+	catch(Exception &e)
+	{
+		QFile::remove(tmp_file);
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+
+	QFile::remove(tmp_file);
+}
+
+/*! \brief The toggle button is checked while the relationships are visible, i.e., it is the inverse of the
+hide relationships option the signal and the update method carry */
+void ModelWidgetTest::toggleRelsButtonIsCheckedWhileRelationshipsAreVisible()
+{
+	SceneInfoWidget scene_info_wgt;
+	QSignalSpy spy(&scene_info_wgt, &SceneInfoWidget::s_hideRelationshipsToggled);
+
+	//Default state: relationships visible
+	QVERIFY(scene_info_wgt.toggle_rels_tb->isChecked());
+
+	//Reflecting the model's option never emits the signal
+	scene_info_wgt.updateHideRelationships(true);
+	QVERIFY(!scene_info_wgt.toggle_rels_tb->isChecked());
+	scene_info_wgt.updateHideRelationships(false);
+	QVERIFY(scene_info_wgt.toggle_rels_tb->isChecked());
+	QCOMPARE(spy.count(), 0);
+
+	//Unchecking the button asks to hide the relationships, checking it again asks to show them
+	scene_info_wgt.toggle_rels_tb->setChecked(false);
+	QCOMPARE(spy.count(), 1);
+	QCOMPARE(spy.at(0).at(0).toBool(), true);
+
+	scene_info_wgt.toggle_rels_tb->setChecked(true);
+	QCOMPARE(spy.count(), 2);
+	QCOMPARE(spy.at(1).at(0).toBool(), false);
+}
+
+void ModelWidgetTest::tableRelsWidgetSeparatesHiddenAndCrossRelationships()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		Table *table_a = nullptr, *table_b = nullptr, *table_c = nullptr;
+		Relationship *rel_ac = nullptr, *rel_ab = nullptr;
+
+		buildHiddenAndCrossModel(model_wgt, table_a, table_b, table_c, rel_ac, rel_ab);
+
+		TableRelsWidget table_rels_wgt;
+		table_rels_wgt.setAttributes(model_wgt.getDatabaseModel(), table_a);
+
+		CustomTableWidget *hidden_tab = table_rels_wgt.findChild<CustomTableWidget *>("hidden_rels_tab"),
+											*cross_tab = table_rels_wgt.findChild<CustomTableWidget *>("cross_rels_tab");
+		QTabWidget *tabs = table_rels_wgt.findChild<QTabWidget *>();
+
+		QVERIFY(hidden_tab != nullptr && cross_tab != nullptr && tabs != nullptr);
+
+		//Relationships first, cross rels. second
+		QCOMPARE(tabs->count(), 2);
+		QVERIFY(tabs->widget(0)->isAncestorOf(hidden_tab));
+		QVERIFY(tabs->widget(1)->isAncestorOf(cross_tab));
+		QCOMPARE(tabs->currentIndex(), 0);
+
+		QCOMPARE(hidden_tab->getRowCount(), 1u);
+		QCOMPARE(hidden_tab->getCellText(0, 0), rel_ac->getName());
+		QCOMPARE(hidden_tab->getCellText(0, 2), table_c->getSignature(true));
+
+		QCOMPARE(cross_tab->getRowCount(), 1u);
+		QCOMPARE(cross_tab->getCellText(0, 0), rel_ab->getName());
+		QCOMPARE(cross_tab->getCellText(0, 2), table_b->getSignature(true));
+
+		//Double-clicking the name or the type cell of a row of the first tab activates that relationship too
+		QSignalSpy obj_spy(&table_rels_wgt, &TableRelsWidget::s_objectActivated);
+
+		emit hidden_tab->s_cellDoubleClicked(0, 0);
+		emit hidden_tab->s_cellDoubleClicked(0, 1);
+		QCOMPARE(obj_spy.count(), 2);
+		QCOMPARE(obj_spy.at(0).at(0).value<BaseObject *>(), rel_ac);
+		QCOMPARE(obj_spy.at(1).at(0).value<BaseObject *>(), rel_ac);
+
+		//The related table cell activates the table on the other end instead, in both tabs
+		emit hidden_tab->s_cellDoubleClicked(0, 2);
+		emit cross_tab->s_cellDoubleClicked(0, 2);
+		QCOMPARE(obj_spy.count(), 4);
+		QCOMPARE(obj_spy.at(2).at(0).value<BaseObject *>(), table_c);
+		QCOMPARE(obj_spy.at(3).at(0).value<BaseObject *>(), table_b);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+/*! \brief The grids of the relationships dialog are sortable: the relationship activated by a row must be
+the one shown in it, whatever the sorting is, and the window title names the table */
+void ModelWidgetTest::tableRelsWidgetKeepsTheRelationshipOfEachRowWhenSorted()
+{
+	try
+	{
+		ModelWidget model_wgt;
+		DatabaseModel *db_model = model_wgt.getDatabaseModel();
+		Table *table_a = nullptr, *table_b = nullptr, *table_c = nullptr;
+		Relationship *rel_ac = nullptr, *rel_ab = nullptr;
+
+		buildHiddenAndCrossModel(model_wgt, table_a, table_b, table_c, rel_ac, rel_ab);
+
+		Table *table_d = createTableWithPk(db_model, "table_d", dynamic_cast<Schema *>(table_a->getSchema()));
+		Relationship *rel_ad = new Relationship(BaseRelationship::Relationship1n, table_a, table_d);
+		db_model->addRelationship(rel_ad);
+
+		TableRelsWidget table_rels_wgt;
+		table_rels_wgt.setAttributes(db_model, table_a);
+
+		QVERIFY(table_rels_wgt.windowTitle().contains(table_a->getSignature(true)));
+
+		CustomTableWidget *hidden_tab = table_rels_wgt.findChild<CustomTableWidget *>("hidden_rels_tab");
+		QTableWidget *tbw = hidden_tab->findChild<QTableWidget *>();
+		QSignalSpy rel_spy(&table_rels_wgt, &TableRelsWidget::s_objectActivated);
+
+		QCOMPARE(hidden_tab->getRowCount(), 2u);
+		QVERIFY(tbw != nullptr);
+
+		for(auto order : { Qt::AscendingOrder, Qt::DescendingOrder })
+		{
+			tbw->sortByColumn(0, order);
+
+			for(unsigned row = 0; row < hidden_tab->getRowCount(); row++)
+			{
+				rel_spy.clear();
+				emit hidden_tab->s_cellDoubleClicked(row, 0);
+
+				QCOMPARE(rel_spy.count(), 1);
+				QCOMPARE(rel_spy.at(0).at(0).value<BaseObject *>()->getName(), hidden_tab->getCellText(row, 0));
+			}
+		}
+
+		//Descending: the relationship of table_d comes first
+		rel_spy.clear();
+		emit hidden_tab->s_cellDoubleClicked(0, 0);
+		QCOMPARE(rel_spy.at(0).at(0).value<BaseObject *>(), rel_ad);
 	}
 	catch(Exception &e)
 	{

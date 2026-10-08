@@ -1970,25 +1970,6 @@ PID: `%1&apos;
     </message>
 </context>
 <context>
-    <name>CrossSceneRelsWidget</name>
-    <message>
-        <source>Cross-scene relationships</source>
-        <translation>シーン間のリレーションシップ</translation>
-    </message>
-    <message>
-        <source>Relationship</source>
-        <translation>リレーションシップ</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation>型</translation>
-    </message>
-    <message>
-        <source>Related table</source>
-        <translation>関連テーブル</translation>
-    </message>
-</context>
-<context>
     <name>CsvLoadWidget</name>
     <message>
         <source>Form</source>
@@ -2261,13 +2242,6 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     <message>
         <source>Are you sure you want to remove all the items?</source>
         <translation>すべての項目を削除しますか？</translation>
-    </message>
-</context>
-<context>
-    <name>CutoffItem</name>
-    <message>
-        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>シーン間リレーションシップ: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -9905,6 +9879,10 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
         <translation>デフォルトのシーン</translation>
     </message>
     <message>
+        <source>Changing the visibility of the relationships takes effect only after saving and reloading the model. Do you want to proceed?</source>
+        <translation>リレーションシップの表示設定の変更は、モデルを保存して再読み込みした後にのみ有効になります。続行しますか？</translation>
+    </message>
+    <message>
         <source>Don&apos;t ask to save and reload again.</source>
         <translation>保存と再読み込みについて今後は確認しない。</translation>
     </message>
@@ -9927,6 +9905,10 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
     <message>
         <source>&lt;strong&gt;WARNING:&lt;/strong&gt; Converting a &lt;strong&gt;one-to-one&lt;/strong&gt; or &lt;strong&gt;one-to-many&lt;/strong&gt; relationship can lead to unreversible changes or break other relationships in the linking chain! Do you want to proceed?</source>
         <translation>&lt;strong&gt;警告:&lt;/strong&gt; &lt;strong&gt;1 対 1&lt;/strong&gt; または &lt;strong&gt;1 対多&lt;/strong&gt;のリレーションシップを変換すると、元に戻せない変更が生じたり、連鎖する他のリレーションシップが壊れたりする可能性があります。続行しますか？</translation>
+    </message>
+    <message>
+        <source>This model has &lt;strong&gt;%1&lt;/strong&gt; relationships. Drawing that many relationships makes the diagram hard to read and slow to handle. Load it hiding the relationships instead? Each table&apos;s relationship marker keeps listing them (double-click the marker to see the list).</source>
+        <translation>このモデルには &lt;strong&gt;%1&lt;/strong&gt; 個のリレーションシップがあります。これほど多くのリレーションシップを描画すると、図が読みにくくなり、操作も遅くなります。リレーションシップを非表示にして読み込みますか？各テーブルのリレーションシップマーカーには引き続き一覧が表示されます（マーカーをダブルクリックすると一覧が表示されます）。</translation>
     </message>
     <message>
         <source>This model concentrates &lt;strong&gt;%1%&lt;/strong&gt; of its &lt;strong&gt;%2&lt;/strong&gt; tables/views/foreign tables in a single schema &lt;strong&gt;%3&lt;/strong&gt;. Segmenting the canvas by schema wouldn&apos;t distribute much of that load into separate scenes. Load it with threshold-based segmentation instead?</source>
@@ -12543,6 +12525,17 @@ available in GUI. All available options are described below.</source>
     </message>
 </context>
 <context>
+    <name>RelMarkerItem</name>
+    <message>
+        <source>Relationships: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>リレーションシップ: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Cross rels.: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>シーン間リレーションシップ: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -13514,6 +13507,10 @@ available in GUI. All available options are described below.</source>
         <translation>フォーム</translation>
     </message>
     <message>
+        <source>&lt;p&gt;Toggles the visibility of the relationships between tables of the same scene. When they are not visible, they are represented by the relationship marker of each table, whose details are shown by double-clicking it. Hiding the relationships is intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;同じシーンにあるテーブル間のリレーションシップの表示/非表示を切り替えます。表示されていない場合、リレーションシップは各テーブルのリレーションシップマーカーで表され、マーカーをダブルクリックすると詳細が表示されます。リレーションシップの非表示は、描画されたリレーションシップが意味を失う大規模なモデル向けです。&lt;/p&gt;&lt;p&gt;&lt;strong&gt;注意:&lt;/strong&gt; 変更は、モデルを保存して再読み込みした後にのみ有効になります。&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Currently selected object(s)</source>
         <translation>現在選択されているオブジェクト</translation>
     </message>
@@ -13536,6 +13533,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>&lt;p&gt;Segmentation threshold. The number of tables, views, or foreign tables created before a new scene is created and new objects are routed to it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;セグメンテーションのしきい値。新しいシーンが作成され、新しいオブジェクトがそこに振り分けられるまでに作成されるテーブル、ビュー、外部テーブルの数です。&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
+        <translation type="vanished">&lt;p&gt;同じシーンにあるテーブル間のリレーションシップを非表示にします。リレーションシップは各テーブルのリレーションシップマーカーで表され、マーカーをダブルクリックすると詳細が表示されます。描画されたリレーションシップが意味を失う大規模なモデル向けです。&lt;/p&gt;&lt;p&gt;&lt;strong&gt;注意:&lt;/strong&gt; 変更は、モデルを保存して再読み込みした後にのみ有効になります。&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14406,6 +14407,45 @@ available in GUI. All available options are described below.</source>
 %3 Type: %4</source>
         <translation>`%1&apos; (%2)
 %3 型: %4</translation>
+    </message>
+</context>
+<context>
+    <name>TableRelsWidget</name>
+    <message>
+        <source>Cross-scene relationships</source>
+        <translation type="vanished">シーン間のリレーションシップ</translation>
+    </message>
+    <message>
+        <source>Table relationships</source>
+        <translation>テーブルのリレーションシップ</translation>
+    </message>
+    <message>
+        <source>Table:</source>
+        <translation>テーブル:</translation>
+    </message>
+    <message>
+        <source>Relationships</source>
+        <translation>リレーションシップ</translation>
+    </message>
+    <message>
+        <source>Cross rels.</source>
+        <translation>シーン間リレーションシップ</translation>
+    </message>
+    <message>
+        <source>Relationship</source>
+        <translation>リレーションシップ</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>型</translation>
+    </message>
+    <message>
+        <source>Related table</source>
+        <translation>関連テーブル</translation>
+    </message>
+    <message>
+        <source>Relationships of %1</source>
+        <translation>%1 のリレーションシップ</translation>
     </message>
 </context>
 <context>
