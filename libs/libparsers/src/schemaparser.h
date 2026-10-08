@@ -153,7 +153,7 @@ class __libparsers SchemaParser {
 		void unsetAttribute();
 
 		//! \brief Increments the column counter while blank chars (space and tabs) are found on the line
-		void ignoreBlankChars(const QString &line);
+		void ignoreBlankChars(QStringView line);
 
 		//! \brief Translates the meta char token to the real character
 		QString convertMetaCharacter(const QString &meta);
