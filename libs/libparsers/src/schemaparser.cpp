@@ -111,6 +111,7 @@ SchemaParser::SchemaParser()
 	line = column = 0;
 	ignore_unk_atribs = ignore_empty_atribs = false;
 	pgsql_version = PgSqlVersions::DefaulVersion;
+	orig_attributes = nullptr;
 }
 
 void SchemaParser::setPgSQLVersion(const QString &pgsql_ver, bool ignore_db_version)
@@ -184,9 +185,33 @@ void SchemaParser::restartParser()
 	/* Clears the buffer and resets the counters for line,
 		column and include statement infos */
 	buffer.clear();
-	attributes.clear();
+	orig_attributes = nullptr;
+	local_attributes.clear();
 	include_infos.clear();
 	line = column = 0;
+}
+
+const QString *SchemaParser::findAttribute(const QString &attrib) const
+{
+	auto itr = local_attributes.find(attrib);
+
+	if(itr != local_attributes.end())
+		return &itr->second;
+
+	if(orig_attributes)
+	{
+		auto o_itr = orig_attributes->find(attrib);
+
+		if(o_itr != orig_attributes->end())
+			return &o_itr->second;
+	}
+
+	return nullptr;
+}
+
+void SchemaParser::setAttribute(const QString &attrib, const QString &value)
+{
+	local_attributes[attrib] = value;
 }
 
 void SchemaParser::loadBuffer(const QString &buf)
@@ -812,16 +837,20 @@ bool SchemaParser::evaluateComparisonExpr()
 					throw Exception(getParseError(ErrorCode::InvalidOperatorInExpression, "", oper),
 													ErrorCode::InvalidOperatorInExpression, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
-				else if(attributes.count(attrib)==0 && !ignore_unk_atribs)
-				{
-					throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
-													ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
-				}
 				else
 				{
+					const QString *attr_ptr = findAttribute(attrib);
+
+					if(!attr_ptr && !ignore_unk_atribs)
+					{
+						throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
+														ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
+					}
+
 					QVariant left_val, right_val;
-					QString attr_val = to_xml_entity ?
-																 UtilsNs::convertToXmlEntities(attributes[attrib]) : attributes[attrib];
+					static const QString empty_val;
+					const QString &attr_ref = attr_ptr ? *attr_ptr : empty_val;
+					QString attr_val = to_xml_entity ? UtilsNs::convertToXmlEntities(attr_ref) : attr_ref;
 
 					to_xml_entity = false;
 					value.remove(CharValueDelim);
@@ -931,14 +960,17 @@ void SchemaParser::defineAttribute()
 				{
 					//Get the attribute in the middle of the value
 					attrib = getAttribute(to_xml_entity);
+					const QString *attr_ptr = findAttribute(attrib);
 
-					if(attributes.count(attrib)==0 && !ignore_unk_atribs)
+					if(!attr_ptr && !ignore_unk_atribs)
 					{
 						throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
 														ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 					}
 
-					value += to_xml_entity ? UtilsNs::convertToXmlEntities(attributes[attrib]) : attributes[attrib];
+					static const QString empty_val;
+					const QString &attr_ref = attr_ptr ? *attr_ptr : empty_val;
+					value += to_xml_entity ? UtilsNs::convertToXmlEntities(attr_ref) : attr_ref;
 					to_xml_entity = false;
 				}
 			}
@@ -985,7 +1017,13 @@ void SchemaParser::defineAttribute()
 
 	if(!error)
 	{
-		attrib = (use_val_as_name ? attributes[new_attrib] : new_attrib);
+		if(use_val_as_name)
+		{
+			const QString *attr_ptr = findAttribute(new_attrib);
+			attrib = attr_ptr ? *attr_ptr : QString();
+		}
+		else
+			attrib = new_attrib;
 
 		//Checking if the attribute has a valid name
 		if(!isValidAttributeName(attrib))
@@ -996,7 +1034,7 @@ void SchemaParser::defineAttribute()
 
 		/* Creates the attribute in the attribute map of the schema, making the attribute
 		 * available on the rest of the script being parsed */
-		attributes[attrib] = value;
+		setAttribute(attrib, value);
 	}
 	else
 	{
@@ -1029,7 +1067,7 @@ void SchemaParser::unsetAttribute()
 			{
 				attrib = getAttribute(to_xml_entity);
 
-				if(attributes.count(attrib)==0 && !ignore_unk_atribs)
+				if(!findAttribute(attrib) && !ignore_unk_atribs)
 				{
 					throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
 													 ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
@@ -1041,7 +1079,7 @@ void SchemaParser::unsetAttribute()
 													 ErrorCode::InvalidAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 
-				attributes[attrib]="";
+				setAttribute(attrib, "");
 			}
 			else
 			{
@@ -1182,8 +1220,10 @@ bool SchemaParser::evaluateExpression()
 			{
 				attrib = getAttribute(to_xml_entity);
 
+				const QString *attr_ptr = findAttribute(attrib);
+
 							 //Raises an error if the attribute does is unknown
-				if(attributes.count(attrib)==0 && !ignore_unk_atribs)
+				if(!attr_ptr && !ignore_unk_atribs)
 				{
 					throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
 													ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
@@ -1201,8 +1241,10 @@ bool SchemaParser::evaluateExpression()
 
 				if(!error)
 				{
+					bool attr_empty = !attr_ptr || attr_ptr->isEmpty();
+
 					//Appliyng the NOT operator if found
-					attrib_true = (cond == TokenNot ? attributes[attrib].isEmpty() : !attributes[attrib].isEmpty());
+					attrib_true = (cond == TokenNot ? attr_empty : !attr_empty);
 
 					//Executing the AND operation if the token is found
 					if(cond == TokenAnd || prev_cond == TokenAnd)
@@ -1399,7 +1441,8 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 		}
 
 		//Init the control variables
-		attributes = attribs;
+		orig_attributes = &attribs;
+		local_attributes.clear();
 		error = if_expr = false;
 		if_level = -1;
 		end_cnt = if_cnt = 0;
@@ -1463,7 +1506,9 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 				atrib = getAttribute(to_xml_entity);
 
 				//Checks if the attribute extracted belongs to the passed list of attributes
-				if(attributes.count(atrib) == 0)
+				const QString *attr_ptr = findAttribute(atrib);
+
+				if(!attr_ptr)
 				{
 					if(!ignore_unk_atribs)
 					{
@@ -1471,7 +1516,8 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 														ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 					}
 
-					attributes[atrib]	= "";
+					setAttribute(atrib, "");
+					attr_ptr = findAttribute(atrib);
 				}
 
 				//If the parser is inside an 'if / else' extracting tokens
@@ -1503,7 +1549,7 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 				{
 					/* If the attribute has no value set and parser must not ignore empty values
 					 * raises an exception */
-					if(attributes[atrib].isEmpty() && !ignore_empty_atribs)
+					if(attr_ptr->isEmpty() && !ignore_empty_atribs)
 					{
 						throw Exception(getParseError(ErrorCode::UndefinedAttributeValue, "", atrib),
 														ErrorCode::UndefinedAttributeValue, PGM_FUNC, PGM_FILE, PGM_LINE);
@@ -1511,7 +1557,7 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 
 					/* If the parser is not in an if / else, concatenates the value of the attribute
 					 * directly in definition in sql */
-					object_def += to_xml_entity ? UtilsNs::convertToXmlEntities(attributes[atrib]) : attributes[atrib];
+					object_def += to_xml_entity ? UtilsNs::convertToXmlEntities(*attr_ptr) : *attr_ptr;
 					to_xml_entity = false;
 				}
 			}
@@ -1574,8 +1620,8 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 						 * evaluations the parser isn't broke by a unknow attribute exception */
 						atrib = getAttribute(to_xml_entity);
 
-						if(attributes.count(atrib) == 0)
-							attributes[atrib] = "";
+						if(!findAttribute(atrib))
+							setAttribute(atrib, "");
 
 						/* A %set's value may hold a plain text spanning more than the current line
 						 * (see getPlainText()); skip past it the same way defineAttribute() would so
@@ -1696,7 +1742,10 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 									int pos = conv_entity ? 2 : 1;
 
 									atrib = word.mid(pos, word.size() - (pos + 1));
-									word = conv_entity ? UtilsNs::convertToXmlEntities(attributes[atrib]) : attributes[atrib];
+									const QString *attr_ptr = findAttribute(atrib);
+									static const QString empty_val;
+									const QString &attr_ref = attr_ptr ? *attr_ptr : empty_val;
+									word = conv_entity ? UtilsNs::convertToXmlEntities(attr_ref) : attr_ref;
 
 									/* If the attribute has no value set and parser must not ignore empty values
 									 * raises an exception */
