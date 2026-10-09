@@ -847,7 +847,6 @@ bool SchemaParser::evaluateComparisonExpr()
 														ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 					}
 
-					QVariant left_val, right_val;
 					static const QString empty_val;
 					const QString &attr_ref = attr_ptr ? *attr_ptr : empty_val;
 					QString attr_val = to_xml_entity ? UtilsNs::convertToXmlEntities(attr_ref) : attr_ref;
@@ -858,24 +857,16 @@ bool SchemaParser::evaluateComparisonExpr()
 					//Evaluating the attribute value against the one captured on the expression without casting
 					if(oper.endsWith('f'))
 					{
-						left_val = QVariant(attr_val.toFloat());
-						right_val = QVariant(value.toFloat());
 						oper.remove('f');
-						expr_is_true = getExpressionResult<float>(oper, left_val, right_val);
+						expr_is_true = getExpressionResult(parseCompareOp(oper), attr_val.toFloat(), value.toFloat());
 					}
 					else if(oper.endsWith('i'))
 					{
-						left_val = QVariant(attr_val.toInt());
-						right_val = QVariant(value.toInt());
 						oper.remove('i');
-						expr_is_true = getExpressionResult<int>(oper, left_val, right_val);
+						expr_is_true = getExpressionResult(parseCompareOp(oper), attr_val.toInt(), value.toInt());
 					}
 					else
-					{
-						left_val = QVariant(attr_val);
-						right_val = QVariant(value);
-						expr_is_true = getExpressionResult<QString>(oper, left_val, right_val);
-					}
+						expr_is_true = getExpressionResult(parseCompareOp(oper), attr_val, value);
 
 					end_eval = true;
 				}
@@ -1323,13 +1314,15 @@ QString SchemaParser::convertMetaCharacter(const QString &meta)
 														{ TokenMetaAm, CharToXmlEntity },
 														{ TokenMetaBs, CharStartEscaped }};
 
-	if(metas.count(meta) == 0)
+	auto itr = metas.find(meta);
+
+	if(itr == metas.end())
 	{
 		throw Exception(getParseError(ErrorCode::InvalidMetacharacter, "", CharStartMetachar + meta),
 										ErrorCode::InvalidMetacharacter, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
-	return metas.at(meta);
+	return itr->second;
 }
 
 QString SchemaParser::convertEscapedCharacter(const QString &escaped)
@@ -1879,12 +1872,31 @@ QString SchemaParser::getSourceCode(const QString &filename, attribs_map &attrib
 	}
 }
 
+SchemaParser::CompareOp SchemaParser::parseCompareOp(const QString &oper)
+{
+	if(oper == TokenEqOper) return CompareOp::OpEq;
+	if(oper == TokenNeOper) return CompareOp::OpNe;
+	if(oper == TokenGtOper) return CompareOp::OpGt;
+	if(oper == TokenLtOper) return CompareOp::OpLt;
+	if(oper == TokenGtEqOper) return CompareOp::OpGtEq;
+	if(oper == TokenLtEqOper) return CompareOp::OpLtEq;
+
+	throw Exception(getParseError(ErrorCode::InvalidOperatorInExpression, "", oper),
+									ErrorCode::InvalidOperatorInExpression, PGM_FUNC, PGM_FILE, PGM_LINE);
+}
+
 template<typename Type>
-bool SchemaParser::getExpressionResult(const QString &oper, const QVariant &left_val, const QVariant &right_val){
-	return ((oper==TokenEqOper && (left_val.value<Type>() == right_val.value<Type>())) ||
-					(oper==TokenNeOper && (left_val.value<Type>() != right_val.value<Type>())) ||
-					(oper==TokenGtOper && (left_val.value<Type>() > right_val.value<Type>())) ||
-					(oper==TokenLtOper && (left_val.value<Type>() < right_val.value<Type>())) ||
-					(oper==TokenGtEqOper && (left_val.value<Type>() >= right_val.value<Type>())) ||
-					(oper==TokenLtEqOper && (left_val.value<Type>() <= right_val.value<Type>())));
+bool SchemaParser::getExpressionResult(CompareOp op, const Type &left_val, const Type &right_val)
+{
+	switch(op)
+	{
+		case CompareOp::OpEq: return left_val == right_val;
+		case CompareOp::OpNe: return left_val != right_val;
+		case CompareOp::OpGt: return left_val > right_val;
+		case CompareOp::OpLt: return left_val < right_val;
+		case CompareOp::OpGtEq: return left_val >= right_val;
+		case CompareOp::OpLtEq: return left_val <= right_val;
+	}
+
+	return false;
 }

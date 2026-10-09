@@ -226,10 +226,24 @@ class __libparsers SchemaParser {
 		//! \brief PostgreSQL version currently used by the parser
 		QString pgsql_version;
 
-		/*! \brief Returns the boolean result of the comparison between left_val and right_val
-		 * using the provided operator oper (see Token*Oper) */
+		//! \brief The 6 comparison operators accepted by a comparison expression (see Token*Oper)
+		enum class CompareOp {
+			OpEq,
+			OpNe,
+			OpGt,
+			OpLt,
+			OpGtEq,
+			OpLtEq
+		};
+
+		/*! \brief Maps one of the Token*Oper strings to its CompareOp. Only called after the caller
+		 * already validated oper against the accepted operators list, so an unrecognized token here
+		 * means an accepted operator was added without updating this switch */
+		CompareOp parseCompareOp(const QString &oper);
+
+		/*! \brief Returns the boolean result of comparing left_val and right_val with op */
 		template<typename Type>
-		bool getExpressionResult(const QString &oper, const QVariant &left_val, const QVariant &right_val);
+		bool getExpressionResult(CompareOp op, const Type &left_val, const Type &right_val);
 
 		/*! \brief Parsers the token @include "file.sch". This method changes the original
 		 *  structure of the buffer by replacing @include token with the code in the included file.
