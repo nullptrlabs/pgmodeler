@@ -206,7 +206,22 @@ class __libparsers SchemaParser {
 				 //! \brief Current column where the parser reading is
 				column;
 
-		attribs_map attributes;
+		/*! \brief Points to the caller's attribute map for the duration of one getSourceCode(attribs_map)
+		 * call (and the methods it calls into, e.g. defineAttribute()); never written to, so the caller's
+		 * map is never copied nor mutated. Reset to nullptr by restartParser() */
+		const attribs_map *orig_attributes;
+
+		/*! \brief Holds only the attributes created or overwritten while parsing -- by %set/%unset, or as
+		 * the empty placeholder of an ignored unknown attribute. Checked before orig_attributes by
+		 * findAttribute(), so it shadows the caller's map without ever touching it. Cleared by restartParser() */
+		attribs_map local_attributes;
+
+		/*! \brief Returns a pointer to attrib's value, preferring local_attributes over orig_attributes;
+		 * nullptr if attrib is in neither */
+		const QString *findAttribute(const QString &attrib) const;
+
+		//! \brief Creates or overwrites attrib in local_attributes; orig_attributes is never touched
+		void setAttribute(const QString &attrib, const QString &value);
 
 		//! \brief PostgreSQL version currently used by the parser
 		QString pgsql_version;
