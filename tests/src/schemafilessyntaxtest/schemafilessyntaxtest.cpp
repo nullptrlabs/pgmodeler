@@ -20,7 +20,10 @@
 */
 
 #include <QtTest/QtTest>
+#include <QDirIterator>
+#include <functional>
 #include "databasemodel.h"
+#include "attributes.h"
 #include "pgmodelerunittest.h"
 
 class SchemaFilesSyntaxTest: public QObject, public PgModelerUnitTest {
@@ -29,8 +32,19 @@ class SchemaFilesSyntaxTest: public QObject, public PgModelerUnitTest {
 	public:
 		SchemaFilesSyntaxTest() : PgModelerUnitTest(SCHEMASDIR) {}
 
+	private:
+		//! \brief Returns every schema file shipped with the application: SQL, XML, alter, data dictionary, catalog and configuration schemas
+		QStringList allSchemaFiles();
+
+		/*! \brief Parses all schema files with attributes built by the given function (attribute name, position -> value),
+		 * failing on any error that is not expected for the configuration */
+		void parseAllSchemas(const std::function<QString(const QString &, int)> &value_for, bool ignore_flags);
+
 	private slots:
 		void schemasDontGenerateSyntaxErrors();
+		void schemasParseWithAllAttributesFilled();
+		void schemasParseWithHalfOfTheAttributesEmpty();
+		void schemasParseWithAllAttributesEmpty();
 };
 
 void SchemaFilesSyntaxTest::schemasDontGenerateSyntaxErrors()
@@ -74,6 +88,81 @@ void SchemaFilesSyntaxTest::schemasDontGenerateSyntaxErrors()
 			out << e.getErrorMessage() << Qt::endl;
 		}
 	}
+}
+
+QStringList SchemaFilesSyntaxTest::allSchemaFiles()
+{
+	QStringList files, dirs = { GlobalAttributes::getSchemasRootPath(),
+															GlobalAttributes::getConfigurationsPath() + GlobalAttributes::DirSeparator + "schemas" };
+
+	for(auto &dir : dirs)
+	{
+		QDirIterator itr(dir, { "*.sch" }, QDir::Files, QDirIterator::Subdirectories);
+
+		while(itr.hasNext())
+			files.append(itr.next());
+	}
+
+	files.sort();
+	return files;
+}
+
+void SchemaFilesSyntaxTest::parseAllSchemas(const std::function<QString(const QString &, int)> &value_for, bool ignore_flags)
+{
+	QStringList files = allSchemaFiles(), errors;
+	QString orig_cwd = QDir::currentPath();
+
+	// Guards against the test silently checking nothing if the schemas are not installed
+	QVERIFY2(files.size() > 200, qPrintable(QString("Only %1 schema files were found").arg(files.size())));
+
+	for(auto &file : files)
+	{
+		SchemaParser schparser;
+		attribs_map attrs;
+		int idx = 0;
+
+		try
+		{
+			schparser.loadFile(file);
+
+			for(auto &name : schparser.extractAttributes())
+			{
+				if(name.isEmpty() || name == Attributes::PgSqlVersion)
+					continue;
+
+				attrs[name] = value_for(name, idx++);
+			}
+
+			schparser.ignoreUnkownAttributes(ignore_flags);
+			schparser.ignoreEmptyAttributes(ignore_flags);
+			schparser.getSourceCode(file, attrs);
+		}
+		catch(Exception &e)
+		{
+			errors.append(QString("%1: %2").arg(file, e.getErrorMessage()));
+			schparser.restartParser();
+		}
+
+		QDir::setCurrent(orig_cwd);
+	}
+
+	QVERIFY2(errors.isEmpty(), qPrintable(errors.join('\n')));
+}
+
+void SchemaFilesSyntaxTest::schemasParseWithAllAttributesFilled()
+{
+	// With every attribute defined and not empty neither the unknown nor the undefined value errors can happen, even without the ignore flags
+	parseAllSchemas([](const QString &name, int idx) { return QString("%1-value%2").arg(name).arg(idx); }, false);
+}
+
+void SchemaFilesSyntaxTest::schemasParseWithHalfOfTheAttributesEmpty()
+{
+	parseAllSchemas([](const QString &name, int idx) { return (idx % 2) ? QString("%1-value").arg(name) : QString(); }, true);
+}
+
+void SchemaFilesSyntaxTest::schemasParseWithAllAttributesEmpty()
+{
+	parseAllSchemas([](const QString &, int) { return QString(); }, true);
 }
 
 QTEST_MAIN(SchemaFilesSyntaxTest)

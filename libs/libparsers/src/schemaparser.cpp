@@ -25,12 +25,8 @@
 #include "pgsqlversions.h"
 #include "globalattributes.h"
 
-const QRegularExpression SchemaParser::AttribRegExp {
-	QRegularExpression::anchoredPattern("^([a-z])([a-z]*|(\\d)*|(\\-)*|(_)*)+"),
-	QRegularExpression::CaseInsensitiveOption
-};
-
 QHash<QString, SchemaParser::CachedFile> SchemaParser::file_cache;
+QReadWriteLock SchemaParser::file_cache_lock;
 
 const QChar SchemaParser::CharComment {'#'};
 const QChar SchemaParser::CharLineEnd {'\n'};
@@ -87,11 +83,35 @@ const QRegularExpression SchemaParser::TokenIncludeRegexp { "^\\s*" +
 																													 "\\s+([\"])((.*)?)\\1\\s*$",
 																													 QRegularExpression::MultilineOption };
 
+bool SchemaParser::isValidAttributeName(const QString &name)
+{
+	if(name.isEmpty())
+		return false;
+
+	// The name starts with an ASCII letter and continues with ASCII letters, digits, hyphens or underscores
+	QChar chr = name[0];
+
+	if(!((chr >= 'a' && chr <= 'z') || (chr >= 'A' && chr <= 'Z')))
+		return false;
+
+	for(qsizetype i = 1; i < name.size(); i++)
+	{
+		chr = name[i];
+
+		if(!((chr >= 'a' && chr <= 'z') || (chr >= 'A' && chr <= 'Z') ||
+				 (chr >= '0' && chr <= '9') || chr == '-' || chr == '_'))
+			return false;
+	}
+
+	return true;
+}
+
 SchemaParser::SchemaParser()
 {
 	line = column = 0;
 	ignore_unk_atribs = ignore_empty_atribs = false;
 	pgsql_version = PgSqlVersions::DefaulVersion;
+	orig_attributes = nullptr;
 }
 
 void SchemaParser::setPgSQLVersion(const QString &pgsql_ver, bool ignore_db_version)
@@ -146,7 +166,8 @@ QStringList SchemaParser::extractAttributes()
 
 int SchemaParser::getCurrentLine()
 {
-	return line + 1;
+	// The line is an index of the buffer, which has more lines than the source file when it includes other files
+	return line + 1 - getIncludedLinesBefore(line);
 }
 
 int SchemaParser::getCurrentColumn()
@@ -164,9 +185,33 @@ void SchemaParser::restartParser()
 	/* Clears the buffer and resets the counters for line,
 		column and include statement infos */
 	buffer.clear();
-	attributes.clear();
+	orig_attributes = nullptr;
+	local_attributes.clear();
 	include_infos.clear();
 	line = column = 0;
+}
+
+const QString *SchemaParser::findAttribute(const QString &attrib) const
+{
+	auto itr = local_attributes.find(attrib);
+
+	if(itr != local_attributes.end())
+		return &itr->second;
+
+	if(orig_attributes)
+	{
+		auto o_itr = orig_attributes->find(attrib);
+
+		if(o_itr != orig_attributes->end())
+			return &o_itr->second;
+	}
+
+	return nullptr;
+}
+
+void SchemaParser::setAttribute(const QString &attrib, const QString &value)
+{
+	local_attributes[attrib] = value;
 }
 
 void SchemaParser::loadBuffer(const QString &buf)
@@ -175,16 +220,12 @@ void SchemaParser::loadBuffer(const QString &buf)
 	QTextStream ts(&buf_aux);
 	bool open_plain_txt = false;
 	QChar prev_chr;
-	QString orig_cwd = QDir::currentPath();
 
 	// Prepares the parser to do new reading
 	restartParser();
 
 	if(filename.isEmpty())
 		filename = UtilsNs::pgmTr(PGM_TR2("Global", "[memory buffer]"));
-
-	if(!search_path.isEmpty())
-		QDir::setCurrent(search_path);
 
 	// While the input file doesn't reach the end
 	while(!ts.atEnd())
@@ -199,9 +240,12 @@ void SchemaParser::loadBuffer(const QString &buf)
 		 * because it would generate syntax error. */
 		for(int pos = 0; pos < lin.size(); pos++)
 		{
-			if(!open_plain_txt && lin[pos] == CharStartPlainText)
+			if(!open_plain_txt && lin[pos] == CharStartPlainText &&
+					prev_chr != CharStartEscaped)
 				open_plain_txt = true;
-			else if(open_plain_txt && lin[pos] == CharEndPlainText)
+			else if(open_plain_txt && lin[pos] == CharEndPlainText &&
+							// Avoids closing the plain text on an escaped \] wrongly
+							prev_chr != CharStartEscaped)
 				open_plain_txt = false;
 			else if(lin[pos] == CharComment &&
 							// Avoids removing a escaped hash \# wrongly
@@ -231,7 +275,6 @@ void SchemaParser::loadBuffer(const QString &buf)
 		}
 		catch(Exception &e)
 		{
-			QDir::setCurrent(orig_cwd);
 			throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 		}
 
@@ -243,11 +286,12 @@ void SchemaParser::loadBuffer(const QString &buf)
 
 bool SchemaParser::parseInclude(const QString &include_ln, QString &src_buf, qint64 curr_stream_pos)
 {
-	QRegularExpressionMatch match = TokenIncludeRegexp.match(include_ln);
-
-	// The line does't contain a well formed include statement
-	if(!match.hasMatch() && !include_ln.contains(TokenInclude))
+	/* Most of the lines don't have an include statement, so we avoid running the
+	 * regular expression on them: it can only match a line that contains the token */
+	if(!include_ln.contains(TokenInclude))
 		return false;
+
+	QRegularExpressionMatch match = TokenIncludeRegexp.match(include_ln);
 
 	/* Making the current line point to the last line of the actual buffer
 	 * and the column point to the last character of the @include "" statement (include_ln),
@@ -257,7 +301,7 @@ bool SchemaParser::parseInclude(const QString &include_ln, QString &src_buf, qin
 	column = include_ln.length() - 1;
 
 	// The line contains a malformed include statement
-	if(!match.hasMatch() && include_ln.contains(TokenInclude))
+	if(!match.hasMatch())
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvalidSyntax)
 										.arg(filename).arg(getCurrentLine()).arg(getCurrentColumn()) + " " +
@@ -265,7 +309,9 @@ bool SchemaParser::parseInclude(const QString &include_ln, QString &src_buf, qin
 										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
-	QDir dir;
+	/* The included file is looked up relative to the search path (an empty one means the current directory).
+	 * The current directory of the process is never changed because it is shared by all threads */
+	QDir dir(search_path);
 	QStringList texts = match.capturedTexts();
 	QString incl_file = dir.absoluteFilePath(texts.last());
 	QFileInfo fi(incl_file);
@@ -310,10 +356,11 @@ bool SchemaParser::parseInclude(const QString &include_ln, QString &src_buf, qin
 		/* Registering the included buffer start and end lines based upon
 		 * the current number of lines in the main buffer where @include was found
 		 * and by counting the number of line breaks in the included buffer, this is
-		 * enough to know where the included buffer starts and ends */
+		 * enough to know where the included buffer starts and ends (each line break is
+		 * one line, so the last line is the start plus the number of lines minus one) */
 		include_infos.push_back(IncludeInfo { fi.absoluteFilePath(),
 																					static_cast<int>(buffer.size()),
-																					static_cast<int>(buffer.size() + incl_buf.count(QChar::LineFeed)),
+																					static_cast<int>(buffer.size() + incl_buf.count(QChar::LineFeed) - 1),
 																					static_cast<int>(include_ln.length()) });
 
 		/* Reset the line/column values so the parser can start the parsing of
@@ -336,26 +383,51 @@ void SchemaParser::loadFile(const QString &filename)
 
 	try
 	{
-		QString cache_key = QFileInfo(filename).absoluteFilePath();
-		auto cache_itr = file_cache.find(cache_key);
+		/* The file name is used as the cache key as it is when it's already absolute, which saves two
+		 * QFileInfo instances on each load (the name of a file may be spelled in more than one way,
+		 * which only means the same file gets more than one entry). A relative name depends on the
+		 * current directory, so it is resolved first */
+		QString cache_key = QDir::isAbsolutePath(filename) ? filename : QFileInfo(filename).absoluteFilePath();
+		CachedFile cached;
+		bool cache_hit = false;
 
-		if(cache_itr != file_cache.constEnd())
+		/* The parser is used from the threads of the export, validation, diff and import tools while the
+		 * main thread may be generating code too, so the cache is only touched under a lock. The entry is
+		 * copied (the lists inside it are implicitly shared) to be used after the lock is released */
+		{
+			QReadLocker locker(&file_cache_lock);
+			auto cache_itr = file_cache.constFind(cache_key);
+
+			if(cache_itr != file_cache.constEnd())
+			{
+				cached = *cache_itr;
+				cache_hit = true;
+			}
+		}
+
+		if(cache_hit)
 		{
 			/* The file (and whatever it @includes) was already loaded and processed by this or another
 			 * instance, so we just reuse that result instead of hitting the disk and reprocessing it again */
 			restartParser();
-			setSearchPath(QFileInfo(filename).absolutePath());
-			buffer = cache_itr->buffer;
-			include_infos = cache_itr->include_infos;
+			setSearchPath(cached.search_path);
+			buffer = cached.buffer;
+			include_infos = cached.include_infos;
 			SchemaParser::filename = filename;
 		}
 		else
 		{
 			QString buf(UtilsNs::loadFile(filename));
 			setSearchPath(QFileInfo(filename).absolutePath());
-			loadBuffer(buf);
+
+			/* The name is set before loading the buffer so the errors found on it (e.g. in
+			 * an @include statement) mention the file instead of the memory buffer */
 			SchemaParser::filename = filename;
-			file_cache[cache_key] = CachedFile { buffer, include_infos };
+			loadBuffer(buf);
+
+			// Two threads may have loaded the same file at the same time, which is harmless since the result is the same
+			QWriteLocker locker(&file_cache_lock);
+			file_cache.insert(cache_key, CachedFile { buffer, include_infos, search_path });
 		}
 	}
 	catch(Exception &e)
@@ -366,11 +438,12 @@ void SchemaParser::loadFile(const QString &filename)
 
 QString SchemaParser::getAttribute(bool &found_conv_to_xml)
 {
-	QString atrib, current_line;
+	QString atrib;
+	QStringView current_line;
 	bool start_attrib, end_attrib, error = false;
 
 	//Get the current line from the buffer
-	current_line = buffer[line];
+	current_line = std::as_const(buffer)[line];
 
 	/* Only start extracting an attribute if it starts with a { or &{
 		even if the current character is an attribute delimiter */
@@ -404,6 +477,8 @@ QString SchemaParser::getAttribute(bool &found_conv_to_xml)
 		//Unmarks the flag indicating end of attribute
 		end_attrib = false;
 
+		int start = column;
+
 		/* Attempt to extract an attribute until a space, end of line
 		 * or attribute is encountered */
 		while(column < current_line.size() &&
@@ -412,15 +487,20 @@ QString SchemaParser::getAttribute(bool &found_conv_to_xml)
 					current_line[column]!=CharTabulation &&
 					!end_attrib && !error)
 		{
-			if(current_line[column] != CharEndAttribute)
-				atrib += current_line[column];
-			else if(current_line[column] == CharEndAttribute && !atrib.isEmpty())
-				end_attrib = true;
-			else
-				error = true;
+			if(current_line[column] == CharEndAttribute)
+			{
+				// The closing brace ends the name, but it can't come before any character of it
+				if(column > start)
+					end_attrib = true;
+				else
+					error = true;
+			}
 
 			column++;
 		}
+
+		if(end_attrib)
+			atrib = current_line.mid(start, column - start - 1).toString();
 
 		/* If the attribute has been started but not finished
 		 * ie absence of the } in its statement (ie. {attr),
@@ -437,9 +517,9 @@ QString SchemaParser::getAttribute(bool &found_conv_to_xml)
 										ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
-	if(!AttribRegExp.match(atrib).hasMatch())
+	if(!isValidAttributeName(atrib))
 	{
-		throw Exception(getParseError(ErrorCode::InvalidAttribute),
+		throw Exception(getParseError(ErrorCode::InvalidAttribute, "", atrib),
 										ErrorCode::InvalidAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
@@ -448,15 +528,17 @@ QString SchemaParser::getAttribute(bool &found_conv_to_xml)
 
 QString SchemaParser::getWord()
 {
-	QString word, current_line;
+	QString word;
 
 	//Gets the current line buffer
-	current_line = buffer[line];
+	QStringView current_line = std::as_const(buffer)[line];
 
 	/* Attempt to extract a word if the first character is not
 		a special character. */
 	if(!isSpecialCharacter(current_line[column]))
 	{
+		int start = column;
+
 		/* Extract the word while it is not end of line, space or
 		 * special character */
 		while(current_line[column] != CharLineEnd &&
@@ -464,9 +546,10 @@ QString SchemaParser::getWord()
 					current_line[column] != CharSpace &&
 					current_line[column] != CharTabulation)
 		{
-			word+=current_line[column];
 			column++;
 		}
+
+		word = current_line.mid(start, column - start).toString();
 	}
 
 	return word;
@@ -474,11 +557,10 @@ QString SchemaParser::getWord()
 
 QString SchemaParser::getPlainText()
 {
-	QString text, current_line;
+	QString text;
+	QStringView current_line = std::as_const(buffer)[line];
 	bool error = false;
 	int start_col = column, start_line = line;
-
-	current_line = buffer[line];
 
 	//Attempt to extract a pure text if the first character is a [
 	if(current_line[column] == CharStartPlainText)
@@ -530,7 +612,7 @@ QString SchemaParser::getPlainText()
 				column=0;
 
 				if(line < buffer.size())
-					current_line = buffer[line];
+					current_line = std::as_const(buffer)[line];
 			}
 			else
 				column++;
@@ -560,10 +642,9 @@ QString SchemaParser::getPlainText()
 
 QString SchemaParser::getConditional()
 {
-	QString conditional, current_line;
+	QString conditional;
+	QStringView current_line = std::as_const(buffer)[line];
 	bool error = false;
-
-	current_line = buffer[line];
 
 	//Will initiate extraction if a % is found
 	if(current_line[column] == CharStartConditional)
@@ -571,15 +652,18 @@ QString SchemaParser::getConditional()
 		// The next char should be the start of the conditional instruction name
 		column++;
 
+		int start = column;
+
 		/* Moves to the next character that is the beginning of
 		 the name of the conditional word */
 		while(current_line[column] != CharLineEnd &&
 					current_line[column] != CharSpace &&
 					current_line[column] != CharTabulation)
 		{
-			conditional += current_line[column];
 			column++;
 		}
+
+		conditional = current_line.mid(start, column - start).toString();
 
 		//If no word was extracted an error is raised
 		if(conditional.isEmpty())
@@ -626,11 +710,10 @@ QString SchemaParser::getEscapedCharacter()
 
 QString SchemaParser::getMetaOrEscapedToken(bool is_escaped)
 {
-	QString chr_token, current_line;
+	QString chr_token;
+	QStringView current_line = std::as_const(buffer)[line];
 	bool error = false;
 	QChar start_chr = is_escaped ? CharStartEscaped : CharStartMetachar;
-
-	current_line = buffer[line];
 
 	//Begins the extraction in case of a $ is found
 	if(current_line[column] == start_chr)
@@ -686,7 +769,8 @@ bool SchemaParser::isSpecialCharacter(const QChar &chr)
 
 bool SchemaParser::evaluateComparisonExpr()
 {
-	QString curr_line, attrib, value, oper, valid_op_chrs="=!<>fi", extra_error_msg;
+	QString attrib, value, oper, valid_op_chrs="=!<>fi", extra_error_msg;
+	QStringView curr_line;
 	bool error = false, end_eval = false, expr_is_true = true, to_xml_entity = false;
 	static QStringList opers = { TokenEqOper, TokenNeOper, TokenGtOper,
 															 TokenLtOper, TokenGtEqOper, TokenLtEqOper };
@@ -694,7 +778,7 @@ bool SchemaParser::evaluateComparisonExpr()
 
 	try
 	{
-		curr_line = buffer[line];
+		curr_line = std::as_const(buffer)[line];
 		column++;
 
 		while(!end_eval && !error)
@@ -753,16 +837,19 @@ bool SchemaParser::evaluateComparisonExpr()
 					throw Exception(getParseError(ErrorCode::InvalidOperatorInExpression, "", oper),
 													ErrorCode::InvalidOperatorInExpression, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
-				else if(attributes.count(attrib)==0 && !ignore_unk_atribs)
-				{
-					throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
-													ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
-				}
 				else
 				{
-					QVariant left_val, right_val;
-					QString attr_val = to_xml_entity ?
-																 UtilsNs::convertToXmlEntities(attributes[attrib]) : attributes[attrib];
+					const QString *attr_ptr = findAttribute(attrib);
+
+					if(!attr_ptr && !ignore_unk_atribs)
+					{
+						throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
+														ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
+					}
+
+					static const QString empty_val;
+					const QString &attr_ref = attr_ptr ? *attr_ptr : empty_val;
+					QString attr_val = to_xml_entity ? UtilsNs::convertToXmlEntities(attr_ref) : attr_ref;
 
 					to_xml_entity = false;
 					value.remove(CharValueDelim);
@@ -770,24 +857,16 @@ bool SchemaParser::evaluateComparisonExpr()
 					//Evaluating the attribute value against the one captured on the expression without casting
 					if(oper.endsWith('f'))
 					{
-						left_val = QVariant(attr_val.toFloat());
-						right_val = QVariant(value.toFloat());
 						oper.remove('f');
-						expr_is_true = getExpressionResult<float>(oper, left_val, right_val);
+						expr_is_true = getExpressionResult(parseCompareOp(oper), attr_val.toFloat(), value.toFloat());
 					}
 					else if(oper.endsWith('i'))
 					{
-						left_val = QVariant(attr_val.toInt());
-						right_val = QVariant(value.toInt());
 						oper.remove('i');
-						expr_is_true = getExpressionResult<int>(oper, left_val, right_val);
+						expr_is_true = getExpressionResult(parseCompareOp(oper), attr_val.toInt(), value.toInt());
 					}
 					else
-					{
-						left_val = QVariant(attr_val);
-						right_val = QVariant(value);
-						expr_is_true = getExpressionResult<QString>(oper, left_val, right_val);
-					}
+						expr_is_true = getExpressionResult(parseCompareOp(oper), attr_val, value);
 
 					end_eval = true;
 				}
@@ -832,7 +911,8 @@ bool SchemaParser::evaluateComparisonExpr()
 
 void SchemaParser::defineAttribute()
 {
-	QString curr_line = buffer[line], attrib, value, new_attrib;
+	QStringView curr_line = std::as_const(buffer)[line];
+	QString attrib, value, new_attrib;
 	bool error=false, end_def=false, use_val_as_name=false, to_xml_entity = false;
 	int curr_ln_idx = line;
 	QChar chr;
@@ -871,14 +951,17 @@ void SchemaParser::defineAttribute()
 				{
 					//Get the attribute in the middle of the value
 					attrib = getAttribute(to_xml_entity);
+					const QString *attr_ptr = findAttribute(attrib);
 
-					if(attributes.count(attrib)==0 && !ignore_unk_atribs)
+					if(!attr_ptr && !ignore_unk_atribs)
 					{
 						throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
 														ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 					}
 
-					value += to_xml_entity ? UtilsNs::convertToXmlEntities(attributes[attrib]) : attributes[attrib];
+					static const QString empty_val;
+					const QString &attr_ref = attr_ptr ? *attr_ptr : empty_val;
+					value += to_xml_entity ? UtilsNs::convertToXmlEntities(attr_ref) : attr_ref;
 					to_xml_entity = false;
 				}
 			}
@@ -902,7 +985,14 @@ void SchemaParser::defineAttribute()
 			}
 			else
 			{
-				value += getWord();
+				QString word = getWord();
+
+				/* A closing token that doesn't belong to a %set value (e.g. a stray ] or }) makes getWord() return an empty
+				 * text without moving the cursor, which would loop forever, so it's treated as a syntax error */
+				if(word.isEmpty())
+					error = true;
+
+				value += word;
 			}
 
 			//If the attribute name was not extracted yet returns a error
@@ -918,18 +1008,24 @@ void SchemaParser::defineAttribute()
 
 	if(!error)
 	{
-		attrib = (use_val_as_name ? attributes[new_attrib] : new_attrib);
+		if(use_val_as_name)
+		{
+			const QString *attr_ptr = findAttribute(new_attrib);
+			attrib = attr_ptr ? *attr_ptr : QString();
+		}
+		else
+			attrib = new_attrib;
 
 		//Checking if the attribute has a valid name
-		if(!AttribRegExp.match(attrib).hasMatch())
+		if(!isValidAttributeName(attrib))
 		{
-			throw Exception(getParseError(ErrorCode::InvalidAttribute),
+			throw Exception(getParseError(ErrorCode::InvalidAttribute, "", attrib),
 											ErrorCode::InvalidAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
 
 		/* Creates the attribute in the attribute map of the schema, making the attribute
 		 * available on the rest of the script being parsed */
-		attributes[attrib] = value;
+		setAttribute(attrib, value);
 	}
 	else
 	{
@@ -940,13 +1036,14 @@ void SchemaParser::defineAttribute()
 
 void SchemaParser::unsetAttribute()
 {
-	QString curr_line, attrib;
+	QStringView curr_line;
+	QString attrib;
 	bool end_def=false, to_xml_entity = false;
 	QChar chr;
 
 	try
 	{
-		curr_line=buffer[line];
+		curr_line = std::as_const(buffer)[line];
 
 		while(!end_def)
 		{
@@ -961,19 +1058,19 @@ void SchemaParser::unsetAttribute()
 			{
 				attrib = getAttribute(to_xml_entity);
 
-				if(attributes.count(attrib)==0 && !ignore_unk_atribs)
+				if(!findAttribute(attrib) && !ignore_unk_atribs)
 				{
 					throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
 													 ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 
-				if(!AttribRegExp.match(attrib).hasMatch())
+				if(!isValidAttributeName(attrib))
 				{
 					throw Exception(getParseError(ErrorCode::InvalidAttribute, "", attrib),
 													 ErrorCode::InvalidAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 
-				attributes[attrib]="";
+				setAttribute(attrib, "");
 			}
 			else
 			{
@@ -988,9 +1085,67 @@ void SchemaParser::unsetAttribute()
 										PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
+
+void SchemaParser::skipAttributeDefinition()
+{
+	QStringView curr_line = std::as_const(buffer)[line];
+	int curr_ln_idx = line;
+	bool end_def = false, to_xml_entity = false;
+	QChar chr;
+
+	try
+	{
+		while(!end_def)
+		{
+			ignoreBlankChars(curr_line);
+			chr = curr_line[column];
+
+			if(chr == CharLineEnd)
+				end_def = true;
+			else if(chr == CharStartConditional)
+			{
+				throw Exception(getParseError(ErrorCode::InvalidSyntax),
+												ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
+			}
+			else if(chr == CharToXmlEntity || chr == CharStartAttribute)
+				getAttribute(to_xml_entity);
+			else if(chr == CharStartPlainText)
+			{
+				getPlainText();
+
+				/* Just like defineAttribute(), stop as soon as a multi-line plain text is consumed:
+				 * the cursor is now on the line of the closing ], which the caller advances past */
+				end_def = (line != curr_ln_idx);
+				curr_line = std::as_const(buffer)[line];
+			}
+			else if(chr == CharStartMetachar)
+				getMetaCharacter();
+			else if(chr == CharStartEscaped)
+				getEscapedCharacter();
+			else
+			{
+				QString word = getWord();
+
+				// A stray ] or } doesn't advance the cursor and would loop forever
+				if(word.isEmpty())
+				{
+					throw Exception(getParseError(ErrorCode::InvalidSyntax),
+													ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
+				}
+			}
+		}
+	}
+	catch(Exception &e)
+	{
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),
+										PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+	}
+}
+
 bool SchemaParser::evaluateExpression()
 {
-	QString current_line, cond, attrib, prev_cond;
+	QString cond, attrib, prev_cond;
+	QStringView current_line;
 	bool error = false, end_eval = false, expr_is_true = true,
 			attrib_true = true, comp_true = true, to_xml_entity = false;
 	unsigned attrib_count = 0, and_or_count = 0;
@@ -998,7 +1153,7 @@ bool SchemaParser::evaluateExpression()
 
 	try
 	{
-		current_line = buffer[line];
+		current_line = std::as_const(buffer)[line];
 
 		while(!end_eval && !error)
 		{
@@ -1010,7 +1165,7 @@ bool SchemaParser::evaluateExpression()
 
 				if(line < buffer.size())
 				{
-					current_line = buffer[line];
+					current_line = std::as_const(buffer)[line];
 					column = 0;
 					ignoreBlankChars(current_line);
 				}
@@ -1056,8 +1211,10 @@ bool SchemaParser::evaluateExpression()
 			{
 				attrib = getAttribute(to_xml_entity);
 
+				const QString *attr_ptr = findAttribute(attrib);
+
 							 //Raises an error if the attribute does is unknown
-				if(attributes.count(attrib)==0 && !ignore_unk_atribs)
+				if(!attr_ptr && !ignore_unk_atribs)
 				{
 					throw Exception(getParseError(ErrorCode::UnkownAttribute, "", attrib),
 													ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
@@ -1075,8 +1232,10 @@ bool SchemaParser::evaluateExpression()
 
 				if(!error)
 				{
+					bool attr_empty = !attr_ptr || attr_ptr->isEmpty();
+
 					//Appliyng the NOT operator if found
-					attrib_true = (cond == TokenNot ? attributes[attrib].isEmpty() : !attributes[attrib].isEmpty());
+					attrib_true = (cond == TokenNot ? attr_empty : !attr_empty);
 
 					//Executing the AND operation if the token is found
 					if(cond == TokenAnd || prev_cond == TokenAnd)
@@ -1131,7 +1290,7 @@ bool SchemaParser::evaluateExpression()
 	return expr_is_true;
 }
 
-void SchemaParser::ignoreBlankChars(const QString &line)
+void SchemaParser::ignoreBlankChars(QStringView line)
 {
 	while(column < line.size() &&
 				(line[column]==CharSpace ||
@@ -1155,13 +1314,15 @@ QString SchemaParser::convertMetaCharacter(const QString &meta)
 														{ TokenMetaAm, CharToXmlEntity },
 														{ TokenMetaBs, CharStartEscaped }};
 
-	if(metas.count(meta) == 0)
+	auto itr = metas.find(meta);
+
+	if(itr == metas.end())
 	{
 		throw Exception(getParseError(ErrorCode::InvalidMetacharacter, "", CharStartMetachar + meta),
 										ErrorCode::InvalidMetacharacter, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
-	return metas.at(meta);
+	return itr->second;
 }
 
 QString SchemaParser::convertEscapedCharacter(const QString &escaped)
@@ -1189,7 +1350,7 @@ QString SchemaParser::convertEscapedCharacter(const QString &escaped)
 	};
 
 	/* Special case for escaped \* which returns the special
-	 * character UtilsNs::DataSeparator (•) */
+	 * character UtilsNs::DataSeparator (·) */
 	if(escaped == "*")
 		return UtilsNs::DataSeparator;
 
@@ -1257,23 +1418,34 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 	bool error = false, if_expr = false, to_xml_entity = false;
 	QChar chr;
 	std::vector<bool> vet_expif, vet_tk_if, vet_tk_then, vet_tk_else;
-	std::map<int, std::vector<QString> > if_map, else_map;
+	/* One entry per %if level, indexed directly by if_level instead of looked up in a map: if_level is
+	 * assigned sequentially (vet_tk_if.size() - 1 right after a push_back, see below) and these two grow
+	 * in lockstep with vet_tk_if, so if_stack[if_level]/else_stack[if_level] are always valid slots */
+	std::vector<std::vector<QString>> if_stack, else_stack;
 	std::vector<QString>::iterator itr, itr_end;
 	std::vector<int> vet_prev_level;
 	std::vector<QString> *vet_aux;
 
-	//In case the file was successfuly loaded
-	if(buffer.size() > 0)
+	try
 	{
+		// Nothing to interpret when no buffer was loaded
+		if(buffer.isEmpty())
+		{
+			restartParser();
+			ignore_unk_atribs = ignore_empty_atribs = false;
+			return object_def;
+		}
+
 		//Init the control variables
-		attributes = attribs;
+		orig_attributes = &attribs;
+		local_attributes.clear();
 		error = if_expr = false;
 		if_level = -1;
 		end_cnt = if_cnt = 0;
 
 		while(line < buffer.size())
 		{
-			chr = buffer[line][column];
+			chr = std::as_const(buffer)[line][column];
 
 			/* Increments the number of rows causing the parser
 			to get the next line buffer for analysis */
@@ -1285,7 +1457,7 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 			else if(chr == CharTabulation || chr == CharSpace)
 			{
 				//The parser will ignore the spaces that are not within pure texts
-				ignoreBlankChars(buffer[line]);
+				ignoreBlankChars(std::as_const(buffer)[line]);
 			}
 			//Metacharacter extraction
 			else if(chr == CharStartMetachar || chr == CharStartEscaped)
@@ -1310,12 +1482,12 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 					if(vet_tk_if[if_level] &&
 							vet_tk_then[if_level] &&
 							!vet_tk_else[if_level])
-						if_map[if_level].push_back(meta);
+						if_stack[if_level].push_back(meta);
 
 					/* If the parser is in 'else' section,
 					 * places the metacharacter on the word map of the current 'else'*/
 					else if(vet_tk_else[if_level])
-						else_map[if_level].push_back(meta);
+						else_stack[if_level].push_back(meta);
 				}
 				else
 					/* If the parsers is not in a 'if / else', puts the metacharacter
@@ -1330,7 +1502,9 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 				atrib = getAttribute(to_xml_entity);
 
 				//Checks if the attribute extracted belongs to the passed list of attributes
-				if(attributes.count(atrib) == 0)
+				const QString *attr_ptr = findAttribute(atrib);
+
+				if(!attr_ptr)
 				{
 					if(!ignore_unk_atribs)
 					{
@@ -1338,7 +1512,8 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 														ErrorCode::UnkownAttribute, PGM_FUNC, PGM_FILE, PGM_LINE);
 					}
 
-					attributes[atrib]	= "";
+					setAttribute(atrib, "");
+					attr_ptr = findAttribute(atrib);
 				}
 
 				//If the parser is inside an 'if / else' extracting tokens
@@ -1360,17 +1535,17 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 									 //If the parser is in the 'if' section
 						if(vet_tk_if[if_level] &&	vet_tk_then[if_level] &&	!vet_tk_else[if_level])
 							//Inserts the attribute value in the map of the words of current the 'if' section
-							if_map[if_level].push_back(atrib);
+							if_stack[if_level].push_back(atrib);
 						else if(vet_tk_else[if_level])
 							//Inserts the attribute value in the map of the words of current the 'else' section
-							else_map[if_level].push_back(atrib);
+							else_stack[if_level].push_back(atrib);
 					}
 				}
 				else
 				{
 					/* If the attribute has no value set and parser must not ignore empty values
 					 * raises an exception */
-					if(attributes[atrib].isEmpty() && !ignore_empty_atribs)
+					if(attr_ptr->isEmpty() && !ignore_empty_atribs)
 					{
 						throw Exception(getParseError(ErrorCode::UndefinedAttributeValue, "", atrib),
 														ErrorCode::UndefinedAttributeValue, PGM_FUNC, PGM_FILE, PGM_LINE);
@@ -1378,7 +1553,7 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 
 					/* If the parser is not in an if / else, concatenates the value of the attribute
 					 * directly in definition in sql */
-					object_def += to_xml_entity ? UtilsNs::convertToXmlEntities(attributes[atrib]) : attributes[atrib];
+					object_def += to_xml_entity ? UtilsNs::convertToXmlEntities(*attr_ptr) : *attr_ptr;
 					to_xml_entity = false;
 				}
 			}
@@ -1434,15 +1609,21 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 					}
 					else
 					{
-						ignoreBlankChars(buffer[line]);
+						ignoreBlankChars(std::as_const(buffer)[line]);
 
 						/* When the %set instruction is ignored due to the fact of it being under a if expression evaluated as false
 						 * there's the need to create an empty representation of it in the set of attributes so in further expressions
 						 * evaluations the parser isn't broke by a unknow attribute exception */
 						atrib = getAttribute(to_xml_entity);
 
-						if(attributes.count(atrib) == 0)
-							attributes[atrib] = "";
+						if(!findAttribute(atrib))
+							setAttribute(atrib, "");
+
+						/* A %set's value may hold a plain text spanning more than the current line
+						 * (see getPlainText()); skip past it the same way defineAttribute() would so
+						 * the line advanced below is the right one instead of landing mid-value */
+						if(cond == TokenSet)
+							skipAttributeDefinition();
 
 						column = 0;
 						line++;
@@ -1467,6 +1648,10 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 						vet_tk_if.push_back(true);
 						vet_tk_then.push_back(false);
 						vet_tk_else.push_back(false);
+
+						//Opens this level's word lists, kept in lockstep with vet_tk_if
+						if_stack.push_back({});
+						else_stack.push_back({});
 
 						//Defines the current if level as the size of list 'if' tokens found  -1
 						if_level = (vet_tk_if.size()-1);
@@ -1504,33 +1689,27 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 							//In case the current 'if' doesn't in the 'else' section of the above 'if' (previous if level)
 							if(!vet_tk_else[prev_if_level])
 								//Get the extracted word vector on the above 'if'
-								vet_aux=&if_map[prev_if_level];
+								vet_aux=&if_stack[prev_if_level];
 							else
 								//Get the extracted word vector on the above 'else'
-								vet_aux=&else_map[prev_if_level];
+								vet_aux=&else_stack[prev_if_level];
 						}
 						else
 							vet_aux = nullptr;
 
-						/* Initializes the iterators to scan
-							 the auxiliary vector if necessary */
-						itr=itr_end=if_map[0].end();
-
-						/* In case the expression of the current 'if' has the value true
-						 * then the parser will scan the list of words on the 'if' part of the
-						 * current 'if' */
+						/* Picks the 'if' or 'else' word list of the current level to scan below. If the picked
+						 * section is empty (no words between %then/%else and %end) or wasn't given at all
+						 * (no %else), the vector is simply empty -- if_stack/else_stack always have a slot for
+						 * every level that was opened, so there's no need to check for its existence first */
 						if(vet_expif[if_level])
 						{
-							itr = if_map[if_level].begin();
-							itr_end = if_map[if_level].end();
+							itr = if_stack[if_level].begin();
+							itr_end = if_stack[if_level].end();
 						}
-
-						/* If there is a 'else' part on the current 'if'
-						 * then the parser will scan the list of words on the 'else' part */
-						else if(else_map.count(if_level)>0)
+						else
 						{
-							itr = else_map[if_level].begin();
-							itr_end = else_map[if_level].end();
+							itr = else_stack[if_level].begin();
+							itr_end = else_stack[if_level].end();
 						}
 
 						/* This iteration scans the list of words selected above
@@ -1557,7 +1736,10 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 									int pos = conv_entity ? 2 : 1;
 
 									atrib = word.mid(pos, word.size() - (pos + 1));
-									word = conv_entity ? UtilsNs::convertToXmlEntities(attributes[atrib]) : attributes[atrib];
+									const QString *attr_ptr = findAttribute(atrib);
+									static const QString empty_val;
+									const QString &attr_ref = attr_ptr ? *attr_ptr : empty_val;
+									word = conv_entity ? UtilsNs::convertToXmlEntities(attr_ref) : attr_ref;
 
 									/* If the attribute has no value set and parser must not ignore empty values
 									 * raises an exception */
@@ -1586,8 +1768,8 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 						 * used auxiliary structures*/
 						else
 						{
-							if_map.clear();
-							else_map.clear();
+							if_stack.clear();
+							else_stack.clear();
 							vet_tk_if.clear();
 							vet_tk_then.clear();
 							vet_tk_else.clear();
@@ -1644,12 +1826,12 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 						 !vet_tk_else[if_level])
 					{
 						//Inserts the word on the words map extracted on 'if' section
-						if_map[if_level].push_back(word);
+						if_stack[if_level].push_back(word);
 					}
 					else if(vet_tk_else[if_level])
 					{
 						//Inserts the word on the words map extracted on 'else' section
-						else_map[if_level].push_back(word);
+						else_stack[if_level].push_back(word);
 					}
 				}
 				else
@@ -1665,12 +1847,16 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 			throw Exception(getParseError(ErrorCode::InvalidSyntax),
 											ErrorCode::InvalidSyntax, PGM_FUNC , PGM_FILE, PGM_LINE);
 		}
-	}
 
-	restartParser();
-	ignore_unk_atribs = false;
-	ignore_empty_atribs = false;
-	return object_def;
+		restartParser();
+		ignore_unk_atribs = ignore_empty_atribs = false;
+		return object_def;
+	}
+	catch(Exception &e)
+	{
+		ignore_unk_atribs = ignore_empty_atribs = false;
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+	}
 }
 
 QString SchemaParser::getSourceCode(const QString &filename, attribs_map &attribs)
@@ -1687,12 +1873,31 @@ QString SchemaParser::getSourceCode(const QString &filename, attribs_map &attrib
 	}
 }
 
+SchemaParser::CompareOp SchemaParser::parseCompareOp(const QString &oper)
+{
+	if(oper == TokenEqOper) return CompareOp::OpEq;
+	if(oper == TokenNeOper) return CompareOp::OpNe;
+	if(oper == TokenGtOper) return CompareOp::OpGt;
+	if(oper == TokenLtOper) return CompareOp::OpLt;
+	if(oper == TokenGtEqOper) return CompareOp::OpGtEq;
+	if(oper == TokenLtEqOper) return CompareOp::OpLtEq;
+
+	throw Exception(getParseError(ErrorCode::InvalidOperatorInExpression, "", oper),
+									ErrorCode::InvalidOperatorInExpression, PGM_FUNC, PGM_FILE, PGM_LINE);
+}
+
 template<typename Type>
-bool SchemaParser::getExpressionResult(const QString &oper, const QVariant &left_val, const QVariant &right_val){
-	return ((oper==TokenEqOper && (left_val.value<Type>() == right_val.value<Type>())) ||
-					(oper==TokenNeOper && (left_val.value<Type>() != right_val.value<Type>())) ||
-					(oper==TokenGtOper && (left_val.value<Type>() > right_val.value<Type>())) ||
-					(oper==TokenLtOper && (left_val.value<Type>() < right_val.value<Type>())) ||
-					(oper==TokenGtEqOper && (left_val.value<Type>() >= right_val.value<Type>())) ||
-					(oper==TokenLtEqOper && (left_val.value<Type>() <= right_val.value<Type>())));
+bool SchemaParser::getExpressionResult(CompareOp op, const Type &left_val, const Type &right_val)
+{
+	switch(op)
+	{
+		case CompareOp::OpEq: return left_val == right_val;
+		case CompareOp::OpNe: return left_val != right_val;
+		case CompareOp::OpGt: return left_val > right_val;
+		case CompareOp::OpLt: return left_val < right_val;
+		case CompareOp::OpGtEq: return left_val >= right_val;
+		case CompareOp::OpLtEq: return left_val <= right_val;
+	}
+
+	return false;
 }

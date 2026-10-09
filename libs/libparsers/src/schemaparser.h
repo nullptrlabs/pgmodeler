@@ -37,6 +37,7 @@
 #include "utilsns.h"
 #include <QRegularExpression>
 #include <QHash>
+#include <QReadWriteLock>
 
 class __libparsers SchemaParser {
 	private:
@@ -51,6 +52,12 @@ class __libparsers SchemaParser {
 				return start_line >= 0 &&
 							 end_line >= start_line &&
 							 stmt_length > 0;
+			}
+
+			//! \brief Number of lines of the buffer that come from the included file
+			int lineCount()
+			{
+				return end_line - start_line + 1;
 			}
 
 			bool contains(int line)
@@ -71,12 +78,18 @@ class __libparsers SchemaParser {
 		struct CachedFile {
 			QStringList buffer;
 			std::vector<IncludeInfo> include_infos;
+
+			//! \brief Absolute path of the folder of the file, which is the search path of its includes
+			QString search_path;
 		};
 
 		/*! \brief Caches the schema files already loaded by any instance of this class, keyed by the
 		 *  file's absolute path. This avoids reading and reprocessing (comment stripping, @include resolution)
 		 *  a schema file more than once per execution, since these files don't change while the app is running */
 		static QHash<QString, CachedFile> file_cache;
+
+		//! \brief Protects file_cache, since schema files are loaded from more than one thread
+		static QReadWriteLock file_cache_lock;
 
 		/*! \brief Indicates that the parser should ignore unknown
 		 attributes avoiding raising exceptions */
@@ -86,8 +99,9 @@ class __libparsers SchemaParser {
 		 attributes avoiding raising exceptions */
 		bool ignore_empty_atribs;
 
-		//! \brief RegExp used to validate attribute names
-		static const QRegularExpression AttribRegExp;
+		/*! \brief Returns whether the name is a valid attribute name, that is, it starts with an ASCII letter
+		 * and the remaining characters are ASCII letters, digits, hyphens or underscores */
+		static bool isValidAttributeName(const QString &name);
 
 		//! \brief Get an attribute name from the buffer on the current position
 		QString getAttribute(bool &found_conv_to_xml);
@@ -151,8 +165,14 @@ class __libparsers SchemaParser {
 		//! \brief Clears the value of attributes when finding the instruction: %unset {attr1} {attr2}...
 		void unsetAttribute();
 
+		/*! \brief Advances the cursor past a %set's value exactly as defineAttribute() would, without
+		 * evaluating or storing anything. Used to skip the value of a %set whose condition evaluated
+		 * to false: a value that holds a plain text spanning multiple lines (see getPlainText()) is
+		 * skipped correctly instead of leaving the cursor in the middle of it */
+		void skipAttributeDefinition();
+
 		//! \brief Increments the column counter while blank chars (space and tabs) are found on the line
-		void ignoreBlankChars(const QString &line);
+		void ignoreBlankChars(QStringView line);
 
 		//! \brief Translates the meta char token to the real character
 		QString convertMetaCharacter(const QString &meta);
@@ -186,15 +206,44 @@ class __libparsers SchemaParser {
 				 //! \brief Current column where the parser reading is
 				column;
 
-		attribs_map attributes;
+		/*! \brief Points to the caller's attribute map for the duration of one getSourceCode(attribs_map)
+		 * call (and the methods it calls into, e.g. defineAttribute()); never written to, so the caller's
+		 * map is never copied nor mutated. Reset to nullptr by restartParser() */
+		const attribs_map *orig_attributes;
+
+		/*! \brief Holds only the attributes created or overwritten while parsing -- by %set/%unset, or as
+		 * the empty placeholder of an ignored unknown attribute. Checked before orig_attributes by
+		 * findAttribute(), so it shadows the caller's map without ever touching it. Cleared by restartParser() */
+		attribs_map local_attributes;
+
+		/*! \brief Returns a pointer to attrib's value, preferring local_attributes over orig_attributes;
+		 * nullptr if attrib is in neither */
+		const QString *findAttribute(const QString &attrib) const;
+
+		//! \brief Creates or overwrites attrib in local_attributes; orig_attributes is never touched
+		void setAttribute(const QString &attrib, const QString &value);
 
 		//! \brief PostgreSQL version currently used by the parser
 		QString pgsql_version;
 
-		/*! \brief Returns the boolean result of the comparison between left_val and right_val
-		 * using the provided operator oper (see Token*Oper) */
+		//! \brief The 6 comparison operators accepted by a comparison expression (see Token*Oper)
+		enum class CompareOp {
+			OpEq,
+			OpNe,
+			OpGt,
+			OpLt,
+			OpGtEq,
+			OpLtEq
+		};
+
+		/*! \brief Maps one of the Token*Oper strings to its CompareOp. Only called after the caller
+		 * already validated oper against the accepted operators list, so an unrecognized token here
+		 * means an accepted operator was added without updating this switch */
+		CompareOp parseCompareOp(const QString &oper);
+
+		/*! \brief Returns the boolean result of comparing left_val and right_val with op */
 		template<typename Type>
-		bool getExpressionResult(const QString &oper, const QVariant &left_val, const QVariant &right_val);
+		bool getExpressionResult(CompareOp op, const Type &left_val, const Type &right_val);
 
 		/*! \brief Parsers the token @include "file.sch". This method changes the original
 		 *  structure of the buffer by replacing @include token with the code in the included file.
@@ -202,6 +251,23 @@ class __libparsers SchemaParser {
 		 *  Currently, you can have includes only in the main buffer (source file). If the included
 		 *  files also have includes this method will raise an exception. This should be changed in the future. */
 		bool parseInclude(const QString &include_ln, QString &src_buf, qint64 curr_stream_pos);
+
+		/*! \brief Returns how many more lines than in the source file the buffer has before the buffer line
+		 * buffer_line. The @include statement is one line of the source file but it is replaced in the buffer by all
+		 * the lines of the included file, so the lines that come after an include must be moved back by this amount to
+		 * be reported at the place they have in the source file */
+		int getIncludedLinesBefore(int buffer_line)
+		{
+			int count = 0;
+
+			for(auto &info : include_infos)
+			{
+				if(info.end_line < buffer_line)
+					count += info.lineCount() - 1;
+			}
+
+			return count;
+		}
 
 		/*! \brief Returns a formatted error message used prior to an exception raising.
 		 * This method take into account if the error happened in the current schema file/buffer or
@@ -211,7 +277,7 @@ class __libparsers SchemaParser {
 		template<typename ...ArgType>
 		QString getParseError(ErrorCode err_code, const QString &extra_msg = "", const ArgType & ...args)
 		{
-			int actual_line = line + 1, incl_line = 0, incl_stmt_len = 0;
+			int actual_line = line + 1 - getIncludedLinesBefore(line), incl_line = 0, incl_buf_line = 0, incl_stmt_len = 0;
 			QString file = filename, msg;
 			bool is_incl_error = false;
 
@@ -221,7 +287,8 @@ class __libparsers SchemaParser {
 			{
 				if(info.contains(line))
 				{
-					incl_line = info.start_line;
+					incl_buf_line = info.start_line;
+					incl_line = info.start_line - getIncludedLinesBefore(info.start_line);
 					actual_line = (line - info.start_line) + 1;
 					file = info.include_file;
 					incl_stmt_len = info.stmt_length;
@@ -252,7 +319,7 @@ class __libparsers SchemaParser {
 			if(is_incl_error)
 			{
 				column = incl_stmt_len - 1;
-				line = incl_line;
+				line = incl_buf_line;
 			}
 
 			return msg;
@@ -300,7 +367,7 @@ class __libparsers SchemaParser {
 		TokenMetaHs, // $hs (hash/number sign '#')
 		TokenMetaPs, // $ps (percentage sign '%')
 		TokenMetaAt, // $at (at character '@')
-		TokenMetaDs, // $ds (special data separator character '•')
+		TokenMetaDs, // $ds (special data separator character '·')
 		TokenMetaAm, // $am (ampersand character '&')
 		TokenMetaBs, // $bs (backslash character '\')
 
