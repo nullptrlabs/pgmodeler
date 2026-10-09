@@ -79,7 +79,7 @@ class SchemaParserTest: public QObject, public PgModelerUnitTest {
 		void testFlagsAreResetAfterASuccessfulParsing();
 		void testFlagsAreResetAfterAFailedParsing();
 		void testParsingWithoutLoadedBufferReturnsEmptyText();
-		void testCurrentLineAndColumnPointToTheError();
+		void testParserIsRestartedAfterAnError();
 		void testLoadFileOfMissingFileRaises();
 		void testCachedLoadProducesTheSameOutputAsTheFirstLoad();
 		void testRelativeFileNamesAreResolvedAgainstTheCurrentDirectory();
@@ -814,7 +814,6 @@ void SchemaParserTest::testErrorPositionsWithSeveralIncludes()
 			{
 				QVERIFY2(msg.contains(main), qPrintable(msg));
 				QVERIFY2(msg.contains(QString("line %1,").arg(error_line)), qPrintable(msg));
-				QCOMPARE(schparser.getCurrentLine(), error_line);
 			}
 			else
 			{
@@ -824,7 +823,6 @@ void SchemaParserTest::testErrorPositionsWithSeveralIncludes()
 
 				// The main file is mentioned with the line of the @include statement
 				QVERIFY2(msg.contains(QString("at line `%1'").arg(include_line)), qPrintable(msg));
-				QCOMPARE(schparser.getCurrentLine(), include_line);
 			}
 		}
 	}
@@ -998,11 +996,6 @@ void SchemaParserTest::testFlagsAreResetAfterAFailedParsing()
 	catch(Exception &e)
 	{
 		QCOMPARE(e.getErrorCode(), ErrorCode::InvalidInstruction);
-
-		// The position of the error is still available to the caller until the parser is restarted
-		QCOMPARE(schparser.getCurrentLine(), 1);
-		QCOMPARE(schparser.getCurrentColumn(), 7);
-		schparser.restartParser();
 	}
 
 	// The flags must not leak to the next parsing of the same instance
@@ -1045,7 +1038,7 @@ void SchemaParserTest::testParsingWithoutLoadedBufferReturnsEmptyText()
 	QCOMPARE(schparser.getSourceCode(attribs), QString());
 }
 
-void SchemaParserTest::testCurrentLineAndColumnPointToTheError()
+void SchemaParserTest::testParserIsRestartedAfterAnError()
 {
 	SchemaParser schparser;
 	attribs_map attribs;
@@ -1061,13 +1054,15 @@ void SchemaParserTest::testCurrentLineAndColumnPointToTheError()
 	}
 	catch(Exception &e)
 	{
+		// The position of the error is only in the message, the parser itself goes back to the initial state
 		QCOMPARE(e.getErrorCode(), ErrorCode::InvalidInstruction);
-		QCOMPARE(schparser.getCurrentLine(), 2);
-		QCOMPARE(schparser.getCurrentColumn(), 7);
-		schparser.restartParser();
+		QVERIFY2(e.getErrorMessage().contains("line 2, column 7"), qPrintable(e.getErrorMessage()));
 		QCOMPARE(schparser.getCurrentLine(), 1);
 		QCOMPARE(schparser.getCurrentColumn(), 1);
 	}
+
+	// The buffer was discarded as well
+	QCOMPARE(schparser.getSourceCode(attribs), QString());
 }
 
 void SchemaParserTest::testLoadFileOfMissingFileRaises()
