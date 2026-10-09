@@ -1316,6 +1316,23 @@ void SchemaParser::ignoreEmptyAttributes(bool ignore)
 
 QString SchemaParser::getSourceCode(const attribs_map &attribs)
 {
+	try
+	{
+		return parseBuffer(attribs);
+	}
+	catch(...)
+	{
+		/* The ignore flags are valid for a single parsing, so they are also cleared when it fails, otherwise the
+		 * next parsing with the same instance would silently inherit them. The buffer and the position are kept
+		 * (restartParser() is not called) because the callers read the position of the error */
+		ignore_unk_atribs = false;
+		ignore_empty_atribs = false;
+		throw;
+	}
+}
+
+QString SchemaParser::parseBuffer(const attribs_map &attribs)
+{
 	QString object_def;
 	unsigned end_cnt = 0, if_cnt = 0;
 	int if_level = -1, prev_if_level = -1;
@@ -1327,19 +1344,6 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 	std::vector<QString>::iterator itr, itr_end;
 	std::vector<int> vet_prev_level;
 	std::vector<QString> *vet_aux;
-
-	/* The ignore flags are valid for a single parsing, so they are cleared when leaving this method in any way,
-	 * errors included, otherwise the next parsing with the same instance would silently inherit them. The buffer
-	 * and the position are kept when an error happens because the callers read the position of the error */
-	struct FlagsReset {
-		bool &ignore_unk, &ignore_empty;
-
-		~FlagsReset()
-		{
-			ignore_unk = false;
-			ignore_empty = false;
-		}
-	} flags_reset { ignore_unk_atribs, ignore_empty_atribs };
 
 	//In case the file was successfuly loaded
 	if(buffer.size() > 0)
@@ -1747,6 +1751,8 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 	}
 
 	restartParser();
+	ignore_unk_atribs = false;
+	ignore_empty_atribs = false;
 	return object_def;
 }
 
