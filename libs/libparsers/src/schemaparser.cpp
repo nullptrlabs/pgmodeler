@@ -1328,22 +1328,16 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 	std::vector<int> vet_prev_level;
 	std::vector<QString> *vet_aux;
 
-	/* The ignore flags are valid for a single parsing, so they are cleared when leaving this method in any way,
-	 * errors included, otherwise the next parsing with the same instance would silently inherit them. The buffer
-	 * and the position are kept when an error happens because the callers read the position of the error */
-	struct FlagsReset {
-		bool &ignore_unk, &ignore_empty;
-
-		~FlagsReset()
-		{
-			ignore_unk = false;
-			ignore_empty = false;
-		}
-	} flags_reset { ignore_unk_atribs, ignore_empty_atribs };
-
-	//In case the file was successfuly loaded
-	if(buffer.size() > 0)
+	try
 	{
+		// Nothing to interpret when no buffer was loaded
+		if(buffer.isEmpty())
+		{
+			restartParser();
+			ignore_unk_atribs = ignore_empty_atribs = false;
+			return object_def;
+		}
+
 		//Init the control variables
 		attributes = attribs;
 		error = if_expr = false;
@@ -1744,10 +1738,19 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 			throw Exception(getParseError(ErrorCode::InvalidSyntax),
 											ErrorCode::InvalidSyntax, PGM_FUNC , PGM_FILE, PGM_LINE);
 		}
-	}
 
-	restartParser();
-	return object_def;
+		restartParser();
+		ignore_unk_atribs = ignore_empty_atribs = false;
+		return object_def;
+	}
+	catch(Exception &e)
+	{
+		/* The parser is restarted when the parsing fails, so the next one starts clean: the ignore flags
+		 * are valid for a single parsing and would otherwise be silently inherited by it */
+		restartParser();
+		ignore_unk_atribs = ignore_empty_atribs = false;
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+	}
 }
 
 QString SchemaParser::getSourceCode(const QString &filename, attribs_map &attribs)
