@@ -20,6 +20,8 @@ v2.0.0
 * [Change] Every private executable now follows the configured UI language instead of only the main GUI.
 * [Change] Validating the database form (`BaseObjectWidget`) now only regenerates the `CREATE DATABASE` SQL instead of the whole model's SQL, eliminating a multi-second stall on large models when applying database-level changes.
 * [Change] `SchemaParser` now caches a schema file's already-processed content (comments stripped, `@include` resolved) keyed by its path, instead of re-reading and reprocessing it on every use; `Catalog`'s own ad hoc query cache was replaced by this central one.
+* [Change] `SchemaParser`'s interpreter was substantially reworked for speed: removed per-call regular expression construction (attribute name validation, XML entity conversion, and several similar fixed patterns across `BaseObject`, `PgSqlType`, `BaseFunction` and `BaseGraphicObject`), stopped copying the full attribute map for every object generated, and simplified its internal dispatch (metacharacters, comparison operators, conditional branches). Parsing a schema file now takes roughly a third of the CPU instructions it used to, and SQL/XML generation on real-world models is 50-70% faster.
+* [Change] Attribute names in `.sch` schema files no longer accept the Unicode Kelvin sign (K) or long s (ſ) as letters, matching the documented `[A-Za-z]` rule; only affects custom or plugin schemas that relied on those exact characters.
 * [Change] Indexed `DatabaseModel::getObject()` by name and signature, avoiding a linear scan for lookups that don't need the fallback.
 * [Change] Reduced redundant layer/scene refresh work during large model loads.
 * [Change] Debounced relationship redraw during batched table/model updates.
@@ -51,6 +53,13 @@ v2.0.0
 * [Fix] Fixed an unescaped value in default column values in the HTML data dictionary.
 * [Fix] Duplicating a table now copies its children with the default name disambiguation.
 * [Fix] Disabled the scene info panel and the plugins dock area while a model is being validated, preventing operations that the running validation pass wouldn't account for.
+* [Fix] Fixed `SchemaParser` hanging indefinitely on a stray `]` or `}` inside a `%set` value instead of reporting a syntax error, reachable by typing a malformed snippet in the Snippets tool.
+* [Fix] Fixed a data race in `SchemaParser`'s shared schema file cache when multiple threads (export, validation, import, diff) parse schemas concurrently.
+* [Fix] Fixed `SchemaParser` changing the application's current working directory while loading an included schema file.
+* [Fix] Fixed the line number reported in errors that occur in a schema file after an `@include`.
+* [Fix] Fixed `SchemaParser` treating an escaped `\]` as closing a plain-text block while stripping comments, which could corrupt schemas combining a literal `]` with a following `#`.
+* [Fix] Fixed `SchemaParser` failing to parse past a `%set` whose value spans multiple lines when it sits inside a branch whose condition is false.
+* [Fix] Fixed the `InvalidAttribute` error message of `SchemaParser` not naming the offending attribute.
 
 v2.0.0-beta1
 ------
