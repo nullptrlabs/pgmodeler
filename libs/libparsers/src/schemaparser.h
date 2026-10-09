@@ -234,10 +234,6 @@ class __libparsers SchemaParser {
 			return count;
 		}
 
-		/*! \brief Interprets the loaded buffer for the given attributes and returns the resulting text.
-		 * The public getSourceCode(attribs) wraps this method to clear the ignore flags when it fails */
-		QString parseBuffer(const attribs_map &attribs);
-
 		/*! \brief Returns a formatted error message used prior to an exception raising.
 		 * This method take into account if the error happened in the current schema file/buffer or
 		 * in a file included via @include. ATTENTION: this method changes the current line and column
