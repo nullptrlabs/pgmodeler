@@ -1745,9 +1745,6 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 	}
 	catch(Exception &e)
 	{
-		/* The parser is restarted when the parsing fails, so the next one starts clean: the ignore flags
-		 * are valid for a single parsing and would otherwise be silently inherited by it */
-		restartParser();
 		ignore_unk_atribs = ignore_empty_atribs = false;
 		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}

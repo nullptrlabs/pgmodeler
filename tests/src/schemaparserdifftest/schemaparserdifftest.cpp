@@ -126,9 +126,8 @@ class SchemaParserDiffTest: public QObject, public PgModelerUnitTest {
 			{
 				out.code = static_cast<int>(e.getErrorCode());
 				out.message = e.getErrorMessage();
-
-				/* The legacy parser kept the position of the error in the instance and the current one restarts itself
-				 * when a parsing fails, so the position is not compared: it is part of the message */
+				out.line = parser.getCurrentLine();
+				out.column = parser.getCurrentColumn();
 			}
 
 			QDir::setCurrent(orig_cwd);
