@@ -298,9 +298,10 @@ QString BaseObject::formatName(const QString &name, bool is_operator)
 bool BaseObject::isValidName(const QString &name)
 {
 	QString aux_name = name;
+	static const QRegularExpression quoted_name_regexp(QRegularExpression::anchoredPattern("(\")(.)+(\")"));
 
 	// Remove the quotes from the start/end of the name to calculate the exact length
-	if(aux_name.contains(QRegularExpression::anchoredPattern("(\")(.)+(\")")))
+	if(aux_name.contains(quoted_name_regexp))
 	{
 		aux_name.remove(0,1);
 		aux_name.remove(aux_name.size()-1,1);
@@ -420,7 +421,8 @@ void BaseObject::setProtected(bool value)
 void BaseObject::setName(const QString &name)
 {
 	QString aux_name=name;
-	bool is_quoted=aux_name.contains(QRegularExpression("^(\")(.)+(\")$"));
+	static const QRegularExpression quoted_name_regexp("^(\")(.)+(\")$");
+	bool is_quoted=aux_name.contains(quoted_name_regexp);
 
 	//Raises an error if the passed name is invalid
 	if(!isValidName(aux_name))
