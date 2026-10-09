@@ -215,9 +215,12 @@ void SchemaParser::loadBuffer(const QString &buf)
 		 * because it would generate syntax error. */
 		for(int pos = 0; pos < lin.size(); pos++)
 		{
-			if(!open_plain_txt && lin[pos] == CharStartPlainText)
+			if(!open_plain_txt && lin[pos] == CharStartPlainText &&
+					prev_chr != CharStartEscaped)
 				open_plain_txt = true;
-			else if(open_plain_txt && lin[pos] == CharEndPlainText)
+			else if(open_plain_txt && lin[pos] == CharEndPlainText &&
+							// Avoids closing the plain text on an escaped \] wrongly
+							prev_chr != CharStartEscaped)
 				open_plain_txt = false;
 			else if(lin[pos] == CharComment &&
 							// Avoids removing a escaped hash \# wrongly
@@ -1053,6 +1056,63 @@ void SchemaParser::unsetAttribute()
 										PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
+
+void SchemaParser::skipAttributeDefinition()
+{
+	QStringView curr_line = std::as_const(buffer)[line];
+	int curr_ln_idx = line;
+	bool end_def = false, to_xml_entity = false;
+	QChar chr;
+
+	try
+	{
+		while(!end_def)
+		{
+			ignoreBlankChars(curr_line);
+			chr = curr_line[column];
+
+			if(chr == CharLineEnd)
+				end_def = true;
+			else if(chr == CharStartConditional)
+			{
+				throw Exception(getParseError(ErrorCode::InvalidSyntax),
+												ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
+			}
+			else if(chr == CharToXmlEntity || chr == CharStartAttribute)
+				getAttribute(to_xml_entity);
+			else if(chr == CharStartPlainText)
+			{
+				getPlainText();
+
+				/* Just like defineAttribute(), stop as soon as a multi-line plain text is consumed:
+				 * the cursor is now on the line of the closing ], which the caller advances past */
+				end_def = (line != curr_ln_idx);
+				curr_line = std::as_const(buffer)[line];
+			}
+			else if(chr == CharStartMetachar)
+				getMetaCharacter();
+			else if(chr == CharStartEscaped)
+				getEscapedCharacter();
+			else
+			{
+				QString word = getWord();
+
+				// A stray ] or } doesn't advance the cursor and would loop forever
+				if(word.isEmpty())
+				{
+					throw Exception(getParseError(ErrorCode::InvalidSyntax),
+													ErrorCode::InvalidSyntax, PGM_FUNC, PGM_FILE, PGM_LINE);
+				}
+			}
+		}
+	}
+	catch(Exception &e)
+	{
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),
+										PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+	}
+}
+
 bool SchemaParser::evaluateExpression()
 {
 	QString cond, attrib, prev_cond;
@@ -1516,6 +1576,12 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 
 						if(attributes.count(atrib) == 0)
 							attributes[atrib] = "";
+
+						/* A %set's value may hold a plain text spanning more than the current line
+						 * (see getPlainText()); skip past it the same way defineAttribute() would so
+						 * the line advanced below is the right one instead of landing mid-value */
+						if(cond == TokenSet)
+							skipAttributeDefinition();
 
 						column = 0;
 						line++;

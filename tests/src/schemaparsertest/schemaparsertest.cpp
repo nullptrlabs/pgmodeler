@@ -1137,7 +1137,7 @@ void SchemaParserTest::testBuffersPreprocessor_data()
 	QTest::newRow("tabsAndSpacesIgnored") << QString("  a \t b\t\t c  ") << QStringList() << false << false << QString("abc") << -1 << 0 << 0;
 	QTest::newRow("unicodeWords") << QString("açaí ção") << QStringList() << false << false << QString("açaíção") << -1 << 0 << 0;
 	QTest::newRow("plainTextOpenedBeforeCommentChar") << QString("[abc]# trailing") << QStringList() << false << false << QString("abc") << -1 << 0 << 0;
-	QTest::newRow("escapedBracketEndsPlainTextForCommentStripping") << QString("[a \\] # b]") << QStringList() << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 1 << 1;
+	QTest::newRow("escapedBracketKeepsPlainTextOpenForCommentStripping") << QString("[a \\] # b]") << QStringList() << false << false << QString("a ] # b") << -1 << 0 << 0;
 }
 
 void SchemaParserTest::testBuffersPreprocessor()
@@ -1571,7 +1571,9 @@ void SchemaParserTest::testBuffersSetUnset_data()
 	QTest::newRow("setNestedElseInTrueOuter") << QString("%if {a} %then\n%if {e} %then\n1\n%else\n%set {x} E\n%end\n%end\n{x}") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString("E") << -1 << 0 << 0;
 	QTest::newRow("setThenUsedInSameBranch") << QString("%if {a} %then\n%set {x} T\n{x}\n%end") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString("T") << -1 << 0 << 0;
 	QTest::newRow("setSelectsLaterIf") << QString("%set {x} 1\n%if {x} %then Y %else N %end") << QStringList() << false << false << QString("Y") << -1 << 0 << 0;
-	QTest::newRow("setMultilineInFalseBranchBreaks") << QString("%if {e} %then\n%set {x} [l1\nl2]\n%end\nok") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 3 << 3;
+	QTest::newRow("setMultilineInFalseBranchSkipsValue") << QString("%if {e} %then\n%set {x} [l1\nl2]\n%end\nok") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString("ok") << -1 << 0 << 0;
+	QTest::newRow("setFalseBranchValueRefIsNotEvaluated") << QString("%if {e} %then\n%set {x} a{zz}b\n%end\nok") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString("ok") << -1 << 0 << 0;
+	QTest::newRow("setFalseBranchStrayCloseBracketStillErrors") << QString("%if {e} %then\n%set {x} a ] b\n%end\nok") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString() << static_cast<int>(ErrorCode::InvalidSyntax) << 2 << 12;
 	QTest::newRow("setMultilineInTrueBranch") << QString("%if {a} %then\n%set {x} [l1\nl2]\n%end\n{x}") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << false << QString("l1\nl2") << -1 << 0 << 0;
 	QTest::newRow("unsetSimple") << QString("%set {x} v\n%unset {x}\n[<]{x}[>]") << QStringList() << false << true << QString("<>") << -1 << 0 << 0;
 	QTest::newRow("unsetMultiple") << QString("%unset {a} {b}\n[<]{a}{b}[>]") << QStringList{ "a=AA", "b=BB", "e=", "n1=x-y_z" } << false << true << QString("<>") << -1 << 0 << 0;

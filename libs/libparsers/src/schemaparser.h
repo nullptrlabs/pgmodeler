@@ -165,6 +165,12 @@ class __libparsers SchemaParser {
 		//! \brief Clears the value of attributes when finding the instruction: %unset {attr1} {attr2}...
 		void unsetAttribute();
 
+		/*! \brief Advances the cursor past a %set's value exactly as defineAttribute() would, without
+		 * evaluating or storing anything. Used to skip the value of a %set whose condition evaluated
+		 * to false: a value that holds a plain text spanning multiple lines (see getPlainText()) is
+		 * skipped correctly instead of leaving the cursor in the middle of it */
+		void skipAttributeDefinition();
+
 		//! \brief Increments the column counter while blank chars (space and tabs) are found on the line
 		void ignoreBlankChars(QStringView line);
 
