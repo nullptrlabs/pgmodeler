@@ -1418,7 +1418,10 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 	bool error = false, if_expr = false, to_xml_entity = false;
 	QChar chr;
 	std::vector<bool> vet_expif, vet_tk_if, vet_tk_then, vet_tk_else;
-	std::map<int, std::vector<QString> > if_map, else_map;
+	/* One entry per %if level, indexed directly by if_level instead of looked up in a map: if_level is
+	 * assigned sequentially (vet_tk_if.size() - 1 right after a push_back, see below) and these two grow
+	 * in lockstep with vet_tk_if, so if_stack[if_level]/else_stack[if_level] are always valid slots */
+	std::vector<std::vector<QString>> if_stack, else_stack;
 	std::vector<QString>::iterator itr, itr_end;
 	std::vector<int> vet_prev_level;
 	std::vector<QString> *vet_aux;
@@ -1479,12 +1482,12 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 					if(vet_tk_if[if_level] &&
 							vet_tk_then[if_level] &&
 							!vet_tk_else[if_level])
-						if_map[if_level].push_back(meta);
+						if_stack[if_level].push_back(meta);
 
 					/* If the parser is in 'else' section,
 					 * places the metacharacter on the word map of the current 'else'*/
 					else if(vet_tk_else[if_level])
-						else_map[if_level].push_back(meta);
+						else_stack[if_level].push_back(meta);
 				}
 				else
 					/* If the parsers is not in a 'if / else', puts the metacharacter
@@ -1532,10 +1535,10 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 									 //If the parser is in the 'if' section
 						if(vet_tk_if[if_level] &&	vet_tk_then[if_level] &&	!vet_tk_else[if_level])
 							//Inserts the attribute value in the map of the words of current the 'if' section
-							if_map[if_level].push_back(atrib);
+							if_stack[if_level].push_back(atrib);
 						else if(vet_tk_else[if_level])
 							//Inserts the attribute value in the map of the words of current the 'else' section
-							else_map[if_level].push_back(atrib);
+							else_stack[if_level].push_back(atrib);
 					}
 				}
 				else
@@ -1646,6 +1649,10 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 						vet_tk_then.push_back(false);
 						vet_tk_else.push_back(false);
 
+						//Opens this level's word lists, kept in lockstep with vet_tk_if
+						if_stack.push_back({});
+						else_stack.push_back({});
+
 						//Defines the current if level as the size of list 'if' tokens found  -1
 						if_level = (vet_tk_if.size()-1);
 
@@ -1682,33 +1689,27 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 							//In case the current 'if' doesn't in the 'else' section of the above 'if' (previous if level)
 							if(!vet_tk_else[prev_if_level])
 								//Get the extracted word vector on the above 'if'
-								vet_aux=&if_map[prev_if_level];
+								vet_aux=&if_stack[prev_if_level];
 							else
 								//Get the extracted word vector on the above 'else'
-								vet_aux=&else_map[prev_if_level];
+								vet_aux=&else_stack[prev_if_level];
 						}
 						else
 							vet_aux = nullptr;
 
-						/* Initializes the iterators to scan
-							 the auxiliary vector if necessary */
-						itr=itr_end=if_map[0].end();
-
-						/* In case the expression of the current 'if' has the value true
-						 * then the parser will scan the list of words on the 'if' part of the
-						 * current 'if' */
+						/* Picks the 'if' or 'else' word list of the current level to scan below. If the picked
+						 * section is empty (no words between %then/%else and %end) or wasn't given at all
+						 * (no %else), the vector is simply empty -- if_stack/else_stack always have a slot for
+						 * every level that was opened, so there's no need to check for its existence first */
 						if(vet_expif[if_level])
 						{
-							itr = if_map[if_level].begin();
-							itr_end = if_map[if_level].end();
+							itr = if_stack[if_level].begin();
+							itr_end = if_stack[if_level].end();
 						}
-
-						/* If there is a 'else' part on the current 'if'
-						 * then the parser will scan the list of words on the 'else' part */
-						else if(else_map.count(if_level)>0)
+						else
 						{
-							itr = else_map[if_level].begin();
-							itr_end = else_map[if_level].end();
+							itr = else_stack[if_level].begin();
+							itr_end = else_stack[if_level].end();
 						}
 
 						/* This iteration scans the list of words selected above
@@ -1767,8 +1768,8 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 						 * used auxiliary structures*/
 						else
 						{
-							if_map.clear();
-							else_map.clear();
+							if_stack.clear();
+							else_stack.clear();
 							vet_tk_if.clear();
 							vet_tk_then.clear();
 							vet_tk_else.clear();
@@ -1825,12 +1826,12 @@ QString SchemaParser::getSourceCode(const attribs_map &attribs)
 						 !vet_tk_else[if_level])
 					{
 						//Inserts the word on the words map extracted on 'if' section
-						if_map[if_level].push_back(word);
+						if_stack[if_level].push_back(word);
 					}
 					else if(vet_tk_else[if_level])
 					{
 						//Inserts the word on the words map extracted on 'else' section
-						else_map[if_level].push_back(word);
+						else_stack[if_level].push_back(word);
 					}
 				}
 				else
