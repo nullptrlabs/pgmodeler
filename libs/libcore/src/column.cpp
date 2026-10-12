@@ -319,10 +319,11 @@ QString Column::getAlterCode(BaseObject *object)
 		else
 			def_val=col->default_value;
 
-		// Generated columns can't have their default value changes after being created
-		if(!this->isGenerated() && !col->isGenerated() &&
-			 this->default_value.simplified().toLower() != def_val.simplified().toLower())
-			attribs[Attributes::DefaultValue]=(def_val.isEmpty() ? Attributes::Unset : def_val);
+		bool drop_generated = this->isGenerated() && !col->isGenerated() && getPgSQLVersion().toDouble() >= 13;
+		attribs[Attributes::Generated] = (drop_generated ? Attributes::Unset : "");
+		attribs[Attributes::DefaultValue] = "";
+		if(!col->isGenerated() && ((!this->isGenerated() && this->default_value.simplified().toLower() != def_val.simplified().toLower()) || (drop_generated && !def_val.isEmpty())))
+			attribs[Attributes::DefaultValue] = (def_val.isEmpty() ? Attributes::Unset : def_val);
 
 		if(this->not_null!=col->not_null)
 			attribs[Attributes::NotNull]=(!col->not_null ? Attributes::Unset : Attributes::True);

@@ -19,17 +19,24 @@
 # Also, you can get the complete GNU General Public License at <http://www.gnu.org/licenses/>
 */
 
-#include <QtTest/QtTest>
 #include "coreutilsns.h"
+#include "pgmodelerunittest.h"
 #include "table.h"
+#include <QtTest/QtTest>
 
-class BaseObjectTest: public QObject {
+class BaseObjectTest : public QObject, public PgModelerUnitTest
+{
 	Q_OBJECT
 
-  private slots:
-    void quoteNameIfKeyword();
-    void nameIsInvalidIfStartsWithNumber();
-		void dontFormatNameIfAlreadyQuoted();
+public:
+	BaseObjectTest() : PgModelerUnitTest(SCHEMASDIR) {}
+
+private slots:
+	void quoteNameIfKeyword();
+	void nameIsInvalidIfStartsWithNumber();
+	void dontFormatNameIfAlreadyQuoted();
+	void dropGeneratedExpression_data();
+	void dropGeneratedExpression();
 };
 
 void BaseObjectTest::quoteNameIfKeyword()
@@ -49,6 +56,48 @@ void BaseObjectTest::dontFormatNameIfAlreadyQuoted()
 {
 	QString name = "\"SomeObjName\"";
 	QCOMPARE(BaseObject::formatName(name), name);
+}
+
+void BaseObjectTest::dropGeneratedExpression_data()
+{
+	QTest::addColumn<QString>("default_value");
+	QTest::newRow("no default") << QString();
+	QTest::newRow("same text as expression") << QString("42");
+	QTest::newRow("different default") << QString("7");
+}
+
+void BaseObjectTest::dropGeneratedExpression()
+{
+	QFETCH(QString, default_value);
+	Table table;
+	table.setName("test_table");
+	Column generated_col, regular_col;
+	generated_col.setName("test_column");
+	generated_col.setType(PgSqlType("integer"));
+	generated_col.setParentTable(&table);
+	generated_col.setGenerated(true);
+	generated_col.setDefaultValue("42");
+	regular_col.setName("test_column");
+	regular_col.setType(PgSqlType("integer"));
+	regular_col.setParentTable(&table);
+	regular_col.setDefaultValue(default_value);
+
+	QString sql = generated_col.getAlterCode(&regular_col);
+	sql.replace(QString("\n%1\n").arg(Attributes::DdlEndToken), " ");
+	QString expected = "ALTER TABLE test_table ALTER COLUMN test_column DROP EXPRESSION;";
+	if(!default_value.isEmpty())
+		expected += " ALTER TABLE test_table ALTER COLUMN test_column SET DEFAULT " + default_value + ";";
+	QCOMPARE(sql.simplified(), expected);
+	regular_col.setGenerated(true);
+	regular_col.setDefaultValue("42");
+	QVERIFY(generated_col.getAlterCode(&regular_col).isEmpty());
+	regular_col.setGenerated(false);
+	regular_col.setDefaultValue(default_value);
+	QString version = BaseObject::getPgSQLVersion();
+	BaseObject::setPgSQLVersion("12.0");
+	sql = generated_col.getAlterCode(&regular_col);
+	BaseObject::setPgSQLVersion(version);
+	QVERIFY(sql.isEmpty());
 }
 
 QTEST_MAIN(BaseObjectTest)

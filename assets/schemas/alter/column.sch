@@ -11,6 +11,11 @@
 		{ddl-end}
 	%end
 
+	%if ({generated} == "unset") %then
+		{alter-table} [ DROP EXPRESSION]
+		{ddl-end}
+	%end
+
 	%if {type} %then
 		{alter-table}
 		[ TYPE ] {type}
