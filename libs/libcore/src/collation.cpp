@@ -35,7 +35,7 @@ Collation::Collation()
 	attributes[Attributes::LocaleMod] = "";
 	attributes[Attributes::Encoding] = "";
 	attributes[Attributes::Provider] = "";
-	attributes[Attributes::Deterministic] = "";
+	attributes[Attributes::Deterministic] = Attributes::False;
 }
 
 void Collation::setLocale(const QString &locale)
@@ -148,6 +148,7 @@ void Collation::setDeterministic(bool value)
 {
 	setCodeInvalidated(is_deterministic != value);
 	is_deterministic = value;
+	attributes[Attributes::Deterministic] = value ? Attributes::True : Attributes::False;
 }
 
 bool Collation::isDeterministic()
