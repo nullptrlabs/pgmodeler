@@ -322,6 +322,8 @@ QString Column::getAlterCode(BaseObject *object)
 		QString this_def_val = this->default_value.simplified().toLower().toLower(),
 				col_def_val = col->getDefaultValue().simplified().toLower();
 
+		attribs[Attributes::Generated] = "";
+
 		if(!this->isGenerated() && !col->isGenerated() && this_def_val != col_def_val)
 			attribs[Attributes::DefaultValue] = (def_val.isEmpty() ? Attributes::Unset : def_val);
 		else if(this->isGenerated() && col->isGenerated() && this_def_val != col_def_val)
