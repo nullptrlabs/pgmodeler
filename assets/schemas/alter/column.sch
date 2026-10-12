@@ -16,7 +16,7 @@
 		{ddl-end}
 	%end
 
-	%if ({generated} != "unset") %then
+	%if {generated} %and ({generated} != "unset") %then
 		{alter-table} [ SET EXPRESSION AS] ( {generated} )
 		{ddl-end}
 	%end
