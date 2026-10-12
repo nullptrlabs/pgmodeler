@@ -449,6 +449,8 @@ QString Column::getDataDictionary(bool md_format, const attribs_map &extra_attri
 		attribs[Attributes::Name] = obj_name;
 		attribs[Attributes::Type] = *type;
 		attribs[Attributes::DefaultValue] = sequence ? NextValFuncTmpl.arg(sequence->getSignature()) : default_value;
+		if(!md_format)
+			attribs[Attributes::DefaultValue] = attribs[Attributes::DefaultValue].toHtmlEscaped();
 		attribs[Attributes::Comment] = comment;
 		attribs[Attributes::NotNull] = not_null ? CoreUtilsNs::DataDictCheckMark : "";
 

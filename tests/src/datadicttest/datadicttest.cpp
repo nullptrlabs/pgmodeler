@@ -32,6 +32,7 @@ class DataDictTest: public QObject, public PgModelerUnitTest {
 	private slots:
 		void generateASimpleDataDict();
 		void generateASplittedDataDictFromSampleModel();
+		void escapeColumnDefaultInHtml();
 };
 
 void DataDictTest::generateASimpleDataDict()
@@ -147,6 +148,37 @@ void DataDictTest::generateASplittedDataDictFromSampleModel()
 		dbmodel.saveDataDictionary("./dict_test.html", true, false, false);
 	}
 	catch (Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void DataDictTest::escapeColumnDefaultInHtml()
+{
+	Schema schema;
+	schema.setName("public");
+	Table table;
+	table.setName("test_table");
+	table.setSchema(&schema);
+	Column column;
+	column.setName("test_column");
+	column.setType(PgSqlType("text"));
+	column.setParentTable(&table);
+	column.setDefaultValue("'<UNKNOWN> & value'::text");
+	attribs_map constraints{{Attributes::PkConstr, ""},
+					{Attributes::FkConstr, ""},
+					{Attributes::UqConstr, ""}};
+
+	try
+	{
+		QString html = column.getDataDictionary(false, constraints);
+		QVERIFY(html.contains("&lt;UNKNOWN&gt; &amp; value"));
+		QVERIFY(!html.contains("<UNKNOWN>"));
+		QCOMPARE(column.getDataDictionary(false, constraints), html);
+		QCOMPARE(column.getDefaultValue(), QString("'<UNKNOWN> & value'::text"));
+		QVERIFY(column.getDataDictionary(true, constraints).contains("<UNKNOWN> & value"));
+	}
+	catch(Exception &e)
 	{
 		QFAIL(e.getExceptionsText().toStdString().c_str());
 	}
