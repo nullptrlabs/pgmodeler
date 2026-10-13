@@ -113,7 +113,7 @@ NewObjectOverlayWidget::NewObjectOverlayWidget(ModelWidget *parent): QWidget(par
 		connect(itr.first, &QToolButton::clicked, this, &NewObjectOverlayWidget::executeAction, Qt::QueuedConnection);
 }
 
-void NewObjectOverlayWidget::setSelectedObjects(std::vector<BaseObject *> &sel_objs)
+bool NewObjectOverlayWidget::setSelectedObjects(std::vector<BaseObject *> &sel_objs)
 {
 	ObjectType obj_type = ObjectType::BaseObject;
 	unsigned sel_objs_cnt = sel_objs.size();
@@ -147,11 +147,15 @@ void NewObjectOverlayWidget::setSelectedObjects(std::vector<BaseObject *> &sel_o
 
 	rels_grp->setVisible(sel_objs_cnt == 0 ||
 											 (sel_objs_cnt == 1 && obj_type == ObjectType::Table) ||
-											 (sel_objs_cnt == 2 && obj_type == ObjectType::Table &&
-																						 sel_objs.at(1)->getObjectType() == ObjectType::Table));
+											 (sel_objs_cnt == 2 &&
+												sel_objs.at(0)->getObjectType() == ObjectType::Table &&
+												sel_objs.at(1)->getObjectType() == ObjectType::Table));
 
 	overlay_frm->adjustSize();
 	this->adjustSize();
+
+	return !db_objs_grp->isHidden() || !sch_objs_grp->isHidden() ||
+				 !tab_objs_grp->isHidden() || !rels_grp->isHidden();
 }
 
 void NewObjectOverlayWidget::executeAction()

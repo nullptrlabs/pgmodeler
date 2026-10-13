@@ -45,7 +45,8 @@ class __libgui NewObjectOverlayWidget: public QWidget, public Ui::NewObjectOverl
 
 	public:
 		explicit NewObjectOverlayWidget(ModelWidget * parent);
-		void setSelectedObjects(std::vector<BaseObject *> &sel_objs);
+		//! \brief Configures the visible buttons and returns false when none is visible
+		bool setSelectedObjects(std::vector<BaseObject *> &sel_objs);
 		void configureOverlayButtons();
 
 	private slots:
