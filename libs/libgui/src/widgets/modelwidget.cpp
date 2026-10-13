@@ -6503,9 +6503,11 @@ void ModelWidget::toggleNewObjectOverlay()
 		(selected_objects[0]->getObjectType()!=ObjectType::BaseRelationship &&
 		selected_objects[0]->getObjectType()!=ObjectType::Textbox)))
 	{
+		if(!new_obj_overlay_wgt->setSelectedObjects(selected_objects))
+			return;
+
 		new_obj_overlay_wgt->raise();
 		new_obj_overlay_wgt->show();
-		new_obj_overlay_wgt->setSelectedObjects(selected_objects);
 		this->adjustOverlayPosition();
 	}
 	else
