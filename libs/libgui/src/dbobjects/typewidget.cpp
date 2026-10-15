@@ -50,7 +50,7 @@ TypeWidget::TypeWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Ty
 			break;
 	}
 
-	enumerations_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(0, CustomTableWidget::AllButtons ^
+	enumerations_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin, CustomTableWidget::AllButtons ^
 																																				 (CustomTableWidget::EditButton | CustomTableWidget::DuplicateButton),
 																																				 true, enumerations_pg);
 	enumerations_tab->setCellsEditable(true);
