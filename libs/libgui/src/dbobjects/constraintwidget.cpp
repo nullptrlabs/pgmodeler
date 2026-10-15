@@ -119,9 +119,16 @@ void ConstraintWidget::selectConstraintType()
 	indexing_chk->setVisible(is_ex);
 	indexing_cmb->setVisible(is_ex);
 
+	constr_attribs_tbw->setTabVisible(constr_attribs_tbw->indexOf(columns_pg), !is_ck);
 	constr_attribs_tbw->setTabVisible(constr_attribs_tbw->indexOf(ref_cols_pg), is_fk);
 	constr_attribs_tbw->setTabVisible(constr_attribs_tbw->indexOf(expression_pg), is_ck || is_ex);
 	constr_attribs_tbw->setTabVisible(constr_attribs_tbw->indexOf(excl_elems_pg), is_ex);
+
+	if(is_ck)
+		col_picker_wgt->setColumns(std::vector<Column *>());
+
+	if(!constr_attribs_tbw->isTabVisible(constr_attribs_tbw->currentIndex()))
+		constr_attribs_tbw->setCurrentIndex(constr_attribs_tbw->indexOf(is_ck ? expression_pg : columns_pg));
 
 	if(!is_fk)
 		ref_table_sel->clearSelector();
