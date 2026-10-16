@@ -60,7 +60,7 @@ const QString GlobalAttributes::PgModelerSite {
 #endif
 };
 
-const QString GlobalAttributes::PgModelerSupport { PgModelerSite + "/support/docs" };
+const QString GlobalAttributes::PgModelerSupport { PgModelerSite + "/docs" };
 const QString GlobalAttributes::PgModelerSourceURL { "https://github.com/nullptrlabs/pgmodeler/releases" };
 const QString GlobalAttributes::PgModelerDownloadURL { PgModelerSite + "/download" };
 const QString GlobalAttributes::PgModelerDonateURL { PgModelerSite + "/#donationForm" };
