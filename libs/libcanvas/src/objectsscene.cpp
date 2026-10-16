@@ -1217,7 +1217,9 @@ void ObjectsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 			emit s_objectSelected(nullptr,false);
 		}
 
-		emit s_popupMenuRequested();
+		//Relationship markers have no context menu
+		if(!dynamic_cast<RelMarkerItem *>(item ? item->topLevelItem() : nullptr))
+			emit s_popupMenuRequested();
 	}
 }
 
