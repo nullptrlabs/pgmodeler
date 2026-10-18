@@ -52,4 +52,5 @@ endif()
 # PrivCodeCompletionWidget is part of the private core
 if(BUILD_PRIV_CODE)
     add_subdirectory(src/privcodecompletiontest)
+    add_subdirectory(src/licensechecktest)
 endif()
