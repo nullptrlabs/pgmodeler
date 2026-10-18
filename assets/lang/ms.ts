@@ -953,12 +953,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Hubungan asas</translation>
     </message>
-    <message numerus="yes">
-        <source>new_object</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1110,10 +1104,6 @@ Ini akan mematikan kod semua objek anak dan objek yang merujuknya.</translation>
         <source>Copy</source>
         <translation>Salinan</translation>
     </message>
-    <message>
-        <source>rel_%1_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1224,27 +1214,6 @@ Ini akan mematikan kod semua objek anak dan objek yang merujuknya.</translation>
     <message>
         <source>Assignment</source>
         <translation>Penugasan</translation>
-    </message>
-</context>
-<context>
-    <name>Catalog</name>
-    <message numerus="yes">
-        <source>Object type: %1</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>The catalog query returned more than one OID!</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>Object type: server</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
     </message>
 </context>
 <context>
@@ -3398,7 +3367,7 @@ Lajur rujukan: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Versi demonstrasi hanya boleh mencipta `%1&apos; tika bagi setiap jenis objek! Anda telah mencapai had ini untuk jenis: `%2&apos;</translation>
+        <translation>Versi demonstrasi hanya boleh mencipta `%1&apos; tika bagi setiap jenis objek! Anda telah mencapai had ini untuk jenis: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -7184,7 +7153,7 @@ Mesej yang dikembalikan oleh DBMS: `%1&apos;</translation>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation>Gagal mengesahkan lesen pgModeler Plus! Anda mesti mengesahkannya dalam GUI sebelum menggunakan antara muka baris arahan.</translation>
+        <translation type="vanished">Gagal mengesahkan lesen pgModeler Plus! Anda mesti mengesahkannya dalam GUI sebelum menggunakan antara muka baris arahan.</translation>
     </message>
     <message>
         <source>License error code: %1</source>
@@ -7192,11 +7161,23 @@ Mesej yang dikembalikan oleh DBMS: `%1&apos;</translation>
     </message>
     <message>
         <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation>Antara muka baris arahan tidak tersedia dalam versi percubaan! Naik taraf lesen anda untuk menggunakannya.</translation>
+        <translation type="vanished">Antara muka baris arahan tidak tersedia dalam versi percubaan! Naik taraf lesen anda untuk menggunakannya.</translation>
     </message>
     <message>
         <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation>Tempoh penggunaan luar talian telah tamat! Anda mesti mengesahkan lesen dalam GUI untuk terus menggunakan antara muka baris arahan.</translation>
+        <translation type="vanished">Tempoh penggunaan luar talian telah tamat! Anda mesti mengesahkan lesen dalam GUI untuk terus menggunakan antara muka baris arahan.</translation>
+    </message>
+    <message>
+        <source>A valid pgModeler Plus license is required to use this feature.</source>
+        <translation>Lesen pgModeler Plus yang sah diperlukan untuk menggunakan ciri ini.</translation>
+    </message>
+    <message>
+        <source>This feature is not available in the trial version! Upgrade your license to use it.</source>
+        <translation>Ciri ini tidak tersedia dalam versi percubaan! Naik taraf lesen anda untuk menggunakannya.</translation>
+    </message>
+    <message>
+        <source>The offline usage period has ended! You have to validate the license to keep using this feature.</source>
+        <translation>Tempoh penggunaan luar talian telah tamat! Anda mesti mengesahkan lesen untuk terus menggunakan ciri ini.</translation>
     </message>
     <message>
         <source>License file found</source>
@@ -12579,33 +12560,6 @@ yang terdapat dalam GUI. Semua pilihan yang tersedia diterangkan di bawah.</tran
     </message>
 </context>
 <context>
-    <name>Relationship</name>
-    <message>
-        <source>%1_has_one_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>many_%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_inherits_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_is_partition_of_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_copies_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -12714,6 +12668,10 @@ yang terdapat dalam GUI. Semua pilihan yang tersedia diterangkan di bawah.</tran
     <message>
         <source>Foreign key (source)</source>
         <translation>Kunci asing (sumber)</translation>
+    </message>
+    <message>
+        <source>Pattern for foreign key indexes generated by the relationship.</source>
+        <translation>Corak untuk indeks kunci asing yang dijana oleh hubungan.</translation>
     </message>
     <message>
         <source>FK Index name</source>
@@ -14519,11 +14477,11 @@ yang terdapat dalam GUI. Semua pilihan yang tersedia diterangkan di bawah.</tran
     </message>
     <message>
         <source>Table</source>
-        <translation type="unfinished">Jadual</translation>
+        <translation>Jadual</translation>
     </message>
     <message>
         <source>Cross relationships</source>
-        <translation type="unfinished"></translation>
+        <translation>Hubungan merentas adegan</translation>
     </message>
 </context>
 <context>

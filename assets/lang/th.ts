@@ -953,12 +953,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>ความสัมพันธ์พื้นฐาน</translation>
     </message>
-    <message numerus="yes">
-        <source>new_object</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1110,10 +1104,6 @@ This will disable the code of all child and referrer objects.</source>
         <source>Copy</source>
         <translation>สำเนา</translation>
     </message>
-    <message>
-        <source>rel_%1_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1224,27 +1214,6 @@ This will disable the code of all child and referrer objects.</source>
     <message>
         <source>Assignment</source>
         <translation>การกำหนดค่า</translation>
-    </message>
-</context>
-<context>
-    <name>Catalog</name>
-    <message numerus="yes">
-        <source>Object type: %1</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>The catalog query returned more than one OID!</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>Object type: server</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
     </message>
 </context>
 <context>
@@ -3398,7 +3367,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">เวอร์ชันสาธิตสร้างได้เพียง `%1&apos; อินสแตนซ์ต่อวัตถุแต่ละชนิด! คุณถึงขีดจำกัดนี้แล้วสำหรับชนิด: `%2&apos;</translation>
+        <translation>เวอร์ชันสาธิตสร้างได้เพียง `%1&apos; อินสแตนซ์ต่อวัตถุแต่ละชนิด! คุณถึงขีดจำกัดนี้แล้วสำหรับชนิด: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -7184,7 +7153,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation>ตรวจสอบใบอนุญาต pgModeler Plus ไม่สำเร็จ! คุณต้องตรวจสอบใน GUI ก่อนใช้งานอินเทอร์เฟซบรรทัดคำสั่ง</translation>
+        <translation type="vanished">ตรวจสอบใบอนุญาต pgModeler Plus ไม่สำเร็จ! คุณต้องตรวจสอบใน GUI ก่อนใช้งานอินเทอร์เฟซบรรทัดคำสั่ง</translation>
     </message>
     <message>
         <source>License error code: %1</source>
@@ -7192,11 +7161,23 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation>อินเทอร์เฟซบรรทัดคำสั่งไม่มีให้ใช้ในเวอร์ชันทดลอง! อัปเกรดใบอนุญาตของคุณเพื่อใช้งาน</translation>
+        <translation type="vanished">อินเทอร์เฟซบรรทัดคำสั่งไม่มีให้ใช้ในเวอร์ชันทดลอง! อัปเกรดใบอนุญาตของคุณเพื่อใช้งาน</translation>
     </message>
     <message>
         <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation>ช่วงเวลาการใช้งานออฟไลน์สิ้นสุดแล้ว! คุณต้องตรวจสอบใบอนุญาตใน GUI เพื่อใช้อินเทอร์เฟซบรรทัดคำสั่งต่อไป</translation>
+        <translation type="vanished">ช่วงเวลาการใช้งานออฟไลน์สิ้นสุดแล้ว! คุณต้องตรวจสอบใบอนุญาตใน GUI เพื่อใช้อินเทอร์เฟซบรรทัดคำสั่งต่อไป</translation>
+    </message>
+    <message>
+        <source>A valid pgModeler Plus license is required to use this feature.</source>
+        <translation>ต้องมีใบอนุญาต pgModeler Plus ที่ถูกต้องจึงจะใช้ฟีเจอร์นี้ได้</translation>
+    </message>
+    <message>
+        <source>This feature is not available in the trial version! Upgrade your license to use it.</source>
+        <translation>ฟีเจอร์นี้ไม่มีให้ใช้ในเวอร์ชันทดลอง! อัปเกรดใบอนุญาตของคุณเพื่อใช้งาน</translation>
+    </message>
+    <message>
+        <source>The offline usage period has ended! You have to validate the license to keep using this feature.</source>
+        <translation>ช่วงเวลาการใช้งานออฟไลน์สิ้นสุดแล้ว! คุณต้องตรวจสอบใบอนุญาตเพื่อใช้ฟีเจอร์นี้ต่อไป</translation>
     </message>
     <message>
         <source>License file found</source>
@@ -12579,33 +12560,6 @@ available in GUI. All available options are described below.</source>
     </message>
 </context>
 <context>
-    <name>Relationship</name>
-    <message>
-        <source>%1_has_one_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>many_%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_inherits_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_is_partition_of_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_copies_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -12714,6 +12668,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Foreign key (source)</source>
         <translation>คีย์นอก (ต้นทาง)</translation>
+    </message>
+    <message>
+        <source>Pattern for foreign key indexes generated by the relationship.</source>
+        <translation>รูปแบบสำหรับดัชนีของคีย์นอกที่สร้างโดยความสัมพันธ์</translation>
     </message>
     <message>
         <source>FK Index name</source>
@@ -14519,11 +14477,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Table</source>
-        <translation type="unfinished">ตาราง</translation>
+        <translation>ตาราง</translation>
     </message>
     <message>
         <source>Cross relationships</source>
-        <translation type="unfinished"></translation>
+        <translation>ความสัมพันธ์ข้ามฉาก</translation>
     </message>
 </context>
 <context>

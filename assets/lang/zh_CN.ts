@@ -953,12 +953,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>基本关系</translation>
     </message>
-    <message numerus="yes">
-        <source>new_object</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1110,10 +1104,6 @@ This will disable the code of all child and referrer objects.</source>
         <source>Copy</source>
         <translation>副本</translation>
     </message>
-    <message>
-        <source>rel_%1_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1224,27 +1214,6 @@ This will disable the code of all child and referrer objects.</source>
     <message>
         <source>Assignment</source>
         <translation>赋值</translation>
-    </message>
-</context>
-<context>
-    <name>Catalog</name>
-    <message numerus="yes">
-        <source>Object type: %1</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>The catalog query returned more than one OID!</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>Object type: server</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
     </message>
 </context>
 <context>
@@ -3398,7 +3367,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">演示版每种对象类型只能创建 `%1&apos; 个实例。类型 `%2&apos; 已达到此限制。</translation>
+        <translation>演示版每种对象类型只能创建 `%1&apos; 个实例。类型 `%2&apos; 已达到此限制。</translation>
     </message>
 </context>
 <context>
@@ -7184,7 +7153,7 @@ DBMS 返回的消息：`%1&apos;</translation>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation>无法验证 pgModeler Plus 许可证。在使用命令行界面之前，必须先在图形界面中验证。</translation>
+        <translation type="vanished">无法验证 pgModeler Plus 许可证。在使用命令行界面之前，必须先在图形界面中验证。</translation>
     </message>
     <message>
         <source>License error code: %1</source>
@@ -7192,11 +7161,23 @@ DBMS 返回的消息：`%1&apos;</translation>
     </message>
     <message>
         <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation>试用版不提供命令行界面。请升级您的许可证后使用。</translation>
+        <translation type="vanished">试用版不提供命令行界面。请升级您的许可证后使用。</translation>
     </message>
     <message>
         <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation>离线使用期限已结束。必须在图形界面中验证许可证，才能继续使用命令行界面。</translation>
+        <translation type="vanished">离线使用期限已结束。必须在图形界面中验证许可证，才能继续使用命令行界面。</translation>
+    </message>
+    <message>
+        <source>A valid pgModeler Plus license is required to use this feature.</source>
+        <translation>使用此功能需要有效的 pgModeler Plus 许可证。</translation>
+    </message>
+    <message>
+        <source>This feature is not available in the trial version! Upgrade your license to use it.</source>
+        <translation>试用版不提供此功能。请升级您的许可证后使用。</translation>
+    </message>
+    <message>
+        <source>The offline usage period has ended! You have to validate the license to keep using this feature.</source>
+        <translation>离线使用期限已结束。必须验证许可证，才能继续使用此功能。</translation>
     </message>
     <message>
         <source>License file found</source>
@@ -12579,33 +12560,6 @@ available in GUI. All available options are described below.</source>
     </message>
 </context>
 <context>
-    <name>Relationship</name>
-    <message>
-        <source>%1_has_one_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>many_%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_inherits_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_is_partition_of_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_copies_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -12714,6 +12668,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Foreign key (source)</source>
         <translation>外键（源）</translation>
+    </message>
+    <message>
+        <source>Pattern for foreign key indexes generated by the relationship.</source>
+        <translation>关系生成的外键索引的规则。</translation>
     </message>
     <message>
         <source>FK Index name</source>
@@ -14519,11 +14477,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Table</source>
-        <translation type="unfinished">表</translation>
+        <translation>表</translation>
     </message>
     <message>
         <source>Cross relationships</source>
-        <translation type="unfinished"></translation>
+        <translation>跨场景关系</translation>
     </message>
 </context>
 <context>

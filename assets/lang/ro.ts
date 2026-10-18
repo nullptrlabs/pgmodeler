@@ -953,14 +953,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Relație de bază</translation>
     </message>
-    <message numerus="yes">
-        <source>new_object</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1112,10 +1104,6 @@ Aceasta va dezactiva codul tuturor obiectelor copil și al celor care îl refer�
         <source>Copy</source>
         <translation>Copie</translation>
     </message>
-    <message>
-        <source>rel_%1_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1226,33 +1214,6 @@ Aceasta va dezactiva codul tuturor obiectelor copil și al celor care îl refer�
     <message>
         <source>Assignment</source>
         <translation>Atribuire</translation>
-    </message>
-</context>
-<context>
-    <name>Catalog</name>
-    <message numerus="yes">
-        <source>Object type: %1</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>The catalog query returned more than one OID!</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>Object type: server</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
     </message>
 </context>
 <context>
@@ -3406,7 +3367,7 @@ Coloană(e) referențiată(e): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Versiunea demonstrativă poate crea doar `%1&apos; instanțe din fiecare tip de obiect! Ați atins această limită pentru tipul: `%2&apos;</translation>
+        <translation>Versiunea demonstrativă poate crea doar `%1&apos; instanțe din fiecare tip de obiect! Ați atins această limită pentru tipul: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -7192,7 +7153,7 @@ Mesajul returnat de SGBD: `%1&apos;</translation>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation>Validarea licenței pgModeler Plus a eșuat! Trebuie să o validați în interfața grafică înainte de a folosi interfața din linia de comandă.</translation>
+        <translation type="vanished">Validarea licenței pgModeler Plus a eșuat! Trebuie să o validați în interfața grafică înainte de a folosi interfața din linia de comandă.</translation>
     </message>
     <message>
         <source>License error code: %1</source>
@@ -7200,11 +7161,23 @@ Mesajul returnat de SGBD: `%1&apos;</translation>
     </message>
     <message>
         <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation>Interfața din linia de comandă nu este disponibilă în versiunea de încercare! Faceți upgrade la licență pentru a o folosi.</translation>
+        <translation type="vanished">Interfața din linia de comandă nu este disponibilă în versiunea de încercare! Faceți upgrade la licență pentru a o folosi.</translation>
     </message>
     <message>
         <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation>Perioada de utilizare offline s-a încheiat! Trebuie să validați licența în interfața grafică pentru a continua să folosiți interfața din linia de comandă.</translation>
+        <translation type="vanished">Perioada de utilizare offline s-a încheiat! Trebuie să validați licența în interfața grafică pentru a continua să folosiți interfața din linia de comandă.</translation>
+    </message>
+    <message>
+        <source>A valid pgModeler Plus license is required to use this feature.</source>
+        <translation>Pentru a utiliza această funcție este necesară o licență pgModeler Plus validă.</translation>
+    </message>
+    <message>
+        <source>This feature is not available in the trial version! Upgrade your license to use it.</source>
+        <translation>Această funcție nu este disponibilă în versiunea de încercare! Faceți upgrade la licență pentru a o folosi.</translation>
+    </message>
+    <message>
+        <source>The offline usage period has ended! You have to validate the license to keep using this feature.</source>
+        <translation>Perioada de utilizare offline s-a încheiat! Trebuie să validați licența pentru a continua să folosiți această funcție.</translation>
     </message>
     <message>
         <source>License file found</source>
@@ -12587,33 +12560,6 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
     </message>
 </context>
 <context>
-    <name>Relationship</name>
-    <message>
-        <source>%1_has_one_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>many_%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_inherits_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_is_partition_of_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_copies_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -12722,6 +12668,10 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
     <message>
         <source>Foreign key (source)</source>
         <translation>Cheie străină (sursă)</translation>
+    </message>
+    <message>
+        <source>Pattern for foreign key indexes generated by the relationship.</source>
+        <translation>Model pentru indecșii cheii străine generați de relație.</translation>
     </message>
     <message>
         <source>FK Index name</source>
@@ -14527,11 +14477,11 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
     </message>
     <message>
         <source>Table</source>
-        <translation type="unfinished">Tabel</translation>
+        <translation>Tabel</translation>
     </message>
     <message>
         <source>Cross relationships</source>
-        <translation type="unfinished"></translation>
+        <translation>Relații încrucișate</translation>
     </message>
 </context>
 <context>
