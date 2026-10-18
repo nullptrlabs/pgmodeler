@@ -953,12 +953,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>基本關聯</translation>
     </message>
-    <message numerus="yes">
-        <source>new_object</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1110,10 +1104,6 @@ This will disable the code of all child and referrer objects.</source>
         <source>Copy</source>
         <translation>複本</translation>
     </message>
-    <message>
-        <source>rel_%1_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1224,27 +1214,6 @@ This will disable the code of all child and referrer objects.</source>
     <message>
         <source>Assignment</source>
         <translation>指派</translation>
-    </message>
-</context>
-<context>
-    <name>Catalog</name>
-    <message numerus="yes">
-        <source>Object type: %1</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>The catalog query returned more than one OID!</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>Object type: server</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
     </message>
 </context>
 <context>
@@ -3398,7 +3367,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">示範版每種物件類型只能建立 `%1&apos; 個執行個體！您已達到類型 `%2&apos; 的此限制</translation>
+        <translation>示範版每種物件類型只能建立 `%1&apos; 個執行個體！您已達到類型 `%2&apos; 的此限制</translation>
     </message>
 </context>
 <context>
@@ -7184,7 +7153,7 @@ DBMS 傳回的訊息：`%1&apos;</translation>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation>驗證 pgModeler Plus 授權失敗！使用命令列介面之前，必須先在圖形介面中完成驗證。</translation>
+        <translation type="vanished">驗證 pgModeler Plus 授權失敗！使用命令列介面之前，必須先在圖形介面中完成驗證。</translation>
     </message>
     <message>
         <source>License error code: %1</source>
@@ -7192,11 +7161,23 @@ DBMS 傳回的訊息：`%1&apos;</translation>
     </message>
     <message>
         <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation>試用版無法使用命令列介面！請升級授權以使用。</translation>
+        <translation type="vanished">試用版無法使用命令列介面！請升級授權以使用。</translation>
     </message>
     <message>
         <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation>離線使用期限已結束！必須在圖形介面中驗證授權，才能繼續使用命令列介面。</translation>
+        <translation type="vanished">離線使用期限已結束！必須在圖形介面中驗證授權，才能繼續使用命令列介面。</translation>
+    </message>
+    <message>
+        <source>A valid pgModeler Plus license is required to use this feature.</source>
+        <translation>使用此功能需要有效的 pgModeler Plus 授權。</translation>
+    </message>
+    <message>
+        <source>This feature is not available in the trial version! Upgrade your license to use it.</source>
+        <translation>試用版無法使用此功能！請升級授權以使用。</translation>
+    </message>
+    <message>
+        <source>The offline usage period has ended! You have to validate the license to keep using this feature.</source>
+        <translation>離線使用期限已結束！必須驗證授權，才能繼續使用此功能。</translation>
     </message>
     <message>
         <source>License file found</source>
@@ -12579,33 +12560,6 @@ available in GUI. All available options are described below.</source>
     </message>
 </context>
 <context>
-    <name>Relationship</name>
-    <message>
-        <source>%1_has_one_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>many_%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_inherits_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_is_partition_of_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_copies_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -12714,6 +12668,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Foreign key (source)</source>
         <translation>外部索引鍵（來源）</translation>
+    </message>
+    <message>
+        <source>Pattern for foreign key indexes generated by the relationship.</source>
+        <translation>關聯所產生之外部索引鍵索引的模式。</translation>
     </message>
     <message>
         <source>FK Index name</source>
@@ -14519,11 +14477,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Table</source>
-        <translation type="unfinished">資料表</translation>
+        <translation>資料表</translation>
     </message>
     <message>
         <source>Cross relationships</source>
-        <translation type="unfinished"></translation>
+        <translation>跨場景關聯</translation>
     </message>
 </context>
 <context>

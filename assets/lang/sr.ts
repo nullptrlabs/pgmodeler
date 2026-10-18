@@ -953,14 +953,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Основни однос</translation>
     </message>
-    <message numerus="yes">
-        <source>new_object</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1112,10 +1104,6 @@ This will disable the code of all child and referrer objects.</source>
         <source>Copy</source>
         <translation>Копија</translation>
     </message>
-    <message>
-        <source>rel_%1_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1226,33 +1214,6 @@ This will disable the code of all child and referrer objects.</source>
     <message>
         <source>Assignment</source>
         <translation>Додела</translation>
-    </message>
-</context>
-<context>
-    <name>Catalog</name>
-    <message numerus="yes">
-        <source>Object type: %1</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>The catalog query returned more than one OID!</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>Object type: server</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
     </message>
 </context>
 <context>
@@ -3406,7 +3367,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Демонстрациона верзија може креирати само `%1&apos; инстанци сваког типа објекта! Достигли сте ово ограничење за тип: `%2&apos;</translation>
+        <translation>Демонстрациона верзија може креирати само `%1&apos; инстанци сваког типа објекта! Достигли сте ово ограничење за тип: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -7192,7 +7153,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation>Валидација лиценце за pgModeler Plus није успела! Морате је валидирати у графичком интерфејсу пре коришћења интерфејса командне линије.</translation>
+        <translation type="vanished">Валидација лиценце за pgModeler Plus није успела! Морате је валидирати у графичком интерфејсу пре коришћења интерфејса командне линије.</translation>
     </message>
     <message>
         <source>License error code: %1</source>
@@ -7200,11 +7161,23 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation>Интерфејс командне линије није доступан у пробној верзији! Надоградите лиценцу да бисте га користили.</translation>
+        <translation type="vanished">Интерфејс командне линије није доступан у пробној верзији! Надоградите лиценцу да бисте га користили.</translation>
     </message>
     <message>
         <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation>Период ван мрежног коришћења је истекао! Морате валидирати лиценцу у графичком интерфејсу да бисте наставили да користите интерфејс командне линије.</translation>
+        <translation type="vanished">Период ван мрежног коришћења је истекао! Морате валидирати лиценцу у графичком интерфејсу да бисте наставили да користите интерфејс командне линије.</translation>
+    </message>
+    <message>
+        <source>A valid pgModeler Plus license is required to use this feature.</source>
+        <translation>За коришћење ове функције потребна је важећа лиценца за pgModeler Plus.</translation>
+    </message>
+    <message>
+        <source>This feature is not available in the trial version! Upgrade your license to use it.</source>
+        <translation>Ова функција није доступна у пробној верзији! Надоградите лиценцу да бисте је користили.</translation>
+    </message>
+    <message>
+        <source>The offline usage period has ended! You have to validate the license to keep using this feature.</source>
+        <translation>Период ван мрежног коришћења је истекао! Морате валидирати лиценцу да бисте наставили да користите ову функцију.</translation>
     </message>
     <message>
         <source>License file found</source>
@@ -12587,33 +12560,6 @@ available in GUI. All available options are described below.</source>
     </message>
 </context>
 <context>
-    <name>Relationship</name>
-    <message>
-        <source>%1_has_one_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>many_%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_inherits_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_is_partition_of_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_copies_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -12722,6 +12668,10 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Foreign key (source)</source>
         <translation>Страни кључ (извор)</translation>
+    </message>
+    <message>
+        <source>Pattern for foreign key indexes generated by the relationship.</source>
+        <translation>Образац за индексе страног кључа које генерише однос.</translation>
     </message>
     <message>
         <source>FK Index name</source>
@@ -14527,11 +14477,11 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Table</source>
-        <translation type="unfinished">Табела</translation>
+        <translation>Табела</translation>
     </message>
     <message>
         <source>Cross relationships</source>
-        <translation type="unfinished"></translation>
+        <translation>Унакрсни односи</translation>
     </message>
 </context>
 <context>

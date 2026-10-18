@@ -953,14 +953,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Základný vzťah</translation>
     </message>
-    <message numerus="yes">
-        <source>new_object</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1112,10 +1104,6 @@ Tým sa vypne kód všetkých podradených a závislých objektov.</translation>
         <source>Copy</source>
         <translation>Kópia</translation>
     </message>
-    <message>
-        <source>rel_%1_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1226,33 +1214,6 @@ Tým sa vypne kód všetkých podradených a závislých objektov.</translation>
     <message>
         <source>Assignment</source>
         <translation>Priradenie</translation>
-    </message>
-</context>
-<context>
-    <name>Catalog</name>
-    <message numerus="yes">
-        <source>Object type: %1</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>The catalog query returned more than one OID!</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>Object type: server</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
     </message>
 </context>
 <context>
@@ -3406,7 +3367,7 @@ Odkazované stĺpce: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Demonštračná verzia môže vytvoriť iba `%1&apos; inštancií každého typu objektu. Tento limit bol dosiahnutý pre typ: `%2&apos;</translation>
+        <translation>Demonštračná verzia môže vytvoriť iba `%1&apos; inštancií každého typu objektu. Tento limit bol dosiahnutý pre typ: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -7192,7 +7153,7 @@ Správa vrátená DBMS: `%1&apos;</translation>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation>Licenciu pgModeler Plus sa nepodarilo overiť. Pred použitím rozhrania príkazového riadka ju musíte overiť v grafickom rozhraní.</translation>
+        <translation type="vanished">Licenciu pgModeler Plus sa nepodarilo overiť. Pred použitím rozhrania príkazového riadka ju musíte overiť v grafickom rozhraní.</translation>
     </message>
     <message>
         <source>License error code: %1</source>
@@ -7200,11 +7161,23 @@ Správa vrátená DBMS: `%1&apos;</translation>
     </message>
     <message>
         <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation>Rozhranie príkazového riadka nie je v skúšobnej verzii k dispozícii. Ak ho chcete používať, upgradujte licenciu.</translation>
+        <translation type="vanished">Rozhranie príkazového riadka nie je v skúšobnej verzii k dispozícii. Ak ho chcete používať, upgradujte licenciu.</translation>
     </message>
     <message>
         <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation>Obdobie offline používania skončilo. Ak chcete rozhranie príkazového riadka naďalej používať, musíte licenciu overiť v grafickom rozhraní.</translation>
+        <translation type="vanished">Obdobie offline používania skončilo. Ak chcete rozhranie príkazového riadka naďalej používať, musíte licenciu overiť v grafickom rozhraní.</translation>
+    </message>
+    <message>
+        <source>A valid pgModeler Plus license is required to use this feature.</source>
+        <translation>Na používanie tejto funkcie je potrebná platná licencia pgModeler Plus.</translation>
+    </message>
+    <message>
+        <source>This feature is not available in the trial version! Upgrade your license to use it.</source>
+        <translation>Táto funkcia nie je v skúšobnej verzii k dispozícii. Ak ju chcete používať, upgradujte licenciu.</translation>
+    </message>
+    <message>
+        <source>The offline usage period has ended! You have to validate the license to keep using this feature.</source>
+        <translation>Obdobie offline používania skončilo. Ak chcete túto funkciu naďalej používať, musíte licenciu overiť.</translation>
     </message>
     <message>
         <source>License file found</source>
@@ -12587,33 +12560,6 @@ dostupné v GUI. Všetky dostupné voľby sú popísané nižšie.</translation>
     </message>
 </context>
 <context>
-    <name>Relationship</name>
-    <message>
-        <source>%1_has_one_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>many_%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_inherits_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_is_partition_of_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_copies_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -12722,6 +12668,10 @@ dostupné v GUI. Všetky dostupné voľby sú popísané nižšie.</translation>
     <message>
         <source>Foreign key (source)</source>
         <translation>Cudzí kľúč (zdroj)</translation>
+    </message>
+    <message>
+        <source>Pattern for foreign key indexes generated by the relationship.</source>
+        <translation>Vzor pre indexy cudzieho kľúča generované vzťahom.</translation>
     </message>
     <message>
         <source>FK Index name</source>
@@ -14527,11 +14477,11 @@ dostupné v GUI. Všetky dostupné voľby sú popísané nižšie.</translation>
     </message>
     <message>
         <source>Table</source>
-        <translation type="unfinished">Tabuľka</translation>
+        <translation>Tabuľka</translation>
     </message>
     <message>
         <source>Cross relationships</source>
-        <translation type="unfinished"></translation>
+        <translation>Vzťahy medzi scénami</translation>
     </message>
 </context>
 <context>
