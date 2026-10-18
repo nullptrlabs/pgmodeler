@@ -25,6 +25,7 @@
 #include <openssl/x509.h>
 #include "licensecheck/licensecheckns.h"
 #include "licensecheck/licensekeydata.h"
+#include "licensecheck/licensekeyfingerprints.h"
 
 /*! \brief Tests the license signature verification and the masked embedded public key.
  *  The signing side (server) is simulated with a throwaway RSA key pair, so no real
@@ -73,6 +74,8 @@ class LicenseCheckTest: public QObject {
 		void emptyOrInvalidInputsAreRejected();
 		void foreignSignatureIsRejectedByTheEmbeddedKey();
 		void noncelessOrEmptyNonceNeverValidates();
+		void siteFingerprintsMatchTheEmbeddedKey();
+		void siteFingerprintsAreDistinctPerSite();
 };
 
 void LicenseCheckTest::embeddedKeyIsARsa2048PublicKey()
@@ -167,6 +170,34 @@ void LicenseCheckTest::noncelessOrEmptyNonceNeverValidates()
 
 	// A response not signed by the embedded key is rejected even if the nonce matches
 	QVERIFY(!LicenseCheckNs::validateServerNonce(response.toUtf8(), "abc"));
+}
+
+void LicenseCheckTest::siteFingerprintsMatchTheEmbeddedKey()
+{
+	/* Every guarded call site compares against its constant from licensekeyfingerprints.h.
+	 * If one of them is stale (for instance after a key rotation) that feature would always
+	 * abort, so each constant must equal the fingerprint computed from the embedded key */
+	const LicenseKeyFp::Site sites[] = { LicenseKeyFp::Import, LicenseKeyFp::Diff,
+																			 LicenseKeyFp::Browse, LicenseKeyFp::SqlTab };
+
+	for(const auto &site : sites)
+		QCOMPARE(LicenseCheckNs::getKeyFingerprint(site.id), site.fp);
+}
+
+void LicenseCheckTest::siteFingerprintsAreDistinctPerSite()
+{
+	QSet<quint64> fps;
+	const LicenseKeyFp::Site sites[] = { LicenseKeyFp::Import, LicenseKeyFp::Diff,
+																			 LicenseKeyFp::Browse, LicenseKeyFp::SqlTab };
+
+	for(const auto &site : sites)
+		fps.insert(site.fp);
+
+	QCOMPARE(fps.size(), 4);
+
+	// An unknown site id, or a constant used at the wrong site, must not match
+	QVERIFY(LicenseCheckNs::getKeyFingerprint(0) != LicenseKeyFp::Import.fp);
+	QVERIFY(LicenseCheckNs::getKeyFingerprint(LicenseKeyFp::Diff.id) != LicenseKeyFp::Import.fp);
 }
 
 QTEST_MAIN(LicenseCheckTest)
