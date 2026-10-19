@@ -63,7 +63,7 @@ const QString GlobalAttributes::PgModelerSite {
 const QString GlobalAttributes::PgModelerSupport { PgModelerSite + "/docs" };
 const QString GlobalAttributes::PgModelerSourceURL { "https://github.com/nullptrlabs/pgmodeler/releases" };
 const QString GlobalAttributes::PgModelerDownloadURL { PgModelerSite + "/download" };
-const QString GlobalAttributes::PgModelerDonateURL { PgModelerSite + "/#donationForm" };
+const QString GlobalAttributes::PgModelerDonateURL { PgModelerSite + "/donate" };
 const QString GlobalAttributes::PgModelerUpdateCheckURL { PgModelerSite + "/checkupdate?version=%1&mode=%2" };
 
 const QString GlobalAttributes::NullptrLabsSite { "https://nullptrlabs.io" };
