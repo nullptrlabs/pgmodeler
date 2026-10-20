@@ -43,6 +43,14 @@ class __libcanvas RelationshipView: public BaseObjectView {
 			ConnectTableEdges
 		};
 
+		/*! \brief The style of the lines used to render the relationships. The orthogonal style draws
+		 * only horizontal/vertical segments with rounded corners and ignores the points added by the user. */
+		enum LineStyle: unsigned {
+			StraightLines,
+			CurvedLines,
+			OrthogonalLines
+		};
+
 	private:
 		//! \brief Graphical point radius
 		static constexpr double GraphicPointRadius=6.0;
@@ -55,14 +63,11 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		static constexpr double ConnLineLength=20.0;
 
 		/*! \brief Ideal radius, along each segment, used to round off the corners of a
-		 * self-relationship's loop when curved lines are enabled */
-		static constexpr double SelfRelCornerRadius=10.0;
+		 * self-relationship's loop and of orthogonal lines */
+		static constexpr double RoundedCornerRadius=10.0;
 
 		//! \brief Indicates that the relationship labels must be hidden
 		static bool hide_name_label,
-
-		//! \brief Indicates that the relationship lines should be curved
-		use_curved_lines,
 
 		//! \brief Indicates that the relationship should be drawn in Crow's foot notation
 		use_crows_foot;
@@ -71,6 +76,9 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		is to connect the line to tables through their central points. The second (better semantics)
 		makes the line start from the fk columns on receiver table and connecting to the pk columns on reference table */
 		static LineConnectionMode line_conn_mode;
+
+		//! \brief Specifies how the lines of all relationships are rendered
+		static LineStyle line_style;
 
 		/*! \brief Indicate that the line is being configured/updated. This flag is used to evict
 		 that the configureLine() method is exceedingly called during the table moving. */
@@ -166,6 +174,9 @@ class __libcanvas RelationshipView: public BaseObjectView {
 			//! \brief The fk/pk columns connection points (fk-to-pk mode only)
 			fk_points, pk_points;
 
+			//! \brief The directions in which the line leaves the tables at p_central (null vector means any direction)
+			QPointF conn_dirs[2];
+
 			//! \brief The line is connected at the same side on both tables (fk-to-pk mode only)
 			bool conn_same_sides { false },
 
@@ -208,6 +219,32 @@ class __libcanvas RelationshipView: public BaseObjectView {
 
 		//! \brief Computes the connection points at the fk/pk columns (falls back to the center points)
 		void configureFkToPkGeometry(LineGeometry &geom);
+
+		/*! \brief Computes the orthogonal line (horizontal/vertical segments only) between the tables
+		 * according to the line connection mode */
+		void configureOrthogonalGeometry(LineGeometry &geom);
+
+		/*! \brief Determines the side of the rect (horizontal or vertical, towards the sign direction) where
+		 * the orthogonal line leaves it to reach other_rect. Returns false if the rects overlap */
+		static bool getEdgeSide(const QRectF &rect, const QRectF &other_rect, bool &horiz, int &sign);
+
+		/*! \brief Returns the position, along the side of rect, where the orthogonal line to other_rect
+		 * would be connected if the side had no other lines */
+		static double getEdgePreferredPos(const QRectF &rect, const QRectF &other_rect, bool horiz, double border);
+
+		/*! \brief Returns the position, along the side of the table tab_idx, where this relationship is connected.
+		 * The lines of all relationships connected to the same side are spread along it to avoid sharing the same point */
+		double getEdgeAnchorPos(unsigned tab_idx, bool horiz, int sign);
+
+		/*! \brief Computes the connection points and directions of the orthogonal line at the tables' edges.
+		 * The stubs parameter receives the minimum length of the first and last segments of the line (crow's foot room) */
+		void configureOrthogonalEdges(LineGeometry &geom, double stubs[2], double &mid_shift);
+
+		/*! \brief Returns the points of the orthogonal line that links p0 to p1 leaving them in the directions dir0 and dir1.
+		 * The stub0 and stub1 parameters are the minimum length of the segments at the ends of the line,
+		 * and mid_shift displaces the middle segment. Null directions are chosen automatically. */
+		static std::vector<QPointF> getOrthogonalRoute(QPointF p0, QPointF dir0, double stub0,
+																									 QPointF p1, QPointF dir1, double stub1, double mid_shift);
 
 		//! \brief Adds the connection points at the ends of the line points
 		void addEndPoints(LineGeometry &geom);
@@ -252,8 +289,9 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		//! \brief Configures one curve per segment of an ordinary relationship line
 		void configureCurvedLines(const LineGeometry &geom);
 
-		//! \brief Configures the single curve that traces the loop of a self-relationship
-		void configureSelfRelCurve(const std::vector<QPointF> &points);
+		/*! \brief Configures the single curve that traces the whole line with its corners rounded.
+		 * It's used by self-relationships and by the orthogonal lines */
+		void configurePolylineCurve(const std::vector<QPointF> &points);
 
 		//! \brief Destroys all curves and makes the straight lines visible again
 		void removeCurves();
@@ -302,11 +340,11 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		//! \brief Returns the current visibility state of name label
 		static bool isNameLabelHidden();
 
-		//! \brief Enables the usage of curved lines for all relationships
-		static void setCurvedLines(bool value);
+		//! \brief Defines the style of the lines used by all relationships
+		static void setLineStyle(LineStyle style);
 
-		//! \brief Returns the current state of curved lines usage
-		static bool isCurvedLines();
+		//! \brief Returns the style of the lines used by the relationships
+		static LineStyle getLineStyle();
 
 		//! \brief Enables the usage of Crow's foot notation for all relationships
 		static void setCrowsFoot(bool value);

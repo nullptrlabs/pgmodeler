@@ -42,7 +42,7 @@
 {spc} [lock-page-delim-resize="] %if {lock-page-delim-resize} %then true %else false %end ["] \n
 {spc} [align-objs-to-grid="] %if {align-objs-to-grid} %then true %else false %end ["] \n
 {spc} [history-max-length="] {history-max-length} ["] \n
-{spc} [use-curved-lines="] %if {use-curved-lines} %then true %else false %end ["] \n
+{spc} [rel-line-style="] {rel-line-style} ["] \n
 {spc} [compact-view="] %if {compact-view} %then true %else false %end ["] \n
 {spc} [save-restore-geometry="] %if {save-restore-geometry} %then true %else false %end ["] \n
 {spc} [low-verbosity="] %if {low-verbosity} %then true %else false %end ["] \n

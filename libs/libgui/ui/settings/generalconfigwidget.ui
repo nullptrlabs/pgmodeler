@@ -927,23 +927,43 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="use_curved_lines_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Replaces any straight line in relationship by curved ones in order to improve the model's visualization.</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Use curved lines for relationships</string>
-           </property>
-          </widget>
+          <layout class="QHBoxLayout" name="rel_line_style_lt">
+           <item>
+            <widget class="QLabel" name="rel_line_style_lbl">
+             <property name="text">
+              <string>Relationship line style:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="rel_line_style_cmb">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>&lt;p&gt;Defines how the relationships' lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Straight</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Curved</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Orthogonal</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
           <widget class="QCheckBox" name="escape_comments_chk">

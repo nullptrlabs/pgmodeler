@@ -6058,15 +6058,19 @@ void ModelWidget::configureBasicActions(BaseObject *obj)
 
 			if(!rel->isSelfRelationship())
 			{
-				if(rel->getPoints().empty())
+				//The points added by the user are ignored by the orthogonal lines
+				if(RelationshipView::getLineStyle() != RelationshipView::OrthogonalLines)
 				{
-					action_break_rel_line->setData(QVariant::fromValue<void *>(rel));
-					popup_menu.addAction(action_break_rel_line);
-				}
-				else
-				{
-					action_remove_rel_points->setData(QVariant::fromValue<void *>(rel));
-					popup_menu.addAction(action_remove_rel_points);
+					if(rel->getPoints().empty())
+					{
+						action_break_rel_line->setData(QVariant::fromValue<void *>(rel));
+						popup_menu.addAction(action_break_rel_line);
+					}
+					else
+					{
+						action_remove_rel_points->setData(QVariant::fromValue<void *>(rel));
+						popup_menu.addAction(action_remove_rel_points);
+					}
 				}
 
 				popup_menu.addAction(action_jump_to_table);
@@ -7124,7 +7128,7 @@ void ModelWidget::rearrangeTablesHierarchically(ObjectsScene *target_scene)
 
 			try
 			{
-				if(!RelationshipView::isCurvedLines() &&
+				if(RelationshipView::getLineStyle() == RelationshipView::StraightLines &&
 						round(rel->getTable(BaseRelationship::SrcTable)->getPosition().y()) !=
 								round(rel->getTable(BaseRelationship::DstTable)->getPosition().y()))
 				{
