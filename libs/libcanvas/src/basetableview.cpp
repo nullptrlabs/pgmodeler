@@ -618,13 +618,19 @@ std::vector<RelationshipView *> BaseTableView::getNearbyRoutes(bool include_conn
 	// Margin that includes the relationships that pass close to the table but not through it
 	constexpr double Margin = 20;
 	QRectF region(this->pos(), this->boundingRect().size());
+	std::vector<QRectF> areas = { region };
 	RelationshipView *rel_view = nullptr;
 
+	// The previous area is checked on its own, a single area covering both would include everything between them
 	if(!move_origin_rect.isNull())
 	{
+		areas.push_back(move_origin_rect);
 		region = region.united(move_origin_rect);
 		move_origin_rect = QRectF();
 	}
+
+	for(auto &area : areas)
+		area.adjust(-Margin, -Margin, Margin, Margin);
 
 	region.adjust(-Margin, -Margin, Margin, Margin);
 
@@ -632,9 +638,15 @@ std::vector<RelationshipView *> BaseTableView::getNearbyRoutes(bool include_conn
 	{
 		rel_view = dynamic_cast<RelationshipView *>(item);
 
-		if(rel_view &&
-			 (include_connected ||
-				std::find(connected_rels.begin(), connected_rels.end(), rel_view->getUnderlyingObject()) == connected_rels.end()))
+		if(!rel_view ||
+			 (!include_connected &&
+				std::find(connected_rels.begin(), connected_rels.end(), rel_view->getUnderlyingObject()) != connected_rels.end()))
+			continue;
+
+		/* The bounding rect of a line covers its whole area, so the route itself is checked to avoid
+		 * updating the lines that only have the table inside the box they occupy */
+		if(std::any_of(areas.begin(), areas.end(), [rel_view](const QRectF &area){
+				 return rel_view->isRouteNear(area); }))
 			rel_views.push_back(rel_view);
 	}
 

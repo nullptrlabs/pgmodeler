@@ -1249,6 +1249,8 @@ void RelationshipView::configureOrthogonalGeometry(LineGeometry &geom)
 	geom.points = getOrthogonalRoute(geom.p_central[0], geom.conn_dirs[0], stubs[0],
 																	 geom.p_central[1], geom.conn_dirs[1], stubs[1], mid_shift);
 
+	direct_route = geom.points;
+
 	if(isObstacleAvoidanceEnabled())
 		geom.points = avoidObstacles(geom.points, geom.conn_dirs, stubs);
 
@@ -1826,6 +1828,29 @@ std::vector<QRectF> RelationshipView::getObstacles(const QRectF &region)
 	}
 
 	return obstacles;
+}
+
+bool RelationshipView::isRouteNear(const QRectF &region) const
+{
+	if(route_points.size() < 2)
+		return true;
+
+	/* A line that goes around a table doesn't need to pass close to it, so the route it would take
+	 * without the obstacles is checked too. The segments are horizontal or vertical, so their
+	 * bounding boxes are the segments themselves */
+	for(auto &route : { std::cref(route_points), std::cref(direct_route) })
+	{
+		for(size_t idx = 0; idx + 1 < route.get().size(); idx++)
+		{
+			const QPointF &p1 = route.get()[idx], &p2 = route.get()[idx + 1];
+
+			if(std::max(p1.x(), p2.x()) >= region.left() && std::min(p1.x(), p2.x()) <= region.right() &&
+				 std::max(p1.y(), p2.y()) >= region.top() && std::min(p1.y(), p2.y()) <= region.bottom())
+				return true;
+		}
+	}
+
+	return false;
 }
 
 std::vector<QRectF> RelationshipView::getEndZones(const QRectF &region)
