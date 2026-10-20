@@ -23,6 +23,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <algorithm>
+#include <cmath>
 
 BezierCurveItem::BezierCurveItem(QGraphicsItem *parent) :  QGraphicsPathItem(parent)
 {
@@ -116,6 +117,12 @@ void BezierCurveItem::setLine(const QLineF &line, bool simple_curve, bool invert
 
 void BezierCurveItem::setPoints(const std::vector<QPointF> &points, double corner_radius)
 {
+	setPoints(points, corner_radius, {}, 0);
+}
+
+void BezierCurveItem::setPoints(const std::vector<QPointF> &points, double corner_radius,
+																const std::vector<QPointF> &bumps, double bump_radius)
+{
 	this->straight_line = this->invert_cpoints = this->simple_curve = false;
 
 	if(points.empty())
@@ -125,6 +132,44 @@ void BezierCurveItem::setPoints(const std::vector<QPointF> &points, double corne
 	}
 
 	QPainterPath path { points.front() };
+
+	/* Draws a straight piece of the polyline from the current position of the path to the target one.
+	 * If the piece is horizontal, the arcs of the bumps lying over it are included */
+	auto line_to = [&](const QPointF &target) {
+		QPointF start = path.currentPosition();
+		double dir = (target.x() >= start.x() ? 1 : -1), min_pos = 0, max_pos = 0;
+		std::vector<double> xs;
+
+		if(!bumps.empty() && std::fabs(target.y() - start.y()) < 0.001)
+		{
+			// Bumps closer than the radius to the piece ends would collide with the corners
+			min_pos = std::min(start.x(), target.x()) + bump_radius;
+			max_pos = std::max(start.x(), target.x()) - bump_radius;
+
+			for(auto &bump : bumps)
+			{
+				if(std::fabs(bump.y() - start.y()) < 0.001 && bump.x() >= min_pos && bump.x() <= max_pos)
+					xs.push_back(bump.x());
+			}
+
+			std::sort(xs.begin(), xs.end());
+
+			if(dir < 0)
+				std::reverse(xs.begin(), xs.end());
+		}
+
+		for(auto &x : xs)
+		{
+			path.lineTo(QPointF(x - (dir * bump_radius), start.y()));
+
+			// Semicircle-like arch above the segment
+			path.cubicTo(QPointF(x - (dir * bump_radius), start.y() - (bump_radius * 1.33)),
+									 QPointF(x + (dir * bump_radius), start.y() - (bump_radius * 1.33)),
+									 QPointF(x + (dir * bump_radius), start.y()));
+		}
+
+		path.lineTo(target);
+	};
 
 	if(points.size() > 1)
 	{
@@ -138,7 +183,7 @@ void BezierCurveItem::setPoints(const std::vector<QPointF> &points, double corne
 			// Degenerate segment (coincident points): no room to round this corner, just go straight through it
 			if(len_in < 0.001 || len_out < 0.001)
 			{
-				path.lineTo(points[i]);
+				line_to(points[i]);
 				continue;
 			}
 
@@ -150,11 +195,11 @@ void BezierCurveItem::setPoints(const std::vector<QPointF> &points, double corne
 			QPointF pre = points[i] - ((seg_in.p2() - seg_in.p1()) / len_in) * radius,
 					post = points[i] + ((seg_out.p2() - seg_out.p1()) / len_out) * radius;
 
-			path.lineTo(pre);
+			line_to(pre);
 			path.quadTo(points[i], post);
 		}
 
-		path.lineTo(points.back());
+		line_to(points.back());
 	}
 
 	this->setPath(path);

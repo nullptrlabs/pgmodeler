@@ -23,6 +23,9 @@
 #include "relationship.h"
 #include "tableview.h"
 #include "utilsns.h"
+#include "objectsscene.h"
+#include <queue>
+#include <limits>
 
 bool RelationshipView::hide_name_label {false};
 bool RelationshipView::use_crows_foot {true};
@@ -128,6 +131,10 @@ RelationshipView::~RelationshipView()
 	QGraphicsItem *item=nullptr;
 	std::vector<std::vector<QGraphicsLineItem *> *> rel_lines = { &lines, &fk_lines, &pk_lines, &src_cf_lines, &dst_cf_lines };
 
+	// The bumps of the lines that crossed this one must be updated
+	if(!route_points.empty())
+		notifyRouteChanged();
+
 	for(auto &curve : curves)
 	{
 		this->removeFromGroup(curve);
@@ -210,6 +217,32 @@ RelationshipView::LineStyle RelationshipView::getLineStyle()
 	return line_style;
 }
 
+void RelationshipView::invalidateRoute()
+{
+	tab_hashes[BaseRelationship::SrcTable].clear();
+	tab_hashes[BaseRelationship::DstTable].clear();
+	configureLine();
+}
+
+void RelationshipView::notifyRouteChanged()
+{
+	ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene());
+
+	if(obj_scene)
+		obj_scene->requestBumpsUpdate();
+}
+
+void RelationshipView::setBumps(const std::vector<QPointF> &new_bumps)
+{
+	if(new_bumps == bumps || curves.empty() || route_points.empty())
+		return;
+
+	bumps = new_bumps;
+	curves[0]->setPoints(route_points, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
+											 bumps, BumpRadius * BaseObjectView::getScreenDpiFactor());
+	configureBoundingRect();
+}
+
 void RelationshipView::setCrowsFoot(bool value)
 {
 	use_crows_foot = value;
@@ -275,6 +308,13 @@ QVariant RelationshipView::itemChange(GraphicsItemChange change, const QVariant 
 	if(change==ItemPositionChange)
 	{
 		this->setFlag(QGraphicsItem::ItemIsMovable, false);
+	}
+	/* The first configuration of the line is done in the constructor, when there's no scene yet to
+	 * look for the tables in the way of an orthogonal line. So we redo it when the scene is assigned */
+	else if(change==ItemSceneHasChanged)
+	{
+		if(scene() && line_style == OrthogonalLines && tables[0] && tables[1])
+			invalidateRoute();
 	}
 	else if(change==ItemSelectedHasChanged)
 	{
@@ -1140,6 +1180,9 @@ void RelationshipView::configureOrthogonalGeometry(LineGeometry &geom)
 
 	geom.points = getOrthogonalRoute(geom.p_central[0], geom.conn_dirs[0], stubs[0],
 																	 geom.p_central[1], geom.conn_dirs[1], stubs[1], mid_shift);
+
+	if(isObstacleAvoidanceEnabled())
+		geom.points = avoidObstacles(geom.points, geom.conn_dirs, stubs);
 }
 
 bool RelationshipView::getEdgeSide(const QRectF &rect, const QRectF &other_rect, bool &horiz, int &sign)
@@ -1358,14 +1401,327 @@ void RelationshipView::configureOrthogonalEdges(LineGeometry &geom, double stubs
 	}
 }
 
+std::vector<QPointF> RelationshipView::cleanRoute(const std::vector<QPointF> &route)
+{
+	std::vector<QPointF> pts;
+	QPointF a, b;
+
+	// Removing the duplicated points as well as the intermediate ones of collinear segments
+	for(auto &pnt : route)
+	{
+		if(!pts.empty() && QLineF(pts.back(), pnt).length() < 0.01)
+			continue;
+
+		if(pts.size() >= 2)
+		{
+			a = pts[pts.size() - 2];
+			b = pts.back();
+
+			if(std::fabs(((b.x() - a.x()) * (pnt.y() - b.y())) - ((b.y() - a.y()) * (pnt.x() - b.x()))) < 0.01)
+				pts.pop_back();
+		}
+
+		pts.push_back(pnt);
+	}
+
+	if(pts.size() < 2 && !route.empty())
+		pts.push_back(route.back());
+
+	return pts;
+}
+
+bool RelationshipView::isSegmentBlocked(const QPointF &p1, const QPointF &p2, const std::vector<QRectF> &obstacles)
+{
+	constexpr double Epsilon = 0.01;
+	double left = std::min(p1.x(), p2.x()), right = std::max(p1.x(), p2.x()),
+			top = std::min(p1.y(), p2.y()), bottom = std::max(p1.y(), p2.y());
+
+	/* A horizontal/vertical segment is blocked when it crosses the inside of an obstacle.
+	 * Segments that only touch the obstacle's borders are free, so they can run along them */
+	for(auto &rect : obstacles)
+	{
+		if(left < rect.right() - Epsilon && right > rect.left() + Epsilon &&
+			 top < rect.bottom() - Epsilon && bottom > rect.top() + Epsilon)
+			return true;
+	}
+
+	return false;
+}
+
+bool RelationshipView::isRouteBlocked(const std::vector<QPointF> &route, const std::vector<QRectF> &obstacles)
+{
+	for(size_t idx = 1; idx < route.size(); idx++)
+	{
+		if(isSegmentBlocked(route[idx - 1], route[idx], obstacles))
+			return true;
+	}
+
+	return false;
+}
+
+bool RelationshipView::isObstacleAvoidanceEnabled()
+{
+	ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene());
+
+	/* Without the scene there is no information about the other tables. Also, when the tables are being
+	 * moved and the relationships are updated at every step (no placeholders), the obstacles are
+	 * ignored to keep the movement fluid. The relationships are fixed when the movement ends */
+	return obj_scene && !(obj_scene->isMovingObjects() && !BaseObjectView::isPlaceholderEnabled());
+}
+
+std::vector<QRectF> RelationshipView::getObstacles(const QRectF &region)
+{
+	std::vector<QRectF> obstacles;
+	BaseTableView *tab = nullptr;
+
+	if(!scene())
+		return obstacles;
+
+	for(auto &item : scene()->items(region, Qt::IntersectsItemBoundingRect))
+	{
+		tab = dynamic_cast<BaseTableView *>(item);
+
+		if(tab && tab != tables[0] && tab != tables[1] && tab->isVisible())
+			obstacles.push_back(QRectF(tab->pos(), tab->boundingRect().size()));
+	}
+
+	return obstacles;
+}
+
+std::vector<QPointF> RelationshipView::findOrthogonalPath(const QPointF &start, const QPointF &goal, int start_dir, int goal_dir,
+																													const std::vector<QRectF> &obstacles)
+{
+	/* Search of the best path on the grid formed by the coordinates of the obstacles' borders (Hanan grid).
+	 * The cost of a path is its length plus a penalty for each bend. The state of the search is the grid
+	 * node plus the direction of the last move, which allows the bends to be accounted for. */
+	constexpr double BendPenalty = 50;
+	constexpr size_t MaxNodes = 12000;
+	const int dx[4] = { 1, 0, -1, 0 }, dy[4] = { 0, 1, 0, -1 };
+
+	struct QueueItem {
+		double f, g;
+		int state;
+
+		bool operator < (const QueueItem &item) const {
+			if(f != item.f)
+				return f > item.f;
+
+			if(g != item.g)
+				return g < item.g;
+
+			return state > item.state;
+		}
+	};
+
+	auto unique_coords = [](std::vector<double> &coords) {
+		std::sort(coords.begin(), coords.end());
+		coords.erase(std::unique(coords.begin(), coords.end(), [](double c1, double c2) {
+			return std::fabs(c1 - c2) < 0.01;
+		}), coords.end());
+	};
+
+	auto index_of = [](const std::vector<double> &coords, double value) {
+		return static_cast<int>(std::lower_bound(coords.begin(), coords.end(), value - 0.01) - coords.begin());
+	};
+
+	std::vector<double> xs { start.x(), goal.x() }, ys { start.y(), goal.y() }, dist;
+	std::vector<int> parent;
+	std::priority_queue<QueueItem> queue;
+	std::vector<QPointF> path;
+
+	for(auto &rect : obstacles)
+	{
+		xs.push_back(rect.left());
+		xs.push_back(rect.right());
+		ys.push_back(rect.top());
+		ys.push_back(rect.bottom());
+	}
+
+	unique_coords(xs);
+	unique_coords(ys);
+
+	int nx = xs.size(), ny = ys.size(),
+			start_x = index_of(xs, start.x()), start_y = index_of(ys, start.y()),
+			goal_x = index_of(xs, goal.x()), goal_y = index_of(ys, goal.y());
+
+	if(static_cast<size_t>(nx) * ny > MaxNodes)
+		return path;
+
+	dist.assign(nx * ny * 4, std::numeric_limits<double>::infinity());
+	parent.assign(nx * ny * 4, -1);
+
+	auto push_state = [&](int ix, int iy, int dir, double g, int from) {
+		int state = ((iy * nx) + ix) * 4 + dir;
+
+		if(g >= dist[state])
+			return;
+
+		dist[state] = g;
+		parent[state] = from;
+		queue.push({ g + std::fabs(xs[ix] - goal.x()) + std::fabs(ys[iy] - goal.y()), g, state });
+	};
+
+	if(start_dir >= 0)
+		push_state(start_x, start_y, start_dir, 0, -1);
+	else
+	{
+		for(int dir = 0; dir < 4; dir++)
+			push_state(start_x, start_y, dir, 0, -1);
+	}
+
+	while(!queue.empty())
+	{
+		QueueItem item = queue.top();
+		queue.pop();
+
+		if(item.g > dist[item.state])
+			continue;
+
+		int cur_dir = item.state % 4, node = item.state / 4,
+				ix = node % nx, iy = node / nx;
+
+		if(ix == goal_x && iy == goal_y)
+		{
+			for(int state = item.state; state >= 0; state = parent[state])
+				path.push_back(QPointF(xs[(state / 4) % nx], ys[(state / 4) / nx]));
+
+			std::reverse(path.begin(), path.end());
+			return path;
+		}
+
+		for(int dir = 0; dir < 4; dir++)
+		{
+			int new_x = ix + dx[dir], new_y = iy + dy[dir];
+			double cost = 0;
+
+			// Going back to where the line came from is never part of a best path
+			if(dir == (cur_dir + 2) % 4 || new_x < 0 || new_x >= nx || new_y < 0 || new_y >= ny)
+				continue;
+
+			QPointF p1(xs[ix], ys[iy]), p2(xs[new_x], ys[new_y]);
+
+			if(isSegmentBlocked(p1, p2, obstacles))
+				continue;
+
+			cost = item.g + QLineF(p1, p2).length() + (dir != cur_dir ? BendPenalty : 0);
+
+			// The line must arrive at the goal in the direction that links it to the table
+			if(new_x == goal_x && new_y == goal_y && goal_dir >= 0 && dir != goal_dir)
+				cost += BendPenalty;
+
+			push_state(new_x, new_y, dir, cost, item.state);
+		}
+	}
+
+	return path;
+}
+
+std::vector<QPointF> RelationshipView::avoidObstacles(const std::vector<QPointF> &route, const QPointF *dirs, const double *stubs)
+{
+	constexpr size_t MaxObstacles = 48;
+	const double regions_margins[2] = { 150, 600 };
+	double clearance = ConnLineLength * 0.3, exit_len = 0;
+	QRectF route_rect, region;
+	std::vector<QRectF> obstacles, all_obstacles;
+	std::vector<QPointF> path, result;
+	QPointF ends[2];
+	int dir_ids[2] = { -1, -1 };
+
+	if(route.size() < 2)
+		return route;
+
+	// Converting the directions (unit vectors) to the indexes used by the path search
+	for(int idx = 0; idx < 2; idx++)
+	{
+		if(dirs[idx].x() > 0)
+			dir_ids[idx] = 0;
+		else if(dirs[idx].y() > 0)
+			dir_ids[idx] = 1;
+		else if(dirs[idx].x() < 0)
+			dir_ids[idx] = 2;
+		else if(dirs[idx].y() < 0)
+			dir_ids[idx] = 3;
+	}
+
+	for(auto &pnt : route)
+		route_rect = route_rect.united(QRectF(pnt, QSizeF(0, 0)));
+
+	for(int attempt = 0; attempt < 2; attempt++)
+	{
+		region = route_rect.adjusted(-regions_margins[attempt], -regions_margins[attempt],
+																 regions_margins[attempt], regions_margins[attempt]);
+		obstacles = getObstacles(region);
+
+		for(auto &rect : obstacles)
+			rect.adjust(-clearance, -clearance, clearance, clearance);
+
+		// If the route doesn't touch any obstacle there's nothing to do
+		if(attempt == 0 && !isRouteBlocked(route, obstacles))
+			return route;
+
+		if(obstacles.size() > MaxObstacles)
+			return route;
+
+		/* The tables linked by the relationship are also obstacles for the search, otherwise the path could go
+		 * through them. The exception is when the line is not connected to the table's border (no direction),
+		 * which happens when it is connected to the table's center */
+		all_obstacles = obstacles;
+
+		for(int idx = 0; idx < 2; idx++)
+		{
+			if(dir_ids[idx] >= 0)
+			{
+				all_obstacles.push_back(QRectF(tables[idx]->pos(), tables[idx]->boundingRect().size()).
+																adjusted(-clearance, -clearance, clearance, clearance));
+			}
+		}
+
+		/* The search starts and ends away from the tables so there's room for the segments
+		 * at the ends of the line (e.g. the crow's foot descriptors) */
+		for(int idx = 0; idx < 2; idx++)
+		{
+			exit_len = (dir_ids[idx] >= 0 ? std::max(stubs[idx], clearance * 2) : 0);
+			ends[idx] = (idx == 0 ? route.front() : route.back()) + (dirs[idx] * exit_len);
+		}
+
+		/* The line arrives at the second table moving against its direction, which is the reverse
+		 * of the direction the line leaves that table */
+		path = findOrthogonalPath(ends[0], ends[1], dir_ids[0], (dir_ids[1] >= 0 ? (dir_ids[1] + 2) % 4 : -1), all_obstacles);
+
+		if(path.empty())
+			continue;
+
+		result.clear();
+		result.push_back(route.front());
+		result.insert(result.end(), path.begin(), path.end());
+		result.push_back(route.back());
+		result = cleanRoute(result);
+
+		// The found path must not touch obstacles outside the region used in the search
+		route_rect = QRectF();
+
+		for(auto &pnt : result)
+			route_rect = route_rect.united(QRectF(pnt, QSizeF(0, 0)));
+
+		obstacles = getObstacles(route_rect);
+
+		for(auto &rect : obstacles)
+			rect.adjust(-clearance, -clearance, clearance, clearance);
+
+		if(!isRouteBlocked(result, obstacles))
+			return result;
+	}
+
+	return route;
+}
+
 std::vector<QPointF> RelationshipView::getOrthogonalRoute(QPointF p0, QPointF dir0, double stub0,
 																													 QPointF p1, QPointF dir1, double stub1, double mid_shift)
 {
 	auto swap_xy = [](const QPointF &pnt) { return QPointF(pnt.y(), pnt.x()); };
 	bool horiz0 = (dir0.x() != 0 && dir0.y() == 0), horiz1 = (dir1.x() != 0 && dir1.y() == 0),
 			vert0 = (dir0.x() == 0 && dir0.y() != 0), vert1 = (dir1.x() == 0 && dir1.y() != 0);
-	std::vector<QPointF> route, pts;
-	QPointF a, b;
+	std::vector<QPointF> route;
 	double dist = 0, mid = 0, margin = 0;
 
 	/* When the directions are unknown or incompatible (one horizontal and the other vertical)
@@ -1429,28 +1785,7 @@ std::vector<QPointF> RelationshipView::getOrthogonalRoute(QPointF p0, QPointF di
 			pnt = swap_xy(pnt);
 	}
 
-	// Removing the duplicated points as well as the intermediate ones of collinear segments
-	for(auto &pnt : route)
-	{
-		if(!pts.empty() && QLineF(pts.back(), pnt).length() < 0.01)
-			continue;
-
-		if(pts.size() >= 2)
-		{
-			a = pts[pts.size() - 2];
-			b = pts.back();
-
-			if(std::fabs(((b.x() - a.x()) * (pnt.y() - b.y())) - ((b.y() - a.y()) * (pnt.x() - b.x()))) < 0.01)
-				pts.pop_back();
-		}
-
-		pts.push_back(pnt);
-	}
-
-	if(pts.size() < 2)
-		pts.push_back(route.back());
-
-	return pts;
+	return cleanRoute(route);
 }
 
 void RelationshipView::removeConnectorLines()
@@ -1645,6 +1980,9 @@ void RelationshipView::configureCurves(const LineGeometry &geom)
 
 void RelationshipView::configureCurvedLines(const LineGeometry &geom)
 {
+	route_points.clear();
+	bumps.clear();
+
 	BezierCurveItem *curve = nullptr;
 	bool invert_cpoints = false, simple_curve = false;
 	unsigned i = 0;
@@ -1704,19 +2042,41 @@ void RelationshipView::configurePolylineCurve(const std::vector<QPointF> &points
 	else
 		curve = curves[0];
 
+	/* The route of the orthogonal lines is stored so the bumps (hops over the lines crossing
+	 * this one) can be applied by the scene later. They're discarded if the route changes */
+	if(line_style == OrthogonalLines)
+	{
+		if(route_points != points)
+			bumps.clear();
+
+		route_points = points;
+	}
+	else
+	{
+		route_points.clear();
+		bumps.clear();
+	}
+
 	curve->setZValue(lines[0]->zValue());
 	curve->setPen(lines[0]->pen());
-	curve->setPoints(points, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor());
+	curve->setPoints(points, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
+									 bumps, BumpRadius * BaseObjectView::getScreenDpiFactor());
 
 	for(auto &line : lines)
 		line->setVisible(false);
 
 	//Removing any extra unused curves
 	trimGroupItems(this, curves, 1);
+
+	if(line_style == OrthogonalLines)
+		notifyRouteChanged();
 }
 
 void RelationshipView::removeCurves()
 {
+	route_points.clear();
+	bumps.clear();
+
 	for(auto &line : lines)
 		line->setVisible(true);
 

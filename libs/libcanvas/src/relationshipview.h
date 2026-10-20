@@ -66,6 +66,9 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		 * self-relationship's loop and of orthogonal lines */
 		static constexpr double RoundedCornerRadius=10.0;
 
+		//! \brief Radius of the arcs the orthogonal lines make to hop over the lines that cross them
+		static constexpr double BumpRadius=4.0;
+
 		//! \brief Indicates that the relationship labels must be hidden
 		static bool hide_name_label,
 
@@ -130,6 +133,13 @@ class __libcanvas RelationshipView: public BaseObjectView {
 
 		//! \brief Stores the curved lines representing the relationship
 		std::vector<BezierCurveItem *> curves;
+
+		//! \brief The points of the last orthogonal line configured. They are used to calculate the bumps
+		std::vector<QPointF> route_points,
+
+		/*! \brief Positions, over the horizontal segments of the orthogonal line, where it hops
+		 * over the vertical lines of other relationships that cross it */
+		bumps;
 
 		//! \brief Stores the crow's foot notation descriptors
 		QGraphicsItemGroup * cf_descriptors[2];
@@ -219,6 +229,40 @@ class __libcanvas RelationshipView: public BaseObjectView {
 
 		//! \brief Computes the connection points at the fk/pk columns (falls back to the center points)
 		void configureFkToPkGeometry(LineGeometry &geom);
+
+		/*! \brief Removes the duplicated points of the route as well as the intermediate
+		 * points of collinear segments */
+		static std::vector<QPointF> cleanRoute(const std::vector<QPointF> &route);
+
+		/*! \brief Returns whether the horizontal/vertical segment crosses the inside of one of the obstacles */
+		static bool isSegmentBlocked(const QPointF &p1, const QPointF &p2, const std::vector<QRectF> &obstacles);
+
+		//! \brief Returns whether any segment of the route crosses the inside of one of the obstacles
+		static bool isRouteBlocked(const std::vector<QPointF> &route, const std::vector<QRectF> &obstacles);
+
+		/*! \brief Returns whether the lines can be routed around the tables placed in their way. It's disabled
+		 * when the scene is not available or while the tables are being moved without placeholders */
+		bool isObstacleAvoidanceEnabled();
+
+		//! \brief Returns the areas of the visible tables inside the region, excluding the ones linked by the relationship
+		std::vector<QRectF> getObstacles(const QRectF &region);
+
+		/*! \brief Searches the best orthogonal path from start to goal that doesn't cross the obstacles.
+		 * The start_dir/goal_dir (0=right, 1=down, 2=left, 3=up, -1=any) are the directions in which the path
+		 * leaves the start and arrives at the goal. Returns an empty path if there's none. */
+		static std::vector<QPointF> findOrthogonalPath(const QPointF &start, const QPointF &goal, int start_dir, int goal_dir,
+																									 const std::vector<QRectF> &obstacles);
+
+		/*! \brief Returns the route modified to go around the tables that stand in its way. The dirs and stubs
+		 * are the same used to create the route. The route is returned unchanged if it has no obstacles or
+		 * if a way around them can't be found */
+		std::vector<QPointF> avoidObstacles(const std::vector<QPointF> &route, const QPointF *dirs, const double *stubs);
+
+		//! \brief Alerts the scene that the orthogonal line changed so the bumps of the lines can be recalculated
+		void notifyRouteChanged();
+
+		//! \brief Defines the positions where the orthogonal line hops over other lines and redraws it
+		void setBumps(const std::vector<QPointF> &new_bumps);
 
 		/*! \brief Computes the orthogonal line (horizontal/vertical segments only) between the tables
 		 * according to the line connection mode */
@@ -365,6 +409,10 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		 where the relationship is connected on envolved tables. The point returned deffers depending on the
 		 line connection mode used.	*/
 		QPointF getConnectionPoint(BaseRelationship::TableId table_idx);
+
+		/*! \brief Forces the line to be completely reconfigured, even if the tables didn't change. It's used
+		 * to update the orthogonal lines when the tables standing in their way are moved */
+		void invalidateRoute();
 
 		//! \brief Returns the label through its index
 		TextboxView *getLabel(BaseRelationship::LabelId lab_idx);

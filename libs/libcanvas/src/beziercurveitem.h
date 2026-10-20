@@ -84,6 +84,13 @@ class __libcanvas BezierCurveItem: public QGraphicsPathItem {
 		 * too short to fit it without overlapping the neighboring corner. */
 		void setPoints(const std::vector<QPointF> &points, double corner_radius);
 
+		/*! \brief Same as above but, additionally, the horizontal segments hop over the vertical lines that cross them.
+		 * Each point in bumps is the position, over a horizontal segment of the polyline, where an arc with
+		 * radius bump_radius is drawn above the segment. Points that are not over a horizontal segment, or
+		 * that are too close to the segment's ends, are ignored. */
+		void setPoints(const std::vector<QPointF> &points, double corner_radius,
+									 const std::vector<QPointF> &bumps, double bump_radius);
+
 		//! \brief Returns if the curve has the control points inverted
 		bool isControlPointsInverted();
 

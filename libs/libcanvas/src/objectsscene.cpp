@@ -85,6 +85,11 @@ ObjectsScene::ObjectsScene(QObject *parent) : QGraphicsScene(parent)
 
 	connect(&scene_move_timer, &QTimer::timeout, this, &ObjectsScene::moveObjectScene);
 
+	bumps_update_pending = false;
+	bumps_timer.setSingleShot(true);
+	bumps_timer.setInterval(50);
+	connect(&bumps_timer, &QTimer::timeout, this, &ObjectsScene::updateRelationshipBumps);
+
 	connect(&corner_hover_timer, &QTimer::timeout, this, [this](){
 		enableSceneMove();
 	});
@@ -1714,6 +1719,20 @@ void ObjectsScene::finishObjectsMove(const QPointF &pnt_end)
 	moving_objs=false;
 	sel_ini_pnt.setX(DNaN);
 	sel_ini_pnt.setY(DNaN);
+
+	/* After the movement the orthogonal relationships that were routed around the previous position of
+	 * the tables, or that must now go around their new one, are updated. When placeholders are not used the
+	 * relationships connected to the tables were updated during the movement without avoiding obstacles */
+	for(auto &obj : tables)
+	{
+		tab_view = dynamic_cast<BaseTableView *>(obj);
+		tab_view->invalidateNearbyRoutes(!BaseObjectView::isPlaceholderEnabled());
+	}
+
+	// Displaying the bumps that were postponed during the movement
+	if(bumps_update_pending)
+		bumps_timer.start();
+
 	updateLayerRects();
 
 	QRectF old_scene_rect = sceneRect(),
@@ -1981,6 +2000,103 @@ bool ObjectsScene::isRelationshipLineVisible()
 bool ObjectsScene::isMovingObjects()
 {
 	return moving_objs;
+}
+
+void ObjectsScene::requestBumpsUpdate()
+{
+	if(moving_objs)
+		bumps_update_pending = true;
+	else
+		bumps_timer.start();
+}
+
+void ObjectsScene::updateRelationshipBumps()
+{
+	// Bumps are only displayed when the user stops moving the objects
+	if(moving_objs)
+	{
+		bumps_update_pending = true;
+		return;
+	}
+
+	bumps_update_pending = false;
+
+	struct Segment {
+		RelationshipView *rel;
+		double pos, lo, hi;
+	};
+
+	std::vector<Segment> h_segs, v_segs;
+	std::map<RelationshipView *, std::vector<QPointF>> rels_bumps;
+	std::vector<QPointF> bumps;
+	RelationshipView *rel_view = nullptr;
+	QPointF p1, p2;
+	double dpi_factor = BaseObjectView::getScreenDpiFactor(),
+			bump_radius = RelationshipView::BumpRadius * dpi_factor,
+			corner_radius = RelationshipView::RoundedCornerRadius * dpi_factor,
+			margin = corner_radius + bump_radius;
+
+	for(auto &item : items())
+	{
+		rel_view = dynamic_cast<RelationshipView *>(item);
+
+		if(!rel_view || !rel_view->isVisible() || rel_view->route_points.size() < 2)
+			continue;
+
+		rels_bumps[rel_view] = {};
+
+		for(size_t idx = 1; idx < rel_view->route_points.size(); idx++)
+		{
+			p1 = rel_view->route_points[idx - 1];
+			p2 = rel_view->route_points[idx];
+
+			if(std::fabs(p1.y() - p2.y()) < 0.01 && std::fabs(p1.x() - p2.x()) > 0.01)
+				h_segs.push_back({ rel_view, p1.y(), std::min(p1.x(), p2.x()), std::max(p1.x(), p2.x()) });
+			else if(std::fabs(p1.x() - p2.x()) < 0.01 && std::fabs(p1.y() - p2.y()) > 0.01)
+				v_segs.push_back({ rel_view, p1.x(), std::min(p1.y(), p2.y()), std::max(p1.y(), p2.y()) });
+		}
+	}
+
+	std::sort(v_segs.begin(), v_segs.end(), [](const Segment &s1, const Segment &s2) {
+		return s1.pos < s2.pos;
+	});
+
+	/* The horizontal segments always hop over the vertical ones, this way only one of the lines
+	 * needs to know about the crossing. Crossings too close to the segments' ends are ignored */
+	for(auto &h_seg : h_segs)
+	{
+		if(h_seg.hi - h_seg.lo < margin * 2)
+			continue;
+
+		auto itr = std::lower_bound(v_segs.begin(), v_segs.end(), h_seg.lo + margin, [](const Segment &seg, double value) {
+			return seg.pos < value;
+		});
+
+		for(; itr != v_segs.end() && itr->pos <= h_seg.hi - margin; ++itr)
+		{
+			if(itr->rel != h_seg.rel &&
+				 h_seg.pos > itr->lo + corner_radius && h_seg.pos < itr->hi - corner_radius)
+				rels_bumps[h_seg.rel].push_back(QPointF(itr->pos, h_seg.pos));
+		}
+	}
+
+	for(auto &itr : rels_bumps)
+	{
+		bumps.clear();
+
+		std::sort(itr.second.begin(), itr.second.end(), [](const QPointF &p1, const QPointF &p2) {
+			return p1.y() != p2.y() ? p1.y() < p2.y() : p1.x() < p2.x();
+		});
+
+		// Crossings too close to each other on the same segment would make the bumps overlap
+		for(auto &bump : itr.second)
+		{
+			if(bumps.empty() || bumps.back().y() != bump.y() || bump.x() - bumps.back().x() >= bump_radius * 3)
+				bumps.push_back(bump);
+		}
+
+		itr.first->setBumps(bumps);
+	}
 }
 
 QList<QGraphicsItem *> ObjectsScene::selectedItems() const

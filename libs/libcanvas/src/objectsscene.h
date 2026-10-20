@@ -90,6 +90,14 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		SceneMoveTimeout=20,
 		SceneMoveThreshold=100;
 
+		/*! \brief Timer that postpones the calculation of the bumps of the orthogonal lines so it's done
+		 * only once after a series of relationship updates */
+		QTimer bumps_timer;
+
+		/*! \brief Indicates that the bumps update was requested while objects were being moved. In this case
+		 * the update is performed only when the movement ends */
+		bool bumps_update_pending;
+
 		//! \brief Timer responsible to move the scene
 		QTimer scene_move_timer,
 
@@ -171,6 +179,10 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		//! \brief Performs the final steps when moving the objects like adjusting position to grid, moving children object, etc
 		void finishObjectsMove(const QPointF &pnt_end);
+
+		/*! \brief Finds the places where the orthogonal lines of the relationships cross each other and
+		 * makes the horizontal ones hop over the vertical ones */
+		void updateRelationshipBumps();
 
 		/*! \brief Performs the scene position adjustment when pressing/releasing the arrow keys to avoid objects to be hidden in the corners.
 		This method will adjust the scene size automatically when moving objects right or down if the selected items bounding rects
@@ -370,6 +382,10 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		bool isRangeSelectionTriggerInverted();
 		bool isRelationshipLineVisible();
 		bool isMovingObjects();
+
+		/*! \brief Requests the update of the bumps of the orthogonal lines. It's performed after a short delay
+		 * or, if objects are being moved, only after the movement ends */
+		void requestBumpsUpdate();
 
 		QList<QGraphicsItem *> selectedItems(void) const;
 		bool hasOnlyTableChildrenSelection(void) const;
