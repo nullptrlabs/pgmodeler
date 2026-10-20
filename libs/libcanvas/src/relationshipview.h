@@ -151,6 +151,42 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		//! \brief Configures the position info object
 		void configurePositionInfo();
 
+		//! \brief Destroys the fk/pk connector lines (used in modes other than fk-to-pk)
+		void removeConnectorLines();
+
+		//! \brief Configures the graphical representation of the points added by the user
+		void configureGraphicPoints(const std::vector<QPointF> &points);
+
+		//! \brief Returns the pen used to draw the relationship lines
+		QPen getLinePen();
+
+		//! \brief Configures the lines that link the fk/pk columns to their connection points (fk-to-pk mode only)
+		void configureConnectorLines(const QPointF &fk_pnt, const QPointF &pk_pnt,
+														 const std::vector<QPointF> &fk_points,
+														 const std::vector<QPointF> &pk_points, const QPen &pen);
+
+		//! \brief Configures the straight segments that go through the provided points
+		void configureLineSegments(const std::vector<QPointF> &points, const QPen &pen);
+
+		//! \brief Returns whether the circles at the line ends must be displayed
+		bool isLineEndCirclesVisible();
+
+		//! \brief Configures the circles at the line ends (p_central holds the two connection points)
+		void configureLineCircles(const QPointF *p_central, const QPen &pen);
+
+		//! \brief Configures the curves (or restores the straight lines when curves are disabled)
+		void configureCurves(const std::vector<QPointF> &points, bool conn_same_sides,
+												 const bool *conn_horiz_sides, const bool *conn_vert_sides);
+
+		//! \brief Configures one curve per segment of an ordinary relationship line
+		void configureCurvedLines(bool conn_same_sides, const bool *conn_horiz_sides, const bool *conn_vert_sides);
+
+		//! \brief Configures the single curve that traces the loop of a self-relationship
+		void configureSelfRelCurve(const std::vector<QPointF> &points);
+
+		//! \brief Destroys all curves and makes the straight lines visible again
+		void removeCurves();
+
 		//! \brief Configures the specified label's position based as well some styles for it
 		void configureLabelPosition(BaseRelationship::LabelId label_id, double x, double y);
 
