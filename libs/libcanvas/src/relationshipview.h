@@ -69,6 +69,12 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		//! \brief Radius of the arcs the orthogonal lines make to hop over the lines that cross them
 		static constexpr double BumpRadius=4.0;
 
+		//! \brief Clearance kept between the lines and the end zones (crow's foot area) of other relationships
+		static constexpr double ZoneClearance=3.0;
+
+		//! \brief Maximum number of times the scene recalculates a line that goes through an end zone
+		static constexpr unsigned MaxZoneRetries=2;
+
 		//! \brief Indicates that the relationship labels must be hidden
 		static bool hide_name_label,
 
@@ -136,6 +142,14 @@ class __libcanvas RelationshipView: public BaseObjectView {
 
 		//! \brief The length of the straight parts at the start and end of the last curve configured
 		double curve_end_lens[2];
+
+		/*! \brief The areas, at the ends of the orthogonal line, occupied by the crow's foot descriptors.
+		 * Other relationships' lines are routed around them */
+		std::vector<QRectF> end_zones;
+
+		/*! \brief Counts how many times the route of the line was recalculated by the scene because it
+		 * went through the end zone of another relationship. It limits the attempts to avoid endless updates */
+		unsigned zone_retries;
 
 		//! \brief The points of the last orthogonal line configured. They are used to calculate the bumps
 		std::vector<QPointF> route_points,
@@ -255,6 +269,9 @@ class __libcanvas RelationshipView: public BaseObjectView {
 
 		//! \brief Returns the areas of the visible tables inside the region, excluding the ones linked by the relationship
 		std::vector<QRectF> getObstacles(const QRectF &region);
+
+		//! \brief Returns the end zones (crow's foot areas) of the other relationships inside the region, including the clearance
+		std::vector<QRectF> getEndZones(const QRectF &region);
 
 		/*! \brief Searches the best orthogonal path from start to goal that doesn't cross the obstacles.
 		 * The start_dir/goal_dir (0=right, 1=down, 2=left, 3=up, -1=any) are the directions in which the path
@@ -424,7 +441,7 @@ class __libcanvas RelationshipView: public BaseObjectView {
 
 		/*! \brief Forces the line to be completely reconfigured, even if the tables didn't change. It's used
 		 * to update the orthogonal lines when the tables standing in their way are moved */
-		void invalidateRoute();
+		void invalidateRoute(bool reset_retries = true);
 
 		//! \brief Returns the label through its index
 		TextboxView *getLabel(BaseRelationship::LabelId lab_idx);

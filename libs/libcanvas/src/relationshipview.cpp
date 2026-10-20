@@ -110,6 +110,7 @@ RelationshipView::RelationshipView(BaseRelationship *rel) : BaseObjectView(rel)
 
 	tables[0]=tables[1]=nullptr;
 	curve_end_lens[0]=curve_end_lens[1]=0;
+	zone_retries=0;
 
 	for(unsigned i=0; i < 2; i++)
 	{
@@ -218,8 +219,11 @@ RelationshipView::LineStyle RelationshipView::getLineStyle()
 	return line_style;
 }
 
-void RelationshipView::invalidateRoute()
+void RelationshipView::invalidateRoute(bool reset_retries)
 {
+	if(reset_retries)
+		zone_retries = 0;
+
 	tab_hashes[BaseRelationship::SrcTable].clear();
 	tab_hashes[BaseRelationship::DstTable].clear();
 	configureLine();
@@ -777,6 +781,8 @@ RelationshipView::LineGeometry RelationshipView::computeLineGeometry()
 	BaseRelationship *base_rel = this->getUnderlyingObject();
 	BaseRelationship::RelType rel_type = base_rel->getRelationshipType();
 	LineGeometry geom;
+
+	end_zones.clear();
 
 	if(base_rel->isSelfRelationship())
 	{
@@ -1368,7 +1374,8 @@ void RelationshipView::configureOrthogonalEdges(LineGeometry &geom, double stubs
 	int sign = 0, rel_idx = 0;
 	unsigned conn_rels_cnt = tables[0]->getConnectedRelsCount(base_rel->getTable(BaseRelationship::SrcTable),
 																														base_rel->getTable(BaseRelationship::DstTable));
-	double ref_pos = 0, rel_shift = 0, perp_delta = 0;
+	double ref_pos = 0, rel_shift = 0, perp_delta = 0, half_width = 0;
+	QPointF end_pnt;
 
 	//When the tables overlap the line keeps going through their centers
 	if(!getEdgeSide(rects[0], rects[1], horiz, sign))
@@ -1395,6 +1402,17 @@ void RelationshipView::configureOrthogonalEdges(LineGeometry &geom, double stubs
 		{
 			geom.end_lens[idx] = stubs[idx] * 1.2;
 			stubs[idx] = geom.end_lens[idx] + (RoundedCornerRadius * BaseObjectView::getScreenDpiFactor());
+
+			// The area of the descriptors: from the table's edge along the line, a little wider than the descriptor itself
+			half_width = 11 * BaseObjectView::getFontFactor() * BaseObjectView::getScreenDpiFactor();
+			end_pnt = geom.p_central[idx] + (dirs[idx] * geom.end_lens[idx]);
+
+			if(horiz)
+				end_zones.push_back(QRectF(QPointF(std::min(geom.p_central[idx].x(), end_pnt.x()), geom.p_central[idx].y() - half_width),
+																	 QPointF(std::max(geom.p_central[idx].x(), end_pnt.x()), geom.p_central[idx].y() + half_width)));
+			else
+				end_zones.push_back(QRectF(QPointF(geom.p_central[idx].x() - half_width, std::min(geom.p_central[idx].y(), end_pnt.y())),
+																	 QPointF(geom.p_central[idx].x() + half_width, std::max(geom.p_central[idx].y(), end_pnt.y()))));
 		}
 	}
 
@@ -1531,6 +1549,31 @@ std::vector<QRectF> RelationshipView::getObstacles(const QRectF &region)
 	return obstacles;
 }
 
+std::vector<QRectF> RelationshipView::getEndZones(const QRectF &region)
+{
+	std::vector<QRectF> zones;
+	RelationshipView *rel_view = nullptr;
+
+	if(!scene())
+		return zones;
+
+	for(auto &item : scene()->items(region, Qt::IntersectsItemBoundingRect))
+	{
+		rel_view = dynamic_cast<RelationshipView *>(item);
+
+		if(!rel_view || rel_view == this || !rel_view->isVisible())
+			continue;
+
+		for(auto &zone : rel_view->end_zones)
+		{
+			if(zone.intersects(region))
+				zones.push_back(zone.adjusted(-ZoneClearance, -ZoneClearance, ZoneClearance, ZoneClearance));
+		}
+	}
+
+	return zones;
+}
+
 std::vector<QPointF> RelationshipView::findOrthogonalPath(const QPointF &start, const QPointF &goal, int start_dir, int goal_dir,
 																													const std::vector<QRectF> &obstacles)
 {
@@ -1538,7 +1581,7 @@ std::vector<QPointF> RelationshipView::findOrthogonalPath(const QPointF &start, 
 	 * The cost of a path is its length plus a penalty for each bend. The state of the search is the grid
 	 * node plus the direction of the last move, which allows the bends to be accounted for. */
 	constexpr double BendPenalty = 50;
-	constexpr size_t MaxNodes = 12000;
+	constexpr size_t MaxNodes = 40000;
 	const int dx[4] = { 1, 0, -1, 0 }, dy[4] = { 0, 1, 0, -1 };
 
 	struct QueueItem {
@@ -1661,7 +1704,7 @@ std::vector<QPointF> RelationshipView::findOrthogonalPath(const QPointF &start, 
 
 std::vector<QPointF> RelationshipView::avoidObstacles(const std::vector<QPointF> &route, const QPointF *dirs, const double *stubs)
 {
-	constexpr size_t MaxObstacles = 48;
+	constexpr size_t MaxObstacles = 80;
 	const double regions_margins[2] = { 150, 600 };
 	double clearance = ConnLineLength * 0.75, exit_len = 0;
 	QRectF route_rect, region;
@@ -1686,16 +1729,25 @@ std::vector<QPointF> RelationshipView::avoidObstacles(const std::vector<QPointF>
 			dir_ids[idx] = 3;
 	}
 
+	/* The obstacles are the tables, with the clearance around them, plus the end zones
+	 * (crow's foot areas) of the other relationships */
+	auto get_all_obstacles = [&](const QRectF &rgn) {
+		std::vector<QRectF> rects = getObstacles(rgn), zones = getEndZones(rgn);
+
+		for(auto &rect : rects)
+			rect.adjust(-clearance, -clearance, clearance, clearance);
+
+		rects.insert(rects.end(), zones.begin(), zones.end());
+		return rects;
+	};
+
 	route_rect = getRouteRect(route);
 
 	for(int attempt = 0; attempt < 2; attempt++)
 	{
 		region = route_rect.adjusted(-regions_margins[attempt], -regions_margins[attempt],
 																 regions_margins[attempt], regions_margins[attempt]);
-		obstacles = getObstacles(region);
-
-		for(auto &rect : obstacles)
-			rect.adjust(-clearance, -clearance, clearance, clearance);
+		obstacles = get_all_obstacles(region);
 
 		// If the route doesn't touch any obstacle there's nothing to do
 		if(attempt == 0 && !isRouteBlocked(route, obstacles))
@@ -1740,10 +1792,7 @@ std::vector<QPointF> RelationshipView::avoidObstacles(const std::vector<QPointF>
 		result = cleanRoute(result);
 
 		// The found path must not touch obstacles outside the region used in the search
-		obstacles = getObstacles(getRouteRect(result));
-
-		for(auto &rect : obstacles)
-			rect.adjust(-clearance, -clearance, clearance, clearance);
+		obstacles = get_all_obstacles(getRouteRect(result));
 
 		if(!isRouteBlocked(result, obstacles))
 			return result;
