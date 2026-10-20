@@ -110,6 +110,7 @@ RelationshipView::RelationshipView(BaseRelationship *rel) : BaseObjectView(rel)
 
 	tables[0]=tables[1]=nullptr;
 	curve_end_lens[0]=curve_end_lens[1]=0;
+	route_stubs[0]=route_stubs[1]=0;
 	zone_retries=0;
 
 	for(unsigned i=0; i < 2; i++)
@@ -738,6 +739,7 @@ void RelationshipView::configureLine()
 
 	updateTablesHashes();
 	syncPlaceholderConnection();
+	discardOutdatedSegmentShifts();
 
 	configuring_line=true;
 
@@ -1201,6 +1203,129 @@ void RelationshipView::configureOrthogonalGeometry(LineGeometry &geom)
 
 	if(isObstacleAvoidanceEnabled())
 		geom.points = avoidObstacles(geom.points, geom.conn_dirs, stubs);
+
+	base_route = geom.points;
+	route_stubs[0] = stubs[0];
+	route_stubs[1] = stubs[1];
+	geom.points = applySegmentShifts(geom.points, stubs);
+}
+
+void RelationshipView::discardOutdatedSegmentShifts()
+{
+	constexpr double Tolerance = 0.01;
+	QRectF rect;
+	bool changed = false;
+
+	for(unsigned idx = 0; idx < 2; idx++)
+	{
+		rect = QRectF(tables[idx]->pos(), tables[idx]->boundingRect().size());
+
+		if(!shift_tab_rects[idx].isNull() &&
+			 (std::fabs(rect.x() - shift_tab_rects[idx].x()) > Tolerance ||
+				std::fabs(rect.y() - shift_tab_rects[idx].y()) > Tolerance ||
+				std::fabs(rect.width() - shift_tab_rects[idx].width()) > Tolerance ||
+				std::fabs(rect.height() - shift_tab_rects[idx].height()) > Tolerance))
+			changed = true;
+
+		shift_tab_rects[idx] = rect;
+	}
+
+	if(changed)
+		getUnderlyingObject()->resetSegmentShifts();
+}
+
+QRectF RelationshipView::getSegmentShiftLimits()
+{
+	double margin = ConnLineLength * BaseObjectView::getScreenDpiFactor();
+	QRectF limits = getRouteRect(base_route);
+
+	for(auto &tab : tables)
+		limits = limits.united(QRectF(tab->pos(), tab->boundingRect().size()));
+
+	return limits.adjusted(-margin, -margin, margin, margin);
+}
+
+double RelationshipView::clampSegmentShift(const std::vector<QPointF> &route, size_t idx, double shift,
+																					 const double *stubs, const QRectF &limits)
+{
+	constexpr double Epsilon = 0.01;
+	double min_len = RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
+			lo = 0, hi = 0, prev_len = 0, next_len = 0, prev_min = 0, next_min = 0;
+	size_t seg_cnt = route.size() - 1;
+	bool horiz = std::fabs(route[idx].y() - route[idx + 1].y()) < Epsilon;
+
+	if(idx < 1 || idx + 1 >= seg_cnt)
+		return 0;
+
+	// The neighbor segments are perpendicular to the displaced one, so their lengths are measured along the displacement axis
+	if(horiz)
+	{
+		lo = limits.top() - route[idx].y();
+		hi = limits.bottom() - route[idx].y();
+		prev_len = route[idx].y() - route[idx - 1].y();
+		next_len = route[idx + 2].y() - route[idx + 1].y();
+	}
+	else
+	{
+		lo = limits.left() - route[idx].x();
+		hi = limits.right() - route[idx].x();
+		prev_len = route[idx].x() - route[idx - 1].x();
+		next_len = route[idx + 2].x() - route[idx + 1].x();
+	}
+
+	prev_min = (idx == 1 ? std::max(min_len, stubs[0]) : min_len);
+	next_min = (idx + 2 == seg_cnt ? std::max(min_len, stubs[1]) : min_len);
+
+	// The previous segment ends at the displaced one and the next one starts at it
+	if(prev_len > 0)
+		lo = std::max(lo, prev_min - prev_len);
+	else
+		hi = std::min(hi, -prev_len - prev_min);
+
+	if(next_len > 0)
+		hi = std::min(hi, next_len - next_min);
+	else
+		lo = std::max(lo, next_len + next_min);
+
+	if(lo > hi)
+		return 0;
+
+	return std::clamp(shift, lo, hi);
+}
+
+std::vector<QPointF> RelationshipView::applySegmentShifts(const std::vector<QPointF> &route, const double *stubs)
+{
+	constexpr double Epsilon = 0.01;
+	std::map<unsigned, BaseRelationship::SegmentShift> shifts = getUnderlyingObject()->getSegmentShifts();
+	std::vector<QPointF> result = route;
+	QRectF limits;
+	QPointF offset;
+	double shift = 0;
+	bool horiz = false;
+
+	if(shifts.empty() || route.size() < 4)
+		return route;
+
+	limits = getSegmentShiftLimits();
+
+	for(auto &itr : shifts)
+	{
+		// Only the inner segments are displaced, the first and the last ones are anchored to the tables
+		if(itr.first < 1 || itr.first + 2 >= route.size())
+			continue;
+
+		horiz = std::fabs(result[itr.first].y() - result[itr.first + 1].y()) < Epsilon;
+
+		if(horiz != (itr.second.orientation == Qt::Horizontal))
+			continue;
+
+		shift = clampSegmentShift(result, itr.first, itr.second.value, stubs, limits);
+		offset = (horiz ? QPointF(0, shift) : QPointF(shift, 0));
+		result[itr.first] += offset;
+		result[itr.first + 1] += offset;
+	}
+
+	return result;
 }
 
 bool RelationshipView::getEdgeSide(const QRectF &rect, const QRectF &other_rect, bool &horiz, int &sign)

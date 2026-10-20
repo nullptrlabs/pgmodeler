@@ -158,6 +158,16 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		 * over the vertical lines of other relationships that cross it */
 		bumps;
 
+		/*! \brief The route of the last orthogonal line configured before the displacements of its segments
+		 * (made by the user) were applied, and the minimum length of its first and last segments */
+		std::vector<QPointF> base_route;
+
+		double route_stubs[2];
+
+		/*! \brief The areas (position and size) of the tables when the line was last configured. The displacements
+		 * of the segments are discarded when one of the tables moves or changes its size */
+		QRectF shift_tab_rects[2];
+
 		//! \brief Stores the crow's foot notation descriptors
 		QGraphicsItemGroup * cf_descriptors[2];
 
@@ -283,6 +293,23 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		 * are the same used to create the route. The route is returned unchanged if it has no obstacles or
 		 * if a way around them can't be found */
 		std::vector<QPointF> avoidObstacles(const std::vector<QPointF> &route, const QPointF *dirs, const double *stubs);
+
+		/*! \brief Discards the displacements of the segments if any of the tables moved or changed its size
+		 * since the line was last configured */
+		void discardOutdatedSegmentShifts();
+
+		/*! \brief Returns the area the segments of the orthogonal line can't leave when displaced: the area of
+		 * the base route and of the tables linked by the relationship, plus a margin */
+		QRectF getSegmentShiftLimits();
+
+		/*! \brief Returns the displacement limited so the segment idx of the route (a horizontal or vertical one) stays
+		 * inside the limits area and its neighbor segments keep the length they need (stubs are the minimum
+		 * length of the first and last segments). The route must be the one the displacement is applied to */
+		double clampSegmentShift(const std::vector<QPointF> &route, size_t idx, double shift, const double *stubs, const QRectF &limits);
+
+		/*! \brief Returns the route with the segments displaced according to the shifts stored in the relationship.
+		 * Shifts that don't match the route (index out of the inner segments or a different orientation) are ignored */
+		std::vector<QPointF> applySegmentShifts(const std::vector<QPointF> &route, const double *stubs);
 
 		//! \brief Alerts the scene that the orthogonal line changed so the bumps of the lines can be recalculated
 		void notifyRouteChanged();
