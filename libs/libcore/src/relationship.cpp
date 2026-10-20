@@ -3048,6 +3048,7 @@ QString Relationship::getXmlCode()
 								attributes[Attributes::SpecialPkCols].isEmpty() &&
 								attributes[Attributes::Points].isEmpty() &&
 								attributes[Attributes::LabelsPos].isEmpty() &&
+								attributes[Attributes::Segments].isEmpty() &&
 								attributes[Attributes::PartitionBoundExpr].isEmpty());
 
 	if(!reduced_form)
