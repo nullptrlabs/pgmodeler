@@ -142,6 +142,9 @@ RelationshipView::~RelationshipView()
 	if(!route_points.empty())
 		notifyRouteChanged();
 
+	if(ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene()))
+		obj_scene->forgetItem(this);
+
 	for(auto &curve : curves)
 	{
 		this->removeFromGroup(curve);
@@ -1814,17 +1817,22 @@ bool RelationshipView::isObstacleAvoidanceEnabled()
 std::vector<QRectF> RelationshipView::getObstacles(const QRectF &region)
 {
 	std::vector<QRectF> obstacles;
-	BaseTableView *tab = nullptr;
+	ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene());
 
-	if(!scene())
+	if(!obj_scene)
 		return obstacles;
 
-	for(auto &item : scene()->items(region, Qt::IntersectsItemBoundingRect))
-	{
-		tab = dynamic_cast<BaseTableView *>(item);
+	QRectF tab_rect;
 
-		if(tab && tab != tables[0] && tab != tables[1] && tab->isVisible())
-			obstacles.push_back(QRectF(tab->pos(), tab->boundingRect().size()));
+	for(auto &tab : obj_scene->getTableViews())
+	{
+		if(tab == tables[0] || tab == tables[1] || !tab->isVisible())
+			continue;
+
+		tab_rect = QRectF(tab->pos(), tab->boundingRect().size());
+
+		if(tab_rect.intersects(region))
+			obstacles.push_back(tab_rect);
 	}
 
 	return obstacles;
@@ -1856,16 +1864,14 @@ bool RelationshipView::isRouteNear(const QRectF &region) const
 std::vector<QRectF> RelationshipView::getEndZones(const QRectF &region)
 {
 	std::vector<QRectF> zones;
-	RelationshipView *rel_view = nullptr;
+	ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene());
 
-	if(!scene())
+	if(!obj_scene)
 		return zones;
 
-	for(auto &item : scene()->items(region, Qt::IntersectsItemBoundingRect))
+	for(auto &rel_view : obj_scene->getRelationshipViews())
 	{
-		rel_view = dynamic_cast<RelationshipView *>(item);
-
-		if(!rel_view || rel_view == this || !rel_view->isVisible())
+		if(rel_view == this || rel_view->end_zones.empty() || !rel_view->isVisible())
 			continue;
 
 		for(auto &zone : rel_view->end_zones)
@@ -2030,7 +2036,7 @@ std::vector<QPointF> RelationshipView::findOrthogonalPath(const QPointF &start, 
 			if(dy[dir] == 0 ? h_blocked[iy * (nx - 1) + std::min(ix, new_x)] : v_blocked[std::min(iy, new_y) * nx + ix])
 				continue;
 
-			cost = item.g + QLineF(p1, p2).length() + (dir != cur_dir ? BendPenalty : 0);
+			cost = item.g + std::fabs(p2.x() - p1.x()) + std::fabs(p2.y() - p1.y()) + (dir != cur_dir ? BendPenalty : 0);
 
 			// The line must arrive at the goal in the direction that links it to the table
 			if(new_x == goal_x && new_y == goal_y && goal_dir >= 0 && dir != goal_dir)

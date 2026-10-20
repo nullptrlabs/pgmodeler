@@ -1059,6 +1059,11 @@ void ObjectsScene::addItem(QGraphicsItem *item, bool blink_new)
 
 	QGraphicsScene::addItem(item);
 
+	if(rel && std::find(rel_views.begin(), rel_views.end(), rel) == rel_views.end())
+		rel_views.push_back(rel);
+	else if(tab && std::find(table_views.begin(), table_views.end(), tab) == table_views.end())
+		table_views.push_back(tab);
+
 	if(blink_new && obj)
 		obj->blink();
 
@@ -1079,6 +1084,7 @@ BaseObjectView *ObjectsScene::detachItem(QGraphicsItem *item)
 
 	item->setVisible(false);
 	item->setActive(false);
+	forgetItem(item);
 	QGraphicsScene::removeItem(item);
 
 	if(obj_view)
@@ -1095,6 +1101,26 @@ BaseObjectView *ObjectsScene::detachItem(QGraphicsItem *item)
 	}
 
 	return obj_view;
+}
+
+const std::vector<BaseTableView *> &ObjectsScene::getTableViews() const
+{
+	return table_views;
+}
+
+const std::vector<RelationshipView *> &ObjectsScene::getRelationshipViews() const
+{
+	return rel_views;
+}
+
+void ObjectsScene::forgetItem(QGraphicsItem *item)
+{
+	// The pointers are compared as they are, since the item may be partially destroyed
+	rel_views.erase(std::remove_if(rel_views.begin(), rel_views.end(), [item](RelationshipView *rel){
+		return static_cast<QGraphicsItem *>(rel) == item; }), rel_views.end());
+
+	table_views.erase(std::remove_if(table_views.begin(), table_views.end(), [item](BaseTableView *tab){
+		return static_cast<QGraphicsItem *>(tab) == item; }), table_views.end());
 }
 
 void ObjectsScene::removeItem(QGraphicsItem *item)

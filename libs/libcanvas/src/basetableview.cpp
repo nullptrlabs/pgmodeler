@@ -96,6 +96,9 @@ BaseTableView::BaseTableView(BaseTable *base_tab) : BaseObjectView(base_tab)
 
 BaseTableView::~BaseTableView()
 {
+	if(ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene()))
+		obj_scene->forgetItem(this);
+
 	this->removeFromGroup(body);
 	this->removeFromGroup(title);
 	this->removeFromGroup(attribs_toggler);
@@ -619,7 +622,6 @@ std::vector<RelationshipView *> BaseTableView::getNearbyRoutes(bool include_conn
 	constexpr double Margin = 20;
 	QRectF region(this->pos(), this->boundingRect().size());
 	std::vector<QRectF> areas = { region };
-	RelationshipView *rel_view = nullptr;
 
 	// The previous area is checked on its own, a single area covering both would include everything between them
 	if(!move_origin_rect.isNull())
@@ -634,11 +636,14 @@ std::vector<RelationshipView *> BaseTableView::getNearbyRoutes(bool include_conn
 
 	region.adjust(-Margin, -Margin, Margin, Margin);
 
-	for(auto &item : scene()->items(region, Qt::IntersectsItemBoundingRect))
-	{
-		rel_view = dynamic_cast<RelationshipView *>(item);
+	ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene());
 
-		if(!rel_view ||
+	if(!obj_scene)
+		return rel_views;
+
+	for(auto &rel_view : obj_scene->getRelationshipViews())
+	{
+		if(!rel_view->sceneBoundingRect().intersects(region) ||
 			 (!include_connected &&
 				std::find(connected_rels.begin(), connected_rels.end(), rel_view->getUnderlyingObject()) != connected_rels.end()))
 			continue;
