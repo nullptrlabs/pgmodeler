@@ -121,7 +121,8 @@ void BezierCurveItem::setPoints(const std::vector<QPointF> &points, double corne
 }
 
 void BezierCurveItem::setPoints(const std::vector<QPointF> &points, double corner_radius,
-																const std::vector<QPointF> &bumps, double bump_radius)
+																const std::vector<QPointF> &bumps, double bump_radius,
+																double start_straight, double end_straight)
 {
 	this->straight_line = this->invert_cpoints = this->simple_curve = false;
 
@@ -191,6 +192,20 @@ void BezierCurveItem::setPoints(const std::vector<QPointF> &points, double corne
 			 * either adjacent segment, which would otherwise overlap the rounding of the next/
 			 * previous corner or overshoot the segment entirely on short loops. */
 			double radius = std::min({ corner_radius, len_in / 2.0, len_out / 2.0 });
+
+			// The rounding of the first/last corners can't invade the straight part reserved at the line ends
+			if(i == 1)
+				radius = std::min(radius, len_in - start_straight);
+
+			if(i == count - 2)
+				radius = std::min(radius, len_out - end_straight);
+
+			// Without room for the curve the corner is kept sharp
+			if(radius < 0.5)
+			{
+				line_to(points[i]);
+				continue;
+			}
 
 			QPointF pre = points[i] - ((seg_in.p2() - seg_in.p1()) / len_in) * radius,
 					post = points[i] + ((seg_out.p2() - seg_out.p1()) / len_out) * radius;

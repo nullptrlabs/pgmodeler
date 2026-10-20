@@ -89,7 +89,13 @@ class __libcanvas BezierCurveItem: public QGraphicsPathItem {
 		 * radius bump_radius is drawn above the segment. Points that are not over a horizontal segment, or
 		 * that are too close to the segment's ends, are ignored. */
 		void setPoints(const std::vector<QPointF> &points, double corner_radius,
-									 const std::vector<QPointF> &bumps, double bump_radius);
+									 const std::vector<QPointF> &bumps, double bump_radius,
+									 double start_straight = 0, double end_straight = 0);
+
+		/* The start_straight and end_straight params define the length of the first and last segments of the
+		 * polyline that must remain straight. The first and last corners have their rounding limited, or even
+		 * removed, so the curve doesn't start before that length. This is used to preserve the area occupied by
+		 * the descriptors (e.g. crow's foot) at the ends of the relationship lines. */
 
 		//! \brief Returns if the curve has the control points inverted
 		bool isControlPointsInverted();
