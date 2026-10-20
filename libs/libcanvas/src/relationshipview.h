@@ -151,6 +151,70 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		//! \brief Configures the position info object
 		void configurePositionInfo();
 
+		/*! \brief Geometry of the relationship line computed on each update. It carries the data
+		 * shared between the stages that compute the connection points and the ones that draw the line */
+		struct LineGeometry {
+			//! \brief The points where the line is connected to the tables
+			QPointF p_central[2],
+
+			//! \brief Points where the fk/pk connector lines meet (fk-to-pk mode only)
+			fk_pnt, pk_pnt;
+
+			//! \brief The points the line goes through, including the ones at its ends
+			std::vector<QPointF> points,
+
+			//! \brief The fk/pk columns connection points (fk-to-pk mode only)
+			fk_points, pk_points;
+
+			//! \brief The line is connected at the same side on both tables (fk-to-pk mode only)
+			bool conn_same_sides { false },
+
+			//! \brief Which tables have the line connected to their horizontal/vertical edges (table edges mode only)
+			conn_horiz_sides[2] { false, false }, conn_vert_sides[2] { false, false };
+		};
+
+		//! \brief Removes from the group and destroys the items beyond the first "count" ones of the vector
+		template<class T>
+		static void trimGroupItems(QGraphicsItemGroup *group, std::vector<T *> &items, size_t count);
+
+		/*! \brief Determines the table sides where the fk/pk connection lines are attached. When the tables
+		 * overlap horizontally both are connected at the same side, otherwise at the opposite ones. */
+		static void getFkPkConnSides(const QRectF &ref_rect, const QRectF &rec_rect,
+																		 BaseTableView::ConnectionPoint &pk_type, BaseTableView::ConnectionPoint &fk_type,
+																		 bool &same_sides);
+
+		//! \brief Computes the geometry of the line according to the relationship type and the line connection mode
+		LineGeometry computeLineGeometry();
+
+		/*! \brief Swaps the tables of identifier 1-1 relationships so the line is drawn
+		 * from the reference to the receiver table */
+		void swapIdentifierTables();
+
+		//! \brief Computes the geometry of self-relationships (the loop at the table's top right corner)
+		void configureSelfRelGeometry(LineGeometry &geom);
+
+		//! \brief Computes the connection points at the tables' center points
+		void configureCenterGeometry(LineGeometry &geom);
+
+		//! \brief Computes the connection points at the fk/pk columns (falls back to the center points)
+		void configureFkToPkGeometry(LineGeometry &geom);
+
+		//! \brief Adds the connection points at the ends of the line points
+		void addEndPoints(LineGeometry &geom);
+
+		//! \brief Computes the connection points at the tables' edges and adds them to the line points
+		void configureTableEdgesGeometry(LineGeometry &geom);
+
+		/*! \brief Computes the connection point at the edge of the table tab_idx where the line crosses it.
+		 * Returns the point where the line leaves the edge towards the other table */
+		QPointF configureEdgeConnection(unsigned tab_idx, const QLineF &line, LineGeometry &geom);
+
+		//! \brief Returns the length factor of the line segment that leaves the table's edge
+		double getEdgeSizeFactor(unsigned tab_idx);
+
+		//! \brief Returns the distance from the table's corners where the line can't be connected
+		double getEdgeBorderFactor(unsigned tab_idx);
+
 		//! \brief Destroys the fk/pk connector lines (used in modes other than fk-to-pk)
 		void removeConnectorLines();
 
@@ -161,9 +225,7 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		QPen getLinePen();
 
 		//! \brief Configures the lines that link the fk/pk columns to their connection points (fk-to-pk mode only)
-		void configureConnectorLines(const QPointF &fk_pnt, const QPointF &pk_pnt,
-														 const std::vector<QPointF> &fk_points,
-														 const std::vector<QPointF> &pk_points, const QPen &pen);
+		void configureConnectorLines(const LineGeometry &geom, const QPen &pen);
 
 		//! \brief Configures the straight segments that go through the provided points
 		void configureLineSegments(const std::vector<QPointF> &points, const QPen &pen);
@@ -175,11 +237,10 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		void configureLineCircles(const QPointF *p_central, const QPen &pen);
 
 		//! \brief Configures the curves (or restores the straight lines when curves are disabled)
-		void configureCurves(const std::vector<QPointF> &points, bool conn_same_sides,
-												 const bool *conn_horiz_sides, const bool *conn_vert_sides);
+		void configureCurves(const LineGeometry &geom);
 
 		//! \brief Configures one curve per segment of an ordinary relationship line
-		void configureCurvedLines(bool conn_same_sides, const bool *conn_horiz_sides, const bool *conn_vert_sides);
+		void configureCurvedLines(const LineGeometry &geom);
 
 		//! \brief Configures the single curve that traces the loop of a self-relationship
 		void configureSelfRelCurve(const std::vector<QPointF> &points);
