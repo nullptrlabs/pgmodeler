@@ -2036,6 +2036,9 @@ void ObjectsScene::updateRelationshipBumps()
 			corner_radius = RelationshipView::RoundedCornerRadius * dpi_factor,
 			margin = corner_radius + bump_radius;
 
+	std::vector<RelationshipView *> rels, conflicts;
+	std::vector<QRectF> zones;
+
 	for(auto &item : items())
 	{
 		rel_view = dynamic_cast<RelationshipView *>(item);
@@ -2043,6 +2046,43 @@ void ObjectsScene::updateRelationshipBumps()
 		if(!rel_view || !rel_view->isVisible() || rel_view->route_points.size() < 2)
 			continue;
 
+		rels.push_back(rel_view);
+		zones.insert(zones.end(), rel_view->end_zones.begin(), rel_view->end_zones.end());
+	}
+
+	/* Lines that go through the end zone (crow's foot area) of another relationship are recalculated now that
+	 * all the zones are known. This covers the lines that were routed before the other relationships existed or
+	 * were configured. The bumps are calculated in the next update, with the new routes */
+	for(auto &rel : rels)
+	{
+		if(rel->zone_retries >= RelationshipView::MaxZoneRetries)
+			continue;
+
+		for(auto &other : rels)
+		{
+			if(other != rel && RelationshipView::isRouteBlocked(rel->route_points, other->end_zones))
+			{
+				conflicts.push_back(rel);
+				break;
+			}
+		}
+	}
+
+	if(!conflicts.empty())
+	{
+		for(auto &rel : conflicts)
+		{
+			rel->zone_retries++;
+			rel->invalidateRoute(false);
+		}
+
+		bumps_timer.start();
+		return;
+	}
+
+	for(auto &item : rels)
+	{
+		rel_view = item;
 		rels_bumps[rel_view] = {};
 
 		for(size_t idx = 1; idx < rel_view->route_points.size(); idx++)
@@ -2061,6 +2101,17 @@ void ObjectsScene::updateRelationshipBumps()
 		return s1.pos < s2.pos;
 	});
 
+	// Bumps are never placed over the crow's foot descriptors
+	auto is_in_zone = [&](const QPointF &pnt) {
+		for(auto &zone : zones)
+		{
+			if(zone.adjusted(-bump_radius * 2, -bump_radius * 2, bump_radius * 2, bump_radius * 2).contains(pnt))
+				return true;
+		}
+
+		return false;
+	};
+
 	/* The horizontal segments always hop over the vertical ones, this way only one of the lines
 	 * needs to know about the crossing. Crossings too close to the segments' ends are ignored */
 	for(auto &h_seg : h_segs)
@@ -2075,7 +2126,8 @@ void ObjectsScene::updateRelationshipBumps()
 		for(; itr != v_segs.end() && itr->pos <= h_seg.hi - margin; ++itr)
 		{
 			if(itr->rel != h_seg.rel &&
-				 h_seg.pos > itr->lo + corner_radius && h_seg.pos < itr->hi - corner_radius)
+				 h_seg.pos > itr->lo + corner_radius && h_seg.pos < itr->hi - corner_radius &&
+				 !is_in_zone(QPointF(itr->pos, h_seg.pos)))
 				rels_bumps[h_seg.rel].push_back(QPointF(itr->pos, h_seg.pos));
 		}
 	}
