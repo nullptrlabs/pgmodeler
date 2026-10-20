@@ -604,13 +604,20 @@ void BaseTableView::requestRelationshipsUpdate()
 
 void BaseTableView::invalidateNearbyRoutes(bool include_connected)
 {
+	for(auto &rel : getNearbyRoutes(include_connected))
+		rel->invalidateRoute();
+}
+
+std::vector<RelationshipView *> BaseTableView::getNearbyRoutes(bool include_connected)
+{
+	std::vector<RelationshipView *> rel_views;
+
 	if(RelationshipView::getLineStyle() != RelationshipView::OrthogonalLines || !scene())
-		return;
+		return rel_views;
 
 	// Margin that includes the relationships that pass close to the table but not through it
 	constexpr double Margin = 20;
 	QRectF region(this->pos(), this->boundingRect().size());
-	std::vector<RelationshipView *> rel_views;
 	RelationshipView *rel_view = nullptr;
 
 	if(!move_origin_rect.isNull())
@@ -631,8 +638,7 @@ void BaseTableView::invalidateNearbyRoutes(bool include_connected)
 			rel_views.push_back(rel_view);
 	}
 
-	for(auto &rel : rel_views)
-		rel->invalidateRoute();
+	return rel_views;
 }
 
 void BaseTableView::togglePlaceholder(bool value)
