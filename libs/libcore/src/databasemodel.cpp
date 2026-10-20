@@ -7538,6 +7538,16 @@ BaseRelationship *DatabaseModel::createRelationship()
 						base_rel->setPoints(points);
 						xmlparser.restorePosition();
 					}
+					else if(elem==Attributes::Segment)
+					{
+						std::map<unsigned, BaseRelationship::SegmentShift> shifts = base_rel->getSegmentShifts();
+
+						xmlparser.getElementAttributes(attribs);
+						shifts[attribs[Attributes::Index].toUInt()] =
+								{ static_cast<Qt::Orientation>(attribs[Attributes::Orientation].toInt()), attribs[Attributes::Value].toDouble() };
+
+						base_rel->setSegmentShifts(shifts);
+					}
 					else if(elem==Attributes::Label)
 					{
 						xmlparser.getElementAttributes(attribs);
@@ -9757,6 +9767,17 @@ void DatabaseModel::saveObjectsMetadata(const QString &filename, MetaAttrOptions
 
 						}
 					}
+
+					//Saving the displacements of the orthogonal line's segments
+					for(auto &itr : rel->getSegmentShifts())
+					{
+						aux_attribs[Attributes::Index]=QString::number(itr.first);
+						aux_attribs[Attributes::Orientation]=QString::number(itr.second.orientation);
+						aux_attribs[Attributes::Value]=QString::number(itr.second.value);
+
+						attribs[Attributes::Position]+=schparser.getSourceCode(GlobalAttributes::getSchemaFilePath(GlobalAttributes::XMLSchemaDir, Attributes::Segment),
+																																	 aux_attribs);
+					}
 				}
 			}
 
@@ -9848,6 +9869,7 @@ void DatabaseModel::loadObjectsMetadata(const QString &filename, MetaAttrOptions
 	BaseObject *object=nullptr, *new_object=nullptr, *aux_obj = nullptr;
 	BaseTable *src_tab=nullptr, *dst_tab=nullptr, *base_tab=nullptr;
 	std::vector<QPointF> points;
+	std::map<unsigned, BaseRelationship::SegmentShift> seg_shifts;
 	std::map<QString, unsigned> labels_attrs;
 	std::vector<QPointF> labels_pos={ QPointF(DNaN,DNaN), QPointF(DNaN,DNaN), QPointF(DNaN,DNaN) };
 	BaseRelationship *rel=nullptr;
@@ -10080,6 +10102,12 @@ void DatabaseModel::loadObjectsMetadata(const QString &filename, MetaAttrOptions
 
 										xmlparser.restorePosition();
 									}
+									//Retrieving and storing the displacements of the orthogonal line's segments
+									else if(aux_elem==Attributes::Segment)
+									{
+										seg_shifts[aux_attrib[Attributes::Index].toUInt()] =
+												{ static_cast<Qt::Orientation>(aux_attrib[Attributes::Orientation].toInt()), aux_attrib[Attributes::Value].toDouble() };
+									}
 									else if(load_custom_sql && aux_elem==Attributes::AppendedSql &&
 													attribs[Attributes::AppendedSql].isEmpty())
 									{
@@ -10121,6 +10149,7 @@ void DatabaseModel::loadObjectsMetadata(const QString &filename, MetaAttrOptions
 									if(load_objs_pos)
 									{
 										rel->setPoints(points);
+										rel->setSegmentShifts(seg_shifts);
 
 										for(unsigned id=BaseRelationship::SrcCardLabel; id <= BaseRelationship::RelNameLabel; id++)
 										{
@@ -10145,6 +10174,7 @@ void DatabaseModel::loadObjectsMetadata(const QString &filename, MetaAttrOptions
 							}
 
 							points.clear();
+							seg_shifts.clear();
 
 						}
 						else if(!object)
