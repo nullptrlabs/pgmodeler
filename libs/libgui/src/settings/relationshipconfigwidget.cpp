@@ -139,7 +139,7 @@ void RelationshipConfigWidget::loadConfiguration()
 		crows_foot_tb->setChecked(config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode]==Attributes::CrowsFoot);
 
 		idx = rel_line_style_cmb->findData(config_params[GlobalAttributes::RelationshipsConf][Attributes::LineStyle]);
-		rel_line_style_cmb->setCurrentIndex(idx < 0 ? RelationshipView::CurvedLines : idx);
+		rel_line_style_cmb->setCurrentIndex(idx < 0 ? RelationshipView::OrthogonalLines : idx);
 
 		deferrable_chk->setChecked(config_params[Attributes::ForeignKeys][Attributes::Deferrable]==Attributes::True);
 		deferral_cmb->setCurrentText(config_params[Attributes::ForeignKeys][Attributes::DeferType]);

@@ -32,7 +32,7 @@ bool RelationshipView::use_crows_foot {true};
 
 RelationshipView::LineConnectionMode RelationshipView::line_conn_mode { RelationshipView::ConnectFkToPk };
 
-RelationshipView::LineStyle RelationshipView::line_style { RelationshipView::CurvedLines };
+RelationshipView::LineStyle RelationshipView::line_style { RelationshipView::OrthogonalLines };
 
 template<class T>
 void RelationshipView::trimGroupItems(QGraphicsItemGroup *group, std::vector<T *> &items, size_t count)
