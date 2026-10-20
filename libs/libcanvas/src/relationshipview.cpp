@@ -24,6 +24,24 @@
 #include "tableview.h"
 #include "utilsns.h"
 
+namespace {
+	/* Removes from the group and destroys the items beyond the first
+	 * "count" ones of the provided vector */
+	template<class T>
+	void trimGroupItems(QGraphicsItemGroup *group, std::vector<T *> &items, size_t count)
+	{
+		T *item = nullptr;
+
+		while(items.size() > count)
+		{
+			item = items.back();
+			items.pop_back();
+			group->removeFromGroup(item);
+			delete item;
+		}
+	}
+}
+
 bool RelationshipView::hide_name_label {false};
 bool RelationshipView::use_curved_lines {true};
 bool RelationshipView::use_crows_foot {true};
@@ -638,21 +656,15 @@ void RelationshipView::configureLine()
 	}
 
 	std::vector<QPointF> points, fk_points, pk_points;
-	QGraphicsLineItem *lin=nullptr;
 	QPointF pos, p_central[2], pk_pnt, fk_pnt;
 	QRectF rect;
-	QPen pen;
-	QGraphicsPolygonItem *pol=nullptr;
-	QPolygonF pol_aux;
 	QString tool_tip;
-	QGraphicsItem *item=nullptr;
-	int i, i1, count;
+	int i;
 	bool conn_same_sides = false,
 			conn_horiz_sides[2] = { false, false }, conn_vert_sides[2] = { false, false };
 	BaseRelationship::RelType rel_type = base_rel->getRelationshipType();
 
 	configuring_line=true;
-	pen.setCapStyle(Qt::RoundCap);
 
 	if(base_rel->isSelfRelationship())
 	{
@@ -718,22 +730,11 @@ void RelationshipView::configureLine()
 
 		if(line_conn_mode==ConnectCenterPoints || line_conn_mode==ConnectTableEdges || !rel_1n)
 		{
-			std::vector<std::vector<QGraphicsLineItem *> *> ref_lines={ &fk_lines, &pk_lines };
-
 			for(i=0; i < 2; i++)
 				p_central[i]=tables[i]->getCenter();
 
 			//Destroying the fk and pk connection lines when the line mode changes
-			for(i=0; i < 2; i++)
-			{
-				while(!ref_lines[i]->empty())
-				{
-					item=ref_lines[i]->back();
-					ref_lines[i]->pop_back();
-					this->removeFromGroup(item);
-					delete item;
-				}
-			}
+			removeConnectorLines();
 		}
 		else if(line_conn_mode==ConnectFkToPk && rel_1n)
 		{
@@ -859,40 +860,7 @@ void RelationshipView::configureLine()
 		}
 
 		points=base_rel->getPoints();
-		count=points.size();
-		pol_aux.append(QPointF(0,0)); pol_aux.append(QPointF(6,0));
-		pol_aux.append(QPointF(6,6)); pol_aux.append(QPointF(0,6));
-
-		for(i=0; i < count; i++)
-		{
-			if(i >= static_cast<int>(graph_points.size()))
-			{
-				pol=new QGraphicsPolygonItem;
-				graph_points.push_back(pol);
-				pol->setZValue(0);
-				pol->setPolygon(pol_aux);
-				pol->setBrush(BaseObjectView::getFillStyle(Attributes::ObjSelection));
-				pol->setPen(BaseObjectView::getBorderStyle(Attributes::ObjSelection));
-				this->addToGroup(pol);
-			}
-			else
-				pol=graph_points[i];
-
-			pol->setPos(points[i]);
-			pol->moveBy(-GraphicPointRadius/2, -GraphicPointRadius/2);
-			pol->setVisible(this->isSelected());
-		}
-
-		//Destroy the graphical points not used
-		i=graph_points.size()-1;
-		while(i > count-1)
-		{
-			item=graph_points.back();
-			graph_points.pop_back();
-			this->removeFromGroup(item);
-			delete item;
-			i--;
-		}
+		configureGraphicPoints(points);
 	}
 
 	if(base_rel->isSelfRelationship() || line_conn_mode != ConnectTableEdges)
@@ -1053,225 +1021,12 @@ void RelationshipView::configureLine()
 		points.push_back(p_central[1]);
 	}
 
-	//If the relationship is selected we do not change the lines colors
-	if(this->isSelected() && !lines.empty())
-		pen = lines[0]->pen();
-	else
-	{
-		//Configuring the relationship line color
-		if(base_rel->getCustomColor()!=Qt::transparent)
-			//Using custom color
-			pen.setColor(base_rel->getCustomColor());
-		else
-			//Using the default color
-			pen=BaseObjectView::getBorderStyle(Attributes::Relationship);
-	}
-
-	//For dependency/partition relationships the line is dashed
-	if(rel_type==BaseRelationship::RelationshipDep ||
-		 rel_type == BaseRelationship::RelationshipPart)
-		pen.setStyle(Qt::DashLine);
-
-	if(line_conn_mode==ConnectFkToPk)
-	{
-		std::vector<QPointF> ref_points={ fk_pnt, pk_pnt };
-		std::vector<std::vector<QPointF> *> ref_pnt_vects={ &fk_points, &pk_points };
-		std::vector<std::vector<QGraphicsLineItem *> *> ref_lines={ &fk_lines, &pk_lines };
-		std::vector<QPointF> *ref_pnt=nullptr;
-		std::vector<QGraphicsLineItem *> *ref_lin=nullptr;
-
-		for(unsigned vet_idx=0; vet_idx < 2; vet_idx++)
-		{
-			ref_pnt=ref_pnt_vects[vet_idx];
-			ref_lin=ref_lines[vet_idx];
-			count=ref_pnt->size();
-
-			for(i=0; i < count; i++)
-			{
-				if(i >= static_cast<int>(ref_lin->size()))
-				{
-					lin=new QGraphicsLineItem;
-					lin->setZValue(-1);
-					ref_lin->push_back(lin);
-					this->addToGroup(lin);
-				}
-				else
-					lin=ref_lin->at(i);
-
-				pen.setWidthF(getDefaultPenWidth());
-				lin->setLine(QLineF(ref_pnt->at(i), ref_points[vet_idx]));
-				lin->setPen(pen);
-			}
-
-			//Destroy the unused pk or fk lines
-			i = ref_lin->size()-1;
-			while(i > count - 1)
-			{
-				item = ref_lin->back();
-				ref_lin->pop_back();
-				this->removeFromGroup(item);
-				delete item;
-				i--;
-			}
-		}
-	}
-
-	//Create the relationship lines
-	count=points.size();
-	for(i=0; i < count-1; i++)
-	{
-		if(i >= static_cast<int>(lines.size()))
-		{
-			lin=new QGraphicsLineItem;
-			lin->setZValue(-1);
-			lines.push_back(lin);
-			this->addToGroup(lin);
-		}
-		else
-			lin=lines[i];
-
-		pen.setWidthF(getDefaultPenWidth());
-		lin->setLine(QLineF(points[i], points[i+1]));
-		lin->setPen(pen);
-	}
-
-	//Removing unused lines
-	if(!base_rel->isSelfRelationship())
-	{
-		i=points.size()-1;
-		i1=lines.size();
-		while(i1 > i)
-		{
-			item=lines.back();
-			lines.pop_back();
-			this->removeFromGroup(item);
-			delete item;
-			i1--;
-		}
-	}
-
-	//Exposing the line ending circles
-	if((!base_rel->isSelfRelationship() && line_conn_mode==ConnectCenterPoints && !use_crows_foot) ||
-		 (!base_rel->isSelfRelationship() &&
-			((line_conn_mode != ConnectTableEdges && rel_type==BaseRelationship::RelationshipDep) ||
-			 (line_conn_mode != ConnectTableEdges && rel_type==BaseRelationship::RelationshipGen) ||
-			 (line_conn_mode != ConnectTableEdges && rel_type==BaseRelationship::RelationshipPart) ||
-			 (line_conn_mode != ConnectTableEdges && rel_type==BaseRelationship::RelationshipNn  && !use_crows_foot))))
-	{
-		for(i=0; i < 2; i++)
-		{
-			line_circles[i]->setVisible(true);
-			line_circles[i]->setPen(pen);
-			line_circles[i]->setBrush(pen.color());
-			line_circles[i]->setPos(p_central[i]-QPointF(GraphicPointRadius/2, GraphicPointRadius/2));
-		}
-	}
-	else
-	{
-		line_circles[0]->setVisible(false);
-		line_circles[1]->setVisible(false);
-	}
-
-	//Using bezier curves instead of straight lines to denote the relationship line
-	if(use_curved_lines && !base_rel->isSelfRelationship())
-	{
-		BezierCurveItem * curve = nullptr;
-		bool invert_cpoints = false, simple_curve = false;
-		i = 0;
-
-		for(auto &line : lines)
-		{
-			if(i >= static_cast<int>(curves.size()))
-			{
-				curve = new BezierCurveItem;
-				curve->setZValue(line->zValue());
-				this->addToGroup(curve);
-				curves.push_back(curve);
-			}
-			else
-				curve = curves[i];
-
-			i++;
-
-			/* Creates simple a curved line in the following situations:
-			 * 1) The crow's foot is not enabled but the relationship connects in the same sides on tables (conn_same_sides)
-			 * 2) The crow's foot is enabled and one of the connection point is not in the horizontal edges of one of the tables (conn_horiz_sides) */
-
-			/* We invert the curve's bounding rect when crow's foot is enabled and the relationship connects
-			 * at the top/bottom edges of both tables */
-			simple_curve = (conn_same_sides && lines.size() == 1) || (conn_horiz_sides[0] != conn_horiz_sides[1] && lines.size() == 3);
-
-			if(!simple_curve)
-				invert_cpoints = (conn_horiz_sides[0] && conn_horiz_sides[1] && lines.size() == 3);
-			else
-				invert_cpoints = (!conn_horiz_sides[0] && conn_horiz_sides[1] && conn_vert_sides[0] && !conn_vert_sides[1]);
-
-			curve->setLine(line->line(), simple_curve, invert_cpoints);
-			curve->setPen(line->pen());
-			line->setVisible(false);
-		}
-
-		//Removing unused curves
-		i=lines.size();
-		i1=curves.size();
-
-		while(i1 > i)
-		{
-			curve=curves.back();
-			curves.pop_back();
-			this->removeFromGroup(curve);
-			delete curve;
-			i1--;
-		}
-	}
-	/* Self-relationships keep their straight horizontal/vertical segments (the loop shape),
-	 * but round off the corners where they meet instead of drawing sharp right angles: a single
-	 * curve item traces the whole loop, with a quadratic curve (control point at the corner
-	 * itself) taking over from the straight segments near each turn. */
-	else if(use_curved_lines && base_rel->isSelfRelationship())
-	{
-		BezierCurveItem *curve = nullptr;
-
-		if(curves.empty())
-		{
-			curve = new BezierCurveItem;
-			this->addToGroup(curve);
-			curves.push_back(curve);
-		}
-		else
-			curve = curves[0];
-
-		curve->setZValue(lines[0]->zValue());
-		curve->setPen(lines[0]->pen());
-		curve->setPoints(points, SelfRelCornerRadius * BaseObjectView::getScreenDpiFactor());
-
-		for(auto &line : lines)
-			line->setVisible(false);
-
-		//Removing any extra unused curves
-		while(curves.size() > 1)
-		{
-			curve = curves.back();
-			curves.pop_back();
-			this->removeFromGroup(curve);
-			delete curve;
-		}
-	}
-	else if(!use_curved_lines && !lines.empty() && !curves.empty())
-	{
-		BezierCurveItem *curve = nullptr;
-
-		for(auto &line : lines)
-			line->setVisible(true);
-
-		while(!curves.empty())
-		{
-			curve=curves.back();
-			curves.pop_back();
-			this->removeFromGroup(curve);
-			delete curve;
-		}
-	}
+	//Configuring the relationship line, its connectors, end circles and curves
+	QPen pen = getLinePen();
+	configureConnectorLines(fk_pnt, pk_pnt, fk_points, pk_points, pen);
+	configureLineSegments(points, pen);
+	configureLineCircles(p_central, pen);
+	configureCurves(points, conn_same_sides, conn_horiz_sides, conn_vert_sides);
 
 	this->configureDescriptor();
 
@@ -1285,6 +1040,277 @@ void RelationshipView::configureLine()
 
 	configuring_line=false;
 }
+void RelationshipView::removeConnectorLines()
+{
+	trimGroupItems(this, fk_lines, 0);
+	trimGroupItems(this, pk_lines, 0);
+}
+
+void RelationshipView::configureGraphicPoints(const std::vector<QPointF> &points)
+{
+	QGraphicsPolygonItem *pol = nullptr;
+	QPolygonF pol_aux;
+	unsigned count = points.size();
+
+	pol_aux.append(QPointF(0,0)); pol_aux.append(QPointF(6,0));
+	pol_aux.append(QPointF(6,6)); pol_aux.append(QPointF(0,6));
+
+	for(unsigned i = 0; i < count; i++)
+	{
+		if(i >= graph_points.size())
+		{
+			pol = new QGraphicsPolygonItem;
+			graph_points.push_back(pol);
+			pol->setZValue(0);
+			pol->setPolygon(pol_aux);
+			pol->setBrush(BaseObjectView::getFillStyle(Attributes::ObjSelection));
+			pol->setPen(BaseObjectView::getBorderStyle(Attributes::ObjSelection));
+			this->addToGroup(pol);
+		}
+		else
+			pol = graph_points[i];
+
+		pol->setPos(points[i]);
+		pol->moveBy(-GraphicPointRadius/2, -GraphicPointRadius/2);
+		pol->setVisible(this->isSelected());
+	}
+
+	//Destroy the graphical points not used
+	trimGroupItems(this, graph_points, count);
+}
+
+QPen RelationshipView::getLinePen()
+{
+	BaseRelationship *base_rel = this->getUnderlyingObject();
+	BaseRelationship::RelType rel_type = base_rel->getRelationshipType();
+	QPen pen;
+
+	pen.setCapStyle(Qt::RoundCap);
+
+	//If the relationship is selected we do not change the lines colors
+	if(this->isSelected() && !lines.empty())
+		pen = lines[0]->pen();
+	else
+	{
+		//Configuring the relationship line color
+		if(base_rel->getCustomColor() != Qt::transparent)
+			//Using custom color
+			pen.setColor(base_rel->getCustomColor());
+		else
+			//Using the default color
+			pen = BaseObjectView::getBorderStyle(Attributes::Relationship);
+	}
+
+	//For dependency/partition relationships the line is dashed
+	if(rel_type == BaseRelationship::RelationshipDep ||
+		 rel_type == BaseRelationship::RelationshipPart)
+		pen.setStyle(Qt::DashLine);
+
+	pen.setWidthF(getDefaultPenWidth());
+
+	return pen;
+}
+
+void RelationshipView::configureConnectorLines(const QPointF &fk_pnt, const QPointF &pk_pnt,
+																							 const std::vector<QPointF> &fk_points,
+																							 const std::vector<QPointF> &pk_points, const QPen &pen)
+{
+	if(line_conn_mode != ConnectFkToPk)
+		return;
+
+	QGraphicsLineItem *lin = nullptr;
+	QPointF ref_points[2] = { fk_pnt, pk_pnt };
+	const std::vector<QPointF> *ref_pnt_vects[2] = { &fk_points, &pk_points };
+	std::vector<QGraphicsLineItem *> *ref_lines[2] = { &fk_lines, &pk_lines };
+	const std::vector<QPointF> *ref_pnt = nullptr;
+	std::vector<QGraphicsLineItem *> *ref_lin = nullptr;
+	unsigned count = 0;
+
+	for(unsigned vet_idx = 0; vet_idx < 2; vet_idx++)
+	{
+		ref_pnt = ref_pnt_vects[vet_idx];
+		ref_lin = ref_lines[vet_idx];
+		count = ref_pnt->size();
+
+		for(unsigned i = 0; i < count; i++)
+		{
+			if(i >= ref_lin->size())
+			{
+				lin = new QGraphicsLineItem;
+				lin->setZValue(-1);
+				ref_lin->push_back(lin);
+				this->addToGroup(lin);
+			}
+			else
+				lin = ref_lin->at(i);
+
+			lin->setLine(QLineF(ref_pnt->at(i), ref_points[vet_idx]));
+			lin->setPen(pen);
+		}
+
+		//Destroy the unused pk or fk lines
+		trimGroupItems(this, *ref_lin, count);
+	}
+}
+
+void RelationshipView::configureLineSegments(const std::vector<QPointF> &points, const QPen &pen)
+{
+	QGraphicsLineItem *lin = nullptr;
+	unsigned seg_cnt = points.size() - 1;
+
+	//Create the relationship lines
+	for(unsigned i = 0; i < seg_cnt; i++)
+	{
+		if(i >= lines.size())
+		{
+			lin = new QGraphicsLineItem;
+			lin->setZValue(-1);
+			lines.push_back(lin);
+			this->addToGroup(lin);
+		}
+		else
+			lin = lines[i];
+
+		lin->setLine(QLineF(points[i], points[i+1]));
+		lin->setPen(pen);
+	}
+
+	//Removing unused lines
+	if(!this->getUnderlyingObject()->isSelfRelationship())
+		trimGroupItems(this, lines, seg_cnt);
+}
+
+bool RelationshipView::isLineEndCirclesVisible()
+{
+	BaseRelationship *base_rel = this->getUnderlyingObject();
+	BaseRelationship::RelType rel_type = base_rel->getRelationshipType();
+
+	if(base_rel->isSelfRelationship())
+		return false;
+
+	if(line_conn_mode == ConnectCenterPoints && !use_crows_foot)
+		return true;
+
+	return line_conn_mode != ConnectTableEdges &&
+				 (rel_type == BaseRelationship::RelationshipDep ||
+					rel_type == BaseRelationship::RelationshipGen ||
+					rel_type == BaseRelationship::RelationshipPart ||
+					(rel_type == BaseRelationship::RelationshipNn && !use_crows_foot));
+}
+
+void RelationshipView::configureLineCircles(const QPointF *p_central, const QPen &pen)
+{
+	//Exposing the line ending circles
+	if(isLineEndCirclesVisible())
+	{
+		for(unsigned i = 0; i < 2; i++)
+		{
+			line_circles[i]->setVisible(true);
+			line_circles[i]->setPen(pen);
+			line_circles[i]->setBrush(pen.color());
+			line_circles[i]->setPos(p_central[i] - QPointF(GraphicPointRadius/2, GraphicPointRadius/2));
+		}
+	}
+	else
+	{
+		line_circles[0]->setVisible(false);
+		line_circles[1]->setVisible(false);
+	}
+}
+
+void RelationshipView::configureCurves(const std::vector<QPointF> &points, bool conn_same_sides,
+																			 const bool *conn_horiz_sides, const bool *conn_vert_sides)
+{
+	//Using bezier curves instead of straight lines to denote the relationship line
+	if(use_curved_lines)
+	{
+		if(this->getUnderlyingObject()->isSelfRelationship())
+			configureSelfRelCurve(points);
+		else
+			configureCurvedLines(conn_same_sides, conn_horiz_sides, conn_vert_sides);
+	}
+	else if(!lines.empty() && !curves.empty())
+		removeCurves();
+}
+
+void RelationshipView::configureCurvedLines(bool conn_same_sides, const bool *conn_horiz_sides, const bool *conn_vert_sides)
+{
+	BezierCurveItem *curve = nullptr;
+	bool invert_cpoints = false, simple_curve = false;
+	unsigned i = 0;
+
+	for(auto &line : lines)
+	{
+		if(i >= curves.size())
+		{
+			curve = new BezierCurveItem;
+			curve->setZValue(line->zValue());
+			this->addToGroup(curve);
+			curves.push_back(curve);
+		}
+		else
+			curve = curves[i];
+
+		i++;
+
+		/* Creates simple a curved line in the following situations:
+		 * 1) The crow's foot is not enabled but the relationship connects in the same sides on tables (conn_same_sides)
+		 * 2) The crow's foot is enabled and one of the connection point is not in the horizontal edges of one of the tables (conn_horiz_sides) */
+
+		/* We invert the curve's bounding rect when crow's foot is enabled and the relationship connects
+		 * at the top/bottom edges of both tables */
+		simple_curve = (conn_same_sides && lines.size() == 1) || (conn_horiz_sides[0] != conn_horiz_sides[1] && lines.size() == 3);
+
+		if(!simple_curve)
+			invert_cpoints = (conn_horiz_sides[0] && conn_horiz_sides[1] && lines.size() == 3);
+		else
+			invert_cpoints = (!conn_horiz_sides[0] && conn_horiz_sides[1] && conn_vert_sides[0] && !conn_vert_sides[1]);
+
+		curve->setLine(line->line(), simple_curve, invert_cpoints);
+		curve->setPen(line->pen());
+		line->setVisible(false);
+	}
+
+	//Removing unused curves
+	trimGroupItems(this, curves, lines.size());
+}
+
+/* Self-relationships keep their straight horizontal/vertical segments (the loop shape),
+ * but round off the corners where they meet instead of drawing sharp right angles: a single
+ * curve item traces the whole loop, with a quadratic curve (control point at the corner
+ * itself) taking over from the straight segments near each turn. */
+void RelationshipView::configureSelfRelCurve(const std::vector<QPointF> &points)
+{
+	BezierCurveItem *curve = nullptr;
+
+	if(curves.empty())
+	{
+		curve = new BezierCurveItem;
+		this->addToGroup(curve);
+		curves.push_back(curve);
+	}
+	else
+		curve = curves[0];
+
+	curve->setZValue(lines[0]->zValue());
+	curve->setPen(lines[0]->pen());
+	curve->setPoints(points, SelfRelCornerRadius * BaseObjectView::getScreenDpiFactor());
+
+	for(auto &line : lines)
+		line->setVisible(false);
+
+	//Removing any extra unused curves
+	trimGroupItems(this, curves, 1);
+}
+
+void RelationshipView::removeCurves()
+{
+	for(auto &line : lines)
+		line->setVisible(true);
+
+	trimGroupItems(this, curves, 0);
+}
+
 
 void RelationshipView::configureToolTip()
 {
