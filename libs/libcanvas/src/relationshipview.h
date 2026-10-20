@@ -134,6 +134,9 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		//! \brief Stores the curved lines representing the relationship
 		std::vector<BezierCurveItem *> curves;
 
+		//! \brief The length of the straight parts at the start and end of the last curve configured
+		double curve_end_lens[2];
+
 		//! \brief The points of the last orthogonal line configured. They are used to calculate the bumps
 		std::vector<QPointF> route_points,
 
@@ -187,6 +190,9 @@ class __libcanvas RelationshipView: public BaseObjectView {
 			//! \brief The directions in which the line leaves the tables at p_central (null vector means any direction)
 			QPointF conn_dirs[2];
 
+			//! \brief The length of the line at each end that must remain straight (area of the crow's foot descriptors)
+			double end_lens[2] { 0, 0 };
+
 			//! \brief The line is connected at the same side on both tables (fk-to-pk mode only)
 			bool conn_same_sides { false },
 
@@ -233,6 +239,9 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		/*! \brief Removes the duplicated points of the route as well as the intermediate
 		 * points of collinear segments */
 		static std::vector<QPointF> cleanRoute(const std::vector<QPointF> &route);
+
+		//! \brief Returns the smallest rect that contains all the points of the route
+		static QRectF getRouteRect(const std::vector<QPointF> &route);
 
 		/*! \brief Returns whether the horizontal/vertical segment crosses the inside of one of the obstacles */
 		static bool isSegmentBlocked(const QPointF &p1, const QPointF &p2, const std::vector<QRectF> &obstacles);
@@ -300,6 +309,9 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		 * Returns the point where the line leaves the edge towards the other table */
 		QPointF configureEdgeConnection(unsigned tab_idx, const QLineF &line, LineGeometry &geom);
 
+		//! \brief Returns whether the lines of the relationship have descriptors (e.g. crow's foot) at their ends
+		bool hasEndDescriptors();
+
 		//! \brief Returns the length factor of the line segment that leaves the table's edge
 		double getEdgeSizeFactor(unsigned tab_idx);
 
@@ -335,7 +347,7 @@ class __libcanvas RelationshipView: public BaseObjectView {
 
 		/*! \brief Configures the single curve that traces the whole line with its corners rounded.
 		 * It's used by self-relationships and by the orthogonal lines */
-		void configurePolylineCurve(const std::vector<QPointF> &points);
+		void configurePolylineCurve(const std::vector<QPointF> &points, double start_len = 0, double end_len = 0);
 
 		//! \brief Destroys all curves and makes the straight lines visible again
 		void removeCurves();

@@ -109,6 +109,7 @@ RelationshipView::RelationshipView(BaseRelationship *rel) : BaseObjectView(rel)
 	this->addToGroup(obj_selection);
 
 	tables[0]=tables[1]=nullptr;
+	curve_end_lens[0]=curve_end_lens[1]=0;
 
 	for(unsigned i=0; i < 2; i++)
 	{
@@ -239,7 +240,8 @@ void RelationshipView::setBumps(const std::vector<QPointF> &new_bumps)
 
 	bumps = new_bumps;
 	curves[0]->setPoints(route_points, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
-											 bumps, BumpRadius * BaseObjectView::getScreenDpiFactor());
+											 bumps, BumpRadius * BaseObjectView::getScreenDpiFactor(),
+											 curve_end_lens[0], curve_end_lens[1]);
 	configureBoundingRect();
 }
 
@@ -987,6 +989,16 @@ void RelationshipView::addEndPoints(LineGeometry &geom)
 	geom.points.push_back(geom.p_central[1]);
 }
 
+bool RelationshipView::hasEndDescriptors()
+{
+	BaseRelationship::RelType rel_type = this->getUnderlyingObject()->getRelationshipType();
+
+	return rel_type == BaseRelationship::Relationship11 ||
+				 rel_type == BaseRelationship::Relationship1n ||
+				 rel_type == BaseRelationship::RelationshipNn ||
+				 rel_type == BaseRelationship::RelationshipFk;
+}
+
 double RelationshipView::getEdgeSizeFactor(unsigned tab_idx)
 {
 	BaseRelationship *base_rel = this->getUnderlyingObject();
@@ -1376,6 +1388,14 @@ void RelationshipView::configureOrthogonalEdges(LineGeometry &geom, double stubs
 
 		geom.conn_dirs[idx] = dirs[idx];
 		stubs[idx] = ConnLineLength * getEdgeSizeFactor(idx);
+
+		/* The crow's foot descriptors occupy the first part of the line segments at the ends. That part
+		 * is kept straight and the segments are extended so the corner's curve fits right after it */
+		if(use_crows_foot && hasEndDescriptors())
+		{
+			geom.end_lens[idx] = stubs[idx] * 1.2;
+			stubs[idx] = geom.end_lens[idx] + (RoundedCornerRadius * BaseObjectView::getScreenDpiFactor());
+		}
 	}
 
 	/* Relationships between the same tables have their middle segments displaced from each other.
@@ -1428,6 +1448,29 @@ std::vector<QPointF> RelationshipView::cleanRoute(const std::vector<QPointF> &ro
 		pts.push_back(route.back());
 
 	return pts;
+}
+
+QRectF RelationshipView::getRouteRect(const std::vector<QPointF> &route)
+{
+	double left = 0, top = 0, right = 0, bottom = 0;
+
+	if(route.empty())
+		return QRectF();
+
+	left = right = route.front().x();
+	top = bottom = route.front().y();
+
+	/* Not using QRectF::united() because it ignores the null rects (zero size),
+	 * which are the ones that represent the isolated points */
+	for(auto &pnt : route)
+	{
+		left = std::min(left, pnt.x());
+		right = std::max(right, pnt.x());
+		top = std::min(top, pnt.y());
+		bottom = std::max(bottom, pnt.y());
+	}
+
+	return QRectF(QPointF(left, top), QPointF(right, bottom));
 }
 
 bool RelationshipView::isSegmentBlocked(const QPointF &p1, const QPointF &p2, const std::vector<QRectF> &obstacles)
@@ -1620,7 +1663,7 @@ std::vector<QPointF> RelationshipView::avoidObstacles(const std::vector<QPointF>
 {
 	constexpr size_t MaxObstacles = 48;
 	const double regions_margins[2] = { 150, 600 };
-	double clearance = ConnLineLength * 0.3, exit_len = 0;
+	double clearance = ConnLineLength * 0.75, exit_len = 0;
 	QRectF route_rect, region;
 	std::vector<QRectF> obstacles, all_obstacles;
 	std::vector<QPointF> path, result;
@@ -1643,8 +1686,7 @@ std::vector<QPointF> RelationshipView::avoidObstacles(const std::vector<QPointF>
 			dir_ids[idx] = 3;
 	}
 
-	for(auto &pnt : route)
-		route_rect = route_rect.united(QRectF(pnt, QSizeF(0, 0)));
+	route_rect = getRouteRect(route);
 
 	for(int attempt = 0; attempt < 2; attempt++)
 	{
@@ -1680,7 +1722,7 @@ std::vector<QPointF> RelationshipView::avoidObstacles(const std::vector<QPointF>
 		 * at the ends of the line (e.g. the crow's foot descriptors) */
 		for(int idx = 0; idx < 2; idx++)
 		{
-			exit_len = (dir_ids[idx] >= 0 ? std::max(stubs[idx], clearance * 2) : 0);
+			exit_len = (dir_ids[idx] >= 0 ? std::max(stubs[idx], clearance + 2) : 0);
 			ends[idx] = (idx == 0 ? route.front() : route.back()) + (dirs[idx] * exit_len);
 		}
 
@@ -1698,12 +1740,7 @@ std::vector<QPointF> RelationshipView::avoidObstacles(const std::vector<QPointF>
 		result = cleanRoute(result);
 
 		// The found path must not touch obstacles outside the region used in the search
-		route_rect = QRectF();
-
-		for(auto &pnt : result)
-			route_rect = route_rect.united(QRectF(pnt, QSizeF(0, 0)));
-
-		obstacles = getObstacles(route_rect);
+		obstacles = getObstacles(getRouteRect(result));
 
 		for(auto &rect : obstacles)
 			rect.adjust(-clearance, -clearance, clearance, clearance);
@@ -1970,7 +2007,7 @@ void RelationshipView::configureCurves(const LineGeometry &geom)
 	if(line_style != StraightLines)
 	{
 		if(line_style == OrthogonalLines || this->getUnderlyingObject()->isSelfRelationship())
-			configurePolylineCurve(geom.points);
+			configurePolylineCurve(geom.points, geom.end_lens[0], geom.end_lens[1]);
 		else
 			configureCurvedLines(geom);
 	}
@@ -2029,7 +2066,7 @@ void RelationshipView::configureCurvedLines(const LineGeometry &geom)
  * orthogonal lines) but rounds off the corners where they meet instead of drawing sharp right
  * angles: a single curve item traces the whole line, with a quadratic curve (control point at
  * the corner itself) taking over from the straight segments near each turn. */
-void RelationshipView::configurePolylineCurve(const std::vector<QPointF> &points)
+void RelationshipView::configurePolylineCurve(const std::vector<QPointF> &points, double start_len, double end_len)
 {
 	BezierCurveItem *curve = nullptr;
 
@@ -2057,10 +2094,14 @@ void RelationshipView::configurePolylineCurve(const std::vector<QPointF> &points
 		bumps.clear();
 	}
 
+	curve_end_lens[0] = start_len;
+	curve_end_lens[1] = end_len;
+
 	curve->setZValue(lines[0]->zValue());
 	curve->setPen(lines[0]->pen());
 	curve->setPoints(points, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
-									 bumps, BumpRadius * BaseObjectView::getScreenDpiFactor());
+									 bumps, BumpRadius * BaseObjectView::getScreenDpiFactor(),
+									 curve_end_lens[0], curve_end_lens[1]);
 
 	for(auto &line : lines)
 		line->setVisible(false);
