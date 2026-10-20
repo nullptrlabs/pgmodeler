@@ -40,6 +40,8 @@
 #include "attributestoggleritem.h"
 #include "relmarkeritem.h"
 
+class RelationshipView;
+
 class __libcanvas BaseTableView: public BaseObjectView {
 	Q_OBJECT
 
@@ -215,6 +217,12 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		 * include_connected is true, since they are already updated by the table's own signals. Does nothing
 		 * when the orthogonal line style is not in use. */
 		void invalidateNearbyRoutes(bool include_connected = false);
+
+		/*! \brief Returns the orthogonal relationships routed near the table, including the area it occupied
+		 * before being moved (which is forgotten by this call). It's the list invalidateNearbyRoutes()
+		 * updates, so the caller can merge the lists of several tables and update each relationship only once.
+		 * The list is empty when the orthogonal line style is not in use. */
+		std::vector<RelationshipView *> getNearbyRoutes(bool include_connected = false);
 
 		//! \brief Toggles the placeholder object when there is at least one relationship connected to the object
 		void togglePlaceholder(bool value) override;

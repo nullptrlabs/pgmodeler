@@ -1721,13 +1721,43 @@ void ObjectsScene::finishObjectsMove(const QPointF &pnt_end)
 	sel_ini_pnt.setY(DNaN);
 
 	/* After the movement the orthogonal relationships that were routed around the previous position of
-	 * the tables, or that must now go around their new one, are updated. When placeholders are not used the
-	 * relationships connected to the tables were updated during the movement without avoiding obstacles */
+	 * the tables, or that must now go around their new one, are updated. Each relationship is updated only once,
+	 * no matter how many of the moved tables it is near to. When placeholders are not used the relationships
+	 * connected to the tables were updated during the movement without avoiding obstacles, so they're updated
+	 * again first, which leaves the crow's foot areas they register ready for the other relationships. */
+	std::vector<RelationshipView *> connected_rel_views, nearby_rel_views;
+	QSet<RelationshipView *> gathered_rel_views;
+	bool placeholders_used = BaseObjectView::isPlaceholderEnabled();
+
 	for(auto &obj : tables)
 	{
 		tab_view = dynamic_cast<BaseTableView *>(obj);
-		tab_view->invalidateNearbyRoutes(!BaseObjectView::isPlaceholderEnabled());
+
+		for(auto &rel_view : tab_view->getNearbyRoutes(true))
+		{
+			if(gathered_rel_views.contains(rel_view))
+				continue;
+
+			gathered_rel_views.insert(rel_view);
+
+			BaseRelationship *rel_obj = rel_view->getUnderlyingObject();
+
+			// A relationship connected to any of the moved tables
+			bool connected = tables.contains(dynamic_cast<BaseObjectView *>(rel_obj->getTable(BaseRelationship::SrcTable)->getOverlyingObject())) ||
+											 tables.contains(dynamic_cast<BaseObjectView *>(rel_obj->getTable(BaseRelationship::DstTable)->getOverlyingObject()));
+
+			if(!connected)
+				nearby_rel_views.push_back(rel_view);
+			else if(!placeholders_used)
+				connected_rel_views.push_back(rel_view);
+		}
 	}
+
+	for(auto &rel_view : connected_rel_views)
+		rel_view->invalidateRoute();
+
+	for(auto &rel_view : nearby_rel_views)
+		rel_view->invalidateRoute();
 
 	// Displaying the bumps that were postponed during the movement
 	if(bumps_update_pending)
