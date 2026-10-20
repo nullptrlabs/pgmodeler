@@ -638,43 +638,59 @@ void RelationshipView::configurePositionInfo()
 	}
 }
 
-void RelationshipView::configureLine()
+bool RelationshipView::isLineUpdateNeeded()
 {
 	BaseRelationship *base_rel = this->getUnderlyingObject();
 	BaseRelationship::TableId src_tab = BaseRelationship::SrcTable,
 			dst_tab = BaseRelationship::DstTable;
 
-	configureToolTip();
-
 	/* We skip the line configuration if the line is still being configured, or the bounding rectangles
 	 * of the involved tables are not valid (they wasn't rendered/configured yet) or the
 	 * hash codes of both tables are unchanged since the last call to this method */
-	if(configuring_line ||
+	return !(configuring_line ||
 
-			BaseTable::isGeomChangesIgnored() ||
+					 BaseTable::isGeomChangesIgnored() ||
 
-			!BaseGraphicObject::isUpdatesEnabled() ||
+					 !BaseGraphicObject::isUpdatesEnabled() ||
 
-			!tables[src_tab]->boundingRect().isValid() ||
+					 !tables[src_tab]->boundingRect().isValid() ||
 
-			!tables[dst_tab]->boundingRect().isValid() ||
+					 !tables[dst_tab]->boundingRect().isValid() ||
 
-			((!tab_hashes[src_tab].isEmpty() &&
-					tab_hashes[src_tab] == base_rel->getTable(src_tab)->getHashCode()) &&
+					 ((!tab_hashes[src_tab].isEmpty() &&
+						 tab_hashes[src_tab] == base_rel->getTable(src_tab)->getHashCode()) &&
 
-			 (!tab_hashes[dst_tab].isEmpty() &&
-					tab_hashes[dst_tab] == base_rel->getTable(dst_tab)->getHashCode())))
-	return;
+						(!tab_hashes[dst_tab].isEmpty() &&
+						 tab_hashes[dst_tab] == base_rel->getTable(dst_tab)->getHashCode())));
+}
 
-	tab_hashes[src_tab] = base_rel->getTable(src_tab)->getHashCode();
-	tab_hashes[dst_tab] = base_rel->getTable(dst_tab)->getHashCode();
+void RelationshipView::updateTablesHashes()
+{
+	BaseRelationship *base_rel = this->getUnderlyingObject();
 
+	tab_hashes[BaseRelationship::SrcTable] = base_rel->getTable(BaseRelationship::SrcTable)->getHashCode();
+	tab_hashes[BaseRelationship::DstTable] = base_rel->getTable(BaseRelationship::DstTable)->getHashCode();
+}
+
+void RelationshipView::syncPlaceholderConnection()
+{
 	//Reconnect the tables if the placeholder usage changes
-	if(using_placeholders!=BaseObjectView::isPlaceholderEnabled())
+	if(using_placeholders != BaseObjectView::isPlaceholderEnabled())
 	{
 		connectTables();
-		using_placeholders=BaseObjectView::isPlaceholderEnabled();
+		using_placeholders = BaseObjectView::isPlaceholderEnabled();
 	}
+}
+
+void RelationshipView::configureLine()
+{
+	configureToolTip();
+
+	if(!isLineUpdateNeeded())
+		return;
+
+	updateTablesHashes();
+	syncPlaceholderConnection();
 
 	configuring_line=true;
 

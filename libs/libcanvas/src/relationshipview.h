@@ -183,6 +183,16 @@ class __libcanvas RelationshipView: public BaseObjectView {
 																		 BaseTableView::ConnectionPoint &pk_type, BaseTableView::ConnectionPoint &fk_type,
 																		 bool &same_sides);
 
+		/*! \brief Returns whether the line must be (re)configured. It's not needed when the line is already
+		 * being configured, the tables aren't rendered yet or their hash codes didn't change since the last update */
+		bool isLineUpdateNeeded();
+
+		//! \brief Stores the current hash codes of the tables to detect their changes in the next update
+		void updateTablesHashes();
+
+		//! \brief Reconnects the tables' signals if the placeholder usage changed
+		void syncPlaceholderConnection();
+
 		//! \brief Computes the geometry of the line according to the relationship type and the line connection mode
 		LineGeometry computeLineGeometry();
 
