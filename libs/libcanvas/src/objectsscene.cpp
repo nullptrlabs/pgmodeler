@@ -2101,11 +2101,16 @@ void ObjectsScene::updateRelationshipBumps()
 		return s1.pos < s2.pos;
 	});
 
-	// Bumps are never placed over the crow's foot descriptors
+	/* Bumps are never placed over the crow's foot descriptors. The test uses the area of the arc (it only
+	 * goes up) against the zones shrunk by the clearance the routes keep from them, so lines passing right
+	 * next to a descriptor still hop over the lines crossing them */
 	auto is_in_zone = [&](const QPointF &pnt) {
+		QRectF arc_rect(pnt.x() - bump_radius, pnt.y() - bump_radius, bump_radius * 2, bump_radius);
+		double clearance = RelationshipView::ZoneClearance;
+
 		for(auto &zone : zones)
 		{
-			if(zone.adjusted(-bump_radius * 2, -bump_radius * 2, bump_radius * 2, bump_radius * 2).contains(pnt))
+			if(zone.adjusted(clearance, clearance, -clearance, -clearance).intersects(arc_rect))
 				return true;
 		}
 
