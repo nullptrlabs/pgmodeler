@@ -162,6 +162,10 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		 * (made by the user) were applied, and the minimum length of its first and last segments */
 		std::vector<QPointF> base_route;
 
+		/*! \brief The route of the last orthogonal line configured before the search for a way around the
+		 * obstacles. It's the route the line takes back when the obstacles leave its way */
+		std::vector<QPointF> direct_route;
+
 		double route_stubs[2];
 
 		/*! \brief The areas (position and size) of the tables when the line was last configured. The displacements
@@ -461,6 +465,10 @@ class __libcanvas RelationshipView: public BaseObjectView {
 
 		//! \brief Returns the relationship that generates the graphical representation
 		BaseRelationship *getUnderlyingObject();
+
+		/*! \brief Returns whether the segments of the last orthogonal route, or of the route it would have
+		 * without going around obstacles, touch the region. When the route is unknown the line is assumed to be near */
+		bool isRouteNear(const QRectF &region) const;
 
 		//! \brief Hides the relationship's name label. This applies to all relationship instances
 		static void setHideNameLabel(bool value);
