@@ -4,6 +4,7 @@
 -->
 <!ELEMENT relationships (foreign-keys, name-patterns)>
 <!ATTLIST relationships link-mode (fk-to-pk|center-pnts|table-edges|crows-foot) "fk-to-pk">
+<!ATTLIST relationships line-style (straight|curved|orthogonal) "curved">
 
 <!ELEMENT foreign-keys EMPTY>
 <!ATTLIST foreign-keys deferrable (false|true) "false">

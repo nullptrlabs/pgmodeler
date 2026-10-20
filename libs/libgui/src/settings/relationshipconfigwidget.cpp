@@ -74,7 +74,12 @@ RelationshipConfigWidget::RelationshipConfigWidget(QWidget * parent) : BaseConfi
 	for(auto &type : IndexingType::getTypes())
 		index_type_cmb->addItem(type, type);
 
+	line_style_gb->setFocusProxy(rel_line_style_cmb);
 	conn_mode_gb->setFocusProxy(crows_foot_tb);
+
+	rel_line_style_cmb->setItemData(RelationshipView::StraightLines, Attributes::Straight);
+	rel_line_style_cmb->setItemData(RelationshipView::CurvedLines, Attributes::Curved);
+	rel_line_style_cmb->setItemData(RelationshipView::OrthogonalLines, Attributes::Orthogonal);
 	foreign_key_gb->setFocusProxy(deferrable_chk);
 
 	QButtonGroup *conn_mode_btns_grp = new QButtonGroup(this);
@@ -85,6 +90,10 @@ RelationshipConfigWidget::RelationshipConfigWidget(QWidget * parent) : BaseConfi
 
 	connect(conn_mode_btns_grp, &QButtonGroup::buttonToggled, this, [this](){
 			setConfigurationChanged(true);
+	});
+
+	connect(rel_line_style_cmb, &QComboBox::currentIndexChanged, this, [this](){
+		setConfigurationChanged(true);
 	});
 
 	connect(deferrable_chk, &QCheckBox::toggled, deferral_cmb, &QComboBox::setEnabled);
@@ -128,6 +137,9 @@ void RelationshipConfigWidget::loadConfiguration()
 		center_pnts_tb->setChecked(config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode]==Attributes::ConnectCenterPnts);
 		tab_edges_tb->setChecked(config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode]==Attributes::ConnectTableEdges);
 		crows_foot_tb->setChecked(config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode]==Attributes::CrowsFoot);
+
+		idx = rel_line_style_cmb->findData(config_params[GlobalAttributes::RelationshipsConf][Attributes::LineStyle]);
+		rel_line_style_cmb->setCurrentIndex(idx < 0 ? RelationshipView::CurvedLines : idx);
 
 		deferrable_chk->setChecked(config_params[Attributes::ForeignKeys][Attributes::Deferrable]==Attributes::True);
 		deferral_cmb->setCurrentText(config_params[Attributes::ForeignKeys][Attributes::DeferType]);
@@ -176,6 +188,8 @@ void RelationshipConfigWidget::saveConfiguration()
 		else
 			config_params[GlobalAttributes::RelationshipsConf][Attributes::LinkMode] = Attributes::ConnectCenterPnts;
 
+		config_params[GlobalAttributes::RelationshipsConf][Attributes::LineStyle] = rel_line_style_cmb->currentData().toString();
+
 		config_params[Attributes::ForeignKeys][Attributes::Deferrable] = (deferrable_chk->isChecked() ? Attributes::True : Attributes::False);
 		config_params[Attributes::ForeignKeys][Attributes::DeferType] = deferral_cmb->currentText();
 		config_params[Attributes::ForeignKeys][Attributes::UpdAction] = (upd_action_cmb->currentIndex() > 0 ? upd_action_cmb->currentText() : "");
@@ -203,6 +217,7 @@ void RelationshipConfigWidget::saveConfiguration()
 
 void RelationshipConfigWidget::applyConfiguration()
 {
+	RelationshipView::setLineStyle(static_cast<RelationshipView::LineStyle>(rel_line_style_cmb->currentIndex()));
 	RelationshipView::setCrowsFoot(crows_foot_tb->isChecked());
 
 	if(!crows_foot_tb->isChecked())
