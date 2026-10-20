@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>865</width>
-    <height>927</height>
+    <height>957</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -64,6 +64,64 @@
         <property name="spacing">
          <number>5</number>
         </property>
+        <item>
+         <widget class="QGroupBox" name="line_style_gb">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Line style</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_18">
+           <property name="spacing">
+            <number>5</number>
+           </property>
+           <property name="leftMargin">
+            <number>5</number>
+           </property>
+           <property name="topMargin">
+            <number>5</number>
+           </property>
+           <property name="rightMargin">
+            <number>5</number>
+           </property>
+           <property name="bottomMargin">
+            <number>5</number>
+           </property>
+           <item>
+            <widget class="QComboBox" name="rel_line_style_cmb">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>&lt;p&gt;Defines how the relationships' lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Straight</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Curved</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Orthogonal</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
         <item>
          <widget class="QGroupBox" name="conn_mode_gb">
           <property name="sizePolicy">
