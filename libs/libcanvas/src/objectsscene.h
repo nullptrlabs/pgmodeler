@@ -37,6 +37,8 @@
 #include "basetableview.h"
 #include "doublenan.h"
 
+class RelationshipView;
+
 class __libcanvas ObjectsScene: public QGraphicsScene {
 	Q_OBJECT
 
@@ -77,6 +79,13 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		QList<LayerItem *> layers_paths;
 
 		std::vector<BaseObjectView *> removed_objs;
+
+		/*! \brief The tables/views and relationships added to the scene. They are kept apart because
+		 * items() visits every child item of the tables, which is too slow for the queries made by
+		 * the routing of the orthogonal lines (see getTableViews() and getRelationshipViews()) */
+		std::vector<BaseTableView *> table_views;
+
+		std::vector<RelationshipView *> rel_views;
 
 		//! \brief Holds the tables/views which have selected children objects
 		QList<BaseTableView *> tabs_sel_children;
@@ -344,6 +353,16 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		static QPageLayout getPageLayout();
 
 		void addItem(QGraphicsItem *item, bool blink_new = false);
+
+		//! \brief Returns the tables/views added to the scene, in no particular order
+		const std::vector<BaseTableView *> &getTableViews() const;
+
+		//! \brief Returns the relationships added to the scene, in no particular order
+		const std::vector<RelationshipView *> &getRelationshipViews() const;
+
+		/*! \brief Removes the table/view or relationship from the lists above. It's called by the destructors
+		 * of those items, since an item deleted while in the scene doesn't go through removeItem() */
+		void forgetItem(QGraphicsItem *item);
 
 		void removeItem(QGraphicsItem *item);
 
