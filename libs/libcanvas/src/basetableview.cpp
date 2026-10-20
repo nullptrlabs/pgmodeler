@@ -23,6 +23,8 @@
 #include "schema.h"
 #include "utilsns.h"
 #include <QGraphicsScene>
+#include "objectsscene.h"
+#include "relationshipview.h"
 
 bool BaseTableView::hide_ext_attribs {false};
 bool BaseTableView::hide_tags {false};
@@ -82,6 +84,10 @@ BaseTableView::BaseTableView(BaseTable *base_tab) : BaseObjectView(base_tab)
 	connect(attribs_toggler, &AttributesTogglerItem::s_collapseModeChanged, this, &BaseTableView::configureCollapsedSections);
 	connect(attribs_toggler, &AttributesTogglerItem::s_paginationToggled, this, &BaseTableView::togglePagination);
 	connect(attribs_toggler, &AttributesTogglerItem::s_currentPageChanged, this, &BaseTableView::configureCurrentPage);
+
+	connect(this, &BaseObjectView::s_objectDimensionChanged, this, [this](){
+		invalidateNearbyRoutes();
+	});
 
 	connect(&sel_enabler_timer, &QTimer::timeout, this, [this](){
 		this->setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -147,6 +153,16 @@ QVariant BaseTableView::itemChange(GraphicsItemChange change, const QVariant &va
 	{
 		BaseTable *tab = dynamic_cast<BaseTable *>(getUnderlyingObject());
 		tab->setZValue(this->zValue());
+	}
+
+	/* Registering the area occupied by the table before the user moves it, so the relationships
+	 * routed around that area can be updated when the movement ends */
+	if(change == ItemPositionChange && move_origin_rect.isNull())
+	{
+		ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene());
+
+		if(obj_scene && obj_scene->isMovingObjects())
+			move_origin_rect = QRectF(this->pos(), this->boundingRect().size());
 	}
 
 	if(change==ItemPositionHasChanged)
@@ -584,6 +600,39 @@ QPointF BaseTableView::getRelMarkerAnchorPoint()
 void BaseTableView::requestRelationshipsUpdate()
 {
 	emit s_relUpdateRequest();
+}
+
+void BaseTableView::invalidateNearbyRoutes(bool include_connected)
+{
+	if(RelationshipView::getLineStyle() != RelationshipView::OrthogonalLines || !scene())
+		return;
+
+	// Margin that includes the relationships that pass close to the table but not through it
+	constexpr double Margin = 20;
+	QRectF region(this->pos(), this->boundingRect().size());
+	std::vector<RelationshipView *> rel_views;
+	RelationshipView *rel_view = nullptr;
+
+	if(!move_origin_rect.isNull())
+	{
+		region = region.united(move_origin_rect);
+		move_origin_rect = QRectF();
+	}
+
+	region.adjust(-Margin, -Margin, Margin, Margin);
+
+	for(auto &item : scene()->items(region, Qt::IntersectsItemBoundingRect))
+	{
+		rel_view = dynamic_cast<RelationshipView *>(item);
+
+		if(rel_view &&
+			 (include_connected ||
+				std::find(connected_rels.begin(), connected_rels.end(), rel_view->getUnderlyingObject()) == connected_rels.end()))
+			rel_views.push_back(rel_view);
+	}
+
+	for(auto &rel : rel_views)
+		rel->invalidateRoute();
 }
 
 void BaseTableView::togglePlaceholder(bool value)
