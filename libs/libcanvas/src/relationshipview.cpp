@@ -111,6 +111,9 @@ RelationshipView::RelationshipView(BaseRelationship *rel) : BaseObjectView(rel)
 	tables[0]=tables[1]=nullptr;
 	curve_end_lens[0]=curve_end_lens[1]=0;
 	route_stubs[0]=route_stubs[1]=0;
+	drag_seg_idx=-1;
+	drag_horiz=drag_moved=false;
+	drag_ini_shift=drag_shift=0;
 	zone_retries=0;
 
 	for(unsigned i=0; i < 2; i++)
@@ -126,6 +129,7 @@ RelationshipView::RelationshipView(BaseRelationship *rel) : BaseObjectView(rel)
 	}
 
 	this->setZValue(-50);
+	this->setAcceptHoverEvents(true);
 	this->configureObject();
 }
 
@@ -454,6 +458,13 @@ void RelationshipView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		{
 			base_rel->resetLabelsDistance();
 			this->configureLabels();
+
+			if(line_style == OrthogonalLines && !base_rel->getSegmentShifts().empty())
+			{
+				base_rel->resetSegmentShifts();
+				emit s_relationshipModified(base_rel);
+				invalidateRoute();
+			}
 		}
 		else if(event->modifiers()==Qt::ShiftModifier)
 		{
@@ -462,7 +473,13 @@ void RelationshipView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 			bool pnt_rem=false;
 			std::vector<QPointF> points = base_rel->getPoints();
 
-			if(!base_rel->isSelfRelationship() && line_style != OrthogonalLines)
+			if(line_style == OrthogonalLines)
+			{
+				//In orthogonal lines SHIFT and dragging moves the segment next to the mouse
+				if(event->buttons()==Qt::LeftButton)
+					startSegmentDrag(event->pos());
+			}
+			else if(!base_rel->isSelfRelationship())
 			{
 				//When the user press SHIFT and clicks on a point this is removed
 				if(event->buttons()==Qt::LeftButton)
@@ -563,7 +580,9 @@ void RelationshipView::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	if(this->isSelected() && event->buttons()==Qt::LeftButton &&
 			!this->getUnderlyingObject()->isProtected())
 	{
-		if(dynamic_cast<QGraphicsPolygonItem *>(sel_object))
+		if(drag_seg_idx >= 0)
+			dragSegment(event->pos());
+		else if(dynamic_cast<QGraphicsPolygonItem *>(sel_object))
 		{
 			QRectF brect = QRectF(tables[0]->pos() - QPointF(20,20),
 														tables[0]->pos() + QPointF(tables[0]->boundingRect().width() + 20, tables[0]->boundingRect().height()  + 20)),
@@ -591,6 +610,32 @@ void RelationshipView::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	BaseObjectView::mouseMoveEvent(event);
 }
 
+void RelationshipView::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+{
+	bool horiz = false;
+
+	// While dragging the cursor is kept as it was set when the drag started
+	if(drag_seg_idx < 0)
+	{
+		/* Holding SHIFT over a segment that can be moved shows the cursor of the direction
+		 * in which the segment moves (a horizontal segment moves up or down) */
+		if(event->modifiers() == Qt::ShiftModifier && pickSegment(event->pos(), horiz) >= 0)
+			setCursor(horiz ? Qt::SizeVerCursor : Qt::SizeHorCursor);
+		else
+			unsetCursor();
+	}
+
+	BaseObjectView::hoverMoveEvent(event);
+}
+
+void RelationshipView::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+	if(drag_seg_idx < 0)
+		unsetCursor();
+
+	BaseObjectView::hoverLeaveEvent(event);
+}
+
 QPainterPath RelationshipView::shape() const
 {
 	return rel_shape;
@@ -602,6 +647,9 @@ void RelationshipView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 	if(event->button() == Qt::LeftButton)
 	{
+		if(drag_seg_idx >= 0)
+			finishSegmentDrag();
+
 		if(dynamic_cast<TextboxView *>(sel_object))
 		{
 			//Calculates the displacement of the label from the initial pos to the current
@@ -1293,10 +1341,116 @@ double RelationshipView::clampSegmentShift(const std::vector<QPointF> &route, si
 	return std::clamp(shift, lo, hi);
 }
 
-std::vector<QPointF> RelationshipView::applySegmentShifts(const std::vector<QPointF> &route, const double *stubs)
+int RelationshipView::pickSegment(const QPointF &pnt, bool &horiz)
 {
 	constexpr double Epsilon = 0.01;
+	double dist = 0, best_dist = LineSelStrokeWidth / 2;
+	QPointF p1, p2;
+	int seg_idx = -1;
+
+	if(line_style != OrthogonalLines || getUnderlyingObject()->isSelfRelationship() ||
+		 getUnderlyingObject()->isProtected() || base_route.size() < 4 || route_points.size() != base_route.size())
+		return -1;
+
+	// Only the inner segments can be moved, the first and the last ones are anchored to the tables
+	for(size_t idx = 1; idx + 2 < route_points.size(); idx++)
+	{
+		p1 = route_points[idx];
+		p2 = route_points[idx + 1];
+		bool seg_horiz = std::fabs(p1.y() - p2.y()) < Epsilon;
+
+		if(seg_horiz)
+		{
+			if(pnt.x() < std::min(p1.x(), p2.x()) || pnt.x() > std::max(p1.x(), p2.x()))
+				continue;
+
+			dist = std::fabs(pnt.y() - p1.y());
+		}
+		else
+		{
+			if(pnt.y() < std::min(p1.y(), p2.y()) || pnt.y() > std::max(p1.y(), p2.y()))
+				continue;
+
+			dist = std::fabs(pnt.x() - p1.x());
+		}
+
+		if(dist <= best_dist)
+		{
+			best_dist = dist;
+			seg_idx = idx;
+			horiz = seg_horiz;
+		}
+	}
+
+	return seg_idx;
+}
+
+bool RelationshipView::startSegmentDrag(const QPointF &pnt)
+{
+	drag_seg_idx = pickSegment(pnt, drag_horiz);
+
+	if(drag_seg_idx < 0)
+		return false;
+
+	drag_moved = false;
+	drag_ini_pos = pnt;
+	drag_ini_shift = drag_shift = (drag_horiz ? route_points[drag_seg_idx].y() - base_route[drag_seg_idx].y() :
+																							route_points[drag_seg_idx].x() - base_route[drag_seg_idx].x());
+
+	setCursor(drag_horiz ? Qt::SizeVerCursor : Qt::SizeHorCursor);
+	return true;
+}
+
+void RelationshipView::dragSegment(const QPointF &pnt)
+{
 	std::map<unsigned, BaseRelationship::SegmentShift> shifts = getUnderlyingObject()->getSegmentShifts();
+	std::vector<QPointF> preview;
+	double delta = (drag_horiz ? pnt.y() - drag_ini_pos.y() : pnt.x() - drag_ini_pos.x());
+
+	shifts[drag_seg_idx] = { (drag_horiz ? Qt::Horizontal : Qt::Vertical), drag_ini_shift + delta };
+	preview = applySegmentShifts(base_route, route_stubs, &shifts);
+
+	drag_shift = (drag_horiz ? preview[drag_seg_idx].y() - base_route[drag_seg_idx].y() :
+														 preview[drag_seg_idx].x() - base_route[drag_seg_idx].x());
+	drag_moved = true;
+
+	// The hops are discarded during the drag, they're calculated again when the line is reconfigured
+	curves[0]->setPoints(preview, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(), {},
+											 BumpRadius * BaseObjectView::getScreenDpiFactor(), curve_end_lens[0], curve_end_lens[1]);
+	configureBoundingRect();
+}
+
+void RelationshipView::finishSegmentDrag()
+{
+	BaseRelationship *base_rel = getUnderlyingObject();
+	std::map<unsigned, BaseRelationship::SegmentShift> shifts = base_rel->getSegmentShifts();
+	unsigned idx = drag_seg_idx;
+
+	drag_seg_idx = -1;
+	unsetCursor();
+
+	if(!drag_moved)
+		return;
+
+	if(std::fabs(drag_shift) < 0.01)
+		shifts.erase(idx);
+	else
+		shifts[idx] = { (drag_horiz ? Qt::Horizontal : Qt::Vertical), drag_shift };
+
+	base_rel->setSegmentShifts(shifts);
+	emit s_relationshipModified(base_rel);
+
+	/* While the objects are being moved the scene disables the obstacles avoidance, so the line is only
+	 * reconfigured (descriptors, labels, hops) after the scene finishes the movement */
+	QMetaObject::invokeMethod(this, [this](){ invalidateRoute(); }, Qt::QueuedConnection);
+}
+
+std::vector<QPointF> RelationshipView::applySegmentShifts(const std::vector<QPointF> &route, const double *stubs,
+																													 const std::map<unsigned, BaseRelationship::SegmentShift> *custom_shifts)
+{
+	constexpr double Epsilon = 0.01;
+	std::map<unsigned, BaseRelationship::SegmentShift> shifts =
+			(custom_shifts ? *custom_shifts : getUnderlyingObject()->getSegmentShifts());
 	std::vector<QPointF> result = route;
 	QRectF limits;
 	QPointF offset;
