@@ -168,6 +168,17 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		 * of the segments are discarded when one of the tables moves or changes its size */
 		QRectF shift_tab_rects[2];
 
+		//! \brief Index of the segment of the orthogonal line being dragged by the user (-1 when none)
+		int drag_seg_idx;
+
+		//! \brief Indicates that the dragged segment is horizontal (it moves vertically) and that it was effectively moved
+		bool drag_horiz, drag_moved;
+
+		//! \brief The point where the drag started and the displacement of the segment at that time and now
+		QPointF drag_ini_pos;
+
+		double drag_ini_shift, drag_shift;
+
 		//! \brief Stores the crow's foot notation descriptors
 		QGraphicsItemGroup * cf_descriptors[2];
 
@@ -309,7 +320,22 @@ class __libcanvas RelationshipView: public BaseObjectView {
 
 		/*! \brief Returns the route with the segments displaced according to the shifts stored in the relationship.
 		 * Shifts that don't match the route (index out of the inner segments or a different orientation) are ignored */
-		std::vector<QPointF> applySegmentShifts(const std::vector<QPointF> &route, const double *stubs);
+		std::vector<QPointF> applySegmentShifts(const std::vector<QPointF> &route, const double *stubs,
+																						const std::map<unsigned, BaseRelationship::SegmentShift> *custom_shifts = nullptr);
+
+		/*! \brief Returns the index of the inner segment of the orthogonal line closest to the point, or -1 if none is
+		 * near enough. The horiz parameter receives the orientation of the segment */
+		int pickSegment(const QPointF &pnt, bool &horiz);
+
+		/*! \brief Starts the drag of the inner segment of the orthogonal line closest to the point (if any is near enough).
+		 * Returns true if a segment was picked */
+		bool startSegmentDrag(const QPointF &pnt);
+
+		//! \brief Moves the dragged segment following the point, previewing the line without reconfiguring it
+		void dragSegment(const QPointF &pnt);
+
+		//! \brief Stores the displacement of the dragged segment in the relationship and reconfigures the line
+		void finishSegmentDrag();
 
 		//! \brief Alerts the scene that the orthogonal line changed so the bumps of the lines can be recalculated
 		void notifyRouteChanged();
@@ -410,6 +436,8 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 		void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 		void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+		void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
+		void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 
 		void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
 
