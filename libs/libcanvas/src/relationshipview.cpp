@@ -25,10 +25,11 @@
 #include "utilsns.h"
 
 bool RelationshipView::hide_name_label {false};
-bool RelationshipView::use_curved_lines {true};
 bool RelationshipView::use_crows_foot {true};
 
 RelationshipView::LineConnectionMode RelationshipView::line_conn_mode { RelationshipView::ConnectFkToPk };
+
+RelationshipView::LineStyle RelationshipView::line_style { RelationshipView::CurvedLines };
 
 template<class T>
 void RelationshipView::trimGroupItems(QGraphicsItemGroup *group, std::vector<T *> &items, size_t count)
@@ -199,14 +200,14 @@ bool RelationshipView::isNameLabelHidden()
 	return hide_name_label;
 }
 
-void RelationshipView::setCurvedLines(bool value)
+void RelationshipView::setLineStyle(LineStyle style)
 {
-	use_curved_lines = value;
+	line_style = style;
 }
 
-bool RelationshipView::isCurvedLines()
+RelationshipView::LineStyle RelationshipView::getLineStyle()
 {
-	return use_curved_lines;
+	return line_style;
 }
 
 void RelationshipView::setCrowsFoot(bool value)
@@ -414,7 +415,7 @@ void RelationshipView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 			bool pnt_rem=false;
 			std::vector<QPointF> points = base_rel->getPoints();
 
-			if(!base_rel->isSelfRelationship())
+			if(!base_rel->isSelfRelationship() && line_style != OrthogonalLines)
 			{
 				//When the user press SHIFT and clicks on a point this is removed
 				if(event->buttons()==Qt::LeftButton)
@@ -449,7 +450,7 @@ void RelationshipView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 					count = lines.size();
 					for(i=0; i < count && !pnt_rem; i++)
 					{
-						if(use_curved_lines)
+						if(line_style == CurvedLines)
 							stroke = ps.createStroke(curves[i]->shape());
 						else
 							stroke = ps.createStroke(lines[i]->shape());
@@ -736,7 +737,12 @@ RelationshipView::LineGeometry RelationshipView::computeLineGeometry()
 	LineGeometry geom;
 
 	if(base_rel->isSelfRelationship())
+	{
 		configureSelfRelGeometry(geom);
+		addEndPoints(geom);
+	}
+	else if(line_style == OrthogonalLines)
+		configureOrthogonalGeometry(geom);
 	else
 	{
 		bool rel_1n = (rel_type == Relationship::Relationship11 ||
@@ -752,12 +758,12 @@ RelationshipView::LineGeometry RelationshipView::computeLineGeometry()
 
 		geom.points = base_rel->getPoints();
 		configureGraphicPoints(geom.points);
-	}
 
-	if(base_rel->isSelfRelationship() || line_conn_mode != ConnectTableEdges)
-		addEndPoints(geom);
-	else
-		configureTableEdgesGeometry(geom);
+		if(line_conn_mode != ConnectTableEdges)
+			addEndPoints(geom);
+		else
+			configureTableEdgesGeometry(geom);
+	}
 
 	return geom;
 }
@@ -911,6 +917,24 @@ void RelationshipView::configureFkToPkGeometry(LineGeometry &geom)
 	{
 		geom.p_central[0] = geom.pk_pnt;
 		geom.p_central[1] = geom.fk_pnt;
+	}
+
+	//The connector lines leave the tables horizontally, but only when the fk/pk columns were found
+	if(!fks.empty())
+	{
+		QPointF pk_dir((pk_pnt_type == BaseTableView::LeftConnPoint ? -1 : 1), 0),
+				fk_dir((fk_pnt_type == BaseTableView::LeftConnPoint ? -1 : 1), 0);
+
+		if(rel_type == Relationship::RelationshipFk)
+		{
+			geom.conn_dirs[1] = pk_dir;
+			geom.conn_dirs[0] = fk_dir;
+		}
+		else
+		{
+			geom.conn_dirs[0] = pk_dir;
+			geom.conn_dirs[1] = fk_dir;
+		}
 	}
 }
 
@@ -1088,6 +1112,347 @@ void RelationshipView::configureTableEdgesGeometry(LineGeometry &geom)
 	geom.points.push_back(p_aux[1]);
 	geom.points.push_back(geom.p_central[1]);
 }
+void RelationshipView::configureOrthogonalGeometry(LineGeometry &geom)
+{
+	BaseRelationship::RelType rel_type = this->getUnderlyingObject()->getRelationshipType();
+	bool rel_1n = (rel_type == Relationship::Relationship11 ||
+								 rel_type == Relationship::Relationship1n ||
+								 rel_type == Relationship::RelationshipFk);
+	double stubs[2] = { 0, 0 }, mid_shift = 0;
+
+	swapIdentifierTables();
+
+	if(line_conn_mode == ConnectFkToPk && rel_1n)
+		configureFkToPkGeometry(geom);
+	else
+	{
+		configureCenterGeometry(geom);
+
+		if(line_conn_mode == ConnectTableEdges)
+			configureOrthogonalEdges(geom, stubs, mid_shift);
+	}
+
+	//The points added by the user are ignored in orthogonal lines
+	configureGraphicPoints({});
+
+	conn_points[0] = geom.p_central[0];
+	conn_points[1] = geom.p_central[1];
+
+	geom.points = getOrthogonalRoute(geom.p_central[0], geom.conn_dirs[0], stubs[0],
+																	 geom.p_central[1], geom.conn_dirs[1], stubs[1], mid_shift);
+}
+
+bool RelationshipView::getEdgeSide(const QRectF &rect, const QRectF &other_rect, bool &horiz, int &sign)
+{
+	double gap_x = std::max(other_rect.left() - rect.right(), rect.left() - other_rect.right()),
+			gap_y = std::max(other_rect.top() - rect.bottom(), rect.top() - other_rect.bottom());
+
+	//When the tables overlap there's no side to connect the line
+	if(gap_x <= 0 && gap_y <= 0)
+		return false;
+
+	/* The line leaves the tables through the facing sides along the axis of the greatest
+	 * gap between them: horizontal sides when they are side by side, vertical ones otherwise */
+	horiz = (gap_x >= gap_y);
+
+	if(horiz)
+		sign = (other_rect.center().x() >= rect.center().x() ? 1 : -1);
+	else
+		sign = (other_rect.center().y() >= rect.center().y() ? 1 : -1);
+
+	return true;
+}
+
+double RelationshipView::getEdgePreferredPos(const QRectF &rect, const QRectF &other_rect, bool horiz, double border)
+{
+	double lo = (horiz ? rect.top() : rect.left()),
+			hi = (horiz ? rect.bottom() : rect.right()),
+			overlap_lo = std::max(lo, (horiz ? other_rect.top() : other_rect.left())),
+			overlap_hi = std::min(hi, (horiz ? other_rect.bottom() : other_rect.right()));
+
+	/* If the tables overlap along the side's axis the line is connected inside the overlapping
+	 * area, which makes it straight, otherwise it is connected at the middle of the side */
+	if(overlap_hi - overlap_lo > border * 2)
+		return (overlap_lo + overlap_hi) / 2;
+
+	return (lo + hi) / 2;
+}
+
+double RelationshipView::getEdgeAnchorPos(unsigned tab_idx, bool horiz, int sign)
+{
+	struct Anchor {
+		BaseRelationship *rel;
+		double desired, other_pos;
+	};
+
+	BaseTableView *tab = tables[tab_idx], *other_tab = nullptr;
+	QRectF rect(tab->pos(), tab->boundingRect().size()), other_rect;
+	RelationshipView *rel_view = nullptr;
+	std::vector<Anchor> anchors;
+	std::vector<double> pos;
+	BaseRelationship *base_rel = this->getUnderlyingObject();
+	int rel_sign = 0, this_idx = -1;
+	bool rel_horiz = false;
+	double lo = (horiz ? rect.top() : rect.left()),
+			hi = (horiz ? rect.bottom() : rect.right()),
+			border = getEdgeBorderFactor(tab_idx),
+			min_lim = lo + border, max_lim = hi - border,
+			/* The crow's foot descriptors are about 20 units wide so their connection points need more room
+			 * than the plain lines, otherwise the descriptors of neighbor relationships overlap */
+			gap = ConnLineLength * (use_crows_foot ? 1.3 : 0.8) * BaseObjectView::getFontFactor() * BaseObjectView::getScreenDpiFactor(),
+			sum_desired = 0, sum_pos = 0;
+	size_t cnt = 0, cluster_start = 0;
+
+	/* Gathering all relationships connected to the same side of the table, including this one,
+	 * so they can be spread along the side instead of sharing the same connection point */
+	for(auto &rel : tab->connected_rels)
+	{
+		rel_view = dynamic_cast<RelationshipView *>(rel->getOverlyingObject());
+
+		if(!rel_view || rel->isSelfRelationship())
+			continue;
+
+		if(rel_view->tables[0] == tab)
+			other_tab = rel_view->tables[1];
+		else if(rel_view->tables[1] == tab)
+			other_tab = rel_view->tables[0];
+		else
+			continue;
+
+		other_rect = QRectF(other_tab->pos(), other_tab->boundingRect().size());
+
+		if(!getEdgeSide(rect, other_rect, rel_horiz, rel_sign) || rel_horiz != horiz || rel_sign != sign)
+			continue;
+
+		anchors.push_back({ rel,
+												getEdgePreferredPos(rect, other_rect, horiz,
+																						rel_view->getEdgeBorderFactor(rel_view->tables[0] == tab ? 0 : 1)),
+												(horiz ? other_rect.center().y() : other_rect.center().x()) });
+	}
+
+	/* Ordering the relationships by their preferred position and then by the position of the opposite
+	 * table, so the lines tend to not cross each other. The object id makes the order stable */
+	std::sort(anchors.begin(), anchors.end(), [](const Anchor &a1, const Anchor &a2) {
+		if(a1.desired != a2.desired)
+			return a1.desired < a2.desired;
+
+		if(a1.other_pos != a2.other_pos)
+			return a1.other_pos < a2.other_pos;
+
+		return a1.rel->getObjectId() < a2.rel->getObjectId();
+	});
+
+	cnt = anchors.size();
+	pos.resize(cnt);
+
+	for(size_t idx = 0; idx < cnt; idx++)
+	{
+		if(anchors[idx].rel == base_rel)
+			this_idx = idx;
+	}
+
+	if(this_idx < 0)
+		return std::clamp(getEdgePreferredPos(rect, QRectF(tables[tab_idx == 0 ? 1 : 0]->pos(),
+																											 tables[tab_idx == 0 ? 1 : 0]->boundingRect().size()),
+																					horiz, border), std::min(min_lim, max_lim), std::max(min_lim, max_lim));
+
+	if(max_lim < min_lim)
+		min_lim = max_lim = (lo + hi) / 2;
+
+	if(cnt > 1)
+		gap = std::min(gap, (max_lim - min_lim) / (cnt - 1));
+
+	/* Pushing apart the connection points that are too close to each other. Each group of points pushed
+	 * together is centered around the original (preferred) position of its members, which keeps
+	 * unrelated lines (e.g. straight ones) untouched */
+	for(size_t idx = 0; idx <= cnt; idx++)
+	{
+		if(idx < cnt && idx > 0 && anchors[idx].desired < pos[idx - 1] + gap)
+			pos[idx] = pos[idx - 1] + gap;
+		else
+		{
+			if(idx > cluster_start)
+			{
+				sum_desired = sum_pos = 0;
+
+				for(size_t cl_idx = cluster_start; cl_idx < idx; cl_idx++)
+				{
+					sum_desired += anchors[cl_idx].desired;
+					sum_pos += pos[cl_idx];
+				}
+
+				for(size_t cl_idx = cluster_start; cl_idx < idx; cl_idx++)
+					pos[cl_idx] += (sum_desired - sum_pos) / (idx - cluster_start);
+			}
+
+			if(idx < cnt)
+			{
+				cluster_start = idx;
+				pos[idx] = anchors[idx].desired;
+			}
+		}
+	}
+
+	//Keeping the connection points inside the side's limits and apart from each other
+	for(size_t idx = 0; idx < cnt; idx++)
+		pos[idx] = std::max(pos[idx], (idx == 0 ? min_lim : pos[idx - 1] + gap));
+
+	for(size_t idx = cnt; idx > 0; idx--)
+		pos[idx - 1] = std::min(pos[idx - 1], (idx == cnt ? max_lim : pos[idx] - gap));
+
+	return std::clamp(pos[this_idx], min_lim, max_lim);
+}
+
+void RelationshipView::configureOrthogonalEdges(LineGeometry &geom, double stubs[2], double &mid_shift)
+{
+	BaseRelationship *base_rel = this->getUnderlyingObject();
+	QRectF rects[2] = { QRectF(tables[0]->pos(), tables[0]->boundingRect().size()),
+											QRectF(tables[1]->pos(), tables[1]->boundingRect().size()) };
+	QPointF dirs[2];
+	bool horiz = false;
+	int sign = 0, rel_idx = 0;
+	unsigned conn_rels_cnt = tables[0]->getConnectedRelsCount(base_rel->getTable(BaseRelationship::SrcTable),
+																														base_rel->getTable(BaseRelationship::DstTable));
+	double ref_pos = 0, rel_shift = 0, perp_delta = 0;
+
+	//When the tables overlap the line keeps going through their centers
+	if(!getEdgeSide(rects[0], rects[1], horiz, sign))
+		return;
+
+	dirs[0] = (horiz ? QPointF(sign, 0) : QPointF(0, sign));
+	dirs[1] = -dirs[0];
+
+	for(unsigned idx = 0; idx < 2; idx++)
+	{
+		ref_pos = getEdgeAnchorPos(idx, horiz, (horiz ? dirs[idx].x() : dirs[idx].y()));
+
+		if(horiz)
+			geom.p_central[idx] = QPointF((dirs[idx].x() > 0 ? rects[idx].right() : rects[idx].left()), ref_pos);
+		else
+			geom.p_central[idx] = QPointF(ref_pos, (dirs[idx].y() > 0 ? rects[idx].bottom() : rects[idx].top()));
+
+		geom.conn_dirs[idx] = dirs[idx];
+		stubs[idx] = ConnLineLength * getEdgeSizeFactor(idx);
+	}
+
+	/* Relationships between the same tables have their middle segments displaced from each other.
+	 * The displacement order depends on the direction of the line so the lines don't cross */
+	if(conn_rels_cnt > 1)
+	{
+		for(auto &rel : tables[0]->connected_rels)
+		{
+			if(rel == base_rel)
+				break;
+
+			if((rel->getTable(BaseRelationship::SrcTable) == base_rel->getTable(BaseRelationship::SrcTable) &&
+					rel->getTable(BaseRelationship::DstTable) == base_rel->getTable(BaseRelationship::DstTable)) ||
+				 (rel->getTable(BaseRelationship::SrcTable) == base_rel->getTable(BaseRelationship::DstTable) &&
+					rel->getTable(BaseRelationship::DstTable) == base_rel->getTable(BaseRelationship::SrcTable)))
+				rel_idx++;
+		}
+
+		perp_delta = (horiz ? geom.p_central[1].y() - geom.p_central[0].y() :
+													geom.p_central[1].x() - geom.p_central[0].x());
+		rel_shift = rel_idx - ((conn_rels_cnt - 1) / 2.0);
+		mid_shift = rel_shift * ConnLineLength * 0.5 * (perp_delta > 0 ? -1 : 1);
+	}
+}
+
+std::vector<QPointF> RelationshipView::getOrthogonalRoute(QPointF p0, QPointF dir0, double stub0,
+																													 QPointF p1, QPointF dir1, double stub1, double mid_shift)
+{
+	auto swap_xy = [](const QPointF &pnt) { return QPointF(pnt.y(), pnt.x()); };
+	bool horiz0 = (dir0.x() != 0 && dir0.y() == 0), horiz1 = (dir1.x() != 0 && dir1.y() == 0),
+			vert0 = (dir0.x() == 0 && dir0.y() != 0), vert1 = (dir1.x() == 0 && dir1.y() != 0);
+	std::vector<QPointF> route, pts;
+	QPointF a, b;
+	double dist = 0, mid = 0, margin = 0;
+
+	/* When the directions are unknown or incompatible (one horizontal and the other vertical)
+	 * the line leaves the tables along the axis with the greatest distance between the points */
+	if(!((horiz0 && horiz1) || (vert0 && vert1)))
+	{
+		double dx = p1.x() - p0.x(), dy = p1.y() - p0.y();
+
+		if(std::fabs(dx) >= std::fabs(dy))
+			dir0 = QPointF((dx >= 0 ? 1 : -1), 0);
+		else
+			dir0 = QPointF(0, (dy >= 0 ? 1 : -1));
+
+		dir1 = -dir0;
+		stub0 = stub1 = 0;
+	}
+
+	/* The route is always calculated for horizontal directions, the vertical
+	 * ones are calculated by swapping the coordinates and swapping them back at the end */
+	bool transposed = (dir0.x() == 0);
+
+	if(transposed)
+	{
+		p0 = swap_xy(p0);
+		p1 = swap_xy(p1);
+		dir0 = swap_xy(dir0);
+		dir1 = swap_xy(dir1);
+	}
+
+	dist = (p1.x() - p0.x()) * dir0.x();
+
+	// The line leaves the tables in opposite directions: the middle segment lies between the points
+	if(dir0.x() * dir1.x() < 0)
+	{
+		mid = (dist / 2) + mid_shift;
+
+		// Keeps room for the segments at the ends of the line (crow's foot) when the points allow it
+		if(dist >= stub0 + stub1)
+			mid = std::clamp(mid, stub0, dist - stub1);
+
+		mid = p0.x() + (dir0.x() * mid);
+	}
+	// The line leaves the tables at the same side: the middle segment goes around the points
+	else
+	{
+		margin = std::max({ stub0, stub1, ConnLineLength * 0.5 });
+
+		if(dir0.x() > 0)
+			mid = std::max(p0.x(), p1.x()) + margin;
+		else
+			mid = std::min(p0.x(), p1.x()) - margin;
+
+		mid += dir0.x() * mid_shift;
+	}
+
+	route = { p0, QPointF(mid, p0.y()), QPointF(mid, p1.y()), p1 };
+
+	if(transposed)
+	{
+		for(auto &pnt : route)
+			pnt = swap_xy(pnt);
+	}
+
+	// Removing the duplicated points as well as the intermediate ones of collinear segments
+	for(auto &pnt : route)
+	{
+		if(!pts.empty() && QLineF(pts.back(), pnt).length() < 0.01)
+			continue;
+
+		if(pts.size() >= 2)
+		{
+			a = pts[pts.size() - 2];
+			b = pts.back();
+
+			if(std::fabs(((b.x() - a.x()) * (pnt.y() - b.y())) - ((b.y() - a.y()) * (pnt.x() - b.x()))) < 0.01)
+				pts.pop_back();
+		}
+
+		pts.push_back(pnt);
+	}
+
+	if(pts.size() < 2)
+		pts.push_back(route.back());
+
+	return pts;
+}
+
 void RelationshipView::removeConnectorLines()
 {
 	trimGroupItems(this, fk_lines, 0);
@@ -1267,10 +1632,10 @@ void RelationshipView::configureLineCircles(const QPointF *p_central, const QPen
 void RelationshipView::configureCurves(const LineGeometry &geom)
 {
 	//Using bezier curves instead of straight lines to denote the relationship line
-	if(use_curved_lines)
+	if(line_style != StraightLines)
 	{
-		if(this->getUnderlyingObject()->isSelfRelationship())
-			configureSelfRelCurve(geom.points);
+		if(line_style == OrthogonalLines || this->getUnderlyingObject()->isSelfRelationship())
+			configurePolylineCurve(geom.points);
 		else
 			configureCurvedLines(geom);
 	}
@@ -1322,11 +1687,11 @@ void RelationshipView::configureCurvedLines(const LineGeometry &geom)
 	trimGroupItems(this, curves, lines.size());
 }
 
-/* Self-relationships keep their straight horizontal/vertical segments (the loop shape),
- * but round off the corners where they meet instead of drawing sharp right angles: a single
- * curve item traces the whole loop, with a quadratic curve (control point at the corner
- * itself) taking over from the straight segments near each turn. */
-void RelationshipView::configureSelfRelCurve(const std::vector<QPointF> &points)
+/* Keeps the straight horizontal/vertical segments of the line (self-relationship loops and
+ * orthogonal lines) but rounds off the corners where they meet instead of drawing sharp right
+ * angles: a single curve item traces the whole line, with a quadratic curve (control point at
+ * the corner itself) taking over from the straight segments near each turn. */
+void RelationshipView::configurePolylineCurve(const std::vector<QPointF> &points)
 {
 	BezierCurveItem *curve = nullptr;
 
@@ -1341,7 +1706,7 @@ void RelationshipView::configureSelfRelCurve(const std::vector<QPointF> &points)
 
 	curve->setZValue(lines[0]->zValue());
 	curve->setPen(lines[0]->pen());
-	curve->setPoints(points, SelfRelCornerRadius * BaseObjectView::getScreenDpiFactor());
+	curve->setPoints(points, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor());
 
 	for(auto &line : lines)
 		line->setVisible(false);
@@ -2183,7 +2548,7 @@ void RelationshipView::configureBoundingRect()
 	QPainterPathStroker ps;
 	ps.setWidth(LineSelStrokeWidth);
 
-	if(!use_curved_lines)
+	if(line_style == StraightLines)
 	{
 		QPainterPath ln_path;
 

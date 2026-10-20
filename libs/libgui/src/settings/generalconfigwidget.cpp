@@ -79,6 +79,10 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 	check_versions_cmb->setItemData(1, Attributes::StableBeta);
 	check_versions_cmb->setItemData(2, Attributes::StableOnly);
 
+	rel_line_style_cmb->setItemData(RelationshipView::StraightLines, Attributes::Straight);
+	rel_line_style_cmb->setItemData(RelationshipView::CurvedLines, Attributes::Curved);
+	rel_line_style_cmb->setItemData(RelationshipView::OrthogonalLines, Attributes::Orthogonal);
+
 	connect(check_update_chk, &QCheckBox::toggled, check_versions_cmb, &QComboBox::setEnabled);
 	connect(unity_cmb, &QComboBox::currentIndexChanged, this, &GeneralConfigWidget::convertMarginUnity);
 	connect(autosave_interv_chk, &QCheckBox::toggled, autosave_interv_spb, &QSpinBox::setEnabled);
@@ -120,6 +124,7 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 	config_params[Attributes::Configuration][Attributes::SourceEditorApp]="";
 	config_params[Attributes::Configuration][Attributes::UiLanguage]="";
 	config_params[Attributes::Configuration][Attributes::UseCurvedLines]="";
+	config_params[Attributes::Configuration][Attributes::RelLineStyle]="";
 	config_params[Attributes::Configuration][Attributes::SaveRestoreGeometry]="";
 	config_params[Attributes::Configuration][Attributes::LowVerbosity]="";
 	config_params[Attributes::Configuration][Attributes::DefaultSchema]="";
@@ -299,7 +304,17 @@ void GeneralConfigWidget::loadConfiguration()
 		confirm_validation_chk->setChecked(config_params[Attributes::Configuration][Attributes::ConfirmValidation]==Attributes::True);
 		code_completion_chk->setChecked(config_params[Attributes::Configuration][Attributes::CodeCompletion]==Attributes::True);
 		use_placeholders_chk->setChecked(config_params[Attributes::Configuration][Attributes::UsePlaceholders]==Attributes::True);
-		use_curved_lines_chk->setChecked(config_params[Attributes::Configuration][Attributes::UseCurvedLines]==Attributes::True);
+		/* Configuration files created before the introduction of the line style option
+		 * only have the use-curved-lines attribute, so we use it as a fallback */
+		idx = rel_line_style_cmb->findData(config_params[Attributes::Configuration][Attributes::RelLineStyle]);
+
+		if(idx < 0)
+		{
+			idx = (config_params[Attributes::Configuration][Attributes::UseCurvedLines] == Attributes::True ?
+						 RelationshipView::CurvedLines : RelationshipView::StraightLines);
+		}
+
+		rel_line_style_cmb->setCurrentIndex(idx);
 
 		print_grid_chk->setChecked(config_params[Attributes::Configuration][Attributes::PrintGrid]==Attributes::True);
 		print_pg_num_chk->setChecked(config_params[Attributes::Configuration][Attributes::PrintPgNum]==Attributes::True);
@@ -514,7 +529,7 @@ void GeneralConfigWidget::saveConfiguration()
 		config_params[Attributes::Configuration][Attributes::CodeCompletion]=(code_completion_chk->isChecked() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::UsePlaceholders]=(use_placeholders_chk->isChecked() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::HistoryMaxLength]=QString::number(history_max_length_spb->value());
-		config_params[Attributes::Configuration][Attributes::UseCurvedLines]=(use_curved_lines_chk->isChecked() ? Attributes::True : "");
+		config_params[Attributes::Configuration][Attributes::RelLineStyle]=rel_line_style_cmb->currentData().toString();
 
 		config_params[Attributes::Configuration][Attributes::ShowCanvasGrid]=(ObjectsScene::isShowGrid() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::ShowPageDelimiters]=(ObjectsScene::isShowPageDelimiters() ? Attributes::True : "");
@@ -679,7 +694,7 @@ void GeneralConfigWidget::applyConfiguration()
 	NumberedTextEditor::setSourceEditorAppArgs(source_editor_args_edt->text());
 
 	RelationshipView::setHideNameLabel(hide_rel_name_chk->isChecked());
-	RelationshipView::setCurvedLines(use_curved_lines_chk->isChecked());
+	RelationshipView::setLineStyle(static_cast<RelationshipView::LineStyle>(rel_line_style_cmb->currentIndex()));
 	TableObjectView::setSchemaNameUserType(hide_sch_name_usr_types_chk->isChecked());
 	ModelWidget::setSaveLastCanvasPosition(save_last_pos_chk->isChecked());
 	ModelWidget::setRenderSmoothnessDisabled(disable_smooth_chk->isChecked());
