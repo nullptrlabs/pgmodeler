@@ -1937,6 +1937,42 @@ std::vector<QPointF> RelationshipView::findOrthogonalPath(const QPointF &start, 
 	if(static_cast<size_t>(nx) * ny > MaxNodes)
 		return path;
 
+	/* The grid edges crossing the inside of an obstacle are marked once, per obstacle, so the search
+	 * doesn't need to go through all obstacles for each edge it examines. The edge tests are the same
+	 * ones used by isSegmentBlocked. Horizontal edge (ix, iy) links the nodes (ix, iy) and (ix + 1, iy);
+	 * vertical edge (ix, iy) links the nodes (ix, iy) and (ix, iy + 1) */
+	constexpr double Epsilon = 0.01;
+	std::vector<char> h_blocked((nx > 1 ? nx - 1 : 0) * static_cast<size_t>(ny), 0),
+										v_blocked(static_cast<size_t>(nx) * (ny > 1 ? ny - 1 : 0), 0);
+
+	auto first_above = [](const std::vector<double> &coords, double value) {
+		return static_cast<int>(std::upper_bound(coords.begin(), coords.end(), value) - coords.begin());
+	};
+
+	auto first_not_below = [](const std::vector<double> &coords, double value) {
+		return static_cast<int>(std::lower_bound(coords.begin(), coords.end(), value) - coords.begin());
+	};
+
+	for(auto &rect : obstacles)
+	{
+		/* Nodes strictly inside the obstacle on each axis (inner_x/inner_y) and the nodes where an edge
+		 * that starts on them still reaches the inside of the obstacle (the previous node is included) */
+		int inner_x_ini = first_above(xs, rect.left() + Epsilon), inner_x_end = first_not_below(xs, rect.right() - Epsilon) - 1,
+				inner_y_ini = first_above(ys, rect.top() + Epsilon), inner_y_end = first_not_below(ys, rect.bottom() - Epsilon) - 1;
+
+		for(int iy = inner_y_ini; iy <= inner_y_end; iy++)
+		{
+			for(int ix = std::max(inner_x_ini - 1, 0); ix <= std::min(inner_x_end, nx - 2); ix++)
+				h_blocked[iy * (nx - 1) + ix] = 1;
+		}
+
+		for(int ix = inner_x_ini; ix <= inner_x_end; ix++)
+		{
+			for(int iy = std::max(inner_y_ini - 1, 0); iy <= std::min(inner_y_end, ny - 2); iy++)
+				v_blocked[iy * nx + ix] = 1;
+		}
+	}
+
 	dist.assign(nx * ny * 4, std::numeric_limits<double>::infinity());
 	parent.assign(nx * ny * 4, -1);
 
@@ -1990,7 +2026,8 @@ std::vector<QPointF> RelationshipView::findOrthogonalPath(const QPointF &start, 
 
 			QPointF p1(xs[ix], ys[iy]), p2(xs[new_x], ys[new_y]);
 
-			if(isSegmentBlocked(p1, p2, obstacles))
+			// The edge between the nodes is the one indexed by the lower of them on the axis of the movement
+			if(dy[dir] == 0 ? h_blocked[iy * (nx - 1) + std::min(ix, new_x)] : v_blocked[std::min(iy, new_y) * nx + ix])
 				continue;
 
 			cost = item.g + QLineF(p1, p2).length() + (dir != cur_dir ? BendPenalty : 0);
