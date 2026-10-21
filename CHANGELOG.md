@@ -14,6 +14,10 @@ v2.0.0
 * [New] Added menu actions to create a tag or a layer directly from one or more selected schemas.
 * [New] Added the `update_ts` CMake target to regenerate the UI translation sources (`.ts`) from the source code.
 * [New] Added UI translations for all supported languages, including Brazilian Portuguese (pt_BR), generated with AI assistance; human review of these translations is still pending.
+* [New] Added the orthogonal line style for relationships (`RelationshipView::OrthogonalLines`): lines are routed with horizontal and vertical segments only, around the tables, their layer rects and the crow's foot areas of other relationships, and hop over the lines they cross through arcs (`BezierCurveItem::HopArc`) stroked with a gradient at the apex that shows which line is on top (darker for convex, lighter for concave). The route search lives in `RelationshipView::getOrthogonalRoute()`, and `BezierCurveItem::setPoints()` gained the polyline mode used to draw it.
+* [New] The segments of orthogonal lines can be moved perpendicularly by dragging them with SHIFT pressed; the end segments are displaced through a jog (a corner next to the table) that can be dragged as well. ALT+SHIFT+click discards the displacements. They are stored per segment index in `BaseRelationship` (`SegmentShift`, `setSegmentShifts()`, `getSegmentShifts()`, `resetSegmentShifts()`), saved as `<segment index orientation value jog/>` elements (new `segment.sch`/`segment.dtd`) in the model file and in the objects metadata, and discarded when one of the linked tables moves or is resized.
+* [New] Added the "Line style" setting (straight, curved or orthogonal) to the relationships configuration (`line-style` attribute in `relationships.conf`, `RelationshipView::setLineStyle()`/`getLineStyle()`), with orthogonal as the default.
+* [New] Added unit tests for the orthogonal relationship lines (`relationshiplinestest`), the persistence of the segment displacements (`relationshippersistencetest`) and the line style settings (`relationshipsettingstest`).
 * [Change] Selection, the Object Search Widget, and Layers operations now operate across every scene (or follow the clicked object's own scene) instead of assuming a single canvas.
 * [Change] The "Rearrange objects" menu is now scoped to the active scene instead of the whole model.
 * [Change] PNG/SVG export now produces one image per scene instead of a single image of the whole model.
@@ -32,6 +36,14 @@ v2.0.0
 * [Change] Avoided a needless re-render cascade when propagating protected state.
 * [Change] Self-relationship loop corners are now rounded when curved lines are enabled.
 * [Change] Tools toolbar buttons now share the width of the widest one.
+* [Change] BREAKING: The "Use curved lines" option (`use-curved-lines` in `general.conf`, `RelationshipView::setCurvedLines()`) was replaced by the line style setting of the relationships configuration; the old value is ignored and the default style is now orthogonal.
+* [Change] Split `RelationshipView::configureLine()` into smaller methods, by connection mode (`configureSelfRelGeometry()`, `configureCenterGeometry()`, `configureFkToPkGeometry()`), by drawing stage and by update guard.
+* [Change] The relationship descriptor of orthogonal lines is kept away from the corners of the route, at the beginning or end of a segment, unless the descriptor is hidden (crow's foot notation on 1:1, 1:n, n:n and fk relationships).
+* [Change] Moving tables now updates only the orthogonal relationships whose routes touch the area of the moved tables, and reconfigures each nearby relationship once when several tables are moved.
+* [Change] Updated the UI dictionaries of all languages with the new texts (relationship line style, FK index pattern, table relationships dialog); translations other than pt_BR are AI generated and pending native review.
+* [Change] The documentation and donation URLs now point to `/docs` and `/donate` on the pgModeler website.
+* [Change] `CustomTableWidget::getItem()` now throws when the item is not allocated.
+* [Change] The Columns tab of `ConstraintWidget` is hidden for CHECK and EXCLUDE constraints.
 * [Fix] Fixed SQL code completion (SQL Tool) losing track of which statement the cursor is in when the buffer has more than one statement, causing it to use the wrong table/command context or list unrelated keywords as implicit table aliases.
 * [Fix] Fixed a table's graphical item, cross-scene relationship classification, position, and relationship marker not consistently following it when it changes schema or scene.
 * [Fix] Fixed cascade schema deletion missing transitively-referenced child objects due to a discarded result in `BaseObject::getLinkedObjects()`.
@@ -60,6 +72,12 @@ v2.0.0
 * [Fix] Fixed `SchemaParser` treating an escaped `\]` as closing a plain-text block while stripping comments, which could corrupt schemas combining a literal `]` with a following `#`.
 * [Fix] Fixed `SchemaParser` failing to parse past a `%set` whose value spans multiple lines when it sits inside a branch whose condition is false.
 * [Fix] Fixed the `InvalidAttribute` error message of `SchemaParser` not naming the offending attribute.
+* [Fix] Fixed the diff emitting an empty `SET EXPRESSION AS ()` (or `SET EXPRESSION AS (true)`) for columns that are not generated.
+* [Fix] Fixed the customization of FK relationships (alias, layers, points, label positions, displaced segments, color, faded out and protected states) being lost when the relationship is recreated at the end of a model loading.
+* [Fix] Fixed two crashes in the displacement of orthogonal line segments: an out-of-range write caused by a segment index from the model file overflowing 32 bits, and a queued reconfiguration running on a view already discarded by the scene.
+* [Fix] Fixed an empty `NewObjectOverlayWidget` being shown when two tables are selected, and skipped showing it when no button is visible.
+* [Fix] Fixed the context menu opening when right clicking a relationship marker.
+* [Fix] Added a left margin to the enumerations table of `TypeWidget` and fixed the FK index tooltip and the form height in the relationships settings.
 
 v2.0.0-beta1
 ------
