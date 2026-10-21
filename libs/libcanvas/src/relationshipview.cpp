@@ -251,15 +251,20 @@ void RelationshipView::notifyRouteChanged()
 		obj_scene->requestBumpsUpdate();
 }
 
-void RelationshipView::setBumps(const std::vector<QPointF> &new_bumps)
+void RelationshipView::setBumps(const std::vector<QPointF> &new_bumps, const std::vector<bool> &convex)
 {
-	if(new_bumps == bumps || curves.empty() || route_points.empty())
+	std::vector<bool> new_convex = convex;
+
+	new_convex.resize(new_bumps.size(), false);
+
+	if((new_bumps == bumps && new_convex == bumps_convex) || curves.empty() || route_points.empty())
 		return;
 
 	bumps = new_bumps;
+	bumps_convex = new_convex;
 	curves[0]->setPoints(route_points, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
 											 bumps, BumpRadius * BaseObjectView::getScreenDpiFactor(),
-											 curve_end_lens[0], curve_end_lens[1]);
+											 curve_end_lens[0], curve_end_lens[1], bumps_convex);
 	configureBoundingRect();
 }
 
@@ -2710,6 +2715,7 @@ void RelationshipView::configureCurvedLines(const LineGeometry &geom)
 {
 	route_points.clear();
 	bumps.clear();
+	bumps_convex.clear();
 
 	BezierCurveItem *curve = nullptr;
 	bool invert_cpoints = false, simple_curve = false;
@@ -2775,7 +2781,10 @@ void RelationshipView::configurePolylineCurve(const std::vector<QPointF> &points
 	if(line_style == OrthogonalLines)
 	{
 		if(route_points != points)
+		{
 			bumps.clear();
+			bumps_convex.clear();
+		}
 
 		route_points = points;
 	}
@@ -2783,6 +2792,7 @@ void RelationshipView::configurePolylineCurve(const std::vector<QPointF> &points
 	{
 		route_points.clear();
 		bumps.clear();
+		bumps_convex.clear();
 	}
 
 	curve_end_lens[0] = start_len;
@@ -2792,7 +2802,7 @@ void RelationshipView::configurePolylineCurve(const std::vector<QPointF> &points
 	curve->setPen(lines[0]->pen());
 	curve->setPoints(points, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
 									 bumps, BumpRadius * BaseObjectView::getScreenDpiFactor(),
-									 curve_end_lens[0], curve_end_lens[1]);
+									 curve_end_lens[0], curve_end_lens[1], bumps_convex);
 
 	for(auto &line : lines)
 		line->setVisible(false);
@@ -2808,6 +2818,7 @@ void RelationshipView::removeCurves()
 {
 	route_points.clear();
 	bumps.clear();
+	bumps_convex.clear();
 
 	for(auto &line : lines)
 		line->setVisible(true);

@@ -20,7 +20,10 @@
 */
 
 #include <QtTest/QtTest>
+#define private public
 #include <cmath>
+#include <QPainter>
+#include <QStyleOptionGraphicsItem>
 #include "beziercurveitem.h"
 #include "pgmodelerunittest.h"
 
@@ -89,6 +92,20 @@ class BezierCurveItemTest: public QObject, public PgModelerUnitTest {
 		void bumpsOnSeveralSegmentsOfTheSamePolyline();
 		void overlappingBumpsNeverMakeThePathGoBackwards();
 		void zeroBumpRadiusDoesNotBreakThePath();
+
+		// Convex and concave bumps
+		void everyBumpKeepsItsApexAndItsKind();
+		void bumpsWithoutAKindAreConcave();
+		void theApexOfAConvexBumpIsDarkerThanTheLine();
+		void theApexOfAConcaveBumpIsLighterThanTheLine();
+		void theEndsOfTheBumpsHaveTheColorOfTheLine();
+		void theGradientOfTheBumpsIsSmooth();
+		void theLightOfAConcaveBumpIsGentle();
+		void dashedLinesKeepTheirPatternThroughTheBumps();
+		void dashedLinesKeepTheirPatternThroughTheCornersAndTheBumps();
+		void aLineWithBumpsHasNoGapsNorOverlapsWhereThePartsMeet();
+		void bumpGradientsDoNotChangeThePath();
+		void bumpGradientsAreNotPaintedAtLowLevelOfDetail();
 		void bumpsWithoutHorizontalSegmentsLeaveThePathUntouched();
 
 		// Hit testing and caches
@@ -703,6 +720,379 @@ void BezierCurveItemTest::hugeCoordinatesAreHandled()
 	item.setPoints({ QPointF(-1e9, -1e9), QPointF(1e9, -1e9), QPointF(1e9, 1e9) }, 10, { QPointF(0, -1e9) }, 4, 20, 20);
 	QVERIFY(isFinite(item.path()));
 	QCOMPARE(count(elements(item.path()), QPainterPath::CurveToElement), 2);
+}
+
+// Convex and concave bumps
+
+namespace {
+	//! \brief Paints the item over a white background and returns the image
+	QImage renderCurve(BezierCurveItem &curve, double scale = 1)
+	{
+		QImage img(200 * scale, 80 * scale, QImage::Format_ARGB32);
+		QPainter painter(&img);
+		QStyleOptionGraphicsItem option;
+
+		img.fill(Qt::white);
+		painter.setRenderHint(QPainter::Antialiasing, true);
+		painter.scale(scale, scale);
+		option.exposedRect = QRectF(0, 0, 200, 80);
+		curve.paint(&painter, &option, nullptr);
+		painter.end();
+		return img;
+	}
+
+	int gray(const QImage &img, const QPointF &pnt, double scale = 1)
+	{
+		return qGray(img.pixel(qRound(pnt.x() * scale), qRound(pnt.y() * scale)));
+	}
+
+	/* The gray of the line at the point. The pixels at the edges of the line are blended with the background (white),
+	 * so the pixel of the neighborhood that is only the color of the line is the darkest one */
+	int lineGray(const QImage &img, const QPointF &pnt)
+	{
+		int min_gray = 255, x = std::floor(pnt.x()), y = std::floor(pnt.y());
+
+		for(int dx = -1; dx <= 1; dx++)
+		{
+			for(int dy = -1; dy <= 1; dy++)
+				min_gray = std::min(min_gray, qGray(img.pixel(x + dx, y + dy)));
+		}
+
+		return min_gray;
+	}
+}
+
+void BezierCurveItemTest::everyBumpKeepsItsApexAndItsKind()
+{
+	BezierCurveItem curve;
+
+	curve.setPoints({ QPointF(0, 40), QPointF(200, 40) }, 10, { QPointF(50, 40), QPointF(100, 40), QPointF(150, 40) }, 5, 0, 0, { true, false, true });
+
+	const auto &hops = curve.getHopArcs();
+
+	QCOMPARE(hops.size(), size_t(3));
+
+	for(size_t idx = 0; idx < hops.size(); idx++)
+	{
+		// The apex of the arch is above the line, at the middle of the bump
+		QVERIFY(std::fabs(hops[idx].apex.x() - (50 + (50 * idx))) < 0.01);
+		QVERIFY(hops[idx].apex.y() < 40 - 3);
+		QVERIFY(hops[idx].apex.y() > 40 - 6);
+		QCOMPARE(hops[idx].radius, 5.0);
+		QVERIFY(hops[idx].path.boundingRect().contains(hops[idx].apex) || std::fabs(hops[idx].path.boundingRect().top() - hops[idx].apex.y()) < 0.5);
+	}
+
+	QCOMPARE(hops[0].convex, true);
+	QCOMPARE(hops[1].convex, false);
+	QCOMPARE(hops[2].convex, true);
+
+	// The hops are discarded when the points are configured again without bumps
+	curve.setPoints({ QPointF(0, 40), QPointF(200, 40) }, 10);
+	QVERIFY(curve.getHopArcs().empty());
+}
+
+void BezierCurveItemTest::bumpsWithoutAKindAreConcave()
+{
+	BezierCurveItem curve;
+
+	curve.setPoints({ QPointF(0, 40), QPointF(200, 40) }, 10, { QPointF(50, 40), QPointF(150, 40) }, 5, 0, 0, { true });
+
+	QCOMPARE(curve.getHopArcs().size(), size_t(2));
+	QCOMPARE(curve.getHopArcs()[0].convex, true);
+	QCOMPARE(curve.getHopArcs()[1].convex, false);
+
+	curve.setPoints({ QPointF(0, 40), QPointF(200, 40) }, 10, { QPointF(50, 40) }, 5);
+	QCOMPARE(curve.getHopArcs().size(), size_t(1));
+	QCOMPARE(curve.getHopArcs()[0].convex, false);
+}
+
+void BezierCurveItemTest::theApexOfAConvexBumpIsDarkerThanTheLine()
+{
+	BezierCurveItem curve;
+	QPointF apex;
+
+	curve.setPen(QPen(QColor(128, 128, 128), 3));
+	curve.setPoints({ QPointF(0, 40), QPointF(200, 40) }, 10, { QPointF(100, 40) }, 8, 0, 0, { true });
+	apex = curve.getHopArcs()[0].apex;
+
+	QImage img = renderCurve(curve);
+
+	// The line is the pen color away from the bump, and the apex is darker than it
+	QVERIFY(std::abs(gray(img, QPointF(20, 40)) - 128) < 12);
+	QVERIFY2(gray(img, apex) < 128 - 30, qPrintable(QString("apex %1").arg(gray(img, apex))));
+}
+
+void BezierCurveItemTest::theApexOfAConcaveBumpIsLighterThanTheLine()
+{
+	BezierCurveItem curve;
+	QPointF apex;
+
+	curve.setPen(QPen(QColor(128, 128, 128), 3));
+	curve.setPoints({ QPointF(0, 40), QPointF(200, 40) }, 10, { QPointF(100, 40) }, 8, 0, 0, { false });
+	apex = curve.getHopArcs()[0].apex;
+
+	QImage img = renderCurve(curve);
+
+	QVERIFY(std::abs(gray(img, QPointF(20, 40)) - 128) < 12);
+	QVERIFY2(gray(img, apex) > 128 + 30, qPrintable(QString("apex %1").arg(gray(img, apex))));
+}
+
+void BezierCurveItemTest::theEndsOfTheBumpsHaveTheColorOfTheLine()
+{
+	BezierCurveItem curve;
+
+	curve.setPen(QPen(QColor(128, 128, 128), 3));
+	curve.setPoints({ QPointF(0, 40), QPointF(200, 40) }, 10, { QPointF(100, 40) }, 8, 0, 0, { true });
+
+	QImage img = renderCurve(curve);
+	QPointF apex = curve.getHopArcs()[0].apex;
+
+	// The gradient fades out before the arch reaches the straight line, so there's no visible step where they meet
+	QVERIFY(std::abs(gray(img, QPointF(100 - 8, 40)) - 128) < 20);
+	QVERIFY(std::abs(gray(img, QPointF(100 + 8, 40)) - 128) < 20);
+	QVERIFY(gray(img, apex) < gray(img, QPointF(100 - 8, 40)));
+}
+
+void BezierCurveItemTest::theGradientOfTheBumpsIsSmooth()
+{
+	for(bool convex : { true, false })
+	{
+		BezierCurveItem curve;
+
+		curve.setPen(QPen(QColor(128, 128, 128), 3));
+		curve.setPoints({ QPointF(0, 40), QPointF(200, 40) }, 10, { QPointF(100, 40) }, 8, 0, 0, { convex });
+
+		QImage img = renderCurve(curve);
+		QPainterPath arc = curve.getHopArcs()[0].path;
+		std::vector<int> grays;
+
+		// The line is sampled along the arc from its start to its apex (the arc is symmetrical)
+		for(int step = 0; step <= 20; step++)
+		{
+			QPointF pnt = arc.pointAtPercent(step / 40.0);
+
+			grays.push_back(lineGray(img, pnt));
+		}
+
+		for(size_t idx = 1; idx < grays.size(); idx++)
+		{
+			// The color changes in the same direction up to the apex (no light or dark spots) and with no steps
+			if(convex)
+				QVERIFY2(grays[idx] <= grays[idx - 1] + 3, qPrintable(QString("step %1: %2 -> %3").arg(idx).arg(grays[idx - 1]).arg(grays[idx])));
+			else
+				QVERIFY2(grays[idx] >= grays[idx - 1] - 3, qPrintable(QString("step %1: %2 -> %3").arg(idx).arg(grays[idx - 1]).arg(grays[idx])));
+
+			QVERIFY2(std::abs(grays[idx] - grays[idx - 1]) <= 14, qPrintable(QString("step %1: %2 -> %3").arg(idx).arg(grays[idx - 1]).arg(grays[idx])));
+		}
+
+		// It starts at the color of the line
+		QVERIFY(std::abs(grays.front() - 128) < 12);
+	}
+}
+
+void BezierCurveItemTest::theLightOfAConcaveBumpIsGentle()
+{
+	BezierCurveItem curve;
+
+	curve.setPen(QPen(QColor(128, 128, 128), 3));
+	curve.setPoints({ QPointF(0, 40), QPointF(200, 40) }, 10, { QPointF(100, 40) }, 8, 0, 0, { false });
+
+	QImage img = renderCurve(curve);
+	int apex = gray(img, curve.getHopArcs()[0].apex);
+
+	// It's lighter than the line but it doesn't get close to white
+	QVERIFY2(apex > 128 + 20 && apex < 215, qPrintable(QString("apex %1").arg(apex)));
+
+	// The brightest point of the arc is not lighter than what the mix with white allows (BezierCurveItem::ConcaveMix is 0.28)
+	constexpr double ConcaveMix = 0.28;
+	int brightest = 0;
+
+	for(int step = 0; step <= 40; step++)
+		brightest = std::max(brightest, gray(img, curve.getHopArcs()[0].path.pointAtPercent(step / 40.0)));
+
+	QVERIFY2(brightest < 128 + (255 - 128) * ConcaveMix + 12, qPrintable(QString("brightest %1").arg(brightest)));
+}
+
+void BezierCurveItemTest::dashedLinesKeepTheirPatternThroughTheBumps()
+{
+	for(auto style : { Qt::DashLine, Qt::DotLine, Qt::DashDotLine })
+	{
+		for(bool convex : { true, false })
+		{
+			BezierCurveItem curve;
+			QGraphicsPathItem reference;
+			QPen pen(QColor(128, 128, 128), 3);
+			std::vector<QPointF> pts = { QPointF(0, 40), QPointF(300, 40) };
+
+			pen.setStyle(style);
+			pen.setCapStyle(Qt::RoundCap);
+			curve.setPen(pen);
+			curve.setPoints(pts, 10, { QPointF(100, 40), QPointF(210, 40) }, 8, 0, 0, { convex, !convex });
+
+			/* The reference is the same line (the parts the curve is painted by, which are polylines) stroked as a whole in a
+			 * single path, which is how a line without gradients is painted: its dashes never restart */
+			QPainterPath whole(curve.pieces.front().path.elementAt(0));
+
+			for(auto &piece : curve.pieces)
+			{
+				for(int idx = 1; idx < piece.path.elementCount(); idx++)
+					whole.lineTo(piece.path.elementAt(idx));
+			}
+
+			reference.setPath(whole);
+			reference.setPen(pen);
+
+			QImage img(320, 80, QImage::Format_ARGB32), ref_img(320, 80, QImage::Format_ARGB32);
+			QStyleOptionGraphicsItem option;
+
+			for(auto *target : { &img, &ref_img })
+			{
+				QPainter painter(target);
+
+				target->fill(Qt::white);
+				painter.setRenderHint(QPainter::Antialiasing, true);
+				option.exposedRect = QRectF(0, 0, 320, 80);
+
+				if(target == &img)
+					curve.paint(&painter, &option, nullptr);
+				else
+					reference.paint(&painter, &option, nullptr);
+			}
+
+			/* Out of the arcs the line must be the same pixel by pixel: the dashes of the parts after an arc
+			 * continue the pattern of the parts before it, as if the line was stroked as a whole */
+			int diff_cnt = 0;
+
+			for(int x = 0; x < 320; x++)
+			{
+				bool near_arc = (std::abs(x - 100) < 12 || std::abs(x - 210) < 12);
+
+				for(int y = 36; y <= 44 && !near_arc; y++)
+				{
+					if(std::abs(qGray(img.pixel(x, y)) - qGray(ref_img.pixel(x, y))) > 40)
+					diff_cnt++;
+				}
+			}
+
+			QVERIFY2(diff_cnt == 0, qPrintable(QString("style %1: %2 pixels differ from the line stroked as a whole").arg(int(style)).arg(diff_cnt)));
+		}
+	}
+}
+
+void BezierCurveItemTest::dashedLinesKeepTheirPatternThroughTheCornersAndTheBumps()
+{
+	for(auto style : { Qt::DashLine, Qt::DashDotLine })
+	{
+		BezierCurveItem curve;
+		QGraphicsPathItem reference;
+		QPen pen(QColor(128, 128, 128), 2);
+		std::vector<QPointF> pts = { QPointF(5, 20), QPointF(150, 20), QPointF(150, 100), QPointF(310, 100) };
+
+		pen.setStyle(style);
+		pen.setCapStyle(Qt::RoundCap);
+		curve.setPen(pen);
+
+		// Hops before and after the rounded corners
+		curve.setPoints(pts, 10, { QPointF(60, 20), QPointF(220, 100) }, 6, 0, 0, { true, false });
+
+		QPainterPath whole(curve.pieces.front().path.elementAt(0));
+
+		for(auto &piece : curve.pieces)
+		{
+			for(int idx = 1; idx < piece.path.elementCount(); idx++)
+				whole.lineTo(piece.path.elementAt(idx));
+		}
+
+		reference.setPath(whole);
+		reference.setPen(pen);
+
+		QImage img(320, 120, QImage::Format_ARGB32), ref_img(320, 120, QImage::Format_ARGB32);
+		QStyleOptionGraphicsItem option;
+
+		for(auto *target : { &img, &ref_img })
+		{
+			QPainter painter(target);
+
+			target->fill(Qt::white);
+			painter.setRenderHint(QPainter::Antialiasing, true);
+			option.exposedRect = QRectF(0, 0, 320, 120);
+
+			if(target == &img)
+				curve.paint(&painter, &option, nullptr);
+			else
+				reference.paint(&painter, &option, nullptr);
+		}
+
+		int diff_cnt = 0;
+
+		for(int x = 0; x < 320; x++)
+		{
+			for(int y = 0; y < 120; y++)
+			{
+				// Near the arcs the line has a gradient
+				bool near_arc = (std::abs(x - 60) < 12 && y < 30) || (std::abs(x - 220) < 12 && y > 80);
+
+				if(!near_arc && std::abs(qGray(img.pixel(x, y)) - qGray(ref_img.pixel(x, y))) > 40)
+					diff_cnt++;
+			}
+		}
+
+		QVERIFY2(diff_cnt == 0, qPrintable(QString("style %1: %2 pixels differ from the line stroked as a whole").arg(int(style)).arg(diff_cnt)));
+	}
+}
+
+void BezierCurveItemTest::aLineWithBumpsHasNoGapsNorOverlapsWhereThePartsMeet()
+{
+	BezierCurveItem curve;
+	QPen pen(QColor(128, 128, 128), 3);
+
+	pen.setCapStyle(Qt::RoundCap);
+	curve.setPen(pen);
+	curve.setPoints({ QPointF(0, 40), QPointF(200, 40) }, 10, { QPointF(100, 40) }, 8, 0, 0, { true });
+
+	QImage img = renderCurve(curve);
+
+	// The straight part and the arc meet at x = 92 and x = 108: the line is continuous there, with the color of the line
+	for(int x : { 91, 92, 93, 107, 108, 109 })
+		QVERIFY2(std::abs(lineGray(img, QPointF(x + 0.5, 40.5)) - 128) < 12, qPrintable(QString("x = %1").arg(x)));
+
+	// The line is painted in parts only when it has bumps
+	QVERIFY(curve.pieces.size() == 3);
+	curve.setPoints({ QPointF(0, 40), QPointF(200, 40) }, 10);
+	QVERIFY(curve.pieces.empty());
+}
+
+void BezierCurveItemTest::bumpGradientsDoNotChangeThePath()
+{
+	BezierCurveItem curve, plain;
+	std::vector<QPointF> pts = { QPointF(0, 40), QPointF(200, 40) };
+
+	curve.setPen(QPen(QColor(128, 128, 128), 3));
+	plain.setPen(QPen(QColor(128, 128, 128), 3));
+	curve.setPoints(pts, 10, { QPointF(100, 40) }, 8, 0, 0, { true });
+	plain.setPoints(pts, 10, { QPointF(100, 40) }, 8, 0, 0, { false });
+
+	// Convex and concave bumps have the same shape, only the painting is different
+	QCOMPARE(curve.path(), plain.path());
+	QCOMPARE(curve.getHopArcs().size(), plain.getHopArcs().size());
+}
+
+void BezierCurveItemTest::bumpGradientsAreNotPaintedAtLowLevelOfDetail()
+{
+	BezierCurveItem convex, concave;
+	std::vector<QPointF> pts = { QPointF(0, 40), QPointF(200, 40) };
+
+	for(auto *curve : { &convex, &concave })
+		curve->setPen(QPen(QColor(128, 128, 128), 3));
+
+	convex.setPoints(pts, 10, { QPointF(100, 40) }, 8, 0, 0, { true });
+	concave.setPoints(pts, 10, { QPointF(100, 40) }, 8, 0, 0, { false });
+
+	// At the normal zoom the kind of the bump changes how it is painted
+	QVERIFY(renderCurve(convex) != renderCurve(concave));
+
+	// Zoomed out the gradients can't be noticed, so they are not painted and both look the same
+	QCOMPARE(renderCurve(convex, 0.2), renderCurve(concave, 0.2));
 }
 
 QTEST_MAIN(BezierCurveItemTest)
