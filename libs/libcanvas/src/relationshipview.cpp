@@ -2074,6 +2074,72 @@ QRectF RelationshipView::getRouteRect(const std::vector<QPointF> &route)
 	return { QPointF(left, top), QPointF(right, bottom) };
 }
 
+QPointF RelationshipView::getDescriptorPosition(const std::vector<QPointF> &route, double half_extent, double corner_room, double &angle)
+{
+	angle = 0;
+
+	if(route.size() < 2)
+		return route.empty() ? QPointF() : route.front();
+
+	size_t seg_count = route.size() - 1, best_seg = 0;
+	double total = 0, mid = 0, best_dist = -1, best_pos = 0, seg_start = 0, len = 0, lo = 0, hi = 0, pos = 0, dist = 0;
+	std::vector<double> starts;
+
+	for(size_t i = 0; i < seg_count; i++)
+	{
+		starts.push_back(total);
+		total += QLineF(route[i], route[i + 1]).length();
+	}
+
+	mid = total / 2.0;
+
+	// The room around the middle of the route is searched in all segments and the closest to the middle wins
+	for(size_t i = 0; i < seg_count; i++)
+	{
+		len = QLineF(route[i], route[i + 1]).length();
+		seg_start = starts[i];
+
+		// The ends at the tables only need the room for the descriptor itself, the ones at the corners also for their curves
+		lo = (i > 0 ? half_extent + corner_room : half_extent);
+		hi = len - (i + 1 < seg_count ? half_extent + corner_room : half_extent);
+
+		if(lo > hi)
+			continue;
+
+		pos = std::clamp(mid - seg_start, lo, hi);
+		dist = std::fabs(seg_start + pos - mid);
+
+		if(best_dist < 0 || dist < best_dist - 0.001)
+		{
+			best_dist = dist;
+			best_seg = i;
+			best_pos = pos;
+		}
+	}
+
+	// No segment has room for the descriptor: it goes to the middle of the longest one
+	if(best_dist < 0)
+	{
+		double longest = -1;
+
+		for(size_t i = 0; i < seg_count; i++)
+		{
+			len = QLineF(route[i], route[i + 1]).length();
+
+			if(len > longest)
+			{
+				longest = len;
+				best_seg = i;
+				best_pos = len / 2.0;
+			}
+		}
+	}
+
+	QLineF seg(route[best_seg], route[best_seg + 1]);
+	angle = -seg.angle();
+	return seg.pointAt(seg.length() > 0 ? best_pos / seg.length() : 0);
+}
+
 bool RelationshipView::isSegmentBlocked(const QPointF &p1, const QPointF &p2, const std::vector<QRectF> &obstacles)
 {
 	constexpr double Epsilon = 0.01;
@@ -2890,6 +2956,15 @@ void RelationshipView::configureDescriptor()
 	QColor line_color=base_rel->getCustomColor();
 	QGraphicsPolygonItem *pol_item=nullptr;
 
+	/* If the crow's feet is enabled the relationship descriptor is hidden
+	 * for 1:1, 1:n, n:n and fk relationship. For generalization, dependency and partitioning
+	 * relationships the descriptor is still displayed. */
+	bool visible = !use_crows_foot ||
+								 (use_crows_foot && (
+										rel_type == BaseRelationship::RelationshipDep ||
+										rel_type == BaseRelationship::RelationshipGen ||
+										rel_type == BaseRelationship::RelationshipPart));
+
 	//Configuring the relationship descriptor color
 	if(base_rel->getCustomColor()!=Qt::transparent)
 		//Using custom color
@@ -2951,7 +3026,13 @@ void RelationshipView::configureDescriptor()
 		pnt = points.at(points.size()/2);
 	else
 	{
-		if(!curves.empty())
+		if(visible && line_style == OrthogonalLines && route_points.size() >= 2)
+		{
+			// The descriptor, when displayed, is kept away from the corners of the route, where the line is curved
+			pnt = getDescriptorPosition(route_points, pol.boundingRect().width() / 2.0,
+																	RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(), angle);
+		}
+		else if(!curves.empty())
 		{
 			int idx = curves.size()/2;
 			BezierCurveItem *curve =  curves.at(idx);
@@ -3021,14 +3102,6 @@ void RelationshipView::configureDescriptor()
 	this->configureAttributes();
 	this->configurePositionInfo();
 
-	/* If the crow's feet is enabled the relationship descriptor is hidden
-	 * for 1:1, 1:n, n:n and fk relationship. For generalization, dependency and partitioning
-	 * relationships the descriptor is still displayed. */
-	bool visible = !use_crows_foot ||
-								 (use_crows_foot && (
-										rel_type == BaseRelationship::RelationshipDep ||
-										rel_type == BaseRelationship::RelationshipGen ||
-										rel_type == BaseRelationship::RelationshipPart));
 	descriptor->setVisible(visible);
 	obj_shadow->setVisible(visible);
 }
