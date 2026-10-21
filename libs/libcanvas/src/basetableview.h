@@ -40,6 +40,8 @@
 #include "attributestoggleritem.h"
 #include "relmarkeritem.h"
 
+class RelationshipView;
+
 class __libcanvas BaseTableView: public BaseObjectView {
 	Q_OBJECT
 
@@ -51,6 +53,10 @@ class __libcanvas BaseTableView: public BaseObjectView {
 
 		/*! \brief Stores the references to the relationships connected to this table. */
 		std::vector<BaseRelationship *> connected_rels;
+
+		/*! \brief Stores the area the table occupied when the user started moving it. It's used to
+		 * update the orthogonal relationships that were routed around the table's previous position */
+		QRectF move_origin_rect;
 
 		/*! \brief Stores the references to the relationships that connect this table to a table
 		 * placed in a different scene. These relationships have no RelationshipView of their own,
@@ -205,6 +211,18 @@ class __libcanvas BaseTableView: public BaseObjectView {
 
 		//! \brief This method just emits the signal to indicate that the relationships attached must be updated
 		void requestRelationshipsUpdate();
+
+		/*! \brief Forces the update of the orthogonal relationships routed near the table, which includes the
+		 * area it occupied before being moved. Relationships connected to the table are only updated if
+		 * include_connected is true, since they are already updated by the table's own signals. Does nothing
+		 * when the orthogonal line style is not in use. */
+		void invalidateNearbyRoutes(bool include_connected = false);
+
+		/*! \brief Returns the orthogonal relationships routed near the table, including the area it occupied
+		 * before being moved (which is forgotten by this call). It's the list invalidateNearbyRoutes()
+		 * updates, so the caller can merge the lists of several tables and update each relationship only once.
+		 * The list is empty when the orthogonal line style is not in use. */
+		std::vector<RelationshipView *> getNearbyRoutes(bool include_connected = false);
 
 		//! \brief Toggles the placeholder object when there is at least one relationship connected to the object
 		void togglePlaceholder(bool value) override;

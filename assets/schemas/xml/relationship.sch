@@ -104,6 +104,7 @@ $br $tb [ dst-table=] "&{dst-table}"
 
 	%if {points} %then $tb <line> $br $tb {points} $tb </line> $br %end
 	%if {labels-pos} %then {labels-pos} %end
+	%if {segments} %then {segments} %end
 
 	%if %not {relgen} %and %not {reldep} %and %not {relpart} %then
 		%if {columns} %then {columns} %end

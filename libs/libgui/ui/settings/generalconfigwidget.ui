@@ -927,25 +927,6 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="use_curved_lines_chk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Replaces any straight line in relationship by curved ones in order to improve the model's visualization.</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Use curved lines for relationships</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QCheckBox" name="escape_comments_chk">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">

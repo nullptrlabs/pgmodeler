@@ -8,6 +8,9 @@
 <!ENTITY % label SYSTEM "label.dtd">
 %label;
 
+<!ENTITY % segment SYSTEM "segment.dtd">
+%segment;
+
 <!ENTITY % textbox SYSTEM "textbox.dtd">
 %textbox;
 
@@ -20,7 +23,7 @@
 <!ENTITY % genericsql SYSTEM "genericsql.dtd">
 %genericsql;
 
-<!ELEMENT info (position*, label*, appended-sql?, prepended-sql?)>
+<!ELEMENT info (position*, label*, segment*, appended-sql?, prepended-sql?)>
 <!ATTLIST info object CDATA #REQUIRED>
 <!ATTLIST info type CDATA #IMPLIED>
 <!ATTLIST info src-table CDATA #IMPLIED>

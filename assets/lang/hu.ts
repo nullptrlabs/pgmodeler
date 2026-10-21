@@ -953,12 +953,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Alapkapcsolat</translation>
     </message>
-    <message numerus="yes">
-        <source>new_object</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1110,10 +1104,6 @@ Ez az összes gyermek- és hivatkozó objektum kódját is kikapcsolja.</transla
         <source>Copy</source>
         <translation>Másolat</translation>
     </message>
-    <message>
-        <source>rel_%1_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1224,27 +1214,6 @@ Ez az összes gyermek- és hivatkozó objektum kódját is kikapcsolja.</transla
     <message>
         <source>Assignment</source>
         <translation>Értékadás</translation>
-    </message>
-</context>
-<context>
-    <name>Catalog</name>
-    <message numerus="yes">
-        <source>Object type: %1</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>The catalog query returned more than one OID!</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>Object type: server</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
     </message>
 </context>
 <context>
@@ -3398,7 +3367,7 @@ Hivatkozott oszlop(ok): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">A bemutató verzió objektumtípusonként csak `%1&apos; példányt hozhat létre! Elérte ezt a korlátot a következő típusnál: `%2&apos;</translation>
+        <translation>A bemutató verzió objektumtípusonként csak `%1&apos; példányt hozhat létre! Elérte ezt a korlátot a következő típusnál: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -7184,7 +7153,7 @@ Az adatbázis-kezelő által visszaadott üzenet: `%1&apos;</translation>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation>Nem sikerült érvényesíteni a pgModeler Plus licencét! A parancssori felület használata előtt a grafikus felületen kell érvényesítenie.</translation>
+        <translation type="vanished">Nem sikerült érvényesíteni a pgModeler Plus licencét! A parancssori felület használata előtt a grafikus felületen kell érvényesítenie.</translation>
     </message>
     <message>
         <source>License error code: %1</source>
@@ -7192,11 +7161,23 @@ Az adatbázis-kezelő által visszaadott üzenet: `%1&apos;</translation>
     </message>
     <message>
         <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation>A parancssori felület a próbaverzióban nem érhető el! A használatához frissítse licencét.</translation>
+        <translation type="vanished">A parancssori felület a próbaverzióban nem érhető el! A használatához frissítse licencét.</translation>
     </message>
     <message>
         <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation>Az offline használati időszak lejárt! A parancssori felület további használatához érvényesítenie kell a licencet a grafikus felületen.</translation>
+        <translation type="vanished">Az offline használati időszak lejárt! A parancssori felület további használatához érvényesítenie kell a licencet a grafikus felületen.</translation>
+    </message>
+    <message>
+        <source>A valid pgModeler Plus license is required to use this feature.</source>
+        <translation>A funkció használatához érvényes pgModeler Plus licenc szükséges.</translation>
+    </message>
+    <message>
+        <source>This feature is not available in the trial version! Upgrade your license to use it.</source>
+        <translation>Ez a funkció a próbaverzióban nem érhető el! A használatához frissítse licencét.</translation>
+    </message>
+    <message>
+        <source>The offline usage period has ended! You have to validate the license to keep using this feature.</source>
+        <translation>Az offline használati időszak lejárt! A funkció további használatához érvényesítenie kell a licencet.</translation>
     </message>
     <message>
         <source>License file found</source>
@@ -12579,33 +12560,6 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
     </message>
 </context>
 <context>
-    <name>Relationship</name>
-    <message>
-        <source>%1_has_one_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>many_%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_inherits_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_is_partition_of_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_copies_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -12714,6 +12668,10 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
     <message>
         <source>Foreign key (source)</source>
         <translation>Idegen kulcs (forrás)</translation>
+    </message>
+    <message>
+        <source>Pattern for foreign key indexes generated by the relationship.</source>
+        <translation>Minta a kapcsolat által létrehozott idegenkulcs-indexekhez.</translation>
     </message>
     <message>
         <source>FK Index name</source>
@@ -14519,11 +14477,11 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
     </message>
     <message>
         <source>Table</source>
-        <translation type="unfinished">Tábla</translation>
+        <translation>Tábla</translation>
     </message>
     <message>
         <source>Cross relationships</source>
-        <translation type="unfinished"></translation>
+        <translation>Kereszt-kapcsolatok</translation>
     </message>
 </context>
 <context>

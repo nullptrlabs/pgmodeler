@@ -23,12 +23,55 @@
 #include "relationship.h"
 #include "tableview.h"
 #include "utilsns.h"
+#include "objectsscene.h"
+#include <queue>
+#include <limits>
 
 bool RelationshipView::hide_name_label {false};
-bool RelationshipView::use_curved_lines {true};
 bool RelationshipView::use_crows_foot {true};
 
 RelationshipView::LineConnectionMode RelationshipView::line_conn_mode { RelationshipView::ConnectFkToPk };
+
+RelationshipView::LineStyle RelationshipView::line_style { RelationshipView::OrthogonalLines };
+
+template<class T>
+void RelationshipView::trimGroupItems(QGraphicsItemGroup *group, std::vector<T *> &items, size_t count)
+{
+	T *item = nullptr;
+
+	while(items.size() > count)
+	{
+		item = items.back();
+		items.pop_back();
+		group->removeFromGroup(item);
+		delete item;
+	}
+}
+
+void RelationshipView::getFkPkConnSides(const QRectF &ref_rect, const QRectF &rec_rect,
+																				BaseTableView::ConnectionPoint &pk_type, BaseTableView::ConnectionPoint &fk_type,
+																				bool &same_sides)
+{
+	if(ref_rect.intersects(rec_rect))
+	{
+		same_sides = true;
+
+		if(rec_rect.center().x() >= ref_rect.center().x())
+			pk_type = fk_type = BaseTableView::LeftConnPoint;
+		else
+			pk_type = fk_type = BaseTableView::RightConnPoint;
+	}
+	else if(ref_rect.right() <= rec_rect.left())
+	{
+		pk_type = BaseTableView::RightConnPoint;
+		fk_type = BaseTableView::LeftConnPoint;
+	}
+	else
+	{
+		pk_type = BaseTableView::LeftConnPoint;
+		fk_type = BaseTableView::RightConnPoint;
+	}
+}
 
 RelationshipView::RelationshipView(BaseRelationship *rel) : BaseObjectView(rel)
 {
@@ -66,6 +109,12 @@ RelationshipView::RelationshipView(BaseRelationship *rel) : BaseObjectView(rel)
 	this->addToGroup(obj_selection);
 
 	tables[0]=tables[1]=nullptr;
+	curve_end_lens[0]=curve_end_lens[1]=0;
+	route_stubs[0]=route_stubs[1]=0;
+	drag_seg_idx=-1;
+	drag_horiz=drag_moved=false;
+	drag_ini_shift=drag_shift=0;
+	zone_retries=0;
 
 	for(unsigned i=0; i < 2; i++)
 	{
@@ -80,6 +129,7 @@ RelationshipView::RelationshipView(BaseRelationship *rel) : BaseObjectView(rel)
 	}
 
 	this->setZValue(-50);
+	this->setAcceptHoverEvents(true);
 	this->configureObject();
 }
 
@@ -87,6 +137,13 @@ RelationshipView::~RelationshipView()
 {
 	QGraphicsItem *item=nullptr;
 	std::vector<std::vector<QGraphicsLineItem *> *> rel_lines = { &lines, &fk_lines, &pk_lines, &src_cf_lines, &dst_cf_lines };
+
+	// The bumps of the lines that crossed this one must be updated
+	if(!route_points.empty())
+		notifyRouteChanged();
+
+	if(ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene()))
+		obj_scene->forgetItem(this);
 
 	for(auto &curve : curves)
 	{
@@ -160,14 +217,48 @@ bool RelationshipView::isNameLabelHidden()
 	return hide_name_label;
 }
 
-void RelationshipView::setCurvedLines(bool value)
+void RelationshipView::setLineStyle(LineStyle style)
 {
-	use_curved_lines = value;
+	line_style = style;
 }
 
-bool RelationshipView::isCurvedLines()
+RelationshipView::LineStyle RelationshipView::getLineStyle()
 {
-	return use_curved_lines;
+	return line_style;
+}
+
+void RelationshipView::invalidateRoute(bool reset_retries)
+{
+	// A view discarded by the scene (its relationship removed) has no tables to route the line between
+	if(!tables[BaseRelationship::SrcTable] || !tables[BaseRelationship::DstTable])
+		return;
+
+	if(reset_retries)
+		zone_retries = 0;
+
+	tab_hashes[BaseRelationship::SrcTable].clear();
+	tab_hashes[BaseRelationship::DstTable].clear();
+	configureLine();
+}
+
+void RelationshipView::notifyRouteChanged()
+{
+	ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene());
+
+	if(obj_scene)
+		obj_scene->requestBumpsUpdate();
+}
+
+void RelationshipView::setBumps(const std::vector<QPointF> &new_bumps)
+{
+	if(new_bumps == bumps || curves.empty() || route_points.empty())
+		return;
+
+	bumps = new_bumps;
+	curves[0]->setPoints(route_points, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
+											 bumps, BumpRadius * BaseObjectView::getScreenDpiFactor(),
+											 curve_end_lens[0], curve_end_lens[1]);
+	configureBoundingRect();
 }
 
 void RelationshipView::setCrowsFoot(bool value)
@@ -235,6 +326,13 @@ QVariant RelationshipView::itemChange(GraphicsItemChange change, const QVariant 
 	if(change==ItemPositionChange)
 	{
 		this->setFlag(QGraphicsItem::ItemIsMovable, false);
+	}
+	/* The first configuration of the line is done in the constructor, when there's no scene yet to
+	 * look for the tables in the way of an orthogonal line. So we redo it when the scene is assigned */
+	else if(change==ItemSceneHasChanged)
+	{
+		if(scene() && line_style == OrthogonalLines && tables[0] && tables[1])
+			invalidateRoute();
 	}
 	else if(change==ItemSelectedHasChanged)
 	{
@@ -367,6 +465,13 @@ void RelationshipView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		{
 			base_rel->resetLabelsDistance();
 			this->configureLabels();
+
+			if(line_style == OrthogonalLines && !base_rel->getSegmentShifts().empty())
+			{
+				base_rel->resetSegmentShifts();
+				emit s_relationshipModified(base_rel);
+				invalidateRoute();
+			}
 		}
 		else if(event->modifiers()==Qt::ShiftModifier)
 		{
@@ -375,7 +480,13 @@ void RelationshipView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 			bool pnt_rem=false;
 			std::vector<QPointF> points = base_rel->getPoints();
 
-			if(!base_rel->isSelfRelationship())
+			if(line_style == OrthogonalLines)
+			{
+				//In orthogonal lines SHIFT and dragging moves the segment next to the mouse
+				if(event->buttons()==Qt::LeftButton)
+					startSegmentDrag(event->pos());
+			}
+			else if(!base_rel->isSelfRelationship())
 			{
 				//When the user press SHIFT and clicks on a point this is removed
 				if(event->buttons()==Qt::LeftButton)
@@ -410,7 +521,7 @@ void RelationshipView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 					count = lines.size();
 					for(i=0; i < count && !pnt_rem; i++)
 					{
-						if(use_curved_lines)
+						if(line_style == CurvedLines)
 							stroke = ps.createStroke(curves[i]->shape());
 						else
 							stroke = ps.createStroke(lines[i]->shape());
@@ -476,7 +587,9 @@ void RelationshipView::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	if(this->isSelected() && event->buttons()==Qt::LeftButton &&
 			!this->getUnderlyingObject()->isProtected())
 	{
-		if(dynamic_cast<QGraphicsPolygonItem *>(sel_object))
+		if(drag_seg_idx >= 0)
+			dragSegment(event->pos());
+		else if(dynamic_cast<QGraphicsPolygonItem *>(sel_object))
 		{
 			QRectF brect = QRectF(tables[0]->pos() - QPointF(20,20),
 														tables[0]->pos() + QPointF(tables[0]->boundingRect().width() + 20, tables[0]->boundingRect().height()  + 20)),
@@ -504,6 +617,32 @@ void RelationshipView::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	BaseObjectView::mouseMoveEvent(event);
 }
 
+void RelationshipView::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+{
+	bool horiz = false;
+
+	// While dragging the cursor is kept as it was set when the drag started
+	if(drag_seg_idx < 0)
+	{
+		/* Holding SHIFT over a segment that can be moved shows the cursor of the direction
+		 * in which the segment moves (a horizontal segment moves up or down) */
+		if(event->modifiers() == Qt::ShiftModifier && pickSegment(event->pos(), horiz) >= 0)
+			setCursor(horiz ? Qt::SizeVerCursor : Qt::SizeHorCursor);
+		else
+			unsetCursor();
+	}
+
+	BaseObjectView::hoverMoveEvent(event);
+}
+
+void RelationshipView::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+	if(drag_seg_idx < 0)
+		unsetCursor();
+
+	BaseObjectView::hoverLeaveEvent(event);
+}
+
 QPainterPath RelationshipView::shape() const
 {
 	return rel_shape;
@@ -515,6 +654,9 @@ void RelationshipView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 	if(event->button() == Qt::LeftButton)
 	{
+		if(drag_seg_idx >= 0)
+			finishSegmentDrag();
+
 		if(dynamic_cast<TextboxView *>(sel_object))
 		{
 			//Calculates the displacement of the label from the initial pos to the current
@@ -599,679 +741,71 @@ void RelationshipView::configurePositionInfo()
 	}
 }
 
-void RelationshipView::configureLine()
+bool RelationshipView::isLineUpdateNeeded()
 {
 	BaseRelationship *base_rel = this->getUnderlyingObject();
 	BaseRelationship::TableId src_tab = BaseRelationship::SrcTable,
 			dst_tab = BaseRelationship::DstTable;
 
-	configureToolTip();
-
 	/* We skip the line configuration if the line is still being configured, or the bounding rectangles
 	 * of the involved tables are not valid (they wasn't rendered/configured yet) or the
 	 * hash codes of both tables are unchanged since the last call to this method */
-	if(configuring_line ||
+	return !(configuring_line ||
 
-			BaseTable::isGeomChangesIgnored() ||
+					 BaseTable::isGeomChangesIgnored() ||
 
-			!BaseGraphicObject::isUpdatesEnabled() ||
+					 !BaseGraphicObject::isUpdatesEnabled() ||
 
-			!tables[src_tab]->boundingRect().isValid() ||
+					 !tables[src_tab]->boundingRect().isValid() ||
 
-			!tables[dst_tab]->boundingRect().isValid() ||
+					 !tables[dst_tab]->boundingRect().isValid() ||
 
-			((!tab_hashes[src_tab].isEmpty() &&
-					tab_hashes[src_tab] == base_rel->getTable(src_tab)->getHashCode()) &&
+					 ((!tab_hashes[src_tab].isEmpty() &&
+						 tab_hashes[src_tab] == base_rel->getTable(src_tab)->getHashCode()) &&
 
-			 (!tab_hashes[dst_tab].isEmpty() &&
-					tab_hashes[dst_tab] == base_rel->getTable(dst_tab)->getHashCode())))
-	return;
+						(!tab_hashes[dst_tab].isEmpty() &&
+						 tab_hashes[dst_tab] == base_rel->getTable(dst_tab)->getHashCode())));
+}
 
-	tab_hashes[src_tab] = base_rel->getTable(src_tab)->getHashCode();
-	tab_hashes[dst_tab] = base_rel->getTable(dst_tab)->getHashCode();
+void RelationshipView::updateTablesHashes()
+{
+	BaseRelationship *base_rel = this->getUnderlyingObject();
 
+	tab_hashes[BaseRelationship::SrcTable] = base_rel->getTable(BaseRelationship::SrcTable)->getHashCode();
+	tab_hashes[BaseRelationship::DstTable] = base_rel->getTable(BaseRelationship::DstTable)->getHashCode();
+}
+
+void RelationshipView::syncPlaceholderConnection()
+{
 	//Reconnect the tables if the placeholder usage changes
-	if(using_placeholders!=BaseObjectView::isPlaceholderEnabled())
+	if(using_placeholders != BaseObjectView::isPlaceholderEnabled())
 	{
 		connectTables();
-		using_placeholders=BaseObjectView::isPlaceholderEnabled();
+		using_placeholders = BaseObjectView::isPlaceholderEnabled();
 	}
+}
 
-	std::vector<QPointF> points, fk_points, pk_points;
-	QGraphicsLineItem *lin=nullptr;
-	QPointF pos, p_central[2], pk_pnt, fk_pnt;
-	QRectF rect;
-	QPen pen;
-	QGraphicsPolygonItem *pol=nullptr;
-	QPolygonF pol_aux;
-	QString tool_tip;
-	QGraphicsItem *item=nullptr;
-	int i, i1, count;
-	bool conn_same_sides = false,
-			conn_horiz_sides[2] = { false, false }, conn_vert_sides[2] = { false, false };
-	BaseRelationship::RelType rel_type = base_rel->getRelationshipType();
+void RelationshipView::configureLine()
+{
+	configureToolTip();
+
+	if(!isLineUpdateNeeded())
+		return;
+
+	updateTablesHashes();
+	syncPlaceholderConnection();
+	discardOutdatedSegmentShifts();
 
 	configuring_line=true;
-	pen.setCapStyle(Qt::RoundCap);
 
-	if(base_rel->isSelfRelationship())
-	{
-		double fnt_factor=font_config[Attributes::Global].font().pointSizeF()/DefaultFontSize,
-				pos_factor = 0, offset = 0;
-		unsigned rel_cnt = tables[0]->getConnectedRelsCount(base_rel->getTable(BaseRelationship::SrcTable),
-																												base_rel->getTable(BaseRelationship::DstTable));
-
-		/* Sefl-relationshihp line format:
-
-					+----<>
-					|     |
-	 ----------   |
-	 | Table  |---+
-	 ----------
-
-	 This line cannot be moved or have points added */
-		pos=tables[0]->pos();
-		rect=tables[0]->boundingRect();
-
-		if(rel_cnt > 1)
-		{
-			int idx = tables[0]->getConnectedRelationshipIndex(base_rel, true);
-			double min_val = std::min<double>(rect.width(), rect.height());
-
-			if(idx < 0) idx =0;
-			pos_factor = min_val * 0.08 * idx;
-		}
-
-		p_central[0].setX(pos.x() + rect.width());
-		p_central[0].setY(pos.y() + (rect.height() / 3.0) + pos_factor);
-		p_central[1].setX(pos.x() + (rect.width() / 1.5) - pos_factor);
-		p_central[1].setY(pos.y());
-
-		if(p_central[0].y() > pos.y() + rect.height())
-			p_central[0].setY(pos.y() + rect.height());
-
-		if(p_central[1].x() < pos.x())
-			p_central[1].setX(pos.x());
-
-		offset = use_crows_foot ? 30 : 20;
-
-		points.push_back(QPointF(p_central[0].x() + (offset * fnt_factor) + pos_factor,  p_central[0].y()));
-		points.push_back(QPointF(p_central[0].x() + (offset * fnt_factor) + pos_factor,  p_central[1].y() - (offset * fnt_factor) - pos_factor));
-		points.push_back(QPointF(p_central[1].x(),  p_central[1].y() - (offset * fnt_factor) - pos_factor));
-
-		base_rel->setPoints(points);
-	}
-	else
-	{
-		Relationship *rel=dynamic_cast<Relationship *>(base_rel);
-		bool rel_1n= (rel_type==Relationship::Relationship11 ||
-									rel_type==Relationship::Relationship1n ||
-									rel_type==Relationship::RelationshipFk);
-
-		if(rel &&
-			 rel->getRelationshipType()==Relationship::Relationship11 &&
-			 rel->isIdentifier())
-		{
-			tables[0]=dynamic_cast<BaseTableView *>(rel->getReferenceTable()->getOverlyingObject());
-			tables[1]=dynamic_cast<BaseTableView *>(rel->getReceiverTable()->getOverlyingObject());
-		}
-
-		if(line_conn_mode==ConnectCenterPoints || line_conn_mode==ConnectTableEdges || !rel_1n)
-		{
-			std::vector<std::vector<QGraphicsLineItem *> *> ref_lines={ &fk_lines, &pk_lines };
-
-			for(i=0; i < 2; i++)
-				p_central[i]=tables[i]->getCenter();
-
-			//Destroying the fk and pk connection lines when the line mode changes
-			for(i=0; i < 2; i++)
-			{
-				while(!ref_lines[i]->empty())
-				{
-					item=ref_lines[i]->back();
-					ref_lines[i]->pop_back();
-					this->removeFromGroup(item);
-					delete item;
-				}
-			}
-		}
-		else if(line_conn_mode==ConnectFkToPk && rel_1n)
-		{
-			QPointF pnt;
-			QRectF rec_tab_rect, ref_tab_rect;
-			double fk_py=0, pk_py=0, fk_px=0, pk_px=0;
-			std::vector<Constraint *> fks;
-			Table *ref_tab=nullptr, *rec_tab=nullptr;
-			TableView *ref_tab_view=nullptr, *rec_tab_view=nullptr;
-			unsigned cnt=0, i=0;
-			BaseTableView::ConnectionPoint pk_pnt_type = BaseTableView::LeftConnPoint,
-					fk_pnt_type = BaseTableView::LeftConnPoint;
-
-			if(!rel)
-			{
-				ref_tab=dynamic_cast<Table *>(base_rel->getTable(BaseRelationship::DstTable));
-				rec_tab=dynamic_cast<Table *>(base_rel->getTable(BaseRelationship::SrcTable));
-			}
-			else
-			{
-				ref_tab=dynamic_cast<Table *>(rel->getReferenceTable());
-				rec_tab=dynamic_cast<Table *>(rel->getReceiverTable());
-			}
-
-			ref_tab_view=dynamic_cast<TableView *>(ref_tab->getOverlyingObject());
-			rec_tab_view=dynamic_cast<TableView *>(rec_tab->getOverlyingObject());
-
-			/* We determine the fk to pk connections only if both tables are not fully collapsed.
-			 * Otherwise, the tables' center points are used as connection point of the relationship */
-			if(rec_tab->getCollapseMode() != BaseTable::AllAttribsCollapsed &&
-				 ref_tab->getCollapseMode() != BaseTable::AllAttribsCollapsed)
-			{
-				rec_tab->getForeignKeys(fks, true, ref_tab);
-
-				//Create the table's rectangles to detect where to connect the relationship
-				ref_tab_rect=QRectF(ref_tab_view->pos(), ref_tab_view->boundingRect().size());
-
-				//In this case the receiver table rect Y must be equal to reference table Y in order to do the correct comparison
-				rec_tab_rect=QRectF(QPointF(rec_tab_view->pos().x(),
-																		ref_tab_view->pos().y()), rec_tab_view->boundingRect().size());
-
-				if(ref_tab_rect.intersects(rec_tab_rect))
-				{
-					//Connects the rectangle at the same sides on both tables
-					conn_same_sides = true;
-
-					if(rec_tab_rect.center().x() >= ref_tab_rect.center().x())
-						pk_pnt_type=fk_pnt_type=BaseTableView::LeftConnPoint;
-					else if(rec_tab_rect.center().x() < ref_tab_rect.center().x())
-						pk_pnt_type=fk_pnt_type=BaseTableView::RightConnPoint;
-				}
-				else
-				{
-					//Connecting the relationship on the opposite sides depending on the tables' position
-					if(ref_tab_rect.right() <= rec_tab_rect.left())
-					{
-						pk_pnt_type=BaseTableView::RightConnPoint;
-						fk_pnt_type=BaseTableView::LeftConnPoint;
-					}
-					else
-					{
-						pk_pnt_type=BaseTableView::LeftConnPoint;
-						fk_pnt_type=BaseTableView::RightConnPoint;
-					}
-				}
-
-				for(auto &constr : fks)
-				{
-					cnt=constr->getColumnCount(Constraint::SourceCols);
-
-					for(i=0; i < cnt; i++)
-					{
-						pnt=rec_tab_view->getConnectionPoints(constr->getColumn(i, Constraint::SourceCols), fk_pnt_type);
-						fk_py+=pnt.y();
-						fk_px=pnt.x();
-						fk_points.push_back(this->mapFromItem(rec_tab_view, pnt));
-
-						pnt=ref_tab_view->getConnectionPoints(constr->getColumn(i, Constraint::ReferencedCols), pk_pnt_type);
-						pk_py+=pnt.y();
-						pk_px=pnt.x();
-						pk_points.push_back(this->mapFromItem(ref_tab_view, pnt));
-					}
-				}
-			}
-
-			if(!fks.empty())
-			{
-				double pk_dx=(pk_pnt_type==BaseTableView::LeftConnPoint ? -ConnLineLength : ConnLineLength),
-						fk_dx=(fk_pnt_type==BaseTableView::LeftConnPoint ? -ConnLineLength : ConnLineLength);
-
-				pk_pnt=this->mapFromItem(ref_tab_view, QPointF(pk_px + pk_dx, pk_py/pk_points.size()));
-				fk_pnt=this->mapFromItem(rec_tab_view, QPointF(fk_px + fk_dx, fk_py/fk_points.size()));
-
-				if(rel_type==Relationship::RelationshipFk)
-				{
-					p_central[1]=pk_pnt;
-					p_central[0]=fk_pnt;
-				}
-				else
-				{
-					p_central[0]=pk_pnt;
-					p_central[1]=fk_pnt;
-				}
-			}
-			else
-			{
-				/* Fallback configuration: if one of the tables are collapsed or if no fk was found in the
-				 * receiver table uses the tables' center points to configure the line in order to avoid glitched lines.
-				 * The second situation may happen when the relationship is being validated and the needed fk was not
-				 * created yet. In a second interaction of the rel. validation they are created
-				 * and the relationship line is properly configured */
-				if(rel_type==Relationship::RelationshipFk)
-				{
-					p_central[1]=pk_pnt=ref_tab_view->getCenter();
-					p_central[0]=fk_pnt=rec_tab_view->getCenter();
-				}
-				else
-				{
-					p_central[0]=pk_pnt=ref_tab_view->getCenter();
-					p_central[1]=fk_pnt=rec_tab_view->getCenter();
-				}
-			}
-		}
-
-		points=base_rel->getPoints();
-		count=points.size();
-		pol_aux.append(QPointF(0,0)); pol_aux.append(QPointF(6,0));
-		pol_aux.append(QPointF(6,6)); pol_aux.append(QPointF(0,6));
-
-		for(i=0; i < count; i++)
-		{
-			if(i >= static_cast<int>(graph_points.size()))
-			{
-				pol=new QGraphicsPolygonItem;
-				graph_points.push_back(pol);
-				pol->setZValue(0);
-				pol->setPolygon(pol_aux);
-				pol->setBrush(BaseObjectView::getFillStyle(Attributes::ObjSelection));
-				pol->setPen(BaseObjectView::getBorderStyle(Attributes::ObjSelection));
-				this->addToGroup(pol);
-			}
-			else
-				pol=graph_points[i];
-
-			pol->setPos(points[i]);
-			pol->moveBy(-GraphicPointRadius/2, -GraphicPointRadius/2);
-			pol->setVisible(this->isSelected());
-		}
-
-		//Destroy the graphical points not used
-		i=graph_points.size()-1;
-		while(i > count-1)
-		{
-			item=graph_points.back();
-			graph_points.pop_back();
-			this->removeFromGroup(item);
-			delete item;
-			i--;
-		}
-	}
-
-	if(base_rel->isSelfRelationship() || line_conn_mode != ConnectTableEdges)
-	{
-		conn_points[0]=p_central[0];
-		conn_points[1]=p_central[1];
-
-		points.insert(points.begin(),p_central[0]);
-		points.push_back(p_central[1]);
-	}
-	else if(line_conn_mode == ConnectTableEdges)
-	{
-		QRectF brect;
-		QPolygonF pol;
-		QLineF edge, line = QLineF(tables[0]->getCenter(), tables[1]->getCenter());
-		QPointF pi, center, p_aux[2];
-		double font_factor=BaseObjectView::getFontFactor() * BaseObjectView::getScreenDpiFactor(),
-				size_factor = 1,
-				border_factor = ConnLineLength * 0.30,
-				min_lim = 0, max_lim = 0,
-				conn_rels_factors[2] = { 0, 0 };
-		unsigned conn_rels_cnt[2] = { 0, 0 };
-		QLineF::IntersectType inter_type;
-
-		for(int tab_idx = 0; tab_idx < 2; tab_idx++)
-		{
-			conn_rels_cnt[tab_idx] = tables[tab_idx]->getConnectedRelsCount(base_rel->getTable(BaseRelationship::SrcTable),
-																																			base_rel->getTable(BaseRelationship::DstTable));
-			conn_rels_factors[tab_idx] = conn_rels_cnt[tab_idx] == 1 ? 1 : 0.08 * (tables[tab_idx]->getConnectedRelationshipIndex(base_rel));
-
-			if(!points.empty())
-			{
-				if(tab_idx == 0)
-					line = QLineF(tables[0]->getCenter(), points[0]);
-				else
-					line = QLineF(tables[1]->getCenter(), points[points.size() - 1]);
-			}
-
-			if(rel_type==BaseRelationship::RelationshipGen || rel_type==BaseRelationship::RelationshipDep || rel_type==BaseRelationship::RelationshipPart)
-				size_factor = 0.40;
-			else if(use_crows_foot)
-			{
-				if(rel_type==BaseRelationship::RelationshipNn ||
-					 (tab_idx == 1 && rel_type==BaseRelationship::RelationshipFk) ||
-					 (tab_idx == 0 &&	rel_type==BaseRelationship::Relationship1n && base_rel->isTableMandatory(BaseRelationship::SrcTable)) ||
-					 (tab_idx == 0 && rel_type==BaseRelationship::Relationship11 && base_rel->isTableMandatory(BaseRelationship::SrcTable)) ||
-					 (tab_idx == 1 && rel_type==BaseRelationship::Relationship11 && base_rel->isTableMandatory(BaseRelationship::DstTable)))
-					size_factor = 1 * font_factor;
-				else
-					size_factor = 1.5 * font_factor;
-
-				if(rel_type == BaseRelationship::RelationshipPart ||
-					 rel_type == BaseRelationship::RelationshipGen ||
-					 rel_type == BaseRelationship::RelationshipDep ||
-					 rel_type == BaseRelationship::Relationship11 ||
-					 (tab_idx == 0 && rel_type == BaseRelationship::Relationship1n) ||
-					 (tab_idx == 1 && rel_type == BaseRelationship::RelationshipFk))
-					border_factor = ConnLineLength * 0.30;
-				else
-					border_factor = ConnLineLength * 0.75;
-			}
-			else
-				size_factor = 0.65 * font_factor;
-
-			brect = QRectF(tables[tab_idx]->pos(), tables[tab_idx]->boundingRect().size());
-			pol = QPolygonF(brect);
-			center = tables[tab_idx]->getCenter();
-
-			for(int idx = 0; idx < pol.size() - 1; idx++)
-			{
-				edge.setP1(pol.at(idx));
-				edge.setP2(pol.at(idx + 1));
-				inter_type = line.intersects(edge, &pi);
-
-				if(inter_type == QLineF::BoundedIntersection)
-				{
-					/* Adjusting the intersection point if there're more than one relationship connected the current table
-					 * this will cause all relationships to be aligned together */
-					if(conn_rels_cnt[tab_idx] > 1)
-					{
-						double max_dim = std::max<double>(brect.height(), brect.width());
-						int signal = 0;
-
-						if(edge.dx() == 0)
-						{
-							signal = edge.dy()/fabs(edge.dy()) * (tab_idx == 0 ? 1 : -1);
-							pi.setY(pi.y() - ((conn_rels_factors[tab_idx] * max_dim) * signal));
-
-							// Adjusting the position of the interesection point to make is as close to the center of the edge as possible
-							pi.setY(pi.y() + ((max_dim * 0.05) * signal));
-						}
-
-						if(edge.dy() == 0)
-						{
-							signal = edge.dx()/fabs(edge.dx()) * (tab_idx == 0 ? 1 : -1);
-							pi.setX(pi.x() - ((conn_rels_factors[tab_idx] * max_dim) * signal));
-
-							// Adjusting the position of the interesection point to make is as close to the center of the edge as possible
-							pi.setX(pi.x() + ((max_dim * 0.05) * signal));
-						}
-					}
-
-					//Avoiding the line to be exposed in the rounded corners of the tables
-					if(edge.dx() == 0)
-					{
-						min_lim = brect.top() + border_factor;
-						max_lim = brect.bottom() - border_factor;
-
-						if(pi.y() < min_lim)
-							pi.setY(min_lim);
-						else if(pi.y() > max_lim)
-							pi.setY(max_lim);
-					}
-					else
-					{
-						min_lim = brect.left() + border_factor;
-						max_lim = brect.right() - border_factor;
-
-						if(pi.x() < min_lim)
-							pi.setX(min_lim);
-						else if(pi.x() > max_lim)
-							pi.setX(max_lim);
-					}
-
-					conn_points[tab_idx] = p_central[tab_idx] = pi;
-
-					if(edge.dx() == 0)
-					{
-						if(pi.x() < center.x())
-							pi.setX(pi.x() - (ConnLineLength * size_factor));
-						else
-							pi.setX(pi.x() + (ConnLineLength * size_factor));
-
-						conn_vert_sides[tab_idx] = true;
-					}
-					else
-					{
-						if(pi.y() < center.y())
-							pi.setY(pi.y() - (ConnLineLength * size_factor));
-						else
-							pi.setY(pi.y() + (ConnLineLength * size_factor));
-
-						conn_horiz_sides[tab_idx] = true;
-					}
-
-					p_aux[tab_idx] = pi;
-					break;
-				}
-				
-				p_aux[tab_idx] = p_central[tab_idx];
-			}
-		}
-
-		points.insert(points.begin(), p_central[0]);
-		points.insert(points.begin() + 1, p_aux[0]);
-
-		points.push_back(p_aux[1]);
-		points.push_back(p_central[1]);
-	}
-
-	//If the relationship is selected we do not change the lines colors
-	if(this->isSelected() && !lines.empty())
-		pen = lines[0]->pen();
-	else
-	{
-		//Configuring the relationship line color
-		if(base_rel->getCustomColor()!=Qt::transparent)
-			//Using custom color
-			pen.setColor(base_rel->getCustomColor());
-		else
-			//Using the default color
-			pen=BaseObjectView::getBorderStyle(Attributes::Relationship);
-	}
-
-	//For dependency/partition relationships the line is dashed
-	if(rel_type==BaseRelationship::RelationshipDep ||
-		 rel_type == BaseRelationship::RelationshipPart)
-		pen.setStyle(Qt::DashLine);
-
-	if(line_conn_mode==ConnectFkToPk)
-	{
-		std::vector<QPointF> ref_points={ fk_pnt, pk_pnt };
-		std::vector<std::vector<QPointF> *> ref_pnt_vects={ &fk_points, &pk_points };
-		std::vector<std::vector<QGraphicsLineItem *> *> ref_lines={ &fk_lines, &pk_lines };
-		std::vector<QPointF> *ref_pnt=nullptr;
-		std::vector<QGraphicsLineItem *> *ref_lin=nullptr;
-
-		for(unsigned vet_idx=0; vet_idx < 2; vet_idx++)
-		{
-			ref_pnt=ref_pnt_vects[vet_idx];
-			ref_lin=ref_lines[vet_idx];
-			count=ref_pnt->size();
-
-			for(i=0; i < count; i++)
-			{
-				if(i >= static_cast<int>(ref_lin->size()))
-				{
-					lin=new QGraphicsLineItem;
-					lin->setZValue(-1);
-					ref_lin->push_back(lin);
-					this->addToGroup(lin);
-				}
-				else
-					lin=ref_lin->at(i);
-
-				pen.setWidthF(getDefaultPenWidth());
-				lin->setLine(QLineF(ref_pnt->at(i), ref_points[vet_idx]));
-				lin->setPen(pen);
-			}
-
-			//Destroy the unused pk or fk lines
-			i = ref_lin->size()-1;
-			while(i > count - 1)
-			{
-				item = ref_lin->back();
-				ref_lin->pop_back();
-				this->removeFromGroup(item);
-				delete item;
-				i--;
-			}
-		}
-	}
-
-	//Create the relationship lines
-	count=points.size();
-	for(i=0; i < count-1; i++)
-	{
-		if(i >= static_cast<int>(lines.size()))
-		{
-			lin=new QGraphicsLineItem;
-			lin->setZValue(-1);
-			lines.push_back(lin);
-			this->addToGroup(lin);
-		}
-		else
-			lin=lines[i];
-
-		pen.setWidthF(getDefaultPenWidth());
-		lin->setLine(QLineF(points[i], points[i+1]));
-		lin->setPen(pen);
-	}
-
-	//Removing unused lines
-	if(!base_rel->isSelfRelationship())
-	{
-		i=points.size()-1;
-		i1=lines.size();
-		while(i1 > i)
-		{
-			item=lines.back();
-			lines.pop_back();
-			this->removeFromGroup(item);
-			delete item;
-			i1--;
-		}
-	}
-
-	//Exposing the line ending circles
-	if((!base_rel->isSelfRelationship() && line_conn_mode==ConnectCenterPoints && !use_crows_foot) ||
-		 (!base_rel->isSelfRelationship() &&
-			((line_conn_mode != ConnectTableEdges && rel_type==BaseRelationship::RelationshipDep) ||
-			 (line_conn_mode != ConnectTableEdges && rel_type==BaseRelationship::RelationshipGen) ||
-			 (line_conn_mode != ConnectTableEdges && rel_type==BaseRelationship::RelationshipPart) ||
-			 (line_conn_mode != ConnectTableEdges && rel_type==BaseRelationship::RelationshipNn  && !use_crows_foot))))
-	{
-		for(i=0; i < 2; i++)
-		{
-			line_circles[i]->setVisible(true);
-			line_circles[i]->setPen(pen);
-			line_circles[i]->setBrush(pen.color());
-			line_circles[i]->setPos(p_central[i]-QPointF(GraphicPointRadius/2, GraphicPointRadius/2));
-		}
-	}
-	else
-	{
-		line_circles[0]->setVisible(false);
-		line_circles[1]->setVisible(false);
-	}
-
-	//Using bezier curves instead of straight lines to denote the relationship line
-	if(use_curved_lines && !base_rel->isSelfRelationship())
-	{
-		BezierCurveItem * curve = nullptr;
-		bool invert_cpoints = false, simple_curve = false;
-		i = 0;
-
-		for(auto &line : lines)
-		{
-			if(i >= static_cast<int>(curves.size()))
-			{
-				curve = new BezierCurveItem;
-				curve->setZValue(line->zValue());
-				this->addToGroup(curve);
-				curves.push_back(curve);
-			}
-			else
-				curve = curves[i];
-
-			i++;
-
-			/* Creates simple a curved line in the following situations:
-			 * 1) The crow's foot is not enabled but the relationship connects in the same sides on tables (conn_same_sides)
-			 * 2) The crow's foot is enabled and one of the connection point is not in the horizontal edges of one of the tables (conn_horiz_sides) */
-
-			/* We invert the curve's bounding rect when crow's foot is enabled and the relationship connects
-			 * at the top/bottom edges of both tables */
-			simple_curve = (conn_same_sides && lines.size() == 1) || (conn_horiz_sides[0] != conn_horiz_sides[1] && lines.size() == 3);
-
-			if(!simple_curve)
-				invert_cpoints = (conn_horiz_sides[0] && conn_horiz_sides[1] && lines.size() == 3);
-			else
-				invert_cpoints = (!conn_horiz_sides[0] && conn_horiz_sides[1] && conn_vert_sides[0] && !conn_vert_sides[1]);
-
-			curve->setLine(line->line(), simple_curve, invert_cpoints);
-			curve->setPen(line->pen());
-			line->setVisible(false);
-		}
-
-		//Removing unused curves
-		i=lines.size();
-		i1=curves.size();
-
-		while(i1 > i)
-		{
-			curve=curves.back();
-			curves.pop_back();
-			this->removeFromGroup(curve);
-			delete curve;
-			i1--;
-		}
-	}
-	/* Self-relationships keep their straight horizontal/vertical segments (the loop shape),
-	 * but round off the corners where they meet instead of drawing sharp right angles: a single
-	 * curve item traces the whole loop, with a quadratic curve (control point at the corner
-	 * itself) taking over from the straight segments near each turn. */
-	else if(use_curved_lines && base_rel->isSelfRelationship())
-	{
-		BezierCurveItem *curve = nullptr;
-
-		if(curves.empty())
-		{
-			curve = new BezierCurveItem;
-			this->addToGroup(curve);
-			curves.push_back(curve);
-		}
-		else
-			curve = curves[0];
-
-		curve->setZValue(lines[0]->zValue());
-		curve->setPen(lines[0]->pen());
-		curve->setPoints(points, SelfRelCornerRadius * BaseObjectView::getScreenDpiFactor());
-
-		for(auto &line : lines)
-			line->setVisible(false);
-
-		//Removing any extra unused curves
-		while(curves.size() > 1)
-		{
-			curve = curves.back();
-			curves.pop_back();
-			this->removeFromGroup(curve);
-			delete curve;
-		}
-	}
-	else if(!use_curved_lines && !lines.empty() && !curves.empty())
-	{
-		BezierCurveItem *curve = nullptr;
-
-		for(auto &line : lines)
-			line->setVisible(true);
-
-		while(!curves.empty())
-		{
-			curve=curves.back();
-			curves.pop_back();
-			this->removeFromGroup(curve);
-			delete curve;
-		}
-	}
+	LineGeometry geom = computeLineGeometry();
+
+	//Configuring the relationship line, its connectors, end circles and curves
+	QPen pen = getLinePen();
+	configureConnectorLines(geom, pen);
+	configureLineSegments(geom.points, pen);
+	configureLineCircles(geom.p_central, pen);
+	configureCurves(geom);
 
 	this->configureDescriptor();
 
@@ -1285,6 +819,1713 @@ void RelationshipView::configureLine()
 
 	configuring_line=false;
 }
+
+void RelationshipView::swapIdentifierTables()
+{
+	Relationship *rel = dynamic_cast<Relationship *>(this->getUnderlyingObject());
+
+	if(rel &&
+		 rel->getRelationshipType() == Relationship::Relationship11 &&
+		 rel->isIdentifier())
+	{
+		tables[0] = dynamic_cast<BaseTableView *>(rel->getReferenceTable()->getOverlyingObject());
+		tables[1] = dynamic_cast<BaseTableView *>(rel->getReceiverTable()->getOverlyingObject());
+	}
+}
+
+RelationshipView::LineGeometry RelationshipView::computeLineGeometry()
+{
+	BaseRelationship *base_rel = this->getUnderlyingObject();
+	BaseRelationship::RelType rel_type = base_rel->getRelationshipType();
+	LineGeometry geom;
+
+	end_zones.clear();
+
+	if(base_rel->isSelfRelationship())
+	{
+		configureSelfRelGeometry(geom);
+		addEndPoints(geom);
+	}
+	else if(line_style == OrthogonalLines)
+		configureOrthogonalGeometry(geom);
+	else
+	{
+		bool rel_1n = (rel_type == Relationship::Relationship11 ||
+									 rel_type == Relationship::Relationship1n ||
+									 rel_type == Relationship::RelationshipFk);
+
+		swapIdentifierTables();
+
+		if(line_conn_mode == ConnectCenterPoints || line_conn_mode == ConnectTableEdges || !rel_1n)
+			configureCenterGeometry(geom);
+		else
+			configureFkToPkGeometry(geom);
+
+		geom.points = base_rel->getPoints();
+		configureGraphicPoints(geom.points);
+
+		if(line_conn_mode != ConnectTableEdges)
+			addEndPoints(geom);
+		else
+			configureTableEdgesGeometry(geom);
+	}
+
+	return geom;
+}
+
+void RelationshipView::configureSelfRelGeometry(LineGeometry &geom)
+{
+	BaseRelationship *base_rel = this->getUnderlyingObject();
+	double fnt_factor = font_config[Attributes::Global].font().pointSizeF() / DefaultFontSize,
+			pos_factor = 0, offset = 0;
+	unsigned rel_cnt = tables[0]->getConnectedRelsCount(base_rel->getTable(BaseRelationship::SrcTable),
+																											base_rel->getTable(BaseRelationship::DstTable));
+	QPointF pos = tables[0]->pos();
+	QRectF rect = tables[0]->boundingRect();
+
+	/* Sefl-relationshihp line format:
+
+				+----<>
+				|     |
+ ----------   |
+ | Table  |---+
+ ----------
+
+ This line cannot be moved or have points added */
+	if(rel_cnt > 1)
+	{
+		int idx = tables[0]->getConnectedRelationshipIndex(base_rel, true);
+		double min_val = std::min<double>(rect.width(), rect.height());
+
+		if(idx < 0) idx =0;
+		pos_factor = min_val * 0.08 * idx;
+	}
+
+	geom.p_central[0].setX(pos.x() + rect.width());
+	geom.p_central[0].setY(pos.y() + (rect.height() / 3.0) + pos_factor);
+	geom.p_central[1].setX(pos.x() + (rect.width() / 1.5) - pos_factor);
+	geom.p_central[1].setY(pos.y());
+
+	if(geom.p_central[0].y() > pos.y() + rect.height())
+		geom.p_central[0].setY(pos.y() + rect.height());
+
+	if(geom.p_central[1].x() < pos.x())
+		geom.p_central[1].setX(pos.x());
+
+	offset = use_crows_foot ? 30 : 20;
+
+	geom.points.push_back(QPointF(geom.p_central[0].x() + (offset * fnt_factor) + pos_factor,  geom.p_central[0].y()));
+	geom.points.push_back(QPointF(geom.p_central[0].x() + (offset * fnt_factor) + pos_factor,  geom.p_central[1].y() - (offset * fnt_factor) - pos_factor));
+	geom.points.push_back(QPointF(geom.p_central[1].x(),  geom.p_central[1].y() - (offset * fnt_factor) - pos_factor));
+
+	base_rel->setPoints(geom.points);
+}
+
+void RelationshipView::configureCenterGeometry(LineGeometry &geom)
+{
+	geom.p_central[BaseRelationship::SrcTable] = tables[BaseRelationship::SrcTable]->getCenter();
+	geom.p_central[BaseRelationship::DstTable] = tables[BaseRelationship::DstTable]->getCenter();
+
+	//Destroying the fk and pk connection lines when the line mode changes
+	removeConnectorLines();
+}
+
+void RelationshipView::configureFkToPkGeometry(LineGeometry &geom)
+{
+	BaseRelationship *base_rel = this->getUnderlyingObject();
+	Relationship *rel = dynamic_cast<Relationship *>(base_rel);
+	BaseRelationship::RelType rel_type = base_rel->getRelationshipType();
+	QPointF pnt;
+	QRectF rec_tab_rect, ref_tab_rect;
+	double fk_py = 0, pk_py = 0, fk_px = 0, pk_px = 0;
+	std::vector<Constraint *> fks;
+	Table *ref_tab = nullptr, *rec_tab = nullptr;
+	TableView *ref_tab_view = nullptr, *rec_tab_view = nullptr;
+	unsigned cnt = 0;
+	BaseTableView::ConnectionPoint pk_pnt_type = BaseTableView::LeftConnPoint,
+			fk_pnt_type = BaseTableView::LeftConnPoint;
+
+	if(!rel)
+	{
+		ref_tab = dynamic_cast<Table *>(base_rel->getTable(BaseRelationship::DstTable));
+		rec_tab = dynamic_cast<Table *>(base_rel->getTable(BaseRelationship::SrcTable));
+	}
+	else
+	{
+		ref_tab = dynamic_cast<Table *>(rel->getReferenceTable());
+		rec_tab = dynamic_cast<Table *>(rel->getReceiverTable());
+	}
+
+	ref_tab_view = dynamic_cast<TableView *>(ref_tab->getOverlyingObject());
+	rec_tab_view = dynamic_cast<TableView *>(rec_tab->getOverlyingObject());
+
+	/* We determine the fk to pk connections only if both tables are not fully collapsed.
+	 * Otherwise, the tables' center points are used as connection point of the relationship */
+	if(rec_tab->getCollapseMode() != BaseTable::AllAttribsCollapsed &&
+		 ref_tab->getCollapseMode() != BaseTable::AllAttribsCollapsed)
+	{
+		rec_tab->getForeignKeys(fks, true, ref_tab);
+
+		//Create the table's rectangles to detect where to connect the relationship
+		ref_tab_rect = QRectF(ref_tab_view->pos(), ref_tab_view->boundingRect().size());
+
+		//In this case the receiver table rect Y must be equal to reference table Y in order to do the correct comparison
+		rec_tab_rect = QRectF(QPointF(rec_tab_view->pos().x(),
+																	ref_tab_view->pos().y()), rec_tab_view->boundingRect().size());
+
+		getFkPkConnSides(ref_tab_rect, rec_tab_rect, pk_pnt_type, fk_pnt_type, geom.conn_same_sides);
+
+		for(auto &constr : fks)
+		{
+			cnt = constr->getColumnCount(Constraint::SourceCols);
+
+			for(unsigned i = 0; i < cnt; i++)
+			{
+				pnt = rec_tab_view->getConnectionPoints(constr->getColumn(i, Constraint::SourceCols), fk_pnt_type);
+				fk_py += pnt.y();
+				fk_px = pnt.x();
+				geom.fk_points.push_back(this->mapFromItem(rec_tab_view, pnt));
+
+				pnt = ref_tab_view->getConnectionPoints(constr->getColumn(i, Constraint::ReferencedCols), pk_pnt_type);
+				pk_py += pnt.y();
+				pk_px = pnt.x();
+				geom.pk_points.push_back(this->mapFromItem(ref_tab_view, pnt));
+			}
+		}
+	}
+
+	if(!fks.empty())
+	{
+		double pk_dx = (pk_pnt_type == BaseTableView::LeftConnPoint ? -ConnLineLength : ConnLineLength),
+				fk_dx = (fk_pnt_type == BaseTableView::LeftConnPoint ? -ConnLineLength : ConnLineLength);
+
+		geom.pk_pnt = this->mapFromItem(ref_tab_view, QPointF(pk_px + pk_dx, pk_py / geom.pk_points.size()));
+		geom.fk_pnt = this->mapFromItem(rec_tab_view, QPointF(fk_px + fk_dx, fk_py / geom.fk_points.size()));
+	}
+	else
+	{
+		/* Fallback configuration: if one of the tables are collapsed or if no fk was found in the
+		 * receiver table uses the tables' center points to configure the line in order to avoid glitched lines.
+		 * The second situation may happen when the relationship is being validated and the needed fk was not
+		 * created yet. In a second interaction of the rel. validation they are created
+		 * and the relationship line is properly configured */
+		geom.pk_pnt = ref_tab_view->getCenter();
+		geom.fk_pnt = rec_tab_view->getCenter();
+	}
+
+	if(rel_type == Relationship::RelationshipFk)
+	{
+		geom.p_central[1] = geom.pk_pnt;
+		geom.p_central[0] = geom.fk_pnt;
+	}
+	else
+	{
+		geom.p_central[0] = geom.pk_pnt;
+		geom.p_central[1] = geom.fk_pnt;
+	}
+
+	//The connector lines leave the tables horizontally, but only when the fk/pk columns were found
+	if(!fks.empty())
+	{
+		QPointF pk_dir((pk_pnt_type == BaseTableView::LeftConnPoint ? -1 : 1), 0),
+				fk_dir((fk_pnt_type == BaseTableView::LeftConnPoint ? -1 : 1), 0);
+
+		if(rel_type == Relationship::RelationshipFk)
+		{
+			geom.conn_dirs[1] = pk_dir;
+			geom.conn_dirs[0] = fk_dir;
+		}
+		else
+		{
+			geom.conn_dirs[0] = pk_dir;
+			geom.conn_dirs[1] = fk_dir;
+		}
+	}
+}
+
+void RelationshipView::addEndPoints(LineGeometry &geom)
+{
+	conn_points[0] = geom.p_central[0];
+	conn_points[1] = geom.p_central[1];
+
+	geom.points.insert(geom.points.begin(), geom.p_central[0]);
+	geom.points.push_back(geom.p_central[1]);
+}
+
+bool RelationshipView::hasEndDescriptors()
+{
+	BaseRelationship::RelType rel_type = this->getUnderlyingObject()->getRelationshipType();
+
+	return rel_type == BaseRelationship::Relationship11 ||
+				 rel_type == BaseRelationship::Relationship1n ||
+				 rel_type == BaseRelationship::RelationshipNn ||
+				 rel_type == BaseRelationship::RelationshipFk;
+}
+
+double RelationshipView::getEdgeSizeFactor(unsigned tab_idx)
+{
+	BaseRelationship *base_rel = this->getUnderlyingObject();
+	BaseRelationship::RelType rel_type = base_rel->getRelationshipType();
+	double font_factor = BaseObjectView::getFontFactor() * BaseObjectView::getScreenDpiFactor();
+
+	if(rel_type == BaseRelationship::RelationshipGen ||
+		 rel_type == BaseRelationship::RelationshipDep ||
+		 rel_type == BaseRelationship::RelationshipPart)
+		return 0.40;
+
+	if(!use_crows_foot)
+		return 0.65 * font_factor;
+
+	if(rel_type == BaseRelationship::RelationshipNn ||
+		 (tab_idx == 1 && rel_type == BaseRelationship::RelationshipFk) ||
+		 (tab_idx == 0 && rel_type == BaseRelationship::Relationship1n && base_rel->isTableMandatory(BaseRelationship::SrcTable)) ||
+		 (tab_idx == 0 && rel_type == BaseRelationship::Relationship11 && base_rel->isTableMandatory(BaseRelationship::SrcTable)) ||
+		 (tab_idx == 1 && rel_type == BaseRelationship::Relationship11 && base_rel->isTableMandatory(BaseRelationship::DstTable)))
+		return 1 * font_factor;
+
+	return 1.5 * font_factor;
+}
+
+double RelationshipView::getEdgeBorderFactor(unsigned tab_idx)
+{
+	BaseRelationship::RelType rel_type = this->getUnderlyingObject()->getRelationshipType();
+
+	if(use_crows_foot &&
+		 !(rel_type == BaseRelationship::RelationshipPart ||
+			 rel_type == BaseRelationship::RelationshipGen ||
+			 rel_type == BaseRelationship::RelationshipDep ||
+			 rel_type == BaseRelationship::Relationship11 ||
+			 (tab_idx == 0 && rel_type == BaseRelationship::Relationship1n) ||
+			 (tab_idx == 1 && rel_type == BaseRelationship::RelationshipFk)))
+		return ConnLineLength * 0.75;
+
+	return ConnLineLength * 0.30;
+}
+
+QPointF RelationshipView::configureEdgeConnection(unsigned tab_idx, const QLineF &line, LineGeometry &geom)
+{
+	BaseRelationship *base_rel = this->getUnderlyingObject();
+	QRectF brect(tables[tab_idx]->pos(), tables[tab_idx]->boundingRect().size());
+	QPolygonF pol(brect);
+	QLineF edge;
+	QPointF pi, center = tables[tab_idx]->getCenter();
+	double size_factor = getEdgeSizeFactor(tab_idx),
+			border_factor = getEdgeBorderFactor(tab_idx),
+			min_lim = 0, max_lim = 0, conn_rels_factor = 0;
+	unsigned conn_rels_cnt = tables[tab_idx]->getConnectedRelsCount(base_rel->getTable(BaseRelationship::SrcTable),
+																																	base_rel->getTable(BaseRelationship::DstTable));
+
+	conn_rels_factor = conn_rels_cnt == 1 ? 1 : 0.08 * (tables[tab_idx]->getConnectedRelationshipIndex(base_rel));
+
+	for(int idx = 0; idx < pol.size() - 1; idx++)
+	{
+		edge.setP1(pol.at(idx));
+		edge.setP2(pol.at(idx + 1));
+
+		if(line.intersects(edge, &pi) != QLineF::BoundedIntersection)
+			continue;
+
+		/* Adjusting the intersection point if there're more than one relationship connected the current table
+		 * this will cause all relationships to be aligned together */
+		if(conn_rels_cnt > 1)
+		{
+			double max_dim = std::max<double>(brect.height(), brect.width());
+			int signal = 0;
+
+			if(edge.dx() == 0)
+			{
+				signal = edge.dy()/fabs(edge.dy()) * (tab_idx == 0 ? 1 : -1);
+				pi.setY(pi.y() - ((conn_rels_factor * max_dim) * signal));
+
+				// Adjusting the position of the interesection point to make is as close to the center of the edge as possible
+				pi.setY(pi.y() + ((max_dim * 0.05) * signal));
+			}
+
+			if(edge.dy() == 0)
+			{
+				signal = edge.dx()/fabs(edge.dx()) * (tab_idx == 0 ? 1 : -1);
+				pi.setX(pi.x() - ((conn_rels_factor * max_dim) * signal));
+
+				// Adjusting the position of the interesection point to make is as close to the center of the edge as possible
+				pi.setX(pi.x() + ((max_dim * 0.05) * signal));
+			}
+		}
+
+		//Avoiding the line to be exposed in the rounded corners of the tables
+		if(edge.dx() == 0)
+		{
+			min_lim = brect.top() + border_factor;
+			max_lim = brect.bottom() - border_factor;
+
+			if(pi.y() < min_lim)
+				pi.setY(min_lim);
+			else if(pi.y() > max_lim)
+				pi.setY(max_lim);
+		}
+		else
+		{
+			min_lim = brect.left() + border_factor;
+			max_lim = brect.right() - border_factor;
+
+			if(pi.x() < min_lim)
+				pi.setX(min_lim);
+			else if(pi.x() > max_lim)
+				pi.setX(max_lim);
+		}
+
+		conn_points[tab_idx] = geom.p_central[tab_idx] = pi;
+
+		if(edge.dx() == 0)
+		{
+			if(pi.x() < center.x())
+				pi.setX(pi.x() - (ConnLineLength * size_factor));
+			else
+				pi.setX(pi.x() + (ConnLineLength * size_factor));
+
+			geom.conn_vert_sides[tab_idx] = true;
+		}
+		else
+		{
+			if(pi.y() < center.y())
+				pi.setY(pi.y() - (ConnLineLength * size_factor));
+			else
+				pi.setY(pi.y() + (ConnLineLength * size_factor));
+
+			geom.conn_horiz_sides[tab_idx] = true;
+		}
+
+		return pi;
+	}
+
+	return geom.p_central[tab_idx];
+}
+
+void RelationshipView::configureTableEdgesGeometry(LineGeometry &geom)
+{
+	QPointF p_aux[2];
+	QLineF line;
+
+	for(unsigned tab_idx = 0; tab_idx < 2; tab_idx++)
+	{
+		line = QLineF(tables[0]->getCenter(), tables[1]->getCenter());
+
+		//If the user added points, the line starts at the table's center and goes to the nearest point
+		if(!geom.points.empty())
+		{
+			if(tab_idx == 0)
+				line = QLineF(tables[0]->getCenter(), geom.points.front());
+			else
+				line = QLineF(tables[1]->getCenter(), geom.points.back());
+		}
+
+		p_aux[tab_idx] = configureEdgeConnection(tab_idx, line, geom);
+	}
+
+	geom.points.insert(geom.points.begin(), geom.p_central[0]);
+	geom.points.insert(geom.points.begin() + 1, p_aux[0]);
+
+	geom.points.push_back(p_aux[1]);
+	geom.points.push_back(geom.p_central[1]);
+}
+void RelationshipView::configureOrthogonalGeometry(LineGeometry &geom)
+{
+	BaseRelationship::RelType rel_type = this->getUnderlyingObject()->getRelationshipType();
+	bool rel_1n = (rel_type == Relationship::Relationship11 ||
+								 rel_type == Relationship::Relationship1n ||
+								 rel_type == Relationship::RelationshipFk);
+	double stubs[2] = { 0, 0 }, mid_shift = 0;
+
+	swapIdentifierTables();
+
+	if(line_conn_mode == ConnectFkToPk && rel_1n)
+		configureFkToPkGeometry(geom);
+	else
+	{
+		configureCenterGeometry(geom);
+
+		if(line_conn_mode == ConnectTableEdges)
+			configureOrthogonalEdges(geom, stubs, mid_shift);
+	}
+
+	//The points added by the user are ignored in orthogonal lines
+	configureGraphicPoints({});
+
+	conn_points[0] = geom.p_central[0];
+	conn_points[1] = geom.p_central[1];
+
+	geom.points = getOrthogonalRoute(geom.p_central[0], geom.conn_dirs[0], stubs[0],
+																	 geom.p_central[1], geom.conn_dirs[1], stubs[1], mid_shift);
+
+	direct_route = geom.points;
+
+	if(isObstacleAvoidanceEnabled())
+		geom.points = avoidObstacles(geom.points, geom.conn_dirs, stubs);
+
+	base_route = geom.points;
+	route_stubs[0] = stubs[0];
+	route_stubs[1] = stubs[1];
+	geom.points = applySegmentShifts(geom.points, stubs);
+}
+
+void RelationshipView::discardOutdatedSegmentShifts()
+{
+	constexpr double Tolerance = 0.01;
+	QRectF rect;
+	bool changed = false;
+
+	for(unsigned idx = 0; idx < 2; idx++)
+	{
+		rect = QRectF(tables[idx]->pos(), tables[idx]->boundingRect().size());
+
+		if(!shift_tab_rects[idx].isNull() &&
+			 (std::fabs(rect.x() - shift_tab_rects[idx].x()) > Tolerance ||
+				std::fabs(rect.y() - shift_tab_rects[idx].y()) > Tolerance ||
+				std::fabs(rect.width() - shift_tab_rects[idx].width()) > Tolerance ||
+				std::fabs(rect.height() - shift_tab_rects[idx].height()) > Tolerance))
+			changed = true;
+
+		shift_tab_rects[idx] = rect;
+	}
+
+	if(changed)
+		getUnderlyingObject()->resetSegmentShifts();
+}
+
+QRectF RelationshipView::getSegmentShiftLimits()
+{
+	double margin = ConnLineLength * BaseObjectView::getScreenDpiFactor();
+	QRectF limits = getRouteRect(base_route);
+
+	for(auto &tab : tables)
+		limits = limits.united(QRectF(tab->pos(), tab->boundingRect().size()));
+
+	return limits.adjusted(-margin, -margin, margin, margin);
+}
+
+double RelationshipView::clampSegmentShift(const std::vector<QPointF> &route, size_t idx, double shift,
+																					 const double *stubs, const QRectF &limits)
+{
+	constexpr double Epsilon = 0.01;
+	double min_len = RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
+			lo = 0, hi = 0, prev_len = 0, next_len = 0, prev_min = 0, next_min = 0;
+	size_t seg_cnt = route.size() - 1;
+	bool horiz = std::fabs(route[idx].y() - route[idx + 1].y()) < Epsilon;
+
+	if(idx < 1 || idx + 1 >= seg_cnt)
+		return 0;
+
+	// The neighbor segments are perpendicular to the displaced one, so their lengths are measured along the displacement axis
+	if(horiz)
+	{
+		lo = limits.top() - route[idx].y();
+		hi = limits.bottom() - route[idx].y();
+		prev_len = route[idx].y() - route[idx - 1].y();
+		next_len = route[idx + 2].y() - route[idx + 1].y();
+	}
+	else
+	{
+		lo = limits.left() - route[idx].x();
+		hi = limits.right() - route[idx].x();
+		prev_len = route[idx].x() - route[idx - 1].x();
+		next_len = route[idx + 2].x() - route[idx + 1].x();
+	}
+
+	prev_min = (idx == 1 ? std::max(min_len, stubs[0]) : min_len);
+	next_min = (idx + 2 == seg_cnt ? std::max(min_len, stubs[1]) : min_len);
+
+	// The previous segment ends at the displaced one and the next one starts at it
+	if(prev_len > 0)
+		lo = std::max(lo, prev_min - prev_len);
+	else
+		hi = std::min(hi, -prev_len - prev_min);
+
+	if(next_len > 0)
+		hi = std::min(hi, next_len - next_min);
+	else
+		lo = std::max(lo, next_len + next_min);
+
+	if(lo > hi)
+		return 0;
+
+	return std::clamp(shift, lo, hi);
+}
+
+int RelationshipView::pickSegment(const QPointF &pnt, bool &horiz)
+{
+	constexpr double Epsilon = 0.01;
+	double dist = 0, best_dist = LineSelStrokeWidth / 2;
+	QPointF p1, p2;
+	int seg_idx = -1;
+
+	if(line_style != OrthogonalLines || getUnderlyingObject()->isSelfRelationship() ||
+		 getUnderlyingObject()->isProtected() || base_route.size() < 4 || route_points.size() != base_route.size())
+		return -1;
+
+	// Only the inner segments can be moved, the first and the last ones are anchored to the tables
+	for(size_t idx = 1; idx + 2 < route_points.size(); idx++)
+	{
+		p1 = route_points[idx];
+		p2 = route_points[idx + 1];
+		bool seg_horiz = std::fabs(p1.y() - p2.y()) < Epsilon;
+
+		if(seg_horiz)
+		{
+			if(pnt.x() < std::min(p1.x(), p2.x()) || pnt.x() > std::max(p1.x(), p2.x()))
+				continue;
+
+			dist = std::fabs(pnt.y() - p1.y());
+		}
+		else
+		{
+			if(pnt.y() < std::min(p1.y(), p2.y()) || pnt.y() > std::max(p1.y(), p2.y()))
+				continue;
+
+			dist = std::fabs(pnt.x() - p1.x());
+		}
+
+		if(dist <= best_dist)
+		{
+			best_dist = dist;
+			seg_idx = idx;
+			horiz = seg_horiz;
+		}
+	}
+
+	return seg_idx;
+}
+
+bool RelationshipView::startSegmentDrag(const QPointF &pnt)
+{
+	drag_seg_idx = pickSegment(pnt, drag_horiz);
+
+	if(drag_seg_idx < 0)
+		return false;
+
+	drag_moved = false;
+	drag_ini_pos = pnt;
+	drag_ini_shift = drag_shift = (drag_horiz ? route_points[drag_seg_idx].y() - base_route[drag_seg_idx].y() :
+																							route_points[drag_seg_idx].x() - base_route[drag_seg_idx].x());
+
+	setCursor(drag_horiz ? Qt::SizeVerCursor : Qt::SizeHorCursor);
+	return true;
+}
+
+void RelationshipView::dragSegment(const QPointF &pnt)
+{
+	std::map<unsigned, BaseRelationship::SegmentShift> shifts = getUnderlyingObject()->getSegmentShifts();
+	std::vector<QPointF> preview;
+	double delta = (drag_horiz ? pnt.y() - drag_ini_pos.y() : pnt.x() - drag_ini_pos.x());
+
+	shifts[drag_seg_idx] = { (drag_horiz ? Qt::Horizontal : Qt::Vertical), drag_ini_shift + delta };
+	preview = applySegmentShifts(base_route, route_stubs, &shifts);
+
+	drag_shift = (drag_horiz ? preview[drag_seg_idx].y() - base_route[drag_seg_idx].y() :
+														 preview[drag_seg_idx].x() - base_route[drag_seg_idx].x());
+	drag_moved = true;
+
+	// The hops are discarded during the drag, they're calculated again when the line is reconfigured
+	curves[0]->setPoints(preview, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(), {},
+											 BumpRadius * BaseObjectView::getScreenDpiFactor(), curve_end_lens[0], curve_end_lens[1]);
+	configureBoundingRect();
+}
+
+void RelationshipView::finishSegmentDrag()
+{
+	BaseRelationship *base_rel = getUnderlyingObject();
+	std::map<unsigned, BaseRelationship::SegmentShift> shifts = base_rel->getSegmentShifts();
+	unsigned idx = drag_seg_idx;
+
+	drag_seg_idx = -1;
+	unsetCursor();
+
+	if(!drag_moved)
+		return;
+
+	if(std::fabs(drag_shift) < 0.01)
+		shifts.erase(idx);
+	else
+		shifts[idx] = { (drag_horiz ? Qt::Horizontal : Qt::Vertical), drag_shift };
+
+	base_rel->setSegmentShifts(shifts);
+	emit s_relationshipModified(base_rel);
+
+	/* While the objects are being moved the scene disables the obstacles avoidance, so the line is only
+	 * reconfigured (descriptors, labels, hops) after the scene finishes the movement */
+	QMetaObject::invokeMethod(this, [this](){ invalidateRoute(); }, Qt::QueuedConnection);
+}
+
+std::vector<QPointF> RelationshipView::applySegmentShifts(const std::vector<QPointF> &route, const double *stubs,
+																													 const std::map<unsigned, BaseRelationship::SegmentShift> *custom_shifts)
+{
+	constexpr double Epsilon = 0.01;
+	std::map<unsigned, BaseRelationship::SegmentShift> shifts =
+			(custom_shifts ? *custom_shifts : getUnderlyingObject()->getSegmentShifts());
+	std::vector<QPointF> result = route;
+	QRectF limits;
+	QPointF offset;
+	double shift = 0;
+	bool horiz = false;
+
+	if(shifts.empty() || route.size() < 4)
+		return route;
+
+	limits = getSegmentShiftLimits();
+
+	for(auto &itr : shifts)
+	{
+		// Only the inner segments are displaced, the first and the last ones are anchored to the tables
+		// The index comes from the model file: the sum is made with size_t to never wrap around
+		if(itr.first < 1 || static_cast<size_t>(itr.first) + 2 >= route.size())
+			continue;
+
+		horiz = std::fabs(result[itr.first].y() - result[itr.first + 1].y()) < Epsilon;
+
+		if(horiz != (itr.second.orientation == Qt::Horizontal))
+			continue;
+
+		shift = clampSegmentShift(result, itr.first, itr.second.value, stubs, limits);
+		offset = (horiz ? QPointF(0, shift) : QPointF(shift, 0));
+		result[itr.first] += offset;
+		result[itr.first + 1] += offset;
+	}
+
+	return result;
+}
+
+bool RelationshipView::getEdgeSide(const QRectF &rect, const QRectF &other_rect, bool &horiz, int &sign)
+{
+	double gap_x = std::max(other_rect.left() - rect.right(), rect.left() - other_rect.right()),
+			gap_y = std::max(other_rect.top() - rect.bottom(), rect.top() - other_rect.bottom());
+
+	//When the tables overlap there's no side to connect the line
+	if(gap_x <= 0 && gap_y <= 0)
+		return false;
+
+	/* The line leaves the tables through the facing sides along the axis of the greatest
+	 * gap between them: horizontal sides when they are side by side, vertical ones otherwise */
+	horiz = (gap_x >= gap_y);
+
+	if(horiz)
+		sign = (other_rect.center().x() >= rect.center().x() ? 1 : -1);
+	else
+		sign = (other_rect.center().y() >= rect.center().y() ? 1 : -1);
+
+	return true;
+}
+
+double RelationshipView::getEdgePreferredPos(const QRectF &rect, const QRectF &other_rect, bool horiz, double border)
+{
+	double lo = (horiz ? rect.top() : rect.left()),
+			hi = (horiz ? rect.bottom() : rect.right()),
+			overlap_lo = std::max(lo, (horiz ? other_rect.top() : other_rect.left())),
+			overlap_hi = std::min(hi, (horiz ? other_rect.bottom() : other_rect.right()));
+
+	/* If the tables overlap along the side's axis the line is connected inside the overlapping
+	 * area, which makes it straight, otherwise it is connected at the middle of the side */
+	if(overlap_hi - overlap_lo > border * 2)
+		return (overlap_lo + overlap_hi) / 2;
+
+	return (lo + hi) / 2;
+}
+
+double RelationshipView::getEdgeAnchorPos(unsigned tab_idx, bool horiz, int sign)
+{
+	struct Anchor {
+		BaseRelationship *rel;
+		double desired, other_pos;
+	};
+
+	BaseTableView *tab = tables[tab_idx], *other_tab = nullptr;
+	QRectF rect(tab->pos(), tab->boundingRect().size()), other_rect;
+	RelationshipView *rel_view = nullptr;
+	std::vector<Anchor> anchors;
+	std::vector<double> pos;
+	BaseRelationship *base_rel = this->getUnderlyingObject();
+	int rel_sign = 0, this_idx = -1;
+	bool rel_horiz = false;
+	double lo = (horiz ? rect.top() : rect.left()),
+			hi = (horiz ? rect.bottom() : rect.right()),
+			border = getEdgeBorderFactor(tab_idx),
+			min_lim = lo + border, max_lim = hi - border,
+			/* The crow's foot descriptors are about 20 units wide so their connection points need more room
+			 * than the plain lines, otherwise the descriptors of neighbor relationships overlap */
+			gap = ConnLineLength * (use_crows_foot ? 1.3 : 0.8) * BaseObjectView::getFontFactor() * BaseObjectView::getScreenDpiFactor(),
+			sum_desired = 0, sum_pos = 0;
+	size_t cnt = 0, cluster_start = 0;
+
+	/* Gathering all relationships connected to the same side of the table, including this one,
+	 * so they can be spread along the side instead of sharing the same connection point */
+	for(auto &rel : tab->connected_rels)
+	{
+		rel_view = dynamic_cast<RelationshipView *>(rel->getOverlyingObject());
+
+		if(!rel_view || rel->isSelfRelationship())
+			continue;
+
+		if(rel_view->tables[0] == tab)
+			other_tab = rel_view->tables[1];
+		else if(rel_view->tables[1] == tab)
+			other_tab = rel_view->tables[0];
+		else
+			continue;
+
+		other_rect = QRectF(other_tab->pos(), other_tab->boundingRect().size());
+
+		if(!getEdgeSide(rect, other_rect, rel_horiz, rel_sign) || rel_horiz != horiz || rel_sign != sign)
+			continue;
+
+		anchors.push_back({ rel,
+												getEdgePreferredPos(rect, other_rect, horiz,
+																						rel_view->getEdgeBorderFactor(rel_view->tables[0] == tab ? 0 : 1)),
+												(horiz ? other_rect.center().y() : other_rect.center().x()) });
+	}
+
+	/* Ordering the relationships by their preferred position and then by the position of the opposite
+	 * table, so the lines tend to not cross each other. The object id makes the order stable */
+	std::sort(anchors.begin(), anchors.end(), [](const Anchor &a1, const Anchor &a2) {
+		if(a1.desired != a2.desired)
+			return a1.desired < a2.desired;
+
+		if(a1.other_pos != a2.other_pos)
+			return a1.other_pos < a2.other_pos;
+
+		return a1.rel->getObjectId() < a2.rel->getObjectId();
+	});
+
+	cnt = anchors.size();
+	pos.resize(cnt);
+
+	for(size_t idx = 0; idx < cnt; idx++)
+	{
+		if(anchors[idx].rel == base_rel)
+			this_idx = idx;
+	}
+
+	if(this_idx < 0)
+		return std::clamp(getEdgePreferredPos(rect, QRectF(tables[tab_idx == 0 ? 1 : 0]->pos(),
+																											 tables[tab_idx == 0 ? 1 : 0]->boundingRect().size()),
+																					horiz, border), std::min(min_lim, max_lim), std::max(min_lim, max_lim));
+
+	if(max_lim < min_lim)
+		min_lim = max_lim = (lo + hi) / 2;
+
+	if(cnt > 1)
+		gap = std::min(gap, (max_lim - min_lim) / (cnt - 1));
+
+	/* Pushing apart the connection points that are too close to each other. Each group of points pushed
+	 * together is centered around the original (preferred) position of its members, which keeps
+	 * unrelated lines (e.g. straight ones) untouched */
+	for(size_t idx = 0; idx <= cnt; idx++)
+	{
+		if(idx < cnt && idx > 0 && anchors[idx].desired < pos[idx - 1] + gap)
+			pos[idx] = pos[idx - 1] + gap;
+		else
+		{
+			if(idx > cluster_start)
+			{
+				sum_desired = sum_pos = 0;
+
+				for(size_t cl_idx = cluster_start; cl_idx < idx; cl_idx++)
+				{
+					sum_desired += anchors[cl_idx].desired;
+					sum_pos += pos[cl_idx];
+				}
+
+				for(size_t cl_idx = cluster_start; cl_idx < idx; cl_idx++)
+					pos[cl_idx] += (sum_desired - sum_pos) / (idx - cluster_start);
+			}
+
+			if(idx < cnt)
+			{
+				cluster_start = idx;
+				pos[idx] = anchors[idx].desired;
+			}
+		}
+	}
+
+	//Keeping the connection points inside the side's limits and apart from each other
+	for(size_t idx = 0; idx < cnt; idx++)
+		pos[idx] = std::max(pos[idx], (idx == 0 ? min_lim : pos[idx - 1] + gap));
+
+	for(size_t idx = cnt; idx > 0; idx--)
+		pos[idx - 1] = std::min(pos[idx - 1], (idx == cnt ? max_lim : pos[idx] - gap));
+
+	return std::clamp(pos[this_idx], min_lim, max_lim);
+}
+
+void RelationshipView::configureOrthogonalEdges(LineGeometry &geom, double stubs[2], double &mid_shift)
+{
+	BaseRelationship *base_rel = this->getUnderlyingObject();
+	QRectF rects[2] = { QRectF(tables[0]->pos(), tables[0]->boundingRect().size()),
+											QRectF(tables[1]->pos(), tables[1]->boundingRect().size()) };
+	QPointF dirs[2];
+	bool horiz = false;
+	int sign = 0, rel_idx = 0;
+	unsigned conn_rels_cnt = tables[0]->getConnectedRelsCount(base_rel->getTable(BaseRelationship::SrcTable),
+																														base_rel->getTable(BaseRelationship::DstTable));
+	double ref_pos = 0, rel_shift = 0, perp_delta = 0, half_width = 0;
+	QPointF end_pnt;
+
+	//When the tables overlap the line keeps going through their centers
+	if(!getEdgeSide(rects[0], rects[1], horiz, sign))
+		return;
+
+	dirs[0] = (horiz ? QPointF(sign, 0) : QPointF(0, sign));
+	dirs[1] = -dirs[0];
+
+	for(unsigned idx = 0; idx < 2; idx++)
+	{
+		ref_pos = getEdgeAnchorPos(idx, horiz, (horiz ? dirs[idx].x() : dirs[idx].y()));
+
+		if(horiz)
+			geom.p_central[idx] = QPointF((dirs[idx].x() > 0 ? rects[idx].right() : rects[idx].left()), ref_pos);
+		else
+			geom.p_central[idx] = QPointF(ref_pos, (dirs[idx].y() > 0 ? rects[idx].bottom() : rects[idx].top()));
+
+		geom.conn_dirs[idx] = dirs[idx];
+		stubs[idx] = ConnLineLength * getEdgeSizeFactor(idx);
+
+		/* The crow's foot descriptors occupy the first part of the line segments at the ends. That part
+		 * is kept straight and the segments are extended so the corner's curve fits right after it */
+		if(use_crows_foot && hasEndDescriptors())
+		{
+			geom.end_lens[idx] = stubs[idx] * 1.2;
+			stubs[idx] = geom.end_lens[idx] + (RoundedCornerRadius * BaseObjectView::getScreenDpiFactor());
+
+			// The area of the descriptors: from the table's edge along the line, a little wider than the descriptor itself
+			half_width = 11 * BaseObjectView::getFontFactor() * BaseObjectView::getScreenDpiFactor();
+			end_pnt = geom.p_central[idx] + (dirs[idx] * geom.end_lens[idx]);
+
+			if(horiz)
+				end_zones.push_back(QRectF(QPointF(std::min(geom.p_central[idx].x(), end_pnt.x()), geom.p_central[idx].y() - half_width),
+																	 QPointF(std::max(geom.p_central[idx].x(), end_pnt.x()), geom.p_central[idx].y() + half_width)));
+			else
+				end_zones.push_back(QRectF(QPointF(geom.p_central[idx].x() - half_width, std::min(geom.p_central[idx].y(), end_pnt.y())),
+																	 QPointF(geom.p_central[idx].x() + half_width, std::max(geom.p_central[idx].y(), end_pnt.y()))));
+		}
+	}
+
+	/* Relationships between the same tables have their middle segments displaced from each other.
+	 * The displacement order depends on the direction of the line so the lines don't cross */
+	if(conn_rels_cnt > 1)
+	{
+		for(auto &rel : tables[0]->connected_rels)
+		{
+			if(rel == base_rel)
+				break;
+
+			if((rel->getTable(BaseRelationship::SrcTable) == base_rel->getTable(BaseRelationship::SrcTable) &&
+					rel->getTable(BaseRelationship::DstTable) == base_rel->getTable(BaseRelationship::DstTable)) ||
+				 (rel->getTable(BaseRelationship::SrcTable) == base_rel->getTable(BaseRelationship::DstTable) &&
+					rel->getTable(BaseRelationship::DstTable) == base_rel->getTable(BaseRelationship::SrcTable)))
+				rel_idx++;
+		}
+
+		perp_delta = (horiz ? geom.p_central[1].y() - geom.p_central[0].y() :
+													geom.p_central[1].x() - geom.p_central[0].x());
+		rel_shift = rel_idx - ((conn_rels_cnt - 1) / 2.0);
+		mid_shift = rel_shift * ConnLineLength * 0.5 * (perp_delta > 0 ? -1 : 1);
+	}
+}
+
+std::vector<QPointF> RelationshipView::cleanRoute(const std::vector<QPointF> &route)
+{
+	std::vector<QPointF> pts;
+	QPointF a, b;
+
+	// Removing the duplicated points as well as the intermediate ones of collinear segments
+	for(auto &pnt : route)
+	{
+		if(!pts.empty() && QLineF(pts.back(), pnt).length() < 0.01)
+			continue;
+
+		if(pts.size() >= 2)
+		{
+			a = pts[pts.size() - 2];
+			b = pts.back();
+
+			if(std::fabs(((b.x() - a.x()) * (pnt.y() - b.y())) - ((b.y() - a.y()) * (pnt.x() - b.x()))) < 0.01)
+				pts.pop_back();
+		}
+
+		pts.push_back(pnt);
+	}
+
+	if(pts.size() < 2 && !route.empty())
+		pts.push_back(route.back());
+
+	return pts;
+}
+
+QRectF RelationshipView::getRouteRect(const std::vector<QPointF> &route)
+{
+	double left = 0, top = 0, right = 0, bottom = 0;
+
+	if(route.empty())
+		return QRectF();
+
+	left = right = route.front().x();
+	top = bottom = route.front().y();
+
+	/* Not using QRectF::united() because it ignores the null rects (zero size),
+	 * which are the ones that represent the isolated points */
+	for(auto &pnt : route)
+	{
+		left = std::min(left, pnt.x());
+		right = std::max(right, pnt.x());
+		top = std::min(top, pnt.y());
+		bottom = std::max(bottom, pnt.y());
+	}
+
+	return { QPointF(left, top), QPointF(right, bottom) };
+}
+
+bool RelationshipView::isSegmentBlocked(const QPointF &p1, const QPointF &p2, const std::vector<QRectF> &obstacles)
+{
+	constexpr double Epsilon = 0.01;
+	double left = std::min(p1.x(), p2.x()), right = std::max(p1.x(), p2.x()),
+			top = std::min(p1.y(), p2.y()), bottom = std::max(p1.y(), p2.y());
+
+	/* A horizontal/vertical segment is blocked when it crosses the inside of an obstacle.
+	 * Segments that only touch the obstacle's borders are free, so they can run along them */
+	for(auto &rect : obstacles)
+	{
+		if(left < rect.right() - Epsilon && right > rect.left() + Epsilon &&
+			 top < rect.bottom() - Epsilon && bottom > rect.top() + Epsilon)
+			return true;
+	}
+
+	return false;
+}
+
+bool RelationshipView::isRouteBlocked(const std::vector<QPointF> &route, const std::vector<QRectF> &obstacles)
+{
+	for(size_t idx = 1; idx < route.size(); idx++)
+	{
+		if(isSegmentBlocked(route[idx - 1], route[idx], obstacles))
+			return true;
+	}
+
+	return false;
+}
+
+bool RelationshipView::isObstacleAvoidanceEnabled()
+{
+	ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene());
+
+	/* Without the scene there is no information about the other tables. Also, when the tables are being
+	 * moved and the relationships are updated at every step (no placeholders), the obstacles are
+	 * ignored to keep the movement fluid. The relationships are fixed when the movement ends */
+	return obj_scene && !(obj_scene->isMovingObjects() && !BaseObjectView::isPlaceholderEnabled());
+}
+
+std::vector<QRectF> RelationshipView::getObstacles(const QRectF &region)
+{
+	std::vector<QRectF> obstacles;
+	ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene());
+
+	if(!obj_scene)
+		return obstacles;
+
+	QRectF tab_rect;
+
+	for(auto &tab : obj_scene->getTableViews())
+	{
+		if(tab == tables[0] || tab == tables[1] || !tab->isVisible())
+			continue;
+
+		// The area of a table includes the rects of the layers (when visible) drawn around it
+		tab_rect = obj_scene->getObjectLayersRect(tab);
+
+		if(tab_rect.intersects(region))
+			obstacles.push_back(tab_rect);
+	}
+
+	return obstacles;
+}
+
+bool RelationshipView::isRouteNear(const QRectF &region) const
+{
+	if(route_points.size() < 2)
+		return true;
+
+	/* A line that goes around a table doesn't need to pass close to it, so the route it would take
+	 * without the obstacles is checked too. The segments are horizontal or vertical, so their
+	 * bounding boxes are the segments themselves */
+	for(auto &route : { std::cref(route_points), std::cref(direct_route) })
+	{
+		for(size_t idx = 0; idx + 1 < route.get().size(); idx++)
+		{
+			const QPointF &p1 = route.get()[idx], &p2 = route.get()[idx + 1];
+
+			if(std::max(p1.x(), p2.x()) >= region.left() && std::min(p1.x(), p2.x()) <= region.right() &&
+				 std::max(p1.y(), p2.y()) >= region.top() && std::min(p1.y(), p2.y()) <= region.bottom())
+				return true;
+		}
+	}
+
+	return false;
+}
+
+std::vector<QRectF> RelationshipView::getEndZones(const QRectF &region)
+{
+	std::vector<QRectF> zones;
+	ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene());
+
+	if(!obj_scene)
+		return zones;
+
+	for(auto &rel_view : obj_scene->getRelationshipViews())
+	{
+		if(rel_view == this || rel_view->end_zones.empty() || !rel_view->isVisible())
+			continue;
+
+		for(auto &zone : rel_view->end_zones)
+		{
+			if(zone.intersects(region))
+				zones.push_back(zone.adjusted(-ZoneClearance, -ZoneClearance, ZoneClearance, ZoneClearance));
+		}
+	}
+
+	return zones;
+}
+
+std::vector<QPointF> RelationshipView::findOrthogonalPath(const QPointF &start, const QPointF &goal, int start_dir, int goal_dir,
+																													const std::vector<QRectF> &obstacles)
+{
+	/* Search of the best path on the grid formed by the coordinates of the obstacles' borders (Hanan grid).
+	 * The cost of a path is its length plus a penalty for each bend. The state of the search is the grid
+	 * node plus the direction of the last move, which allows the bends to be accounted for. */
+	constexpr double BendPenalty = 50;
+	constexpr size_t MaxNodes = 40000;
+	const int dx[4] = { 1, 0, -1, 0 }, dy[4] = { 0, 1, 0, -1 };
+
+	struct QueueItem {
+		double f, g;
+		int state;
+
+		bool operator < (const QueueItem &item) const {
+			if(f != item.f)
+				return f > item.f;
+
+			if(g != item.g)
+				return g < item.g;
+
+			return state > item.state;
+		}
+	};
+
+	auto unique_coords = [](std::vector<double> &coords) {
+		std::sort(coords.begin(), coords.end());
+		coords.erase(std::unique(coords.begin(), coords.end(), [](double c1, double c2) {
+			return std::fabs(c1 - c2) < 0.01;
+		}), coords.end());
+	};
+
+	auto index_of = [](const std::vector<double> &coords, double value) {
+		return static_cast<int>(std::lower_bound(coords.begin(), coords.end(), value - 0.01) - coords.begin());
+	};
+
+	std::vector<double> xs { start.x(), goal.x() }, ys { start.y(), goal.y() }, dist;
+	std::vector<int> parent;
+	std::priority_queue<QueueItem> queue;
+	std::vector<QPointF> path;
+
+	for(auto &rect : obstacles)
+	{
+		xs.push_back(rect.left());
+		xs.push_back(rect.right());
+		ys.push_back(rect.top());
+		ys.push_back(rect.bottom());
+	}
+
+	unique_coords(xs);
+	unique_coords(ys);
+
+	int nx = xs.size(), ny = ys.size(),
+			start_x = index_of(xs, start.x()), start_y = index_of(ys, start.y()),
+			goal_x = index_of(xs, goal.x()), goal_y = index_of(ys, goal.y());
+
+	if(static_cast<size_t>(nx) * ny > MaxNodes)
+		return path;
+
+	/* The grid edges crossing the inside of an obstacle are marked once, per obstacle, so the search
+	 * doesn't need to go through all obstacles for each edge it examines. The edge tests are the same
+	 * ones used by isSegmentBlocked. Horizontal edge (ix, iy) links the nodes (ix, iy) and (ix + 1, iy);
+	 * vertical edge (ix, iy) links the nodes (ix, iy) and (ix, iy + 1) */
+	constexpr double Epsilon = 0.01;
+	std::vector<char> h_blocked((nx > 1 ? nx - 1 : 0) * static_cast<size_t>(ny), 0),
+										v_blocked(static_cast<size_t>(nx) * (ny > 1 ? ny - 1 : 0), 0);
+
+	auto first_above = [](const std::vector<double> &coords, double value) {
+		return static_cast<int>(std::upper_bound(coords.begin(), coords.end(), value) - coords.begin());
+	};
+
+	auto first_not_below = [](const std::vector<double> &coords, double value) {
+		return static_cast<int>(std::lower_bound(coords.begin(), coords.end(), value) - coords.begin());
+	};
+
+	for(auto &rect : obstacles)
+	{
+		/* Nodes strictly inside the obstacle on each axis (inner_x/inner_y) and the nodes where an edge
+		 * that starts on them still reaches the inside of the obstacle (the previous node is included) */
+		int inner_x_ini = first_above(xs, rect.left() + Epsilon), inner_x_end = first_not_below(xs, rect.right() - Epsilon) - 1,
+				inner_y_ini = first_above(ys, rect.top() + Epsilon), inner_y_end = first_not_below(ys, rect.bottom() - Epsilon) - 1;
+
+		for(int iy = inner_y_ini; iy <= inner_y_end; iy++)
+		{
+			for(int ix = std::max(inner_x_ini - 1, 0); ix <= std::min(inner_x_end, nx - 2); ix++)
+				h_blocked[iy * (nx - 1) + ix] = 1;
+		}
+
+		for(int ix = inner_x_ini; ix <= inner_x_end; ix++)
+		{
+			for(int iy = std::max(inner_y_ini - 1, 0); iy <= std::min(inner_y_end, ny - 2); iy++)
+				v_blocked[iy * nx + ix] = 1;
+		}
+	}
+
+	dist.assign(nx * ny * 4, std::numeric_limits<double>::infinity());
+	parent.assign(nx * ny * 4, -1);
+
+	auto push_state = [&](int ix, int iy, int dir, double g, int from) {
+		int state = ((iy * nx) + ix) * 4 + dir;
+
+		if(g >= dist[state])
+			return;
+
+		dist[state] = g;
+		parent[state] = from;
+		queue.push({ g + std::fabs(xs[ix] - goal.x()) + std::fabs(ys[iy] - goal.y()), g, state });
+	};
+
+	if(start_dir >= 0)
+		push_state(start_x, start_y, start_dir, 0, -1);
+	else
+	{
+		for(int dir = 0; dir < 4; dir++)
+			push_state(start_x, start_y, dir, 0, -1);
+	}
+
+	while(!queue.empty())
+	{
+		QueueItem item = queue.top();
+		queue.pop();
+
+		if(item.g > dist[item.state])
+			continue;
+
+		int cur_dir = item.state % 4, node = item.state / 4,
+				ix = node % nx, iy = node / nx;
+
+		if(ix == goal_x && iy == goal_y)
+		{
+			for(int state = item.state; state >= 0; state = parent[state])
+				path.push_back(QPointF(xs[(state / 4) % nx], ys[(state / 4) / nx]));
+
+			std::reverse(path.begin(), path.end());
+			return path;
+		}
+
+		for(int dir = 0; dir < 4; dir++)
+		{
+			int new_x = ix + dx[dir], new_y = iy + dy[dir];
+			double cost = 0;
+
+			// Going back to where the line came from is never part of a best path
+			if(dir == (cur_dir + 2) % 4 || new_x < 0 || new_x >= nx || new_y < 0 || new_y >= ny)
+				continue;
+
+			QPointF p1(xs[ix], ys[iy]), p2(xs[new_x], ys[new_y]);
+
+			// The edge between the nodes is the one indexed by the lower of them on the axis of the movement
+			if(dy[dir] == 0 ? h_blocked[iy * (nx - 1) + std::min(ix, new_x)] : v_blocked[std::min(iy, new_y) * nx + ix])
+				continue;
+
+			cost = item.g + std::fabs(p2.x() - p1.x()) + std::fabs(p2.y() - p1.y()) + (dir != cur_dir ? BendPenalty : 0);
+
+			// The line must arrive at the goal in the direction that links it to the table
+			if(new_x == goal_x && new_y == goal_y && goal_dir >= 0 && dir != goal_dir)
+				cost += BendPenalty;
+
+			push_state(new_x, new_y, dir, cost, item.state);
+		}
+	}
+
+	return path;
+}
+
+std::vector<QPointF> RelationshipView::avoidObstacles(const std::vector<QPointF> &route, const QPointF *dirs, const double *stubs)
+{
+	constexpr size_t MaxObstacles = 80;
+	const double regions_margins[2] = { 150, 600 };
+	double clearance = ConnLineLength * 0.75, exit_len = 0;
+	QRectF route_rect, region;
+	std::vector<QRectF> obstacles, all_obstacles;
+	std::vector<QPointF> path, result;
+	QPointF ends[2];
+	int dir_ids[2] = { -1, -1 };
+
+	if(route.size() < 2)
+		return route;
+
+	// Converting the directions (unit vectors) to the indexes used by the path search
+	for(int idx = 0; idx < 2; idx++)
+	{
+		if(dirs[idx].x() > 0)
+			dir_ids[idx] = 0;
+		else if(dirs[idx].y() > 0)
+			dir_ids[idx] = 1;
+		else if(dirs[idx].x() < 0)
+			dir_ids[idx] = 2;
+		else if(dirs[idx].y() < 0)
+			dir_ids[idx] = 3;
+	}
+
+	/* The obstacles are the tables, with the clearance around them, plus the end zones
+	 * (crow's foot areas) of the other relationships */
+	auto get_all_obstacles = [&](const QRectF &rgn) {
+		std::vector<QRectF> rects = getObstacles(rgn), zones = getEndZones(rgn);
+
+		for(auto &rect : rects)
+			rect.adjust(-clearance, -clearance, clearance, clearance);
+
+		rects.insert(rects.end(), zones.begin(), zones.end());
+		return rects;
+	};
+
+	route_rect = getRouteRect(route);
+
+	for(int attempt = 0; attempt < 2; attempt++)
+	{
+		region = route_rect.adjusted(-regions_margins[attempt], -regions_margins[attempt],
+																 regions_margins[attempt], regions_margins[attempt]);
+		obstacles = get_all_obstacles(region);
+
+		// If the route doesn't touch any obstacle there's nothing to do
+		if(attempt == 0 && !isRouteBlocked(route, obstacles))
+			return route;
+
+		if(obstacles.size() > MaxObstacles)
+			return route;
+
+		/* The tables linked by the relationship are also obstacles for the search, otherwise the path could go
+		 * through them. The exception is when the line is not connected to the table's border (no direction),
+		 * which happens when it is connected to the table's center */
+		all_obstacles = obstacles;
+
+		for(int idx = 0; idx < 2; idx++)
+		{
+			if(dir_ids[idx] >= 0)
+			{
+				all_obstacles.push_back(QRectF(tables[idx]->pos(), tables[idx]->boundingRect().size()).
+																adjusted(-clearance, -clearance, clearance, clearance));
+			}
+		}
+
+		/* The search starts and ends away from the tables so there's room for the segments
+		 * at the ends of the line (e.g. the crow's foot descriptors) */
+		for(int idx = 0; idx < 2; idx++)
+		{
+			exit_len = (dir_ids[idx] >= 0 ? std::max(stubs[idx], clearance + 2) : 0);
+			ends[idx] = (idx == 0 ? route.front() : route.back()) + (dirs[idx] * exit_len);
+		}
+
+		/* The line arrives at the second table moving against its direction, which is the reverse
+		 * of the direction the line leaves that table */
+		path = findOrthogonalPath(ends[0], ends[1], dir_ids[0], (dir_ids[1] >= 0 ? (dir_ids[1] + 2) % 4 : -1), all_obstacles);
+
+		if(path.empty())
+			continue;
+
+		result.clear();
+		result.push_back(route.front());
+		result.insert(result.end(), path.begin(), path.end());
+		result.push_back(route.back());
+		result = cleanRoute(result);
+
+		// The found path must not touch obstacles outside the region used in the search
+		obstacles = get_all_obstacles(getRouteRect(result));
+
+		if(!isRouteBlocked(result, obstacles))
+			return result;
+	}
+
+	return route;
+}
+
+std::vector<QPointF> RelationshipView::getOrthogonalRoute(QPointF p0, QPointF dir0, double stub0,
+																													 QPointF p1, QPointF dir1, double stub1, double mid_shift)
+{
+	auto swap_xy = [](const QPointF &pnt) { return QPointF(pnt.y(), pnt.x()); };
+	bool horiz0 = (dir0.x() != 0 && dir0.y() == 0), horiz1 = (dir1.x() != 0 && dir1.y() == 0),
+			vert0 = (dir0.x() == 0 && dir0.y() != 0), vert1 = (dir1.x() == 0 && dir1.y() != 0);
+	std::vector<QPointF> route;
+	double dist = 0, mid = 0, margin = 0;
+
+	/* When the directions are unknown or incompatible (one horizontal and the other vertical)
+	 * the line leaves the tables along the axis with the greatest distance between the points */
+	if(!((horiz0 && horiz1) || (vert0 && vert1)))
+	{
+		double dx = p1.x() - p0.x(), dy = p1.y() - p0.y();
+
+		if(std::fabs(dx) >= std::fabs(dy))
+			dir0 = QPointF((dx >= 0 ? 1 : -1), 0);
+		else
+			dir0 = QPointF(0, (dy >= 0 ? 1 : -1));
+
+		dir1 = -dir0;
+		stub0 = stub1 = 0;
+	}
+
+	/* The route is always calculated for horizontal directions, the vertical
+	 * ones are calculated by swapping the coordinates and swapping them back at the end */
+	bool transposed = (dir0.x() == 0);
+
+	if(transposed)
+	{
+		p0 = swap_xy(p0);
+		p1 = swap_xy(p1);
+		dir0 = swap_xy(dir0);
+		dir1 = swap_xy(dir1);
+	}
+
+	dist = (p1.x() - p0.x()) * dir0.x();
+
+	// The line leaves the tables in opposite directions: the middle segment lies between the points
+	if(dir0.x() * dir1.x() < 0)
+	{
+		mid = (dist / 2) + mid_shift;
+
+		// Keeps room for the segments at the ends of the line (crow's foot) when the points allow it
+		if(dist >= stub0 + stub1)
+			mid = std::clamp(mid, stub0, dist - stub1);
+
+		mid = p0.x() + (dir0.x() * mid);
+	}
+	// The line leaves the tables at the same side: the middle segment goes around the points
+	else
+	{
+		margin = std::max({ stub0, stub1, ConnLineLength * 0.5 });
+
+		if(dir0.x() > 0)
+			mid = std::max(p0.x(), p1.x()) + margin;
+		else
+			mid = std::min(p0.x(), p1.x()) - margin;
+
+		mid += dir0.x() * mid_shift;
+	}
+
+	route = { p0, QPointF(mid, p0.y()), QPointF(mid, p1.y()), p1 };
+
+	if(transposed)
+	{
+		for(auto &pnt : route)
+			pnt = swap_xy(pnt);
+	}
+
+	return cleanRoute(route);
+}
+
+void RelationshipView::removeConnectorLines()
+{
+	trimGroupItems(this, fk_lines, 0);
+	trimGroupItems(this, pk_lines, 0);
+}
+
+void RelationshipView::configureGraphicPoints(const std::vector<QPointF> &points)
+{
+	QGraphicsPolygonItem *pol = nullptr;
+	QPolygonF pol_aux;
+	unsigned count = points.size();
+
+	pol_aux.append(QPointF(0,0)); pol_aux.append(QPointF(6,0));
+	pol_aux.append(QPointF(6,6)); pol_aux.append(QPointF(0,6));
+
+	for(unsigned i = 0; i < count; i++)
+	{
+		if(i >= graph_points.size())
+		{
+			pol = new QGraphicsPolygonItem;
+			graph_points.push_back(pol);
+			pol->setZValue(0);
+			pol->setPolygon(pol_aux);
+			pol->setBrush(BaseObjectView::getFillStyle(Attributes::ObjSelection));
+			pol->setPen(BaseObjectView::getBorderStyle(Attributes::ObjSelection));
+			this->addToGroup(pol);
+		}
+		else
+			pol = graph_points[i];
+
+		pol->setPos(points[i]);
+		pol->moveBy(-GraphicPointRadius/2, -GraphicPointRadius/2);
+		pol->setVisible(this->isSelected());
+	}
+
+	//Destroy the graphical points not used
+	trimGroupItems(this, graph_points, count);
+}
+
+QPen RelationshipView::getLinePen()
+{
+	BaseRelationship *base_rel = this->getUnderlyingObject();
+	BaseRelationship::RelType rel_type = base_rel->getRelationshipType();
+	QPen pen;
+
+	pen.setCapStyle(Qt::RoundCap);
+
+	//If the relationship is selected we do not change the lines colors
+	if(this->isSelected() && !lines.empty())
+		pen = lines[0]->pen();
+	else
+	{
+		//Configuring the relationship line color
+		if(base_rel->getCustomColor() != Qt::transparent)
+			//Using custom color
+			pen.setColor(base_rel->getCustomColor());
+		else
+			//Using the default color
+			pen = BaseObjectView::getBorderStyle(Attributes::Relationship);
+	}
+
+	//For dependency/partition relationships the line is dashed
+	if(rel_type == BaseRelationship::RelationshipDep ||
+		 rel_type == BaseRelationship::RelationshipPart)
+		pen.setStyle(Qt::DashLine);
+
+	pen.setWidthF(getDefaultPenWidth());
+
+	return pen;
+}
+
+void RelationshipView::configureConnectorLines(const LineGeometry &geom, const QPen &pen)
+{
+	if(line_conn_mode != ConnectFkToPk)
+		return;
+
+	QGraphicsLineItem *lin = nullptr;
+	QPointF ref_points[2] = { geom.fk_pnt, geom.pk_pnt };
+	const std::vector<QPointF> *ref_pnt_vects[2] = { &geom.fk_points, &geom.pk_points };
+	std::vector<QGraphicsLineItem *> *ref_lines[2] = { &fk_lines, &pk_lines };
+	const std::vector<QPointF> *ref_pnt = nullptr;
+	std::vector<QGraphicsLineItem *> *ref_lin = nullptr;
+	unsigned count = 0;
+
+	for(unsigned vet_idx = 0; vet_idx < 2; vet_idx++)
+	{
+		ref_pnt = ref_pnt_vects[vet_idx];
+		ref_lin = ref_lines[vet_idx];
+		count = ref_pnt->size();
+
+		for(unsigned i = 0; i < count; i++)
+		{
+			if(i >= ref_lin->size())
+			{
+				lin = new QGraphicsLineItem;
+				lin->setZValue(-1);
+				ref_lin->push_back(lin);
+				this->addToGroup(lin);
+			}
+			else
+				lin = ref_lin->at(i);
+
+			lin->setLine(QLineF(ref_pnt->at(i), ref_points[vet_idx]));
+			lin->setPen(pen);
+		}
+
+		//Destroy the unused pk or fk lines
+		trimGroupItems(this, *ref_lin, count);
+	}
+}
+
+void RelationshipView::configureLineSegments(const std::vector<QPointF> &points, const QPen &pen)
+{
+	QGraphicsLineItem *lin = nullptr;
+	unsigned seg_cnt = points.size() - 1;
+
+	//Create the relationship lines
+	for(unsigned i = 0; i < seg_cnt; i++)
+	{
+		if(i >= lines.size())
+		{
+			lin = new QGraphicsLineItem;
+			lin->setZValue(-1);
+			lines.push_back(lin);
+			this->addToGroup(lin);
+		}
+		else
+			lin = lines[i];
+
+		lin->setLine(QLineF(points[i], points[i+1]));
+		lin->setPen(pen);
+	}
+
+	//Removing unused lines
+	if(!this->getUnderlyingObject()->isSelfRelationship())
+		trimGroupItems(this, lines, seg_cnt);
+}
+
+bool RelationshipView::isLineEndCirclesVisible()
+{
+	BaseRelationship *base_rel = this->getUnderlyingObject();
+	BaseRelationship::RelType rel_type = base_rel->getRelationshipType();
+
+	if(base_rel->isSelfRelationship())
+		return false;
+
+	if(line_conn_mode == ConnectCenterPoints && !use_crows_foot)
+		return true;
+
+	return line_conn_mode != ConnectTableEdges &&
+				 (rel_type == BaseRelationship::RelationshipDep ||
+					rel_type == BaseRelationship::RelationshipGen ||
+					rel_type == BaseRelationship::RelationshipPart ||
+					(rel_type == BaseRelationship::RelationshipNn && !use_crows_foot));
+}
+
+void RelationshipView::configureLineCircles(const QPointF *p_central, const QPen &pen)
+{
+	//Exposing the line ending circles
+	if(isLineEndCirclesVisible())
+	{
+		for(unsigned i = 0; i < 2; i++)
+		{
+			line_circles[i]->setVisible(true);
+			line_circles[i]->setPen(pen);
+			line_circles[i]->setBrush(pen.color());
+			line_circles[i]->setPos(p_central[i] - QPointF(GraphicPointRadius/2, GraphicPointRadius/2));
+		}
+	}
+	else
+	{
+		line_circles[0]->setVisible(false);
+		line_circles[1]->setVisible(false);
+	}
+}
+
+void RelationshipView::configureCurves(const LineGeometry &geom)
+{
+	//Using bezier curves instead of straight lines to denote the relationship line
+	if(line_style != StraightLines)
+	{
+		if(line_style == OrthogonalLines || this->getUnderlyingObject()->isSelfRelationship())
+			configurePolylineCurve(geom.points, geom.end_lens[0], geom.end_lens[1]);
+		else
+			configureCurvedLines(geom);
+	}
+	else if(!lines.empty() && !curves.empty())
+		removeCurves();
+}
+
+void RelationshipView::configureCurvedLines(const LineGeometry &geom)
+{
+	route_points.clear();
+	bumps.clear();
+
+	BezierCurveItem *curve = nullptr;
+	bool invert_cpoints = false, simple_curve = false;
+	unsigned i = 0;
+
+	for(auto &line : lines)
+	{
+		if(i >= curves.size())
+		{
+			curve = new BezierCurveItem;
+			curve->setZValue(line->zValue());
+			this->addToGroup(curve);
+			curves.push_back(curve);
+		}
+		else
+			curve = curves[i];
+
+		i++;
+
+		/* Creates simple a curved line in the following situations:
+		 * 1) The crow's foot is not enabled but the relationship connects in the same sides on tables (conn_same_sides)
+		 * 2) The crow's foot is enabled and one of the connection point is not in the horizontal edges of one of the tables (conn_horiz_sides) */
+
+		/* We invert the curve's bounding rect when crow's foot is enabled and the relationship connects
+		 * at the top/bottom edges of both tables */
+		simple_curve = (geom.conn_same_sides && lines.size() == 1) ||
+									 (geom.conn_horiz_sides[0] != geom.conn_horiz_sides[1] && lines.size() == 3);
+
+		if(!simple_curve)
+			invert_cpoints = (geom.conn_horiz_sides[0] && geom.conn_horiz_sides[1] && lines.size() == 3);
+		else
+			invert_cpoints = (!geom.conn_horiz_sides[0] && geom.conn_horiz_sides[1] &&
+												geom.conn_vert_sides[0] && !geom.conn_vert_sides[1]);
+
+		curve->setLine(line->line(), simple_curve, invert_cpoints);
+		curve->setPen(line->pen());
+		line->setVisible(false);
+	}
+
+	//Removing unused curves
+	trimGroupItems(this, curves, lines.size());
+}
+
+/* Keeps the straight horizontal/vertical segments of the line (self-relationship loops and
+ * orthogonal lines) but rounds off the corners where they meet instead of drawing sharp right
+ * angles: a single curve item traces the whole line, with a quadratic curve (control point at
+ * the corner itself) taking over from the straight segments near each turn. */
+void RelationshipView::configurePolylineCurve(const std::vector<QPointF> &points, double start_len, double end_len)
+{
+	BezierCurveItem *curve = nullptr;
+
+	if(curves.empty())
+	{
+		curve = new BezierCurveItem;
+		this->addToGroup(curve);
+		curves.push_back(curve);
+	}
+	else
+		curve = curves[0];
+
+	/* The route of the orthogonal lines is stored so the bumps (hops over the lines crossing
+	 * this one) can be applied by the scene later. They're discarded if the route changes */
+	if(line_style == OrthogonalLines)
+	{
+		if(route_points != points)
+			bumps.clear();
+
+		route_points = points;
+	}
+	else
+	{
+		route_points.clear();
+		bumps.clear();
+	}
+
+	curve_end_lens[0] = start_len;
+	curve_end_lens[1] = end_len;
+
+	curve->setZValue(lines[0]->zValue());
+	curve->setPen(lines[0]->pen());
+	curve->setPoints(points, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
+									 bumps, BumpRadius * BaseObjectView::getScreenDpiFactor(),
+									 curve_end_lens[0], curve_end_lens[1]);
+
+	for(auto &line : lines)
+		line->setVisible(false);
+
+	//Removing any extra unused curves
+	trimGroupItems(this, curves, 1);
+
+	if(line_style == OrthogonalLines)
+		notifyRouteChanged();
+}
+
+void RelationshipView::removeCurves()
+{
+	route_points.clear();
+	bumps.clear();
+
+	for(auto &line : lines)
+		line->setVisible(true);
+
+	trimGroupItems(this, curves, 0);
+}
+
 
 void RelationshipView::configureToolTip()
 {
@@ -2110,7 +3351,7 @@ void RelationshipView::configureBoundingRect()
 	QPainterPathStroker ps;
 	ps.setWidth(LineSelStrokeWidth);
 
-	if(!use_curved_lines)
+	if(line_style == StraightLines)
 	{
 		QPainterPath ln_path;
 

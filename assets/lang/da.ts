@@ -953,13 +953,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Grundlæggende relation</translation>
     </message>
-    <message numerus="yes">
-        <source>new_object</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1111,10 +1104,6 @@ Det deaktiverer koden for alle underordnede og afhængige objekter.</translation
         <source>Copy</source>
         <translation>Kopi</translation>
     </message>
-    <message>
-        <source>rel_%1_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1225,30 +1214,6 @@ Det deaktiverer koden for alle underordnede og afhængige objekter.</translation
     <message>
         <source>Assignment</source>
         <translation>Tildeling</translation>
-    </message>
-</context>
-<context>
-    <name>Catalog</name>
-    <message numerus="yes">
-        <source>Object type: %1</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>The catalog query returned more than one OID!</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>Object type: server</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
     </message>
 </context>
 <context>
@@ -3402,7 +3367,7 @@ Refererede kolonner: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Demoversionen kan kun oprette `%1&apos; instanser af hver objekttype. Denne grænse er nået for typen: `%2&apos;</translation>
+        <translation>Demoversionen kan kun oprette `%1&apos; instanser af hver objekttype. Denne grænse er nået for typen: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -7188,7 +7153,7 @@ Meddelelse returneret af DBMS&apos;en: `%1&apos;</translation>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation>pgModeler Plus-licensen kunne ikke valideres. Du skal validere den i den grafiske brugerflade, før du bruger kommandolinjegrænsefladen.</translation>
+        <translation type="vanished">pgModeler Plus-licensen kunne ikke valideres. Du skal validere den i den grafiske brugerflade, før du bruger kommandolinjegrænsefladen.</translation>
     </message>
     <message>
         <source>License error code: %1</source>
@@ -7196,11 +7161,23 @@ Meddelelse returneret af DBMS&apos;en: `%1&apos;</translation>
     </message>
     <message>
         <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation>Kommandolinjegrænsefladen er ikke tilgængelig i prøveversionen. Opgrader din licens for at bruge den.</translation>
+        <translation type="vanished">Kommandolinjegrænsefladen er ikke tilgængelig i prøveversionen. Opgrader din licens for at bruge den.</translation>
     </message>
     <message>
         <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation>Perioden for offlinebrug er udløbet. Du skal validere licensen i den grafiske brugerflade for at fortsætte med at bruge kommandolinjegrænsefladen.</translation>
+        <translation type="vanished">Perioden for offlinebrug er udløbet. Du skal validere licensen i den grafiske brugerflade for at fortsætte med at bruge kommandolinjegrænsefladen.</translation>
+    </message>
+    <message>
+        <source>A valid pgModeler Plus license is required to use this feature.</source>
+        <translation>Der kræves en gyldig pgModeler Plus-licens for at bruge denne funktion.</translation>
+    </message>
+    <message>
+        <source>This feature is not available in the trial version! Upgrade your license to use it.</source>
+        <translation>Denne funktion er ikke tilgængelig i prøveversionen. Opgrader din licens for at bruge den.</translation>
+    </message>
+    <message>
+        <source>The offline usage period has ended! You have to validate the license to keep using this feature.</source>
+        <translation>Perioden for offlinebrug er udløbet. Du skal validere licensen for at fortsætte med at bruge denne funktion.</translation>
     </message>
     <message>
         <source>License file found</source>
@@ -12583,33 +12560,6 @@ som er tilgængelige i den grafiske brugerflade. Alle tilgængelige indstillinge
     </message>
 </context>
 <context>
-    <name>Relationship</name>
-    <message>
-        <source>%1_has_one_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>many_%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_inherits_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_is_partition_of_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_copies_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -12718,6 +12668,10 @@ som er tilgængelige i den grafiske brugerflade. Alle tilgængelige indstillinge
     <message>
         <source>Foreign key (source)</source>
         <translation>Fremmednøgle (kilde)</translation>
+    </message>
+    <message>
+        <source>Pattern for foreign key indexes generated by the relationship.</source>
+        <translation>Mønster for fremmednøgleindekser, der genereres af relationen.</translation>
     </message>
     <message>
         <source>FK Index name</source>
@@ -14523,11 +14477,11 @@ som er tilgængelige i den grafiske brugerflade. Alle tilgængelige indstillinge
     </message>
     <message>
         <source>Table</source>
-        <translation type="unfinished">Tabel</translation>
+        <translation>Tabel</translation>
     </message>
     <message>
         <source>Cross relationships</source>
-        <translation type="unfinished"></translation>
+        <translation>Relationer på tværs af scener</translation>
     </message>
 </context>
 <context>

@@ -88,6 +88,7 @@ void BaseRelationship::configureRelationship()
 	attributes[Attributes::SrcTable]="";
 	attributes[Attributes::DstTable]="";
 	attributes[Attributes::Points]="";
+	attributes[Attributes::Segments]="";
 	attributes[Attributes::Columns]="";
 	attributes[Attributes::Constraints]="";
 	attributes[Attributes::Elements]="";
@@ -369,6 +370,16 @@ void BaseRelationship::setRelationshipAttributes()
 					schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
 		}
 
+		attributes[Attributes::Segments] = "";
+		for(auto &itr : segment_shifts)
+		{
+			attributes[Attributes::Index] = QString::number(itr.first);
+			attributes[Attributes::Orientation] = QString::number(itr.second.orientation);
+			attributes[Attributes::Value] = QString::number(itr.second.value);
+			attributes[Attributes::Segments] +=
+					schparser.getSourceCode(Attributes::Segment, attributes, SchemaParser::XmlCode);
+		}
+
 		QStringList label_attribs {
 			Attributes::SrcLabel,
 			Attributes::DstLabel,
@@ -494,7 +505,8 @@ QString BaseRelationship::getSourceCode(SchemaParser::CodeType def_type)
 	bool reduced_form;
 	setRelationshipAttributes();
 	reduced_form=(attributes[Attributes::Points].isEmpty() &&
-								attributes[Attributes::LabelsPos].isEmpty());
+								attributes[Attributes::LabelsPos].isEmpty() &&
+								attributes[Attributes::Segments].isEmpty());
 
 	if(!reduced_form)
 		cached_reduced_code.clear();
@@ -506,6 +518,26 @@ void BaseRelationship::setPoints(const std::vector<QPointF> &points)
 {
 	setCodeInvalidated(true);
 	this->points=points;
+}
+
+void BaseRelationship::setSegmentShifts(const std::map<unsigned, SegmentShift> &shifts)
+{
+	setCodeInvalidated(true);
+	segment_shifts=shifts;
+}
+
+std::map<unsigned, BaseRelationship::SegmentShift> BaseRelationship::getSegmentShifts()
+{
+	return segment_shifts;
+}
+
+void BaseRelationship::resetSegmentShifts()
+{
+	if(segment_shifts.empty())
+		return;
+
+	setCodeInvalidated(true);
+	segment_shifts.clear();
 }
 
 void BaseRelationship::setLabelDistance(LabelId label_id, QPointF label_dist)
@@ -555,6 +587,7 @@ void BaseRelationship::operator = (BaseRelationship &rel)
 	this->dst_table=rel.dst_table;
 	this->rel_type=rel.rel_type;
 	this->points=rel.points;
+	this->segment_shifts=rel.segment_shifts;
 	this->custom_color=rel.custom_color;
 
 	for(int i=0; i < 3; i++)

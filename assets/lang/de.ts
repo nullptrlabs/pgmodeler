@@ -953,13 +953,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Basisbeziehung</translation>
     </message>
-    <message numerus="yes">
-        <source>new_object</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1111,10 +1104,6 @@ Dadurch wird der Code aller untergeordneten und abhängigen Objekte deaktiviert.
         <source>Copy</source>
         <translation>Kopie</translation>
     </message>
-    <message>
-        <source>rel_%1_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1225,30 +1214,6 @@ Dadurch wird der Code aller untergeordneten und abhängigen Objekte deaktiviert.
     <message>
         <source>Assignment</source>
         <translation>Zuweisung</translation>
-    </message>
-</context>
-<context>
-    <name>Catalog</name>
-    <message numerus="yes">
-        <source>Object type: %1</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>The catalog query returned more than one OID!</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>Object type: server</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
     </message>
 </context>
 <context>
@@ -3402,7 +3367,7 @@ Referenzierte Spalten: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Die Demoversion kann nur `%1&apos; Instanzen jedes Objekttyps erstellen. Dieses Limit wurde für den Typ `%2&apos; erreicht.</translation>
+        <translation>Die Demoversion kann nur `%1&apos; Instanzen jedes Objekttyps erstellen. Dieses Limit wurde für den Typ `%2&apos; erreicht.</translation>
     </message>
 </context>
 <context>
@@ -7188,7 +7153,7 @@ Vom DBMS zurückgegebene Meldung: `%1&apos;</translation>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation>Die pgModeler-Plus-Lizenz konnte nicht validiert werden. Sie müssen sie in der grafischen Oberfläche validieren, bevor Sie die Befehlszeilenschnittstelle verwenden können.</translation>
+        <translation type="vanished">Die pgModeler-Plus-Lizenz konnte nicht validiert werden. Sie müssen sie in der grafischen Oberfläche validieren, bevor Sie die Befehlszeilenschnittstelle verwenden können.</translation>
     </message>
     <message>
         <source>License error code: %1</source>
@@ -7196,11 +7161,23 @@ Vom DBMS zurückgegebene Meldung: `%1&apos;</translation>
     </message>
     <message>
         <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation>Die Befehlszeilenschnittstelle ist in der Testversion nicht verfügbar. Aktualisieren Sie Ihre Lizenz, um sie zu verwenden.</translation>
+        <translation type="vanished">Die Befehlszeilenschnittstelle ist in der Testversion nicht verfügbar. Aktualisieren Sie Ihre Lizenz, um sie zu verwenden.</translation>
     </message>
     <message>
         <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation>Der Offline-Nutzungszeitraum ist abgelaufen. Sie müssen die Lizenz in der grafischen Oberfläche validieren, um die Befehlszeilenschnittstelle weiter nutzen zu können.</translation>
+        <translation type="vanished">Der Offline-Nutzungszeitraum ist abgelaufen. Sie müssen die Lizenz in der grafischen Oberfläche validieren, um die Befehlszeilenschnittstelle weiter nutzen zu können.</translation>
+    </message>
+    <message>
+        <source>A valid pgModeler Plus license is required to use this feature.</source>
+        <translation>Für die Verwendung dieser Funktion ist eine gültige pgModeler-Plus-Lizenz erforderlich.</translation>
+    </message>
+    <message>
+        <source>This feature is not available in the trial version! Upgrade your license to use it.</source>
+        <translation>Diese Funktion ist in der Testversion nicht verfügbar. Aktualisieren Sie Ihre Lizenz, um sie zu verwenden.</translation>
+    </message>
+    <message>
+        <source>The offline usage period has ended! You have to validate the license to keep using this feature.</source>
+        <translation>Der Offline-Nutzungszeitraum ist abgelaufen. Sie müssen die Lizenz validieren, um diese Funktion weiter nutzen zu können.</translation>
     </message>
     <message>
         <source>License file found</source>
@@ -12583,33 +12560,6 @@ die in der GUI verfügbar sind. Alle verfügbaren Optionen sind unten beschriebe
     </message>
 </context>
 <context>
-    <name>Relationship</name>
-    <message>
-        <source>%1_has_one_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>many_%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_inherits_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_is_partition_of_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_copies_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -12718,6 +12668,10 @@ die in der GUI verfügbar sind. Alle verfügbaren Optionen sind unten beschriebe
     <message>
         <source>Foreign key (source)</source>
         <translation>Fremdschlüssel (Quelle)</translation>
+    </message>
+    <message>
+        <source>Pattern for foreign key indexes generated by the relationship.</source>
+        <translation>Muster für die von der Beziehung erzeugten Fremdschlüsselindizes.</translation>
     </message>
     <message>
         <source>FK Index name</source>
@@ -14523,11 +14477,11 @@ die in der GUI verfügbar sind. Alle verfügbaren Optionen sind unten beschriebe
     </message>
     <message>
         <source>Table</source>
-        <translation type="unfinished">Tabelle</translation>
+        <translation>Tabelle</translation>
     </message>
     <message>
         <source>Cross relationships</source>
-        <translation type="unfinished"></translation>
+        <translation>Szenenübergreifende Beziehungen</translation>
     </message>
 </context>
 <context>

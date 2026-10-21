@@ -953,14 +953,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <source>Basic Relationship</source>
         <translation>Pamata attiecība</translation>
     </message>
-    <message numerus="yes">
-        <source>new_object</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
 </context>
 <context>
     <name>BaseObjectView</name>
@@ -1112,10 +1104,6 @@ Tas izslēgs visu atkarīgo un atsaucošos objektu kodu.</translation>
         <source>Copy</source>
         <translation>Kopija</translation>
     </message>
-    <message>
-        <source>rel_%1_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>BaseTableView</name>
@@ -1226,33 +1214,6 @@ Tas izslēgs visu atkarīgo un atsaucošos objektu kodu.</translation>
     <message>
         <source>Assignment</source>
         <translation>Piešķiršana</translation>
-    </message>
-</context>
-<context>
-    <name>Catalog</name>
-    <message numerus="yes">
-        <source>Object type: %1</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>The catalog query returned more than one OID!</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>Object type: server</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
     </message>
 </context>
 <context>
@@ -3406,7 +3367,7 @@ Atsauces kolonna(s): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Demonstrācijas versija var izveidot tikai `%1&apos; katra objekta tipa instances! Jūs sasniedzāt šo ierobežojumu tipam: `%2&apos;</translation>
+        <translation>Demonstrācijas versija var izveidot tikai `%1&apos; katra objekta tipa instances! Jūs sasniedzāt šo ierobežojumu tipam: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -7192,7 +7153,7 @@ DBVS atgrieztais ziņojums: `%1&apos;</translation>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation>Neizdevās validēt pgModeler Plus licenci! Pirms komandrindas saskarnes izmantošanas tā jāvalidē grafiskajā saskarnē.</translation>
+        <translation type="vanished">Neizdevās validēt pgModeler Plus licenci! Pirms komandrindas saskarnes izmantošanas tā jāvalidē grafiskajā saskarnē.</translation>
     </message>
     <message>
         <source>License error code: %1</source>
@@ -7200,11 +7161,23 @@ DBVS atgrieztais ziņojums: `%1&apos;</translation>
     </message>
     <message>
         <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation>Komandrindas saskarne nav pieejama izmēģinājuma versijā! Jauniniet savu licenci, lai to izmantotu.</translation>
+        <translation type="vanished">Komandrindas saskarne nav pieejama izmēģinājuma versijā! Jauniniet savu licenci, lai to izmantotu.</translation>
     </message>
     <message>
         <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation>Bezsaistes lietošanas periods ir beidzies! Lai turpinātu izmantot komandrindas saskarni, licence jāvalidē grafiskajā saskarnē.</translation>
+        <translation type="vanished">Bezsaistes lietošanas periods ir beidzies! Lai turpinātu izmantot komandrindas saskarni, licence jāvalidē grafiskajā saskarnē.</translation>
+    </message>
+    <message>
+        <source>A valid pgModeler Plus license is required to use this feature.</source>
+        <translation>Lai izmantotu šo funkciju, nepieciešama derīga pgModeler Plus licence.</translation>
+    </message>
+    <message>
+        <source>This feature is not available in the trial version! Upgrade your license to use it.</source>
+        <translation>Šī funkcija nav pieejama izmēģinājuma versijā! Jauniniet savu licenci, lai to izmantotu.</translation>
+    </message>
+    <message>
+        <source>The offline usage period has ended! You have to validate the license to keep using this feature.</source>
+        <translation>Bezsaistes lietošanas periods ir beidzies! Lai turpinātu izmantot šo funkciju, licence jāvalidē.</translation>
     </message>
     <message>
         <source>License file found</source>
@@ -12587,33 +12560,6 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
     </message>
 </context>
 <context>
-    <name>Relationship</name>
-    <message>
-        <source>%1_has_one_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>many_%1_has_many_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_inherits_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_is_partition_of_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1_copies_%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>RelationshipConfigWidget</name>
     <message>
         <source>Form</source>
@@ -12722,6 +12668,10 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
     <message>
         <source>Foreign key (source)</source>
         <translation>Ārējā atslēga (avots)</translation>
+    </message>
+    <message>
+        <source>Pattern for foreign key indexes generated by the relationship.</source>
+        <translation>Šablons attiecību ģenerētajiem ārējās atslēgas indeksiem.</translation>
     </message>
     <message>
         <source>FK Index name</source>
@@ -14527,11 +14477,11 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
     </message>
     <message>
         <source>Table</source>
-        <translation type="unfinished">Tabula</translation>
+        <translation>Tabula</translation>
     </message>
     <message>
         <source>Cross relationships</source>
-        <translation type="unfinished"></translation>
+        <translation>Starpainu attiecības</translation>
     </message>
 </context>
 <context>

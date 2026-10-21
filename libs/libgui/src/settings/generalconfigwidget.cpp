@@ -119,7 +119,6 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 	config_params[Attributes::Configuration][Attributes::HistoryMaxLength]="";
 	config_params[Attributes::Configuration][Attributes::SourceEditorApp]="";
 	config_params[Attributes::Configuration][Attributes::UiLanguage]="";
-	config_params[Attributes::Configuration][Attributes::UseCurvedLines]="";
 	config_params[Attributes::Configuration][Attributes::SaveRestoreGeometry]="";
 	config_params[Attributes::Configuration][Attributes::LowVerbosity]="";
 	config_params[Attributes::Configuration][Attributes::DefaultSchema]="";
@@ -299,7 +298,6 @@ void GeneralConfigWidget::loadConfiguration()
 		confirm_validation_chk->setChecked(config_params[Attributes::Configuration][Attributes::ConfirmValidation]==Attributes::True);
 		code_completion_chk->setChecked(config_params[Attributes::Configuration][Attributes::CodeCompletion]==Attributes::True);
 		use_placeholders_chk->setChecked(config_params[Attributes::Configuration][Attributes::UsePlaceholders]==Attributes::True);
-		use_curved_lines_chk->setChecked(config_params[Attributes::Configuration][Attributes::UseCurvedLines]==Attributes::True);
 
 		print_grid_chk->setChecked(config_params[Attributes::Configuration][Attributes::PrintGrid]==Attributes::True);
 		print_pg_num_chk->setChecked(config_params[Attributes::Configuration][Attributes::PrintPgNum]==Attributes::True);
@@ -514,7 +512,6 @@ void GeneralConfigWidget::saveConfiguration()
 		config_params[Attributes::Configuration][Attributes::CodeCompletion]=(code_completion_chk->isChecked() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::UsePlaceholders]=(use_placeholders_chk->isChecked() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::HistoryMaxLength]=QString::number(history_max_length_spb->value());
-		config_params[Attributes::Configuration][Attributes::UseCurvedLines]=(use_curved_lines_chk->isChecked() ? Attributes::True : "");
 
 		config_params[Attributes::Configuration][Attributes::ShowCanvasGrid]=(ObjectsScene::isShowGrid() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::ShowPageDelimiters]=(ObjectsScene::isShowPageDelimiters() ? Attributes::True : "");
@@ -679,7 +676,6 @@ void GeneralConfigWidget::applyConfiguration()
 	NumberedTextEditor::setSourceEditorAppArgs(source_editor_args_edt->text());
 
 	RelationshipView::setHideNameLabel(hide_rel_name_chk->isChecked());
-	RelationshipView::setCurvedLines(use_curved_lines_chk->isChecked());
 	TableObjectView::setSchemaNameUserType(hide_sch_name_usr_types_chk->isChecked());
 	ModelWidget::setSaveLastCanvasPosition(save_last_pos_chk->isChecked());
 	ModelWidget::setRenderSmoothnessDisabled(disable_smooth_chk->isChecked());

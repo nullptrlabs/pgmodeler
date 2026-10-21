@@ -37,6 +37,8 @@
 #include "basetableview.h"
 #include "doublenan.h"
 
+class RelationshipView;
+
 class __libcanvas ObjectsScene: public QGraphicsScene {
 	Q_OBJECT
 
@@ -78,6 +80,13 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		std::vector<BaseObjectView *> removed_objs;
 
+		/*! \brief The tables/views and relationships added to the scene. They are kept apart because
+		 * items() visits every child item of the tables, which is too slow for the queries made by
+		 * the routing of the orthogonal lines (see getTableViews() and getRelationshipViews()) */
+		std::vector<BaseTableView *> table_views;
+
+		std::vector<RelationshipView *> rel_views;
+
 		//! \brief Holds the tables/views which have selected children objects
 		QList<BaseTableView *> tabs_sel_children;
 
@@ -89,6 +98,17 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		static constexpr int SceneMoveStep=20,
 		SceneMoveTimeout=20,
 		SceneMoveThreshold=100;
+
+		/*! \brief Timer that postpones the calculation of the bumps of the orthogonal lines so it's done
+		 * only once after a series of relationship updates */
+		QTimer bumps_timer;
+
+		/*! \brief Indicates that the bumps update was requested while objects were being moved. In this case
+		 * the update is performed only when the movement ends */
+		bool bumps_update_pending;
+
+		//! \brief Stores the last value of getLayersSignature() to detect changes in the layer rects
+		QString layers_signature;
 
 		//! \brief Timer responsible to move the scene
 		QTimer scene_move_timer,
@@ -171,6 +191,22 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		//! \brief Performs the final steps when moving the objects like adjusting position to grid, moving children object, etc
 		void finishObjectsMove(const QPointF &pnt_end);
+
+		/*! \brief Returns the rects drawn around the object by each of the active layers it belongs to, in the order of the
+		 * object's layers. Each layer rect is larger than the previous one so they appear nested around the object */
+		QList<std::pair<unsigned, QRectF>> getObjectLayerRects(BaseObjectView *obj, const QFontMetricsF &fm);
+
+		/*! \brief Returns a string that changes whenever something that alters the layer rects around the objects
+		 * changes (visibility of rects and names, active layers and the layers of the objects), but not
+		 * when the objects are only moved */
+		QString getLayersSignature();
+
+		//! \brief Forces the update of the routes of the orthogonal lines of all relationships
+		void invalidateRelationshipsRoutes();
+
+		/*! \brief Finds the places where the orthogonal lines of the relationships cross each other and
+		 * makes the horizontal ones hop over the vertical ones */
+		void updateRelationshipBumps();
 
 		/*! \brief Performs the scene position adjustment when pressing/releasing the arrow keys to avoid objects to be hidden in the corners.
 		This method will adjust the scene size automatically when moving objects right or down if the selected items bounding rects
@@ -333,6 +369,16 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		void addItem(QGraphicsItem *item, bool blink_new = false);
 
+		//! \brief Returns the tables/views added to the scene, in no particular order
+		const std::vector<BaseTableView *> &getTableViews() const;
+
+		//! \brief Returns the relationships added to the scene, in no particular order
+		const std::vector<RelationshipView *> &getRelationshipViews() const;
+
+		/*! \brief Removes the table/view or relationship from the lists above. It's called by the destructors
+		 * of those items, since an item deleted while in the scene doesn't go through removeItem() */
+		void forgetItem(QGraphicsItem *item);
+
 		void removeItem(QGraphicsItem *item);
 
 		/*! \brief Define the geometry of the scene. If the rectangle is invalid or
@@ -370,6 +416,14 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		bool isRangeSelectionTriggerInverted();
 		bool isRelationshipLineVisible();
 		bool isMovingObjects();
+
+		/*! \brief Returns the rect occupied by the object including the layer rects displayed around it.
+		 * If the layer rects are not visible this is the object's own rect */
+		QRectF getObjectLayersRect(BaseObjectView *obj);
+
+		/*! \brief Requests the update of the bumps of the orthogonal lines. It's performed after a short delay
+		 * or, if objects are being moved, only after the movement ends */
+		void requestBumpsUpdate();
 
 		QList<QGraphicsItem *> selectedItems(void) const;
 		bool hasOnlyTableChildrenSelection(void) const;

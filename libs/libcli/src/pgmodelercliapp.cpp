@@ -2553,7 +2553,7 @@ bool PgModelerCliApp::containsRelAttributes(const QString &str)
 									 Attributes::Type, Attributes::SrcRequired, Attributes::DstRequired,
 									 Attributes::SrcTable, Attributes::DstTable,	Attributes::Points,
 									 Attributes::Columns,	Attributes::Column, Attributes::Constraint,
-									 Attributes::Label, Attributes::Line, Attributes::Position,
+									 Attributes::Label, Attributes::Line, Attributes::Position, Attributes::Segment,
 									 Attributes::Identifier, Attributes::Deferrable, Attributes::DeferType,
 									 Attributes::TableName, Attributes::SpecialPkCols, Attributes::Table,
 									 Attributes::AncestorTable, Attributes::CopyOptions, Attributes::CopyMode,

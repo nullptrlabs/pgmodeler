@@ -85,6 +85,11 @@ ObjectsScene::ObjectsScene(QObject *parent) : QGraphicsScene(parent)
 
 	connect(&scene_move_timer, &QTimer::timeout, this, &ObjectsScene::moveObjectScene);
 
+	bumps_update_pending = false;
+	bumps_timer.setSingleShot(true);
+	bumps_timer.setInterval(50);
+	connect(&bumps_timer, &QTimer::timeout, this, &ObjectsScene::updateRelationshipBumps);
+
 	connect(&corner_hover_timer, &QTimer::timeout, this, [this](){
 		enableSceneMove();
 	});
@@ -392,10 +397,96 @@ void ObjectsScene::setActiveLayers(QList<unsigned> layer_ids)
 	emit s_activeLayersChanged();
 }
 
+QList<std::pair<unsigned, QRectF>> ObjectsScene::getObjectLayerRects(BaseObjectView *obj, const QFontMetricsF &fm)
+{
+	QList<std::pair<unsigned, QRectF>> rects;
+	QRectF brect = obj->boundingRect();
+
+	brect.moveTo(obj->pos());
+
+	for(auto &layer_id : obj->getLayers())
+	{
+		if(static_cast<int>(layer_id) >= layers.size() ||
+			 !active_layers.contains(layers.at(layer_id)))
+			continue;
+
+		/* We need to adjust the bounding rect dimension in such a way
+		 * to take into account the font height (if the layer names are visible)
+		 * as well as a default padding so the rectangles doesn't have the same size
+		 * of the object's bounding rect */
+		brect.adjust(-LayerItem::LayerPadding,
+								 (is_layer_names_visible ? -fm.height() : -LayerItem::LayerPadding),
+								 LayerItem::LayerPadding,
+								 LayerItem::LayerPadding);
+
+		rects.append({ layer_id, brect });
+	}
+
+	return rects;
+}
+
+QRectF ObjectsScene::getObjectLayersRect(BaseObjectView *obj)
+{
+	QRectF rect(obj->pos(), obj->boundingRect().size());
+
+	if(!is_layer_rects_visible || layers_paths.isEmpty())
+		return rect;
+
+	for(auto &layer_rect : getObjectLayerRects(obj, QFontMetricsF(LayerItem::getDefaultFont())))
+		rect = rect.united(layer_rect.second);
+
+	return rect;
+}
+
+QString ObjectsScene::getLayersSignature()
+{
+	QString signature = QString("%1|%2|%3").arg(is_layer_rects_visible).arg(is_layer_names_visible).arg(active_layers.join(","));
+	quint64 objs_hash = 0;
+	QStringList layer_ids;
+
+	if(!is_layer_rects_visible)
+		return signature;
+
+	for(auto &tab_view : table_views)
+	{
+		layer_ids.clear();
+
+		for(auto &layer_id : tab_view->getLayers())
+			layer_ids.append(QString::number(layer_id));
+
+		// The sum makes the result independent of the order of the tables
+		objs_hash += qHash(QString("%1:%2").arg(reinterpret_cast<quintptr>(tab_view)).arg(layer_ids.join(",")));
+	}
+
+	return signature + "|" + QString::number(objs_hash);
+}
+
+void ObjectsScene::invalidateRelationshipsRoutes()
+{
+	if(RelationshipView::getLineStyle() != RelationshipView::OrthogonalLines)
+		return;
+
+	// A copy is used because the list is a member that may change while the lines are updated
+	std::vector<RelationshipView *> rels = rel_views;
+
+	for(auto &rel : rels)
+		rel->invalidateRoute();
+}
+
 void ObjectsScene::updateLayerRects()
 {
 	if(layers_paths.isEmpty())
 		return;
+
+	/* The orthogonal lines go around the layer rects of the tables, so they are
+	 * updated whenever something that changes those rects is changed */
+	QString signature = getLayersSignature();
+
+	if(signature != layers_signature)
+	{
+		layers_signature = signature;
+		invalidateRelationshipsRoutes();
+	}
 
 	for(auto &path : layers_paths)
 		path->setVisible(false);
@@ -406,7 +497,6 @@ void ObjectsScene::updateLayerRects()
 	int idx = 0, act_layer_idx = 0;
 	BaseObjectView *obj_view = nullptr;
 	ObjectType obj_type;
-	QRectF brect;
 	QMap<int, QList<QRectF>> rects;
 	QFontMetricsF fm(LayerItem::getDefaultFont());
 
@@ -426,26 +516,8 @@ void ObjectsScene::updateLayerRects()
 				 obj_type ==ObjectType::Relationship)
 				continue;
 
-			brect = obj_view->boundingRect();
-			brect.moveTo(obj_view->pos());
-
-			for(auto &layer_id : obj_view->getLayers())
-			{
-				if(static_cast<int>(layer_id) >= layers.size() ||
-					 !active_layers.contains(layers.at(layer_id)))
-					continue;
-
-				/* We need to adjust the bounding rect dimension in such a way
-				 * to take into account the font height (if the layer names are visible)
-				 * as well as a default padding so the rectangles doesn't have the same size
-				 * of the object's bounding rect */
-				brect.adjust(-LayerItem::LayerPadding,
-										 (is_layer_names_visible ? -fm.height() : -LayerItem::LayerPadding),
-										 LayerItem::LayerPadding,
-										 LayerItem::LayerPadding);
-
-				rects[layer_id].append(brect);
-			}
+			for(auto &layer_rect : getObjectLayerRects(obj_view, fm))
+				rects[layer_rect.first].append(layer_rect.second);
 		}
 	}
 
@@ -1054,6 +1126,11 @@ void ObjectsScene::addItem(QGraphicsItem *item, bool blink_new)
 
 	QGraphicsScene::addItem(item);
 
+	if(rel && std::find(rel_views.begin(), rel_views.end(), rel) == rel_views.end())
+		rel_views.push_back(rel);
+	else if(tab && std::find(table_views.begin(), table_views.end(), tab) == table_views.end())
+		table_views.push_back(tab);
+
 	if(blink_new && obj)
 		obj->blink();
 
@@ -1074,6 +1151,7 @@ BaseObjectView *ObjectsScene::detachItem(QGraphicsItem *item)
 
 	item->setVisible(false);
 	item->setActive(false);
+	forgetItem(item);
 	QGraphicsScene::removeItem(item);
 
 	if(obj_view)
@@ -1090,6 +1168,26 @@ BaseObjectView *ObjectsScene::detachItem(QGraphicsItem *item)
 	}
 
 	return obj_view;
+}
+
+const std::vector<BaseTableView *> &ObjectsScene::getTableViews() const
+{
+	return table_views;
+}
+
+const std::vector<RelationshipView *> &ObjectsScene::getRelationshipViews() const
+{
+	return rel_views;
+}
+
+void ObjectsScene::forgetItem(QGraphicsItem *item)
+{
+	// The pointers are compared as they are, since the item may be partially destroyed
+	rel_views.erase(std::remove_if(rel_views.begin(), rel_views.end(), [item](RelationshipView *rel){
+		return static_cast<QGraphicsItem *>(rel) == item; }), rel_views.end());
+
+	table_views.erase(std::remove_if(table_views.begin(), table_views.end(), [item](BaseTableView *tab){
+		return static_cast<QGraphicsItem *>(tab) == item; }), table_views.end());
 }
 
 void ObjectsScene::removeItem(QGraphicsItem *item)
@@ -1714,6 +1812,50 @@ void ObjectsScene::finishObjectsMove(const QPointF &pnt_end)
 	moving_objs=false;
 	sel_ini_pnt.setX(DNaN);
 	sel_ini_pnt.setY(DNaN);
+
+	/* After the movement the orthogonal relationships that were routed around the previous position of
+	 * the tables, or that must now go around their new one, are updated. Each relationship is updated only once,
+	 * no matter how many of the moved tables it is near to. When placeholders are not used the relationships
+	 * connected to the tables were updated during the movement without avoiding obstacles, so they're updated
+	 * again first, which leaves the crow's foot areas they register ready for the other relationships. */
+	std::vector<RelationshipView *> connected_rel_views, nearby_rel_views;
+	QSet<RelationshipView *> gathered_rel_views;
+	bool placeholders_used = BaseObjectView::isPlaceholderEnabled();
+
+	for(auto &obj : tables)
+	{
+		tab_view = dynamic_cast<BaseTableView *>(obj);
+
+		for(auto &rel_view : tab_view->getNearbyRoutes(true))
+		{
+			if(gathered_rel_views.contains(rel_view))
+				continue;
+
+			gathered_rel_views.insert(rel_view);
+
+			BaseRelationship *rel_obj = rel_view->getUnderlyingObject();
+
+			// A relationship connected to any of the moved tables
+			bool connected = tables.contains(dynamic_cast<BaseObjectView *>(rel_obj->getTable(BaseRelationship::SrcTable)->getOverlyingObject())) ||
+											 tables.contains(dynamic_cast<BaseObjectView *>(rel_obj->getTable(BaseRelationship::DstTable)->getOverlyingObject()));
+
+			if(!connected)
+				nearby_rel_views.push_back(rel_view);
+			else if(!placeholders_used)
+				connected_rel_views.push_back(rel_view);
+		}
+	}
+
+	for(auto &rel_view : connected_rel_views)
+		rel_view->invalidateRoute();
+
+	for(auto &rel_view : nearby_rel_views)
+		rel_view->invalidateRoute();
+
+	// Displaying the bumps that were postponed during the movement
+	if(bumps_update_pending)
+		bumps_timer.start();
+
 	updateLayerRects();
 
 	QRectF old_scene_rect = sceneRect(),
@@ -1981,6 +2123,160 @@ bool ObjectsScene::isRelationshipLineVisible()
 bool ObjectsScene::isMovingObjects()
 {
 	return moving_objs;
+}
+
+void ObjectsScene::requestBumpsUpdate()
+{
+	if(moving_objs)
+		bumps_update_pending = true;
+	else
+		bumps_timer.start();
+}
+
+void ObjectsScene::updateRelationshipBumps()
+{
+	// Bumps are only displayed when the user stops moving the objects
+	if(moving_objs)
+	{
+		bumps_update_pending = true;
+		return;
+	}
+
+	bumps_update_pending = false;
+
+	struct Segment {
+		RelationshipView *rel;
+		double pos, lo, hi;
+	};
+
+	std::vector<Segment> h_segs, v_segs;
+	std::map<RelationshipView *, std::vector<QPointF>> rels_bumps;
+	std::vector<QPointF> bumps;
+	RelationshipView *rel_view = nullptr;
+	QPointF p1, p2;
+	double dpi_factor = BaseObjectView::getScreenDpiFactor(),
+			bump_radius = RelationshipView::BumpRadius * dpi_factor,
+			corner_radius = RelationshipView::RoundedCornerRadius * dpi_factor,
+			margin = corner_radius + bump_radius;
+
+	std::vector<RelationshipView *> rels, conflicts;
+	std::vector<QRectF> zones;
+
+	for(auto &item : items())
+	{
+		rel_view = dynamic_cast<RelationshipView *>(item);
+
+		if(!rel_view || !rel_view->isVisible() || rel_view->route_points.size() < 2)
+			continue;
+
+		rels.push_back(rel_view);
+		zones.insert(zones.end(), rel_view->end_zones.begin(), rel_view->end_zones.end());
+	}
+
+	/* Lines that go through the end zone (crow's foot area) of another relationship are recalculated now that
+	 * all the zones are known. This covers the lines that were routed before the other relationships existed or
+	 * were configured. The bumps are calculated in the next update, with the new routes */
+	for(auto &rel : rels)
+	{
+		if(rel->zone_retries >= RelationshipView::MaxZoneRetries)
+			continue;
+
+		for(auto &other : rels)
+		{
+			if(other != rel && RelationshipView::isRouteBlocked(rel->route_points, other->end_zones))
+			{
+				conflicts.push_back(rel);
+				break;
+			}
+		}
+	}
+
+	if(!conflicts.empty())
+	{
+		for(auto &rel : conflicts)
+		{
+			rel->zone_retries++;
+			rel->invalidateRoute(false);
+		}
+
+		bumps_timer.start();
+		return;
+	}
+
+	for(auto &item : rels)
+	{
+		rel_view = item;
+		rels_bumps[rel_view] = {};
+
+		for(size_t idx = 1; idx < rel_view->route_points.size(); idx++)
+		{
+			p1 = rel_view->route_points[idx - 1];
+			p2 = rel_view->route_points[idx];
+
+			if(std::fabs(p1.y() - p2.y()) < 0.01 && std::fabs(p1.x() - p2.x()) > 0.01)
+				h_segs.push_back({ rel_view, p1.y(), std::min(p1.x(), p2.x()), std::max(p1.x(), p2.x()) });
+			else if(std::fabs(p1.x() - p2.x()) < 0.01 && std::fabs(p1.y() - p2.y()) > 0.01)
+				v_segs.push_back({ rel_view, p1.x(), std::min(p1.y(), p2.y()), std::max(p1.y(), p2.y()) });
+		}
+	}
+
+	std::sort(v_segs.begin(), v_segs.end(), [](const Segment &s1, const Segment &s2) {
+		return s1.pos < s2.pos;
+	});
+
+	/* Bumps are never placed over the crow's foot descriptors. The test uses the area of the arc (it only
+	 * goes up) against the zones shrunk by the clearance the routes keep from them, so lines passing right
+	 * next to a descriptor still hop over the lines crossing them */
+	auto is_in_zone = [&](const QPointF &pnt) {
+		QRectF arc_rect(pnt.x() - bump_radius, pnt.y() - bump_radius, bump_radius * 2, bump_radius);
+		double clearance = RelationshipView::ZoneClearance;
+
+		for(auto &zone : zones)
+		{
+			if(zone.adjusted(clearance, clearance, -clearance, -clearance).intersects(arc_rect))
+				return true;
+		}
+
+		return false;
+	};
+
+	/* The horizontal segments always hop over the vertical ones, this way only one of the lines
+	 * needs to know about the crossing. Crossings too close to the segments' ends are ignored */
+	for(auto &h_seg : h_segs)
+	{
+		if(h_seg.hi - h_seg.lo < margin * 2)
+			continue;
+
+		auto itr = std::lower_bound(v_segs.begin(), v_segs.end(), h_seg.lo + margin, [](const Segment &seg, double value) {
+			return seg.pos < value;
+		});
+
+		for(; itr != v_segs.end() && itr->pos <= h_seg.hi - margin; ++itr)
+		{
+			if(itr->rel != h_seg.rel &&
+				 h_seg.pos > itr->lo + corner_radius && h_seg.pos < itr->hi - corner_radius &&
+				 !is_in_zone(QPointF(itr->pos, h_seg.pos)))
+				rels_bumps[h_seg.rel].push_back(QPointF(itr->pos, h_seg.pos));
+		}
+	}
+
+	for(auto &itr : rels_bumps)
+	{
+		bumps.clear();
+
+		std::sort(itr.second.begin(), itr.second.end(), [](const QPointF &p1, const QPointF &p2) {
+			return p1.y() != p2.y() ? p1.y() < p2.y() : p1.x() < p2.x();
+		});
+
+		// Crossings too close to each other on the same segment would make the bumps overlap
+		for(auto &bump : itr.second)
+		{
+			if(bumps.empty() || bumps.back().y() != bump.y() || bump.x() - bumps.back().x() >= bump_radius * 3)
+				bumps.push_back(bump);
+		}
+
+		itr.first->setBumps(bumps);
+	}
 }
 
 QList<QGraphicsItem *> ObjectsScene::selectedItems() const
