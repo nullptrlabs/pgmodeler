@@ -74,7 +74,7 @@ class RelationshipPersistenceTest: public QObject, public PgModelerUnitTest {
 		//! \brief Replaces, in the model file, the first line that has the token by the replacement
 		QString changeModelFile(const QString &src, const QString &token, const QString &replacement);
 
-		static BaseRelationship::SegmentShift shift(Qt::Orientation orient, double value);
+		static BaseRelationship::SegmentShift shift(Qt::Orientation orient, double value, double jog = 0);
 
 	private slots:
 		void initTestCase();
@@ -89,6 +89,7 @@ class RelationshipPersistenceTest: public QObject, public PgModelerUnitTest {
 		// XML of the relationship
 		void xmlContainsOneSegmentElementPerShift();
 		void xmlOfRelationshipWithoutShiftsHasNoSegmentElement();
+		void xmlSegmentHasTheJogOnlyWhenItIsNotZero();
 		void xmlIsRegeneratedWhenTheShiftsChange();
 		void xmlSegmentsFollowTheIndexOrder();
 		void xmlKeepsRelationshipsWithoutColumnsInReducedFormOnlyWithoutShifts();
@@ -97,6 +98,7 @@ class RelationshipPersistenceTest: public QObject, public PgModelerUnitTest {
 
 		// Model file
 		void modelRoundTripPreservesTheShifts();
+		void modelRoundTripPreservesTheJogOfTheShifts();
 		void modelRoundTripPreservesShiftsOfEveryRelationshipType();
 		void modelRoundTripKeepsPointsLabelsAndShiftsTogether();
 		void sampleModelRoundTripPreservesEverythingTheUserCustomizedInEveryRelationship();
@@ -116,6 +118,7 @@ class RelationshipPersistenceTest: public QObject, public PgModelerUnitTest {
 
 		// Objects metadata file
 		void metadataRoundTripPreservesTheShifts();
+		void metadataRoundTripPreservesTheJogOfTheShifts();
 		void metadataIsIgnoredWithoutThePositioningOption();
 		void metadataWithoutShiftsClearsTheShiftsOfTheTarget();
 		void metadataKeepsShiftsOfEachRelationshipSeparate();
@@ -157,11 +160,12 @@ bool RelationshipPersistenceTest::loadingMetadataFails(DatabaseModel &model, con
 	return false;
 }
 
-BaseRelationship::SegmentShift RelationshipPersistenceTest::shift(Qt::Orientation orient, double value)
+BaseRelationship::SegmentShift RelationshipPersistenceTest::shift(Qt::Orientation orient, double value, double jog)
 {
 	BaseRelationship::SegmentShift sh;
 	sh.orientation = orient;
 	sh.value = value;
+	sh.jog = jog;
 	return sh;
 }
 
@@ -427,6 +431,35 @@ void RelationshipPersistenceTest::shiftsReplaceTheWholeMap()
 	}
 }
 
+void RelationshipPersistenceTest::xmlSegmentHasTheJogOnlyWhenItIsNotZero()
+{
+	try
+	{
+		DatabaseModel model;
+		model.createSystemObjects(true);
+		fillModel(model);
+
+		BaseRelationship *rel = getRelationship(model, "rel_ab");
+		QString xml;
+
+		// Without a jog the element is the same as the ones of the files created before the jog existed
+		rel->setSegmentShifts({{ 0, shift(Qt::Horizontal, 12) }});
+		xml = rel->getSourceCode(SchemaParser::XmlCode);
+		QVERIFY(xml.contains(QString("<segment index=\"0\" orientation=\"%1\" value=\"12\"/>").arg(int(Qt::Horizontal))));
+		QVERIFY(!xml.contains("jog="));
+
+		rel->setSegmentShifts({{ 0, shift(Qt::Horizontal, 12, 7.5) }, { 2, shift(Qt::Horizontal, -3, 0) }});
+		xml = rel->getSourceCode(SchemaParser::XmlCode);
+		QVERIFY(xml.contains(QString("<segment index=\"0\" orientation=\"%1\" value=\"12\" jog=\"7.5\"/>").arg(int(Qt::Horizontal))));
+		QVERIFY(xml.contains(QString("<segment index=\"2\" orientation=\"%1\" value=\"-3\"/>").arg(int(Qt::Horizontal))));
+		QCOMPARE(xml.count("jog="), 1);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
 void RelationshipPersistenceTest::xmlContainsOneSegmentElementPerShift()
 {
 	try
@@ -634,6 +667,35 @@ void RelationshipPersistenceTest::xmlElementOrderRespectsTheDtd()
 
 		if(xml.contains("<column "))
 			QVERIFY(xml.indexOf("<segment ") < xml.indexOf("<column "));
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipPersistenceTest::modelRoundTripPreservesTheJogOfTheShifts()
+{
+	try
+	{
+		DatabaseModel model, loaded;
+		QString file = tmpFile("round_trip_jog.dbm");
+
+		model.createSystemObjects(true);
+		fillModel(model);
+		getRelationship(model, "rel_ab")->setSegmentShifts({{ 0, shift(Qt::Horizontal, -24.5, 13.25) }, { 2, shift(Qt::Vertical, 12) }});
+		model.saveModel(file, SchemaParser::XmlCode);
+
+		loaded.createSystemObjects(false);
+		loaded.loadModel(file);
+
+		auto got = getRelationship(loaded, "rel_ab")->getSegmentShifts();
+
+		QCOMPARE(got.size(), size_t(2));
+		QCOMPARE(got.at(0).value, -24.5);
+		QCOMPARE(got.at(0).jog, 13.25);
+		QCOMPARE(got.at(2).value, 12.0);
+		QCOMPARE(got.at(2).jog, 0.0);
 	}
 	catch(Exception &e)
 	{
@@ -1302,6 +1364,34 @@ void RelationshipPersistenceTest::shiftsSurviveSavingTheModelTwiceWithoutReload(
 
 		QCOMPARE(readFile(file_2), readFile(file_1));
 		QVERIFY(readFile(file_2).contains("<segment "));
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipPersistenceTest::metadataRoundTripPreservesTheJogOfTheShifts()
+{
+	try
+	{
+		DatabaseModel source, target;
+		QString meta = tmpFile("meta_jog.omf");
+
+		source.createSystemObjects(true);
+		fillModel(source);
+		getRelationship(source, "rel_ab")->setSegmentShifts({{ 0, shift(Qt::Horizontal, -11, 9.5) }, { 2, shift(Qt::Vertical, 22.5) }});
+		source.saveObjectsMetadata(meta);
+
+		target.createSystemObjects(true);
+		fillModel(target);
+		target.loadObjectsMetadata(meta);
+
+		auto got = getRelationship(target, "rel_ab")->getSegmentShifts();
+
+		QCOMPARE(got.size(), size_t(2));
+		QCOMPARE(got.at(0).jog, 9.5);
+		QCOMPARE(got.at(2).jog, 0.0);
 	}
 	catch(Exception &e)
 	{

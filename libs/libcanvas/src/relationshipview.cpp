@@ -112,6 +112,8 @@ RelationshipView::RelationshipView(BaseRelationship *rel) : BaseObjectView(rel)
 	curve_end_lens[0]=curve_end_lens[1]=0;
 	route_stubs[0]=route_stubs[1]=0;
 	drag_seg_idx=-1;
+	drag_jog_end=-1;
+	drag_jog_sign=1;
 	drag_horiz=drag_moved=false;
 	drag_ini_shift=drag_shift=0;
 	zone_retries=0;
@@ -249,15 +251,20 @@ void RelationshipView::notifyRouteChanged()
 		obj_scene->requestBumpsUpdate();
 }
 
-void RelationshipView::setBumps(const std::vector<QPointF> &new_bumps)
+void RelationshipView::setBumps(const std::vector<QPointF> &new_bumps, const std::vector<bool> &convex)
 {
-	if(new_bumps == bumps || curves.empty() || route_points.empty())
+	std::vector<bool> new_convex = convex;
+
+	new_convex.resize(new_bumps.size(), false);
+
+	if((new_bumps == bumps && new_convex == bumps_convex) || curves.empty() || route_points.empty())
 		return;
 
 	bumps = new_bumps;
+	bumps_convex = new_convex;
 	curves[0]->setPoints(route_points, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
 											 bumps, BumpRadius * BaseObjectView::getScreenDpiFactor(),
-											 curve_end_lens[0], curve_end_lens[1]);
+											 curve_end_lens[0], curve_end_lens[1], bumps_convex);
 	configureBoundingRect();
 }
 
@@ -1264,7 +1271,7 @@ void RelationshipView::configureOrthogonalGeometry(LineGeometry &geom)
 	base_route = geom.points;
 	route_stubs[0] = stubs[0];
 	route_stubs[1] = stubs[1];
-	geom.points = applySegmentShifts(geom.points, stubs);
+	geom.points = applySegmentShifts(geom.points, stubs, nullptr, &route_seg_keys);
 }
 
 void RelationshipView::discardOutdatedSegmentShifts()
@@ -1350,61 +1357,139 @@ double RelationshipView::clampSegmentShift(const std::vector<QPointF> &route, si
 	return std::clamp(shift, lo, hi);
 }
 
-int RelationshipView::pickSegment(const QPointF &pnt, bool &horiz)
+int RelationshipView::pickSegment(const QPointF &pnt, bool &horiz, int *jog_end)
 {
 	constexpr double Epsilon = 0.01;
-	double dist = 0, best_dist = LineSelStrokeWidth / 2;
+	double dist = 0, best_dist = LineSelStrokeWidth / 2, slack = 0,
+			min_len = RoundedCornerRadius * BaseObjectView::getScreenDpiFactor();
 	QPointF p1, p2;
-	int seg_idx = -1;
+	int seg_idx = -1, key = -1, code = 0;
+	size_t seg_cnt = (route_points.size() > 1 ? route_points.size() - 1 : 0);
+
+	if(jog_end)
+		*jog_end = -1;
 
 	if(line_style != OrthogonalLines || getUnderlyingObject()->isSelfRelationship() ||
-		 getUnderlyingObject()->isProtected() || base_route.size() < 4 || route_points.size() != base_route.size())
+		 getUnderlyingObject()->isProtected() || base_route.size() < 2 || route_seg_keys.size() != seg_cnt)
 		return -1;
 
-	// Only the inner segments can be moved, the first and the last ones are anchored to the tables
-	for(size_t idx = 1; idx + 2 < route_points.size(); idx++)
+	/* The segments next to the tables can be picked too, but not the part of them that contains the area of the
+	 * descriptors (the stubs). The segments that make the jogs of the displaced end segments are picked to change
+	 * the length of the jog (the part of the segment next to the table that keeps going straight) */
+	for(size_t idx = 0; idx < seg_cnt; idx++)
 	{
+		code = route_seg_keys[idx];
+
+		if(code == -1)
+			continue;
+
 		p1 = route_points[idx];
 		p2 = route_points[idx + 1];
-		bool seg_horiz = std::fabs(p1.y() - p2.y()) < Epsilon;
+		bool seg_horiz = std::fabs(p1.y() - p2.y()) < Epsilon, is_jog = (code <= -2);
+
+		// The jogs are short, so a little more than their length is accepted
+		slack = (is_jog ? LineSelStrokeWidth / 2 : 0);
 
 		if(seg_horiz)
 		{
-			if(pnt.x() < std::min(p1.x(), p2.x()) || pnt.x() > std::max(p1.x(), p2.x()))
+			if(pnt.x() < std::min(p1.x(), p2.x()) - slack || pnt.x() > std::max(p1.x(), p2.x()) + slack)
 				continue;
 
 			dist = std::fabs(pnt.y() - p1.y());
 		}
 		else
 		{
-			if(pnt.y() < std::min(p1.y(), p2.y()) || pnt.y() > std::max(p1.y(), p2.y()))
+			if(pnt.y() < std::min(p1.y(), p2.y()) - slack || pnt.y() > std::max(p1.y(), p2.y()) + slack)
 				continue;
 
 			dist = std::fabs(pnt.x() - p1.x());
 		}
 
+		key = (is_jog ? (-code - 2) / 2 : code);
+
+		// Segments at the ends of the route as they are in the base route (without a jog): the stub can't be picked
+		if(!is_jog)
+		{
+			if(idx == 0 && key == 0 && QLineF(route_points.front(), pnt).length() < std::max(min_len, route_stubs[0]))
+				continue;
+
+			if(idx + 1 == seg_cnt && static_cast<size_t>(key) + 1 == base_route.size() - 1 &&
+				 QLineF(route_points.back(), pnt).length() < std::max(min_len, route_stubs[1]))
+				continue;
+		}
+
 		if(dist <= best_dist)
 		{
 			best_dist = dist;
-			seg_idx = idx;
+			seg_idx = key;
 			horiz = seg_horiz;
+
+			if(jog_end)
+				*jog_end = (is_jog ? (-code - 2) % 2 : -1);
 		}
 	}
 
 	return seg_idx;
 }
 
+double RelationshipView::getJogLength(const std::vector<QPointF> &route, size_t seg_idx, unsigned key, int end)
+{
+	constexpr double Epsilon = 0.01;
+	double min_len = RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(), dist = 0;
+	bool base_horiz = std::fabs(base_route[key].y() - base_route[key + 1].y()) < Epsilon;
+
+	/* The jog is the segment [seg_idx]. Its point on the line that comes from the table is the first one for the jog
+	 * at the start of the line and the last one for the jog at the end of the line */
+	const QPointF &jog_pnt = (end == 0 ? route[seg_idx] : route[seg_idx + 1]),
+			&table_pnt = (end == 0 ? base_route.front() : base_route.back());
+
+	dist = (base_horiz ? std::fabs(jog_pnt.x() - table_pnt.x()) : std::fabs(jog_pnt.y() - table_pnt.y()));
+	return std::max(dist - std::max(min_len, route_stubs[end]), 0.0);
+}
+
 bool RelationshipView::startSegmentDrag(const QPointF &pnt)
 {
-	drag_seg_idx = pickSegment(pnt, drag_horiz);
+	constexpr double Epsilon = 0.01;
+
+	drag_seg_idx = pickSegment(pnt, drag_horiz, &drag_jog_end);
 
 	if(drag_seg_idx < 0)
+	{
+		drag_jog_end = -1;
 		return false;
+	}
 
 	drag_moved = false;
 	drag_ini_pos = pnt;
-	drag_ini_shift = drag_shift = (drag_horiz ? route_points[drag_seg_idx].y() - base_route[drag_seg_idx].y() :
-																							route_points[drag_seg_idx].x() - base_route[drag_seg_idx].x());
+
+	/* The displacement is measured from the point of the displayed segment the base segment is
+	 * the origin of (a segment displaced after a jog doesn't have the same index in both routes) */
+	int code = (drag_jog_end >= 0 ? getJogKey(drag_seg_idx, drag_jog_end == 1) : drag_seg_idx);
+	auto itr = std::find(route_seg_keys.begin(), route_seg_keys.end(), code);
+	size_t disp_idx = itr - route_seg_keys.begin();
+
+	if(itr == route_seg_keys.end())
+	{
+		drag_seg_idx = drag_jog_end = -1;
+		return false;
+	}
+
+	if(drag_jog_end >= 0)
+	{
+		/* The jog moves along the base segment, away from the table when it gets longer: the first end moves in the direction
+		 * of the segment, the last one (which is the end of the segment) in the opposite direction */
+		bool base_horiz = !drag_horiz;
+		double dir = (base_horiz ? base_route[drag_seg_idx + 1].x() - base_route[drag_seg_idx].x() :
+															 base_route[drag_seg_idx + 1].y() - base_route[drag_seg_idx].y());
+
+		drag_jog_sign = ((dir >= Epsilon) == (drag_jog_end == 0) ? 1 : -1);
+		drag_ini_shift = drag_shift = getJogLength(route_points, disp_idx, drag_seg_idx, drag_jog_end);
+	}
+	else
+	{
+		drag_ini_shift = drag_shift = (drag_horiz ? route_points[disp_idx].y() - base_route[drag_seg_idx].y() :
+																								route_points[disp_idx].x() - base_route[drag_seg_idx].x());
+	}
 
 	setCursor(drag_horiz ? Qt::SizeVerCursor : Qt::SizeHorCursor);
 	return true;
@@ -1414,13 +1499,42 @@ void RelationshipView::dragSegment(const QPointF &pnt)
 {
 	std::map<unsigned, BaseRelationship::SegmentShift> shifts = getUnderlyingObject()->getSegmentShifts();
 	std::vector<QPointF> preview;
+	std::vector<int> preview_keys;
 	double delta = (drag_horiz ? pnt.y() - drag_ini_pos.y() : pnt.x() - drag_ini_pos.x());
+	auto cur_shift = shifts.find(drag_seg_idx);
+	int code = (drag_jog_end >= 0 ? getJogKey(drag_seg_idx, drag_jog_end == 1) : drag_seg_idx);
 
-	shifts[drag_seg_idx] = { (drag_horiz ? Qt::Horizontal : Qt::Vertical), drag_ini_shift + delta };
-	preview = applySegmentShifts(base_route, route_stubs, &shifts);
+	if(drag_jog_end >= 0)
+	{
+		// The jog only exists for a segment that is displaced
+		if(cur_shift == shifts.end())
+			return;
 
-	drag_shift = (drag_horiz ? preview[drag_seg_idx].y() - base_route[drag_seg_idx].y() :
-														 preview[drag_seg_idx].x() - base_route[drag_seg_idx].x());
+		// The jog moves along the axis of the base segment, that is the axis the mouse moves it (the jog is perpendicular to it)
+		cur_shift->second.jog = drag_ini_shift + (delta * drag_jog_sign);
+	}
+	else
+	{
+		shifts[drag_seg_idx] = { (drag_horiz ? Qt::Horizontal : Qt::Vertical), drag_ini_shift + delta,
+														 (cur_shift != shifts.end() ? cur_shift->second.jog : 0) };
+	}
+
+	preview = applySegmentShifts(base_route, route_stubs, &shifts, &preview_keys);
+
+	auto itr = std::find(preview_keys.begin(), preview_keys.end(), code);
+	size_t disp_idx = itr - preview_keys.begin();
+
+	if(itr == preview_keys.end())
+		return;
+
+	if(drag_jog_end >= 0)
+		drag_shift = getJogLength(preview, disp_idx, drag_seg_idx, drag_jog_end);
+	else
+	{
+		drag_shift = (drag_horiz ? preview[disp_idx].y() - base_route[drag_seg_idx].y() :
+															 preview[disp_idx].x() - base_route[drag_seg_idx].x());
+	}
+
 	drag_moved = true;
 
 	// The hops are discarded during the drag, they're calculated again when the line is reconfigured
@@ -1434,17 +1548,30 @@ void RelationshipView::finishSegmentDrag()
 	BaseRelationship *base_rel = getUnderlyingObject();
 	std::map<unsigned, BaseRelationship::SegmentShift> shifts = base_rel->getSegmentShifts();
 	unsigned idx = drag_seg_idx;
+	bool jog_dragged = (drag_jog_end >= 0);
+	auto cur_shift = shifts.find(idx);
 
 	drag_seg_idx = -1;
+	drag_jog_end = -1;
 	unsetCursor();
 
 	if(!drag_moved)
 		return;
 
-	if(std::fabs(drag_shift) < 0.01)
+	if(jog_dragged)
+	{
+		if(cur_shift == shifts.end())
+			return;
+
+		cur_shift->second.jog = (drag_shift < 0.01 ? 0 : drag_shift);
+	}
+	else if(std::fabs(drag_shift) < 0.01)
 		shifts.erase(idx);
 	else
-		shifts[idx] = { (drag_horiz ? Qt::Horizontal : Qt::Vertical), drag_shift };
+	{
+		shifts[idx] = { (drag_horiz ? Qt::Horizontal : Qt::Vertical), drag_shift,
+										(cur_shift != shifts.end() ? cur_shift->second.jog : 0) };
+	}
 
 	base_rel->setSegmentShifts(shifts);
 	emit s_relationshipModified(base_rel);
@@ -1454,26 +1581,114 @@ void RelationshipView::finishSegmentDrag()
 	QMetaObject::invokeMethod(this, [this](){ invalidateRoute(); }, Qt::QueuedConnection);
 }
 
+double RelationshipView::clampEndSegmentShift(const std::vector<QPointF> &route, bool first, double shift,
+																							const double *stubs, const QRectF &limits)
+{
+	constexpr double Epsilon = 0.01;
+	double min_len = RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
+			start_len = std::max(min_len, stubs[0]), end_len = std::max(min_len, stubs[1]),
+			lo = 0, hi = 0, seg_len = 0, neighbor_len = 0, neighbor_min = 0, needed = 0;
+	size_t n = route.size(), seg_cnt = n - 1;
+	const QPointF &seg_start = route[first ? 0 : n - 2], &seg_end = route[first ? 1 : n - 1];
+	bool horiz = std::fabs(seg_start.y() - seg_end.y()) < Epsilon;
+
+	seg_len = (horiz ? std::fabs(seg_end.x() - seg_start.x()) : std::fabs(seg_end.y() - seg_start.y()));
+
+	/* The segment needs room for the jog next to the table (it keeps the area of the descriptor and
+	 * the corner's curve) and for the part that is displaced. A route with one segment has a jog at each end */
+	if(seg_cnt == 1)
+		needed = start_len + end_len + min_len;
+	else
+		needed = (first ? start_len : end_len) + min_len;
+
+	if(seg_len < needed)
+		return 0;
+
+	// Limits of the displacement, measured along the axis perpendicular to the segment
+	if(horiz)
+	{
+		lo = limits.top() - seg_start.y();
+		hi = limits.bottom() - seg_start.y();
+	}
+	else
+	{
+		lo = limits.left() - seg_start.x();
+		hi = limits.right() - seg_start.x();
+	}
+
+	/* The neighbor segment is perpendicular to the displaced one and its length changes with the displacement:
+	 * the end of it that is shared with the segment moves, the other end stays at the neighbor's other neighbor */
+	if(seg_cnt > 1)
+	{
+		if(first)
+		{
+			neighbor_len = (horiz ? route[2].y() - route[1].y() : route[2].x() - route[1].x());
+			neighbor_min = (seg_cnt == 2 ? end_len : min_len);
+
+			if(neighbor_len > 0)
+				hi = std::min(hi, neighbor_len - neighbor_min);
+			else
+				lo = std::max(lo, neighbor_len + neighbor_min);
+		}
+		else
+		{
+			neighbor_len = (horiz ? route[n - 2].y() - route[n - 3].y() : route[n - 2].x() - route[n - 3].x());
+			neighbor_min = (seg_cnt == 2 ? start_len : min_len);
+
+			if(neighbor_len > 0)
+				lo = std::max(lo, neighbor_min - neighbor_len);
+			else
+				hi = std::min(hi, -neighbor_len - neighbor_min);
+		}
+	}
+
+	if(lo > hi)
+		return 0;
+
+	return std::clamp(shift, lo, hi);
+}
+
+int RelationshipView::getJogKey(unsigned key, bool last_end)
+{
+	return -2 - static_cast<int>((key * 2) + (last_end ? 1 : 0));
+}
+
+double RelationshipView::clampJogLength(double length, double room, bool single)
+{
+	return std::clamp(length, 0.0, std::max((single ? room / 2 : room), 0.0));
+}
+
 std::vector<QPointF> RelationshipView::applySegmentShifts(const std::vector<QPointF> &route, const double *stubs,
-																													 const std::map<unsigned, BaseRelationship::SegmentShift> *custom_shifts)
+																													 const std::map<unsigned, BaseRelationship::SegmentShift> *custom_shifts,
+																													 std::vector<int> *seg_keys)
 {
 	constexpr double Epsilon = 0.01;
 	std::map<unsigned, BaseRelationship::SegmentShift> shifts =
 			(custom_shifts ? *custom_shifts : getUnderlyingObject()->getSegmentShifts());
 	std::vector<QPointF> result = route;
+	std::vector<int> keys;
 	QRectF limits;
-	QPointF offset;
-	double shift = 0;
+	QPointF offset, perp, dir, jog_start, jog_end;
+	double shift = 0, min_len = RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
+			jog = 0, stub_start = 0, stub_end = 0;
 	bool horiz = false;
+	size_t seg_cnt = (route.size() > 1 ? route.size() - 1 : 0);
 
-	if(shifts.empty() || route.size() < 4)
+	// Without displacements every segment comes from the segment of the same index
+	for(size_t idx = 0; idx < seg_cnt; idx++)
+		keys.push_back(idx);
+
+	if(seg_keys)
+		*seg_keys = keys;
+
+	if(shifts.empty() || route.size() < 2)
 		return route;
 
 	limits = getSegmentShiftLimits();
 
 	for(auto &itr : shifts)
 	{
-		// Only the inner segments are displaced, the first and the last ones are anchored to the tables
+		// The segments at the ends of the line are not moved here, they get a jog (see below)
 		// The index comes from the model file: the sum is made with size_t to never wrap around
 		if(itr.first < 1 || static_cast<size_t>(itr.first) + 2 >= route.size())
 			continue;
@@ -1488,6 +1703,85 @@ std::vector<QPointF> RelationshipView::applySegmentShifts(const std::vector<QPoi
 		result[itr.first] += offset;
 		result[itr.first + 1] += offset;
 	}
+
+	/* The first and the last segments are anchored to the tables, since they hold the descriptors. To displace them
+	 * the line is given a jog: the segment keeps going straight for the length of the stub (which has the area of
+	 * the descriptor), turns towards the displacement, and then goes on parallel to where it was. In other words,
+	 * the corner is added to the route and the part of the segment that is not next to the table is what moves */
+	for(int end = 0; end < 2; end++)
+	{
+		bool first = (end == 1), single = (seg_cnt == 1);
+		unsigned key = (first ? 0 : seg_cnt - 1);
+		auto itr = shifts.find(key);
+
+		// A route with a single segment is handled once, as the first
+		if(itr == shifts.end() || (single && !first))
+			continue;
+
+		size_t n = result.size();
+		const QPointF &seg_start = result[first ? 0 : n - 2], &seg_end = result[first ? 1 : n - 1];
+
+		horiz = std::fabs(seg_start.y() - seg_end.y()) < Epsilon;
+
+		if(horiz != (itr->second.orientation == Qt::Horizontal))
+			continue;
+
+		shift = clampEndSegmentShift(result, first, itr->second.value, stubs, limits);
+
+		if(std::fabs(shift) < Epsilon)
+			continue;
+
+		perp = (horiz ? QPointF(0, shift) : QPointF(shift, 0));
+
+		// Unit vector in the direction of the segment (from the first point to the last one)
+		dir = (horiz ? QPointF((seg_end.x() >= seg_start.x() ? 1 : -1), 0) : QPointF(0, (seg_end.y() >= seg_start.y() ? 1 : -1)));
+
+		// The length of the stub is increased by the jog length the user chose (the stub can't get shorter than its minimum)
+		stub_start = std::max(min_len, stubs[0]);
+		stub_end = std::max(min_len, stubs[1]);
+
+		// What is left of the segment after the stubs and the displaced part (that must keep the minimum length)
+		jog = clampJogLength(itr->second.jog,
+												 QLineF(seg_start, seg_end).length() - (single ? stub_start + stub_end : (first ? stub_start : stub_end)) - min_len,
+												 single);
+		stub_start += jog;
+		stub_end += jog;
+
+		if(single)
+		{
+			QPointF p0 = result[0], p1 = result[1];
+
+			result = { p0,
+								 p0 + (dir * stub_start),
+								 p0 + (dir * stub_start) + perp,
+								 p1 - (dir * stub_end) + perp,
+								 p1 - (dir * stub_end),
+								 p1 };
+
+			keys = { -1, getJogKey(0, false), 0, getJogKey(0, true), -1 };
+		}
+		else if(first)
+		{
+			jog_start = result[0] + (dir * stub_start);
+			jog_end = jog_start + perp;
+			result[1] += perp;
+			result.insert(result.begin() + 1, { jog_start, jog_end });
+			keys.erase(keys.begin());
+			keys.insert(keys.begin(), { -1, getJogKey(0, false), 0 });
+		}
+		else
+		{
+			jog_start = result[n - 1] - (dir * stub_end);
+			jog_end = jog_start + perp;
+			result[n - 2] += perp;
+			result.insert(result.begin() + (n - 1), { jog_end, jog_start });
+			keys.pop_back();
+			keys.insert(keys.end(), { static_cast<int>(key), getJogKey(key, true), -1 });
+		}
+	}
+
+	if(seg_keys)
+		*seg_keys = keys;
 
 	return result;
 }
@@ -2421,6 +2715,7 @@ void RelationshipView::configureCurvedLines(const LineGeometry &geom)
 {
 	route_points.clear();
 	bumps.clear();
+	bumps_convex.clear();
 
 	BezierCurveItem *curve = nullptr;
 	bool invert_cpoints = false, simple_curve = false;
@@ -2486,7 +2781,10 @@ void RelationshipView::configurePolylineCurve(const std::vector<QPointF> &points
 	if(line_style == OrthogonalLines)
 	{
 		if(route_points != points)
+		{
 			bumps.clear();
+			bumps_convex.clear();
+		}
 
 		route_points = points;
 	}
@@ -2494,6 +2792,7 @@ void RelationshipView::configurePolylineCurve(const std::vector<QPointF> &points
 	{
 		route_points.clear();
 		bumps.clear();
+		bumps_convex.clear();
 	}
 
 	curve_end_lens[0] = start_len;
@@ -2503,7 +2802,7 @@ void RelationshipView::configurePolylineCurve(const std::vector<QPointF> &points
 	curve->setPen(lines[0]->pen());
 	curve->setPoints(points, RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(),
 									 bumps, BumpRadius * BaseObjectView::getScreenDpiFactor(),
-									 curve_end_lens[0], curve_end_lens[1]);
+									 curve_end_lens[0], curve_end_lens[1], bumps_convex);
 
 	for(auto &line : lines)
 		line->setVisible(false);
@@ -2519,6 +2818,7 @@ void RelationshipView::removeCurves()
 {
 	route_points.clear();
 	bumps.clear();
+	bumps_convex.clear();
 
 	for(auto &line : lines)
 		line->setVisible(true);

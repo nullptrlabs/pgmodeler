@@ -251,6 +251,9 @@ class RelationshipLinesTest: public QObject, public PgModelerUnitTest {
 		void reconfiguringTheLinesOfALoadedModelSpreadsTheAnchors();
 		void relationshipsAddedLaterRespaceTheExistingOnes();
 		void aCrossingGivesABumpOnTheHorizontalLine();
+		void bumpsKnowWhichLineIsOnTop();
+		void theKindOfABumpFollowsTheStackingOrderOfTheLines();
+		void eachBumpOfALineHasItsOwnKind();
 		void bumpsDisappearWhenTheCrossingLineMovesAway();
 		void linesThatDoNotCrossGiveNoBumps();
 		void manualCrossingGivesOnlyTheHorizontalLineABump();
@@ -271,9 +274,21 @@ class RelationshipLinesTest: public QObject, public PgModelerUnitTest {
 		void aShiftMovesTheMiddleSegmentOfARoute();
 		void shiftsDoNotAccumulateAndTheBaseRouteIsKept();
 		void aShiftOfZeroOrOfAnotherOrientationIsIgnored();
-		void theSegmentsAtTheEndsAreNeverShifted();
+		void theSegmentsAtTheEndsGetAJogWhenShifted();
+		void aShiftOfTheLastSegmentGetsAJogNextToTheTable();
+		void aJogOfAnEndSegmentNeverTouchesTheAreaOfTheDescriptors();
+		void endShiftsAreLimitedByTheLengthOfTheSegments();
+		void endShiftsKeepTheRouteValidWithOtherShifts();
+		void dragWithShiftOnAnEndSegmentAddsAJogAndStoresTheShift();
+		void theStubOfAnEndSegmentCannotBeDragged();
+		void theJogOfAnEndSegmentCanBeDraggedAlongTheLine();
+		void theJogOfTheLastSegmentMovesInTheOppositeDirection();
+		void theJogIsLimitedByTheRoomOfTheSegment();
+		void theJogOfASingleSegmentRouteMovesBothEnds();
+		void draggingTheDisplacedPartKeepsTheJog();
+		void theCursorOverAJogShowsTheDirectionItMoves();
 		void indexesOutOfTheRouteAreIgnored();
-		void routesWithoutInnerSegmentsIgnoreTheShifts();
+		void aRouteWithASingleSegmentGetsAJogAtEachEnd();
 		void aShiftIsLimitedByTheLengthTheNeighborSegmentsNeed();
 		void aShiftIsLimitedByTheAreaOfTheRelationship();
 		void shiftsSurviveTheUpdatesOfTheNeighborhood();
@@ -296,7 +311,7 @@ class RelationshipLinesTest: public QObject, public PgModelerUnitTest {
 		void aSecondDragStartsFromTheCurrentPosition();
 		void dragWithoutShiftNeverMovesASegment();
 		void onlyTheLeftButtonStartsTheDrag();
-		void theEndSegmentsAndTheEmptySpaceCannotBeDragged();
+		void theEmptySpaceAroundTheLineCannotBeDragged();
 		void aProtectedRelationshipCannotBeDragged();
 		void selfRelationshipsCannotBeDragged();
 		void shiftClickInTheOtherStylesStillEditsThePoints();
@@ -1648,6 +1663,120 @@ void RelationshipLinesTest::relationshipsAddedLaterRespaceTheExistingOnes()
 	}
 }
 
+void RelationshipLinesTest::bumpsKnowWhichLineIsOnTop()
+{
+	try
+	{
+		applyMode(RelationshipView::ConnectTableEdges, false);
+
+		Rig rig;
+		Table *tab_a = addTable(rig, "tab_a", QPointF(0, 0)), *tab_b = addTable(rig, "tab_b", QPointF(1600, 0)),
+				*tab_c = addTable(rig, "tab_c", QPointF(700, -700)), *tab_d = addTable(rig, "tab_d", QPointF(700, 700));
+		RelationshipView *rv_h = relView(addRel(rig, tab_a, tab_b)), *rv_v = relView(addRel(rig, tab_c, tab_d));
+
+		settle(200);
+
+		QCOMPARE(rv_h->bumps.size(), size_t(1));
+		QCOMPARE(rv_h->bumps_convex.size(), size_t(1));
+
+		// The scene lists the items from the one on top to the one at the bottom: the bump is convex when the vertical line is above
+		QList<QGraphicsItem *> items = rig.scene->items();
+		bool v_on_top = items.indexOf(rv_v) < items.indexOf(rv_h);
+
+		QCOMPARE(rv_h->bumps_convex[0], v_on_top);
+
+		// The curve is told about it
+		QCOMPARE(rv_h->curves[0]->getHopArcs().size(), size_t(1));
+		QCOMPARE(rv_h->curves[0]->getHopArcs()[0].convex, v_on_top);
+
+		// The line that doesn't hop has no bumps nor kinds
+		QVERIFY(rv_v->bumps.empty());
+		QVERIFY(rv_v->bumps_convex.empty());
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::theKindOfABumpFollowsTheStackingOrderOfTheLines()
+{
+	try
+	{
+		applyMode(RelationshipView::ConnectTableEdges, false);
+
+		Rig rig;
+		Table *tab_a = addTable(rig, "tab_a", QPointF(0, 0)), *tab_b = addTable(rig, "tab_b", QPointF(1600, 0)),
+				*tab_c = addTable(rig, "tab_c", QPointF(700, -700)), *tab_d = addTable(rig, "tab_d", QPointF(700, 700));
+		RelationshipView *rv_h = relView(addRel(rig, tab_a, tab_b)), *rv_v = relView(addRel(rig, tab_c, tab_d));
+
+		settle(200);
+
+		// The vertical line is below the horizontal one, which is the one that hops: concave bump
+		rv_v->stackBefore(rv_h);
+		rig.scene->updateRelationshipBumps();
+		QCOMPARE(rv_h->bumps.size(), size_t(1));
+		QCOMPARE(rv_h->bumps_convex, std::vector<bool>({ false }));
+		QCOMPARE(rv_h->curves[0]->getHopArcs()[0].convex, false);
+
+		// The vertical line goes over the bump: convex bump. The position is the same, only the kind changes
+		QPointF bump = rv_h->bumps[0];
+
+		rv_h->stackBefore(rv_v);
+		rig.scene->updateRelationshipBumps();
+		QCOMPARE(rv_h->bumps.size(), size_t(1));
+		QCOMPARE(rv_h->bumps[0], bump);
+		QCOMPARE(rv_h->bumps_convex, std::vector<bool>({ true }));
+		QCOMPARE(rv_h->curves[0]->getHopArcs()[0].convex, true);
+
+		// And back again
+		rv_v->stackBefore(rv_h);
+		rig.scene->updateRelationshipBumps();
+		QCOMPARE(rv_h->bumps_convex, std::vector<bool>({ false }));
+		QCOMPARE(rv_h->curves[0]->getHopArcs()[0].convex, false);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::eachBumpOfALineHasItsOwnKind()
+{
+	try
+	{
+		applyMode(RelationshipView::ConnectTableEdges, false);
+
+		Rig rig;
+		Table *tab_a = addTable(rig, "tab_a", QPointF(0, 0)), *tab_b = addTable(rig, "tab_b", QPointF(2200, 0)),
+				*tab_c = addTable(rig, "tab_c", QPointF(700, -700)), *tab_d = addTable(rig, "tab_d", QPointF(700, 700)),
+				*tab_e = addTable(rig, "tab_e", QPointF(1400, -700)), *tab_f = addTable(rig, "tab_f", QPointF(1400, 700));
+		RelationshipView *rv_h = relView(addRel(rig, tab_a, tab_b)),
+				*rv_v1 = relView(addRel(rig, tab_c, tab_d)), *rv_v2 = relView(addRel(rig, tab_e, tab_f));
+
+		settle(200);
+
+		// The first vertical line (on the left) is above the horizontal one and the second is below it
+		rv_v2->stackBefore(rv_h);
+		rv_h->stackBefore(rv_v1);
+		rig.scene->updateRelationshipBumps();
+
+		QCOMPARE(rv_h->bumps.size(), size_t(2));
+		QVERIFY(rv_h->bumps[0].x() < rv_h->bumps[1].x());
+		QCOMPARE(rv_h->bumps_convex, std::vector<bool>({ true, false }));
+
+		const auto &arcs = rv_h->curves[0]->getHopArcs();
+
+		QCOMPARE(arcs.size(), size_t(2));
+		QCOMPARE(arcs[0].convex, true);
+		QCOMPARE(arcs[1].convex, false);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
 void RelationshipLinesTest::aCrossingGivesABumpOnTheHorizontalLine()
 {
 	try
@@ -2405,23 +2534,219 @@ void RelationshipLinesTest::aShiftOfZeroOrOfAnotherOrientationIsIgnored()
 	}
 }
 
-void RelationshipLinesTest::theSegmentsAtTheEndsAreNeverShifted()
+void RelationshipLinesTest::theSegmentsAtTheEndsGetAJogWhenShifted()
 {
 	try
 	{
 		Rig rig;
 		ZLayout z = makeZ(rig);
 		std::vector<QPointF> base = z.rv->route_points;
+		double stub = std::max(RelationshipView::RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(), z.rv->route_stubs[0]);
 
-		for(auto orient : { Qt::Horizontal, Qt::Vertical })
+		QCOMPARE(base.size(), size_t(4));
+		QVERIFY(isHorizontal(base[0], base[1]));
+
+		// The first segment doesn't move: the line goes straight for the length of the stub, turns, and keeps going displaced
+		z.rel->setSegmentShifts({{ 0, { Qt::Horizontal, 20 } }});
+		z.rv->invalidateRoute();
+
+		const std::vector<QPointF> &route = z.rv->route_points;
+
+		QCOMPARE(route.size(), base.size() + 2);
+		QCOMPARE(route.front(), base.front());
+		QCOMPARE(route.back(), base.back());
+
+		// The stub, next to the table, stays where the segment was
+		QCOMPARE(route[1].y(), base[0].y());
+		QVERIFY(std::fabs(route[1].x() - (base[0].x() + stub)) < Eps);
+
+		// The jog is perpendicular to the segment, and the rest of it goes on displaced
+		QVERIFY(std::fabs(route[2].x() - route[1].x()) < Eps);
+		QVERIFY(std::fabs(route[2].y() - (base[0].y() + 20)) < Eps);
+		QVERIFY(std::fabs(route[3].y() - (base[0].y() + 20)) < Eps);
+		QCOMPARE(route[3].x(), base[1].x());
+
+		// The neighbor segment gets shorter by the displacement, the rest of the line is the same
+		QVERIFY(std::fabs(route[4].y() - base[2].y()) < Eps);
+		QCOMPARE(route[5], base[3]);
+		QVERIFY2(checkRoute(z.rv, true).isEmpty(), qPrintable(checkRoute(z.rv, true)));
+
+		// A shift in the other orientation doesn't apply to the segment
+		z.rel->setSegmentShifts({{ 0, { Qt::Vertical, 60 } }, { 2, { Qt::Vertical, 60 } }});
+		z.rv->invalidateRoute();
+		QCOMPARE(z.rv->route_points, base);
+
+		// Without shifts the line comes back to the base route
+		z.rel->resetSegmentShifts();
+		z.rv->invalidateRoute();
+		QCOMPARE(z.rv->route_points, base);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::aShiftOfTheLastSegmentGetsAJogNextToTheTable()
+{
+	try
+	{
+		Rig rig;
+		ZLayout z = makeZ(rig);
+		std::vector<QPointF> base = z.rv->route_points;
+		double stub = std::max(RelationshipView::RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(), z.rv->route_stubs[1]);
+
+		QCOMPARE(base.size(), size_t(4));
+
+		z.rel->setSegmentShifts({{ 2, { Qt::Horizontal, -20 } }});
+		z.rv->invalidateRoute();
+
+		const std::vector<QPointF> &route = z.rv->route_points;
+
+		QCOMPARE(route.size(), base.size() + 2);
+		QCOMPARE(route.front(), base.front());
+		QCOMPARE(route.back(), base.back());
+
+		// The displaced part starts where the neighbor segment ends and goes up to the jog, next to the table
+		QVERIFY(std::fabs(route[2].y() - (base[3].y() - 20)) < Eps);
+		QVERIFY(std::fabs(route[3].y() - (base[3].y() - 20)) < Eps);
+		QVERIFY(std::fabs(route[3].x() - (base[3].x() - stub)) < Eps);
+
+		// The jog, back to where the segment was, and the stub next to the table
+		QVERIFY(std::fabs(route[4].x() - route[3].x()) < Eps);
+		QVERIFY(std::fabs(route[4].y() - base[3].y()) < Eps);
+		QCOMPARE(route[5], base[3]);
+		QVERIFY2(checkRoute(z.rv, true).isEmpty(), qPrintable(checkRoute(z.rv, true)));
+
+		// Both ends at the same time
+		z.rel->setSegmentShifts({{ 0, { Qt::Horizontal, 20 } }, { 2, { Qt::Horizontal, -20 } }});
+		z.rv->invalidateRoute();
+		QCOMPARE(z.rv->route_points.size(), base.size() + 4);
+		QCOMPARE(z.rv->route_points.front(), base.front());
+		QCOMPARE(z.rv->route_points.back(), base.back());
+		QVERIFY2(checkRoute(z.rv, true).isEmpty(), qPrintable(checkRoute(z.rv, true)));
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::aJogOfAnEndSegmentNeverTouchesTheAreaOfTheDescriptors()
+{
+	try
+	{
+		Rig rig;
+		ZLayout z = makeZ(rig, true);
+		std::vector<QPointF> base = z.rv->route_points;
+		std::vector<QRectF> zones = z.rv->end_zones;
+
+		QCOMPARE(zones.size(), size_t(2));
+
+		z.rel->setSegmentShifts({{ 0, { Qt::Horizontal, 30 } }, { 2, { Qt::Horizontal, -30 } }});
+		z.rv->invalidateRoute();
+
+		const std::vector<QPointF> &route = z.rv->route_points;
+
+		QCOMPARE(route.size(), base.size() + 4);
+		QCOMPARE(z.rv->end_zones, zones);
+
+		// Everything but the stubs (the first and the last segments) is outside of the areas of the descriptors
+		for(size_t idx = 1; idx + 2 < route.size(); idx++)
 		{
-			for(unsigned idx : { 0u, 2u })
-			{
-				z.rel->setSegmentShifts({{ idx, { orient, 60 } }});
-				z.rv->invalidateRoute();
-				QVERIFY2(z.rv->route_points == base, qPrintable(QString("index %1").arg(idx)));
-			}
+			QVERIFY2(!RelationshipView::isSegmentBlocked(route[idx], route[idx + 1], zones),
+							 qPrintable(QString("segment %1 crosses the area of a descriptor").arg(idx)));
 		}
+
+		// The curve doesn't start before the descriptors end, so the corners next to the stubs are not rounded over them
+		QVERIFY(z.rv->curve_end_lens[0] > 0);
+		QVERIFY(QLineF(route[0], route[1]).length() >= z.rv->curve_end_lens[0] + RelationshipView::RoundedCornerRadius - Eps);
+		QVERIFY(QLineF(route[route.size() - 2], route.back()).length() >= z.rv->curve_end_lens[1] + RelationshipView::RoundedCornerRadius - Eps);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::endShiftsAreLimitedByTheLengthOfTheSegments()
+{
+	try
+	{
+		for(int crows = 0; crows < 2; crows++)
+		{
+			Rig rig;
+			ZLayout z = makeZ(rig, crows);
+			std::vector<QPointF> base = z.rv->route_points;
+			double min_len = RelationshipView::RoundedCornerRadius * BaseObjectView::getScreenDpiFactor();
+
+			// A huge displacement is limited: the neighbor segment keeps the length it needs and the line stays near the tables
+			for(double value : { 1e7, -1e7 })
+			{
+				z.rel->setSegmentShifts({{ 0, { Qt::Horizontal, value } }, { 2, { Qt::Horizontal, value } }});
+				z.rv->invalidateRoute();
+
+				QCOMPARE(z.rv->route_points.front(), base.front());
+				QCOMPARE(z.rv->route_points.back(), base.back());
+				QVERIFY2(checkRoute(z.rv, true).isEmpty(), qPrintable(checkRoute(z.rv, true)));
+
+				for(size_t idx = 1; idx < z.rv->route_points.size(); idx++)
+					QVERIFY(QLineF(z.rv->route_points[idx - 1], z.rv->route_points[idx]).length() > Eps);
+			}
+
+			// A segment that is too short for the stub, the jog and the displaced part is not displaced
+			QRectF rect_a = tableRect(tableView(z.a));
+			moveTable(rig, z.b, QPointF(rect_a.right() + 25, rect_a.bottom() + 400));
+			base = z.rv->route_points;
+			z.rel->setSegmentShifts({{ 0, { Qt::Horizontal, 20 } }, { 2, { Qt::Horizontal, 20 } }});
+			z.rv->invalidateRoute();
+
+			for(size_t idx = 1; idx < z.rv->route_points.size(); idx++)
+				QVERIFY(QLineF(z.rv->route_points[idx - 1], z.rv->route_points[idx]).length() > Eps);
+
+			QVERIFY2(checkRoute(z.rv, true).isEmpty(), qPrintable(checkRoute(z.rv, true)));
+			Q_UNUSED(min_len);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::endShiftsKeepTheRouteValidWithOtherShifts()
+{
+	try
+	{
+		Rig rig;
+		ZLayout z = makeZ(rig, true);
+		std::vector<QPointF> base = z.rv->route_points;
+
+		// The inner segment is displaced first, then the ends (the indexes are the ones of the base route)
+		z.rel->setSegmentShifts({{ 0, { Qt::Horizontal, 25 } }, { 1, { Qt::Vertical, 40 } }, { 2, { Qt::Horizontal, -25 } }});
+		z.rv->invalidateRoute();
+
+		const std::vector<QPointF> &route = z.rv->route_points;
+
+		QCOMPARE(route.size(), base.size() + 4);
+		QCOMPARE(route.front(), base.front());
+		QCOMPARE(route.back(), base.back());
+		QVERIFY2(checkRoute(z.rv, true).isEmpty(), qPrintable(checkRoute(z.rv, true)));
+
+		// The inner segment moved sideways and the base route is kept for the next update
+		QCOMPARE(z.rv->base_route, base);
+		QVERIFY(std::fabs(route[4].x() - (base[1].x() + 40)) < Eps);
+		QCOMPARE(z.rv->route_seg_keys.size(), route.size() - 1);
+
+		for(int i = 0; i < 3; i++)
+		{
+			z.rv->invalidateRoute();
+			QCOMPARE(z.rv->route_points, route);
+		}
+
+		z.rel->resetSegmentShifts();
+		z.rv->invalidateRoute();
+		QCOMPARE(z.rv->route_points, base);
 	}
 	catch(Exception &e)
 	{
@@ -2453,7 +2778,7 @@ void RelationshipLinesTest::indexesOutOfTheRouteAreIgnored()
 	}
 }
 
-void RelationshipLinesTest::routesWithoutInnerSegmentsIgnoreTheShifts()
+void RelationshipLinesTest::aRouteWithASingleSegmentGetsAJogAtEachEnd()
 {
 	try
 	{
@@ -2467,7 +2792,21 @@ void RelationshipLinesTest::routesWithoutInnerSegmentsIgnoreTheShifts()
 
 		QCOMPARE(base.size(), size_t(2));
 
-		rel->setSegmentShifts({{ 0, { Qt::Horizontal, 20 } }, { 1, { Qt::Horizontal, 20 } }, { 1, { Qt::Vertical, 20 } }});
+		// The only segment is displaced after a jog at each end
+		rel->setSegmentShifts({{ 0, { Qt::Horizontal, 20 } }});
+		rv->invalidateRoute();
+
+		QCOMPARE(rv->route_points.size(), size_t(6));
+		QCOMPARE(rv->route_points.front(), base.front());
+		QCOMPARE(rv->route_points.back(), base.back());
+		QVERIFY(std::fabs(rv->route_points[2].y() - (base[0].y() + 20)) < Eps);
+		QVERIFY(std::fabs(rv->route_points[3].y() - (base[0].y() + 20)) < Eps);
+		QCOMPARE(rv->route_points[1].y(), base[0].y());
+		QCOMPARE(rv->route_points[4].y(), base[0].y());
+		QVERIFY2(checkRoute(rv, true).isEmpty(), qPrintable(checkRoute(rv, true)));
+
+		// The orientation must match and the indexes out of the route (the base one has a single segment) are ignored
+		rel->setSegmentShifts({{ 0, { Qt::Vertical, 20 } }, { 1, { Qt::Horizontal, 20 } }, { 2, { Qt::Vertical, 20 } }});
 		rv->invalidateRoute();
 		QCOMPARE(rv->route_points, base);
 		QVERIFY2(checkRoute(rv, true).isEmpty(), qPrintable(checkRoute(rv, true)));
@@ -3041,6 +3380,325 @@ void RelationshipLinesTest::dragWithShiftMovesAVerticalSegmentAndStoresTheShift(
 	}
 }
 
+void RelationshipLinesTest::dragWithShiftOnAnEndSegmentAddsAJogAndStoresTheShift()
+{
+	try
+	{
+		Rig rig;
+		ZLayout z = makeZ(rig);
+		std::vector<QPointF> base = z.rv->route_points;
+		QSignalSpy spy(z.rv, &RelationshipView::s_relationshipModified);
+		QPointF mid = segmentMiddle(z.rv, 0);
+
+		QVERIFY(isHorizontal(base[0], base[1]));
+
+		dragSegment(z.rv, mid, mid + QPointF(0, 30), Qt::ShiftModifier);
+
+		// The shift is stored for the first segment of the base route and the line got a jog next to the table
+		QCOMPARE(z.rel->getSegmentShifts().size(), size_t(1));
+		QCOMPARE(z.rel->getSegmentShifts().at(0).orientation, Qt::Horizontal);
+		QVERIFY(std::fabs(z.rel->getSegmentShifts().at(0).value - 30) < Eps);
+		QCOMPARE(z.rv->route_points.size(), base.size() + 2);
+		QCOMPARE(z.rv->route_points.front(), base.front());
+		QCOMPARE(z.rv->route_points.back(), base.back());
+		QCOMPARE(z.rv->route_points[1].y(), base[0].y());
+		QVERIFY(std::fabs(z.rv->route_points[2].y() - (base[0].y() + 30)) < Eps);
+		QCOMPARE(spy.count(), 1);
+		QCOMPARE(z.rv->drag_seg_idx, -1);
+		QVERIFY2(checkRoute(z.rv, true).isEmpty(), qPrintable(checkRoute(z.rv, true)));
+
+		// The displaced part (now the third segment) is dragged again from where it is, adding to the stored shift
+		QPointF new_mid = segmentMiddle(z.rv, 2);
+
+		dragSegment(z.rv, new_mid, new_mid + QPointF(0, 20), Qt::ShiftModifier);
+		QVERIFY(std::fabs(z.rel->getSegmentShifts().at(0).value - 50) < Eps);
+		QCOMPARE(z.rv->route_points.size(), base.size() + 2);
+
+		// The stub, the segment next to the table, can't be dragged
+		QPointF stub_pnt = z.rv->route_points[0] + QPointF(2, 0);
+
+		sendMouse(z.rv, QEvent::GraphicsSceneMousePress, stub_pnt, Qt::LeftButton, Qt::LeftButton, Qt::ShiftModifier);
+		QCOMPARE(z.rv->drag_seg_idx, -1);
+		sendMouse(z.rv, QEvent::GraphicsSceneMouseRelease, stub_pnt, Qt::LeftButton, Qt::NoButton, Qt::ShiftModifier);
+
+		// Dragging it back to where it was removes the shift and the jog
+		new_mid = segmentMiddle(z.rv, 2);
+		dragSegment(z.rv, new_mid, new_mid - QPointF(0, 50), Qt::ShiftModifier);
+		QVERIFY(z.rel->getSegmentShifts().empty());
+		QCOMPARE(z.rv->route_points, base);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::theStubOfAnEndSegmentCannotBeDragged()
+{
+	try
+	{
+		Rig rig;
+		ZLayout z = makeZ(rig, true);
+		std::vector<QPointF> base = z.rv->route_points;
+		QPointF dirs[2] = { (base[1] - base[0]) / QLineF(base[0], base[1]).length(),
+												(base[3] - base[2]) / QLineF(base[2], base[3]).length() };
+
+		z.rv->setSelected(true);
+
+		// Over the area of the descriptors, next to each table, the segment can't be picked
+		for(const QPointF &pnt : { base[0] + (dirs[0] * 3), base[0] + (dirs[0] * (z.rv->curve_end_lens[0] / 2)),
+															 base[3] - (dirs[1] * 3), base[3] - (dirs[1] * (z.rv->curve_end_lens[1] / 2)) })
+		{
+			sendMouse(z.rv, QEvent::GraphicsSceneMousePress, pnt, Qt::LeftButton, Qt::LeftButton, Qt::ShiftModifier);
+			QCOMPARE(z.rv->drag_seg_idx, -1);
+			sendMouse(z.rv, QEvent::GraphicsSceneMouseRelease, pnt, Qt::LeftButton, Qt::NoButton, Qt::ShiftModifier);
+		}
+
+		// Beyond the stub it picks the segment, that is identified by its index in the base route
+		QPointF pnt = base[0] + (dirs[0] * (z.rv->route_stubs[0] + 30));
+
+		sendMouse(z.rv, QEvent::GraphicsSceneMousePress, pnt, Qt::LeftButton, Qt::LeftButton, Qt::ShiftModifier);
+		QCOMPARE(z.rv->drag_seg_idx, 0);
+		sendMouse(z.rv, QEvent::GraphicsSceneMouseRelease, pnt, Qt::LeftButton, Qt::NoButton, Qt::ShiftModifier);
+
+		pnt = base[3] - (dirs[1] * (z.rv->route_stubs[1] + 30));
+		sendMouse(z.rv, QEvent::GraphicsSceneMousePress, pnt, Qt::LeftButton, Qt::LeftButton, Qt::ShiftModifier);
+		QCOMPARE(z.rv->drag_seg_idx, 2);
+		sendMouse(z.rv, QEvent::GraphicsSceneMouseRelease, pnt, Qt::LeftButton, Qt::NoButton, Qt::ShiftModifier);
+
+		QVERIFY(z.rel->getSegmentShifts().empty());
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::theJogOfAnEndSegmentCanBeDraggedAlongTheLine()
+{
+	try
+	{
+		for(int crows = 0; crows < 2; crows++)
+		{
+			Rig rig;
+			ZLayout z = makeZ(rig, crows);
+			std::vector<QPointF> base = z.rv->route_points;
+			double stub = std::max(RelationshipView::RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(), z.rv->route_stubs[0]);
+			std::vector<QRectF> zones = z.rv->end_zones;
+
+			z.rel->setSegmentShifts({{ 0, { Qt::Horizontal, 30 } }});
+			z.rv->invalidateRoute();
+
+			// The jog (the second segment) is vertical, so it moves horizontally: the stub gets longer
+			QPointF mid = segmentMiddle(z.rv, 1);
+
+			QVERIFY(!isHorizontal(z.rv->route_points[1], z.rv->route_points[2]));
+			dragSegment(z.rv, mid, mid + QPointF(40, 0), Qt::ShiftModifier);
+
+			QCOMPARE(z.rel->getSegmentShifts().size(), size_t(1));
+			QVERIFY(std::fabs(z.rel->getSegmentShifts().at(0).value - 30) < Eps);
+			QVERIFY(std::fabs(z.rel->getSegmentShifts().at(0).jog - 40) < Eps);
+
+			const std::vector<QPointF> &route = z.rv->route_points;
+
+			QCOMPARE(route.size(), base.size() + 2);
+			QCOMPARE(route.front(), base.front());
+			QCOMPARE(route.back(), base.back());
+			QVERIFY(std::fabs(route[1].x() - (base[0].x() + stub + 40)) < Eps);
+			QVERIFY(std::fabs(route[2].x() - route[1].x()) < Eps);
+			QVERIFY(std::fabs(route[2].y() - (base[0].y() + 30)) < Eps);
+			QVERIFY2(checkRoute(z.rv, true).isEmpty(), qPrintable(checkRoute(z.rv, true)));
+			QCOMPARE(z.rv->end_zones, zones);
+
+			// Dragging towards the table shortens the stub up to the minimum length, never beyond it
+			mid = segmentMiddle(z.rv, 1);
+			dragSegment(z.rv, mid, mid - QPointF(15, 0), Qt::ShiftModifier);
+			QVERIFY(std::fabs(z.rel->getSegmentShifts().at(0).jog - 25) < Eps);
+
+			mid = segmentMiddle(z.rv, 1);
+			dragSegment(z.rv, mid, mid - QPointF(500, 0), Qt::ShiftModifier);
+			QVERIFY(std::fabs(z.rel->getSegmentShifts().at(0).jog) < Eps);
+			QVERIFY(std::fabs(z.rv->route_points[1].x() - (base[0].x() + stub)) < Eps);
+			QVERIFY2(checkRoute(z.rv, true).isEmpty(), qPrintable(checkRoute(z.rv, true)));
+
+			// The shift is kept when the jog goes back to its minimum
+			QCOMPARE(z.rel->getSegmentShifts().size(), size_t(1));
+			QVERIFY(std::fabs(z.rel->getSegmentShifts().at(0).value - 30) < Eps);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::theJogOfTheLastSegmentMovesInTheOppositeDirection()
+{
+	try
+	{
+		Rig rig;
+		ZLayout z = makeZ(rig, true);
+		std::vector<QPointF> base = z.rv->route_points;
+		double stub = std::max(RelationshipView::RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(), z.rv->route_stubs[1]);
+
+		z.rel->setSegmentShifts({{ 2, { Qt::Horizontal, -30 } }});
+		z.rv->invalidateRoute();
+
+		// The last jog is the fourth segment: the table is on its right, so the stub gets longer when the jog moves left
+		QCOMPARE(z.rv->route_points.size(), base.size() + 2);
+		QVERIFY(!isHorizontal(z.rv->route_points[3], z.rv->route_points[4]));
+
+		QPointF mid = segmentMiddle(z.rv, 3);
+
+		dragSegment(z.rv, mid, mid - QPointF(35, 0), Qt::ShiftModifier);
+
+		QVERIFY(std::fabs(z.rel->getSegmentShifts().at(2).value + 30) < Eps);
+		QVERIFY(std::fabs(z.rel->getSegmentShifts().at(2).jog - 35) < Eps);
+		QVERIFY(std::fabs(z.rv->route_points[4].x() - (base[3].x() - stub - 35)) < Eps);
+		QCOMPARE(z.rv->route_points.back(), base.back());
+		QVERIFY2(checkRoute(z.rv, true).isEmpty(), qPrintable(checkRoute(z.rv, true)));
+
+		// Dragging to the other side shortens it
+		mid = segmentMiddle(z.rv, 3);
+		dragSegment(z.rv, mid, mid + QPointF(10, 0), Qt::ShiftModifier);
+		QVERIFY(std::fabs(z.rel->getSegmentShifts().at(2).jog - 25) < Eps);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::theJogIsLimitedByTheRoomOfTheSegment()
+{
+	try
+	{
+		for(int crows = 0; crows < 2; crows++)
+		{
+			Rig rig;
+			ZLayout z = makeZ(rig, crows);
+			std::vector<QPointF> base = z.rv->route_points;
+			double min_len = RelationshipView::RoundedCornerRadius * BaseObjectView::getScreenDpiFactor();
+
+			// Even an absurd length leaves room for the displaced part, at both ends
+			z.rel->setSegmentShifts({{ 0, { Qt::Horizontal, 20, 1e7 } }, { 2, { Qt::Horizontal, 20, 1e7 } }});
+			z.rv->invalidateRoute();
+
+			QCOMPARE(z.rv->route_points.size(), base.size() + 4);
+			QCOMPARE(z.rv->route_points.front(), base.front());
+			QCOMPARE(z.rv->route_points.back(), base.back());
+			QVERIFY2(checkRoute(z.rv, true).isEmpty(), qPrintable(checkRoute(z.rv, true)));
+
+			// The displaced parts (third and the fifth to last segments) keep at least the minimum length
+			const std::vector<QPointF> &route = z.rv->route_points;
+
+			QVERIFY(QLineF(route[2], route[3]).length() >= min_len - Eps);
+			QVERIFY(QLineF(route[route.size() - 4], route[route.size() - 3]).length() >= min_len - Eps);
+
+			// A negative one is the same as no jog
+			z.rel->setSegmentShifts({{ 0, { Qt::Horizontal, 20, -50 } }});
+			z.rv->invalidateRoute();
+			QVERIFY(std::fabs(z.rv->route_points[1].x() - (base[0].x() + std::max(min_len, z.rv->route_stubs[0]))) < Eps);
+		}
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::theJogOfASingleSegmentRouteMovesBothEnds()
+{
+	try
+	{
+		applyMode(RelationshipView::ConnectTableEdges, false);
+
+		Rig rig;
+		Table *tab_a = addTable(rig, "tab_a", QPointF(0, 0)), *tab_b = addTable(rig, "tab_b", QPointF(600, 0));
+		Relationship *rel = addRel(rig, tab_a, tab_b);
+		RelationshipView *rv = relView(rel);
+		std::vector<QPointF> base = rv->route_points;
+		double stub = std::max(RelationshipView::RoundedCornerRadius * BaseObjectView::getScreenDpiFactor(), rv->route_stubs[0]);
+
+		rel->setSegmentShifts({{ 0, { Qt::Horizontal, 20 } }});
+		rv->invalidateRoute();
+		QCOMPARE(rv->route_points.size(), size_t(6));
+
+		// The jog of the second end is dragged, the jog of the first end follows it
+		QPointF mid = segmentMiddle(rv, 3);
+
+		dragSegment(rv, mid, mid - QPointF(30, 0), Qt::ShiftModifier);
+
+		QVERIFY(std::fabs(rel->getSegmentShifts().at(0).jog - 30) < Eps);
+		QVERIFY(std::fabs(rv->route_points[1].x() - (base[0].x() + stub + 30)) < Eps);
+		QVERIFY(std::fabs(rv->route_points[4].x() - (base[1].x() - stub - 30)) < Eps);
+		QCOMPARE(rv->route_points.front(), base.front());
+		QCOMPARE(rv->route_points.back(), base.back());
+		QVERIFY2(checkRoute(rv, true).isEmpty(), qPrintable(checkRoute(rv, true)));
+
+		// The first jog moves the same way
+		mid = segmentMiddle(rv, 1);
+		dragSegment(rv, mid, mid - QPointF(10, 0), Qt::ShiftModifier);
+		QVERIFY(std::fabs(rel->getSegmentShifts().at(0).jog - 20) < Eps);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::draggingTheDisplacedPartKeepsTheJog()
+{
+	try
+	{
+		Rig rig;
+		ZLayout z = makeZ(rig);
+
+		z.rel->setSegmentShifts({{ 0, { Qt::Horizontal, 30, 18 } }});
+		z.rv->invalidateRoute();
+
+		// The displaced part is the third segment: moving it changes the shift but keeps the length of the jog
+		QPointF mid = segmentMiddle(z.rv, 2);
+
+		dragSegment(z.rv, mid, mid + QPointF(0, 10), Qt::ShiftModifier);
+		QVERIFY(std::fabs(z.rel->getSegmentShifts().at(0).value - 40) < Eps);
+		QVERIFY(std::fabs(z.rel->getSegmentShifts().at(0).jog - 18) < Eps);
+
+		// Taking it back to the origin removes the shift, and the jog with it
+		mid = segmentMiddle(z.rv, 2);
+		dragSegment(z.rv, mid, mid - QPointF(0, 40), Qt::ShiftModifier);
+		QVERIFY(z.rel->getSegmentShifts().empty());
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::theCursorOverAJogShowsTheDirectionItMoves()
+{
+	try
+	{
+		Rig rig;
+		ZLayout z = makeZ(rig);
+
+		z.rel->setSegmentShifts({{ 0, { Qt::Horizontal, 30 } }});
+		z.rv->invalidateRoute();
+
+		// The jog is vertical so it moves horizontally
+		sendHover(z.rv, segmentMiddle(z.rv, 1), Qt::ShiftModifier);
+		QCOMPARE(z.rv->cursor().shape(), Qt::SizeHorCursor);
+
+		// Far from the jog there's nothing to move
+		sendHover(z.rv, segmentMiddle(z.rv, 1) + QPointF(0, 100), Qt::ShiftModifier);
+		QCOMPARE(z.rv->cursor().shape(), Qt::ArrowCursor);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
 void RelationshipLinesTest::dragWithShiftMovesAHorizontalSegment()
 {
 	try
@@ -3258,7 +3916,7 @@ void RelationshipLinesTest::onlyTheLeftButtonStartsTheDrag()
 	}
 }
 
-void RelationshipLinesTest::theEndSegmentsAndTheEmptySpaceCannotBeDragged()
+void RelationshipLinesTest::theEmptySpaceAroundTheLineCannotBeDragged()
 {
 	try
 	{
@@ -3268,16 +3926,6 @@ void RelationshipLinesTest::theEndSegmentsAndTheEmptySpaceCannotBeDragged()
 		double tolerance = RelationshipView::LineSelStrokeWidth / 2;
 
 		z.rv->setSelected(true);
-
-		// First and last segments
-		for(size_t idx : { size_t(0), size_t(2) })
-		{
-			QPointF mid = segmentMiddle(z.rv, idx);
-
-			sendMouse(z.rv, QEvent::GraphicsSceneMousePress, mid, Qt::LeftButton, Qt::LeftButton, Qt::ShiftModifier);
-			QCOMPARE(z.rv->drag_seg_idx, -1);
-			sendMouse(z.rv, QEvent::GraphicsSceneMouseRelease, mid, Qt::LeftButton, Qt::NoButton, Qt::ShiftModifier);
-		}
 
 		// Next to the middle segment, but outside the tolerance, or beyond its ends
 		QPointF mid = segmentMiddle(z.rv, 1);
@@ -3463,12 +4111,15 @@ void RelationshipLinesTest::theCursorShowsTheDirectionTheSegmentMoves()
 			sendHover(z.rv, segmentMiddle(z.rv, 1), Qt::ShiftModifier);
 			QCOMPARE(z.rv->cursor().shape(), Qt::SizeHorCursor);
 
-			// Without SHIFT, over the end segments, or away from the line the cursor is the common one
+			// Without SHIFT, over the stubs of the end segments, or away from the line the cursor is the common one
 			sendHover(z.rv, segmentMiddle(z.rv, 1), Qt::NoModifier);
 			QCOMPARE(z.rv->cursor().shape(), Qt::ArrowCursor);
 
-			sendHover(z.rv, segmentMiddle(z.rv, 1), Qt::ShiftModifier);
+			// The end segments move too (vertically, as they are horizontal), except next to the tables, where the descriptors are
 			sendHover(z.rv, segmentMiddle(z.rv, 0), Qt::ShiftModifier);
+			QCOMPARE(z.rv->cursor().shape(), Qt::SizeVerCursor);
+
+			sendHover(z.rv, z.rv->route_points[0] + QPointF(3, 0), Qt::ShiftModifier);
 			QCOMPARE(z.rv->cursor().shape(), Qt::ArrowCursor);
 
 			sendHover(z.rv, segmentMiddle(z.rv, 1), Qt::ShiftModifier);
@@ -4853,15 +5504,21 @@ void RelationshipLinesTest::appliedShiftsAlwaysGiveAValidRoute()
 				bool horiz = (idx + 1 < route.size()) && isHorizontal(route[idx], route[idx + 1]);
 				double value = (rnd.bounded(4) == 0 ? 1e7 : rnd.bounded(600)) * (rnd.bounded(2) ? 1 : -1);
 
-				shifts[idx] = { (rnd.bounded(5) == 0 ? (horiz ? Qt::Vertical : Qt::Horizontal) : (horiz ? Qt::Horizontal : Qt::Vertical)), value };
+				// The jog is also random (it only applies to the end segments)
+				double jog = (rnd.bounded(3) == 0 ? 0 : (rnd.bounded(6) == 0 ? 1e7 : rnd.bounded(300)) * (rnd.bounded(8) == 0 ? -1 : 1));
+
+				shifts[idx] = { (rnd.bounded(5) == 0 ? (horiz ? Qt::Vertical : Qt::Horizontal) : (horiz ? Qt::Horizontal : Qt::Vertical)), value, jog };
 			}
 
 			z.rv->base_route = route;
 
-			std::vector<QPointF> result = z.rv->applySegmentShifts(route, stubs, &shifts);
+			std::vector<int> keys;
+			std::vector<QPointF> result = z.rv->applySegmentShifts(route, stubs, &shifts, &keys);
 			QString what = QString("round %1").arg(round);
 
-			QCOMPARE(result.size(), route.size());
+			// The displacement of the end segments adds a jog (two points) to each end
+			QVERIFY(result.size() >= route.size() && result.size() <= route.size() + 4 && (result.size() - route.size()) % 2 == 0);
+			QCOMPARE(keys.size(), result.size() - 1);
 			QCOMPARE(result.front(), route.front());
 			QCOMPARE(result.back(), route.back());
 
@@ -4871,8 +5528,9 @@ void RelationshipLinesTest::appliedShiftsAlwaysGiveAValidRoute()
 
 				QVERIFY2(horiz != vert, qPrintable(QString("%1: segment %2 is not orthogonal or has no length").arg(what).arg(i - 1)));
 
-				// The orientation of every segment is kept (shifts never turn a segment)
-				QCOMPARE(horiz, isHorizontal(route[i - 1], route[i]));
+				// The orientation of every segment that comes from a segment of the route is kept (shifts never turn a segment)
+				if(keys[i - 1] >= 0)
+					QCOMPARE(horiz, isHorizontal(route[keys[i - 1]], route[keys[i - 1] + 1]));
 			}
 
 			// The segments don't shrink below the length they need: the first and last ones also keep the room of the stubs
@@ -4882,16 +5540,25 @@ void RelationshipLinesTest::appliedShiftsAlwaysGiveAValidRoute()
 			{
 				double min = min_len;
 
-				if(i == 1)
+				// The stubs: the segments next to the tables are not part of the displaced ones, they only exist when displaced
+				if(i == 1 && keys[0] == 0)
 					min = std::max(min, stubs[0]);
 
-				if(i + 1 == result.size())
+				if(i + 1 == result.size() && static_cast<size_t>(keys[i - 1]) + 1 == route.size() - 1)
 					min = std::max(min, stubs[1]);
 
-				double before = QLineF(route[i - 1], route[i]).length(), len = QLineF(result[i - 1], result[i]).length();
+				// The jogs are as long as the displacement, and the stubs are as long as the room they need
+				if(keys[i - 1] < 0)
+				{
+					QVERIFY2(QLineF(result[i - 1], result[i]).length() > Eps, qPrintable(what));
+					continue;
+				}
+
+				double before = QLineF(route[keys[i - 1]], route[keys[i - 1] + 1]).length(), len = QLineF(result[i - 1], result[i]).length();
 
 				// A segment that was already shorter than the minimum can't get shorter than it was
-				QVERIFY2(len >= std::min(min, before) - 0.5, qPrintable(QString("%1: segment %2 went from %3 to %4 (min %5)").arg(what).arg(i - 1).arg(before).arg(len).arg(min)));
+				QVERIFY2(len >= std::min(min_len, before) - 0.5 || len >= std::min(min, before) - 0.5,
+								 qPrintable(QString("%1: segment %2 went from %3 to %4 (min %5)").arg(what).arg(i - 1).arg(before).arg(len).arg(min)));
 			}
 		}
 	}

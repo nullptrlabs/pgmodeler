@@ -53,10 +53,13 @@ class __libcore BaseRelationship: public BaseGraphicObject  {
 		};
 
 		/*! \brief Displacement the user applied to a segment of the orthogonal line. The segments are
-		 * identified by their index in the line's route, the orientation is used to validate the index */
+		 * identified by their index in the line's route, the orientation is used to validate the index.
+		 * The segments at the ends of the line are displaced after a jog (a corner) next to the table: the jog
+		 * is the length (beyond the minimum one) the line goes straight before turning, which the user can change */
 		struct SegmentShift {
 			Qt::Orientation orientation;
 			double value;
+			double jog { 0 };
 		};
 
 	protected:
