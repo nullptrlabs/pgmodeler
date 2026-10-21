@@ -2150,8 +2150,15 @@ void ObjectsScene::updateRelationshipBumps()
 	};
 
 	std::vector<Segment> h_segs, v_segs;
-	std::map<RelationshipView *, std::vector<QPointF>> rels_bumps;
+	struct Bump {
+		QPointF pos;
+		bool convex;
+	};
+
+	std::map<RelationshipView *, std::vector<Bump>> rels_bumps;
+	std::map<RelationshipView *, size_t> stack_ranks;
 	std::vector<QPointF> bumps;
+	std::vector<bool> bumps_convex;
 	RelationshipView *rel_view = nullptr;
 	QPointF p1, p2;
 	double dpi_factor = BaseObjectView::getScreenDpiFactor(),
@@ -2169,6 +2176,9 @@ void ObjectsScene::updateRelationshipBumps()
 		if(!rel_view || !rel_view->isVisible() || rel_view->route_points.size() < 2)
 			continue;
 
+		/* The items come from the scene from the top one to the bottom one, so the lower the rank
+		 * of a line the higher it is in the stack of items (the line that is painted over the others) */
+		stack_ranks[rel_view] = rels.size();
 		rels.push_back(rel_view);
 		zones.insert(zones.end(), rel_view->end_zones.begin(), rel_view->end_zones.end());
 	}
@@ -2256,26 +2266,34 @@ void ObjectsScene::updateRelationshipBumps()
 			if(itr->rel != h_seg.rel &&
 				 h_seg.pos > itr->lo + corner_radius && h_seg.pos < itr->hi - corner_radius &&
 				 !is_in_zone(QPointF(itr->pos, h_seg.pos)))
-				rels_bumps[h_seg.rel].push_back(QPointF(itr->pos, h_seg.pos));
+			{
+				/* The bump is a convex one if the vertical line, the one that is hopped over, is above the line
+				 * that hops, and a concave one if the line that hops is above the vertical one */
+				rels_bumps[h_seg.rel].push_back({ QPointF(itr->pos, h_seg.pos), stack_ranks[itr->rel] < stack_ranks[h_seg.rel] });
+			}
 		}
 	}
 
 	for(auto &itr : rels_bumps)
 	{
 		bumps.clear();
+		bumps_convex.clear();
 
-		std::sort(itr.second.begin(), itr.second.end(), [](const QPointF &p1, const QPointF &p2) {
-			return p1.y() != p2.y() ? p1.y() < p2.y() : p1.x() < p2.x();
+		std::sort(itr.second.begin(), itr.second.end(), [](const Bump &b1, const Bump &b2) {
+			return b1.pos.y() != b2.pos.y() ? b1.pos.y() < b2.pos.y() : b1.pos.x() < b2.pos.x();
 		});
 
 		// Crossings too close to each other on the same segment would make the bumps overlap
 		for(auto &bump : itr.second)
 		{
-			if(bumps.empty() || bumps.back().y() != bump.y() || bump.x() - bumps.back().x() >= bump_radius * 3)
-				bumps.push_back(bump);
+			if(bumps.empty() || bumps.back().y() != bump.pos.y() || bump.pos.x() - bumps.back().x() >= bump_radius * 3)
+			{
+				bumps.push_back(bump.pos);
+				bumps_convex.push_back(bump.convex);
+			}
 		}
 
-		itr.first->setBumps(bumps);
+		itr.first->setBumps(bumps, bumps_convex);
 	}
 }
 

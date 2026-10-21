@@ -251,6 +251,9 @@ class RelationshipLinesTest: public QObject, public PgModelerUnitTest {
 		void reconfiguringTheLinesOfALoadedModelSpreadsTheAnchors();
 		void relationshipsAddedLaterRespaceTheExistingOnes();
 		void aCrossingGivesABumpOnTheHorizontalLine();
+		void bumpsKnowWhichLineIsOnTop();
+		void theKindOfABumpFollowsTheStackingOrderOfTheLines();
+		void eachBumpOfALineHasItsOwnKind();
 		void bumpsDisappearWhenTheCrossingLineMovesAway();
 		void linesThatDoNotCrossGiveNoBumps();
 		void manualCrossingGivesOnlyTheHorizontalLineABump();
@@ -1653,6 +1656,120 @@ void RelationshipLinesTest::relationshipsAddedLaterRespaceTheExistingOnes()
 		// The relationships created first end up as spread as the last one, not only the one added last
 		for(size_t i = 1; i < ys.size(); i++)
 			QVERIFY2(ys[i] - ys[i - 1] >= min_gap - 0.6, qPrintable(QString("%1 and %2: %3 (min %4)").arg(i - 1).arg(i).arg(ys[i] - ys[i - 1]).arg(min_gap)));
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::bumpsKnowWhichLineIsOnTop()
+{
+	try
+	{
+		applyMode(RelationshipView::ConnectTableEdges, false);
+
+		Rig rig;
+		Table *tab_a = addTable(rig, "tab_a", QPointF(0, 0)), *tab_b = addTable(rig, "tab_b", QPointF(1600, 0)),
+				*tab_c = addTable(rig, "tab_c", QPointF(700, -700)), *tab_d = addTable(rig, "tab_d", QPointF(700, 700));
+		RelationshipView *rv_h = relView(addRel(rig, tab_a, tab_b)), *rv_v = relView(addRel(rig, tab_c, tab_d));
+
+		settle(200);
+
+		QCOMPARE(rv_h->bumps.size(), size_t(1));
+		QCOMPARE(rv_h->bumps_convex.size(), size_t(1));
+
+		// The scene lists the items from the one on top to the one at the bottom: the bump is convex when the vertical line is above
+		QList<QGraphicsItem *> items = rig.scene->items();
+		bool v_on_top = items.indexOf(rv_v) < items.indexOf(rv_h);
+
+		QCOMPARE(rv_h->bumps_convex[0], v_on_top);
+
+		// The curve is told about it
+		QCOMPARE(rv_h->curves[0]->getHopArcs().size(), size_t(1));
+		QCOMPARE(rv_h->curves[0]->getHopArcs()[0].convex, v_on_top);
+
+		// The line that doesn't hop has no bumps nor kinds
+		QVERIFY(rv_v->bumps.empty());
+		QVERIFY(rv_v->bumps_convex.empty());
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::theKindOfABumpFollowsTheStackingOrderOfTheLines()
+{
+	try
+	{
+		applyMode(RelationshipView::ConnectTableEdges, false);
+
+		Rig rig;
+		Table *tab_a = addTable(rig, "tab_a", QPointF(0, 0)), *tab_b = addTable(rig, "tab_b", QPointF(1600, 0)),
+				*tab_c = addTable(rig, "tab_c", QPointF(700, -700)), *tab_d = addTable(rig, "tab_d", QPointF(700, 700));
+		RelationshipView *rv_h = relView(addRel(rig, tab_a, tab_b)), *rv_v = relView(addRel(rig, tab_c, tab_d));
+
+		settle(200);
+
+		// The vertical line is below the horizontal one, which is the one that hops: concave bump
+		rv_v->stackBefore(rv_h);
+		rig.scene->updateRelationshipBumps();
+		QCOMPARE(rv_h->bumps.size(), size_t(1));
+		QCOMPARE(rv_h->bumps_convex, std::vector<bool>({ false }));
+		QCOMPARE(rv_h->curves[0]->getHopArcs()[0].convex, false);
+
+		// The vertical line goes over the bump: convex bump. The position is the same, only the kind changes
+		QPointF bump = rv_h->bumps[0];
+
+		rv_h->stackBefore(rv_v);
+		rig.scene->updateRelationshipBumps();
+		QCOMPARE(rv_h->bumps.size(), size_t(1));
+		QCOMPARE(rv_h->bumps[0], bump);
+		QCOMPARE(rv_h->bumps_convex, std::vector<bool>({ true }));
+		QCOMPARE(rv_h->curves[0]->getHopArcs()[0].convex, true);
+
+		// And back again
+		rv_v->stackBefore(rv_h);
+		rig.scene->updateRelationshipBumps();
+		QCOMPARE(rv_h->bumps_convex, std::vector<bool>({ false }));
+		QCOMPARE(rv_h->curves[0]->getHopArcs()[0].convex, false);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::eachBumpOfALineHasItsOwnKind()
+{
+	try
+	{
+		applyMode(RelationshipView::ConnectTableEdges, false);
+
+		Rig rig;
+		Table *tab_a = addTable(rig, "tab_a", QPointF(0, 0)), *tab_b = addTable(rig, "tab_b", QPointF(2200, 0)),
+				*tab_c = addTable(rig, "tab_c", QPointF(700, -700)), *tab_d = addTable(rig, "tab_d", QPointF(700, 700)),
+				*tab_e = addTable(rig, "tab_e", QPointF(1400, -700)), *tab_f = addTable(rig, "tab_f", QPointF(1400, 700));
+		RelationshipView *rv_h = relView(addRel(rig, tab_a, tab_b)),
+				*rv_v1 = relView(addRel(rig, tab_c, tab_d)), *rv_v2 = relView(addRel(rig, tab_e, tab_f));
+
+		settle(200);
+
+		// The first vertical line (on the left) is above the horizontal one and the second is below it
+		rv_v2->stackBefore(rv_h);
+		rv_h->stackBefore(rv_v1);
+		rig.scene->updateRelationshipBumps();
+
+		QCOMPARE(rv_h->bumps.size(), size_t(2));
+		QVERIFY(rv_h->bumps[0].x() < rv_h->bumps[1].x());
+		QCOMPARE(rv_h->bumps_convex, std::vector<bool>({ true, false }));
+
+		const auto &arcs = rv_h->curves[0]->getHopArcs();
+
+		QCOMPARE(arcs.size(), size_t(2));
+		QCOMPARE(arcs[0].convex, true);
+		QCOMPARE(arcs[1].convex, false);
 	}
 	catch(Exception &e)
 	{

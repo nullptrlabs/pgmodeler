@@ -158,6 +158,10 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		 * over the vertical lines of other relationships that cross it */
 		bumps;
 
+		/*! \brief For each bump, whether it is a convex one (the line it hops over is on top of this line) or a concave one
+		 * (this line is on top). The bumps are drawn differently, so it is clear which line is on top */
+		std::vector<bool> bumps_convex;
+
 		/*! \brief The route of the last orthogonal line configured before the displacements of its segments
 		 * (made by the user) were applied, and the minimum length of its first and last segments */
 		std::vector<QPointF> base_route;
@@ -381,7 +385,7 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		void notifyRouteChanged();
 
 		//! \brief Defines the positions where the orthogonal line hops over other lines and redraws it
-		void setBumps(const std::vector<QPointF> &new_bumps);
+		void setBumps(const std::vector<QPointF> &new_bumps, const std::vector<bool> &convex = {});
 
 		/*! \brief Computes the orthogonal line (horizontal/vertical segments only) between the tables
 		 * according to the line connection mode */

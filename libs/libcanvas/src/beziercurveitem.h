@@ -30,9 +30,21 @@
 
 #include "canvasglobal.h"
 #include <QGraphicsPathItem>
+#include <QRadialGradient>
 #include <vector>
 
 class __libcanvas BezierCurveItem: public QGraphicsPathItem {
+	public:
+		/*! \brief The arcs the line makes to hop over other lines (see setPoints()). Each one is stroked with a
+		 * gradient at its apex that darkens it (convex: the line crossing it is above) or lightens it (concave: the arc is
+		 * above the line crossing it), which tells which of the lines is on top */
+		struct HopArc {
+			QPainterPath path;
+			QPointF apex;
+			double radius;
+			bool convex;
+		};
+
 	private:
 		/*! \brief Stores the stroke of the curve itself.
 		 * This object is used to do a better colision detection.
@@ -49,11 +61,40 @@ class __libcanvas BezierCurveItem: public QGraphicsPathItem {
 
 		bool straight_line;
 
+		//! \brief The arcs the line makes to hop over other lines (see setPoints())
+		std::vector<HopArc> hop_arcs;
+
+		/*! \brief A part of the path painted on its own: the arcs of the hops (that are painted with a gradient) and the parts
+		 * of the line between them. The line is painted part by part, each one only once, so the gradient is part of the
+		 * stroke of the arc (there's no need to paint anything over the line). start_len is the length of the path before the
+		 * part, which keeps the dashes of a dashed line continuous from one part to the next. hop is the index of the
+		 * arc in hop_arcs or -1 if the part is not an arc. */
+		struct PathPiece {
+			QPainterPath path;
+			double start_len;
+			int hop;
+		};
+
+		/*! \brief The parts of the path (only when the line has hops, otherwise it's painted as a whole) */
+		std::vector<PathPiece> pieces;
+
 		/*! \brief Below this level of detail (see QStyleOptionGraphicsItem::levelOfDetailFromTransform())
 		 * paint() skips antialiasing: at that scale the jagged edges aren't perceptible, and stroking
 		 * the curve with antialiasing on is one of the more expensive parts of painting it. The curve's
 		 * shape/path is never altered, so it stays consistent with the stroke used for click detection. */
 		static constexpr double MinLodForAntialiasing = 0.4;
+
+		/*! \brief How much the apex of the convex hop arcs is darkened (see QColor::darker(), in percentage), and how much
+		 * the apex of the concave ones is lightened (the part, from 0 to 1, of the way from the color of the line to white) */
+		static constexpr int ConvexFactor = 190;
+
+		static constexpr double ConcaveMix = 0.28;
+
+		//! \brief Returns the gradient used to stroke the arc: from the color of the line to a darker or lighter one at its apex
+		QRadialGradient getHopGradient(const HopArc &arc) const;
+
+		//! \brief Paints the line part by part, the arcs of the hops with their gradients
+		void paintPieces(QPainter *painter);
 
 	protected:
 		void setPath(const QPainterPath &path);
@@ -90,12 +131,19 @@ class __libcanvas BezierCurveItem: public QGraphicsPathItem {
 		 * that are too close to the segment's ends, are ignored. */
 		void setPoints(const std::vector<QPointF> &points, double corner_radius,
 									 const std::vector<QPointF> &bumps, double bump_radius,
-									 double start_straight = 0, double end_straight = 0);
+									 double start_straight = 0, double end_straight = 0,
+									 const std::vector<bool> &convex_bumps = {});
+
+		/* The convex_bumps param tells, for each bump, if it is a convex one (the line it hops over is on top of this
+		 * line) or a concave one (this line is on top). The bumps without a value (the vector is shorter) are concave. */
 
 		/* The start_straight and end_straight params define the length of the first and last segments of the
 		 * polyline that must remain straight. The first and last corners have their rounding limited, or even
 		 * removed, so the curve doesn't start before that length. This is used to preserve the area occupied by
 		 * the descriptors (e.g. crow's foot) at the ends of the relationship lines. */
+
+		//! \brief Returns the arcs the line makes to hop over other lines, with the apex and the kind (convex or concave) of each one
+		const std::vector<HopArc> &getHopArcs() const;
 
 		//! \brief Returns if the curve has the control points inverted
 		bool isControlPointsInverted();
