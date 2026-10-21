@@ -1772,7 +1772,7 @@ QRectF RelationshipView::getRouteRect(const std::vector<QPointF> &route)
 		bottom = std::max(bottom, pnt.y());
 	}
 
-	return QRectF(QPointF(left, top), QPointF(right, bottom));
+	return { QPointF(left, top), QPointF(right, bottom) };
 }
 
 bool RelationshipView::isSegmentBlocked(const QPointF &p1, const QPointF &p2, const std::vector<QRectF> &obstacles)
