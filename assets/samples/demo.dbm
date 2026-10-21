@@ -3,7 +3,9 @@
 CAUTION: Do not modify this file unless you know what you are doing.
  Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="1.1.0-beta" use-changelog="false" last-position="0,0" last-zoom="0.7" max-obj-count="9"
+<dbmodel pgmodeler-ver="2.0.0" use-changelog="false" max-obj-count="9"
+	 gen-disabled-objs-code="false" show-sys-schemas-rects="false" seg-mode="0" seg-threshold="500"
+	 last-position="0,200" last-zoom="0.85" scene-rect="0,0,1746.73,1562.12" last-scene="0"
 	 default-schema="public" default-owner="postgres"
 	 layers="Default layer"
 	 active-layers="0"
@@ -13,14 +15,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <database name="demodb" is-template="false" allow-conns="true">
 </database>
 
-<schema name="public" layers="0" rect-visible="true" fill-color="#6abdb2" name-color="#000000" sql-disabled="true">
+<schema name="public" layers="0" rect-visible="true" fill-color="#d4918b" name-color="#000000" sql-disabled="true">
 </schema>
 
-<schema name="schema_a" layers="0" rect-visible="true" fill-color="#df83eb" name-color="#000000">
+<schema name="schema_a" layers="0" rect-visible="true" fill-color="#9bc9a7" name-color="#000000">
 	<role name="postgres"/>
 </schema>
 
-<schema name="schema_b" layers="0" rect-visible="true" fill-color="#fbe97f" name-color="#000000">
+<schema name="schema_b" layers="0" rect-visible="true" fill-color="#21b49e" name-color="#000000">
 	<role name="postgres"/>
 </schema>
 
@@ -36,7 +38,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="table_a" layers="0" collapse-mode="2" max-obj-count="2" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="120" y="720"/>
+	<position x="152.857" y="768.571"/>
 	<column name="id_a" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -54,7 +56,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="table_b" layers="0" collapse-mode="2" max-obj-count="2" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="400" y="1000"/>
+	<position x="387.143" y="985.714"/>
 	<column name="id_b" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -72,10 +74,10 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<type name="varchar" length="256"/>
 </domain>
 
-<table name="table_f" layers="0" collapse-mode="2" max-obj-count="1" z-value="0">
+<table name="table_f" layers="0" collapse-mode="1" max-obj-count="1" z-value="0">
 	<schema name="schema_a"/>
 	<role name="postgres"/>
-	<position x="1580" y="1380"/>
+	<position x="1132.32" y="1008.75"/>
 	<column name="id_f" not-null="true">
 		<type name="bigserial" length="1"/>
 	</column>
@@ -87,7 +89,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="table_c" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="120" y="1240"/>
+	<position x="152.143" y="1136.25"/>
 	<column name="id_c" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -108,13 +110,13 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="table_d" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
 	<schema name="schema_a"/>
 	<role name="postgres"/>
-	<position x="1180" y="760"/>
+	<position x="1167.5" y="713.393"/>
 </table>
 
 <table name="table_h" layers="0" collapse-mode="2" max-obj-count="4" z-value="0">
 	<schema name="schema_a"/>
 	<role name="postgres"/>
-	<position x="1080" y="1240"/>
+	<position x="1085.71" y="1211.43"/>
 	<column name="id_h" not-null="true">
 		<type name="serial" length="1"/>
 	</column>
@@ -136,13 +138,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="schema_b"/>
 	<role name="postgres"/>
 	<tag name="red_tables"/>
-	<position x="120" y="380"/>
+	<position x="115" y="447.5"/>
 </table>
 
 <relationship name="table_a_has_many_table_d" type="rel1n" layers="0"
 	 src-col-pattern="{sc}_{st}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#678013"
 	 src-table="public.table_a"
 	 dst-table="schema_a.table_d"
@@ -155,6 +158,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<label ref-type="name-label">
 		<position x="35.4574" y="6.59827"/>
 	</label>
+	<segment index="2" orientation="1" value="75.2941"/>
 	<column name="test_attrib" not-null="true">
 		<type name="smallint" length="1"/>
 	</column>
@@ -172,6 +176,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{sc}_{st}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#fe0300"
 	 src-table="public.table_b"
 	 dst-table="schema_a.table_d"
@@ -179,19 +184,21 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<label ref-type="name-label">
 		<position x="98.5197" y="-25.1606"/>
 	</label>
+	<segment index="1" orientation="2" value="63.5294"/>
 </relationship>
 
 <table name="table_e" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
 	<schema name="schema_a"/>
 	<role name="postgres"/>
-	<position x="1620" y="1020"/>
+	<position x="1441.43" y="975.714"/>
 </table>
 
 <relationship name="table_f_has_many_table_c" type="rel1n" layers="0"
 	 src-col-pattern="{sc}_{st}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
-	 custom-color="#456796"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#9b653d"
 	 src-table="schema_a.table_f"
 	 dst-table="public.table_c"
 	 src-required="false" dst-required="false">
@@ -201,6 +208,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<label ref-type="name-label">
 		<position x="35.5197" y="9.93933"/>
 	</label>
+	<segment index="0" orientation="1" value="56.4706"/>
 </relationship>
 
 <function name="dummy_trig_func"
@@ -233,7 +241,7 @@ END;]]> </definition>
 <view name="view_b" layers="0" collapse-mode="2" max-obj-count="2" z-value="0">
 	<schema name="schema_b"/>
 	<role name="postgres"/>
-	<position x="580" y="340"/>
+	<position x="573.571" y="417.5"/>
 	<reference object="public.table_a" type="table" ref-name="ta" ref-alias="_ta" use-signature="true" format-name="true" use-columns="true"/>
 	<reference object="schema_a.table_d" type="table" ref-name="td" ref-alias="_td" use-columns="true"/>
 	<simplecol name="expr" type="double precision"/>
@@ -257,27 +265,28 @@ FROM
 	<label ref-type="name-label">
 		<position x="-7.45554" y="28.5689"/>
 	</label>
+	<segment index="1" orientation="2" value="-43.5294"/>
 </relationship>
 
-<textbox name="pagila_desc" layers="0" z-value="0" width="495.844" font-size="11">
-	<position x="20" y="20"/>
+<textbox name="pagila_desc" layers="0" z-value="0" width="492.578" font-size="11">
+	<position x="1179.11" y="275.714"/>
 	<comment> <![CDATA[[ demodb database ]
 
 This database model demonstrate some features when designing database models. It does not represent any specific context but can be exported to the database since it generates well formed SQL syntax.]]> </comment>
 </textbox>
 
-<textbox name="view_test_txt" layers="0" z-value="0" width="213.547" font-size="10">
-	<position x="840" y="280"/>
+<textbox name="view_test_txt" layers="0" z-value="0" width="227.547" font-size="10">
+	<position x="576.429" y="255.893"/>
 	<comment> <![CDATA[Views can be constructed from references to tables, foreign tables and views. Alternatively, one can define the full view's definition SQL command without working with references.]]> </comment>
 </textbox>
 
-<textbox name="tag_txt" layers="0" z-value="0" width="306.719" font-size="10">
-	<position x="220" y="240"/>
+<textbox name="tag_txt" layers="0" z-value="0" width="308.703" font-size="10">
+	<position x="103.393" y="288.393"/>
 	<comment> <![CDATA[Note the table below with a different color. pgModeler implements the concept of "tags" in order to permit user to graphically separate tables through different colors.]]> </comment>
 </textbox>
 
-<textbox name="col_propag_txt" layers="0" z-value="0" width="464.188" font-size="10">
-	<position x="120" y="1480"/>
+<textbox name="col_propag_txt" layers="0" z-value="0" width="461.438" font-size="10">
+	<position x="143.361" y="1340.59"/>
 	<comment> <![CDATA[pgModeler implements a mechanism called "column propagation" when using relationships 1:1, 1:n and generalization.
 
 This mechanism creates the needed columns and constraints in a cascade way on all set of tables affected by one or more relationships.
@@ -286,8 +295,8 @@ For instance, the "table_c" is linked to "table_f" through the column "id_f_tabl
 the relationship that connects them. Ahead, the "table_e" inherits "table_c", and, as a result, all columns of the latter are copied to the first, including the column "id_f_table_f" product of another relationship.]]> </comment>
 </textbox>
 
-<textbox name="fk_rel_txt" layers="0" z-value="0" width="298.953" font-size="10">
-	<position x="1080" y="1520"/>
+<textbox name="fk_rel_txt" layers="0" z-value="0" width="333.234" font-size="10">
+	<position x="1371.93" y="1187.92"/>
 	<comment> <![CDATA[User is not obligated to use the relationships to generate the foreign keys. You can manually create your own foreign keys on the desired tables and pgModeler will automatically create the relationships to graphically represent the link between them.
 
 You can check that situation on "table_h". There we have three foreign keys created by hand 
@@ -297,9 +306,11 @@ mentioned tables, those objects weren't created by the user.]]> </comment>
 
 <relationship name="table_e_inherits_table_c" type="relgen" layers="0"
 	 pk-pattern="{dt}_pk"
-	 custom-color="#124544"
+	 custom-color="#85159a"
 	 src-table="schema_a.table_e"
 	 dst-table="public.table_c">
+	<segment index="2" orientation="1" value="-18.8235"/>
+	<segment index="3" orientation="2" value="71.7647"/>
 	<special-pk-cols indexes="0"/>
 </relationship>
 
@@ -308,15 +319,16 @@ mentioned tables, those objects weren't created by the user.]]> </comment>
 	 pk-pattern="{gt}_pk" uq-pattern="{gt}_uq"
 	 src-fk-pattern="{st}_fk" dst-fk-pattern="{dt}_fk"
 	 pk-col-pattern="id"
+	 fk-idx-pattern="{gt}_idx"
 	 custom-color="#d28818"
 	 src-table="schema_a.table_e"
 	 dst-table="schema_a.table_e"
 	 src-required="false" dst-required="false"
 	 table-name="many_table_e_has_many_table_e">
 	<line>
-		<position x="1883.26" y="1083.51"/>
-	<position x="1883.26" y="987"/>
-	<position x="1773.5" y="987"/>
+		<position x="1699.28" y="1025.56"/>
+	<position x="1699.28" y="945.714"/>
+	<position x="1593.33" y="945.714"/>
 	</line>
 	<label ref-type="src-label">
 		<position x="8" y="-15.76"/>
@@ -329,7 +341,7 @@ mentioned tables, those objects weren't created by the user.]]> </comment>
 <view name="view_a" layers="0" collapse-mode="2" max-obj-count="2" z-value="0">
 	<schema name="schema_a"/>
 	<role name="postgres"/>
-	<position x="1360" y="440"/>
+	<position x="1474.29" y="562.857"/>
 	<reference object="public.table_b" type="table" ref-name="tb" ref-alias="_tb" use-signature="true" format-name="true" use-columns="true"/>
 	<reference object="schema_b.view_b" type="view" ref-name="va" ref-alias="_va" use-signature="true" format-name="true" use-columns="true"/>
 	<definition> <![CDATA[SELECT @{tb}.*, @{va}.* 
@@ -346,7 +358,7 @@ FROM
 	 src-required="false" dst-required="false"/>
 
 <relationship name="rel_view_b_table_b" type="reltv" layers="0"
-	 custom-color="#ef1f38"
+	 custom-color="#a0c789"
 	 src-table="schema_a.view_a"
 	 dst-table="public.table_b"
 	 src-required="false" dst-required="false"/>
@@ -377,17 +389,13 @@ FROM
 	<label ref-type="dst-label">
 		<position x="9.54001" y="35.8"/>
 	</label>
+	<segment index="1" orientation="2" value="-41.1765"/>
 </relationship>
 
 <relationship name="rel_table_h_table_f" type="relfk" layers="0"
-	 custom-color="#1c70ed"
+	 custom-color="#34ce4c"
 	 src-table="schema_a.table_h"
 	 dst-table="schema_a.table_f" reference-fk="table_g_fk"
-	 src-required="false" dst-required="false"/>
-
-<relationship name="rel_table_h_table_e" type="relfk" layers="0"
-	 src-table="schema_a.table_h"
-	 dst-table="schema_a.table_e" reference-fk="table_e_fk"
 	 src-required="false" dst-required="false"/>
 
 </dbmodel>
