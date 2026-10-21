@@ -376,6 +376,7 @@ void BaseRelationship::setRelationshipAttributes()
 			attributes[Attributes::Index] = QString::number(itr.first);
 			attributes[Attributes::Orientation] = QString::number(itr.second.orientation);
 			attributes[Attributes::Value] = QString::number(itr.second.value);
+			attributes[Attributes::Jog] = (itr.second.jog != 0 ? QString::number(itr.second.jog) : "");
 			attributes[Attributes::Segments] +=
 					schparser.getSourceCode(Attributes::Segment, attributes, SchemaParser::XmlCode);
 		}

@@ -168,6 +168,20 @@ class __libcanvas RelationshipView: public BaseObjectView {
 
 		double route_stubs[2];
 
+		/*! \brief For each segment of the route displayed (route_points), the index of the segment of base_route it comes from.
+		 * Displacements of the segments at the ends of the line don't move those segments: the line gets a jog (two extra
+		 * corners) next to the table and the rest of the segment is displaced. The part of the segment next to the table
+		 * (the stub) has the key -1 and can't be moved. The segment that makes the jog has a key <= -2 (see getJogKey()): it
+		 * can be moved along the line, which changes the length of the stub */
+		std::vector<int> route_seg_keys;
+
+		/*! \brief The jog being dragged: the end of the line it is in (0 = first, 1 = last), or -1 when the
+		 * segment dragged is not a jog. When a jog is dragged drag_shift is the length of the jog (see SegmentShift) */
+		int drag_jog_end;
+
+		//! \brief Direction (1 or -1) the coordinate of the dragged jog changes when its length increases
+		int drag_jog_sign;
+
 		/*! \brief The areas (position and size) of the tables when the line was last configured. The displacements
 		 * of the segments are discarded when one of the tables moves or changes its size */
 		QRectF shift_tab_rects[2];
@@ -322,14 +336,36 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		 * length of the first and last segments). The route must be the one the displacement is applied to */
 		double clampSegmentShift(const std::vector<QPointF> &route, size_t idx, double shift, const double *stubs, const QRectF &limits);
 
-		/*! \brief Returns the route with the segments displaced according to the shifts stored in the relationship.
-		 * Shifts that don't match the route (index out of the inner segments or a different orientation) are ignored */
-		std::vector<QPointF> applySegmentShifts(const std::vector<QPointF> &route, const double *stubs,
-																						const std::map<unsigned, BaseRelationship::SegmentShift> *custom_shifts = nullptr);
+		/*! \brief Returns the displacement limited for the first (first = true) or last segment of the route. The segment
+		 * isn't moved itself: the part of it that doesn't contain the area the end descriptors (the stub) is displaced after
+		 * a jog. So the segment must be long enough for the stub, the jog and the displaced part, and the neighbor segment
+		 * can't get shorter than it needs. For routes with a single segment both ends get a jog. */
+		double clampEndSegmentShift(const std::vector<QPointF> &route, bool first, double shift, const double *stubs, const QRectF &limits);
 
-		/*! \brief Returns the index of the inner segment of the orthogonal line closest to the point, or -1 if none is
-		 * near enough. The horiz parameter receives the orientation of the segment */
-		int pickSegment(const QPointF &pnt, bool &horiz);
+		//! \brief Returns the key (see route_seg_keys) of the segment that makes the jog at an end of the base segment key
+		static int getJogKey(unsigned key, bool last_end);
+
+		/*! \brief Returns the length of the jog (see SegmentShift) the segment seg_idx of the route makes at the end of the
+		 * line (0 = first, 1 = last) of the base segment key, measured from where the stub ends */
+		double getJogLength(const std::vector<QPointF> &route, size_t seg_idx, unsigned key, int end);
+
+		/*! \brief Returns the length of the jog (the length beyond the minimum one the line goes straight before turning)
+		 * limited by the room that is left in the segment after the stubs and the part that is displaced. In a route
+		 * with a single segment the jog is the same at both ends, so each one can only use half of the room */
+		static double clampJogLength(double length, double room, bool single);
+
+		/*! \brief Returns the route with the segments displaced according to the shifts stored in the relationship.
+		 * Shifts that don't match the route (index out of the route or a different orientation) are ignored.
+		 * The displacement of the first/last segment adds a jog to the route (see route_seg_keys). If seg_keys is provided
+		 * it receives, for each segment of the returned route, the index of the segment of the original route it comes from (or -1) */
+		std::vector<QPointF> applySegmentShifts(const std::vector<QPointF> &route, const double *stubs,
+																						const std::map<unsigned, BaseRelationship::SegmentShift> *custom_shifts = nullptr,
+																						std::vector<int> *seg_keys = nullptr);
+
+		/*! \brief Returns the index (in the base route) of the segment of the orthogonal line closest to the point, or -1 if
+		 * none is near enough. The horiz parameter receives the orientation of the segment. The part of the segments at the ends
+		 * of the line next to the tables (the area of the descriptors) can't be picked */
+		int pickSegment(const QPointF &pnt, bool &horiz, int *jog_end = nullptr);
 
 		/*! \brief Starts the drag of the inner segment of the orthogonal line closest to the point (if any is near enough).
 		 * Returns true if a segment was picked */

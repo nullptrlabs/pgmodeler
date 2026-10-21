@@ -384,6 +384,7 @@ namespace Attributes {
 	Italic("italic"),
 	Item("item"),
 	Items("items"),
+	Jog("jog"),
 	JoinFunc("join"),
 	KeepClusterObjs("keep-cluster-objs"),
 	KeepObjsPerms("keep-objs-perms"),

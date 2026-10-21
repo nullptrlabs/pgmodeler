@@ -7570,7 +7570,8 @@ BaseRelationship *DatabaseModel::createRelationship()
 
 						xmlparser.getElementAttributes(attribs);
 						shifts[attribs[Attributes::Index].toUInt()] =
-								{ static_cast<Qt::Orientation>(attribs[Attributes::Orientation].toInt()), attribs[Attributes::Value].toDouble() };
+								{ static_cast<Qt::Orientation>(attribs[Attributes::Orientation].toInt()), attribs[Attributes::Value].toDouble(),
+									attribs[Attributes::Jog].toDouble() };
 
 						base_rel->setSegmentShifts(shifts);
 					}
@@ -9828,6 +9829,7 @@ void DatabaseModel::saveObjectsMetadata(const QString &filename, MetaAttrOptions
 						aux_attribs[Attributes::Index]=QString::number(itr.first);
 						aux_attribs[Attributes::Orientation]=QString::number(itr.second.orientation);
 						aux_attribs[Attributes::Value]=QString::number(itr.second.value);
+						aux_attribs[Attributes::Jog]=(itr.second.jog != 0 ? QString::number(itr.second.jog) : "");
 
 						attribs[Attributes::Position]+=schparser.getSourceCode(GlobalAttributes::getSchemaFilePath(GlobalAttributes::XMLSchemaDir, Attributes::Segment),
 																																	 aux_attribs);
@@ -10160,7 +10162,8 @@ void DatabaseModel::loadObjectsMetadata(const QString &filename, MetaAttrOptions
 									else if(aux_elem==Attributes::Segment)
 									{
 										seg_shifts[aux_attrib[Attributes::Index].toUInt()] =
-												{ static_cast<Qt::Orientation>(aux_attrib[Attributes::Orientation].toInt()), aux_attrib[Attributes::Value].toDouble() };
+												{ static_cast<Qt::Orientation>(aux_attrib[Attributes::Orientation].toInt()), aux_attrib[Attributes::Value].toDouble(),
+													aux_attrib[Attributes::Jog].toDouble() };
 									}
 									else if(load_custom_sql && aux_elem==Attributes::AppendedSql &&
 													attribs[Attributes::AppendedSql].isEmpty())
