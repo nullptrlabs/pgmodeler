@@ -184,8 +184,20 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		 * entry per scene instead of a single one for the whole model */
 		QMap<int, QRectF> scene_rects;
 
-		//! \brief Stores the layer information of FK relationships during the model loading
-		std::map<QString, QStringList> fk_rel_layers;
+		/*! \brief What the user customized in a FK relationship (the way it is drawn). It's stored during the model loading
+		 * because the relationship can be destroyed and recreated at the end of the process, see restoreFKRelationshipsCustomization() */
+		struct FKRelCustomization {
+			QString name, alias, src_table, dst_table, fk_name;
+			QList<unsigned> layers;
+			std::vector<QPointF> points;
+			QPointF labels_dist[3];
+			std::map<unsigned, BaseRelationship::SegmentShift> segment_shifts;
+			QColor custom_color;
+			bool faded_out, rel_protected;
+		};
+
+		//! \brief Stores the customization of the FK relationships during the model loading
+		std::vector<FKRelCustomization> fk_rels_custom;
 
 		//! \brief Stores the model widget that is managing this database model instance
 		ModelWidget *model_wgt;
@@ -375,8 +387,10 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Updates all the relationships in such a way to create the missing columns/constraints
 		void updateRelsGeneratedObjects();
 
-		//! \brief Restore the layer information of FK relationship during loading process
-		void restoreFKRelationshipLayers();
+		/*! \brief Restores the customization of the FK relationships (layers, points, labels, displaced segments, color,
+		 * alias and the faded out and protected states) that were recreated at the end of the loading process. The
+		 * name is not restored */
+		void restoreFKRelationshipsCustomization();
 
 		/*! \brief This method returns the value of the flag loading_model
 		 *  which is set by loadModel to indicate that objects are being
