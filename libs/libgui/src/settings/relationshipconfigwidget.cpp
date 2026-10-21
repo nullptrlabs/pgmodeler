@@ -77,9 +77,9 @@ RelationshipConfigWidget::RelationshipConfigWidget(QWidget * parent) : BaseConfi
 	line_style_gb->setFocusProxy(rel_line_style_cmb);
 	conn_mode_gb->setFocusProxy(crows_foot_tb);
 
+	rel_line_style_cmb->setItemData(RelationshipView::OrthogonalLines, Attributes::Orthogonal);
 	rel_line_style_cmb->setItemData(RelationshipView::StraightLines, Attributes::Straight);
 	rel_line_style_cmb->setItemData(RelationshipView::CurvedLines, Attributes::Curved);
-	rel_line_style_cmb->setItemData(RelationshipView::OrthogonalLines, Attributes::Orthogonal);
 	foreign_key_gb->setFocusProxy(deferrable_chk);
 
 	QButtonGroup *conn_mode_btns_grp = new QButtonGroup(this);
