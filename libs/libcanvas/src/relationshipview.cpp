@@ -229,6 +229,10 @@ RelationshipView::LineStyle RelationshipView::getLineStyle()
 
 void RelationshipView::invalidateRoute(bool reset_retries)
 {
+	// A view discarded by the scene (its relationship removed) has no tables to route the line between
+	if(!tables[BaseRelationship::SrcTable] || !tables[BaseRelationship::DstTable])
+		return;
+
 	if(reset_retries)
 		zone_retries = 0;
 
@@ -1470,7 +1474,8 @@ std::vector<QPointF> RelationshipView::applySegmentShifts(const std::vector<QPoi
 	for(auto &itr : shifts)
 	{
 		// Only the inner segments are displaced, the first and the last ones are anchored to the tables
-		if(itr.first < 1 || itr.first + 2 >= route.size())
+		// The index comes from the model file: the sum is made with size_t to never wrap around
+		if(itr.first < 1 || static_cast<size_t>(itr.first) + 2 >= route.size())
 			continue;
 
 		horiz = std::fabs(result[itr.first].y() - result[itr.first + 1].y()) < Epsilon;
