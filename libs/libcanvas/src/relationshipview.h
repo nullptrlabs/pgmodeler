@@ -46,9 +46,9 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		/*! \brief The style of the lines used to render the relationships. The orthogonal style draws
 		 * only horizontal/vertical segments with rounded corners and ignores the points added by the user. */
 		enum LineStyle: unsigned {
+			OrthogonalLines,
 			StraightLines,
-			CurvedLines,
-			OrthogonalLines
+			CurvedLines
 		};
 
 	private:
