@@ -3367,7 +3367,7 @@ Viitatut sarakkeet: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Esittelyversio voi luoda vain `%1&apos; esiintymää kutakin objektityyppiä kohden. Tämä raja on saavutettu tyypille: `%2&apos;</translation>
+        <translation type="vanished">Esittelyversio voi luoda vain `%1&apos; esiintymää kutakin objektityyppiä kohden. Tämä raja on saavutettu tyypille: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ Tietokannan hallintajärjestelmän palauttama viesti: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Korvaa suhteiden suorat viivat kaarevilla viivoilla mallin visualisoinnin parantamiseksi.</translation>
+        <translation type="vanished">Korvaa suhteiden suorat viivat kaarevilla viivoilla mallin visualisoinnin parantamiseksi.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Käytä kaarevia viivoja suhteille</translation>
+        <translation type="vanished">Käytä kaarevia viivoja suhteille</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ käytettävissä oleville tärkeimmille toiminnoille. Kaikki käytettävissä ol
     <message>
         <source>None</source>
         <translation>Ei mitään</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Viivatyyli</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Määrittää, miten suhteiden viivat piirretään. &lt;strong&gt;Suorat&lt;/strong&gt; viivat yhdistävät taulut suoraan, &lt;strong&gt;kaarevat&lt;/strong&gt; viivat korvaavat suorat viivat käyrillä ja &lt;strong&gt;ortogonaaliset&lt;/strong&gt; viivat käyttävät vain vaaka- ja pystysuuntaisia osuuksia pyöristetyin kulmin (viivoihin käsin lisätyt pisteet ohitetaan tässä tyylissä).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Suorat</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Kaarevat</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Ortogonaaliset</translation>
     </message>
 </context>
 <context>

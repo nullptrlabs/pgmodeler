@@ -3367,7 +3367,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Η δοκιμαστική έκδοση μπορεί να δημιουργήσει μόνο `%1&apos; στιγμιότυπα κάθε τύπου αντικειμένου! Φτάσατε σε αυτό το όριο για τον τύπο: `%2&apos;</translation>
+        <translation type="vanished">Η δοκιμαστική έκδοση μπορεί να δημιουργήσει μόνο `%1&apos; στιγμιότυπα κάθε τύπου αντικειμένου! Φτάσατε σε αυτό το όριο για τον τύπο: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Αντικαθιστά κάθε ευθεία γραμμή σε μια σχέση με καμπύλες γραμμές για καλύτερη οπτικοποίηση του μοντέλου.</translation>
+        <translation type="vanished">Αντικαθιστά κάθε ευθεία γραμμή σε μια σχέση με καμπύλες γραμμές για καλύτερη οπτικοποίηση του μοντέλου.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Χρήση καμπύλων γραμμών για τις σχέσεις</translation>
+        <translation type="vanished">Χρήση καμπύλων γραμμών για τις σχέσεις</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>None</source>
         <translation>Κανένα</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Στυλ γραμμών</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Καθορίζει τον τρόπο σχεδίασης των γραμμών των σχέσεων. Οι &lt;strong&gt;ευθείες&lt;/strong&gt; γραμμές συνδέουν απευθείας τους πίνακες, οι &lt;strong&gt;καμπύλες&lt;/strong&gt; αντικαθιστούν τις ευθείες γραμμές με καμπύλες και οι &lt;strong&gt;ορθογώνιες&lt;/strong&gt; γραμμές χρησιμοποιούν μόνο οριζόντια και κάθετα τμήματα με στρογγυλεμένες γωνίες (τα σημεία που προστίθενται χειροκίνητα στις γραμμές αγνοούνται σε αυτό το στυλ).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Ευθείες</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Καμπύλες</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Ορθογώνιες</translation>
     </message>
 </context>
 <context>

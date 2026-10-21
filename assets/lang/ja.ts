@@ -3367,7 +3367,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>デモ版では、オブジェクトの種類ごとに `%1&apos; 個のインスタンスしか作成できません。種類 `%2&apos; でこの上限に達しました。</translation>
+        <translation type="vanished">デモ版では、オブジェクトの種類ごとに `%1&apos; 個のインスタンスしか作成できません。種類 `%2&apos; でこの上限に達しました。</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ DBMS から返されたメッセージ: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>モデルの見やすさを向上させるため、リレーションシップの直線を曲線に置き換えます。</translation>
+        <translation type="vanished">モデルの見やすさを向上させるため、リレーションシップの直線を曲線に置き換えます。</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>リレーションシップに曲線を使用</translation>
+        <translation type="vanished">リレーションシップに曲線を使用</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>None</source>
         <translation>なし</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>線のスタイル</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;リレーションシップの線の描画方法を定義します。&lt;strong&gt;直線&lt;/strong&gt;はテーブルを直接接続し、&lt;strong&gt;曲線&lt;/strong&gt;は直線を曲線に置き換え、&lt;strong&gt;直交線&lt;/strong&gt;は角を丸めた水平方向と垂直方向のセグメントのみを使用します（このスタイルでは、線に手動で追加したポイントは無視されます）。&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>直線</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>曲線</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>直交線</translation>
     </message>
 </context>
 <context>

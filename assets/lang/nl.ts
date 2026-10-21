@@ -3367,7 +3367,7 @@ Doelkolommen: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>De demoversie kan slechts `%1&apos; instanties van elk objecttype maken. Deze limiet is bereikt voor het type: `%2&apos;</translation>
+        <translation type="vanished">De demoversie kan slechts `%1&apos; instanties van elk objecttype maken. Deze limiet is bereikt voor het type: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ Door het DBMS geretourneerd bericht: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Vervangt alle rechte lijnen in relaties door gebogen lijnen om de weergave van het model te verbeteren.</translation>
+        <translation type="vanished">Vervangt alle rechte lijnen in relaties door gebogen lijnen om de weergave van het model te verbeteren.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Gebogen lijnen gebruiken voor relaties</translation>
+        <translation type="vanished">Gebogen lijnen gebruiken voor relaties</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ die in de GUI beschikbaar zijn. Alle beschikbare opties worden hieronder beschre
     <message>
         <source>None</source>
         <translation>Geen</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Lijnstijl</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Bepaalt hoe de lijnen van de relaties worden getekend. &lt;strong&gt;Rechte&lt;/strong&gt; lijnen verbinden de tabellen direct, &lt;strong&gt;gebogen&lt;/strong&gt; lijnen vervangen de rechte lijnen door bochten en &lt;strong&gt;orthogonale&lt;/strong&gt; lijnen gebruiken alleen horizontale en verticale segmenten met afgeronde hoeken (de handmatig aan de lijnen toegevoegde punten worden in deze stijl genegeerd).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Recht</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Gebogen</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Orthogonaal</translation>
     </message>
 </context>
 <context>

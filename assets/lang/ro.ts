@@ -3367,7 +3367,7 @@ Coloană(e) referențiată(e): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Versiunea demonstrativă poate crea doar `%1&apos; instanțe din fiecare tip de obiect! Ați atins această limită pentru tipul: `%2&apos;</translation>
+        <translation type="vanished">Versiunea demonstrativă poate crea doar `%1&apos; instanțe din fiecare tip de obiect! Ați atins această limită pentru tipul: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ Mesajul returnat de SGBD: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Înlocuiește orice linie dreaptă dintr-o relație cu linii curbe pentru a îmbunătăți vizualizarea modelului.</translation>
+        <translation type="vanished">Înlocuiește orice linie dreaptă dintr-o relație cu linii curbe pentru a îmbunătăți vizualizarea modelului.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Folosește linii curbe pentru relații</translation>
+        <translation type="vanished">Folosește linii curbe pentru relații</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
     <message>
         <source>None</source>
         <translation>Niciuna</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Stilul liniilor</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Definește modul în care sunt desenate liniile relațiilor. Liniile &lt;strong&gt;drepte&lt;/strong&gt; conectează direct tabelele, cele &lt;strong&gt;curbe&lt;/strong&gt; înlocuiesc liniile drepte cu curbe, iar liniile &lt;strong&gt;ortogonale&lt;/strong&gt; folosesc doar segmente orizontale și verticale cu colțuri rotunjite (punctele adăugate manual pe linii sunt ignorate în acest stil).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Drepte</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Curbe</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Ortogonale</translation>
     </message>
 </context>
 <context>

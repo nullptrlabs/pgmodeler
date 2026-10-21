@@ -3367,7 +3367,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>演示版每种对象类型只能创建 `%1&apos; 个实例。类型 `%2&apos; 已达到此限制。</translation>
+        <translation type="vanished">演示版每种对象类型只能创建 `%1&apos; 个实例。类型 `%2&apos; 已达到此限制。</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ DBMS 返回的消息：`%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>将关系中的所有直线替换为曲线，以改善模型的可视化效果。</translation>
+        <translation type="vanished">将关系中的所有直线替换为曲线，以改善模型的可视化效果。</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>对关系使用曲线</translation>
+        <translation type="vanished">对关系使用曲线</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>None</source>
         <translation>无</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>线条样式</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;定义关系线条的绘制方式。&lt;strong&gt;直线&lt;/strong&gt;直接连接各个表，&lt;strong&gt;曲线&lt;/strong&gt;将直线替换为曲线，&lt;strong&gt;正交线&lt;/strong&gt;仅使用带圆角的水平和垂直线段（此样式下会忽略手动添加到线条上的点）。&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>直线</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>曲线</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>正交线</translation>
     </message>
 </context>
 <context>

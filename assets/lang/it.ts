@@ -3367,7 +3367,7 @@ Colonne referenziate: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>La versione dimostrativa può creare solo `%1&apos; istanze per ogni tipo di oggetto. Questo limite è stato raggiunto per il tipo: `%2&apos;</translation>
+        <translation type="vanished">La versione dimostrativa può creare solo `%1&apos; istanze per ogni tipo di oggetto. Questo limite è stato raggiunto per il tipo: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ Messaggio restituito dal DBMS: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Sostituisce le linee rette delle relazioni con linee curve per migliorare la visualizzazione del modello.</translation>
+        <translation type="vanished">Sostituisce le linee rette delle relazioni con linee curve per migliorare la visualizzazione del modello.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Usa linee curve per le relazioni</translation>
+        <translation type="vanished">Usa linee curve per le relazioni</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ disponibili nella GUI. Tutte le opzioni disponibili sono descritte di seguito.</
     <message>
         <source>None</source>
         <translation>Nessuna</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Stile della linea</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Definisce come vengono disegnate le linee delle relazioni. Le linee &lt;strong&gt;rette&lt;/strong&gt; collegano direttamente le tabelle, quelle &lt;strong&gt;curve&lt;/strong&gt; sostituiscono le linee rette con delle curve e le linee &lt;strong&gt;ortogonali&lt;/strong&gt; usano solo segmenti orizzontali e verticali con angoli arrotondati (i punti aggiunti manualmente alle linee vengono ignorati in questo stile).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Rette</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Curve</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Ortogonali</translation>
     </message>
 </context>
 <context>

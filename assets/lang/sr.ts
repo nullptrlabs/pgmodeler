@@ -3367,7 +3367,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Демонстрациона верзија може креирати само `%1&apos; инстанци сваког типа објекта! Достигли сте ово ограничење за тип: `%2&apos;</translation>
+        <translation type="vanished">Демонстрациона верзија може креирати само `%1&apos; инстанци сваког типа објекта! Достигли сте ово ограничење за тип: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Замењује све праве линије у односима закривљеним ради бољег приказа модела.</translation>
+        <translation type="vanished">Замењује све праве линије у односима закривљеним ради бољег приказа модела.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Користи закривљене линије за односе</translation>
+        <translation type="vanished">Користи закривљене линије за односе</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>None</source>
         <translation>Ништа</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Стил линија</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Одређује како се цртају линије односа. &lt;strong&gt;Равне&lt;/strong&gt; линије директно повезују табеле, &lt;strong&gt;закривљене&lt;/strong&gt; замењују равне линије кривама, а &lt;strong&gt;ортогоналне&lt;/strong&gt; линије користе само хоризонталне и вертикалне сегменте са заобљеним угловима (тачке ручно додате линијама се у овом стилу занемарују).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Равне</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Закривљене</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Ортогоналне</translation>
     </message>
 </context>
 <context>

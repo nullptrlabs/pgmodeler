@@ -3367,7 +3367,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Демонстрационная версия может создавать только `%1&apos; экземпляров каждого типа объектов. Этот предел достигнут для типа: `%2&apos;</translation>
+        <translation type="vanished">Демонстрационная версия может создавать только `%1&apos; экземпляров каждого типа объектов. Этот предел достигнут для типа: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Заменяет все прямые линии связей изогнутыми, чтобы улучшить отображение модели.</translation>
+        <translation type="vanished">Заменяет все прямые линии связей изогнутыми, чтобы улучшить отображение модели.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Использовать изогнутые линии для связей</translation>
+        <translation type="vanished">Использовать изогнутые линии для связей</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>None</source>
         <translation>Нет</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Стиль линий</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Определяет, как рисуются линии связей. &lt;strong&gt;Прямые&lt;/strong&gt; линии соединяют таблицы напрямую, &lt;strong&gt;изогнутые&lt;/strong&gt; заменяют прямые линии кривыми, а &lt;strong&gt;ортогональные&lt;/strong&gt; линии используют только горизонтальные и вертикальные сегменты со скруглёнными углами (точки, добавленные вручную на линии, в этом стиле игнорируются).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Прямые</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Изогнутые</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Ортогональные</translation>
     </message>
 </context>
 <context>
