@@ -277,6 +277,8 @@ class RelationshipLinesTest: public QObject, public PgModelerUnitTest {
 		void theSegmentsAtTheEndsGetAJogWhenShifted();
 		void aShiftOfTheLastSegmentGetsAJogNextToTheTable();
 		void aJogOfAnEndSegmentNeverTouchesTheAreaOfTheDescriptors();
+		void theDescriptorStaysInTheMiddleOfTheRouteWhenThereIsRoom();
+		void theDescriptorMovesAwayFromTheCornersOfTheRoute();
 		void endShiftsAreLimitedByTheLengthOfTheSegments();
 		void endShiftsKeepTheRouteValidWithOtherShifts();
 		void dragWithShiftOnAnEndSegmentAddsAJogAndStoresTheShift();
@@ -5736,6 +5738,75 @@ void RelationshipLinesTest::randomScenesKeepEveryInvariantWhateverTheUserDoes()
 	{
 		QFAIL(e.getExceptionsText().toStdString().c_str());
 	}
+}
+
+void RelationshipLinesTest::theDescriptorStaysInTheMiddleOfTheRouteWhenThereIsRoom()
+{
+	double angle = 1;
+
+	// A straight route: the middle, with the angle of the segment
+	QPointF pnt = RelationshipView::getDescriptorPosition({ QPointF(0, 0), QPointF(200, 0) }, 10, 10, angle);
+	QCOMPARE(pnt, QPointF(100, 0));
+	QCOMPARE(angle, 0.0);
+
+	// Z route, the middle is in the middle of the vertical segment (the angle is the one of the direction of the route)
+	pnt = RelationshipView::getDescriptorPosition({ QPointF(0, 0), QPointF(100, 0), QPointF(100, 100), QPointF(200, 100) }, 10, 10, angle);
+	QCOMPARE(pnt, QPointF(100, 50));
+	QCOMPARE(angle, -270.0);
+
+	// The room at the corners is the half of the descriptor plus the curve of the corner: just enough
+	pnt = RelationshipView::getDescriptorPosition({ QPointF(0, 0), QPointF(100, 0), QPointF(100, 40), QPointF(200, 40) }, 10, 10, angle);
+	QCOMPARE(pnt, QPointF(100, 20));
+}
+
+void RelationshipLinesTest::theDescriptorMovesAwayFromTheCornersOfTheRoute()
+{
+	double angle = 0, half = 10, room = 10, clear = half + room;
+
+	/* The middle of the route is exactly on the corner: the descriptor goes to the beginning of the segment that follows or
+	 * to the end of the one that precedes, just before the curve of the corner */
+	std::vector<QPointF> route { QPointF(0, 0), QPointF(100, 0), QPointF(100, 100), QPointF(200, 100) };
+	QPointF pnt = RelationshipView::getDescriptorPosition({ QPointF(0, 0), QPointF(100, 0), QPointF(100, 300) }, half, room, angle);
+
+	// total = 400, middle = 200, on the vertical segment: clear of the corner (y=100 from it)
+	QCOMPARE(pnt, QPointF(100, 100));
+
+	// total = 200, the middle at the corner of the L route
+	route = { QPointF(0, 0), QPointF(100, 0), QPointF(100, 100) };
+	pnt = RelationshipView::getDescriptorPosition(route, half, room, angle);
+	QVERIFY(pnt == QPointF(100 - clear, 0) || pnt == QPointF(100, clear));
+	QVERIFY(std::fabs(angle) < Eps || std::fabs(angle + 270) < Eps);
+
+	// The corner is under the descriptor but not exactly in the middle
+	route = { QPointF(0, 0), QPointF(110, 0), QPointF(110, 100), QPointF(120, 100) };
+	pnt = RelationshipView::getDescriptorPosition(route, half, room, angle);
+	QVERIFY(QLineF(pnt, route[1]).length() >= clear - Eps);
+	QVERIFY(pnt == QPointF(110 - clear, 0) || pnt == QPointF(110, clear));
+
+	// A short jog (the middle segment) that has no room: the closest segment with room is used
+	route = { QPointF(0, 0), QPointF(98, 0), QPointF(98, 12), QPointF(200, 12) };
+	pnt = RelationshipView::getDescriptorPosition(route, half, room, angle);
+	QCOMPARE(pnt.y(), 12.0);
+	QVERIFY2(pnt.x() >= 98 + clear - Eps, qPrintable(QString("x=%1").arg(pnt.x())));
+	QCOMPARE(angle, 0.0);
+
+	// Wherever the middle is, the descriptor never covers a corner when some segment has room for it
+	for(double jog = 0; jog <= 200; jog += 7)
+	{
+		route = { QPointF(0, 0), QPointF(60 + jog, 0), QPointF(60 + jog, 80), QPointF(200, 80) };
+		pnt = RelationshipView::getDescriptorPosition(route, half, room, angle);
+
+		for(size_t i = 1; i + 1 < route.size(); i++)
+		{
+			QVERIFY2(QLineF(pnt, route[i]).length() >= clear - Eps,
+							 qPrintable(QString("jog=%1 corner %2 at %3").arg(jog).arg(i).arg(QLineF(pnt, route[i]).length())));
+		}
+	}
+
+	// Nothing has room: the descriptor is placed in the middle of the longest segment
+	route = { QPointF(0, 0), QPointF(25, 0), QPointF(25, 15), QPointF(45, 15) };
+	pnt = RelationshipView::getDescriptorPosition(route, half, room, angle);
+	QCOMPARE(pnt, QPointF(12.5, 0));
 }
 
 // TESTS-END
