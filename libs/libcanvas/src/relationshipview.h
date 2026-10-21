@@ -300,6 +300,13 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		//! \brief Returns the smallest rect that contains all the points of the route
 		static QRectF getRouteRect(const std::vector<QPointF> &route);
 
+		/*! \brief Returns the point of the route where the relationship descriptor is placed, and the angle (in the
+		 * convention of QGraphicsItem::setRotation) of the segment there. It's the middle of the route unless the descriptor,
+		 * which extends half_extent along the line, would cover a corner: in this case it goes to the closest place of
+		 * the route that is clear of corners, i.e. the beginning or the end of a segment, just before the curve of the corner.
+		 * The corner_room is the length of the segment, next to a corner, taken by the curve of the corner */
+		static QPointF getDescriptorPosition(const std::vector<QPointF> &route, double half_extent, double corner_room, double &angle);
+
 		/*! \brief Returns whether the horizontal/vertical segment crosses the inside of one of the obstacles */
 		static bool isSegmentBlocked(const QPointF &p1, const QPointF &p2, const std::vector<QRectF> &obstacles);
 
