@@ -618,9 +618,17 @@ std::vector<RelationshipView *> BaseTableView::getNearbyRoutes(bool include_conn
 	if(RelationshipView::getLineStyle() != RelationshipView::OrthogonalLines || !scene())
 		return rel_views;
 
-	// Margin that includes the relationships that pass close to the table but not through it
-	constexpr double Margin = 20;
-	QRectF region(this->pos(), this->boundingRect().size());
+	ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene());
+
+	if(!obj_scene)
+		return rel_views;
+
+	/* Margin that includes the relationships that pass close to the table but not through it. When the layer rects
+	 * are visible the lines also go around them, so the margin is increased by the space they occupy around the table */
+	QRectF region(this->pos(), this->boundingRect().size()),
+			layers_rect = obj_scene->getObjectLayersRect(this);
+	double margin = 20 + std::max({ region.left() - layers_rect.left(), region.top() - layers_rect.top(),
+																	layers_rect.right() - region.right(), layers_rect.bottom() - region.bottom() });
 	std::vector<QRectF> areas = { region };
 
 	// The previous area is checked on its own, a single area covering both would include everything between them
@@ -632,14 +640,9 @@ std::vector<RelationshipView *> BaseTableView::getNearbyRoutes(bool include_conn
 	}
 
 	for(auto &area : areas)
-		area.adjust(-Margin, -Margin, Margin, Margin);
+		area.adjust(-margin, -margin, margin, margin);
 
-	region.adjust(-Margin, -Margin, Margin, Margin);
-
-	ObjectsScene *obj_scene = dynamic_cast<ObjectsScene *>(scene());
-
-	if(!obj_scene)
-		return rel_views;
+	region.adjust(-margin, -margin, margin, margin);
 
 	for(auto &rel_view : obj_scene->getRelationshipViews())
 	{

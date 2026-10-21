@@ -1834,7 +1834,8 @@ std::vector<QRectF> RelationshipView::getObstacles(const QRectF &region)
 		if(tab == tables[0] || tab == tables[1] || !tab->isVisible())
 			continue;
 
-		tab_rect = QRectF(tab->pos(), tab->boundingRect().size());
+		// The area of a table includes the rects of the layers (when visible) drawn around it
+		tab_rect = obj_scene->getObjectLayersRect(tab);
 
 		if(tab_rect.intersects(region))
 			obstacles.push_back(tab_rect);
