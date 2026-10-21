@@ -3367,7 +3367,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>เวอร์ชันสาธิตสร้างได้เพียง `%1&apos; อินสแตนซ์ต่อวัตถุแต่ละชนิด! คุณถึงขีดจำกัดนี้แล้วสำหรับชนิด: `%2&apos;</translation>
+        <translation type="vanished">เวอร์ชันสาธิตสร้างได้เพียง `%1&apos; อินสแตนซ์ต่อวัตถุแต่ละชนิด! คุณถึงขีดจำกัดนี้แล้วสำหรับชนิด: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>แทนที่เส้นตรงทุกเส้นในความสัมพันธ์ด้วยเส้นโค้งเพื่อให้มองโมเดลได้ดีขึ้น</translation>
+        <translation type="vanished">แทนที่เส้นตรงทุกเส้นในความสัมพันธ์ด้วยเส้นโค้งเพื่อให้มองโมเดลได้ดีขึ้น</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>ใช้เส้นโค้งสำหรับความสัมพันธ์</translation>
+        <translation type="vanished">ใช้เส้นโค้งสำหรับความสัมพันธ์</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>None</source>
         <translation>ไม่มี</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>รูปแบบเส้น</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;กำหนดวิธีวาดเส้นของความสัมพันธ์ &lt;strong&gt;เส้นตรง&lt;/strong&gt;เชื่อมต่อตารางโดยตรง &lt;strong&gt;เส้นโค้ง&lt;/strong&gt;จะแทนที่เส้นตรงด้วยเส้นโค้ง และ&lt;strong&gt;เส้นตั้งฉาก&lt;/strong&gt;ใช้เฉพาะส่วนแนวนอนและแนวตั้งที่มีมุมมน (จุดที่เพิ่มเข้าไปในเส้นด้วยตนเองจะถูกละเว้นในรูปแบบนี้)&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>เส้นตรง</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>เส้นโค้ง</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>เส้นตั้งฉาก</translation>
     </message>
 </context>
 <context>

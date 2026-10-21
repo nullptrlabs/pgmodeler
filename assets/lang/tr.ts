@@ -3367,7 +3367,7 @@ Başvurulan sütun(lar): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Tanıtım sürümü her nesne türünden yalnızca `%1&apos; örnek oluşturabilir! Şu tür için bu sınıra ulaştınız: `%2&apos;</translation>
+        <translation type="vanished">Tanıtım sürümü her nesne türünden yalnızca `%1&apos; örnek oluşturabilir! Şu tür için bu sınıra ulaştınız: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ DBMS&apos;nin döndürdüğü ileti: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Model görselleştirmesini iyileştirmek için bir ilişkideki tüm düz çizgileri eğri çizgilerle değiştirir.</translation>
+        <translation type="vanished">Model görselleştirmesini iyileştirmek için bir ilişkideki tüm düz çizgileri eğri çizgilerle değiştirir.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>İlişkiler için eğri çizgiler kullan</translation>
+        <translation type="vanished">İlişkiler için eğri çizgiler kullan</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ bir komut satırı arayüzü sağlar. Kullanılabilir tüm seçenekler aşağıd
     <message>
         <source>None</source>
         <translation>Yok</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Çizgi stili</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;İlişkilerin çizgilerinin nasıl çizileceğini belirler. &lt;strong&gt;Düz&lt;/strong&gt; çizgiler tabloları doğrudan bağlar, &lt;strong&gt;eğri&lt;/strong&gt; çizgiler düz çizgilerin yerine eğriler koyar ve &lt;strong&gt;dik açılı&lt;/strong&gt; çizgiler yalnızca yuvarlatılmış köşelere sahip yatay ve dikey bölümler kullanır (çizgilere elle eklenen noktalar bu stilde yok sayılır).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Düz</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Eğri</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Dik açılı</translation>
     </message>
 </context>
 <context>

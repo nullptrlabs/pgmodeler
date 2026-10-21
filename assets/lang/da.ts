@@ -3367,7 +3367,7 @@ Refererede kolonner: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Demoversionen kan kun oprette `%1&apos; instanser af hver objekttype. Denne grænse er nået for typen: `%2&apos;</translation>
+        <translation type="vanished">Demoversionen kan kun oprette `%1&apos; instanser af hver objekttype. Denne grænse er nået for typen: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ Meddelelse returneret af DBMS&apos;en: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Erstatter alle rette linjer i relationer med kurvede linjer for at forbedre visningen af modellen.</translation>
+        <translation type="vanished">Erstatter alle rette linjer i relationer med kurvede linjer for at forbedre visningen af modellen.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Brug kurvede linjer til relationer</translation>
+        <translation type="vanished">Brug kurvede linjer til relationer</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ som er tilgængelige i den grafiske brugerflade. Alle tilgængelige indstillinge
     <message>
         <source>None</source>
         <translation>Ingen</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Linjestil</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Angiver, hvordan relationernes linjer tegnes. &lt;strong&gt;Lige&lt;/strong&gt; linjer forbinder tabellerne direkte, &lt;strong&gt;kurvede&lt;/strong&gt; linjer erstatter de lige linjer med kurver, og &lt;strong&gt;ortogonale&lt;/strong&gt; linjer bruger kun vandrette og lodrette segmenter med afrundede hjørner (punkter, der er tilføjet manuelt til linjerne, ignoreres i denne stil).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Lige</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Kurvede</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Ortogonale</translation>
     </message>
 </context>
 <context>

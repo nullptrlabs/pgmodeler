@@ -3367,7 +3367,7 @@ Hivatkozott oszlop(ok): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>A bemutató verzió objektumtípusonként csak `%1&apos; példányt hozhat létre! Elérte ezt a korlátot a következő típusnál: `%2&apos;</translation>
+        <translation type="vanished">A bemutató verzió objektumtípusonként csak `%1&apos; példányt hozhat létre! Elérte ezt a korlátot a következő típusnál: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ Az adatbázis-kezelő által visszaadott üzenet: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>A kapcsolatokban minden egyenes vonalat ívelt vonalra cserél a modell jobb megjelenítése érdekében.</translation>
+        <translation type="vanished">A kapcsolatokban minden egyenes vonalat ívelt vonalra cserél a modell jobb megjelenítése érdekében.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Ívelt vonalak használata a kapcsolatokhoz</translation>
+        <translation type="vanished">Ívelt vonalak használata a kapcsolatokhoz</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
     <message>
         <source>None</source>
         <translation>Nincs</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Vonalstílus</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Meghatározza, hogyan rajzolódnak a kapcsolatok vonalai. Az &lt;strong&gt;egyenes&lt;/strong&gt; vonalak közvetlenül összekötik a táblákat, az &lt;strong&gt;ívelt&lt;/strong&gt; vonalak görbékkel helyettesítik az egyeneseket, az &lt;strong&gt;ortogonális&lt;/strong&gt; vonalak pedig csak vízszintes és függőleges szakaszokat használnak lekerekített sarkokkal (a vonalakhoz kézzel hozzáadott pontokat ez a stílus figyelmen kívül hagyja).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Egyenes</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Ívelt</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Ortogonális</translation>
     </message>
 </context>
 <context>

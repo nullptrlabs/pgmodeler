@@ -3367,7 +3367,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>데모 버전에서는 객체 유형마다 `%1&apos;개의 인스턴스만 만들 수 있습니다. 유형 `%2&apos;에서 이 제한에 도달했습니다.</translation>
+        <translation type="vanished">데모 버전에서는 객체 유형마다 `%1&apos;개의 인스턴스만 만들 수 있습니다. 유형 `%2&apos;에서 이 제한에 도달했습니다.</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ DBMS가 반환한 메시지: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>모델의 시각화를 개선하기 위해 관계의 직선을 곡선으로 바꿉니다.</translation>
+        <translation type="vanished">모델의 시각화를 개선하기 위해 관계의 직선을 곡선으로 바꿉니다.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>관계에 곡선 사용</translation>
+        <translation type="vanished">관계에 곡선 사용</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>None</source>
         <translation>없음</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>선 스타일</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;관계 선을 그리는 방식을 정의합니다. &lt;strong&gt;직선&lt;/strong&gt;은 테이블을 직접 연결하고, &lt;strong&gt;곡선&lt;/strong&gt;은 직선을 곡선으로 대체하며, &lt;strong&gt;직교선&lt;/strong&gt;은 모서리가 둥근 수평 및 수직 세그먼트만 사용합니다(이 스타일에서는 선에 수동으로 추가한 점이 무시됩니다).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>직선</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>곡선</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>직교선</translation>
     </message>
 </context>
 <context>

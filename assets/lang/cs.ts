@@ -3367,7 +3367,7 @@ Odkazované sloupce: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Demonstrační verze může vytvořit pouze `%1&apos; instancí každého typu objektu. Tento limit byl dosažen pro typ: `%2&apos;</translation>
+        <translation type="vanished">Demonstrační verze může vytvořit pouze `%1&apos; instancí každého typu objektu. Tento limit byl dosažen pro typ: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ Zpráva vrácená DBMS: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Nahradí všechny rovné čáry ve vztazích křivkami, aby se zlepšilo zobrazení modelu.</translation>
+        <translation type="vanished">Nahradí všechny rovné čáry ve vztazích křivkami, aby se zlepšilo zobrazení modelu.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Používat pro vztahy křivé čáry</translation>
+        <translation type="vanished">Používat pro vztahy křivé čáry</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ dostupné v GUI. Všechny dostupné volby jsou popsány níže.</translation>
     <message>
         <source>None</source>
         <translation>Žádný</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Styl čar</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Určuje, jak se kreslí čáry vztahů. &lt;strong&gt;Přímé&lt;/strong&gt; čáry spojují tabulky přímo, &lt;strong&gt;křivé&lt;/strong&gt; nahrazují přímé čáry křivkami a &lt;strong&gt;ortogonální&lt;/strong&gt; čáry používají pouze vodorovné a svislé úseky se zaoblenými rohy (body přidané ručně na čáry jsou v tomto stylu ignorovány).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Přímé</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Křivé</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Ortogonální</translation>
     </message>
 </context>
 <context>

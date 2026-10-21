@@ -3367,7 +3367,7 @@ Atsauces kolonna(s): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Demonstrācijas versija var izveidot tikai `%1&apos; katra objekta tipa instances! Jūs sasniedzāt šo ierobežojumu tipam: `%2&apos;</translation>
+        <translation type="vanished">Demonstrācijas versija var izveidot tikai `%1&apos; katra objekta tipa instances! Jūs sasniedzāt šo ierobežojumu tipam: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ DBVS atgrieztais ziņojums: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Aizstāj jebkuru taisnu līniju attiecībā ar liektu, lai uzlabotu modeļa vizualizāciju.</translation>
+        <translation type="vanished">Aizstāj jebkuru taisnu līniju attiecībā ar liektu, lai uzlabotu modeļa vizualizāciju.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Izmantot liektas līnijas attiecībām</translation>
+        <translation type="vanished">Izmantot liektas līnijas attiecībām</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
     <message>
         <source>None</source>
         <translation>Nav</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Līniju stils</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Nosaka, kā tiek zīmētas attiecību līnijas. &lt;strong&gt;Taisnas&lt;/strong&gt; līnijas savieno tabulas tieši, &lt;strong&gt;liektas&lt;/strong&gt; aizstāj taisnās līnijas ar līknēm, bet &lt;strong&gt;ortogonālas&lt;/strong&gt; līnijas izmanto tikai horizontālus un vertikālus posmus ar noapaļotiem stūriem (manuāli pievienotie līniju punkti šajā stilā tiek ignorēti).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Taisnas</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Liektas</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Ortogonālas</translation>
     </message>
 </context>
 <context>

@@ -3367,7 +3367,7 @@ Sklicevani stolpci: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Predstavitvena različica lahko ustvari samo `%1&apos; primerkov vsakega tipa objekta! Dosegli ste to omejitev za tip: `%2&apos;</translation>
+        <translation type="vanished">Predstavitvena različica lahko ustvari samo `%1&apos; primerkov vsakega tipa objekta! Dosegli ste to omejitev za tip: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ Sporočilo, ki ga je vrnil SUPB: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Vse ravne črte v razmerju zamenja z ukrivljenimi za boljši prikaz modela.</translation>
+        <translation type="vanished">Vse ravne črte v razmerju zamenja z ukrivljenimi za boljši prikaz modela.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Uporabi ukrivljene črte za razmerja</translation>
+        <translation type="vanished">Uporabi ukrivljene črte za razmerja</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ ki so na voljo v grafičnem vmesniku. Vse razpoložljive možnosti so opisane sp
     <message>
         <source>None</source>
         <translation>Brez</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Slog črt</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Določa, kako so narisane črte razmerij. &lt;strong&gt;Ravne&lt;/strong&gt; črte neposredno povezujejo tabele, &lt;strong&gt;ukrivljene&lt;/strong&gt; nadomestijo ravne črte s krivuljami, &lt;strong&gt;pravokotne&lt;/strong&gt; črte pa uporabljajo samo vodoravne in navpične odseke z zaobljenimi vogali (točke, ročno dodane črtam, se v tem slogu prezrejo).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Ravne</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Ukrivljene</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Pravokotne</translation>
     </message>
 </context>
 <context>

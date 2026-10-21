@@ -3367,7 +3367,7 @@ Lajur rujukan: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Versi demonstrasi hanya boleh mencipta `%1&apos; tika bagi setiap jenis objek! Anda telah mencapai had ini untuk jenis: `%2&apos;</translation>
+        <translation type="vanished">Versi demonstrasi hanya boleh mencipta `%1&apos; tika bagi setiap jenis objek! Anda telah mencapai had ini untuk jenis: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5707,11 @@ Mesej yang dikembalikan oleh DBMS: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Menggantikan sebarang garis lurus dalam hubungan dengan garis melengkung untuk meningkatkan visualisasi model.</translation>
+        <translation type="vanished">Menggantikan sebarang garis lurus dalam hubungan dengan garis melengkung untuk meningkatkan visualisasi model.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Guna garis melengkung untuk hubungan</translation>
+        <translation type="vanished">Guna garis melengkung untuk hubungan</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -12696,6 +12696,26 @@ yang terdapat dalam GUI. Semua pilihan yang tersedia diterangkan di bawah.</tran
     <message>
         <source>None</source>
         <translation>Tiada</translation>
+    </message>
+    <message>
+        <source>Line style</source>
+        <translation>Gaya garis</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines how the relationships&apos; lines are drawn. &lt;strong&gt;Straight&lt;/strong&gt; lines connect the tables directly, &lt;strong&gt;curved&lt;/strong&gt; ones replace the straight lines by curves and &lt;strong&gt;orthogonal&lt;/strong&gt; lines use only horizontal and vertical segments with rounded corners (the points added manually to the lines are ignored in this style).&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Menentukan cara garis hubungan dilukis. Garis &lt;strong&gt;lurus&lt;/strong&gt; menyambung jadual secara terus, garis &lt;strong&gt;melengkung&lt;/strong&gt; menggantikan garis lurus dengan lengkung, dan garis &lt;strong&gt;ortogon&lt;/strong&gt; hanya menggunakan segmen mendatar dan menegak dengan sudut bulat (titik yang ditambah secara manual pada garis diabaikan dalam gaya ini).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Straight</source>
+        <translation>Lurus</translation>
+    </message>
+    <message>
+        <source>Curved</source>
+        <translation>Melengkung</translation>
+    </message>
+    <message>
+        <source>Orthogonal</source>
+        <translation>Ortogon</translation>
     </message>
 </context>
 <context>
