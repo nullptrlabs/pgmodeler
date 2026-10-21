@@ -397,6 +397,7 @@ extern __libparsers const QString
 	Italic,
 	Item,
 	Items,
+	Jog,
 	JoinFunc,
 	KeepClusterObjs,
 	KeepObjsPerms,

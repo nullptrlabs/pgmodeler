@@ -6,3 +6,4 @@
 <!ATTLIST segment index CDATA #REQUIRED>
 <!ATTLIST segment orientation (1|2) #REQUIRED>
 <!ATTLIST segment value CDATA #REQUIRED>
+<!ATTLIST segment jog CDATA #IMPLIED>
