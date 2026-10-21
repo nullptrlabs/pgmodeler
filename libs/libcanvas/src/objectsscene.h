@@ -107,6 +107,9 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		 * the update is performed only when the movement ends */
 		bool bumps_update_pending;
 
+		//! \brief Stores the last value of getLayersSignature() to detect changes in the layer rects
+		QString layers_signature;
+
 		//! \brief Timer responsible to move the scene
 		QTimer scene_move_timer,
 
@@ -188,6 +191,18 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		//! \brief Performs the final steps when moving the objects like adjusting position to grid, moving children object, etc
 		void finishObjectsMove(const QPointF &pnt_end);
+
+		/*! \brief Returns the rects drawn around the object by each of the active layers it belongs to, in the order of the
+		 * object's layers. Each layer rect is larger than the previous one so they appear nested around the object */
+		QList<std::pair<unsigned, QRectF>> getObjectLayerRects(BaseObjectView *obj, const QFontMetricsF &fm);
+
+		/*! \brief Returns a string that changes whenever something that alters the layer rects around the objects
+		 * changes (visibility of rects and names, active layers and the layers of the objects), but not
+		 * when the objects are only moved */
+		QString getLayersSignature();
+
+		//! \brief Forces the update of the routes of the orthogonal lines of all relationships
+		void invalidateRelationshipsRoutes();
 
 		/*! \brief Finds the places where the orthogonal lines of the relationships cross each other and
 		 * makes the horizontal ones hop over the vertical ones */
@@ -401,6 +416,10 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		bool isRangeSelectionTriggerInverted();
 		bool isRelationshipLineVisible();
 		bool isMovingObjects();
+
+		/*! \brief Returns the rect occupied by the object including the layer rects displayed around it.
+		 * If the layer rects are not visible this is the object's own rect */
+		QRectF getObjectLayersRect(BaseObjectView *obj);
 
 		/*! \brief Requests the update of the bumps of the orthogonal lines. It's performed after a short delay
 		 * or, if objects are being moved, only after the movement ends */

@@ -242,6 +242,7 @@ class RelationshipLinesTest: public QObject, public PgModelerUnitTest {
 		void movingAnObstacleIntoThePathReroutesTheLine();
 		void obstacleMovedAlongTheLineKeepsAllRoutesValid();
 		void hiddenTablesAreNotObstacles();
+		void layerRectsOfTheTablesAreObstacles();
 		void tablesOfTheRelationshipAreNotCrossedByTheDetour();
 		void moreObstaclesThanTheSearchSupportsKeepTheSimpleRoute();
 		void aTableBoxedInByOthersStillGetsAValidRoute();
@@ -1385,6 +1386,57 @@ void RelationshipLinesTest::hiddenTablesAreNotObstacles()
 	}
 }
 
+void RelationshipLinesTest::layerRectsOfTheTablesAreObstacles()
+{
+	try
+	{
+		applyMode(RelationshipView::ConnectTableEdges, false);
+
+		Rig rig;
+		Table *tab_a = addTable(rig, "tab_a", QPointF(0, 0)), *tab_b = addTable(rig, "tab_b", QPointF(1400, 0)),
+				*tab_c = addTable(rig, "tab_c", QPointF(700, 0));
+		RelationshipView *rv = relView(addRel(rig, tab_a, tab_b));
+		QRectF rect_c = tableRect(tableView(tab_c));
+
+		rig.scene->addLayer("layer_c1");
+		rig.scene->addLayer("layer_c2");
+
+		QVERIFY(rv->route_points.size() > 2);
+
+		// Without the rects of the layers visible the obstacle is the table itself
+		QCOMPARE(rig.scene->getObjectLayersRect(tableView(tab_c)), rect_c);
+
+		/* The rects of nested layers (and the names) take more room around the table than the clearance the lines
+		 * keep from the tables, so only the lines that consider the rects stay out of them */
+		rig.scene->setActiveLayers(rig.scene->getLayers());
+		tab_c->setLayers(QList<unsigned> { 1, 2 });
+		rig.scene->setLayerNamesVisible(true);
+		rig.scene->setLayerRectsVisible(true);
+
+		QRectF layers_rect = rig.scene->getObjectLayersRect(tableView(tab_c));
+
+		QVERIFY(layers_rect.width() > rect_c.width());
+		QVERIFY(layers_rect.height() > rect_c.height());
+		QVERIFY(layers_rect.contains(rect_c));
+		QVERIFY(rect_c.left() - layers_rect.left() > 15);
+
+		/* The lines are updated by the scene when the rects of the layers appear,
+		 * so the route must go around the rect of the layer and not only around the table */
+		QVERIFY2(!RelationshipView::isRouteBlocked(rv->route_points, { layers_rect }),
+						 "The route crosses the rect of the layer of the table");
+
+		// Hiding the rects makes the table the only obstacle again
+		rig.scene->setLayerRectsVisible(false);
+		QCOMPARE(rig.scene->getObjectLayersRect(tableView(tab_c)), rect_c);
+		rv->invalidateRoute();
+		QVERIFY2(checkRoute(rv, true).isEmpty(), qPrintable(checkRoute(rv, true)));
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
 void RelationshipLinesTest::tablesOfTheRelationshipAreNotCrossedByTheDetour()
 {
 	try
@@ -1523,10 +1575,9 @@ void RelationshipLinesTest::loadedModelHasTheAnchorsOfEachSideSpreadApart()
 
 		QString overlap = findOverlappingAnchors(wgt.getScenes().at(0));
 
-		/* The relationships are configured one by one while the model is loaded, so the first ones keep the connection
-		 * points they got when fewer neighbors existed on the same side of the table, until they are reconfigured
-		 * (e.g. when one of the tables moves) */
-		QEXPECT_FAIL("", "Known limitation: the connection points of a loaded model are only spread apart after the lines are reconfigured", Continue);
+		/* The relationships are configured one by one while the model is loaded, so the first ones get the connection
+		 * points of when fewer neighbors existed on the same side of the table. The scene reconfigures all the lines when
+		 * it first computes the layer rects (they are obstacles for the lines), which spreads the connection points apart */
 		QVERIFY2(overlap.isEmpty(), qPrintable(overlap));
 	}
 	catch(Exception &e)

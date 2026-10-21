@@ -397,10 +397,96 @@ void ObjectsScene::setActiveLayers(QList<unsigned> layer_ids)
 	emit s_activeLayersChanged();
 }
 
+QList<std::pair<unsigned, QRectF>> ObjectsScene::getObjectLayerRects(BaseObjectView *obj, const QFontMetricsF &fm)
+{
+	QList<std::pair<unsigned, QRectF>> rects;
+	QRectF brect = obj->boundingRect();
+
+	brect.moveTo(obj->pos());
+
+	for(auto &layer_id : obj->getLayers())
+	{
+		if(static_cast<int>(layer_id) >= layers.size() ||
+			 !active_layers.contains(layers.at(layer_id)))
+			continue;
+
+		/* We need to adjust the bounding rect dimension in such a way
+		 * to take into account the font height (if the layer names are visible)
+		 * as well as a default padding so the rectangles doesn't have the same size
+		 * of the object's bounding rect */
+		brect.adjust(-LayerItem::LayerPadding,
+								 (is_layer_names_visible ? -fm.height() : -LayerItem::LayerPadding),
+								 LayerItem::LayerPadding,
+								 LayerItem::LayerPadding);
+
+		rects.append({ layer_id, brect });
+	}
+
+	return rects;
+}
+
+QRectF ObjectsScene::getObjectLayersRect(BaseObjectView *obj)
+{
+	QRectF rect(obj->pos(), obj->boundingRect().size());
+
+	if(!is_layer_rects_visible || layers_paths.isEmpty())
+		return rect;
+
+	for(auto &layer_rect : getObjectLayerRects(obj, QFontMetricsF(LayerItem::getDefaultFont())))
+		rect = rect.united(layer_rect.second);
+
+	return rect;
+}
+
+QString ObjectsScene::getLayersSignature()
+{
+	QString signature = QString("%1|%2|%3").arg(is_layer_rects_visible).arg(is_layer_names_visible).arg(active_layers.join(","));
+	quint64 objs_hash = 0;
+	QStringList layer_ids;
+
+	if(!is_layer_rects_visible)
+		return signature;
+
+	for(auto &tab_view : table_views)
+	{
+		layer_ids.clear();
+
+		for(auto &layer_id : tab_view->getLayers())
+			layer_ids.append(QString::number(layer_id));
+
+		// The sum makes the result independent of the order of the tables
+		objs_hash += qHash(QString("%1:%2").arg(reinterpret_cast<quintptr>(tab_view)).arg(layer_ids.join(",")));
+	}
+
+	return signature + "|" + QString::number(objs_hash);
+}
+
+void ObjectsScene::invalidateRelationshipsRoutes()
+{
+	if(RelationshipView::getLineStyle() != RelationshipView::OrthogonalLines)
+		return;
+
+	// A copy is used because the list is a member that may change while the lines are updated
+	std::vector<RelationshipView *> rels = rel_views;
+
+	for(auto &rel : rels)
+		rel->invalidateRoute();
+}
+
 void ObjectsScene::updateLayerRects()
 {
 	if(layers_paths.isEmpty())
 		return;
+
+	/* The orthogonal lines go around the layer rects of the tables, so they are
+	 * updated whenever something that changes those rects is changed */
+	QString signature = getLayersSignature();
+
+	if(signature != layers_signature)
+	{
+		layers_signature = signature;
+		invalidateRelationshipsRoutes();
+	}
 
 	for(auto &path : layers_paths)
 		path->setVisible(false);
@@ -411,7 +497,6 @@ void ObjectsScene::updateLayerRects()
 	int idx = 0, act_layer_idx = 0;
 	BaseObjectView *obj_view = nullptr;
 	ObjectType obj_type;
-	QRectF brect;
 	QMap<int, QList<QRectF>> rects;
 	QFontMetricsF fm(LayerItem::getDefaultFont());
 
@@ -431,26 +516,8 @@ void ObjectsScene::updateLayerRects()
 				 obj_type ==ObjectType::Relationship)
 				continue;
 
-			brect = obj_view->boundingRect();
-			brect.moveTo(obj_view->pos());
-
-			for(auto &layer_id : obj_view->getLayers())
-			{
-				if(static_cast<int>(layer_id) >= layers.size() ||
-					 !active_layers.contains(layers.at(layer_id)))
-					continue;
-
-				/* We need to adjust the bounding rect dimension in such a way
-				 * to take into account the font height (if the layer names are visible)
-				 * as well as a default padding so the rectangles doesn't have the same size
-				 * of the object's bounding rect */
-				brect.adjust(-LayerItem::LayerPadding,
-										 (is_layer_names_visible ? -fm.height() : -LayerItem::LayerPadding),
-										 LayerItem::LayerPadding,
-										 LayerItem::LayerPadding);
-
-				rects[layer_id].append(brect);
-			}
+			for(auto &layer_rect : getObjectLayerRects(obj_view, fm))
+				rects[layer_rect.first].append(layer_rect.second);
 		}
 	}
 
