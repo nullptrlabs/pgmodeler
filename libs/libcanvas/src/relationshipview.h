@@ -67,7 +67,7 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		static constexpr double RoundedCornerRadius=10.0;
 
 		//! \brief Radius of the arcs the orthogonal lines make to hop over the lines that cross them
-		static constexpr double BumpRadius=4.0;
+		static constexpr double BumpRadius=6.0;
 
 		//! \brief Clearance kept between the lines and the end zones (crow's foot area) of other relationships
 		static constexpr double ZoneClearance=3.0;
