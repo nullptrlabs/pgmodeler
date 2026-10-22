@@ -18,6 +18,9 @@ v2.0.0
 * [New] The segments of orthogonal lines can be moved perpendicularly by dragging them with SHIFT pressed; the end segments are displaced through a jog (a corner next to the table) that can be dragged as well. ALT+SHIFT+click discards the displacements. They are stored per segment index in `BaseRelationship` (`SegmentShift`, `setSegmentShifts()`, `getSegmentShifts()`, `resetSegmentShifts()`), saved as `<segment index orientation value jog/>` elements (new `segment.sch`/`segment.dtd`) in the model file and in the objects metadata, and discarded when one of the linked tables moves or is resized.
 * [New] Added the "Line style" setting (straight, curved or orthogonal) to the relationships configuration (`line-style` attribute in `relationships.conf`, `RelationshipView::setLineStyle()`/`getLineStyle()`), with orthogonal as the default.
 * [New] Added unit tests for the orthogonal relationship lines (`relationshiplinestest`), the persistence of the segment displacements (`relationshippersistencetest`) and the line style settings (`relationshipsettingstest`).
+* [New] Added `SecretsNs` (`secretsns.h`), a dependency-free way to obfuscate secrets stored in configuration files: `SecretsNs::encrypt()` and `SecretsNs::decrypt()` (HMAC-SHA256 in counter mode with an authenticating synthetic IV, keyed by the machine id and the user's home directory) produce values in the form `pgm-enc1:<base64>`; values without the prefix are legacy plain text and are read as they are.
+* [New] Added `UtilsNs::setOwnerOnlyAccess()` to restrict a file to its owner (no effect on Windows).
+* [New] Added unit tests for the secrets encryption (`secretsnstest`).
 * [Change] Selection, the Object Search Widget, and Layers operations now operate across every scene (or follow the clicked object's own scene) instead of assuming a single canvas.
 * [Change] The "Rearrange objects" menu is now scoped to the active scene instead of the whole model.
 * [Change] PNG/SVG export now produces one image per scene instead of a single image of the whole model.
@@ -44,6 +47,8 @@ v2.0.0
 * [Change] The documentation and donation URLs now point to `/docs` and `/donate` on the pgModeler website.
 * [Change] `CustomTableWidget::getItem()` now throws when the item is not allocated.
 * [Change] The Columns tab of `ConstraintWidget` is hidden for CHECK and EXCLUDE constraints.
+* [Change] The database connection passwords (`connections.conf`) and the SSH tunnel passwords (`sshtunnel.conf`) are now saved encrypted through `SecretsNs`, and both files are restricted to their owner. Existing plain text passwords keep working and are encrypted the next time the settings are saved. Older versions read the encrypted value as the password itself, so connections need their password retyped after a downgrade.
+* [Change] The Versioning plugin now masks the password of remote URLs (`scheme://user:******@host`) in the debug log, in the error and warning messages and in the remote URL shown by the versioning widget (`GitWrapper::maskUrlPassword()`).
 * [Fix] Fixed SQL code completion (SQL Tool) losing track of which statement the cursor is in when the buffer has more than one statement, causing it to use the wrong table/command context or list unrelated keywords as implicit table aliases.
 * [Fix] Fixed a table's graphical item, cross-scene relationship classification, position, and relationship marker not consistently following it when it changes schema or scene.
 * [Fix] Fixed cascade schema deletion missing transitively-referenced child objects due to a discarded result in `BaseObject::getLinkedObjects()`.
