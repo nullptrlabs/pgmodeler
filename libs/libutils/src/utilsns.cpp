@@ -88,6 +88,21 @@ namespace UtilsNs {
 		output.close();
 	}
 
+	bool setOwnerOnlyAccess(const QString &filename)
+	{
+		#ifdef Q_OS_WIN
+			Q_UNUSED(filename)
+			return true;
+		#else
+			QFile file(filename);
+
+			if(!file.exists())
+				return true;
+
+			return file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
+		#endif
+	}
+
 	QByteArray loadFile(const QString &filename, qint64 max_len)
 	{
 		QFile input;

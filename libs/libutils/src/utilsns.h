@@ -88,6 +88,11 @@ namespace UtilsNs {
 	 * Raises an exception in case of the file couldn,t be open */
 	__libutils void saveFile(const QString &filename, const QByteArray &buffer, bool mk_path = false);
 
+	/*! \brief Restricts the access to the file to its owner only (read/write), used in files that hold sensitive
+	 * data like passwords. Does nothing if the file doesn't exist and in Windows, where the permissions model is different.
+	 * Returns false if the permissions couldn't be changed. */
+	__libutils bool setOwnerOnlyAccess(const QString &filename);
+
 	/*! \brief Read the contents of the file specified by its filename returning its contents.
 	 * Raises an exception in case of the file couldn't be open.
 	 * The optional parameter max_len can be specified and determines the maximum length of
