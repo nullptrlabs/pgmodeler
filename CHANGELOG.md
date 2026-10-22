@@ -21,6 +21,7 @@ v2.0.0
 * [New] Added `SecretsNs` (`secretsns.h`), a dependency-free way to obfuscate secrets stored in configuration files: `SecretsNs::encrypt()` and `SecretsNs::decrypt()` (HMAC-SHA256 in counter mode with an authenticating synthetic IV, keyed by the machine id and the user's home directory) produce values in the form `pgm-enc1:<base64>`; values without the prefix are legacy plain text and are read as they are.
 * [New] Added `UtilsNs::setOwnerOnlyAccess()` to restrict a file to its owner (no effect on Windows).
 * [New] Added unit tests for the secrets encryption (`secretsnstest`).
+* [New] Added `DangerZoneWidget`, a dialog that asks the user to type a given text (e.g., the name of a database) before a destructive operation proceeds; `DangerZoneWidget::confirm()` shows it as a fixed-size form whose confirm button is enabled only when the typed text matches exactly.
 * [Change] Selection, the Object Search Widget, and Layers operations now operate across every scene (or follow the clicked object's own scene) instead of assuming a single canvas.
 * [Change] The "Rearrange objects" menu is now scoped to the active scene instead of the whole model.
 * [Change] PNG/SVG export now produces one image per scene instead of a single image of the whole model.
@@ -48,7 +49,8 @@ v2.0.0
 * [Change] `CustomTableWidget::getItem()` now throws when the item is not allocated.
 * [Change] The Columns tab of `ConstraintWidget` is hidden for CHECK and EXCLUDE constraints.
 * [Change] The database connection passwords (`connections.conf`) and the SSH tunnel passwords (`sshtunnel.conf`) are now saved encrypted through `SecretsNs`, and both files are restricted to their owner. Existing plain text passwords keep working and are encrypted the next time the settings are saved. Older versions read the encrypted value as the password itself, so connections need their password retyped after a downgrade.
-* [Change] The Versioning plugin now masks the password of remote URLs (`scheme://user:******@host`) in the debug log, in the error and warning messages and in the remote URL shown by the versioning widget (`GitWrapper::maskUrlPassword()`).
+* [Change] The Versioning plugin now masks the credentials embedded in remote URLs in the debug log, in the error and warning messages and in the remote URL shown by the versioning widget (`GitWrapper::maskUrlCredentials()`): the whole user info of http(s) URLs is hidden (`https://******@host`), since an access token can't be told apart from a user name, and only the password is hidden in URLs of other schemes (`ssh://user:******@host`).
+* [Change] Dropping a database in the SQL tool (`SQLToolWidget::dropDatabase()`, reached from the database explorer's toolbar and the database list) now requires, after the confirmation message, typing the name of the database in a "Danger zone" dialog (`DangerZoneWidget`) before the `DROP DATABASE` is executed.
 * [Fix] Fixed SQL code completion (SQL Tool) losing track of which statement the cursor is in when the buffer has more than one statement, causing it to use the wrong table/command context or list unrelated keywords as implicit table aliases.
 * [Fix] Fixed a table's graphical item, cross-scene relationship classification, position, and relationship marker not consistently following it when it changes schema or scene.
 * [Fix] Fixed cascade schema deletion missing transitively-referenced child objects due to a discarded result in `BaseObject::getLinkedObjects()`.
