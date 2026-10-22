@@ -58,6 +58,8 @@ v2.0.0
 * [Fix] Fixed objects being left outside their scene's rectangle after threshold rebucketing.
 * [Fix] Fixed `pg_catalog`/`public` leaking into the scene name, or auto-activating, outside schema segmentation.
 * [Fix] Fixed `--fix-sdbm` discarding almost every object of a split model saved with ID comments.
+* [Fix] Fixed the Versioning plugin displaying the "Repository successfully synchronized" message after a failed pull or push (e.g., when the credentials dialog is canceled, on merge conflicts or rejected pushes) in `VersioningWidget::syncChanges()`; the push is now skipped unless the pull succeeds.
+* [Fix] Fixed the spelling of the synchronization success message of the Versioning plugin and the missing translation of the "Merge conflict detected" and tags synchronization messages.
 * [Fix] Fixed `DatabaseModel` not being destroyed together with its `ModelWidget`, leaking memory on every model close.
 * [Fix] Fixed a use-after-free when pasting or duplicating table objects.
 * [Fix] Fixed a `PGresult` leak in `Connection::executeDMLCommand` on failed commands.
