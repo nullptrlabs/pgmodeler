@@ -64,6 +64,9 @@ class __libgui LineNumbersWidget : public QWidget {
 		//! \brief Font color when the line is selected
 		hl_color;
 
+		//! \brief Selects the lines between the one at start_sel_line and the one under evnt_cursor
+		void selectLines(QTextCursor evnt_cursor);
+
 	protected:
 		void paintEvent(QPaintEvent *event) override;
 		void mousePressEvent(QMouseEvent *event) override;
