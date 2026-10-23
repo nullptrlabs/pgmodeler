@@ -39,8 +39,14 @@ class __libgui RelationshipConfigWidget:  public BaseConfigWidget, public Ui::Re
 
 		std::map<QString, attribs_map> patterns;
 
+		//! \brief Indicates if the last call to applyConfiguration() changed the line style in use
+		bool line_style_changed { false };
+
 	public:
 		RelationshipConfigWidget(QWidget * parent = nullptr);
+
+		//! \brief Returns true if the last applied configuration changed the line style of the relationships
+		bool isLineStyleChanged();
 
 		void saveConfiguration() override;
 

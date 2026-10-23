@@ -461,9 +461,9 @@ QString ObjectsScene::getLayersSignature()
 	return signature + "|" + QString::number(objs_hash);
 }
 
-void ObjectsScene::invalidateRelationshipsRoutes()
+void ObjectsScene::invalidateRelationshipsRoutes(bool force)
 {
-	if(RelationshipView::getLineStyle() != RelationshipView::OrthogonalLines)
+	if(!force && RelationshipView::getLineStyle() != RelationshipView::OrthogonalLines)
 		return;
 
 	// A copy is used because the list is a member that may change while the lines are updated

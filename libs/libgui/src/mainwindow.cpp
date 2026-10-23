@@ -1810,12 +1810,23 @@ void MainWindow::applyConfigurations()
 
 	qApp->setOverrideCursor(Qt::WaitCursor);
 
+	/* The hash codes of the tables, which the relationships use to skip the reconfiguration
+	 * of their lines, don't change with the line style, so we force the reconfiguration */
+	bool line_style_changed =
+			configuration_wgt->getConfigurationWidget<RelationshipConfigWidget>()->isLineStyleChanged();
+
 	//Force the update of all opened models
 	for(auto &model : models_tbw->findChildren<ModelWidget *>())
 	{
 		model->updateObjectsOpacity();
 		model->db_model->setObjectsModified();
 		model->db_model->setCodesInvalidated();
+
+		if(line_style_changed)
+		{
+			for(auto &scene : model->getScenes())
+				scene->invalidateRelationshipsRoutes(true);
+		}
 	}
 
 	if(current_model)

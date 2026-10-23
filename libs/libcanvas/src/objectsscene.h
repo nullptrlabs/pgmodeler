@@ -201,9 +201,6 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		 * when the objects are only moved */
 		QString getLayersSignature();
 
-		//! \brief Forces the update of the routes of the orthogonal lines of all relationships
-		void invalidateRelationshipsRoutes();
-
 		/*! \brief Finds the places where the orthogonal lines of the relationships cross each other and
 		 * makes the horizontal ones hop over the vertical ones */
 		void updateRelationshipBumps();
@@ -446,6 +443,10 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		/*! \brief Expand the scene rect to the specified direction.
 		 * The size expanded is determined by the current page layout used by the scene. */
 		void expandSceneRect(ExpandDirection exp_dir);
+
+		/*! \brief Forces the update of the routes of the orthogonal lines of all relationships.
+		 * When force is true, the lines are reconfigured whatever the current line style is */
+		void invalidateRelationshipsRoutes(bool force = false);
 
 	public slots:
 		//! \brief Force the update of all layer rectangles
