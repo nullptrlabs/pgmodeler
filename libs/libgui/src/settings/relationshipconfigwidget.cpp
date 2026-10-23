@@ -121,6 +121,11 @@ RelationshipConfigWidget::RelationshipConfigWidget(QWidget * parent) : BaseConfi
 	});
 }
 
+bool RelationshipConfigWidget::isLineStyleChanged()
+{
+	return line_style_changed;
+}
+
 std::map<QString, attribs_map> RelationshipConfigWidget::getConfigurationParams()
 {
 	return config_params;
@@ -217,7 +222,10 @@ void RelationshipConfigWidget::saveConfiguration()
 
 void RelationshipConfigWidget::applyConfiguration()
 {
-	RelationshipView::setLineStyle(static_cast<RelationshipView::LineStyle>(rel_line_style_cmb->currentIndex()));
+	RelationshipView::LineStyle style = static_cast<RelationshipView::LineStyle>(rel_line_style_cmb->currentIndex());
+
+	line_style_changed = (style != RelationshipView::getLineStyle());
+	RelationshipView::setLineStyle(style);
 	RelationshipView::setCrowsFoot(crows_foot_tb->isChecked());
 
 	if(!crows_foot_tb->isChecked())
