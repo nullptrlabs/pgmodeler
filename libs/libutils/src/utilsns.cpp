@@ -25,6 +25,7 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <cstdlib>
+#include <map>
 #include <QTemporaryFile>
 #include <QDir>
 
@@ -138,7 +139,16 @@ namespace UtilsNs {
 
 	QString getStringHash(const QByteArray &string, QCryptographicHash::Algorithm algorithm)
 	{
-		return QCryptographicHash::hash(string, algorithm).toHex();
+		/* Reusing one hasher per thread and algorithm. When Qt hashes through OpenSSL
+		 * (e.g. Qt 6.12 + OpenSSL 4) each new QCryptographicHash loads and unloads an
+		 * OpenSSL provider, and this function is called for every table child object
+		 * during model loading */
+		thread_local std::map<QCryptographicHash::Algorithm, QCryptographicHash> hashes;
+		QCryptographicHash &hash = hashes.try_emplace(algorithm, algorithm).first->second;
+
+		hash.reset();
+		hash.addData(string);
+		return hash.result().toHex();
 	}
 
 	QString formatMessage(const QString &msg)
