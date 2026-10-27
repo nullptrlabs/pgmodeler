@@ -177,7 +177,20 @@ namespace UtilsNs {
 
 	QString getStringHash(const QByteArray &string, QCryptographicHash::Algorithm algorithm)
 	{
-		return QCryptographicHash::hash(string, algorithm).toHex();
+		/* If the algorithm is not Md5 we just use the QCryptographicHash::hash() method 
+		 * to get the hash of the string. By default all objetcs in pgModeler are hashed using
+		 * Md5 algorithm because it is the fastest one and it is enough for our needs. */
+		if(algorithm != QCryptographicHash::Md5)
+			return QCryptographicHash::hash(string, algorithm).toHex();
+
+		/* Md5 is the only algorithm used in hot paths (object hash codes), so one hasher
+		 * per thread is reused. When Qt hashes through OpenSSL, each new QCryptographicHash
+		 * loads/unloads an OpenSSL provider, which is costly when creating one per call. */
+		thread_local QCryptographicHash hasher(QCryptographicHash::Md5);
+
+		hasher.reset();
+		hasher.addData(string);
+		return hasher.result().toHex();
 	}
 
 	QString formatMessage(const QString &msg)
