@@ -669,35 +669,34 @@ void Relationship::addObject(TableObject *tab_obj, int obj_idx)
 
 void Relationship::destroyObjects()
 {
-	while(!rel_constraints.empty())
-	{
-		delete rel_constraints.back();
-		rel_constraints.pop_back();
-	}
+	/* The objects handled here aren't in the model's creation order, so the deps/refs cleanup
+	 * done by DatabaseModel::destroyObjects() doesn't reach them. They're unlinked explicitly
+	 * before being deleted to avoid leaving dangling pointers in the objects still alive. */
+	auto destroy_obj = [](TableObject *obj) {
+		obj->clearAllDepsRefs();
+		delete obj;
+	};
 
-	while(!rel_attributes.empty())
-	{
-		delete rel_attributes.back();
-		rel_attributes.pop_back();
-	}
+	auto destroy_list = [&destroy_obj](std::vector<TableObject *> &list) {
+		for(auto &obj : list)
+			destroy_obj(obj);
 
-	while(!cols_stack.empty())
-	{
-		delete cols_stack.top();
-		cols_stack.pop();
-	}
+		list.clear();
+	};
 
-	while(!constrs_stack.empty())
-	{
-		delete constrs_stack.top();
-		constrs_stack.pop();
-	}
+	auto destroy_stack = [&destroy_obj](auto &stack) {
+		while(!stack.empty())
+		{
+			destroy_obj(stack.top());
+			stack.pop();
+		}
+	};
 
-	while(!indexes_stack.empty())
-	{
-		delete indexes_stack.top();
-		indexes_stack.pop();
-	}
+	destroy_list(rel_constraints);
+	destroy_list(rel_attributes);
+	destroy_stack(cols_stack);
+	destroy_stack(constrs_stack);
+	destroy_stack(indexes_stack);
 }
 
 void Relationship::removeObject(unsigned obj_id, ObjectType obj_type)
