@@ -671,35 +671,30 @@ void Relationship::destroyObjects()
 {
 	while(!rel_constraints.empty())
 	{
-		rel_constraints.back()->clearAllDepsRefs();
 		delete rel_constraints.back();
 		rel_constraints.pop_back();
 	}
 
 	while(!rel_attributes.empty())
 	{
-		rel_attributes.back()->clearAllDepsRefs();
 		delete rel_attributes.back();
 		rel_attributes.pop_back();
 	}
 
 	while(!cols_stack.empty())
 	{
-		cols_stack.top()->clearAllDepsRefs();
 		delete cols_stack.top();
 		cols_stack.pop();
 	}
 
 	while(!constrs_stack.empty())
 	{
-		constrs_stack.top()->clearAllDepsRefs();
 		delete constrs_stack.top();
 		constrs_stack.pop();
 	}
 
 	while(!indexes_stack.empty())
 	{
-		indexes_stack.top()->clearAllDepsRefs();
 		delete indexes_stack.top();
 		indexes_stack.pop();
 	}

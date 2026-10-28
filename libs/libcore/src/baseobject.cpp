@@ -1619,12 +1619,10 @@ void BaseObject::setClearDepsInDtor(bool value)
 
 void BaseObject::clearDependencies()
 {
-	if(object_deps.empty())
+	if(object_deps.empty() && object_refs.empty())
 		return;
 
-	auto deps_snapshot = object_deps;
-
-	for(auto &obj : deps_snapshot)
+	for(auto &obj : object_deps)
 		obj->unsetReference(this);
 
 	object_deps.clear();
