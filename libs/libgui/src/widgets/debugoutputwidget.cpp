@@ -20,9 +20,10 @@
 */
 
 #include "debugoutputwidget.h"
+#include "customuistyle.h"
 #include "guiutilsns.h"
 #include "application.h"
-#include "settings/appearanceconfigwidget.h"
+#include <QScrollBar>
 
 DebugOutputWidget::DebugOutputWidget(QWidget *parent) : QWidget(parent)
 {
@@ -31,9 +32,16 @@ DebugOutputWidget::DebugOutputWidget(QWidget *parent) : QWidget(parent)
 	dbg_output_txt->showLineNumbers(false);
 	dbg_output_txt->showActionButtons(false);
 	dbg_output_txt->setFilenameFilters({ tr("Text files (*.txt)"), tr("All files (*)") }, "txt");
+
+	/* This connection forces the update of vertical scrollbar maximum value
+	 * after the document changes (lines are added) so the document can
+	 * automatically be scrolled to the last line always */
+	connect(dbg_output_txt->verticalScrollBar(), &QScrollBar::rangeChanged, this, [this](int, int max) {
+		dbg_output_txt->verticalScrollBar()->setValue(max);
+	});
 }
 
-void DebugOutputWidget::setLogMessages(bool value)
+void DebugOutputWidget::setLogAppMessages(bool value)
 {
 	if(value)
 	{
@@ -58,26 +66,39 @@ void DebugOutputWidget::showActionButtons(bool show)
 
 void DebugOutputWidget::logMessage(const QString &msg, const QColor &fg_color)
 {
-	QTextCursor tc = dbg_output_txt->textCursor();
-	int ini_pos = tc.position();
+	/* Creates a cursor directly in the document
+	 * so we can directly change it without a virtual posicion via textCursor() */
+	QTextCursor tc(dbg_output_txt->document());
+	tc.movePosition(QTextCursor::End);
 
-	dbg_output_txt->appendPlainText(msg);
+	/* Inserts a paragraph separator so a new line can be added
+	 * if the document is not empty */
+	if(!dbg_output_txt->document()->isEmpty())
+		tc.insertBlock();
 
+	QTextCharFormat fmt;
+
+	// Defining the coloring of the current line
 	if(fg_color != Qt::transparent)
 	{
-		QTextCharFormat fmt = tc.charFormat();
-		int curr_pos = tc.position();
-
-		tc.setPosition(ini_pos, QTextCursor::MoveAnchor);
-		tc.setPosition(curr_pos, QTextCursor::KeepAnchor);
-
-		if(!AppearanceConfigWidget::isDarkUiTheme())
+		if(!CustomUiStyle::isDarkPalette())
 			fmt.setForeground(fg_color.darker(130));
 		else
 			fmt.setForeground(fg_color);
-
-		tc.mergeCharFormat(fmt);
 	}
+
+	/* Insert the message/line with the defined formatting
+	 * and move the cursor to the start of the new line */
+	tc.insertText(msg, fmt);
+	tc.movePosition(QTextCursor::StartOfBlock);
+
+	/* Updates the document cursor so the position change
+	 * and new line addition can take effect */
+	dbg_output_txt->setTextCursor(tc);
+
+	/* Forcing the text to be always at left avoiding
+	 * the scrolling to the end of the line */
+	dbg_output_txt->horizontalScrollBar()->setValue(0);
 }
 
 void DebugOutputWidget::logMessage(QtMsgType type, const QMessageLogContext &, const QString &msg)
@@ -91,5 +112,5 @@ void DebugOutputWidget::logMessage(QtMsgType type, const QMessageLogContext &, c
 	};
 
 	logMessage(msg, msg_colors.count(type) ?
-							 msg_colors[type] : Qt::transparent);
+						 msg_colors[type] : Qt::transparent);
 }

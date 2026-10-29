@@ -97,9 +97,9 @@ class __libcore OperationList: public QObject {
 		unsigned getChainSize();
 
 	public:
-		OperationList(DatabaseModel *model);
+		OperationList(DatabaseModel *model, QObject *parent = nullptr);
 
-		virtual ~OperationList();
+		~OperationList() override;
 
 		/*! \brief Starts chaining operations.
 		 This means that all operations added after calling this
@@ -186,6 +186,14 @@ class __libcore OperationList: public QObject {
 		 of the object with the new value for the operations which refer the object is not
 		 executed incorrectly using previous index */
 		void updateObjectIndex(BaseObject *object, unsigned new_idx);
+
+	signals:
+		/*! \brief Emitted at the end of executeOperation(), once per operation restored by an
+		 * undo/redo, carrying the object in its just-restored state and the kind of operation that
+		 * touched it. OperationList has no notion of anything GUI-side (scenes, views, ...) -- this
+		 * is the hook that lets a layer that does (see ModelWidget::handleObjectSchemaChanged())
+		 * react to a restoration without OperationList needing to know why it would care */
+		void s_operationExecuted(BaseObject *object, Operation::OperType op_type);
 };
 
 #endif

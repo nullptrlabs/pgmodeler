@@ -42,10 +42,9 @@ class __libcore Schema: public BaseGraphicObject {
 
 	public:
 		Schema();
+		~Schema() override = default;
 
-	 virtual ~Schema(){}
-
-		virtual void setName(const QString &name) override;
+		void setName(const QString &name) override;
 
 		void setNameColor(const QColor &color);
 		QColor getNameColor();
@@ -56,7 +55,7 @@ class __libcore Schema: public BaseGraphicObject {
 		void setRectVisible(bool value);
 		bool isRectVisible();
 
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 };
 
 #endif

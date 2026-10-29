@@ -27,10 +27,10 @@
 BaseRelationship::BaseRelationship(BaseRelationship *rel)
 {
 	if(!rel)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
-	for(unsigned i=0; i < 3; i++)
-		lables[i]=nullptr;
+	for(auto & lable : lables)
+		lable = nullptr;
 
 	src_table=dst_table=nullptr;
 
@@ -41,7 +41,6 @@ BaseRelationship::BaseRelationship(BaseRelationship *rel)
 }
 
 BaseRelationship::BaseRelationship(RelType rel_type, BaseTable *src_tab, BaseTable *dst_tab, bool src_mandatory, bool dst_mandatory)
-
 {
 	try
 	{
@@ -75,7 +74,7 @@ BaseRelationship::BaseRelationship(RelType rel_type, BaseTable *src_tab, BaseTab
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -89,6 +88,7 @@ void BaseRelationship::configureRelationship()
 	attributes[Attributes::SrcTable]="";
 	attributes[Attributes::DstTable]="";
 	attributes[Attributes::Points]="";
+	attributes[Attributes::Segments]="";
 	attributes[Attributes::Columns]="";
 	attributes[Attributes::Constraints]="";
 	attributes[Attributes::Elements]="";
@@ -135,12 +135,12 @@ void BaseRelationship::configureRelationship()
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgNotAllocatedTable)
 							.arg(this->getName())
 							.arg(BaseObject::getTypeName(ObjectType::BaseRelationship)),
-							ErrorCode::AsgNotAllocatedTable,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+							ErrorCode::AsgNotAllocatedTable,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		/* Raises an error if the relationship type is generalization or dependency
 			and the source and destination table are the same. */
 		if((rel_type==RelationshipGen || rel_type==RelationshipDep || rel_type==RelationshipPart) && src_table==dst_table)
-			throw Exception(ErrorCode::InvInheritCopyPartRelationship,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::InvInheritCopyPartRelationship,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		//Allocates the textbox for the name label
 		lables[RelNameLabel]=new Textbox;
@@ -163,21 +163,16 @@ void BaseRelationship::configureRelationship()
 	}
 	else
 		//Raises an error if the specified relationship typ is invalid
-		throw Exception(ErrorCode::AllocationObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AllocationObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 }
 
 BaseRelationship::~BaseRelationship()
 {
-	//disconnectRelationship();
-
-	//Unallocates the labels
-	for(unsigned i = 0; i < 3; i++)
+	//Deallocates the labels
+	for(auto & label : lables)
 	{
-		if(lables[i])
-		{
-			delete lables[i];
-			lables[i] = nullptr;
-		}
+		delete label;
+		label = nullptr;
 	}
 }
 
@@ -192,7 +187,18 @@ void BaseRelationship::setName(const QString &name)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
+	}
+}
+
+void BaseRelationship::setModified(bool value)
+{
+	BaseGraphicObject::setModified(value);
+
+	for(unsigned lbl_id = SrcCardLabel; lbl_id <= RelNameLabel; lbl_id++)
+	{
+		if(lables[lbl_id])
+			lables[lbl_id]->setModified(value);
 	}
 }
 
@@ -208,7 +214,7 @@ void BaseRelationship::setMandatoryTable(TableId table_id, bool value)
 	if(rel_type==Relationship11 &&
 			((table_id==SrcTable && value && dst_mandatory) ||
 			 (table_id==DstTable && value && src_mandatory)))
-		throw Exception(ErrorCode::NotImplementedRelationshipType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::NotImplementedRelationshipType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Case the source table is mandatory
 	if(table_id==SrcTable)
@@ -320,7 +326,7 @@ void BaseRelationship::connectRelationship()
 Textbox *BaseRelationship::getLabel(LabelId label_id)
 {
 	if(label_id > RelNameLabel)
-		throw Exception(ErrorCode::RefLabelInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefLabelInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return lables[label_id];
 }
@@ -342,51 +348,76 @@ bool BaseRelationship::isSelfRelationship()
 
 void BaseRelationship::setRelationshipAttributes()
 {
-	unsigned count, i;
-	QString str_aux,
-			label_attribs[3]={ Attributes::SrcLabel,
-							   Attributes::DstLabel,
-							   Attributes::NameLabel};
-
-	attributes[Attributes::Type]=getRelTypeAttribute();
-	attributes[Attributes::SrcRequired]=(src_mandatory ? Attributes::True : "");
-	attributes[Attributes::DstRequired]=(dst_mandatory ? Attributes::True : "");
-
-	if(src_table)
-		attributes[Attributes::SrcTable]=src_table->getName(true);
-
-	if(dst_table)
-		attributes[Attributes::DstTable]=dst_table->getName(true);
-
-
-	count=points.size();
-	for(i=0; i < count; i++)
+	try
 	{
-		attributes[Attributes::XPos]=QString("%1").arg(points[i].x());
-		attributes[Attributes::YPos]=QString("%1").arg(points[i].y());
-		str_aux+=schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
-	}
-	attributes[Attributes::Points]=str_aux;
+		attributes[Attributes::Type] = getRelTypeAttribute();
+		attributes[Attributes::SrcRequired] = (src_mandatory ? Attributes::True : "");
+		attributes[Attributes::DstRequired] = (dst_mandatory ? Attributes::True : "");
 
-	str_aux="";
-	for(i=0; i < 3; i++)
-	{
-		if(!std::isnan(lables_dist[i].x()))
+		if(src_table)
+			attributes[Attributes::SrcTable] = src_table->getName(true);
+
+		if(dst_table)
+			attributes[Attributes::DstTable] = dst_table->getName(true);
+
+		attributes[Attributes::Points] = "";
+		for(auto &pnt : points)
 		{
-			attributes[Attributes::XPos]=QString("%1").arg(lables_dist[i].x());
-			attributes[Attributes::YPos]=QString("%1").arg(lables_dist[i].y());
-			attributes[Attributes::Position]=schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
-			attributes[Attributes::RefType]=label_attribs[i];
-			str_aux+=schparser.getSourceCode(Attributes::Label, attributes, SchemaParser::XmlCode);
+			attributes[Attributes::Id] = "";
+			attributes[Attributes::XPos] = QString("%1").arg(pnt.x());
+			attributes[Attributes::YPos] = QString("%1").arg(pnt.y());
+			attributes[Attributes::Points] +=
+					schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
 		}
+
+		attributes[Attributes::Segments] = "";
+		for(auto &itr : segment_shifts)
+		{
+			attributes[Attributes::Index] = QString::number(itr.first);
+			attributes[Attributes::Orientation] = QString::number(itr.second.orientation);
+			attributes[Attributes::Value] = QString::number(itr.second.value);
+			attributes[Attributes::Jog] = (itr.second.jog != 0 ? QString::number(itr.second.jog) : "");
+			attributes[Attributes::Segments] +=
+					schparser.getSourceCode(Attributes::Segment, attributes, SchemaParser::XmlCode);
+		}
+
+		QStringList label_attribs {
+			Attributes::SrcLabel,
+			Attributes::DstLabel,
+			Attributes::NameLabel
+		};
+
+		unsigned lbl_idx = 0;
+		attributes[Attributes::LabelsPos] = "";
+
+		for(auto &lbl_dist : lables_dist)
+		{
+			if(!std::isnan(lbl_dist.x()))
+			{
+				attributes[Attributes::Id] = "";
+				attributes[Attributes::XPos] = QString("%1").arg(lbl_dist.x());
+				attributes[Attributes::YPos] = QString("%1").arg(lbl_dist.y());
+				attributes[Attributes::Position] =
+						schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
+
+				attributes[Attributes::RefType] = label_attribs[lbl_idx];
+				attributes[Attributes::LabelsPos] +=
+						schparser.getSourceCode(Attributes::Label, attributes, SchemaParser::XmlCode);
+			}
+
+			lbl_idx++;
+		}
+
+		attributes[Attributes::CustomColor] = (custom_color != Qt::transparent ? custom_color.name() : "");
+		attributes[Attributes::ReferenceFk] = (reference_fk ? reference_fk->getName() : "");
+
+		setFadedOutAttribute();
+		setLayersAttribute();
 	}
-
-	attributes[Attributes::LabelsPos]=str_aux;
-	attributes[Attributes::CustomColor]=(custom_color!=Qt::transparent ? custom_color.name() : "");
-	attributes[Attributes::ReferenceFk]=(reference_fk ? reference_fk->getName() : "");
-
-	setFadedOutAttribute();
-	setLayersAttribute();
+	catch(Exception &e)
+	{
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+	}
 }
 
 QString BaseRelationship::getCachedCode(unsigned def_type)
@@ -397,17 +428,15 @@ QString BaseRelationship::getCachedCode(unsigned def_type)
 	{
 		if(def_type==SchemaParser::XmlCode  && !cached_reduced_code.isEmpty())
 			return cached_reduced_code;
-		else
-			return cached_code[def_type];
+		
+		return cached_code[def_type];
 	}
-	else
-		return "";
+	
+	return "";
 }
 
 void BaseRelationship::setReferenceForeignKey(Constraint *ref_fk)
 {
-	//if(ref_fk && rel_type != RELATIONSHIP_FK)
-		//Throw error...
 	this->reference_fk = ref_fk;
 }
 
@@ -461,30 +490,29 @@ bool BaseRelationship::canSimulateRelationship11()
 QString BaseRelationship::getSourceCode(SchemaParser::CodeType def_type)
 {
 	QString code_def = getCachedCode(def_type);
-	if(!code_def.isEmpty()) return code_def;
+
+	if(!code_def.isEmpty()) 
+		return code_def;
 
 	if(def_type==SchemaParser::SqlCode)
 	{
 		if(rel_type!=RelationshipFk)
 			return "";
-		else
-		{
-			cached_code[def_type] = reference_fk->getSourceCode(SchemaParser::SqlCode);
-			return cached_code[def_type];
-		}
+		
+		cached_code[def_type] = reference_fk->getSourceCode(SchemaParser::SqlCode);
+		return cached_code[def_type];
 	}
-	else
-	{
-		bool reduced_form;
-		setRelationshipAttributes();
-		reduced_form=(attributes[Attributes::Points].isEmpty() &&
-								 attributes[Attributes::LabelsPos].isEmpty());
+	
+	bool reduced_form;
+	setRelationshipAttributes();
+	reduced_form=(attributes[Attributes::Points].isEmpty() &&
+								attributes[Attributes::LabelsPos].isEmpty() &&
+								attributes[Attributes::Segments].isEmpty());
 
-		if(!reduced_form)
-			cached_reduced_code.clear();
+	if(!reduced_form)
+		cached_reduced_code.clear();
 
-		return BaseObject::getSourceCode(SchemaParser::XmlCode,reduced_form);
-	}
+	return BaseObject::getSourceCode(SchemaParser::XmlCode,reduced_form);	
 }
 
 void BaseRelationship::setPoints(const std::vector<QPointF> &points)
@@ -493,10 +521,30 @@ void BaseRelationship::setPoints(const std::vector<QPointF> &points)
 	this->points=points;
 }
 
+void BaseRelationship::setSegmentShifts(const std::map<unsigned, SegmentShift> &shifts)
+{
+	setCodeInvalidated(true);
+	segment_shifts=shifts;
+}
+
+std::map<unsigned, BaseRelationship::SegmentShift> BaseRelationship::getSegmentShifts()
+{
+	return segment_shifts;
+}
+
+void BaseRelationship::resetSegmentShifts()
+{
+	if(segment_shifts.empty())
+		return;
+
+	setCodeInvalidated(true);
+	segment_shifts.clear();
+}
+
 void BaseRelationship::setLabelDistance(LabelId label_id, QPointF label_dist)
 {
 	if(label_id > RelNameLabel)
-		throw Exception(ErrorCode::RefObjectInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefObjectInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	lables_dist[label_id]=label_dist;
 	setCodeInvalidated(true);
@@ -505,7 +553,7 @@ void BaseRelationship::setLabelDistance(LabelId label_id, QPointF label_dist)
 QPointF BaseRelationship::getLabelDistance(LabelId label_id)
 {
 	if(label_id > RelNameLabel)
-		throw Exception(ErrorCode::RefObjectInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefObjectInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return lables_dist[label_id];
 }
@@ -540,6 +588,7 @@ void BaseRelationship::operator = (BaseRelationship &rel)
 	this->dst_table=rel.dst_table;
 	this->rel_type=rel.rel_type;
 	this->points=rel.points;
+	this->segment_shifts=rel.segment_shifts;
 	this->custom_color=rel.custom_color;
 
 	for(int i=0; i < 3; i++)
@@ -575,8 +624,8 @@ QString BaseRelationship::getRelTypeAttribute()
 		{
 			if(src_table->getObjectType()==ObjectType::View)
 				return Attributes::RelationshipTabView;
-			else
-				return Attributes::RelationshipDep;
+			
+			return Attributes::RelationshipDep;
 		}
 	}
 }
@@ -595,8 +644,8 @@ QString BaseRelationship::getRelationshipTypeName(RelType rel_type, bool is_view
 		{
 			if(is_view)
 				return tr("Dependency");
-			else
-				return tr("Copy");
+			
+			return tr("Copy");
 		}
   }
 }

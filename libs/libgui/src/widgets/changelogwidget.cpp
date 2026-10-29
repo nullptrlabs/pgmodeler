@@ -20,9 +20,9 @@
 */
 
 #include "changelogwidget.h"
+#include "customuistyle.h"
 #include "settings/generalconfigwidget.h"
 #include "guiutilsns.h"
-#include "columndatawidget.h"
 #include "baseform.h"
 #include "csvparser.h"
 
@@ -31,19 +31,25 @@ ChangelogWidget::ChangelogWidget(QWidget *parent) : QWidget(parent)
 	setupUi(this);
 	model = nullptr;
 	setModel(nullptr);
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::DefaultFrmHint,
+															{ summary_frm, separator_ln });
+
 	GuiUtilsNs::createDropShadow(this, 5, 5, 30);
 
-	GuiUtilsNs::configureWidgetFont(added_cnt_lbl, GuiUtilsNs::HugeFontFactor);
-	GuiUtilsNs::configureWidgetFont(removed_cnt_lbl, GuiUtilsNs::HugeFontFactor);
-	GuiUtilsNs::configureWidgetFont(updated_cnt_lbl, GuiUtilsNs::HugeFontFactor);
-	GuiUtilsNs::configureWidgetFont(total_cnt_lbl, GuiUtilsNs::HugeFontFactor);
+	GuiUtilsNs::configureWidgetsFont({ added_cnt_lbl, removed_cnt_lbl,
+																		 updated_cnt_lbl, total_cnt_lbl },
+																	 GuiUtilsNs::HugeFontFactor);
 
-	connect(inspect_tb, &QToolButton::clicked, this, &ChangelogWidget::inspectChangelog);
+	connect(inspect_btn, &QPushButton::clicked, this, &ChangelogWidget::inspectChangelog);
 	connect(hide_tb, &QToolButton::clicked, this, &ChangelogWidget::s_visibilityChanged);
-	connect(clear_tb, &QToolButton::clicked, this, &ChangelogWidget::clearChangelog);
+	connect(clear_btn, &QPushButton::clicked, this, &ChangelogWidget::clearChangelog);
 	connect(persisted_chk, &QCheckBox::toggled, this, [this](bool checked){
+		bool is_persisted = model->getDatabaseModel()->isPersistedChangelog();
 		model->getDatabaseModel()->setPersistedChangelog(checked);
-		model->setModified(true);
+
+		if(is_persisted != checked)
+			model->setModified(true);
 	});
 }
 
@@ -89,8 +95,8 @@ void ChangelogWidget::updateChangelogInfo()
 		total_cnt_lbl->setText(QString::number(total_len));
 	}
 
-	inspect_tb->setEnabled(total_len > 0);
-	clear_tb->setEnabled(total_len > 0);
+	inspect_btn->setEnabled(total_len > 0);
+	clear_btn->setEnabled(total_len > 0);
 	adjustSize();
 }
 
@@ -101,7 +107,7 @@ void ChangelogWidget::clearChangelog()
 	msgbox.show("",
 							tr("<strong>ATTENTION:</strong> All the changelog records made until today will be lost and the filtering by \
 date of modification in partial diff will be unavailable! Do you want to proceed?"),
-								 Messagebox::AlertIcon, Messagebox::YesNoButtons);
+								 Messagebox::Alert, Messagebox::YesNoButtons, false);
 
 	if(msgbox.isAccepted())
 	{
@@ -167,10 +173,10 @@ void ChangelogWidget::inspectChangelog()
 			obj_type = BaseObject::getObjectType(data_tbw->item(row, 2)->text());
 			action = data_tbw->item(row, 3)->text();
 
-			data_tbw->item(row, 1)->setIcon(QIcon(GuiUtilsNs::getIconPath(obj_type)));
+			data_tbw->item(row, 1)->setIcon(GuiUtilsNs::getIcon(obj_type));
 			data_tbw->item(row, 2)->setText(BaseObject::getTypeName(obj_type));
 			data_tbw->item(row, 3)->setText(actions_i18n[action]);
-			data_tbw->item(row, 3)->setIcon(QIcon(GuiUtilsNs::getIconPath(actions_icons[action])));
+			data_tbw->item(row, 3)->setIcon(GuiUtilsNs::getIcon(actions_icons[action]));
 
 			fnt = data_tbw->item(row, 2)->font();
 			fnt.setItalic(true);
@@ -187,15 +193,14 @@ void ChangelogWidget::inspectChangelog()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
-	data_tbw->setWindowTitle("Changelog entries");
+	data_tbw->setWindowTitle(tr("Changelog entries"));
 	base_form.setMainWidget(data_tbw);
 	base_form.setButtonConfiguration(Messagebox::OkButton);
-	base_form.apply_ok_btn->setShortcut(QKeySequence("Enter"));
-	base_form.main_frm->layout()->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin,
-																									 GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
+	base_form.accept_btn->setShortcut(QKeySequence("Enter"));
+	base_form.main_frm->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
 
 	GeneralConfigWidget::restoreWidgetGeometry(&base_form, this->metaObject()->className());
 	base_form.exec();

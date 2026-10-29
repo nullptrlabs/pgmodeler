@@ -1,0 +1,38 @@
+CompileFlags:
+  # Use compile_commands.json from cmake-build directory
+  CompilationDatabase: cmake-build
+
+Diagnostics:
+  # clangd will read clang-tidy configuration from .clang-tidy file
+  # This ensures consistency between editor analysis and build-time analysis
+  ClangTidy:
+    # No checks specified here - they are all defined in .clang-tidy
+    # This allows a single source of truth for all clang-tidy configuration
+    Add: []
+    Remove: []
+  
+  # Suppress warnings from system headers and dependencies
+  UnusedIncludes: Strict
+  
+  # clangd respects the HeaderFilterRegex from .clang-tidy
+  # No additional suppression needed here
+  Suppress: []
+
+InlayHints:
+  # Show inline hints for better code understanding
+  Enabled: Yes
+  ParameterNames: Yes
+  DeducedTypes: Yes
+  Designators: Yes
+
+Hover:
+  ShowAKA: Yes
+
+Completion:
+  AllScopes: Yes
+
+Index:
+  # Background indexing mode: Build (index as you build) or Skip (no background indexing)
+  Background: Build
+  
+  StandardLibrary: Yes

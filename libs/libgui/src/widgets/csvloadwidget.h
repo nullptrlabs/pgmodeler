@@ -29,7 +29,7 @@
 #define CSV_LOAD_WIDGET_H
 
 #include "ui_csvloadwidget.h"
-#include "fileselectorwidget.h"
+#include "pathselectorwidget.h"
 #include "csvdocument.h"
 
 class __libgui CsvLoadWidget : public QWidget, Ui::CsvLoadWidget {
@@ -42,7 +42,7 @@ class __libgui CsvLoadWidget : public QWidget, Ui::CsvLoadWidget {
 		//! \brief Holds the rows extracted from the csv file
 		QList<QStringList> csv_rows;
 
-		FileSelectorWidget *file_sel;
+		PathSelectorWidget *file_sel;
 
 		CsvDocument csv_document;
 

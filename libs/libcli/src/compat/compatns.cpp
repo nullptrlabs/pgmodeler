@@ -85,7 +85,7 @@ namespace CompatNs {
 																.arg(attribs[Attributes::Table])
 																.arg(BaseObject::getTypeName(ObjectType::Table));
 
-									throw Exception(str_aux,ErrorCode::RefObjectInexistsModel,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+									throw Exception(str_aux,ErrorCode::RefObjectInexistsModel,PGM_FUNC,PGM_FILE,PGM_LINE);
 								}
 
 								if(!attribs[Attributes::Column].isEmpty())
@@ -105,7 +105,7 @@ namespace CompatNs {
 																				attribs[Attributes::Column])
 																	.arg(BaseObject::getTypeName(ObjectType::Column));
 
-										throw Exception(str_aux,ErrorCode::RefObjectInexistsModel,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										throw Exception(str_aux,ErrorCode::RefObjectInexistsModel,PGM_FUNC,PGM_FILE,PGM_LINE);
 									}
 								}
 
@@ -210,7 +210,7 @@ namespace CompatNs {
 																		 .arg(BaseObject::getTypeName(ObjectType::Table))
 																		 .arg(aux_attribs[Attributes::Table])
 																		 .arg(BaseObject::getTypeName(ObjectType::Tag))
-																 , ErrorCode::RefObjectInexistsModel,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+																 , ErrorCode::RefObjectInexistsModel,PGM_FUNC,PGM_FILE,PGM_LINE);
 							}
 
 							view->setTag(dynamic_cast<Tag *>(tag));
@@ -244,8 +244,8 @@ namespace CompatNs {
 		}
 		catch(Exception &e)
 		{
-			if(view) delete view;
-			throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+			delete view;
+			throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 		}
 
 		return view;
@@ -263,7 +263,7 @@ namespace CompatNs {
 		XmlParser *xmlparser = dbmodel->getXMLParser();
 
 		if(!object)
-			throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		xmlparser->getElementAttributes(attribs);
 		obj_type_aux=object->getObjectType();
@@ -394,15 +394,15 @@ namespace CompatNs {
 													 .arg(object->getTypeName())
 													 .arg(attribs_aux[Attributes::Name])
 													 .arg(BaseObject::getTypeName(obj_type)),
-											 ErrorCode::RefObjectInexistsModel,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											 ErrorCode::RefObjectInexistsModel,PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
-		//Schema on extensions are optional
-		else if(!object->getSchema() && (BaseObject::acceptsSchema(obj_type_aux) && obj_type_aux != ObjectType::Extension))
+
+		if(!object->getSchema() && (BaseObject::acceptsSchema(obj_type_aux) && obj_type_aux != ObjectType::Extension))
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::InvObjectAllocationNoSchema)
-													 .arg(object->getName())
-													 .arg(object->getTypeName()),
-											 ErrorCode::InvObjectAllocationNoSchema,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											.arg(object->getName())
+											.arg(object->getTypeName()),
+											ErrorCode::InvObjectAllocationNoSchema,PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
 	}
 

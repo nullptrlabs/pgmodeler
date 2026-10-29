@@ -39,26 +39,28 @@ class __libgui RelationshipConfigWidget:  public BaseConfigWidget, public Ui::Re
 
 		std::map<QString, attribs_map> patterns;
 
-		virtual void hideEvent(QHideEvent *) override;
+		//! \brief Indicates if the last call to applyConfiguration() changed the line style in use
+		bool line_style_changed { false };
 
 	public:
 		RelationshipConfigWidget(QWidget * parent = nullptr);
 
-		virtual void saveConfiguration() override;
+		//! \brief Returns true if the last applied configuration changed the line style of the relationships
+		bool isLineStyleChanged();
 
-		virtual void loadConfiguration() override;
+		void saveConfiguration() override;
+
+		void loadConfiguration() override;
 
 		static std::map<QString, attribs_map> getConfigurationParams();
 
 	public slots:
-		virtual void applyConfiguration() override;
-		virtual void restoreDefaults() override;
+		void applyConfiguration() override;
+		void restoreDefaults() override;
 
 	private slots:
 		void fillNamePatterns();
 		void updatePattern();
-		void enableConnModePreview();
-
 };
 
 #endif

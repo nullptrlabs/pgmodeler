@@ -3,7 +3,7 @@
 
 #include <QtCore/QtGlobal>
 
-#if defined(UTILS_SYMBOLS)
+#ifdef UTILS_SYMBOLS
 	#define __libutils Q_DECL_EXPORT
 #else
 	#define __libutils Q_DECL_IMPORT

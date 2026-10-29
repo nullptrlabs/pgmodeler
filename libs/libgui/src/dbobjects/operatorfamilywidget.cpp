@@ -24,15 +24,13 @@
 OperatorFamilyWidget::OperatorFamilyWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::OpFamily)
 {
 	Ui_OperatorFamilyWidget::setupUi(this);
-	configureFormLayout(opfamily_grid, ObjectType::OpFamily);
 
 	indexing_cmb->addItems(IndexingType::getTypes());
 
-	setRequiredField(indexing_lbl);	
-	opfamily_grid->addItem(new QSpacerItem(10,10,QSizePolicy::Minimum,QSizePolicy::Expanding), opfamily_grid->count()+1, 0, 1, 0);
-
-	configureTabOrder();
-	setMinimumSize(500, 290);
+	setRequiredField(indexing_lbl);
+	configureTabbedLayout(false);
+	//configureTabOrder();
+	setMinimumSize(550, 350);
 }
 
 void OperatorFamilyWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, OperatorFamily *op_family)
@@ -59,7 +57,7 @@ void OperatorFamilyWidget::applyConfiguration()
 	catch(Exception &e)
 	{
 		cancelConfiguration();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

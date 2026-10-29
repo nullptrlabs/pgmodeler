@@ -33,15 +33,21 @@ BaseGraphicObject::BaseGraphicObject()
 	attributes[Attributes::FadedOut]="";
 	attributes[Attributes::Layers]="";
 	attributes[Attributes::ZValue]="";
+	attributes[Attributes::Scene]="";
 	receiver_object=nullptr;
 	z_value=0;
+	scene_idx=-1;
 	resetLayers();
 }
 
 void BaseGraphicObject::setProtected(bool value)
 {
+	bool changed = this->isProtected() != value;
+
 	BaseObject::setProtected(value);
-	emit s_objectProtected(this->isProtected());
+
+	if(changed)
+		emit s_objectProtected(this->isProtected());
 }
 
 void BaseGraphicObject::setSystemObject(bool value)
@@ -51,7 +57,7 @@ void BaseGraphicObject::setSystemObject(bool value)
 
 void BaseGraphicObject::setModified(bool value)
 {
-	is_modified=value;
+	is_modified = value;
 
 	if(is_modified && updates_enabled)
 		emit s_objectModified();
@@ -93,11 +99,44 @@ void BaseGraphicObject::setLayersAttribute()
 	attributes[Attributes::Layers] = layers_str.join(',');
 }
 
+void BaseGraphicObject::setSceneIndexAttribute()
+{
+	attributes[Attributes::Scene] = scene_idx >= 0 ? QString::number(scene_idx) : "";
+}
+
+void BaseGraphicObject::setSceneIndex(int idx)
+{
+	scene_idx = idx;
+	setCodeInvalidated(true);
+}
+
+int BaseGraphicObject::getSceneIndex()
+{
+	return scene_idx;
+}
+
+void BaseGraphicObject::resetSceneIndex()
+{
+	setSceneIndex(-1);
+}
+
 void BaseGraphicObject::setPositionAttribute()
 {
-	attributes[Attributes::XPos]=QString("%1").arg(position.x());
-	attributes[Attributes::YPos]=QString("%1").arg(position.y());
-	attributes[Attributes::Position]=schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
+	setPositionAttribute(position, Attributes::Position);
+}
+
+void BaseGraphicObject::setPositionAttribute(const QPointF &pos, const QString &pos_attr, const QString &id)
+{
+	if(pos_attr.isEmpty() ||
+		 std::isnan(pos.x()) ||
+		 std::isnan(pos.y()))
+		return;
+
+	attributes[Attributes::Id] = id;
+	attributes[Attributes::XPos] = QString("%1").arg(pos.x());
+	attributes[Attributes::YPos] = QString("%1").arg(pos.y());
+	attributes[pos_attr] =
+			schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
 }
 
 void  BaseGraphicObject::setPosition(const QPointF &pos)
@@ -113,9 +152,10 @@ QPointF BaseGraphicObject::getPosition()
 
 void BaseGraphicObject::operator = (BaseGraphicObject &obj)
 {
-	*(dynamic_cast<BaseObject *>(this))=dynamic_cast<BaseObject &>(obj);
-	this->position=obj.position;
-	this->z_value=obj.z_value;
+	*(dynamic_cast<BaseObject *>(this)) = dynamic_cast<BaseObject &>(obj);
+	this->position = obj.position;
+	this->z_value = obj.z_value;
+	this->scene_idx = obj.scene_idx;
 }
 
 void BaseGraphicObject::setReceiverObject(QObject *obj)
@@ -163,7 +203,8 @@ void BaseGraphicObject::setLayers(QStringList list)
 	setCodeInvalidated(true);
 
 	//Sanitizing the string list by removing non-numbers
-	list.replaceInStrings(QRegularExpression("^(.)*(\\D)+(.)*$"), "0");
+	static const QRegularExpression non_numeric_regexp("^(.)*(\\D)+(.)*$");
+	list.replaceInStrings(non_numeric_regexp, "0");
 	list.removeDuplicates();
 	layers.clear();
 

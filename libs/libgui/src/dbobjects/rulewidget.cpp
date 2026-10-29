@@ -38,14 +38,9 @@ RuleWidget::RuleWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Ru
 
 	commands_tab=new CustomTableWidget(CustomTableWidget::AllButtons ^ CustomTableWidget::DuplicateButton, true, this);
 	commands_tab->setHeaderLabel(tr("SQL command"),0);
-	commands_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("sqlcode")),0);
-	dynamic_cast<QGridLayout *>(commands_gb->layout())->addWidget(commands_tab, 1, 0, 1, 2);
+	commands_tab->setHeaderIcon(GuiUtilsNs::getIcon("sqlcode"),0);
 
-	frame=generateInformationFrame(tr("To create a rule that does not perform any action (<strong>DO NOTHING</strong>) simply do not specify commands in the SQL commands table."));
-	rule_grid->addWidget(frame, rule_grid->count()+1, 0, 1, 0);
-	frame->setParent(this);
-
-	configureFormLayout(rule_grid, ObjectType::Rule);
+	sql_commands_lt->addWidget(commands_tab);
 
 	event_cmb->addItems(EventType::getTypes());
 	exec_type_cmb->addItems(ExecutionType::getTypes());
@@ -54,10 +49,14 @@ RuleWidget::RuleWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Ru
 	connect(commands_tab, &CustomTableWidget::s_rowUpdated, this, &RuleWidget::handleCommand);
 	connect(commands_tab, &CustomTableWidget::s_rowEdited, this, &RuleWidget::editCommand);
 
-	setRequiredField(event_lbl);
-	configureTabOrder();
+	rule_lt->removeItem(rule_attribs_lt);
+	extra_wgts_lt->addLayout(rule_attribs_lt);
+	configureTabbedLayout(rule_attribs_tbw);
 
-	setMinimumSize(550, 500);
+	setRequiredField(event_lbl);
+	//configureTabOrder();
+
+	setMinimumSize(550, 450);
 }
 
 void RuleWidget::editCommand(int row)
@@ -81,7 +80,7 @@ void RuleWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Bas
 	unsigned qtd, i;
 
 	if(!parent_tab)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	BaseObjectWidget::setAttributes(model, op_list, rule, parent_tab);
 
@@ -130,7 +129,7 @@ void RuleWidget::applyConfiguration()
 	catch(Exception &e)
 	{
 		cancelConfiguration();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

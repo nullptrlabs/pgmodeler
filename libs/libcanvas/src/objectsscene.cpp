@@ -25,7 +25,9 @@
 #include "graphicalview.h"
 #include "tableview.h"
 #include "schemaview.h"
+#include "relmarkeritem.h"
 #include "databasemodel.h"
+#include "customuistyle.h"
 #include <QScrollBar>
 
 const QColor ObjectsScene::DefaultGridColor { "#e1e1e1"};
@@ -58,7 +60,7 @@ double ObjectsScene::delimiter_scale {1};
 double ObjectsScene::min_scene_width { page_layout.paintRect().width() };
 double ObjectsScene::min_scene_height { page_layout.paintRect().height() };
 
-ObjectsScene::ObjectsScene()
+ObjectsScene::ObjectsScene(QObject *parent) : QGraphicsScene(parent)
 {		
 	is_layer_rects_visible=is_layer_names_visible=false;
 	moving_objs=move_scene=false;
@@ -82,6 +84,11 @@ ObjectsScene::ObjectsScene()
 	scene_move_dx=scene_move_dy=0;
 
 	connect(&scene_move_timer, &QTimer::timeout, this, &ObjectsScene::moveObjectScene);
+
+	bumps_update_pending = false;
+	bumps_timer.setSingleShot(true);
+	bumps_timer.setInterval(50);
+	connect(&bumps_timer, &QTimer::timeout, this, &ObjectsScene::updateRelationshipBumps);
 
 	connect(&corner_hover_timer, &QTimer::timeout, this, [this](){
 		enableSceneMove();
@@ -329,12 +336,12 @@ void ObjectsScene::setActiveLayers(QStringList act_layers)
 	setActiveLayers(layers_idxs);
 }
 
-void ObjectsScene::setActiveLayers(QList<unsigned> layers_idxs)
+void ObjectsScene::setActiveLayers(QList<unsigned> layer_ids)
 {
 	BaseObjectView *obj_view = nullptr;
 	active_layers.clear();
 
-	if(!layers_idxs.isEmpty())
+	if(!layer_ids.isEmpty())
 	{
 		bool is_in_layer = false;
 		unsigned layer_cnt = static_cast<unsigned>(layers.size());
@@ -349,7 +356,7 @@ void ObjectsScene::setActiveLayers(QList<unsigned> layers_idxs)
 				sch_view = dynamic_cast<SchemaView *>(obj_view);
 				is_in_layer = false;
 
-				for(auto &idx : layers_idxs)
+				for(auto &idx : layer_ids)
 				{
 					if(obj_view->isInLayer(idx))
 					{
@@ -369,7 +376,7 @@ void ObjectsScene::setActiveLayers(QList<unsigned> layers_idxs)
 			}
 		}
 
-		for(auto &idx : layers_idxs)
+		for(auto &idx : layer_ids)
 		{
 			if(idx < layer_cnt)
 				active_layers.push_back(layers[idx]);
@@ -390,10 +397,96 @@ void ObjectsScene::setActiveLayers(QList<unsigned> layers_idxs)
 	emit s_activeLayersChanged();
 }
 
+QList<std::pair<unsigned, QRectF>> ObjectsScene::getObjectLayerRects(BaseObjectView *obj, const QFontMetricsF &fm)
+{
+	QList<std::pair<unsigned, QRectF>> rects;
+	QRectF brect = obj->boundingRect();
+
+	brect.moveTo(obj->pos());
+
+	for(auto &layer_id : obj->getLayers())
+	{
+		if(static_cast<int>(layer_id) >= layers.size() ||
+			 !active_layers.contains(layers.at(layer_id)))
+			continue;
+
+		/* We need to adjust the bounding rect dimension in such a way
+		 * to take into account the font height (if the layer names are visible)
+		 * as well as a default padding so the rectangles doesn't have the same size
+		 * of the object's bounding rect */
+		brect.adjust(-LayerItem::LayerPadding,
+								 (is_layer_names_visible ? -fm.height() : -LayerItem::LayerPadding),
+								 LayerItem::LayerPadding,
+								 LayerItem::LayerPadding);
+
+		rects.append({ layer_id, brect });
+	}
+
+	return rects;
+}
+
+QRectF ObjectsScene::getObjectLayersRect(BaseObjectView *obj)
+{
+	QRectF rect(obj->pos(), obj->boundingRect().size());
+
+	if(!is_layer_rects_visible || layers_paths.isEmpty())
+		return rect;
+
+	for(auto &layer_rect : getObjectLayerRects(obj, QFontMetricsF(LayerItem::getDefaultFont())))
+		rect = rect.united(layer_rect.second);
+
+	return rect;
+}
+
+QString ObjectsScene::getLayersSignature()
+{
+	QString signature = QString("%1|%2|%3").arg(is_layer_rects_visible).arg(is_layer_names_visible).arg(active_layers.join(","));
+	quint64 objs_hash = 0;
+	QStringList layer_ids;
+
+	if(!is_layer_rects_visible)
+		return signature;
+
+	for(auto &tab_view : table_views)
+	{
+		layer_ids.clear();
+
+		for(auto &layer_id : tab_view->getLayers())
+			layer_ids.append(QString::number(layer_id));
+
+		// The sum makes the result independent of the order of the tables
+		objs_hash += qHash(QString("%1:%2").arg(reinterpret_cast<quintptr>(tab_view)).arg(layer_ids.join(",")));
+	}
+
+	return signature + "|" + QString::number(objs_hash);
+}
+
+void ObjectsScene::invalidateRelationshipsRoutes(bool force)
+{
+	if(!force && RelationshipView::getLineStyle() != RelationshipView::OrthogonalLines)
+		return;
+
+	// A copy is used because the list is a member that may change while the lines are updated
+	std::vector<RelationshipView *> rels = rel_views;
+
+	for(auto &rel : rels)
+		rel->invalidateRoute();
+}
+
 void ObjectsScene::updateLayerRects()
 {
 	if(layers_paths.isEmpty())
 		return;
+
+	/* The orthogonal lines go around the layer rects of the tables, so they are
+	 * updated whenever something that changes those rects is changed */
+	QString signature = getLayersSignature();
+
+	if(signature != layers_signature)
+	{
+		layers_signature = signature;
+		invalidateRelationshipsRoutes();
+	}
 
 	for(auto &path : layers_paths)
 		path->setVisible(false);
@@ -404,7 +497,6 @@ void ObjectsScene::updateLayerRects()
 	int idx = 0, act_layer_idx = 0;
 	BaseObjectView *obj_view = nullptr;
 	ObjectType obj_type;
-	QRectF brect;
 	QMap<int, QList<QRectF>> rects;
 	QFontMetricsF fm(LayerItem::getDefaultFont());
 
@@ -424,26 +516,8 @@ void ObjectsScene::updateLayerRects()
 				 obj_type ==ObjectType::Relationship)
 				continue;
 
-			brect = obj_view->boundingRect();
-			brect.moveTo(obj_view->pos());
-
-			for(auto &layer_id : obj_view->getLayers())
-			{
-				if(static_cast<int>(layer_id) >= layers.size() ||
-					 !active_layers.contains(layers.at(layer_id)))
-					continue;
-
-				/* We need to adjust the bounding rect dimension in such a way
-				 * to take into account the font height (if the layer names are visible)
-				 * as well as a default padding so the rectangles doesn't have the same size
-				 * of the object's bounding rect */
-				brect.adjust(-LayerItem::LayerPadding,
-										 (is_layer_names_visible ? -fm.height() : -LayerItem::LayerPadding),
-										 LayerItem::LayerPadding,
-										 LayerItem::LayerPadding);
-
-				rects[layer_id].append(brect);
-			}
+			for(auto &layer_rect : getObjectLayerRects(obj_view, fm))
+				rects[layer_rect.first].append(layer_rect.second);
 		}
 	}
 
@@ -589,7 +663,8 @@ void ObjectsScene::setLayerColors(int layer_id, QColor txt_color, QColor bg_colo
 		return;
 
 	layers_paths[layer_id]->setTextColor(txt_color);
-	layers_paths[layer_id]->setPen(QPen(bg_color, BaseObjectView::ObjectBorderWidth * BaseObjectView::getScreenDpiFactor()));
+	layers_paths[layer_id]->setPen(QPen(CustomUiStyle::getAdjustedColor(bg_color, CustomUiStyle::MinFactor, CustomUiStyle::MinFactor),
+																			BaseObjectView::ObjectBorderWidth * BaseObjectView::getScreenDpiFactor()));
 
 	bg_color.setAlpha(BaseObjectView::ObjectAlphaChannel * 0.80);
 	layers_paths[layer_id]->setBrush(bg_color);
@@ -665,10 +740,10 @@ void ObjectsScene::setGridPattern(GridPattern pattern)
 
 QPointF ObjectsScene::alignPointToGrid(const QPointF &pnt)
 {
-	int px = static_cast<int>(round(pnt.x()/static_cast<double>(grid_size))) * grid_size,
-			py = static_cast<int>(round(pnt.y()/static_cast<double>(grid_size))) * grid_size;
+	double px = round(pnt.x() / static_cast<double>(grid_size)) * grid_size,
+			   py = round(pnt.y() / static_cast<double>(grid_size)) * grid_size;
 
-	return QPointF(px,	py);
+	return { QPointF(px, py).toPoint() };
 }
 
 void ObjectsScene::setSceneRect(const QRectF &rect)
@@ -740,7 +815,14 @@ void ObjectsScene::drawBackground(QPainter *painter, const QRectF &rect)
 			pen_width = BaseObjectView::ObjectBorderWidth *
 									BaseObjectView::getScreenDpiFactor();
 	QSizeF aux_size;
-	QRectF scn_rect = sceneRect();
+	QRectF scn_rect = sceneRect(),
+			/* The grid/page delimiters are only meaningful within the area that
+			 * Qt is actually asking to be redrawn (rect). This avoids iterating up to the
+			 * full scene rect below, which is costly as it scales with the total scene area 
+			 * instead of the exposed area, which gets very expensive on large 
+			 * scenes where objects are spread far apart 
+			 * (a huge scene rect with comparatively few objects). */
+			visible_rect = rect.intersected(scn_rect);
 	QPen pen = QPen(QColor(), pen_width);
 	int start_x = 0, start_y = 0,
 			end_x = 0, end_y = 0;
@@ -760,17 +842,17 @@ void ObjectsScene::drawBackground(QPainter *painter, const QRectF &rect)
 
 	painter->fillRect(rect, canvas_color);
 
-	start_x = round(scn_rect.left()/grid_size) * grid_size;
-	start_y = round(scn_rect.top()/grid_size) * grid_size;
-	end_x = scn_rect.right();
-	end_y = scn_rect.bottom();
+	start_x = floor(visible_rect.left()/grid_size) * grid_size;
+	start_y = floor(visible_rect.top()/grid_size) * grid_size;
+	end_x = ceil(visible_rect.right()/grid_size) * grid_size;
+	end_y = ceil(visible_rect.bottom()/grid_size) * grid_size;
 
 	if(show_grid && !move_scene)
 	{
 		int x1 = 0, y1 = 0,
 				x2 = 0, y2 = 0;
 
-		pen.setWidthF(pen_width *	(grid_pattern == GridPattern::DotPattern ? 1.65 : 1));
+		pen.setWidthF(pen_width *	(grid_pattern == GridPattern::DotPattern ? 1.60 : 1));
 		pen.setColor(grid_color);
 		painter->setPen(pen);
 
@@ -816,25 +898,20 @@ void ObjectsScene::drawBackground(QPainter *painter, const QRectF &rect)
 		pen.setDashPattern({3, 5});
 		painter->setPen(pen);
 
-		double st_x = start_x, st_y = start_y;
+		/* The page delimiters must stay phase-locked to the absolute origin
+		 * (0,0) no matter where start_x/start_y (now based on the exposed
+		 * area, see above) happen to fall, otherwise the delimiter lines
+		 * would appear to drift/shift while panning around a large scene.
+		 * So we always snap to the nearest page boundary at or before
+		 * start_x/start_y, regardless of their sign, instead of only doing
+		 * so for the negative-coordinates (infinite canvas) case. */
+		double st_x = round(start_x/page_w) * page_w,
+				st_y = round(start_y/page_h) * page_h;
 
-		/* If the current origin point of the canvas is not at the positive origin (0,0)
-		 * we need to calculate the number of page delimiter to be drawn before the (0,0).
-		 * This avoid the delimiters to be shifted every time the canvas origin moves
-		 * far to a negative point. */
-		if(start_x < 0 || start_y < 0)
-		{
-			/* Due to the infinite canvas feature, we need to calculate
-			 * the number of pages before origin (0,0) so the iteration
-			 * can start in the right position of rendering */
-			st_x = round(start_x/page_w) * page_w,
-			st_y = round(start_y/page_h) * page_h;
-
-			/* We decremente in one page the start rendering position
-			 * so the round operation above doesn't cut any start page */
-			st_x -= page_w;
-			st_y -= page_h;
-		}
+		/* We decremente in one page the start rendering position
+		 * so the round operation above doesn't cut any start page */
+		st_x -= page_w;
+		st_y -= page_h;
 
 		for(int px = st_x; px < end_x; px += page_w)
 		{
@@ -860,8 +937,13 @@ void ObjectsScene::drawBackground(QPainter *painter, const QRectF &rect)
 		pen.setStyle(Qt::SolidLine);
 		painter->setPen(pen);
 
-		painter->drawLine(start_x, end_y, end_x, end_y);
-		painter->drawLine(end_x, start_y, end_x, end_y);
+		/* Using the actual scene rect here (not start_x/start_y/end_x/end_y,
+		 * which now refer to the exposed area) so the boundary is drawn at the
+		 * real edges of the scene. The painter's clip rect (set above) takes
+		 * care of only rendering the portion of these lines that falls within
+		 * the currently exposed area. */
+		painter->drawLine(scn_rect.left(), scn_rect.bottom(), scn_rect.right(), scn_rect.bottom());
+		painter->drawLine(scn_rect.right(), scn_rect.top(), scn_rect.right(), scn_rect.bottom());
 	}
 
 	painter->restore();
@@ -919,6 +1001,15 @@ void ObjectsScene::showRelationshipLine(bool value, const QPointF &p_start)
 				flags=QGraphicsItem::ItemIsSelectable |
 					  QGraphicsItem::ItemSendsGeometryChanges;
 		}
+		/* Relationship markers aren't BaseObjectView-derived so they fall through the check above
+		 * and would otherwise permanently lose ItemIsMovable (setFlags() below replaces the
+		 * whole flag set) the first time a relationship is drawn interactively anywhere in the
+		 * scene, since this loop touches every item, not just the ones involved in the new
+		 * relationship */
+		else if(dynamic_cast<RelMarkerItem *>(items.front()) && !value)
+			flags=QGraphicsItem::ItemIsMovable |
+				  QGraphicsItem::ItemIsSelectable |
+				  QGraphicsItem::ItemSendsGeometryChanges;
 
 		items.front()->setFlags(flags);
 		items.pop_front();
@@ -985,7 +1076,7 @@ void ObjectsScene::handleChildrenSelectionChanged()
 	if(!tab_view)
 		return;
 
-	if(tab_view->getSelectedChidren().empty())
+	if(tab_view->getSelectedChidren().empty())		
 		tabs_sel_children.removeAll(tab_view);
 	else if(!tabs_sel_children.contains(tab_view))
 		tabs_sel_children.append(tab_view);
@@ -995,7 +1086,8 @@ void ObjectsScene::handleChildrenSelectionChanged()
 
 void ObjectsScene::addItem(QGraphicsItem *item, bool blink_new)
 {
-	if(!item)	return;
+	if(!item)
+		return;
 
 	RelationshipView *rel=dynamic_cast<RelationshipView *>(item);
 	BaseTableView *tab=dynamic_cast<BaseTableView *>(item);
@@ -1034,6 +1126,11 @@ void ObjectsScene::addItem(QGraphicsItem *item, bool blink_new)
 
 	QGraphicsScene::addItem(item);
 
+	if(rel && std::find(rel_views.begin(), rel_views.end(), rel) == rel_views.end())
+		rel_views.push_back(rel);
+	else if(tab && std::find(table_views.begin(), table_views.end(), tab) == table_views.end())
+		table_views.push_back(tab);
+
 	if(blink_new && obj)
 		obj->blink();
 
@@ -1041,33 +1138,69 @@ void ObjectsScene::addItem(QGraphicsItem *item, bool blink_new)
 		updateLayerRects();
 }
 
+BaseObjectView *ObjectsScene::detachItem(QGraphicsItem *item)
+{
+	if(!item)
+		return nullptr;
+
+	BaseObjectView *obj_view=dynamic_cast<BaseObjectView *>(item);
+	RelationshipView *rel=dynamic_cast<RelationshipView *>(item);
+
+	if(rel)
+		rel->disconnectTables();
+
+	item->setVisible(false);
+	item->setActive(false);
+	forgetItem(item);
+	QGraphicsScene::removeItem(item);
+
+	if(obj_view)
+	{
+		BaseObject *obj = obj_view->getUnderlyingObject();
+
+		if(BaseTable::isBaseTable(obj->getObjectType()) ||
+			 obj->getObjectType() == ObjectType::Textbox)
+			updateLayerRects();
+
+		disconnect(obj_view, nullptr, this, nullptr);
+		disconnect(obj_view, nullptr, dynamic_cast<BaseGraphicObject*>(obj_view->getUnderlyingObject()), nullptr);
+		disconnect(dynamic_cast<BaseGraphicObject*>(obj_view->getUnderlyingObject()), nullptr, obj_view, nullptr);
+	}
+
+	return obj_view;
+}
+
+const std::vector<BaseTableView *> &ObjectsScene::getTableViews() const
+{
+	return table_views;
+}
+
+const std::vector<RelationshipView *> &ObjectsScene::getRelationshipViews() const
+{
+	return rel_views;
+}
+
+void ObjectsScene::forgetItem(QGraphicsItem *item)
+{
+	// The pointers are compared as they are, since the item may be partially destroyed
+	rel_views.erase(std::remove_if(rel_views.begin(), rel_views.end(), [item](RelationshipView *rel){
+		return static_cast<QGraphicsItem *>(rel) == item; }), rel_views.end());
+
+	table_views.erase(std::remove_if(table_views.begin(), table_views.end(), [item](BaseTableView *tab){
+		return static_cast<QGraphicsItem *>(tab) == item; }), table_views.end());
+}
+
 void ObjectsScene::removeItem(QGraphicsItem *item)
 {
-	if(item)
+	BaseObjectView *obj_view = detachItem(item);
+
+	if(obj_view)
 	{
-		BaseObjectView *obj_view=dynamic_cast<BaseObjectView *>(item);
-		RelationshipView *rel=dynamic_cast<RelationshipView *>(item);
-
-		if(rel)
-			rel->disconnectTables();
-
-		item->setVisible(false);
-		item->setActive(false);
-		QGraphicsScene::removeItem(item);
-
-		if(obj_view)
-		{
-			BaseObject *obj = obj_view->getUnderlyingObject();
-
-			if(BaseTable::isBaseTable(obj->getObjectType()) ||
-				 obj->getObjectType() == ObjectType::Textbox)
-				updateLayerRects();
-
-			disconnect(obj_view, nullptr, this, nullptr);
-			disconnect(obj_view, nullptr, dynamic_cast<BaseGraphicObject*>(obj_view->getUnderlyingObject()), nullptr);
-			disconnect(dynamic_cast<BaseGraphicObject*>(obj_view->getUnderlyingObject()), nullptr, obj_view, nullptr);
-			removed_objs.push_back(obj_view);
-		}
+		/* This item is genuinely being discarded (queued in removed_objs, only actually deleted
+		 * once this scene itself is destroyed) -- its model object may well outlive that, so its
+		 * back-reference must be cleared now, not whenever the view eventually gets deleted */
+		obj_view->detachFromObject();
+		removed_objs.push_back(obj_view);
 	}
 }
 
@@ -1090,10 +1223,14 @@ void ObjectsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 	if(this->selectedItems().size()==1 && event->buttons()==Qt::LeftButton && !rel_line->isVisible())
 	{
 		//Gets the selected graphical object
-		BaseObjectView *obj=dynamic_cast<BaseObjectView *>(this->selectedItems().at(0));
+		QGraphicsItem *sel_item = this->selectedItems().at(0);
+		BaseObjectView *obj=dynamic_cast<BaseObjectView *>(sel_item);
+		RelMarkerItem *rel_marker = dynamic_cast<RelMarkerItem *>(sel_item);
 
 		if(obj)
 			emit s_objectDoubleClicked(dynamic_cast<BaseGraphicObject *>(obj->getUnderlyingObject()));
+		else if(rel_marker)
+			emit s_relMarkerDoubleClicked(rel_marker->getTable());
 	}
 	else
 		//Emit a signal indicating that no object was selected
@@ -1116,6 +1253,19 @@ void ObjectsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 	if(rel_line->isVisible())
 		event->setModifiers(Qt::ControlModifier);
 
+	/* A click resets the whole (now cross-scene) selection when it's the kind of click that would
+	 * replace or clear a selection: an empty-area click, or a plain click (no Ctrl/Shift) on an
+	 * item that isn't already part of the selection. This must NOT be gated on is_deselection (or
+	 * on anything else derived from this scene's own selectedItems()) -- the whole point is to
+	 * reach scenes that have nothing selected locally at all (selection lives in some OTHER scene),
+	 * where a local-only check would never see anything to reset and silently leave it behind. A
+	 * plain click on an ALREADY selected item is excluded on purpose: that's how dragging an
+	 * existing multi-selection starts, and must not clear it */
+	bool resets_selection =
+			(!item && (event->buttons()==Qt::LeftButton || event->buttons()==Qt::RightButton)) ||
+			(event->buttons()==Qt::LeftButton && item && !item->isSelected() &&
+			 (event->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) == 0);
+
 	if(is_deselection)
 		this->blockItemsSignals(true);
 
@@ -1132,6 +1282,9 @@ void ObjectsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		this->blockItemsSignals(false);
 		emit s_objectSelected(nullptr, false);
 	}
+
+	if(resets_selection)
+		emit s_selectionResetTriggered();
 
 	if(event->buttons()==Qt::LeftButton)
 	{
@@ -1162,7 +1315,9 @@ void ObjectsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 			emit s_objectSelected(nullptr,false);
 		}
 
-		emit s_popupMenuRequested();
+		//Relationship markers have no context menu
+		if(!dynamic_cast<RelMarkerItem *>(item ? item->topLevelItem() : nullptr))
+			emit s_popupMenuRequested();
 	}
 }
 
@@ -1208,36 +1363,36 @@ unsigned int ObjectsScene::getExpansionFactor()
 
 bool ObjectsScene::mouseIsAtCorner()
 {
-	QGraphicsView *view=getActiveViewport();
+	QGraphicsView *view =getActiveViewport();
 
 	if(view)
 	{
-		QPoint pos=view->mapFromGlobal(QCursor::pos());
-		QRect rect=view->rect();
+		QPoint pos = view->mapFromGlobal(QCursor::pos());
+		QRect rect = view->rect();
 
 		if(rect.contains(pos))
 		{
 			if(pos.x() <= SceneMoveThreshold)
-				scene_move_dx=-SceneMoveStep;
+				scene_move_dx = -SceneMoveStep;
 			else if(pos.x() >= (view->width() - view->verticalScrollBar()->width() - SceneMoveThreshold))
-				scene_move_dx=SceneMoveStep;
+				scene_move_dx = SceneMoveStep;
 			else
-				scene_move_dx=0;
+				scene_move_dx = 0;
 
 			if(pos.y() <= SceneMoveThreshold)
-				scene_move_dy=-SceneMoveStep;
+				scene_move_dy = -SceneMoveStep;
 			else if(pos.y() >= (view->height() - view->horizontalScrollBar()->height() - SceneMoveThreshold))
-				scene_move_dy=SceneMoveStep;
+				scene_move_dy = SceneMoveStep;
 			else
-				scene_move_dy=0;
+				scene_move_dy = 0;
 
-			return scene_move_dx!=0 || scene_move_dy!=0;
+			return scene_move_dx != 0 || scene_move_dy != 0;
 		}
-		else
-			return false;
-	}
-	else
+		
 		return false;
+	}
+	
+	return false;
 }
 
 QGraphicsView *ObjectsScene::getActiveViewport()
@@ -1442,10 +1597,12 @@ void ObjectsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 					QList<QGraphicsItem *> items=this->selectedItems();
 					BaseObjectView *obj_view=nullptr;
 
-					for(QGraphicsItem *item : items)
+					for(auto &item : items)
 					{
 						obj_view=dynamic_cast<BaseObjectView *>(item);
-						obj_view->togglePlaceholder(true);
+
+						if(obj_view)
+							obj_view->togglePlaceholder(true);
 					}
 				}
 
@@ -1559,11 +1716,16 @@ void ObjectsScene::finishObjectsMove(const QPointF &pnt_end)
 				{
 					base_rel=dynamic_cast<BaseRelationship *>(rel);
 
+					// Cross-scene relationships have no RelationshipView -- nothing to move
+					RelationshipView *base_rel_view = dynamic_cast<RelationshipView *>(base_rel->getOverlyingObject());
+
+					if(!base_rel_view)
+						continue;
+
 					/* If the relationship contains points and it is not selected then it will be included on the list
 						 in order to move their custom line points */
-					if(!dynamic_cast<RelationshipView *>(base_rel->getOverlyingObject())->isSelected() &&
-							!base_rel->getPoints().empty())
-						rel_list.push_back(dynamic_cast<QGraphicsItem *>(base_rel->getOverlyingObject()));
+					if(!base_rel_view->isSelected() && !base_rel->getPoints().empty())
+						rel_list.push_back(base_rel_view);
 				}
 
 				QList<BaseObjectView *> list = sch_view->getChildren();
@@ -1650,6 +1812,50 @@ void ObjectsScene::finishObjectsMove(const QPointF &pnt_end)
 	moving_objs=false;
 	sel_ini_pnt.setX(DNaN);
 	sel_ini_pnt.setY(DNaN);
+
+	/* After the movement the orthogonal relationships that were routed around the previous position of
+	 * the tables, or that must now go around their new one, are updated. Each relationship is updated only once,
+	 * no matter how many of the moved tables it is near to. When placeholders are not used the relationships
+	 * connected to the tables were updated during the movement without avoiding obstacles, so they're updated
+	 * again first, which leaves the crow's foot areas they register ready for the other relationships. */
+	std::vector<RelationshipView *> connected_rel_views, nearby_rel_views;
+	QSet<RelationshipView *> gathered_rel_views;
+	bool placeholders_used = BaseObjectView::isPlaceholderEnabled();
+
+	for(auto &obj : tables)
+	{
+		tab_view = dynamic_cast<BaseTableView *>(obj);
+
+		for(auto &rel_view : tab_view->getNearbyRoutes(true))
+		{
+			if(gathered_rel_views.contains(rel_view))
+				continue;
+
+			gathered_rel_views.insert(rel_view);
+
+			BaseRelationship *rel_obj = rel_view->getUnderlyingObject();
+
+			// A relationship connected to any of the moved tables
+			bool connected = tables.contains(dynamic_cast<BaseObjectView *>(rel_obj->getTable(BaseRelationship::SrcTable)->getOverlyingObject())) ||
+											 tables.contains(dynamic_cast<BaseObjectView *>(rel_obj->getTable(BaseRelationship::DstTable)->getOverlyingObject()));
+
+			if(!connected)
+				nearby_rel_views.push_back(rel_view);
+			else if(!placeholders_used)
+				connected_rel_views.push_back(rel_view);
+		}
+	}
+
+	for(auto &rel_view : connected_rel_views)
+		rel_view->invalidateRoute();
+
+	for(auto &rel_view : nearby_rel_views)
+		rel_view->invalidateRoute();
+
+	// Displaying the bumps that were postponed during the movement
+	if(bumps_update_pending)
+		bumps_timer.start();
+
 	updateLayerRects();
 
 	QRectF old_scene_rect = sceneRect(),
@@ -1788,6 +1994,34 @@ void ObjectsScene::clearTablesChildrenSelection()
 	tabs_sel_children.clear();
 }
 
+void ObjectsScene::selectObjectsInLayers(const QList<unsigned int> &layer_ids)
+{
+	clearSelection();
+
+	if(layer_ids.isEmpty())
+		return;
+
+	BaseObjectView *obj_view = nullptr;
+	bool is_in_layer = false;
+
+	for(auto &item : this->items())
+	{
+		obj_view = dynamic_cast<BaseObjectView *>(item);
+
+		if(obj_view && !obj_view->parentItem() && !obj_view->isSelected())
+		{
+			for(auto &idx : layer_ids)
+			{
+				if(obj_view->isInLayer(idx))
+				{
+					obj_view->setSelected(true);
+					break;
+				}
+			}
+		}
+	}
+}
+
 void ObjectsScene::clearSelection()
 {
 	clearTablesChildrenSelection();
@@ -1889,6 +2123,178 @@ bool ObjectsScene::isRelationshipLineVisible()
 bool ObjectsScene::isMovingObjects()
 {
 	return moving_objs;
+}
+
+void ObjectsScene::requestBumpsUpdate()
+{
+	if(moving_objs)
+		bumps_update_pending = true;
+	else
+		bumps_timer.start();
+}
+
+void ObjectsScene::updateRelationshipBumps()
+{
+	// Bumps are only displayed when the user stops moving the objects
+	if(moving_objs)
+	{
+		bumps_update_pending = true;
+		return;
+	}
+
+	bumps_update_pending = false;
+
+	struct Segment {
+		RelationshipView *rel;
+		double pos, lo, hi;
+	};
+
+	std::vector<Segment> h_segs, v_segs;
+	struct Bump {
+		QPointF pos;
+		bool convex;
+	};
+
+	std::map<RelationshipView *, std::vector<Bump>> rels_bumps;
+	std::map<RelationshipView *, size_t> stack_ranks;
+	std::vector<QPointF> bumps;
+	std::vector<bool> bumps_convex;
+	RelationshipView *rel_view = nullptr;
+	QPointF p1, p2;
+	double dpi_factor = BaseObjectView::getScreenDpiFactor(),
+			bump_radius = RelationshipView::BumpRadius * dpi_factor,
+			corner_radius = RelationshipView::RoundedCornerRadius * dpi_factor,
+			margin = corner_radius + bump_radius;
+
+	std::vector<RelationshipView *> rels, conflicts;
+	std::vector<QRectF> zones;
+
+	for(auto &item : items())
+	{
+		rel_view = dynamic_cast<RelationshipView *>(item);
+
+		if(!rel_view || !rel_view->isVisible() || rel_view->route_points.size() < 2)
+			continue;
+
+		/* The items come from the scene from the top one to the bottom one, so the lower the rank
+		 * of a line the higher it is in the stack of items (the line that is painted over the others) */
+		stack_ranks[rel_view] = rels.size();
+		rels.push_back(rel_view);
+		zones.insert(zones.end(), rel_view->end_zones.begin(), rel_view->end_zones.end());
+	}
+
+	/* Lines that go through the end zone (crow's foot area) of another relationship are recalculated now that
+	 * all the zones are known. This covers the lines that were routed before the other relationships existed or
+	 * were configured. The bumps are calculated in the next update, with the new routes */
+	for(auto &rel : rels)
+	{
+		if(rel->zone_retries >= RelationshipView::MaxZoneRetries)
+			continue;
+
+		for(auto &other : rels)
+		{
+			if(other != rel && RelationshipView::isRouteBlocked(rel->route_points, other->end_zones))
+			{
+				conflicts.push_back(rel);
+				break;
+			}
+		}
+	}
+
+	if(!conflicts.empty())
+	{
+		for(auto &rel : conflicts)
+		{
+			rel->zone_retries++;
+			rel->invalidateRoute(false);
+		}
+
+		bumps_timer.start();
+		return;
+	}
+
+	for(auto &item : rels)
+	{
+		rel_view = item;
+		rels_bumps[rel_view] = {};
+
+		for(size_t idx = 1; idx < rel_view->route_points.size(); idx++)
+		{
+			p1 = rel_view->route_points[idx - 1];
+			p2 = rel_view->route_points[idx];
+
+			if(std::fabs(p1.y() - p2.y()) < 0.01 && std::fabs(p1.x() - p2.x()) > 0.01)
+				h_segs.push_back({ rel_view, p1.y(), std::min(p1.x(), p2.x()), std::max(p1.x(), p2.x()) });
+			else if(std::fabs(p1.x() - p2.x()) < 0.01 && std::fabs(p1.y() - p2.y()) > 0.01)
+				v_segs.push_back({ rel_view, p1.x(), std::min(p1.y(), p2.y()), std::max(p1.y(), p2.y()) });
+		}
+	}
+
+	std::sort(v_segs.begin(), v_segs.end(), [](const Segment &s1, const Segment &s2) {
+		return s1.pos < s2.pos;
+	});
+
+	/* Bumps are never placed over the crow's foot descriptors. The test uses the area of the arc (it only
+	 * goes up) against the zones shrunk by the clearance the routes keep from them, so lines passing right
+	 * next to a descriptor still hop over the lines crossing them */
+	auto is_in_zone = [&](const QPointF &pnt) {
+		QRectF arc_rect(pnt.x() - bump_radius, pnt.y() - bump_radius, bump_radius * 2, bump_radius);
+		double clearance = RelationshipView::ZoneClearance;
+
+		for(auto &zone : zones)
+		{
+			if(zone.adjusted(clearance, clearance, -clearance, -clearance).intersects(arc_rect))
+				return true;
+		}
+
+		return false;
+	};
+
+	/* The horizontal segments always hop over the vertical ones, this way only one of the lines
+	 * needs to know about the crossing. Crossings too close to the segments' ends are ignored */
+	for(auto &h_seg : h_segs)
+	{
+		if(h_seg.hi - h_seg.lo < margin * 2)
+			continue;
+
+		auto itr = std::lower_bound(v_segs.begin(), v_segs.end(), h_seg.lo + margin, [](const Segment &seg, double value) {
+			return seg.pos < value;
+		});
+
+		for(; itr != v_segs.end() && itr->pos <= h_seg.hi - margin; ++itr)
+		{
+			if(itr->rel != h_seg.rel &&
+				 h_seg.pos > itr->lo + corner_radius && h_seg.pos < itr->hi - corner_radius &&
+				 !is_in_zone(QPointF(itr->pos, h_seg.pos)))
+			{
+				/* The bump is a convex one if the vertical line, the one that is hopped over, is above the line
+				 * that hops, and a concave one if the line that hops is above the vertical one */
+				rels_bumps[h_seg.rel].push_back({ QPointF(itr->pos, h_seg.pos), stack_ranks[itr->rel] < stack_ranks[h_seg.rel] });
+			}
+		}
+	}
+
+	for(auto &itr : rels_bumps)
+	{
+		bumps.clear();
+		bumps_convex.clear();
+
+		std::sort(itr.second.begin(), itr.second.end(), [](const Bump &b1, const Bump &b2) {
+			return b1.pos.y() != b2.pos.y() ? b1.pos.y() < b2.pos.y() : b1.pos.x() < b2.pos.x();
+		});
+
+		// Crossings too close to each other on the same segment would make the bumps overlap
+		for(auto &bump : itr.second)
+		{
+			if(bumps.empty() || bumps.back().y() != bump.pos.y() || bump.pos.x() - bumps.back().x() >= bump_radius * 3)
+			{
+				bumps.push_back(bump.pos);
+				bumps_convex.push_back(bump.convex);
+			}
+		}
+
+		itr.first->setBumps(bumps, bumps_convex);
+	}
 }
 
 QList<QGraphicsItem *> ObjectsScene::selectedItems() const

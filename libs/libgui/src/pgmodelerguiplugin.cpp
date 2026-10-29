@@ -26,59 +26,48 @@ QList<PgModelerGuiPlugin *> PgModelerGuiPlugin::reg_plugins;
 
 PgModelerGuiPlugin::PgModelerGuiPlugin()
 {
-	QGridLayout *gridLayout=nullptr;
-	QSpacerItem *verticalSpacer=nullptr;
-	QFont font;
-	QWidget *widget=nullptr;
-
 	main_window = nullptr;
-	plugin_info_frm=new BaseForm;
-	gridLayout=new QGridLayout;
+	plugin_info_frm = new BaseForm;
 
-	widget=new QWidget;
-	widget->setWindowTitle(QT_TRANSLATE_NOOP("PgModelerGuiPlugin", "Plug-in information"));
+	QWidget *widget = new QWidget;
+	widget->setWindowTitle(QT_TRANSLATE_NOOP("PgModelerGuiPlugin", "Plugin information"));
 
-	gridLayout->setHorizontalSpacing(GuiUtilsNs::LtSpacing);
-	gridLayout->setVerticalSpacing(GuiUtilsNs::LtSpacing);
-	gridLayout->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
+	QGroupBox *info_grp = GuiUtilsNs::createWidgetInParent<QGroupBox>(GuiUtilsNs::LtMargin, widget);
+	info_grp->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	info_grp->setTitle(QT_TRANSLATE_NOOP("PgModelerGuiPlugin", "Version info"));
+
+	title_lbl = GuiUtilsNs::createWidgetInParent<QLabel>(GuiUtilsNs::LtMargin, info_grp);
+	author_lbl = GuiUtilsNs::createWidgetInParent<QLabel>(GuiUtilsNs::LtMargin, info_grp);
+	version_lbl = GuiUtilsNs::createWidgetInParent<QLabel>(GuiUtilsNs::LtMargin, info_grp);
+
+	GuiUtilsNs::configureWidgetFont(title_lbl, GuiUtilsNs::BigFontFactor, true);
+	GuiUtilsNs::configureWidgetsFont({ author_lbl, version_lbl}, GuiUtilsNs::BigFontFactor);
+
+	QHBoxLayout *hbox = GuiUtilsNs::createHBoxLayout(0);
 
 	icon_lbl = new QLabel(widget);
 	icon_lbl->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	icon_lbl->setMinimumSize(QSize(64, 64));
 	icon_lbl->setMaximumSize(QSize(64, 64));
 	icon_lbl->setScaledContents(true);
-	gridLayout->addWidget(icon_lbl, 0, 0, 2, 1);
 
-	title_lbl = new QLabel(widget);
-	title_lbl->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-	font.setPointSize(12);
-	font.setBold(true);
-	font.setItalic(true);
-	title_lbl->setFont(font);
-	gridLayout->addWidget(title_lbl, 0, 1, 1, 1);
+	hbox->addWidget(info_grp);
+	hbox->addWidget(icon_lbl);
+	hbox->setAlignment(icon_lbl, Qt::AlignVCenter | Qt::AlignHCenter);
 
-	author_lbl = new QLabel(widget);
-	author_lbl->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-	author_lbl->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	gridLayout->addWidget(author_lbl, 1, 1, 2, 1);
+	widget->layout()->addItem(hbox);
 
-	verticalSpacer = new QSpacerItem(20, 18, QSizePolicy::Minimum, QSizePolicy::Expanding);
-	gridLayout->addItem(verticalSpacer, 2, 0, 2, 1);
+	QGroupBox *description_grp = GuiUtilsNs::createWidgetInParent<QGroupBox>(GuiUtilsNs::LtMargin, widget);
+	description_grp->setTitle(QT_TRANSLATE_NOOP("PgModelerGuiPlugin", "Description"));
+	description_grp->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	version_lbl = new QLabel(widget);
-	version_lbl->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-	version_lbl->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	gridLayout->addWidget(version_lbl, 3, 1, 1, 1);
-
-	description_lbl = new QLabel(widget);
-	description_lbl->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+	description_lbl = GuiUtilsNs::createWidgetInParent<QLabel>(GuiUtilsNs::LtMargin, description_grp);
+	description_lbl->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	description_lbl->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
 	description_lbl->setWordWrap(true);
 	description_lbl->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	gridLayout->addWidget(description_lbl, 4, 0, 1, 2);
 
-	widget->setLayout(gridLayout);
-	widget->setMinimumSize(480, 240);
+	widget->setMinimumSize(500, 250);
 	plugin_info_frm->setMainWidget(widget);
 }
 
@@ -136,16 +125,20 @@ QList<QToolButton *> PgModelerGuiPlugin::getPluginsToolButtons()
 	return buttons;
 }
 
-QList<PgModelerGuiPlugin::PluginWidgets> PgModelerGuiPlugin::getPluginsWidgets(QWidget *parent)
+QList<PgModelerGuiPlugin::PluginWidgets> PgModelerGuiPlugin::getPluginsWidgets(QWidget *parent, PgModelerGuiPlugin::WidgetDockMode parent_id)
 {
 	QList<PluginWidgets> widgets;
 	PluginWidgets p_wgt;
 
 	for(auto &plug : reg_plugins)
 	{
+		if(plug->getWidgetDockMode() == NoDock ||
+			 plug->getWidgetDockMode() != parent_id)
+			continue;
+
 		p_wgt = plug->createWidgets(parent);
 
-		if(!p_wgt.button && !p_wgt.widget)
+		if(!p_wgt.action_btn && !p_wgt.main_wgt)
 			continue;
 
 		widgets.append(p_wgt);
@@ -168,18 +161,18 @@ void PgModelerGuiPlugin::postInitPlugin()
 {
 	if(!main_window)
 	{
-		throw Exception(QT_TRANSLATE_NOOP("PgModelerGuiPlugin", "Trying to perform a post initialization on a plug-in without initializing the application's main window!"),
-										ErrorCode::Custom, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(QT_TRANSLATE_NOOP("PgModelerGuiPlugin", "Attempting to post-initialize a plugin without initializing the application's main window!"),
+										ErrorCode::Custom, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
 void PgModelerGuiPlugin::configurePluginInfo(const QString &title, const QString &version, const QString &author, const QString &description)
 {
 	title_lbl->setText(title);
-	version_lbl->setText(QString(QT_TRANSLATE_NOOP("PgModelerPlugin", "<strong>Version:</strong> %1")).arg(version));
-	author_lbl->setText(QString(QT_TRANSLATE_NOOP("PgModelerPlugin","<strong>Author:</strong> %1")).arg(author));
+	version_lbl->setText(QString(QT_TRANSLATE_NOOP("PgModelerPlugin", "<strong>Version</strong> %1")).arg(version));
+	author_lbl->setText(QString(QT_TRANSLATE_NOOP("PgModelerPlugin","<strong>Author</strong> %1")).arg(author));
 	description_lbl->setText(description);
-	icon_lbl->setPixmap(QPixmap(getPluginIcon(getPluginName())));
+	icon_lbl->setPixmap(getPluginPixmap(getPluginName()));
 }
 
 void PgModelerGuiPlugin::showPluginInfo()
@@ -187,9 +180,24 @@ void PgModelerGuiPlugin::showPluginInfo()
 	plugin_info_frm->show();
 }
 
-QString PgModelerGuiPlugin::getPluginIcon(const QString &icon_name)
+PgModelerGuiPlugin::WidgetDockMode PgModelerGuiPlugin::getWidgetDockMode() const
+{
+	return NoDock;
+}
+
+QString PgModelerGuiPlugin::getPluginIconPath(const QString &icon_name) const
 {
 	return QString(":/%1/%2.png").arg(getPluginName(), icon_name);
+}
+
+QIcon PgModelerGuiPlugin::getPluginIcon(const QString &icon_name) const
+{
+	return { QIcon(getPluginIconPath(icon_name)) };
+}
+
+QPixmap PgModelerGuiPlugin::getPluginPixmap(const QString &icon_name) const
+{
+	return { QPixmap(getPluginIconPath(icon_name)) };
 }
 
 PgModelerGuiPlugin::PluginWidgets PgModelerGuiPlugin::createWidgets(QWidget *)

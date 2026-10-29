@@ -3,7 +3,7 @@
  <class>BaseForm</class>
  <widget class="QDialog" name="BaseForm">
   <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
+   <enum>Qt::WindowModality::ApplicationModal</enum>
   </property>
   <property name="geometry">
    <rect>
@@ -23,26 +23,42 @@
    <string>Dialog</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../res/resources.qrc">
+   <iconset resource="../../../priv-core/res/logoicons.qrc">
     <normaloff>:/icons/icons/pgmodeler_logo.png</normaloff>:/icons/icons/pgmodeler_logo.png</iconset>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <property name="leftMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="1" column="0">
+   <item>
+    <widget class="QFrame" name="main_frm">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Shape::StyledPanel</enum>
+     </property>
+     <property name="lineWidth">
+      <number>1</number>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QWidget" name="buttons_wgt" native="true">
      <property name="autoFillBackground">
       <bool>false</bool>
@@ -64,23 +80,23 @@
        <number>0</number>
       </property>
       <item row="0" column="0">
-       <layout class="QGridLayout" name="buttons_lt">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
+       <layout class="QHBoxLayout" name="horizontalLayout">
         <property name="spacing">
          <number>5</number>
         </property>
-        <item row="0" column="0">
+        <property name="leftMargin">
+         <number>5</number>
+        </property>
+        <property name="topMargin">
+         <number>5</number>
+        </property>
+        <property name="rightMargin">
+         <number>5</number>
+        </property>
+        <property name="bottomMargin">
+         <number>5</number>
+        </property>
+        <item>
          <widget class="QLabel" name="pgmodeler_name_lbl">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -96,8 +112,8 @@
           </property>
           <property name="maximumSize">
            <size>
-            <width>169</width>
-            <height>35</height>
+            <width>150</width>
+            <height>30</height>
            </size>
           </property>
           <property name="styleSheet">
@@ -107,7 +123,7 @@
            <string/>
           </property>
           <property name="textFormat">
-           <enum>Qt::PlainText</enum>
+           <enum>Qt::TextFormat::PlainText</enum>
           </property>
           <property name="pixmap">
            <pixmap resource="../res/resources.qrc">:/images/images/pgmodeler_name.png</pixmap>
@@ -117,8 +133,21 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QPushButton" name="apply_ok_btn">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="accept_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -158,8 +187,8 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="3">
-         <widget class="QPushButton" name="cancel_btn">
+        <item>
+         <widget class="QPushButton" name="reject_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -199,45 +228,16 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
        </layout>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QFrame" name="main_frm">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
-     </property>
     </widget>
    </item>
   </layout>
  </widget>
  <resources>
   <include location="../res/resources.qrc"/>
-  <include location="../res/resources.qrc"/>
+  <include location="../../../priv-core/res/logoicons.qrc"/>
  </resources>
  <connections/>
 </ui>

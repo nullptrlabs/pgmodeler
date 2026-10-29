@@ -45,7 +45,7 @@ class __libgui UserMappingWidget: public BaseObjectWidget, public Ui::UserMappin
 		void setAttributes(DatabaseModel *model, OperationList *op_list, UserMapping *user_map);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

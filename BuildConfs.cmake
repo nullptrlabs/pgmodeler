@@ -1,0 +1,273 @@
+set(CMAKE_WARN_DEPRECATED OFF)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# set(CMAKE_VERBOSE_MAKEFILE ON)
+
+# By default the compiler used is clang/clang++
+if(LINUX)
+  set(CMAKE_C_COMPILER /usr/bin/clang)
+  set(CMAKE_CXX_COMPILER /usr/bin/clang++)
+elseif(WIN32)
+  set(CMAKE_C_COMPILER C:/msys64/mingw64/bin/clang)
+  set(CMAKE_CXX_COMPILER C:/msys64/mingw64/bin/clang++)
+endif()
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Importing Qt6 components
+# Forcing a version >= 6.6.0. If no suitable version is found the script aborts
+find_package(Qt6 6.6.0 REQUIRED COMPONENTS Core Gui Network PrintSupport Svg Widgets)
+
+qt_standard_project_setup()
+
+# Disabling deprecated Qt code of version below 6.6
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060600)
+
+link_libraries(
+    Qt::Core
+    Qt::Gui
+    Qt::Network
+    Qt::PrintSupport
+    Qt::Svg
+    Qt::Widgets)
+
+# Private plugins/core code source detection
+# If the folder where the sources are stored exist we configure a
+# set of variables and compiler defs that instruct cmake to
+# include private code and resources
+set(PRIV_PLUGINS_DIR priv-plugins)
+set(PRIV_PLUGINS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PRIV_PLUGINS_DIR})
+
+set(PRIV_CORE_DIR priv-core)
+set(PRIV_CORE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PRIV_CORE_DIR})
+
+if(PLUS_VERSION AND EXISTS ${PRIV_PLUGINS_ROOT})
+	# PLUS version: include full private code and resources
+	# Specific logic to add OpenSSL support on macOS
+	# We expect that the the library and its headers is on the
+	# folder openssl_build in the root of pgModeler's source
+	if(APPLE)
+		set(OPENSSL_ROOT_DIR "${CMAKE_SOURCE_DIR}/openssl_build")
+		# Forcing the static usage of OpenSSL
+		set(OPENSSL_USE_STATIC_LIBS TRUE)
+
+		# Hiding OpenSSL symbols in pgModeler code to avoid
+		# conflicts with other libs or plugins
+		set(LIB_SSL "${OPENSSL_ROOT_DIR}/lib/libssl.a")
+		set(LIB_CRYPTO "${OPENSSL_ROOT_DIR}/lib/libcrypto.a")
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-load_hidden,${LIB_SSL} -Wl,-load_hidden,${LIB_CRYPTO}")
+	endif()
+
+	# Adding support for OpenSSL
+	find_package(OpenSSL REQUIRED)
+	link_libraries(OpenSSL::SSL OpenSSL::Crypto)
+
+	# Enabling the private plugins/core code build (full features with license checking)
+	set(BUILD_PRIV_CODE ON)
+	set(BUILD_PRIV_ASSETS ON)
+	set(PRIV_CORE_SRC ${PRIV_CORE_ROOT}/src)
+	set(PRIV_PLUGINS_SRC ${PRIV_PLUGINS_ROOT}/src)
+	add_compile_definitions(PRIV_CODE_SYMBOLS)
+endif()
+
+# Enable the compilation of sample plugins
+# if their sources exists in plugins/*
+set(PLUGINS_DIR plugins)
+set(PLUGINS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/${PLUGINS_DIR})
+
+if(EXISTS ${PLUGINS_ROOT} AND NOT BUILD_PRIV_CODE)
+		# Enabling the plugins build
+		set(BUILD_PLUGINS ON)
+endif()
+
+# Adding custom C defs if some cmake variables are set
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+    add_compile_definitions(PGMODELER_DEBUG)
+endif()
+
+# AddressSanitizer option (can be enabled with -DUSE_ADDR_SANITIZER=ON)
+if(USE_ADDR_SANITIZER)
+	add_compile_options(-fsanitize=address -fno-omit-frame-pointer -g)
+	add_link_options(-fsanitize=address)
+endif()
+
+if(NOT PLUS_VERSION)
+    add_compile_definitions(CHECK_CURR_VER)
+endif()
+
+if(SNAPSHOT_BUILD)
+    add_compile_definitions(SNAPSHOT_BUILD)
+endif()
+
+if(NO_UPDATE_CHECK)
+    add_compile_definitions(NO_UPDATE_CHECK)
+endif()
+
+if(APPIMAGE_BUILD AND LINUX)
+    add_compile_definitions(APPIMAGE_BUILD)
+endif()
+
+# This function wraps a call to qt_add_executable and set a
+# variable named PGM_TARGET in the parent scope (where the function
+# was called). In macOS, the executable is always built as standalone
+# not as a application bundle
+# The parameter USE_PRIV_EXEC_ICONS when ON indicates that the executable
+# icon must be the one available in private resources dir otherwise
+# the one in the target's res/ is used instead. This options has
+# effect only when building Windows binaries
+function(pgm_add_executable TARGET)
+  list(APPEND _SOURCES ${ARGN})
+
+  if(WIN32)
+		set(PRIV_ICO_RES ${PRIV_CORE_RES}/${TARGET}/windows_ico.rc)
+
+		if((PLUS_VERSION OR BUILD_PRIV_ASSETS) AND EXISTS ${PRIV_ICO_RES})
+      set(EXEC_ICO_RES ${PRIV_ICO_RES})
+    else()
+      set(EXEC_ICO_RES res/windows_ico.rc)
+    endif()
+
+    list(APPEND _SOURCES ${EXEC_ICO_RES})
+  endif()
+
+  add_executable(${TARGET} ${_SOURCES})
+
+	# Strip symbols in release builds for security
+	if(CMAKE_BUILD_TYPE STREQUAL Release AND NOT WIN32)
+		set_target_properties(${TARGET} PROPERTIES
+													LINK_FLAGS_RELEASE "-s")
+	endif()
+
+  if(WIN32)
+    set_target_properties(${TARGET} PROPERTIES
+                          WIN32_EXECUTABLE TRUE
+                          LINK_FLAGS "-mwindows")
+  elseif(APPLE)
+    set_target_properties(${TARGET} PROPERTIES
+                          MACOSX_BUNDLE FALSE
+                          BUILD_WITH_INSTALL_RPATH TRUE
+                          INSTALL_NAME_DIR "@executable_path/../Frameworks")
+  endif()
+
+  set(PGM_TARGET ${TARGET} PARENT_SCOPE)
+endfunction()
+
+# This function configure the default includes and link libraries
+# as being the libs subprojects sources and generated libs
+function(pgm_set_default_inc_libs TARGET)
+  target_include_directories(${TARGET} PRIVATE
+	  ${LIBCANVAS_INC}
+	  ${LIBCLI_INC}
+	  ${LIBCONNECTOR_INC}
+	  ${LIBCORE_INC}
+	  ${LIBGUI_INC}
+	  ${LIBPARSERS_INC}
+	  ${LIBUTILS_INC})
+
+  target_link_libraries(${TARGET} PRIVATE
+	  canvas
+	  cli
+	  connector
+	  core
+	  gui
+	  parsers
+	  utils)
+endfunction()
+
+# This function wraps a call to qt_add_library and set a
+# variable named PGM_TARGET in the parent scope (where the function
+# was called). The library is always built as with option SHARED
+function(pgm_add_library TARGET)
+  string(TOUPPER  "${TARGET}_SYMBOLS" LIB_SYMBOLS)
+  add_compile_definitions(${LIB_SYMBOLS})
+
+  add_library(${TARGET} SHARED ${ARGN})
+
+	# Strip symbols in release builds for security
+	if(CMAKE_BUILD_TYPE STREQUAL Release AND NOT WIN32)
+		set_target_properties(${TARGET} PROPERTIES
+							  LINK_FLAGS_RELEASE "-s")
+	endif()
+
+	if(APPLE)
+		set_target_properties(${TARGET} PROPERTIES
+				BUILD_WITH_INSTALL_RPATH TRUE
+				INSTALL_NAME_DIR "@executable_path/../Frameworks")
+	endif()
+
+  set(PGM_TARGET ${TARGET} PARENT_SCOPE)
+endfunction()
+
+# This function configures the deployment settings of a library.
+function(pgm_install_library TARGET)
+    install(TARGETS ${TARGET}
+        LIBRARY DESTINATION ${PGM_PRIVATELIBDIR}
+        FRAMEWORK DESTINATION ${PGM_PRIVATELIBDIR}
+        RUNTIME DESTINATION ${PGM_PRIVATELIBDIR})
+endfunction()
+
+# This function configures the deployment settings of an executable.
+# The IS_PRIVBIN, when true, indicates that the output folder of the binary
+# must be the one configured in PGM_PRIVATEBINDIR otherwise will be PGM_BINDIR
+function(pgm_install_executable TARGET IS_PRIVBIN)
+    if(IS_PRIVBIN)
+        set(DEST ${PGM_PRIVATEBINDIR})
+    else()
+        set(DEST ${PGM_BINDIR})
+    endif()
+
+    install(TARGETS ${TARGET}
+				BUNDLE DESTINATION ${DEST}
+        RUNTIME DESTINATION ${DEST})
+endfunction()
+
+# This function includes priv-core sources into the current target.
+# It automatically appends source files, forms, and resources to the
+# caller's SOURCES, FORMS, and RESOURCES lists (if they exist).
+# It also adds the necessary include directories to the current target.
+# Parameters:
+#   TARGET - The target to add sources/includes to
+#   INCLUDE_SOURCES - If ON, adds sources and UI forms (needed by libgui)
+#                     If OFF, adds only include directories (executables/plugins)
+function(pgm_inc_priv_core_sources TARGET INCLUDE_SOURCES)
+	if(NOT BUILD_PRIV_ASSETS)
+		return()
+	endif()
+
+	# Add include directories to the current target (only if BUILD_PRIV_CODE is ON)
+	if(DEFINED TARGET AND BUILD_PRIV_CODE)
+		target_include_directories(${TARGET} PRIVATE ${PRIV_CORE_INC})
+		
+		# Only add sources if INCLUDE_SOURCES is ON (to avoid ODR violation)
+		if(INCLUDE_SOURCES)
+			target_sources(${TARGET} PRIVATE ${PRIV_CORE_SOURCES} ${PRIV_CORE_FORMS})
+
+			# Hiding key symbols of priv-core. 
+			# This is important to avoid ODR violation when the same symbols are 
+			# defined in plugins or other libs
+			if(CMAKE_BUILD_TYPE STREQUAL Release AND UNIX)
+				target_compile_definitions(${TARGET} PRIVATE PRIV_CORE_HIDE_INTERNAL_SYMBOLS)
+			endif()
+
+			# Enable AUTOUIC for this target if there are UI forms
+			if(PRIV_CORE_FORMS)
+				set_target_properties(${TARGET} PROPERTIES AUTOUIC ON)
+				# Collect all ui/* subdirectories automatically (up to 2 levels)
+				file(GLOB _priv_ui_dirs LIST_DIRECTORIES true "${PRIV_CORE_ROOT}/ui/*")
+				file(GLOB _priv_ui_subdirs LIST_DIRECTORIES true "${PRIV_CORE_ROOT}/ui/*/*")
+				set_property(TARGET ${TARGET} APPEND PROPERTY AUTOUIC_SEARCH_PATHS
+					${PRIV_CORE_ROOT}/ui
+					${_priv_ui_dirs}
+					${_priv_ui_subdirs})
+			endif()
+		endif()
+	endif()
+
+	# Always add resources if they exist (works for both PLUS and DEMO versions)
+	if(DEFINED TARGET AND PRIV_CORE_RESOURCES)
+		target_sources(${TARGET} PRIVATE ${PRIV_CORE_RESOURCES})
+		
+		# Enable AUTORCC for this target
+		set_target_properties(${TARGET} PROPERTIES AUTORCC ON)
+	endif()
+endfunction()

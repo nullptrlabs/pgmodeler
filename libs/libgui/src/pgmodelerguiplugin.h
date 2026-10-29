@@ -32,7 +32,7 @@
 #include "baseform.h"
 #include "pgmodelerplugin.h"
 
-#if defined(PRIVATE_PLUGINS_SYMBOLS)
+#ifdef PRIV_CODE_SYMBOLS
 	#include "privpluginsns.h"
 #endif
 
@@ -103,17 +103,55 @@ class __libgui PgModelerGuiPlugin: public PgModelerPlugin {
 		void configurePluginInfo(const QString &title, const QString &version, const QString &author, const QString &description);
 
 	public:
-		struct PluginWidgets {
-			QToolButton *button;
-			QWidget *widget;
+		/*! \brief This enum references the ids (positions) of the tool buttons
+		 *  at WelcomeWidget. They are used to indicate the position where a custom
+		 *  button of the plugin (when available) must be inserted */
+		enum WelcomeWgtBtnId: int {
+			NewModelBtn, // "New model" button
+			LoadModelBtn, // "Load model" button
+			SampleModelsBtn, // "Sample models" button
+			RecentModelsBtn, // "Recent models" button
+			LastSessionBtn, // "Last session" button
+			SupportBtn, // "Support" button
 
-			PluginWidgets(QToolButton *btn, QWidget *wgt)
+			/* Special id that indicate thes appending of
+			 * plugin's button at the buttons layout in WelcomeWidget */
+			AppendBtn
+		};
+
+		struct PluginWidgets {
+			//! \brief The action button that somehow toggles the plugin's main widget
+			QAbstractButton *action_btn;
+
+			//! \brief The widget that reunites the majority of features of the plugin
+			QWidget *main_wgt,
+
+			/*! \brief An option, general purpose, widget. By convention this widget
+			 * must be as minimal as possible, for example, an informational widget,
+			 * or something that executes small tasks */
+			*extra_wgt;
+
+			/*! \brief The tool button that is inserted in the layout at WelcomeWidget
+			 * to trigger an specific action of the plugin. The actual button styles
+			 * are overriden by the WelcomWidget tool buttons style to keep the UI uniform.
+			 * This widget is only installed when the plugin's dock mode is DockOnMainWnd,
+			 * otherwise it is ignored */
+			QToolButton *welcome_wgt_btn;
+
+			//! \brief The position where the welcome wiget button must be installed
+			WelcomeWgtBtnId w_wgt_btn_id;
+
+			PluginWidgets(QAbstractButton *act_btn, QWidget *m_wgt, QWidget *ext_wgt,
+										QToolButton *w_wgt_btn = nullptr, WelcomeWgtBtnId w_btn_id = AppendBtn)
 			{
-				button = btn;
-				widget = wgt;
+				action_btn = act_btn;
+				main_wgt = m_wgt;
+				extra_wgt = ext_wgt;
+				welcome_wgt_btn = w_wgt_btn;
+				w_wgt_btn_id = w_btn_id;
 			}
 
-			PluginWidgets() : PluginWidgets(nullptr, nullptr) {}
+			PluginWidgets() : PluginWidgets(nullptr, nullptr, nullptr, nullptr) {}
 		};
 
 		enum ActionId: unsigned {
@@ -147,21 +185,36 @@ class __libgui PgModelerGuiPlugin: public PgModelerPlugin {
 			BottomSection
 		};
 
+		/*! \brief This enum controls where the plugin widgets are docked (installed).
+		 *  Currently, there are two areas: at MainWindow::side_widgets_stw and
+		 *  SQLExecutionWidget::plugins_wgts_stw. */
+		enum WidgetDockMode: unsigned {
+			//! \brief The widgets are installed/docked in the MainWindow::side_widgets_stw
+			DockOnMainWnd,
+
+			//! \brief The widgets are installed/docked in the SQLExecutionWidget::plugins_wgts_stw
+			DockOnSqlExecWgt,
+
+			/*! \brief The widgets are not docked at all. Basically, plugins widget will be
+			 *  installed nowhere. This must be avoided since can lead to memory leaks */
+			NoDock
+		};
+
 		PgModelerGuiPlugin();
 
 		virtual ~PgModelerGuiPlugin();
 
 		//! \brief Returns the plugin's title, this same text is used as action's text on plugins toolbar.
-		virtual QString getPluginTitle() = 0;
+		virtual QString getPluginTitle() const = 0;
 
 		//! \brief Returns the plugin's author
-		virtual QString getPluginAuthor() = 0;
+		virtual QString getPluginAuthor() const = 0;
 
 		//! \brief Returns the plugin's version
-		virtual QString getPluginVersion() = 0;
+		virtual QString getPluginVersion() const = 0;
 
 		//! \brief Returns the plugin's complete description
-		virtual QString getPluginDescription() = 0;
+		virtual QString getPluginDescription() const = 0;
 
 		//! \brief Shows the plugin's information dialog
 		virtual void showPluginInfo();
@@ -171,13 +224,22 @@ class __libgui PgModelerGuiPlugin: public PgModelerPlugin {
 
 		/*! \brief Returns the menu section id where the ModelAction should be placed in
 		 *  the model widget popup menu. */
-		virtual MenuSectionId getMenuSection() = 0;
+		virtual MenuSectionId getMenuSection() const = 0;
 
 		//! \brief Returns the tool button inserted in database explorer instances
 		virtual QToolButton *getToolButton() = 0;
 
+		//! \brief Returns the parent class id in which the plugin's widgets are installed
+		virtual WidgetDockMode getWidgetDockMode() const;
+
 		//! \brief Returns the path to a plugin icon in the plugin's qrc file
-		QString getPluginIcon(const QString &icon_name);
+		QString getPluginIconPath(const QString &icon_name) const;
+
+		//! \brief Returns an QIcon instance with the plugin icon in the plugin's qrc file
+		QIcon getPluginIcon(const QString &icon_name) const;
+
+		//! \brief Returns an QPixmap instance with the plugin icon in the plugin's qrc file
+		QPixmap getPluginPixmap(const QString &icon_name) const;
 
 		/*! \brief Returns an struct containing a toolbutton and a widget
 		 *  that are installed in the areas in SQLExecutionWidget reserved for plugin
@@ -200,7 +262,7 @@ class __libgui PgModelerGuiPlugin: public PgModelerPlugin {
 		static QList<QToolButton *> getPluginsToolButtons();
 
 		//! \brief Returns the list of custom widgets of all registered plugins
-		static QList<PluginWidgets> getPluginsWidgets(QWidget *parent);
+		static QList<PluginWidgets> getPluginsWidgets(QWidget *parent, WidgetDockMode parent_id);
 
 		friend class PluginsConfigWidget;
 };

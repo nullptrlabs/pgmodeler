@@ -1,4 +1,5 @@
 #include "extension.h"
+#include "utilsns.h"
 #include "pgsqltypes/pgsqltype.h"
 
 Extension::Extension()
@@ -16,7 +17,7 @@ void Extension::setSchema(BaseObject *schema)
 	if(schema && schema->isDependingOn(this))
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgInvSchemaExtension).arg(schema->getName(), obj_name),
-										ErrorCode::AsgInvSchemaExtension, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::AsgInvSchemaExtension, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	if(!schema)
@@ -46,7 +47,7 @@ void Extension::setSchema(BaseObject *schema)
 				{
 					throw Exception(Exception::getErrorMessage(ErrorCode::AsgSchExtTypeConflict)
 													.arg(schema->getName(), obj_name, ext_obj.getName(), BaseObject::getTypeName(ObjectType::Type)),
-													ErrorCode::AsgSchExtTypeConflict, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+													ErrorCode::AsgSchExtTypeConflict, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 			}
 		}
@@ -60,8 +61,8 @@ void Extension::addObject(const ExtObject &ext_obj)
 	if(!ext_obj.isValid())
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvExtensionObject).arg(obj_name),
-										ErrorCode::InvExtensionObject, __PRETTY_FUNCTION__, __FILE__, __LINE__, nullptr,
-										QString(QT_TR_NOOP("Invalid object: %1 (%2)")).arg(ext_obj.getSignature(),
+										ErrorCode::InvExtensionObject, PGM_FUNC, PGM_FILE, PGM_LINE, nullptr,
+										UtilsNs::pgmTr(PGM_TR2("Global", "Invalid object: %1 (%2)")).arg(ext_obj.getSignature(),
 																																			 BaseObject::getTypeName(ext_obj.getType())));
 	}
 
@@ -84,8 +85,8 @@ const std::vector<Extension::ExtObject> &Extension::getObjects(ObjectType obj_ty
 {
 	if(obj_type != ObjectType::Type && obj_type != ObjectType::Schema)
 	{
-		throw Exception(ErrorCode::ObtObjectInvalidType, __PRETTY_FUNCTION__, __FILE__, __LINE__, nullptr,
-										QString(QT_TR_NOOP("Invalid object type: %1")).arg(BaseObject::getTypeName(obj_type)));
+		throw Exception(ErrorCode::ObtObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE, nullptr,
+										UtilsNs::pgmTr(PGM_TR2("Global", "Invalid object type: %1")).arg(BaseObject::getTypeName(obj_type)));
 	}
 
 	return ext_objects[obj_type];
@@ -94,7 +95,7 @@ const std::vector<Extension::ExtObject> &Extension::getObjects(ObjectType obj_ty
 void Extension::setVersion(VersionId ver, const QString &value)
 {
 	if(ver > OldVersion)
-		throw Exception(ErrorCode::RefAttributeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefAttributeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(versions[ver] != value);
 	versions[ver]=value;
@@ -103,7 +104,7 @@ void Extension::setVersion(VersionId ver, const QString &value)
 QString Extension::getVersion(VersionId ver)
 {
 	if(ver > OldVersion)
-		throw Exception(ErrorCode::RefAttributeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefAttributeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return versions[ver];
 }
@@ -177,7 +178,7 @@ QString Extension::getAlterCode(BaseObject *object)
 	Extension *ext=dynamic_cast<Extension *>(object);
 
 	if(!ext)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
@@ -192,7 +193,7 @@ QString Extension::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 

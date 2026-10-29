@@ -39,6 +39,8 @@ class __libgui DatabaseWidget: public BaseObjectWidget, public Ui::DatabaseWidge
 		*def_schema_sel,
 		*def_owner_sel,
 		*def_tablespace_sel;
+
+		QString getSQLCodePreview() override;
 		
 	public:
 		DatabaseWidget(QWidget * parent = nullptr);
@@ -46,7 +48,7 @@ class __libgui DatabaseWidget: public BaseObjectWidget, public Ui::DatabaseWidge
 		void setAttributes(DatabaseModel *model);
 		
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

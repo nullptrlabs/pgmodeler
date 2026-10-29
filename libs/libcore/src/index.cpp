@@ -82,10 +82,10 @@ int Index::getElementIndex(IndexElement elem)
 void Index::addIndexElement(IndexElement elem)
 {
 	if(getElementIndex(elem) >= 0)
-		throw Exception(ErrorCode::InsDuplicatedElement,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::InsDuplicatedElement,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(elem.getExpression().isEmpty() && !elem.getColumn() && !elem.getSimpleColumn().isValid())
-		throw Exception(ErrorCode::AsgInvalidExpressionObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidExpressionObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	idx_elements.push_back(elem);
 	setCodeInvalidated(true);
@@ -100,7 +100,7 @@ void Index::addIndexElement(const QString &expr, Collation *coll, OperatorClass 
 
 		//Raises an error if the expression is empty
 		if(expr.isEmpty())
-			throw Exception(ErrorCode::AsgInvalidExpressionObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgInvalidExpressionObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		//Configures the element
 		elem.setExpression(expr);
@@ -111,7 +111,7 @@ void Index::addIndexElement(const QString &expr, Collation *coll, OperatorClass 
 		elem.setSortingAttribute(IndexElement::AscOrder, asc_order);
 
 		if(getElementIndex(elem) >= 0)
-			throw Exception(ErrorCode::InsDuplicatedElement,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::InsDuplicatedElement,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		idx_elements.push_back(elem);
 		setCodeInvalidated(true);
@@ -119,7 +119,7 @@ void Index::addIndexElement(const QString &expr, Collation *coll, OperatorClass 
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -134,7 +134,7 @@ void Index::addIndexElement(Column *column, Collation *coll, OperatorClass *op_c
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgNotAllocatedColumn)
 							.arg(this->getName(), this->getTypeName()),
-							ErrorCode::AsgNotAllocatedColumn, __PRETTY_FUNCTION__,__FILE__,__LINE__);
+							ErrorCode::AsgNotAllocatedColumn, PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
 
 		//Configures the element
@@ -146,7 +146,7 @@ void Index::addIndexElement(Column *column, Collation *coll, OperatorClass *op_c
 		elem.setSortingAttribute(IndexElement::AscOrder, asc_order);
 
 		if(getElementIndex(elem) >= 0)
-			throw Exception(ErrorCode::InsDuplicatedElement,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::InsDuplicatedElement,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		idx_elements.push_back(elem);
 		setCodeInvalidated(true);
@@ -154,7 +154,7 @@ void Index::addIndexElement(Column *column, Collation *coll, OperatorClass *op_c
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -166,20 +166,20 @@ void Index::addIndexElements(std::vector<IndexElement> &elems)
 	{
 		idx_elements.clear();
 
-		for(unsigned i=0; i < elems.size(); i++)
-			addIndexElement(elems[i]);
+		for(const auto & elem : elems)
+			addIndexElement(elem);
 	}
 	catch(Exception &e)
 	{
 		idx_elements = elems_bkp;
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
 void Index::removeIndexElement(unsigned idx_elem)
 {
 	if(idx_elem >= idx_elements.size())
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	idx_elements.erase(idx_elements.begin() + idx_elem);
 	setCodeInvalidated(true);
@@ -194,7 +194,7 @@ void Index::removeIndexElements()
 IndexElement Index::getIndexElement(unsigned elem_idx)
 {
 	if(elem_idx >= idx_elements.size())
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return idx_elements[elem_idx];
 }
@@ -212,7 +212,7 @@ unsigned Index::getIndexElementCount()
 void Index::setIndexAttribute(IndexAttrib attrib_id, bool value)
 {
 	if(attrib_id > NullsNotDistinct)
-		throw Exception(ErrorCode::RefAttributeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefAttributeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(index_attribs[attrib_id] != value);
 	index_attribs[attrib_id]=value;
@@ -245,7 +245,7 @@ unsigned Index::getFillFactor()
 bool Index::getIndexAttribute(IndexAttrib attrib_id)
 {
 	if(attrib_id > NullsNotDistinct)
-		throw Exception(ErrorCode::RefAttributeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefAttributeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return index_attribs[attrib_id];
 }
@@ -346,7 +346,7 @@ void Index::addColumn(Column *col)
 	if(!col)
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgNotAllocatedColumn).arg(getName(), getTypeName()),
-										ErrorCode::AsgNotAllocatedColumn, __PRETTY_FUNCTION__,__FILE__,__LINE__);
+										ErrorCode::AsgNotAllocatedColumn, PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	// We ignore the column if it alread exits in the list
@@ -363,7 +363,7 @@ void Index::addSimpleColumn(const SimpleColumn &col)
 	if(!col.isValid())
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgNotAllocatedColumn).arg(getName(), getTypeName()),
-										ErrorCode::AsgNotAllocatedColumn, __PRETTY_FUNCTION__,__FILE__,__LINE__);
+										ErrorCode::AsgNotAllocatedColumn, PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	// We ignore the column if it alread exits in the list
@@ -386,7 +386,7 @@ void Index::setColumns(const std::vector<Column *> &cols)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -401,7 +401,7 @@ void Index::setSimpleColumns(const std::vector<SimpleColumn> &cols)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -481,7 +481,7 @@ QString Index::getAlterCode(BaseObject *object)
 	Index *index=dynamic_cast<Index *>(object);
 
 	if(!index)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
@@ -508,7 +508,7 @@ QString Index::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -516,11 +516,11 @@ void Index::validateElements()
 {
 	if(indexing_type!=IndexingType::Btree)
 	{
-		for(unsigned i=0; i < idx_elements.size(); i++)
+		for(auto & idx_element : idx_elements)
 		{
-			if(idx_elements[i].isSortingEnabled())
+			if(idx_element.isSortingEnabled())
 			{
-				idx_elements[i].setSortingEnabled(false);
+				idx_element.setSortingEnabled(false);
 				setCodeInvalidated(true);
 			}
 		}
@@ -558,7 +558,7 @@ QString Index::getDataDictionary(bool md_format, const attribs_map &extra_attrib
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 

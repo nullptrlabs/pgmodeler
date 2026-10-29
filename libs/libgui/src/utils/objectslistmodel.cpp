@@ -29,12 +29,12 @@
 #include "utilsns.h"
 
 const QStringList ObjectsListModel::HeaderTexts {
-	QT_TR_NOOP("Object"), QT_TR_NOOP("Type"), QT_TR_NOOP("ID"),
-	QT_TR_NOOP("Parent"), QT_TR_NOOP("Parent type")
+	PGM_TR2("Global", "ID"), PGM_TR2("Global", "Object"), PGM_TR2("Global", "Type"),
+	PGM_TR2("Global", "Parent"), PGM_TR2("Global", "Parent type")
 };
 
 const QStringList ObjectsListModel::HeaderIcons {
-	"objects", "usertype", "typeoid",
+	"typeoid", "objects", "usertype",
 	"schema", "usertype", "attribute"
 };
 
@@ -73,7 +73,7 @@ QModelIndex ObjectsListModel::index(int row, int column, const QModelIndex &pare
 
 QModelIndex ObjectsListModel::parent(const QModelIndex &) const
 {
-	return QModelIndex();
+	return {};
 }
 
 std::tuple<int,int,int> ObjectsListModel::getIndexMargins()
@@ -93,8 +93,12 @@ void ObjectsListModel::configureHeader(const QString &search_attr)
 {
 	QFontMetrics fm(qApp->font());
 	ItemData header_dt;
-	QStringList header_texts = HeaderTexts;
+	QStringList header_texts;
 	auto [ h_margin, h_margin_no_ico, v_margin ] = getIndexMargins();
+
+	// The texts are only marked for translation where they are declared, so they are translated here
+	for(auto &text : HeaderTexts)
+		header_texts.append(UtilsNs::pgmTr(text));
 
 	// Configuring the header items
 	header_texts.append(
@@ -155,9 +159,9 @@ QVariant ObjectsListModel::getItemData(const ItemData &item_dt, int role) const
 		return item_dt.sz_hint;
 
 	if(role == Qt::TextAlignmentRole)
-		return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
+		return { Qt::AlignLeft | Qt::AlignVCenter };
 
-	return QVariant();
+	return {};
 }
 
 void ObjectsListModel::fillModel(const std::vector<BaseObject*>& obj_list, const QString& search_attr)
@@ -185,12 +189,20 @@ void ObjectsListModel::fillModel(const std::vector<BaseObject*>& obj_list, const
 		else if(obj_type == ObjectType::Constraint)
 			sub_type = dynamic_cast<Constraint *>(obj)->getConstraintType().getTypeId();
 
-		//First column: Object name
+		//First column: Object id
+		item_dt.clear();
+		item_dt.id = obj->getObjectId();
+		item_dt.text = QString::number(obj->getObjectId());
+		item_dt.object = obj;
+		item_dt.sz_hint = fm.boundingRect(item_dt.text).size() + QSize(h_margin_no_ico, v_margin);
+		item_data.append(item_dt);
+
+		//Second column: Object name
 		item_dt.clear();
 		item_dt.text = obj->getName();
-		item_dt.sz_hint = fm.boundingRect(item_dt.text).size() + QSize(h_margin, v_margin);
-		item_dt.icon = GuiUtilsNs::getIconPath(obj_type, sub_type);
 		item_dt.object = obj;
+		item_dt.sz_hint = fm.boundingRect(item_dt.text).size() + QSize(h_margin, v_margin);		
+		item_dt.icon = GuiUtilsNs::getIconPath(obj_type, sub_type);
 
 		if(obj->isProtected() || obj->isSystemObject())
 		{
@@ -207,19 +219,12 @@ void ObjectsListModel::fillModel(const std::vector<BaseObject*>& obj_list, const
 		item_dt.strikeout = obj->isSQLDisabled() && !obj->isSystemObject();
 		item_data.append(item_dt);
 
-		//Second column: Object type
+		//Third column: Object type
 		item_dt.clear();
 		item_dt.text = obj->getTypeName();
 		item_dt.obj_type = obj ? obj->getObjectType() : ObjectType::BaseObject;
 		item_dt.sz_hint = fm.boundingRect(item_dt.text).size() + QSize(h_margin_no_ico, v_margin);
 		item_dt.italic = true;
-		item_data.append(item_dt);
-
-		//Third column: Object id
-		item_dt.clear();
-		item_dt.id = obj->getObjectId();
-		item_dt.text = QString::number(obj->getObjectId());
-		item_dt.sz_hint = fm.boundingRect(item_dt.text).size() + QSize(h_margin_no_ico, v_margin);
 		item_data.append(item_dt);
 
 		//Fourth column: Parent object name
@@ -356,9 +361,9 @@ void ObjectsListModel::fillModel(const std::vector<attribs_map> &attr_list)
 QVariant ObjectsListModel::data(const QModelIndex &index, int role) const
 {
 	if(index.row() < row_count && index.column() < col_count)
-		return getItemData(item_data.at(index.row() * col_count + index.column()), role);
+		return getItemData(item_data.at((index.row() * col_count) + index.column()), role);
 
-	return QVariant();
+	return {};
 }
 
 QVariant ObjectsListModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -366,7 +371,7 @@ QVariant ObjectsListModel::headerData(int section, Qt::Orientation orientation, 
 	if(orientation == Qt::Horizontal)
 	{
 		if(section >= col_count)
-			return QVariant();
+			return {};
 
 		return getItemData(header_data.at(section), role);
 	}

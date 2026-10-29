@@ -32,15 +32,20 @@ unexpected behavior and crashes.
 
 #include <QObject>
 
-//! \brief This macro expands to a block of code inside a try/catch blockz
-#define __trycatch(body) \
+/*! \brief This macro expands to a block of code inside a try/catch block. A user-initiated
+ * cancellation (ErrorCode::OperationCancelled, e.g. from TaskProgressWidget's cancel button, see
+ * DatabaseModel::loadModel()) is not an error and is silently swallowed instead of popping up an
+ * error dialog -- whatever cleanup the cancelled operation itself needed has already run by the
+ * time its exception reaches here */
+#define __trycatch(...) \
 try \
 { \
-	body \
+	__VA_ARGS__ \
 } \
 catch(Exception &e) \
 { \
-	Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__); \
+	if(e.getErrorCode() != ErrorCode::OperationCancelled) \
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE); \
 }
 
 /*! \brief This macro expands to a slot method call to be used with QObject::connect method.
@@ -75,7 +80,7 @@ catch(Exception &e) \
  *				receiver->ReceiverClass::someMethod();
  *			}
  *			catch(Exception &e) {
- *				Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+ *				Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
  *			}
  *		});
  */
@@ -116,7 +121,7 @@ catch(Exception &e) \
  *				receiver->ReceiverClass::someMethod(args...);
  *			}
  *			catch(Exception &e) {
- *				Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+ *				Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
  *			}
  *		});
  */
@@ -124,13 +129,5 @@ catch(Exception &e) \
 [receiver](auto... args) { \
 	__trycatch( (receiver)->method(args...); ) \
 }
-
-/*! \brief This macro is just a placeholder for the original QObject::connect call.
- * It acts just to flag where a original QObject connect is happening.
- * This macro is for TEMPORARY USE and will be replaced by the original call
- * once the signal/slots connections that need to use try/catch versions are refactored.
- */
-/* #define q_connect(sender, signal, receiver, slot, ...) \
-connect(sender, signal, receiver, slot, ##__VA_ARGS__); */
 
 #endif

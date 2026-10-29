@@ -21,22 +21,66 @@
 
 #include "utilsns.h"
 #include "exception.h"
+#include "globalattributes.h"
 #include <QFile>
 #include <QRegularExpression>
-#include <QCryptographicHash>
+#include <cstdlib>
+#include <QTemporaryFile>
+#include <QDir>
+
+#ifndef Q_OS_WIN
+	#include "execinfo.h"
+	#include <cxxabi.h>
+#endif
+
+#ifndef Q_OS_WIN
+namespace {
+	QString demangleStackSymbol(const char *raw_symbol)
+	{
+		QString symbol = QString::fromUtf8(raw_symbol);
+		int open_paren = symbol.indexOf('('),
+			plus_sign = symbol.indexOf('+', open_paren);
+
+		if(open_paren < 0 || plus_sign < 0 || plus_sign <= open_paren + 1)
+			return symbol;
+
+		QByteArray mangled_name = symbol.mid(open_paren + 1, plus_sign - open_paren - 1).toUtf8();
+		int demangle_status = -1;
+		char *demangled_name = abi::__cxa_demangle(mangled_name.constData(), nullptr, nullptr, &demangle_status);
+
+		if(demangle_status == 0 && demangled_name)
+			symbol.replace(open_paren + 1, plus_sign - open_paren - 1, QString::fromUtf8(demangled_name));
+
+		if(demangled_name)
+			free(demangled_name);
+
+		return symbol;
+	}
+}
+#endif
 
 namespace UtilsNs {
-	void saveFile(const QString &filename, const QByteArray &buffer)
+
+	void saveFile(const QString &filename, const QByteArray &buffer, bool mk_path)
 	{
 		QFile output;
 
-		output.setFileName(filename);
-		output.open(QFile::WriteOnly);
+		// Trying to create the full path to the file
+		if(mk_path)
+		{
+			QFileInfo fi(filename);
+			QDir dir = fi.absoluteDir();
 
-		if(!output.isOpen())
+			if(!dir.exists())
+				dir.mkpath(fi.absolutePath());
+		}
+
+		output.setFileName(filename);
+
+		if(!output.open(QFile::WriteOnly))
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotWritten).arg(output.fileName()),
-											ErrorCode::FileDirectoryNotWritten,__PRETTY_FUNCTION__,__FILE__,__LINE__,
+											ErrorCode::FileDirectoryNotWritten,PGM_FUNC,PGM_FILE,PGM_LINE,
 											nullptr, output.errorString());
 		}
 
@@ -44,31 +88,74 @@ namespace UtilsNs {
 		output.close();
 	}
 
-	QByteArray loadFile(const QString &filename)
+	bool setOwnerOnlyAccess(const QString &filename)
+	{
+		#ifdef Q_OS_WIN
+			Q_UNUSED(filename)
+			return true;
+		#else
+			QFile file(filename);
+
+			if(!file.exists())
+				return true;
+
+			return file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
+		#endif
+	}
+
+	QByteArray loadFile(const QString &filename, qint64 max_len)
 	{
 		QFile input;
 
 		input.setFileName(filename);
-		input.open(QFile::ReadOnly);
 
-		if(!input.isOpen())
+		if(!input.open(QFile::ReadOnly))
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotAccessed).arg(input.fileName()),
-											ErrorCode::FileDirectoryNotAccessed,__PRETTY_FUNCTION__,__FILE__,__LINE__,
+											ErrorCode::FileDirectoryNotAccessed,PGM_FUNC,PGM_FILE,PGM_LINE,
 											nullptr, input.errorString());
 		}
 
 		/* In order to avoid storing the contents of the file in a local variable
 		 * and returning it making two copies we just return the result of readAll().
 		 * The file descriptor will be closed in the destructor of QFile */
-		return input.readAll();
+		if(max_len <= 0)
+			// Read all contents if the max_len is not set
+			return input.readAll();
+
+		// Reading only the first max_len bytes of the file
+		return input.read(max_len);
+	}
+
+	QString pgmTr(const char *text)
+	{
+		return QCoreApplication::translate(TrContext, text);
+	}
+
+	QString pgmTr(const QString &text)
+	{
+		return pgmTr(text.toUtf8().constData());
 	}
 
 	QString convertToXmlEntities(QString value)
 	{
+		bool has_special_chr = false;
+
 		/* If the extracted value has one of the expected special chars
-		 * in order to perform the replacemnt to xml entities */
-		if(value.contains(QRegularExpression("(&|\\<|\\>|\")")))
+		 * in order to perform the replacemnt to xml entities. This is a plain scan
+		 * because building a regular expression on each call is far more expensive
+		 * than the replacements themselves and this function is called for every &{attribute}
+		 * the schema parser finds */
+		for(const QChar &chr : std::as_const(value))
+		{
+			if(chr == '&' || chr == '<' || chr == '>' || chr == '"')
+			{
+				has_special_chr = true;
+				break;
+			}
+		}
+
+		if(has_special_chr)
 		{
 			if(!value.contains(UtilsNs::EntityQuot) && !value.contains(UtilsNs::EntityLt) &&
 				 !value.contains(UtilsNs::EntityGt) && !value.contains(UtilsNs::EntityAmp) &&
@@ -83,11 +170,27 @@ namespace UtilsNs {
 		return value;
 	}
 
-	QString getStringHash(const QString& string)
+	QString getStringHash(const QString &string, QCryptographicHash::Algorithm algorithm)
 	{
-		QCryptographicHash hash_gen(QCryptographicHash::Md5);
-		hash_gen.addData(string.toUtf8());
-		return hash_gen.result().toHex();
+		return getStringHash(string.toUtf8(), algorithm);
+	}
+
+	QString getStringHash(const QByteArray &string, QCryptographicHash::Algorithm algorithm)
+	{
+		/* If the algorithm is not Md5 we just use the QCryptographicHash::hash() method 
+		 * to get the hash of the string. By default all objetcs in pgModeler are hashed using
+		 * Md5 algorithm because it is the fastest one and it is enough for our needs. */
+		if(algorithm != QCryptographicHash::Md5)
+			return QCryptographicHash::hash(string, algorithm).toHex();
+
+		/* Md5 is the only algorithm used in hot paths (object hash codes), so one hasher
+		 * per thread is reused. When Qt hashes through OpenSSL, each new QCryptographicHash
+		 * loads/unloads an OpenSSL provider, which is costly when creating one per call. */
+		thread_local QCryptographicHash hasher(QCryptographicHash::Md5);
+
+		hasher.reset();
+		hasher.addData(string);
+		return hasher.result().toHex();
 	}
 
 	QString formatMessage(const QString &msg)
@@ -125,5 +228,52 @@ namespace UtilsNs {
 		fmt_msg.replace("\n", "<br/>");
 
 		return fmt_msg;
+	}
+
+	QString generateStackTrace(int signal)
+	{
+		#ifndef Q_OS_WIN
+			void *stack[30];
+			size_t stack_size;
+			char **symbols=nullptr;
+			stack_size = backtrace(stack, 30);
+			symbols = backtrace_symbols(stack, stack_size);
+		#endif
+
+		QStringList s_trace;
+
+		s_trace.append(QString("** pgModeler crashed after receive signal: %1 **\n\nDate/Time: %2 \nVersion: %3 \nBuild: %4 \n")
+									 .arg(signal)
+									 .arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"),
+												GlobalAttributes::PgModelerVersion,
+												GlobalAttributes::PgModelerBuildNumber));
+
+		s_trace.append(QString("Compilation Qt version: %1\nRunning Qt version: %2\n")
+									 .arg(QT_VERSION_STR)
+									 .arg(qVersion()));
+
+		#ifndef Q_OS_WIN
+			for(size_t i = 0; i < stack_size; i++)
+				s_trace.append(QString("[%1] ").arg(stack_size-1-i) + demangleStackSymbol(symbols[i]));
+
+			free(symbols);
+		#else
+			s_trace.append("** Stack trace unavailable on Windows system **");
+		#endif
+
+		return s_trace.join('\n');
+	}
+
+	QString getTemporaryFilePath(const QString &abs_filepath_tmpl)
+	{
+		QTemporaryFile temp(abs_filepath_tmpl);
+
+		if(!temp.open())
+			return "";
+
+		QString temp_file = temp.fileName();
+		temp.close();
+
+		return temp_file;
 	}
 }

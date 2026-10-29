@@ -27,6 +27,7 @@
 #ifndef PHYSICAL_TABLE_H
 #define PHYSICAL_TABLE_H
 
+#include <QCoreApplication>
 #include <QStringList>
 #include "basegraphicobject.h"
 #include "basetable.h"
@@ -38,6 +39,9 @@
 #include "pgsqltypes/partitioningtype.h"
 
 class __libcore PhysicalTable: public BaseTable {
+	//! \brief Gives the class its own tr(), so the texts it translates are in the context PhysicalTable
+	Q_DECLARE_TR_FUNCTIONS(PhysicalTable)
+
 	protected:
 		//! \brief Specifies the table from which columns are copied
 		PhysicalTable *copy_table;
@@ -127,25 +131,29 @@ class __libcore PhysicalTable: public BaseTable {
 		//! \brief Toggles the generation of columns and constraints in form of ALTER commands
 		void __setGenerateAlterCmds(bool value);
 
+		/*! \brief Returns the total children objects count in the table
+		 *  This method makes no distinction between relationship-added
+		 *  object and user-created ones */
+		unsigned getObjectCount() override;
+
 	public:
 		PhysicalTable();
-
-		virtual ~PhysicalTable(){}
+		~PhysicalTable() override = default;
 
 		//! \brief Returns true if the provided table is considered a physical table (Table, ForeignTable, PhysicalTable)
 		static bool isPhysicalTable(ObjectType obj_type);
 
 		//! \brief Defines the table's name. This method updates the type named after the table
-		virtual void setName(const QString &name) override;
+		void setName(const QString &name) override;
 
 		//! \brief Defines the table's schema. This method updates the type named after the table
-		virtual void setSchema(BaseObject *schema) override;
+		void setSchema(BaseObject *schema) override;
 
 		//! \brief Configures the copy table
 		void setCopyTable(PhysicalTable *tab);
 
 		//! \brief Configures the copy table options
-		void setCopyTableOptions(CopyOptions copy_op);
+		void setCopyTableOptions(CopyOptions cpy_op);
 
 		//! \brief Returns the copy table
 		PhysicalTable *getCopyTable();
@@ -163,22 +171,22 @@ class __libcore PhysicalTable: public BaseTable {
 		PhysicalTable *getPartitionedTable();
 
 		//! \brief Adds an object to the table. It can be inserted at a specified index 'obj_idx'.
-		virtual void addObject(BaseObject *obj, int obj_idx=-1) override;
+		void addObject(BaseObject *obj, int obj_idx = -1) override;
 
 		//! \brief Gets a object from table through its index and type
-		virtual BaseObject *getObject(unsigned obj_idx, ObjectType obj_type) override;
+		BaseObject *getObject(unsigned obj_idx, ObjectType obj_type) override;
 
 		//! \brief Gets a object from table through its name and type
-		virtual BaseObject *getObject(const QString &name, ObjectType obj_type) override;
+		BaseObject *getObject(const QString &name, ObjectType obj_type) override;
 
 		//! \brief Removes a object from table through its index and type
-		virtual void removeObject(unsigned obj_idx, ObjectType obj_type) override;
+		void removeObject(unsigned obj_idx, ObjectType obj_type) override;
 
 		//! \brief Removes a object from table through its name and type
-		virtual void removeObject(const QString &name, ObjectType obj_type) override;
+		void removeObject(const QString &name, ObjectType obj_type) override;
 
 		//! \brief Removes the specified object from table
-		virtual void removeObject(BaseObject *obj) override;
+		void removeObject(BaseObject *obj) override;
 
 		//! \brief Adds a column to table (optionally the user can add the object at the specified index 'idx')
 		void addColumn(Column *col, int idx=-1);
@@ -252,7 +260,7 @@ class __libcore PhysicalTable: public BaseTable {
 
 		/*! \brief Gets the the count for the specified object type. The boolean parameter indicates
 		 that objects added by relationship must be counted */
-		virtual unsigned getObjectCount(ObjectType obj_type, bool inc_added_by_rel=true) override;
+		unsigned getObjectCount(ObjectType obj_type, bool inc_added_by_rel = true) override;
 
 		//! \brief Removes a column through its name
 		void removeColumn(const QString &name);
@@ -273,24 +281,27 @@ class __libcore PhysicalTable: public BaseTable {
 		void removeTrigger(unsigned idx);
 
 		//! \brief Returns the SQL / XML definition for table
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) override = 0;
+		QString getSourceCode(SchemaParser::CodeType def_type) override = 0;
 
 		//! \brief Gets the object index using its name and type
-		virtual int getObjectIndex(const QString &name, ObjectType obj_type) override;
+		int getObjectIndex(const QString &name, ObjectType obj_type) override;
 
 		/*! \brief Returns the index for the specified table object.
-		If the object specified on the parameter owns to another table other than 'this'
-		then the name of the objects are compared instead of the memory address */
-		virtual int getObjectIndex(BaseObject *obj) override;
+		 *  The parameter strict, when true, causes the comparison to be made
+		 *  strictly by matching the object's parent table address and its own address.
+		 *
+		 *  When strict is false, the comparison ocurrs ALSO by matching object's name
+		 *  against others of the same type in the parent table. */
+		int getObjectIndex(BaseObject *obj, bool strict = false) override;
 
 		//! \brief Returns the children objects of the table excluding the provided children types
-		virtual std::vector<BaseObject *> getObjects(const std::vector<ObjectType> &excl_types = {}) override;
+		std::vector<BaseObject *> getObjects(const std::vector<ObjectType> &excl_types = {}) override;
 
 		//! \brief Returns all the partition keys used by the table
 		std::vector<PartitionKey> getPartitionKeys();
 
 		//! \brief Protects the table and its aggregated objects against modification
-		virtual void setProtected(bool value) override;
+		void setProtected(bool value) override;
 
 		/*! \brief Toggles the generation of columns and constraints in form of ALTER commands.
 		 *  This method ignores the value when true if the table is a partitioned or partition. */
@@ -325,9 +336,6 @@ class __libcore PhysicalTable: public BaseTable {
 		//! \brief Returns the specified object type list. Returns null if an invalid object type is provided
 		virtual std::vector<TableObject *> *getObjectList(ObjectType obj_type);
 
-		//! \brief Returns a list of objects that references the providede column.
-		std::vector<TableObject *> getColumnReferences(Column *column);
-
 		//! \brief Reset the current index of the objects created by relationship
 		void resetRelObjectsIndexes();
 
@@ -343,11 +351,11 @@ class __libcore PhysicalTable: public BaseTable {
 		void setRelObjectsIndexes(const std::vector<QString> &obj_names, const std::vector<unsigned> &idxs, ObjectType obj_type);
 
 		//! \brief Invalidates the cached code forcing the generation of both SQL and XML
-		virtual void setCodeInvalidated(bool value) override;
+		void setCodeInvalidated(bool value) override;
 
 		/*! \brief Returns the alter definition by comparing the this table against the one provided via parameter
 		 * This is a pure virtual method and must be implemented by children classes */
-		virtual QString getAlterCode(BaseObject *object) override = 0;
+		QString getAlterCode(BaseObject *object) override = 0;
 
 		/*! \brief Defines an initial set of data for the table in a CSV-like buffer.
 		In order to separate columns and values use the DATA_SEPARATOR char and to separate
@@ -367,11 +375,11 @@ class __libcore PhysicalTable: public BaseTable {
 		 * invalidate the tables code (see setCodeInvalidated()) after retrieving the resulting code */
 		void setTableAttributes(SchemaParser::CodeType def_type, bool incl_rel_added_objs, bool incl_contraints);
 
-		virtual void setObjectListsCapacity(unsigned capacity) override;
+		void setObjectListsCapacity(unsigned capacity) override;
 
-		virtual unsigned getMaxObjectCount() override;
+		unsigned getMaxObjectCount() override;
 
-		virtual QString getDataDictionary(bool split, bool md_format, const attribs_map &extra_attribs = {}) override;
+		QString getDataDictionary(bool split, bool md_format, const attribs_map &extra_attribs = {}) override;
 
 		friend class Relationship;
 		friend class OperationList;

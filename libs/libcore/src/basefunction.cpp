@@ -61,25 +61,28 @@ void BaseFunction::addParameter(Parameter param)
 {
 	std::vector<Parameter>::iterator itr,itr_end;
 	bool found=false;
+	Qt::CaseSensitivity case_mode = BaseObject::isQuotingDisabled() ?
+																	Qt::CaseInsensitive : Qt::CaseSensitive;
 
-	itr=parameters.begin();
-	itr_end=parameters.end();
+	itr = parameters.begin();
+	itr_end = parameters.end();
 
 	//Checks the duplicity of parameter names
-	while(itr!=itr_end && !found)
+	while(itr != itr_end && !found)
 	{
 		/* Compares the parameters name storing in the 'found' flag
 		 if already exists in the function */
-		found=(itr->getName()==param.getName());
+		found=(itr->getName().compare(param.getName(), case_mode) == 0);
 		itr++;
 	}
 
 	//If a duplicated parameter is found an error is raised
 	if(found)
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgDuplicatedParameterFunction)
-						.arg(param.getName())
-						.arg(this->signature),
-						ErrorCode::AsgDuplicatedParameterFunction,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						.arg(param.getName(), this->signature),
+						ErrorCode::AsgDuplicatedParameterFunction,PGM_FUNC,PGM_FILE,PGM_LINE);
+	}
 
 	//Inserts the parameter in the function
 	parameters.push_back(param);
@@ -149,7 +152,7 @@ void BaseFunction::setBasicFunctionAttributes(SchemaParser::CodeType def_type)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -170,7 +173,7 @@ void BaseFunction::setLibrary(const QString &library)
 	if(language->getName().toLower() != DefaultLanguages::C)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgRefLibraryFuncLanguageNotC)
 						.arg(this->getSignature()),
-						ErrorCode::AsgRefLibraryFuncLanguageNotC,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgRefLibraryFuncLanguageNotC,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(this->library != library);
 	this->library=library;
@@ -181,7 +184,7 @@ void BaseFunction::setSymbol(const QString &symbol)
 	if(language->getName().toLower() != DefaultLanguages::C)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgRefLibraryFuncLanguageNotC)
 						.arg(this->getSignature()),
-						ErrorCode::AsgRefLibraryFuncLanguageNotC,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgRefLibraryFuncLanguageNotC,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(this->symbol != symbol);
 	this->symbol=symbol;
@@ -191,10 +194,11 @@ void BaseFunction::setLanguage(BaseObject *lang)
 {
 	//Raises an error if the language is not allocated
 	if(!lang)
-		throw Exception(ErrorCode::AsgNotAllocatedLanguage,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocatedLanguage,PGM_FUNC,PGM_FILE,PGM_LINE);
+
 	//Raises an error if the language object is invalid
-	else if(lang->getObjectType()!=ObjectType::Language)
-		throw Exception(ErrorCode::AsgInvalidLanguageObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+	if(lang->getObjectType()!=ObjectType::Language)
+		throw Exception(ErrorCode::AsgInvalidLanguageObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(this->language != lang);
 	this->language=lang;
@@ -226,7 +230,7 @@ void BaseFunction::addTransformTypes(const QStringList &types)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -235,13 +239,13 @@ void BaseFunction::setConfigurationParam(const QString &cfg_param, const QString
 	if(!ConfigParamPattern.match(cfg_param).hasMatch())
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvConfigParameterName).arg(cfg_param).arg(signature),
-										ErrorCode::InvConfigParameterName, __PRETTY_FUNCTION__,__FILE__,__LINE__);
+										ErrorCode::InvConfigParameterName, PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	if(value.isEmpty())
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::EmptyConfigParameterValue).arg(cfg_param).arg(signature),
-										ErrorCode::EmptyConfigParameterValue, __PRETTY_FUNCTION__,__FILE__,__LINE__);
+										ErrorCode::EmptyConfigParameterValue, PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	config_params[cfg_param] = value;
@@ -264,7 +268,7 @@ void BaseFunction::setFunctionSource(const QString &src_code)
 	if(language && language->getName().toLower() == DefaultLanguages::C)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgSourceCodeFuncCLanguage)
 						.arg(this->getSignature()),
-						ErrorCode::AsgSourceCodeFuncCLanguage,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgSourceCodeFuncCLanguage,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(this->func_source != src_code);
 	this->func_source=src_code;
@@ -299,7 +303,7 @@ Parameter BaseFunction::getParameter(unsigned param_idx)
 {
 	//Raises an error if the parameter index is out of bound
 	if(param_idx>=parameters.size())
-		throw Exception(ErrorCode::RefParameterInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefParameterInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return parameters[param_idx];
 }
@@ -356,7 +360,7 @@ void BaseFunction::removeParameter(unsigned param_idx)
 {
 	//Raises an error if parameter index is out of bound
 	if(param_idx>=parameters.size())
-		throw Exception(ErrorCode::RefParameterInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefParameterInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	auto itr = parameters.begin() + param_idx;
 	parameters.erase(itr);
@@ -372,6 +376,7 @@ void BaseFunction::createSignature(bool format, bool prepend_schema)
 {
 	QString aux_str;
 	QStringList fmt_params;
+	static const QRegularExpression arg_mode_regexp("^(IN)?( )*(OUT)?( )");
 
 	for(auto &param : parameters)
 	{
@@ -384,7 +389,7 @@ void BaseFunction::createSignature(bool format, bool prepend_schema)
 			 * So in order to avoid signature conflicts (mainly whe diff functions) we remove it.
 			 * The keyword OUT is also removed for IN OUT parameters, since removing the IN parameter the OUT keyword will remain which
 			 * forms an invalid signature. */
-			aux_str = param.getSourceCode(SchemaParser::SqlCode, true).replace(QRegularExpression("^(IN)?( )*(OUT)?( )"),"").trimmed();
+			aux_str = param.getSourceCode(SchemaParser::SqlCode, true).replace(arg_mode_regexp,"").trimmed();
 			aux_str.remove(',');
 			fmt_params.append(aux_str);
 			param.setCodeInvalidated(true);
@@ -454,7 +459,7 @@ attribs_map BaseFunction::getAlterCodeAttributes(BaseFunction *func)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 
 	return attribs;

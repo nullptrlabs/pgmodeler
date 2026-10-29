@@ -3,9 +3,11 @@
            Unexpected results may occur if the code is changed deliberately.
 -->
 <!ELEMENT appearance (design, code, objects)>
-<!ATTLIST appearance ui-theme (system|dark|light|inksaver) "system">
+<!ATTLIST appearance ui-theme CDATA #IMPLIED>
 <!ATTLIST appearance icons-size (big|medium|small) "big">
 <!ATTLIST appearance custom-scale CDATA #IMPLIED>
+<!ATTLIST appearance ui-font CDATA #IMPLIED>
+<!ATTLIST appearance ui-font-size CDATA #IMPLIED>
 
 <!ELEMENT design EMPTY>
 <!ATTLIST design grid-size CDATA #REQUIRED>
@@ -26,6 +28,7 @@
 <!ATTLIST code highlight-lines (false|true) "true">
 <!ATTLIST code line-numbers-color CDATA #IMPLIED>
 <!ATTLIST code line-numbers-bg-color CDATA #IMPLIED>
+<!ATTLIST code line-numbers-hl-color CDATA #IMPLIED>
 <!ATTLIST code line-highlight-color CDATA #IMPLIED>
 
 <!ELEMENT objects (global, font+, object+)>
@@ -41,7 +44,7 @@
 <!ATTLIST font underline (false|true) "false">
 <!ATTLIST font id (table-schema-name|view-schema-name|table-name|column|fk-column|pk-column|uq-column|nn-column|
                    prot-column|inh-column|index|rule|trigger|constraint|view-name|attribute|label|
-                   constraints|object-type|ref-table|ref-column|alias|pos-info|tag|policy|foreigntable-name|
+                   constraints|object-type|ref-table|ref-column|alias|pos-info|rel-marker|tag|policy|foreigntable-name|
                    foreigntable-schema-name) "table-name">
 
 <!ELEMENT object EMPTY>
@@ -50,5 +53,5 @@
 <!ATTLIST object id (table-title|table-body|textbox|view-title|view-body|view-toggler-btns|view-toggler-body|
                      label|relationship|attribute|column|pk-column|uq-column|fk-column|nn-column|rule|trigger|index|constraint|
 					 locker-body|locker-arc|obj-selection|reference|view-ext-body|table-ext-body|table-toggler-btns|
-					 table-toggler-body|pos-info|tag|placeholder|policy|foreigntable-title|foreigntable-body|
+					 table-toggler-body|pos-info|rel-marker|tag|placeholder|policy|foreigntable-title|foreigntable-body|
 					 foreigntable-ext-body|foreigntable-toggler-btns|foreigntable-toggler-body|obj-shadow) "table-title">

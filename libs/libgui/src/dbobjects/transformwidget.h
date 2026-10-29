@@ -46,7 +46,7 @@ class __libgui TransformWidget: public BaseObjectWidget, public Ui::TransformWid
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Transform *transform);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

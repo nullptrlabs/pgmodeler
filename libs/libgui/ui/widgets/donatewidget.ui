@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>440</width>
-    <height>365</height>
+    <width>650</width>
+    <height>430</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -16,10 +16,16 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>430</height>
+   </size>
+  </property>
   <property name="maximumSize">
    <size>
-    <width>16777215</width>
-    <height>600</height>
+    <width>650</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -43,11 +49,17 @@
    </property>
    <item row="0" column="0">
     <widget class="QFrame" name="frame">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
@@ -65,7 +77,7 @@
       <property name="spacing">
        <number>5</number>
       </property>
-      <item row="0" column="0">
+      <item row="0" column="1" colspan="3">
        <widget class="QLabel" name="title_lbl">
         <property name="font">
          <font>
@@ -74,17 +86,118 @@
          </font>
         </property>
         <property name="text">
-         <string>pgModeler needs your support!</string>
+         <string>Do more with pgModeler Plus!</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
         <property name="margin">
          <number>0</number>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="0" column="0" rowspan="2">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>180</width>
+            <height>180</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>180</width>
+            <height>180</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="../../res/resources.qrc">:/images/images/pgmodeler_plus.png</pixmap>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>20</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="nullptrlabs_lbl">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>60</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>150</width>
+              <height>60</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="mouseTracking">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
+            </property>
+            <property name="openExternalLinks">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="4">
        <widget class="QToolButton" name="hide_tb">
         <property name="toolTip">
          <string>Hide this widget</string>
@@ -94,7 +207,7 @@
         </property>
         <property name="icon">
          <iconset resource="../../res/resources.qrc">
-          <normaloff>:/icons/icons/close1.png</normaloff>:/icons/icons/close1.png</iconset>
+          <normaloff>:/icons/icons/closetab.png</normaloff>:/icons/icons/closetab.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -110,7 +223,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="2">
+      <item row="1" column="1" colspan="4">
        <widget class="QLabel" name="message_lbl">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -130,16 +243,28 @@
          </font>
         </property>
         <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
+         <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;pgModeler is brought to you thanks to a &lt;span style=&quot; font-style:italic;&quot;&gt;great effort to create and distribute a quality product&lt;/span&gt;. This project is reaching levels of maturity never imagined. All this results from joint work between its author and the &lt;span style=&quot; font-weight:600;&quot;&gt;Open Source community&lt;/span&gt;. There is no sponsorship involved.&lt;br/&gt;&lt;br/&gt;This software has a long way to go yet and with your help, we'll keep maintaining a good job and bringing new improvements on each release. If you like pgModeler and think it deserves a contribution, please consider supporting it!&lt;br/&gt;&lt;br/&gt;Thank you!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>While the **Community** version is the heart of our open-source engine, the **Plus** version is designed for **professional lifecycle** management. By upgrading, you get exclusive access to:
+
+* **Reverse engineering:** Import live databases directly into your visual models.
+
+* **Model diff and sync:** Automate complex schema migrations with ease.
+
+* **Live database management:** Manage and monitor your servers in real-time.
+
+* **Productivity suite:** Includes SSH tunneling, backup utilities, Git-friendly model format, and much more.
+
+**Support the project your way:**
+
+If you don't need the Plus features right now but still want to help keep the project alive and independent, please consider making a small donation. Thank you!</string>
         </property>
         <property name="textFormat">
-         <enum>Qt::RichText</enum>
+         <enum>Qt::TextFormat::MarkdownText</enum>
         </property>
         <property name="alignment">
-         <set>Qt::AlignJustify|Qt::AlignTop</set>
+         <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
         </property>
         <property name="wordWrap">
          <bool>true</bool>
@@ -148,30 +273,69 @@
          <number>0</number>
         </property>
         <property name="textInteractionFlags">
-         <set>Qt::NoTextInteraction</set>
+         <set>Qt::TextInteractionFlag::NoTextInteraction</set>
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2">
+      <item row="2" column="0" colspan="5">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <property name="spacing">
          <number>5</number>
         </property>
         <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+         <widget class="QPushButton" name="upgrade_btn">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <property name="sizeHint" stdset="0">
+          <property name="text">
+           <string>Upgrade now!</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res/resources.qrc">
+            <normaloff>:/icons/icons/update.png</normaloff>:/icons/icons/update.png</iconset>
+          </property>
+          <property name="iconSize">
            <size>
-            <width>118</width>
-            <height>20</height>
+            <width>25</width>
+            <height>25</height>
            </size>
           </property>
-         </spacer>
+          <property name="checkable">
+           <bool>false</bool>
+          </property>
+         </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="donate_tb">
+         <widget class="QPushButton" name="learn_btn">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Learn more</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res/resources.qrc">
+            <normaloff>:/icons/icons/info.png</normaloff>:/icons/icons/info.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="checkable">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="donate_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -194,18 +358,12 @@
           <property name="checkable">
            <bool>false</bool>
           </property>
-          <property name="popupMode">
-           <enum>QToolButton::InstantPopup</enum>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer">
+         <spacer name="horizontalSpacer_2">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -215,6 +373,32 @@
           </property>
          </spacer>
         </item>
+        <item>
+         <widget class="QPushButton" name="cancel_btn">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>No, thanks!</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../res/resources.qrc">
+            <normaloff>:/icons/icons/close1.png</normaloff>:/icons/icons/close1.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="checkable">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -223,7 +407,6 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

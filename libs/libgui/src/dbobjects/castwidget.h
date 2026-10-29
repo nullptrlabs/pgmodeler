@@ -47,7 +47,7 @@ class __libgui CastWidget: public BaseObjectWidget, public Ui::CastWidget {
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Cast *cast);
 		
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

@@ -20,14 +20,19 @@
 */
 
 #include "modelrestorationform.h"
+#include "customuistyle.h"
 #include "utilsns.h"
 #include "globalattributes.h"
 #include <QDir>
 #include <QFileInfo>
+#include "tabordermanager.h"
 
 ModelRestorationForm::ModelRestorationForm(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f)
 {
 	setupUi(this);
+	installEventFilter(new TabOrderManager(this));
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
 	connect(restore_btn, &QPushButton::clicked, this, &ModelRestorationForm::accept);
 	connect(cancel_btn, &QPushButton::clicked, this, &ModelRestorationForm::reject);
@@ -109,14 +114,26 @@ bool ModelRestorationForm::hasTemporaryModels()
 	return !this->getTemporaryModels().isEmpty();
 }
 
-void ModelRestorationForm::removeTemporaryFiles()
+void ModelRestorationForm::removeTemporaryFiles(bool rm_tmp_dirs)
 {
-	QDir tmp_file;
-	QStringList tmp_files = QDir(GlobalAttributes::getTemporaryPath(), "*",
-															 QDir::Name, QDir::Files | QDir::NoDotAndDotDot).entryList();
+	QDir::Filters filter = (rm_tmp_dirs ? QDir::Files | QDir::Dirs : QDir::Files);
+	QDir tmp_file = QDir(GlobalAttributes::getTemporaryPath(), "*",
+											 QDir::Name, filter | QDir::NoDotAndDotDot);
+	QStringList entries = tmp_file.entryList();
+	QFileInfo fi;
 
-	for(auto &file : tmp_files)
-		tmp_file.remove(GlobalAttributes::getTemporaryFilePath(file));
+	for(auto &entry : entries)
+	{
+		fi.setFile(GlobalAttributes::getTemporaryFilePath(entry));
+
+		if(fi.isFile())
+			tmp_file.remove(fi.absoluteFilePath());
+		else
+		{
+			tmp_file.setPath(fi.absoluteFilePath());
+			tmp_file.removeRecursively();
+		}
+	}
 }
 
 void ModelRestorationForm::removeTemporaryModels()

@@ -23,7 +23,7 @@
 #include <QTextBlock>
 #include <QScrollBar>
 #include <QFileDialog>
-#include <QTemporaryFile>
+#include "customuistyle.h"
 #include "guiutilsns.h"
 #include <QMenu>
 #include <QHBoxLayout>
@@ -64,22 +64,15 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 
 	if(act_btns_enabled)
 	{
-		QPalette pal = this->palette();
-		QFont font = this->font();
-
 		show_act_btns = true;
-		font.setPointSizeF(font.pointSizeF() * 0.90);
-
-		QVBoxLayout *top_wgt_lt = new QVBoxLayout;
-		top_wgt_lt->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin,
-																	 GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
 		top_widget = new QWidget(this);
 		top_widget->setObjectName("top_widget");
 		top_widget->setAutoFillBackground(true);
-		top_widget->setLayout(top_wgt_lt);
 
-		pal.setColor(QPalette::Window, LineNumbersWidget::getBackgroundColor());
-		top_widget->setPalette(pal);
+		QVBoxLayout *top_wgt_lt = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargins,
+																													 GuiUtilsNs::LtSpacing,
+																													 top_widget);
+
 		top_widget->setVisible(act_btns_enabled);
 		top_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
@@ -87,115 +80,115 @@ NumberedTextEditor::NumberedTextEditor(QWidget * parent, bool act_btns_enabled, 
 		search_wgt->setObjectName("search_wgt");
 		search_wgt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		search_wgt->setVisible(false);
-		search_wgt->layout()->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin,
-																						 GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
+		search_wgt->setAutoFillBackground(true);
+		search_wgt->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
 
-		QHBoxLayout *buttons_lt = new QHBoxLayout;
-		buttons_lt->setContentsMargins(0, 0, 0, 0);
-
+		QHBoxLayout *buttons_lt = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing);
 		top_wgt_lt->addLayout(buttons_lt);
 
 		QLabel *ico = new QLabel(top_widget);
 		msg_lbl = new QLabel(top_widget);
 		msg_lbl->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
-		ico->setPixmap(QPixmap(GuiUtilsNs::getIconPath("alert")));
+		ico->setPixmap(GuiUtilsNs::getPixmap("alert"));
 		ico->setScaledContents(true);
 
 		editor_alert_wgt = new QWidget(top_widget);
-		editor_alert_wgt->setFont(font);
 
-		QHBoxLayout *alert_lt = new QHBoxLayout;
-		alert_lt->setContentsMargins(0,0,0,0);
+		QHBoxLayout *alert_lt = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing, editor_alert_wgt);
 		alert_lt->addWidget(ico);
 		alert_lt->addWidget(msg_lbl);
 		editor_alert_wgt->setVisible(false);
-		editor_alert_wgt->setLayout(alert_lt);
 
 		buttons_lt->addWidget(editor_alert_wgt);
 		buttons_lt->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Expanding));
 
 		load_file_btn = new QToolButton(top_widget);
-		load_file_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("open")));
+		load_file_btn->setIcon(GuiUtilsNs::getIcon("open"));
 		load_file_btn->setAutoRaise(true);
 		load_file_btn->setText(tr("Load"));
 		load_file_btn->setShortcut(QKeySequence("Ctrl+L"));
 		load_file_btn->setToolTip(tr("Load text from an external file (%1)")
 															.arg(load_file_btn->shortcut().toString()));
-		load_file_btn->setFont(font);
 		load_file_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		buttons_lt->addWidget(load_file_btn);
 
 		save_file_btn = new QToolButton(top_widget);
-		save_file_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("save")));
+		save_file_btn->setIcon(GuiUtilsNs::getIcon("save"));
 		save_file_btn->setAutoRaise(true);
 		save_file_btn->setText(tr("Save"));
 		save_file_btn->setShortcut(QKeySequence("Ctrl+S"));
 		save_file_btn->setToolTip(tr("Save the text to a file (%1)")
 															.arg(load_file_btn->shortcut().toString()));
-		save_file_btn->setFont(font);
 		save_file_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		buttons_lt->addWidget(save_file_btn);
 
 		copy_btn = new QToolButton(top_widget);
-		copy_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("copy")));
+		copy_btn->setIcon(GuiUtilsNs::getIcon("copy"));
 		copy_btn->setAutoRaise(true);
 		copy_btn->setDisabled(true);
 		copy_btn->setText(tr("Copy"));
 		copy_btn->setShortcut(QKeySequence("Ctrl+C"));
-		copy_btn->setToolTip(tr("Copy the whole text to the clipboard (%1)")
+		copy_btn->setToolTip(tr("Copy a text to the clipboard (%1)")
 												 .arg(copy_btn->shortcut().toString()));
-		copy_btn->setFont(font);
 		copy_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		buttons_lt->addWidget(copy_btn);
 
 		edit_src_btn = new QToolButton(top_widget);
-		edit_src_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("edit")));
+		edit_src_btn->setIcon(GuiUtilsNs::getIcon("edit"));
 		edit_src_btn->setAutoRaise(true);
 		edit_src_btn->setText(tr("Edit"));
 		edit_src_btn->setShortcut(QKeySequence("Ctrl+E"));
 		edit_src_btn->setToolTip(tr("Edit the text in the defined external editor (%1)")
 														 .arg(edit_src_btn->shortcut().toString()));
-		edit_src_btn->setFont(font);
 		edit_src_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		buttons_lt->addWidget(edit_src_btn);
 
 		search_btn = new QToolButton(top_widget);
-		search_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("findtext")));
+		search_btn->setIcon(GuiUtilsNs::getIcon("findtext"));
 		search_btn->setAutoRaise(true);
 		search_btn->setCheckable(true);
 		search_btn->setText(tr("Search"));
 		search_btn->setShortcut(QKeySequence("Ctrl+F"));
 		search_btn->setToolTip(tr("Search in the text field (%1)")
 													 .arg(search_btn->shortcut().toString()));
-		search_btn->setFont(font);
 		search_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		buttons_lt->addWidget(search_btn);
 
 		word_wrap_btn = new QToolButton(top_widget);
-		word_wrap_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("wordwrap")));
+		word_wrap_btn->setIcon(GuiUtilsNs::getIcon("wordwrap"));
 		word_wrap_btn->setAutoRaise(true);
 		word_wrap_btn->setCheckable(true);
 		word_wrap_btn->setText(tr("Wrap"));
 		word_wrap_btn->setShortcut(QKeySequence("Ctrl+W"));
 		word_wrap_btn->setToolTip(tr("Toggles the word wrap (%1)")
 															.arg(word_wrap_btn->shortcut().toString()));
-		word_wrap_btn->setFont(font);
 		word_wrap_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		word_wrap_btn->setDisabled(true);
 		buttons_lt->addWidget(word_wrap_btn);
 
 		clear_btn = new QToolButton(top_widget);
-		clear_btn->setIcon(QIcon(GuiUtilsNs::getIconPath("cleartext")));
+		clear_btn->setIcon(GuiUtilsNs::getIcon("cleartext"));
 		clear_btn->setAutoRaise(true);
 		clear_btn->setText(tr("Clear"));
 		clear_btn->setToolTip(tr("Clears the entire text"));
-		clear_btn->setFont(font);
 		clear_btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		clear_btn->setDisabled(true);
 
 		buttons_lt->addWidget(clear_btn);
-		ico->setMaximumSize(edit_src_btn->iconSize());
+
+		for(auto &btn : top_widget->findChildren<QToolButton *>())
+		{
+			GuiUtilsNs::configureWidgetFont(btn, GuiUtilsNs::MediumFontFactor);
+			btn->setStyleSheet(QString("QToolButton { qproperty-iconSize: %1px %1px; }")
+												 .arg(qApp->style()->pixelMetric(QStyle::PM_SmallIconSize)));
+		}
+
+		ico->setMaximumSize(qApp->style()->pixelMetric(QStyle::PM_SmallIconSize),
+												qApp->style()->pixelMetric(QStyle::PM_SmallIconSize));
+
+		GuiUtilsNs::configureWidgetsFont({ top_widget, msg_lbl }, GuiUtilsNs::MediumFontFactor);
+		top_widget->setMaximumHeight(35);
 		top_widget->adjustSize();
 
 		connect(load_file_btn, &QToolButton::clicked, this, &NumberedTextEditor::loadFile);
@@ -280,7 +273,12 @@ void NumberedTextEditor::setFilenameFilters(const QStringList &list, const QStri
 
 void NumberedTextEditor::setDefaultFont(const QFont &font)
 {
-	default_font=font;
+	default_font = font;
+}
+
+QFont NumberedTextEditor::getDefaultFont()
+{
+	return default_font;
 }
 
 void NumberedTextEditor::setLineNumbersVisible(bool value)
@@ -474,18 +472,18 @@ void NumberedTextEditor::identSelection(bool ident_right)
 		cursor.setPosition(end, QTextCursor::KeepAnchor);
 		lines = cursor.selectedText().split(QChar(QChar::ParagraphSeparator));
 
-		for(int i=0; i < lines.size(); i++)
+		for(auto &line : lines)
 		{
-			if(!lines[i].isEmpty())
+			if(!line.isEmpty())
 			{
 				if(ident_right)
 				{
-					lines[i].prepend(QChar('\t'));
+					line.prepend(QChar('\t'));
 					count++;
 				}
-				else if(lines[i].at(0)==QChar('\t'))
+				else if(line.at(0) == QChar('\t'))
 				{
-					lines[i].remove(0,1);
+					line.remove(0,1);
 					count++;
 				}
 			}
@@ -515,7 +513,7 @@ void NumberedTextEditor::loadFile()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	if(loaded)
@@ -536,7 +534,7 @@ void NumberedTextEditor::saveFile()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -547,20 +545,16 @@ void NumberedTextEditor::editSource()
 	QStringList args;
 
 	if(tmp_src_file.isEmpty())
-	{
-		QTemporaryFile tmp_file;
-		tmp_file.setFileTemplate(GlobalAttributes::getTemporaryFilePath("source_XXXXXX.sql"));
-		tmp_file.open();
-		tmp_src_file = tmp_file.fileName();
-		tmp_file.close();
-	}
+		tmp_src_file = UtilsNs::getTemporaryFilePath(GlobalAttributes::getTemporaryFilePath("source_XXXXXX.sql"));
 
 	input.setFileName(tmp_src_file);
 
 	if(!input.open(QFile::WriteOnly | QFile::Truncate))
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotAccessed)
 										.arg(tmp_src_file),
-										ErrorCode::FileDirectoryNotAccessed ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										ErrorCode::FileDirectoryNotAccessed ,PGM_FUNC,PGM_FILE,PGM_LINE);
+	}
 
 	buffer.append(this->toPlainText().toUtf8());
 	input.write(buffer);
@@ -603,7 +597,7 @@ void NumberedTextEditor::updateSource(int exit_code, QProcess::ExitStatus)
 		if(!input.open(QFile::ReadOnly))
 			throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotAccessed)
 											.arg(tmp_src_file),
-											ErrorCode::FileDirectoryNotAccessed ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											ErrorCode::FileDirectoryNotAccessed ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		this->setPlainText(input.readAll());
 		input.close();
@@ -779,14 +773,31 @@ void NumberedTextEditor::resizeWidgets()
 
 	if(top_widget && show_act_btns)
 	{
-		top_widget->setStyleSheet(QString("QWidget#%1 { background-color: palette(window); }")
-															.arg(top_widget->objectName()));
+		QPalette tw_pal = top_widget->palette();
+		tw_pal.setColor(QPalette::Window, line_numbers_wgt->getBackgroundColor());
 
+		search_wgt->setPalette(tw_pal);
+		top_widget->setPalette(tw_pal);
 		top_widget->setGeometry(lt_margin, rect.top(),
 														width, top_widget->height());
+
+		/* Adjusting the action button styles
+		 * if the top_widget width is to low to fit all buttons. */
+		Qt::ToolButtonStyle style = Qt::ToolButtonIconOnly;
+
+		/* We define a base width that is close to the
+		 * sum of the widths of the visible buttons either
+		 * in read-only and read/write mode */
+		int base_width = isReadOnly() ? 350 : 600;
+
+		if(top_widget->width() > base_width)
+			style = Qt::ToolButtonTextBesideIcon;
+
+		for(auto &btn : top_widget->findChildren<QToolButton *>())
+			btn->setToolButtonStyle(style);
 	}
 
-	QString border_pal = AppearanceConfigWidget::isDarkUiTheme() ? "midlight" : "mid",
+	QString border_pal = CustomUiStyle::isDarkPalette() ? "dark" : "mid",
 
 			vp_style = QString("QWidget#%1 { \
 														background-color: palette(base); \
@@ -800,8 +811,8 @@ void NumberedTextEditor::resizeWidgets()
 
 	viewport()->setStyleSheet(vp_style);
 
-	setStyleSheet(QString("NumberedTextEditor { background-color: palette(window); border: 1px solid palette(%1); }")
-								.arg(AppearanceConfigWidget::isDarkUiTheme() ? "midlight" : "mid"));
+	/* setStyleSheet(QString("NumberedTextEditor { background-color: palette(window); border: 1px solid palette(%1); }")
+								.arg(CustomUiStyle::isDarkPalette() ? "dark" : "mid")); */
 }
 
 int NumberedTextEditor::getLineNumbersWidth()
@@ -819,7 +830,7 @@ int NumberedTextEditor::getLineNumbersWidth()
 	}
 
 	chr_width = this->fontMetrics().horizontalAdvance(QChar('9'));
-	return (15 + chr_width * digits);
+	return (15 + (chr_width * digits));
 }
 
 void NumberedTextEditor::setWordWrapMode(QTextOption::WrapMode policy)

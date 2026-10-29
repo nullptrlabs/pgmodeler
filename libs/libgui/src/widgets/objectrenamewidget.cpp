@@ -20,6 +20,7 @@
 */
 
 #include "objectrenamewidget.h"
+#include "customuistyle.h"
 #include "guiutilsns.h"
 #include "coreutilsns.h"
 #include "messagebox.h"
@@ -35,11 +36,14 @@ ObjectRenameWidget::ObjectRenameWidget(QWidget * parent) : QDialog(parent)
 	setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 	setAttribute(Qt::WA_TranslucentBackground, true);
 
-	connect(new_name_edt, &QLineEdit::returnPressed, apply_tb, &QToolButton::click);
-	connect(cancel_tb, &QToolButton::clicked, this, &ObjectRenameWidget::reject);
+	GuiUtilsNs::configureWidgetFont(rename_lbl, GuiUtilsNs::SmallFontFactor, true);
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
+
+	connect(new_name_edt, &QLineEdit::returnPressed, apply_btn, &QPushButton::click);
+	connect(cancel_btn, &QPushButton::clicked, this, &ObjectRenameWidget::reject);
 
 	connect(new_name_edt, &QLineEdit::textChanged, this, [this](){
-		apply_tb->setEnabled(!new_name_edt->text().isEmpty());
+		apply_btn->setEnabled(!new_name_edt->text().isEmpty());
 	});
 
 	handle_lbl->installEventFilter(this);
@@ -57,14 +61,14 @@ void ObjectRenameWidget::setAttributes(std::vector<BaseObject *> objs, DatabaseM
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::OprReservedObject)
 												 .arg(obj->getName(), obj->getTypeName()),
-											ErrorCode::OprReservedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											ErrorCode::OprReservedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
 
 		if(tab_obj && tab_obj->isAddedByRelationship())
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::OprRelationshipAddedObject)
 											.arg(tab_obj->getName(), tab_obj->getTypeName()),
-											ErrorCode::OprRelationshipAddedObject ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											ErrorCode::OprRelationshipAddedObject ,PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
 	}
 
@@ -82,17 +86,17 @@ void ObjectRenameWidget::updateLabelsButtons()
 	if(objects.size() == 1)
 	{
 		BaseObject *obj = objects.front();
-		obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(obj->getSchemaName())));
+		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(obj->getSchemaName()));
 		obj_icon_lbl->setToolTip(obj->getTypeName());
 		new_name_edt->setText(obj->getName());
-		rename_lbl->setText(tr("Rename %1 <strong>%2</strong> to:").arg(obj->getTypeName().toLower(), obj->getName()));
+		rename_lbl->setText(tr("Rename %1 <strong><u>%2</u></strong> to").arg(obj->getTypeName().toLower(), obj->getName()));
 	}
 	else
 	{
 		new_name_edt->setText("");
-		obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("objects")));
+		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap("objects"));
 		obj_icon_lbl->setToolTip("");
-		rename_lbl->setText(tr("Rename <strong>%1</strong> object(s) to:").arg(objects.size()));
+		rename_lbl->setText(tr("Rename %1 object(s) to").arg(objects.size()));
 	}
 
 	use_defaults_chk->setVisible(paste_mode);
@@ -100,19 +104,19 @@ void ObjectRenameWidget::updateLabelsButtons()
 
 	if(!paste_mode)
 	{
-		cancel_tb->setText(tr("Cancel"));
-		cancel_tb->setIcon(QIcon(GuiUtilsNs::getIconPath("close1")));
+		cancel_btn->setText(tr("Cancel"));
+		cancel_btn->setIcon(GuiUtilsNs::getIcon("close1"));
 
-		disconnect(apply_tb, nullptr, this, nullptr);
-		connect(apply_tb, &QToolButton::clicked, this, &ObjectRenameWidget::applyRenaming, Qt::UniqueConnection);
+		disconnect(apply_btn, nullptr, this, nullptr);
+		connect(apply_btn, &QPushButton::clicked, this, &ObjectRenameWidget::applyRenaming, Qt::UniqueConnection);
 	}
 	else
 	{
-		cancel_tb->setText(tr("Ignore"));
-		cancel_tb->setIcon(QIcon(GuiUtilsNs::getIconPath("cancel")));
+		cancel_btn->setText(tr("Ignore"));
+		cancel_btn->setIcon(GuiUtilsNs::getIcon("cancel"));
 
-		disconnect(apply_tb, nullptr, this, nullptr);
-		connect(apply_tb, &QToolButton::clicked, this, &ObjectRenameWidget::validateName, Qt::UniqueConnection);
+		disconnect(apply_btn, nullptr, this, nullptr);
+		connect(apply_btn, &QPushButton::clicked, this, &ObjectRenameWidget::validateName, Qt::UniqueConnection);
 	}
 }
 
@@ -181,8 +185,8 @@ void ObjectRenameWidget::applyRenaming()
 			if(objects.size() > 1)
 			{
 				Messagebox msg_box;
-				msg_box.show(tr("<strong>CAUTION:</strong> You're about to rename multiple objects at once! This operation may cause irreversible changes to other objects not necessarily selected. Do you really want to proceed?"),
-										 Messagebox::AlertIcon, Messagebox::YesNoButtons);
+				msg_box.show(tr("<strong>CAUTION:</strong> You are about to rename multiple objects at once! This operation may cause irreversible changes to other objects not necessarily selected. Do you really want to proceed?"),
+										 Messagebox::Alert, Messagebox::YesNoButtons);
 
 				if(msg_box.isRejected())
 					return;
@@ -234,15 +238,15 @@ void ObjectRenameWidget::applyRenaming()
 							obj_map[obj_type] = *model->getObjectList(obj_type);
 						else if(obj_map.count(ObjectType::BaseTable) == 0)
 						{
-								obj_map[ObjectType::BaseTable] = *model->getObjectList(ObjectType::Table);
+							obj_map[ObjectType::BaseTable] = *model->getObjectList(ObjectType::Table);
 
-								obj_map[ObjectType::BaseTable].insert(obj_map[ObjectType::BaseTable].end(),
-																model->getObjectList(ObjectType::View)->begin(),
-																model->getObjectList(ObjectType::View)->end());
+							obj_map[ObjectType::BaseTable].insert(obj_map[ObjectType::BaseTable].end(),
+															model->getObjectList(ObjectType::View)->begin(),
+															model->getObjectList(ObjectType::View)->end());
 
-								obj_map[ObjectType::BaseTable].insert(obj_map[ObjectType::BaseTable].end(),
-																model->getObjectList(ObjectType::ForeignTable)->begin(),
-																model->getObjectList(ObjectType::ForeignTable)->end());
+							obj_map[ObjectType::BaseTable].insert(obj_map[ObjectType::BaseTable].end(),
+															model->getObjectList(ObjectType::ForeignTable)->begin(),
+															model->getObjectList(ObjectType::ForeignTable)->end());
 						}
 
 						new_name = CoreUtilsNs::generateUniqueName<BaseObject>(object,
@@ -269,12 +273,17 @@ void ObjectRenameWidget::applyRenaming()
 				{
 					BaseTable *base_tab = tab_obj->getParentTable();
 					PhysicalTable *tab = dynamic_cast<PhysicalTable *>(base_tab);
-					Column *col=dynamic_cast<Column *>(tab_obj);
+					Column *col = dynamic_cast<Column *>(tab_obj);
 
 					/* If the object is a column and some primary key on table is referencing it
 					 * the relationships will be revalidated */
 					if(col && tab)
+					{
 						revalidate_rels = true;
+
+						// Forcing the update of views that eventually references the renamed column
+						model->updateViewsReferencingTable(tab);
+					}
 
 					base_tab->setModified(true);
 					dynamic_cast<Schema *>(base_tab->getSchema())->setModified(true);
@@ -298,7 +307,7 @@ void ObjectRenameWidget::applyRenaming()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 		if(obj_type != ObjectType::Database)
 			op_list->removeLastOperation();
@@ -315,7 +324,7 @@ void ObjectRenameWidget::validateName()
 	if(!BaseObject::isValidName(new_name_edt->text()))
 	{
 		Messagebox::error(Exception::getErrorMessage(ErrorCode::AsgInvalidNameObject),
-											ErrorCode::AsgInvalidNameObject, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+											ErrorCode::AsgInvalidNameObject, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 		return;
 	}

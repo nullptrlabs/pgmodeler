@@ -26,10 +26,14 @@
 #include "operationlist.h"
 #include "mainwindow.h"
 #include "widgets/numberedtexteditor.h"
-#include "tools/sqlexecutionwidget.h"
-#include "tools/modeldatabasediffform.h"
-#include "tools/databaseimportform.h"
-#include "tools/modelexportform.h"
+#include "tools/modelexportwidget.h"
+#include <QRadioButton>
+
+#ifdef PRIV_CODE_SYMBOLS
+	#include "tools/sqlexecutionwidget.h"
+	#include "tools/difftoolwidget.h"
+	#include "tools/databaseimportwidget.h"
+#endif
 
 std::map<QString, GeneralConfigWidget::WidgetState> GeneralConfigWidget::widgets_geom;
 std::map<QString, attribs_map> GeneralConfigWidget::config_params;
@@ -42,23 +46,30 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 																			 QPageSize::B7, QPageSize::B8, QPageSize::B9, QPageSize::C5E, QPageSize::Comm10E, QPageSize::DLE,
 																			 QPageSize::Executive, QPageSize::Folio, QPageSize::Ledger, QPageSize::Legal, QPageSize::Letter,
 																			 QPageSize::Tabloid, QPageSize::Custom };
+
 	Ui_GeneralConfigWidget::setupUi(this);
 
-	confs_dir_sel = new FileSelectorWidget(this);
+	confs_dir_sel = new PathSelectorWidget(this);
 	confs_dir_sel->setToolTip(tr("pgModeler configurations directory for the current user"));
 	confs_dir_sel->setReadOnly(true);
 	confs_dir_sel->setDirectoryMode(true);
-	confs_dir_sel->setSelectedFile(GlobalAttributes::getConfigurationsPath());
-	general_grid->addWidget(confs_dir_sel, 1, 1, 1, 1);
+	confs_dir_sel->setSelectedPath(GlobalAttributes::getConfigurationsPath());
+	confs_dir_lt->addWidget(confs_dir_sel);
 
-	source_editor_sel = new FileSelectorWidget(this);
-	source_editor_sel->setAllowFilenameInput(true);
-	source_editor_sel->setFileMustExist(true);
+	source_editor_sel = new PathSelectorWidget(this);
+	source_editor_sel->setAllowPathInput(true);
+	source_editor_sel->setPathMustExist(true);
 	source_editor_sel->setAcceptMode(QFileDialog::AcceptOpen);
 	source_editor_sel->setWindowTitle(tr("Select application"));
 	source_editor_sel->setToolTip(tr("External source code editor application"));
 	source_editor_sel->setCheckExecutionFlag(true);
-	general_grid->addWidget(source_editor_sel, 2, 1, 1, 1);
+	source_editor_lt->addWidget(source_editor_sel);
+
+	GuiUtilsNs::configureBuddyWidgets(this);
+	GuiUtilsNs::configureWidgetsFont({ sql_history_lbl, trunc_columns_data_chk,
+																		 width_lbl, height_lbl, left_lbl,
+																		 right_lbl, top_lbl, bottom_lbl },
+																	 GuiUtilsNs::SmallFontFactor, true);
 
 	int i = 0;
 	for(auto &pg_id : page_ids)
@@ -72,12 +83,11 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 	connect(unity_cmb, &QComboBox::currentIndexChanged, this, &GeneralConfigWidget::convertMarginUnity);
 	connect(autosave_interv_chk, &QCheckBox::toggled, autosave_interv_spb, &QSpinBox::setEnabled);
 	connect(paper_cmb, &QComboBox::currentIndexChanged, this,  &GeneralConfigWidget::selectPaperSize);
-	connect(save_restore_geometry_chk, &QCheckBox::toggled, reset_sizes_tb, &QToolButton::setEnabled);
-	connect(reset_sizes_tb, &QToolButton::clicked, this, &GeneralConfigWidget::resetDialogsSizes);
+	connect(save_restore_geometry_chk, &QCheckBox::toggled, reset_sizes_btn, &QPushButton::setEnabled);
+	connect(reset_sizes_btn, &QPushButton::clicked, this, &GeneralConfigWidget::resetDialogsSizes);
 
 	connect(trunc_columns_data_chk, &QCheckBox::toggled, trunc_columns_data_spb, &QComboBox::setEnabled);
 	connect(trunc_columns_data_chk, &QCheckBox::toggled, disable_inline_editor_chk, &QComboBox::setEnabled);
-	connect(trunc_columns_data_chk, &QCheckBox::toggled, bytes_lbl, &QLabel::setEnabled);
 
 	config_params[Attributes::Configuration][Attributes::GridSize]="";
 	config_params[Attributes::Configuration][Attributes::OpListSize]="";
@@ -109,10 +119,11 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 	config_params[Attributes::Configuration][Attributes::HistoryMaxLength]="";
 	config_params[Attributes::Configuration][Attributes::SourceEditorApp]="";
 	config_params[Attributes::Configuration][Attributes::UiLanguage]="";
-	config_params[Attributes::Configuration][Attributes::UseCurvedLines]="";
 	config_params[Attributes::Configuration][Attributes::SaveRestoreGeometry]="";
 	config_params[Attributes::Configuration][Attributes::LowVerbosity]="";
 	config_params[Attributes::Configuration][Attributes::DefaultSchema]="";
+	config_params[Attributes::Configuration][Attributes::HideEmptyObjGroups]="";
+	config_params[Attributes::Configuration][Attributes::DisableNameQuoting]="";
 
 	selectPaperSize();
 
@@ -128,6 +139,13 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 													 "*.qm", QDir::Name, QDir::AllEntries | QDir::NoDotAndDotDot).entryList();
 
 	langs.replaceInStrings(".qm", "");
+
+	/* English (US) is the language of the original texts of the UI, so it has no dictionary. It's always
+	 * available and, when selected, no translation is loaded (see Application::loadTranslation()), which is
+	 * different from "System default" that uses the dictionary of the system's language, if there is one */
+	langs.removeAll(GlobalAttributes::OriginalUiLanguage);
+	langs.prepend(GlobalAttributes::OriginalUiLanguage);
+
 	ui_language_cmb->addItem(tr("System default"));
 	QString native_lang;
 
@@ -147,51 +165,91 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 	QList<QComboBox *> combos=this->findChildren<QComboBox *>();
 	QList<QRadioButton *> radios=this->findChildren<QRadioButton *>();
 
-	for(QCheckBox *chk : chk_boxes)
+	for(auto &chk : chk_boxes)
 	{
 		child_wgts.push_back(chk);
 		connect(chk, &QCheckBox::toggled, this, &GeneralConfigWidget::setConfigurationChanged);
 	}
 
-	for(QSpinBox *spin : spin_boxes)
+	for(auto &spin : spin_boxes)
 	{
 		child_wgts.push_back(spin);
 		connect(spin, &QSpinBox::valueChanged, this, &GeneralConfigWidget::setConfigurationChanged);
 	}
 
-	for(QDoubleSpinBox *dspin : dspin_boxes)
+	for(auto &dspin : dspin_boxes)
 	{
 		child_wgts.push_back(dspin);
 		connect(dspin,  &QDoubleSpinBox::valueChanged, this, &GeneralConfigWidget::setConfigurationChanged);
 	}
 
-	for(QComboBox *cmb : combos)
+	for(auto &cmb : combos)
 	{
 		child_wgts.push_back(cmb);
 		connect(cmb, &QComboBox::currentIndexChanged, this, &GeneralConfigWidget::setConfigurationChanged);
 	}
 
-	for(QRadioButton *radio : radios)
+	for(auto &radio : radios)
 	{
 		child_wgts.push_back(radio);
 		connect(radio, &QRadioButton::toggled, this, &GeneralConfigWidget::setConfigurationChanged);
 	}
 
-	connect(source_editor_sel, &FileSelectorWidget::s_selectorChanged, this, &GeneralConfigWidget::setConfigurationChanged);
+	connect(source_editor_sel, &PathSelectorWidget::s_selectorChanged, this, &GeneralConfigWidget::setConfigurationChanged);
 
-	connect(clear_sql_history_tb, &QToolButton::clicked, this, [](){
-		SQLExecutionWidget::destroySQLHistory();
+	#ifdef PRIV_CODE_SYMBOLS
+		connect(clear_sql_history_btn, &QPushButton::clicked, this, [](){
+			SQLExecutionWidget::destroySQLHistory();
+		});
+	#else
+		sql_tool_gb->setVisible(false);
+		sql_tool_gb->setEnabled(false);
+		printing_gb->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+		printing_spc->changeSize(10, 10, QSizePolicy::Expanding, QSizePolicy::Expanding);
+	#endif
+
+	connect(reset_alerts_choices_btn, &QPushButton::clicked, this, &GeneralConfigWidget::resetAlertChoices);
+
+	connect(disable_name_quoting_chk, &QCheckBox::toggled, this, [this](bool checked){
+		if(checked && config_params[Attributes::Configuration][Attributes::AlertDisableQuoting] == Attributes::True)
+		{
+			Messagebox msgbox;
+
+			msgbox.setCustomOptionText(tr("Don't alert me again"));
+
+			msgbox.show(tr("<strong>WARNING:</strong> Disabling automatic name quoting compromises core features of the tool and significantly increases the risk of database model corruption.\
+										 Critical features such as export, import and diff operations may produce invalid or inconsistent results.\
+										 This option is unsafe for general use and should remain disabled unless <strong>you fully understand the implications</strong>.\
+										 <strong>This configuration is dangerous. Use it entirely at your own risk.</strong>"), Messagebox::Alert, Messagebox::OkButton);
+
+			config_params[Attributes::Configuration][Attributes::AlertDisableQuoting] =
+					msgbox.isCustomOptionChecked() ? Attributes::False : Attributes::True;
+		}
 	});
-
-	connect(reset_alerts_choices_tb, &QToolButton::clicked, this, &GeneralConfigWidget::resetAlertChoices);
 }
 
 void GeneralConfigWidget::showEvent(QShowEvent *)
 {
-	reset_alerts_choices_tb->setEnabled(config_params[Attributes::Configuration][Attributes::AlertUnsavedModels] != Attributes::True ||
+	reset_alerts_choices_btn->setEnabled(config_params[Attributes::Configuration][Attributes::AlertUnsavedModels] != Attributes::True ||
 																			 config_params[Attributes::Configuration][Attributes::AlertOpenSqlTabs] != Attributes::True ||
-																			 config_params[Attributes::Configuration][Attributes::UseDefDisambiguation] == Attributes::True);
+																			 config_params[Attributes::Configuration][Attributes::UseDefDisambiguation] == Attributes::True ||
+																			 config_params[Attributes::Configuration][Attributes::AlertApplyMetadata] == Attributes::False ||
+																			 config_params[Attributes::Configuration][Attributes::AlertDisableQuoting] != Attributes::True ||
+																			 config_params[Attributes::Configuration][Attributes::AlertResizeRowsCols] == Attributes::False ||
+																			 config_params[Attributes::Configuration][Attributes::AlertSaveReloadModel] != Attributes::True);
 
+}
+
+void GeneralConfigWidget::resetAlertChoices()
+{
+	config_params[Attributes::Configuration][Attributes::AlertUnsavedModels] = Attributes::True;
+	config_params[Attributes::Configuration][Attributes::AlertOpenSqlTabs] = Attributes::True;
+	config_params[Attributes::Configuration][Attributes::UseDefDisambiguation] = Attributes::False;
+	config_params[Attributes::Configuration][Attributes::AlertApplyMetadata] = Attributes::True;
+	config_params[Attributes::Configuration][Attributes::AlertDisableQuoting] = Attributes::True;
+	config_params[Attributes::Configuration][Attributes::AlertResizeRowsCols] = Attributes::True;
+	config_params[Attributes::Configuration][Attributes::AlertSaveReloadModel] = Attributes::True;
+	reset_alerts_choices_btn->setEnabled(false);
 }
 
 void GeneralConfigWidget::loadConfiguration()
@@ -202,14 +260,18 @@ void GeneralConfigWidget::loadConfiguration()
 		unsigned interv=0;
 		int x=0, y=0, w=0, h=0, idx = -1;
 
-		for(QWidget *wgt : child_wgts)
+		for(auto &wgt : child_wgts)
 			wgt->blockSignals(true);
 
 		BaseConfigWidget::loadConfiguration(GlobalAttributes::GeneralConf, config_params, { Attributes::Id });
 
 		if(!config_params[Attributes::Configuration].count(Attributes::AlertUnsavedModels) ||
 			 !config_params[Attributes::Configuration].count(Attributes::AlertOpenSqlTabs) ||
-			 !config_params[Attributes::Configuration].count(Attributes::UseDefDisambiguation))
+			 !config_params[Attributes::Configuration].count(Attributes::UseDefDisambiguation) ||
+			 !config_params[Attributes::Configuration].count(Attributes::AlertApplyMetadata) ||
+			 !config_params[Attributes::Configuration].count(Attributes::AlertDisableQuoting) ||
+			 !config_params[Attributes::Configuration].count(Attributes::AlertResizeRowsCols) ||
+			 !config_params[Attributes::Configuration].count(Attributes::AlertSaveReloadModel))
 			resetAlertChoices();
 
 		oplist_size_spb->setValue((config_params[Attributes::Configuration][Attributes::OpListSize]).toUInt());
@@ -236,14 +298,12 @@ void GeneralConfigWidget::loadConfiguration()
 		confirm_validation_chk->setChecked(config_params[Attributes::Configuration][Attributes::ConfirmValidation]==Attributes::True);
 		code_completion_chk->setChecked(config_params[Attributes::Configuration][Attributes::CodeCompletion]==Attributes::True);
 		use_placeholders_chk->setChecked(config_params[Attributes::Configuration][Attributes::UsePlaceholders]==Attributes::True);
-		use_curved_lines_chk->setChecked(config_params[Attributes::Configuration][Attributes::UseCurvedLines]==Attributes::True);
 
 		print_grid_chk->setChecked(config_params[Attributes::Configuration][Attributes::PrintGrid]==Attributes::True);
 		print_pg_num_chk->setChecked(config_params[Attributes::Configuration][Attributes::PrintPgNum]==Attributes::True);
 
 		paper_cmb->setCurrentIndex((config_params[Attributes::Configuration][Attributes::PaperType]).toUInt());
-		portrait_rb->setChecked(config_params[Attributes::Configuration][Attributes::PaperOrientation]==Attributes::Portrait);
-		landscape_rb->setChecked(config_params[Attributes::Configuration][Attributes::PaperOrientation]==Attributes::Landscape);
+		orientation_cmb->setCurrentIndex(config_params[Attributes::Configuration][Attributes::PaperOrientation] == Attributes::Landscape ? 0 : 1);
 
 		margin=config_params[Attributes::Configuration][Attributes::PaperMargin].split(',');
 		custom_size=config_params[Attributes::Configuration][Attributes::PaperCustomSize].split(',');
@@ -262,11 +322,11 @@ void GeneralConfigWidget::loadConfiguration()
 		hide_sch_name_usr_types_chk->setChecked(config_params[Attributes::Configuration][Attributes::HideSchNameUserTypes]==Attributes::True);
 		hide_obj_shadows_chk->setChecked(config_params[Attributes::Configuration][Attributes::HideObjShadows]==Attributes::True);
 
-		source_editor_sel->setSelectedFile(config_params[Attributes::Configuration][Attributes::SourceEditorApp]);
+		source_editor_sel->setSelectedPath(config_params[Attributes::Configuration][Attributes::SourceEditorApp]);
 		source_editor_args_edt->setText(config_params[Attributes::Configuration][Attributes::SourceEditorArgs]);
 
 		save_restore_geometry_chk->setChecked(config_params[Attributes::Configuration][Attributes::SaveRestoreGeometry]==Attributes::True);
-		reset_sizes_tb->setEnabled(save_restore_geometry_chk->isChecked());
+		reset_sizes_btn->setEnabled(save_restore_geometry_chk->isChecked());
 		low_verbosity_chk->setChecked(config_params[Attributes::Configuration][Attributes::LowVerbosity]==Attributes::True);
 		escape_comments_chk->setChecked(config_params[Attributes::Configuration][Attributes::EscapeComment]==Attributes::True);
 
@@ -274,18 +334,22 @@ void GeneralConfigWidget::loadConfiguration()
 		trunc_columns_data_spb->setValue(config_params[Attributes::Configuration][Attributes::ColumnTruncThreshold].toInt());
 
 		trunc_columns_data_spb->setEnabled(trunc_columns_data_chk->isChecked());
-		bytes_lbl->setEnabled(trunc_columns_data_chk->isChecked());
-
 		disable_inline_editor_chk->setChecked(config_params[Attributes::Configuration][Attributes::DisableInlineEditor]==Attributes::True);
 		disable_inline_editor_chk->setEnabled(disable_inline_editor_chk->isChecked());
 
 		hide_obj_sel_info_chk->setChecked(config_params[Attributes::Configuration][Attributes::HideObjectsSelInfo]==Attributes::True);
 		hide_cur_pos_zoom_info_chk->setChecked(config_params[Attributes::Configuration][Attributes::HideCurPosZoomInfo]==Attributes::True);
 
+		hide_empty_obj_grps_chk->setChecked(config_params[Attributes::Configuration][Attributes::HideEmptyObjGroups]==Attributes::True);
+
+		disable_name_quoting_chk->blockSignals(true);
+		disable_name_quoting_chk->setChecked(config_params[Attributes::Configuration][Attributes::DisableNameQuoting] == Attributes::True);
+		disable_name_quoting_chk->blockSignals(false);
+
 		int ui_idx = ui_language_cmb->findData(config_params[Attributes::Configuration][Attributes::UiLanguage]);
 		ui_language_cmb->setCurrentIndex(ui_idx >= 0 ? ui_idx : 0);
 
-		for(QWidget *wgt : child_wgts)
+		for(auto &wgt : child_wgts)
 			wgt->blockSignals(false);
 
 		widgets_geom.clear();
@@ -307,7 +371,7 @@ void GeneralConfigWidget::loadConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e, e.getExtraInfo());
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e, e.getExtraInfo());
 	}
 }
 
@@ -435,7 +499,8 @@ void GeneralConfigWidget::saveConfiguration()
 		config_params[Attributes::Configuration][Attributes::OpListSize]=QString::number(oplist_size_spb->value());
 		config_params[Attributes::Configuration][Attributes::AutoSaveInterval]=QString::number(autosave_interv_chk->isChecked() ? autosave_interv_spb->value() : 0);
 		config_params[Attributes::Configuration][Attributes::PaperType]=QString::number(paper_cmb->currentIndex());
-		config_params[Attributes::Configuration][Attributes::PaperOrientation]=(portrait_rb->isChecked() ? Attributes::Portrait : Attributes::Landscape);
+		config_params[Attributes::Configuration][Attributes::PaperOrientation]=(orientation_cmb->currentIndex()  == 0 ? Attributes::Landscape : Attributes::Portrait);
+
 		config_params[Attributes::Configuration][Attributes::CanvasCornerMove]=(corner_move_chk->isChecked() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::InvertRangeSelTrigger]=(invert_rangesel_chk->isChecked() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::CheckUpdate]=(check_update_chk->isChecked() ? Attributes::True : "");
@@ -447,7 +512,6 @@ void GeneralConfigWidget::saveConfiguration()
 		config_params[Attributes::Configuration][Attributes::CodeCompletion]=(code_completion_chk->isChecked() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::UsePlaceholders]=(use_placeholders_chk->isChecked() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::HistoryMaxLength]=QString::number(history_max_length_spb->value());
-		config_params[Attributes::Configuration][Attributes::UseCurvedLines]=(use_curved_lines_chk->isChecked() ? Attributes::True : "");
 
 		config_params[Attributes::Configuration][Attributes::ShowCanvasGrid]=(ObjectsScene::isShowGrid() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::ShowPageDelimiters]=(ObjectsScene::isShowPageDelimiters() ? Attributes::True : "");
@@ -474,7 +538,7 @@ void GeneralConfigWidget::saveConfiguration()
 		config_params[Attributes::Configuration][Attributes::HideSchNameUserTypes]=(hide_sch_name_usr_types_chk->isChecked() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::HideObjShadows]=(hide_obj_shadows_chk->isChecked() ? Attributes::True : "");
 
-		config_params[Attributes::Configuration][Attributes::SourceEditorApp]=source_editor_sel->getSelectedFile();
+		config_params[Attributes::Configuration][Attributes::SourceEditorApp]=source_editor_sel->getSelectedPath();
 		config_params[Attributes::Configuration][Attributes::SourceEditorArgs]=source_editor_args_edt->text();
 		config_params[Attributes::Configuration][Attributes::UiLanguage]=ui_language_cmb->currentData().toString();
 
@@ -491,6 +555,10 @@ void GeneralConfigWidget::saveConfiguration()
 
 		config_params[Attributes::Configuration][Attributes::HideObjectsSelInfo]=(hide_obj_sel_info_chk->isChecked() ? Attributes::True : "");
 		config_params[Attributes::Configuration][Attributes::HideCurPosZoomInfo]=(hide_cur_pos_zoom_info_chk->isChecked() ? Attributes::True : "");
+
+		config_params[Attributes::Configuration][Attributes::HideEmptyObjGroups]=(hide_empty_obj_grps_chk->isChecked() ? Attributes::True : "");
+
+		config_params[Attributes::Configuration][Attributes::DisableNameQuoting]=(disable_name_quoting_chk->isChecked() ? Attributes::True : "");
 
 		config_params[Attributes::Configuration][Attributes::File]="";
 		config_params[Attributes::Configuration][Attributes::RecentModels]="";
@@ -562,7 +630,7 @@ void GeneralConfigWidget::saveConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -574,6 +642,7 @@ void GeneralConfigWidget::applyConfiguration()
 	  widgets_geom.clear();
 
 	BaseObject::setEscapeComments(escape_comments_chk->isChecked());
+	BaseObject::setQuotingDisabled(disable_name_quoting_chk->isChecked());
 
 	QPageLayout page_lt;
 	QPageSize::PageSizeId size_id = static_cast<QPageSize::PageSizeId>(paper_cmb->itemData(paper_cmb->currentIndex()).toInt());
@@ -586,7 +655,7 @@ void GeneralConfigWidget::applyConfiguration()
 		page_sz = QPageSize(QSizeF(width_spb->value(), height_spb->value()), QPageSize::Point);
 
 	page_lt.setPageSize(page_sz);
-	page_lt.setOrientation(portrait_rb->isChecked() ? QPageLayout::Portrait : QPageLayout::Landscape);
+	page_lt.setOrientation(orientation_cmb->currentIndex() == 0 ? QPageLayout::Landscape : QPageLayout::Portrait);
 	page_lt.setMargins(QMarginsF(left_marg->value(), top_marg->value(), right_marg->value(), bottom_marg->value()));
 	ObjectsScene::setPageLayout(page_lt);
 
@@ -603,11 +672,10 @@ void GeneralConfigWidget::applyConfiguration()
 	BaseTableView::setHideExtAttributes(hide_ext_attribs_chk->isChecked());
 	BaseTableView::setHideTags(hide_table_tags_chk->isChecked());
 
-	NumberedTextEditor::setSourceEditorApp(source_editor_sel->getSelectedFile());
+	NumberedTextEditor::setSourceEditorApp(source_editor_sel->getSelectedPath());
 	NumberedTextEditor::setSourceEditorAppArgs(source_editor_args_edt->text());
 
 	RelationshipView::setHideNameLabel(hide_rel_name_chk->isChecked());
-	RelationshipView::setCurvedLines(use_curved_lines_chk->isChecked());
 	TableObjectView::setSchemaNameUserType(hide_sch_name_usr_types_chk->isChecked());
 	ModelWidget::setSaveLastCanvasPosition(save_last_pos_chk->isChecked());
 	ModelWidget::setRenderSmoothnessDisabled(disable_smooth_chk->isChecked());
@@ -618,14 +686,19 @@ void GeneralConfigWidget::applyConfiguration()
 	BaseObjectView::setPlaceholderEnabled(use_placeholders_chk->isChecked());
 	BaseObjectView::setShadowHidden(hide_obj_shadows_chk->isChecked());
 
-	SQLExecutionWidget::setSQLHistoryMaxLength(history_max_length_spb->value());
-	ModelDatabaseDiffForm::setLowVerbosity(low_verbosity_chk->isChecked());
-	DatabaseImportForm::setLowVerbosity(low_verbosity_chk->isChecked());
-	ModelExportForm::setLowVerbosity(low_verbosity_chk->isChecked());
+	#ifdef PRIV_CODE_SYMBOLS
+		SQLExecutionWidget::setSQLHistoryMaxLength(history_max_length_spb->value());
+		DiffToolWidget::setLowVerbosity(low_verbosity_chk->isChecked());
+		DatabaseImportWidget::setLowVerbosity(low_verbosity_chk->isChecked());
+	#endif
+
+	ModelExportWidget::setLowVerbosity(low_verbosity_chk->isChecked());
 	Connection::setIgnoreDbVersion(old_pgsql_versions_chk->isChecked());
 
 	PlainTextItemDelegate::setMaxDisplayLength(trunc_columns_data_chk->isChecked() ? trunc_columns_data_spb->value() : 0);
 	PlainTextItemDelegate::setTextEditorEnabled(trunc_columns_data_chk->isChecked() ? !disable_inline_editor_chk->isChecked() : false);
+
+	setConfigurationChanged(false);
 }
 
 void GeneralConfigWidget::restoreDefaults()
@@ -642,7 +715,7 @@ void GeneralConfigWidget::restoreDefaults()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -671,13 +744,8 @@ void GeneralConfigWidget::convertMarginUnity()
 
 void GeneralConfigWidget::selectPaperSize()
 {
-	bool visible=paper_cmb->currentIndex()==paper_cmb->count()-1;
-
-	custom_lbl->setVisible(visible);
-	width_lbl->setVisible(visible);
-	height_lbl->setVisible(visible);
-	width_spb->setVisible(visible);
-	height_spb->setVisible(visible);
+	bool visible = (paper_cmb->currentIndex()== paper_cmb->count() - 1);
+	custom_page_sz_grp->setVisible(visible);
 }
 
 void GeneralConfigWidget::setConfigurationChanged(bool changed)
@@ -694,12 +762,4 @@ void GeneralConfigWidget::resetDialogsSizes()
 
 	if(Messagebox::isAccepted(res))
 		widgets_geom.clear();
-}
-
-void GeneralConfigWidget::resetAlertChoices()
-{
-	config_params[Attributes::Configuration][Attributes::AlertUnsavedModels] = Attributes::True;
-	config_params[Attributes::Configuration][Attributes::AlertOpenSqlTabs] = Attributes::True;
-	config_params[Attributes::Configuration][Attributes::UseDefDisambiguation] = Attributes::False;
-	reset_alerts_choices_tb->setEnabled(false);
 }

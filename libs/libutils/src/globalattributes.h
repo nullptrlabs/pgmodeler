@@ -101,7 +101,8 @@ class __libutils GlobalAttributes {
 		/*! \brief Returns the path to a file that is under a root path. Generally the root path is the full path to a folder that
 		 * stores assets related to pgModeler (config files, schema files, etc) in its installation root.
 		 *
-		 * The parameter file_ext is the file extension that is appended to the requested file.
+		 * The parameter file_ext is the file extension that is appended to the requested file. This is a convenience parameter,
+		 * to avoid writting the extension in the last parameter of the parameter pack pth_elems.
 		 * The parameter root_path is the base path where the file name (and eventually subfolders) will be appended
 		 * The parameter subfolder is a base subfolder where the file is located
 		 * The paramter pack ...pth_elems is the last part of the complete file path. By using this, one can form a path with a
@@ -154,6 +155,8 @@ class __libutils GlobalAttributes {
 		PgModelerDonateURL,
 		PgModelerUpdateCheckURL,
 
+		NullptrLabsSite,
+
 		EnvSchemasPath,
 		EnvConfPath,
 		EnvTmplConfPath,
@@ -176,6 +179,8 @@ class __libutils GlobalAttributes {
 		DbModelBkpExt,
 		ObjMetadataExt,
 		DirSeparator,
+		UiLanguageParam,		 //! \brief Name of the general config parameter that stores the UI language (same value as Attributes::UiLanguage, which is not available in libutils)
+		OriginalUiLanguage,	 //! \brief Id of the language of the original UI texts (en_US), which has no dictionary to be loaded
 		ResourcesDir,				 //! \brief Directory name which holds the pgModeler's plug-ins resources directory (res)
 		ConfigurationsDir,	 //! \brief Default name for the configurations directory
 		DefaultConfsDir,		 //! \brief Default name for the default configurations directory
@@ -207,6 +212,7 @@ class __libutils GlobalAttributes {
 		RelationshipsConf,		 //! \brief Default name for the relationships configuration file
 		SnippetsConf,					 //! \brief Default name for the code snippets configuration file
 		DiffPresetsConf,			 //! \brief Default name for the diff presets configuration file
+		ThemeConf,					   //! \brief Default name for the UI theme color palette configuration file
 
 		SQLHighlightConf,			 //! \brief Configuration file for SQL language highlight
 		XMLHighlightConf,			 //! \brief Configuration file for XML language highlight
@@ -328,6 +334,13 @@ class __libutils GlobalAttributes {
 		/*! \brief Returns the param_name value in the specified configuration file.
 		 *  Returns empty string when the config parameter or the file does not exist. */
 		static QString getConfigParamFromFile(const QString &param_name, const QString &conf_file);
+
+			//! \brief Returns a configured path either to a file or directory that is under a root path.
+		template<typename ...args>
+		static QString getPath(const QString &root_path, args... pth_elems)
+		{
+			return getFilePath("", root_path, pth_elems...);
+		};
 
 		friend class PgModelerPlugin;
 		friend class PgModelerCliPlugin;

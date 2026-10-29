@@ -67,9 +67,9 @@ class __libcore Aggregate: public BaseObject {
 		bool isValidFunction(unsigned func_idx, Function *func);
 
 	protected:
-		virtual void configureSearchAttributes();
+		void configureSearchAttributes() override;
 
-		virtual void updateDependencies();
+		void updateDependencies() override;
 
 	public:
 		//! \brief Constants used to reference the functions used by the aggregate
@@ -79,8 +79,7 @@ class __libcore Aggregate: public BaseObject {
 		};
 
 		Aggregate();
-
-		virtual ~Aggregate() {}
+		~Aggregate() override = default;
 
 		//! \brief Defines one of the functions used by the aggregate
 		void setFunction(FunctionId func_id, Function *func);
@@ -111,13 +110,13 @@ class __libcore Aggregate: public BaseObject {
 		unsigned getDataTypeCount();
 
 		//! \brief Returns the SQL / XML code definition for the aggregate
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
-		virtual QString getDropCode(bool cascade) final;
+		QString getDropCode(bool cascade) final;
 
-		virtual QString getAlterCode(BaseObject *object) final;
+		QString getAlterCode(BaseObject *object) final;
 
-		virtual QString getSignature(bool format=true) final;
+		QString getSignature(bool format = true) final;
 };
 
 #endif

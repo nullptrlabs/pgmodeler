@@ -45,7 +45,7 @@ class __libgui LanguageWidget: public BaseObjectWidget, public Ui::LanguageWidge
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Language *language);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

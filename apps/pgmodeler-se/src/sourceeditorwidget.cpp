@@ -34,18 +34,17 @@ SourceEditorWidget::SourceEditorWidget(QWidget *parent) : QWidget(parent)
 	code_compl_wgt = new CodeCompletionWidget(editor_txt);
 	code_compl_wgt->configureCompletion(nullptr, editor_hl);
 
-	source_file_sel = new FileSelectorWidget(source_file_parent);
+	source_file_sel = new PathSelectorWidget(source_file_parent);
 	source_file_sel->setReadOnly(true);
 	source_file_parent->setVisible(false);
 
-	QVBoxLayout *vbox = new QVBoxLayout(source_file_parent);
-	vbox->setContentsMargins(0, 0, 0, 0);
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(0, 0, source_file_parent);
 	vbox->addWidget(source_file_sel);
 
 	for(auto &itr : snippets)
-		code_compl_wgt->insertCustomItem(itr.first, itr.second, QPixmap(GuiUtilsNs::getIconPath("codesnippet")));
+		code_compl_wgt->insertCustomItem(itr.first, itr.second, GuiUtilsNs::getPixmap("codesnippet"));
 
-	vbox = new QVBoxLayout(search_parent);
+	vbox = GuiUtilsNs::createVBoxLayout(0, 0, search_parent);
 	vbox->setContentsMargins(0, 0, 0, GuiUtilsNs::LtMargin);
 	vbox->addWidget(search_wgt);
 
@@ -85,7 +84,7 @@ void SourceEditorWidget::saveFile(const QString &filename)
 	validate_tb->setEnabled(filename.endsWith(GlobalAttributes::SchemaExt));
 	indent_tb->setEnabled(filename.endsWith(GlobalAttributes::SchemaExt));
 	this->filename = filename;
-	source_file_sel->setSelectedFile(filename);
+	source_file_sel->setSelectedPath(filename);
 	source_file_parent->setVisible(true);
 }
 
@@ -100,7 +99,7 @@ void SourceEditorWidget::loadSyntaxConfig(const QString &filename)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -209,7 +208,7 @@ void SourceEditorWidget::loadFile(const QString &filename)
 	indent_tb->setEnabled(enable);
 	code_compl_wgt->setEnabled(enable);
 	this->filename = filename;
-	source_file_sel->setSelectedFile(filename);
+	source_file_sel->setSelectedPath(filename);
 	source_file_parent->setVisible(true);
 
 	QString ext = "." + QFileInfo(filename).suffix();
@@ -235,7 +234,7 @@ void SourceEditorWidget::validateSyntax()
 		schparser.loadBuffer(editor_txt->toPlainText());
 		schparser.getSourceCode({});
 
-		Messagebox::info(tr("No lexical or sytactical errors found."));
+		Messagebox::info(tr("No lexical or syntactical errors found."));
 	}
 	catch(Exception &e)
 	{
@@ -254,7 +253,7 @@ void SourceEditorWidget::validateSyntax()
 		pal.setColor(QPalette::HighlightedText, QColor("#ffffff"));
 		editor_txt->setPalette(pal);
 
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -267,7 +266,7 @@ void SourceEditorWidget::applyIndentation()
 {
 	QStringList buffer = editor_txt->toPlainText().split(QChar::LineFeed);
 	int if_level = 0, comment_pos = -1, line_count = buffer.size();
-	bool found_cond = false, found_if = false, inline_ifend = false;
+	bool found_cond = false, /* found_if = false,*/ inline_ifend = false;
 	QString cond_pattern = QString("^(( )|(\\t))*(%1)"), line,
 			tk_if = SchemaParser::CharStartConditional + SchemaParser::TokenIf,
 			tk_then = SchemaParser::CharStartConditional + SchemaParser::TokenThen,
@@ -284,7 +283,7 @@ void SourceEditorWidget::applyIndentation()
 		if(line.contains(QRegularExpression(cond_pattern.arg(tk_if))) && !inline_ifend)
 		{
 			if_level++;
-			found_if = found_cond = true;
+			/* found_if = */ found_cond = true;
 		}
 		else if(line.contains(QRegularExpression(cond_pattern.arg(tk_else))) ||
 						line.contains(QRegularExpression(cond_pattern.arg(tk_end))))
@@ -309,7 +308,7 @@ void SourceEditorWidget::applyIndentation()
 					buffer.insert(ln_idx, *itr);
 
 				ln_idx = 0;
-				found_cond = found_if = false;
+				found_cond = /* found_if = */ false;
 				if_level = 0;
 				line_count = buffer.size();
 				continue;
@@ -327,7 +326,7 @@ void SourceEditorWidget::applyIndentation()
 		}
 
 		buffer[ln_idx] = line;
-		found_cond = found_if = false;
+		found_cond /* = found_if */ = false;
 	}
 
 	QRegularExpression cond_tk_regexp(QString("^(( )|(\\t))*(%1)[a-z]+").arg(SchemaParser::CharStartConditional));

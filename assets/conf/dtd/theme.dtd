@@ -1,0 +1,17 @@
+<!--
+  CAUTION: Do not modify this file directly on it's code unless you know what you are doing.
+           Unexpected results may occur if the code is changed deliberately.
+-->
+<!ELEMENT theme (description, palette+)>
+<!ATTLIST theme name CDATA #REQUIRED>
+
+<!ELEMENT description (#PCDATA)>
+
+<!ELEMENT palette EMPTY>
+<!ATTLIST palette role CDATA #REQUIRED>
+<!ATTLIST palette active CDATA #IMPLIED>
+<!ATTLIST palette inactive CDATA #IMPLIED>
+<!ATTLIST palette disabled CDATA #IMPLIED>
+<!ATTLIST palette fg-color CDATA #IMPLIED>
+<!ATTLIST palette bg-color CDATA #IMPLIED>
+

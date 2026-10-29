@@ -78,7 +78,9 @@ class __libcanvas RoundedRectItem: public QAbstractGraphicsShapeItem {
 		QVector<QPointF> calculatePoints(QPointF start_pnt, double start_angle, double end_angle);
 
 	public:
-		explicit RoundedRectItem(QGraphicsItem *parent = 0);
+		static constexpr double DefaultRadius = 9.0;
+
+		explicit RoundedRectItem(QGraphicsItem *parent = nullptr);
 
 		void setBorderRadius(double radius);
 		double getBorderRadius();
@@ -93,9 +95,9 @@ class __libcanvas RoundedRectItem: public QAbstractGraphicsShapeItem {
 
 		QPolygonF getPolygon();
 
-		virtual QRectF boundingRect() const override;
+		QRectF boundingRect() const override;
 
-		virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *) override;
+		void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *) override;
 };
 
 #endif

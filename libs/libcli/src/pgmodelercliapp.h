@@ -36,15 +36,41 @@
 #include "settings/generalconfigwidget.h"
 #include "settings/connectionsconfigwidget.h"
 #include "settings/relationshipconfigwidget.h"
-#include "settings/generalconfigwidget.h"
-#include "tools/databaseimporthelper.h"
-#include "tools/modelsdiffhelper.h"
 #include "pgmodelercliplugin.h"
+
+#ifdef PRIV_CODE_SYMBOLS
+   #include "tools/databaseimporthelper.h"
+	#include "tools/modelsdiffhelper.h"
+#endif
 
 class __libcli PgModelerCliApp: public Application {
 	Q_OBJECT
 
 	private:
+		#ifdef PRIV_CODE_SYMBOLS
+			//! \brief Import helper object
+			DatabaseImportHelper *import_hlp;
+
+			//! \brief Diff helper object
+			ModelsDiffHelper *diff_hlp;
+		#endif
+
+		struct MenuItem {
+			QString section, option, value, text;
+
+			MenuItem() = default;
+
+			MenuItem(const QString &_section) :
+				section(_section) {};
+
+			MenuItem(const QString &_option, const QString &_value, const QString &_text) :
+				option(_option), value(_value), text(_text){}
+
+			bool isEmpty() const
+			{ return section.isEmpty() && option.isEmpty() &&
+							 value.isEmpty() && text.isEmpty(); }
+		};
+
 		XmlParser *xmlparser;
 
 		qint64 buffer_size;
@@ -60,20 +86,14 @@ class __libcli PgModelerCliApp: public Application {
 		plugin_op,
 		export_op;
 
-		//! \brief Holds the pgModeler version in which the model was construted (used by the fix operation)
+		//! \brief Holds the pgModeler version in which the model was constructed (used by the fix operation)
 		QString model_version;
 
 		//! \brief Export helper object
 		ModelExportHelper *export_hlp;
 
-		//! \brief Import helper object
-		DatabaseImportHelper *import_hlp;
-
-		//! \brief Diff helper object
-		ModelsDiffHelper *diff_hlp;
-
-		//! \brief Reference database model
-		DatabaseModel *model;
+		//! \brief Input database model
+		DatabaseModel *input_model;
 
 		//! \brief Graphical scene used to export the model to png
 		ObjectsScene *scene;
@@ -132,6 +152,9 @@ class __libcli PgModelerCliApp: public Application {
 		//! \brief Stores the changelog of the model that is being fixed to reproduce it in the output model
 		QString changelog;
 
+		//! \brief The <dbmodel> tag of the model being fixed, kept so values that depend on the recreated objects can be applied later
+		QString model_header_tag;
+
 		static const QRegularExpression PasswordRegExp;
 
 		static const QString PasswordPlaceholder;
@@ -142,12 +165,29 @@ class __libcli PgModelerCliApp: public Application {
 		//! \brief Returns if the specified options exists on short options map
 		bool isOptionRecognized(QString &op, bool &accepts_val);
 
+		/*! \brief Translates one of the file association messages (MsgFileAssociated and
+		 * MsgNoFileAssociation, which only hold the text to be translated) and fills in its arguments */
+		static QString getFileAssociationMsg(const QString &msg_tmpl);
+
 		//! \brief Loads the input model and perform all tasks needed to configure the graphical objects
 		void loadModel();
 
 		/*! \brief Extracts the xml defintions from the input model and store them on obj_xml list
 		in order to be parsed by the recreateObjects() method */
 		void extractObjectXML();
+
+		/*! \brief Reads the scene segmentation data (segmentation mode and threshold, last scene, scene
+		 * rectangles) from the <dbmodel> header and <scenes> element of the model being fixed and
+		 * applies it to the input model, so it's saved back in the fixed model */
+		void restoreSegmentation(const QString &header_xml);
+
+		/*! \brief Reads the remaining model-level attributes of the <dbmodel> tag (author, code generation
+		 * and visibility flags, last position/zoom, layer colors and visibility) and applies them to the input model */
+		void restoreModelAttributes(const QString &dbm_tag);
+
+		/*! \brief Applies the default schema, owner, collation and tablespace declared in the <dbmodel> tag.
+		 * Must run after the objects were recreated since the defaults are resolved by name */
+		void restoreDefaultObjects();
 
 		//! \brief Recreates the objects from the obj_xml list fixing the creation order for them
 		void recreateObjects();
@@ -172,8 +212,6 @@ class __libcli PgModelerCliApp: public Application {
 		void fixOpClassesFamiliesReferences(QString &obj_xml);
 
 		void configureConnection(bool extra_conn);
-		void importDatabase(DatabaseModel *model, Connection conn);
-
 		void handleLinuxMimeDatabase(bool uninstall, bool system_wide, bool force);
 		void handleWindowsMimeDatabase(bool uninstall, bool system_wide, bool force);
 
@@ -195,6 +233,10 @@ class __libcli PgModelerCliApp: public Application {
 		void runPluginsPostOperations();
 
 		int exec();
+
+		#ifdef PRIV_CODE_SYMBOLS
+			void importDatabase(DatabaseModel *model, Connection conn);
+		#endif
 
 	public:
 		//! \brief Option names constants
@@ -221,6 +263,7 @@ class __libcli PgModelerCliApp: public Application {
 		NonTransactional,
 		PgSqlVer,
 		Help,
+		Version,
 		ShowGrid,
 		ShowDelimiters,
 		PageByPage,
@@ -253,11 +296,17 @@ class __libcli PgModelerCliApp: public Application {
 		ForceChildren,
 		OnlyMatching,
 		CommentsAsAliases,
+		SegMode,
+		SegThreshold,
+		SegModeSchema,
+		SegModeThreshold,
+		HideRels,
 		PartialDiff,
 		Force,
 		StartDate,
 		EndDate,
-		CompareTo,
+		CompareDb,
+		CompareFile,
 		SaveDiff,
 		ApplyDiff,
 		NoDiffPreview,
@@ -275,6 +324,7 @@ class __libcli PgModelerCliApp: public Application {
 		MissingOnly,
 		IgnoreFaultyPlugins,
 		ListPlugins,
+		NoEscapeComments,
 
 		ConnOptions,
 		TagExpr,
@@ -283,25 +333,38 @@ class __libcli PgModelerCliApp: public Application {
 		ModelFixLog,
 
 		MsgFileAssociated,
-		MsgNoFileAssociation;
+		MsgNoFileAssociation,
+
+		MenuItemOptTmpl;
 
 		PgModelerCliApp(int argc, char **argv);
-
-		virtual ~PgModelerCliApp();
+		~PgModelerCliApp() override;
 
 		//! \brief Shows the options menu
 		void showMenu();
 
 					 //! \brief Shows the version info
-		void showVersionInfo();
+		void showVersionInfo(bool only_ver_num);
 
 		/*! \brief Prints to the stdout the provided text appending a \n on the string
 		 * even if the silent mode is active. */
 		void printText(const QString &txt = "");
 
+	/*! \brief Prints a menu item with automatic line breaking
+	 * \param item Long option (e.g., "export-to-file")
+	 * \param opt_value Optional value accepted by the option (e.g., "[FILE]", "[DBNAME]")
+	 * \param description Description text
+	 * \param ini_pos Initial position for description text. If -1, uses length of options + 4 spaces
+	 * \param break_pos Position where line should break (counted from line start) */
+		void printMenuItem(const MenuItem &item, int ini_pos = -1, int break_pos = 120);
+
+		/*! \brief Prints multiple menu items with consistent alignment
+		 * \param items List of tuples containing (long_opt, opt_value, description). If only long_opt has content, it's treated as a section title
+		 * \param break_pos Position where line should break (counted from line start) */
+		void printMenuItems(const QList<MenuItem> &items, int break_pos = 120);
+
 		//! \brief Prints to the stdout only if the silent mode is not active
 		void printMessage(const QString &txt = "");
-
 		//! \brief Returns the options parsed when calling the application
 		attribs_map getParsedOptions();
 
@@ -310,15 +373,17 @@ class __libcli PgModelerCliApp: public Application {
 
 		//! \brief Replaces the value of a single parsed option
 		void setParsedOptValue(const QString &opt, const QString &value);
-
 		void fixModel();
 		void exportModel();
-		void importDatabase();
-		void diffModelDatabase();
 		void updateMimeType();
 		void createConfigurations();
 		void listConnections();
 		void listPlugins();
+
+		#ifdef PRIV_CODE_SYMBOLS
+			void importDatabase();
+			void diffModels();
+		#endif
 
 	private slots:
 		void handleObjectAddition(BaseObject *);

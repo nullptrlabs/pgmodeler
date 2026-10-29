@@ -31,11 +31,6 @@ PlainTextItemDelegate::PlainTextItemDelegate(QObject *parent, bool read_only) : 
 	this->read_only = read_only;
 }
 
-PlainTextItemDelegate::~PlainTextItemDelegate()
-{
-
-}
-
 void PlainTextItemDelegate::setMaxDisplayLength(int value)
 {
 	max_display_len = value;

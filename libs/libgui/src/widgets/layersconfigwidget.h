@@ -89,6 +89,8 @@ class __libgui LayersConfigWidget : public QWidget, Ui::LayersConfigWidget {
 		//! \brief Checks the items in the layers grid reflecting the active layers in the model performs a full update (slower) in the layers rects
 		void setLayersActive();
 
+		void selectObjectsInLayers();
+
 	public slots:
 		/*! \brief This slot adds an item to the layers grid and performs the need operations
 		 * to make the new layer available to the scene and model widget */

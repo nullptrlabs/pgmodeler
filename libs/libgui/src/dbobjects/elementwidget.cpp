@@ -27,23 +27,27 @@ ElementWidget::ElementWidget(QWidget *parent) : QWidget(parent)
 	element = nullptr;
 
 	setupUi(this);
+
+	GuiUtilsNs::configureWidgetsFont({ column_rb, expression_rb },
+																	 GuiUtilsNs::SmallFontFactor, true);
+
 	elem_expr_hl=new SyntaxHighlighter(elem_expr_txt, false, true, font().pointSizeF());
 	elem_expr_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
-	parent_obj=nullptr;
-	op_class_sel=new ObjectSelectorWidget(ObjectType::OpClass, this);
-	collation_sel=new ObjectSelectorWidget(ObjectType::Collation, this);
-	operator_sel=new ObjectSelectorWidget(ObjectType::Operator, this);
+	parent_obj = nullptr;
+	op_class_sel = new ObjectSelectorWidget(ObjectType::OpClass, this);
+	collation_sel = new ObjectSelectorWidget(ObjectType::Collation, this);
+	operator_sel = new ObjectSelectorWidget(ObjectType::Operator, this);
 
-	element_grid->addWidget(collation_sel, 3,1,1,2);
-	element_grid->addWidget(op_class_sel, 4,1,1,2);
-	element_grid->addWidget(operator_sel, 5,1,1,2);
+	op_class_lt->addWidget(op_class_sel);
+	collation_lt->addWidget(collation_sel);
+	operator_lt->addWidget(operator_sel);
 
 	connect(column_rb, &QRadioButton::toggled, this, &ElementWidget::selectElementObject);
 	connect(expression_rb, &QRadioButton::toggled, this, &ElementWidget::selectElementObject);
-	connect(sorting_chk, &QCheckBox::toggled, ascending_rb, &QRadioButton::setEnabled);
-	connect(sorting_chk, &QCheckBox::toggled, descending_rb, &QRadioButton::setEnabled);
 	connect(sorting_chk, &QCheckBox::toggled, nulls_first_chk, &QCheckBox::setEnabled);
+	connect(sorting_chk, &QCheckBox::toggled, sort_mode_cmb, &QComboBox::setEnabled);
+
 
 	this->setEnabled(false);
 	collation_sel->setVisible(false);
@@ -66,9 +70,10 @@ ElementWidget::ElementWidget(QWidget *parent) : QWidget(parent)
 	setTabOrder(op_class_sel->rem_object_tb, op_class_sel->sel_object_tb);
 	setTabOrder(op_class_sel->sel_object_tb, sorting_chk);
 
-	setTabOrder(sorting_chk, ascending_rb);
-	setTabOrder(ascending_rb, descending_rb);
-	setTabOrder(descending_rb, nulls_first_chk);
+	setTabOrder(sorting_chk, sort_mode_cmb);
+	setTabOrder(sort_mode_cmb, nulls_first_chk);
+
+	GuiUtilsNs::configureBuddyWidgets(this);
 }
 
 void ElementWidget::setAttributes(DatabaseModel *model, BaseObject *parent_obj, Element *elem)
@@ -109,11 +114,7 @@ void ElementWidget::setAttributes(DatabaseModel *model, BaseObject *parent_obj, 
 			elem_expr_txt->setPlainText(elem->getExpression());
 		}
 
-		if(elem->getSortingAttribute(IndexElement::AscOrder))
-			ascending_rb->setChecked(true);
-		else
-			descending_rb->setChecked(true);
-
+		sort_mode_cmb->setCurrentIndex(elem->getSortingAttribute(IndexElement::AscOrder) ? 0 : 1);
 		nulls_first_chk->setChecked(elem->getSortingAttribute(IndexElement::NullsFirst));
 		sorting_chk->setChecked(elem->isSortingEnabled());
 		op_class_sel->setSelectedObject(elem->getOperatorClass());
@@ -127,12 +128,13 @@ void ElementWidget::setAttributes(DatabaseModel *model, BaseObject *parent_obj)
 	if(!model || !parent_obj)
 	{
 		this->setEnabled(false);
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
-	else if(parent_obj->getObjectType()!=ObjectType::Table &&
-					parent_obj->getObjectType()!=ObjectType::View &&
-					parent_obj->getObjectType()!=ObjectType::Relationship)
-		throw Exception(ErrorCode::OprObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+
+	if(parent_obj->getObjectType()!=ObjectType::Table &&
+		 parent_obj->getObjectType()!=ObjectType::View &&
+		 parent_obj->getObjectType()!=ObjectType::Relationship)
+		throw Exception(ErrorCode::OprObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	this->setEnabled(true);
 	this->parent_obj=parent_obj;
@@ -141,8 +143,8 @@ void ElementWidget::setAttributes(DatabaseModel *model, BaseObject *parent_obj)
 	collation_sel->setModel(model);
 	operator_sel->setModel(model);
 
-	cols_combo_parent->setVisible(BaseTable::isBaseTable(parent_obj->getObjectType()));
 	column_rb->setVisible(BaseTable::isBaseTable(parent_obj->getObjectType()));
+	column_cmb->setVisible(BaseTable::isBaseTable(parent_obj->getObjectType()));
 	expression_rb->setChecked(parent_obj->getObjectType() == ObjectType::View);
 
 	if(BaseTable::isBaseTable(parent_obj->getObjectType()))
@@ -172,8 +174,7 @@ void ElementWidget::setPartitionKey(PartitionKey *elem)
 	collation_sel->setVisible(true);
 	collation_lbl->setVisible(true);
 	sorting_chk->setVisible(false);
-	ascending_rb->setVisible(false);
-	descending_rb->setVisible(false);
+	sort_mode_cmb->setVisible(false);
 	nulls_first_chk->setVisible(false);
 }
 
@@ -186,7 +187,7 @@ void ElementWidget::applyConfiguration()
 {
 	element->setSortingEnabled(sorting_chk->isChecked());
 	element->setSortingAttribute(IndexElement::NullsFirst, nulls_first_chk->isChecked());
-	element->setSortingAttribute(IndexElement::AscOrder, ascending_rb->isChecked());
+	element->setSortingAttribute(IndexElement::AscOrder, sort_mode_cmb->currentIndex() == 0);
 	element->setOperatorClass(dynamic_cast<OperatorClass *>(op_class_sel->getSelectedObject()));
 	element->setCollation(dynamic_cast<Collation *>(collation_sel->getSelectedObject()));
 	element->setOperator(dynamic_cast<Operator *>(operator_sel->getSelectedObject()));
@@ -242,7 +243,7 @@ void ElementWidget::updateColumnsCombo()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

@@ -380,7 +380,7 @@ p, li { white-space: pre-wrap; }
            </size>
           </property>
           <property name="toolTip">
-           <string>pgModeler is proudly a brazilian software!</string>
+           <string>pgModeler is proudly a Brazilian software!</string>
           </property>
           <property name="styleSheet">
            <string notr="true"/>

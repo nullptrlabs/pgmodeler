@@ -39,28 +39,23 @@ PolicyWidget::PolicyWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 	check_hl = new SyntaxHighlighter(check_edt, false, false, font().pointSizeF());
 	check_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
-	roles_tab = new CustomTableWidget(CustomTableWidget::AllButtons ^
-																		 (CustomTableWidget::DuplicateButton |
-																			CustomTableWidget::UpdateButton |
-																			CustomTableWidget::EditButton), true, this);
+	roles_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																																	CustomTableWidget::AllButtons ^
+																																	(CustomTableWidget::DuplicateButton |
+																																	 CustomTableWidget::UpdateButton |
+																																	 CustomTableWidget::EditButton),
+																																	true, roles_pg);
 	roles_tab->setColumnCount(1);
 	roles_tab->setHeaderLabel(tr("Name"), 0);
-	roles_tab->setHeaderIcon(QPixmap(GuiUtilsNs::getIconPath("uid")), 0);
-
-	QVBoxLayout *vbox = new QVBoxLayout;
-	vbox->addWidget(roles_tab);
-
-	QFrame *frame=generateInformationFrame(tr("Leave the <em><strong>Roles</strong></em> grid empty in order to create a %1 applicable to <strong><em>PUBLIC</em></strong>.")
-																				 .arg(BaseObject::getTypeName(ObjectType::Policy).toLower()));
-	vbox->addWidget(frame);
-	frame->setParent(this);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
-	attribs_tbw->widget(0)->setLayout(vbox);
+	roles_tab->setHeaderIcon(GuiUtilsNs::getIcon("uid"), 0);
 
 	command_cmb->addItems(PolicyCmdType::getTypes());
 
-	configureFormLayout(policy_grid, ObjectType::Policy);
-	configureTabOrder({ command_cmb, permissive_chk, attribs_tbw });
+	policy_lt->removeItem(command_mode_lt);
+	extra_wgts_lt->addLayout(command_mode_lt);
+	configureTabbedLayout(attribs_tbw);
+
+	//configureTabOrder({ command_cmb, mode_cmb, attribs_tbw });
 
 	connect(roles_tab, &CustomTableWidget::s_rowAdded, model_objs_wgt, &ModelObjectsWidget::show);
 	connect(model_objs_wgt, qOverload<BaseObject *, bool>(&ModelObjectsWidget::s_visibilityChanged), this, &PolicyWidget::selectRole);
@@ -69,7 +64,7 @@ PolicyWidget::PolicyWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 void PolicyWidget::setAttributes(DatabaseModel *model, OperationList *op_list, BaseObject *parent_obj, Policy *policy)
 {
 	if(!parent_obj)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	BaseObjectWidget::setAttributes(model, op_list, policy, parent_obj);
 	model_objs_wgt->setModel(model);
@@ -77,7 +72,7 @@ void PolicyWidget::setAttributes(DatabaseModel *model, OperationList *op_list, B
 	if(policy)
 	{
 		command_cmb->setCurrentText(~policy->getPolicyCommand());
-		permissive_chk->setChecked(policy->isPermissive());
+		mode_cmb->setCurrentIndex(policy->isPermissive() ? 1 : 0);
 		check_edt->setPlainText(policy->getCheckExpression());
 		using_edt->setPlainText(policy->getUsingExpression());
 
@@ -121,7 +116,7 @@ void PolicyWidget::applyConfiguration()
 		policy->removeRoles();
 		policy->setUsingExpression(using_edt->toPlainText());
 		policy->setCheckExpression(check_edt->toPlainText());
-		policy->setPermissive(permissive_chk->isChecked());
+		policy->setPermissive(mode_cmb->currentIndex() == 1);
 		policy->setPolicyCommand(command_cmb->currentText());
 
 		count=roles_tab->getRowCount();
@@ -135,6 +130,6 @@ void PolicyWidget::applyConfiguration()
 	catch(Exception &e)
 	{
 		cancelConfiguration();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }

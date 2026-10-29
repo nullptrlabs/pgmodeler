@@ -1,67 +1,76 @@
-![pgmodeler_mainwindow](https://user-images.githubusercontent.com/2205476/213446508-9bd549b3-ee7f-476d-9249-f537c31fce04.png)
+<img width="1254" height="663" alt="pgModeler 2.0 Community Edition" src="https://pgmodeler.io/img/pgmodeler_2_gh_ss.png" />
 
+## :rocket: Why pgModeler?
 
-[![Linux build](https://github.com/pgmodeler/pgmodeler/workflows/Linux%20build/badge.svg)](https://github.com/pgmodeler/pgmodeler/actions?query=workflow%3A%22Linux+build%22)
-[![Windows build](https://github.com/pgmodeler/pgmodeler/workflows/Windows%20build/badge.svg)](https://github.com/pgmodeler/pgmodeler/actions?query=workflow%3A%22Windows+build%22)
-[![macOs build](https://github.com/pgmodeler/pgmodeler/workflows/macOs%20build/badge.svg)](https://github.com/pgmodeler/pgmodeler/actions?query=workflow%3A%22macOs+build%22)
+**pgModeler** is a PostgreSQL-first, multiplatform database modeling platform designed specifically for the **PostgreSQL** ecosystem. Built with a strong focus on correctness, productivity, and PostgreSQL feature parity, pgModeler aims to be the definitive open-source reference for visual database design and schema engineering.
 
-:rocket: What's pgModeler?
-------------
+Unlike generic modeling tools, pgModeler fully embraces PostgreSQL’s advanced capabilities, ensuring that your visual models translate accurately into production-ready database schemas. Whether you are designing a new system from scratch or maintaining a large and complex infrastructure, pgModeler provides the flexibility and precision required by modern PostgreSQL workflows.
 
-An **open-source, multiplatform database modeler for PostgreSQL**. This project aims to be a reference database design tool when it comes to FOSS in the PostgreSQL ecosystem.
-Its feature-rich interface allows quick data modeling and fast code deployment on a server. It also supports reverse engineering by creating a visual representation of existing databases. Besides, pgModeler can also generate SQL scripts to sync a model and a database through the process called diff.
-This tool is not about modeling only, it also counts with a minimalist but functional database server administration module that allows the execution of any sort of SQL commands, and provides database browsing and data handling in a simple and intuitive UI.
+The platform is distributed in two editions:
 
-For more details about additional features, screenshots, and other useful information, please, visit the [project's official website](https://pgmodeler.io). For any feedback about the software visit the [Issues](https://github.com/pgmodeler/pgmodeler/issues) page. Additionally, follow pgModeler on [X](https://x.com/pgmodeler), [Bluesky](https://bsky.app/profile/pgmodeler.io) or [Mastodon](https://mastodon.social/@pgmodeler) and be up-to-date with new features, fixes, and releases.
+### pgModeler Community (Open Source)
 
-:hammer_and_wrench: Building & Installing
-----------------------
+The Community Edition is free and open source, focused on visual modeling, PostgreSQL schema design, SQL generation, and educational or development workflows.
 
-Being a multiplatform software, the building process differs slightly on each supported OS. This way, the installation procedures are fully described in the [Installation](https://www.pgmodeler.io/support/installation) section on the project's website.
+#### Key capabilities:
+* **Visual modeling:** Create and edit complex relational schemas through an intuitive drag-and-drop interface. Manage tables, views, relationships, functions, operators, and many other PostgreSQL-specific objects.
+* **Schema generation:** Generate high-quality SQL scripts directly from your visual models while preserving PostgreSQL compatibility and advanced object definitions.
+* **Validation & consistency tools:** Detect modeling inconsistencies, broken references, and dependency issues before deployment.
+* **Cross-platform native experience:** Built with **C++ and Qt**, delivering native performance on Linux, Windows, and macOS.
 
-You may want to check the [official plugin repository](https://github.com/pgmodeler/plugins) as well for information regarding extending pgModeler's features.
+The Community Edition remains the foundation of the pgModeler platform and continues receiving active maintenance, PostgreSQL compatibility updates, performance improvements, bug fixes, and usability enhancements.
 
-:spiral_notepad: Licensing
----------
+### pgModeler Plus (Commercial Edition)
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation version 3.
+**pgModeler Plus** extends the Community Edition with advanced database lifecycle management capabilities designed for professional and enterprise environments.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#### Exclusive Plus features:
+* **Reverse engineering:** Connect to existing PostgreSQL instances and generate complete visual representations of live databases.
+* **Database Diff & Synchronization:** Compare models against databases or other model files and generate precise synchronization scripts automatically.
+* **Integrated database management:** Execute SQL commands, browse data, and manage database objects through a streamlined administration interface.
+* **Professional workflows:** Advanced productivity resources designed for teams, consultants, DBAs, and large-scale PostgreSQL deployments.
 
-See [LICENSE](https://github.com/pgmodeler/pgmodeler/blob/main/LICENSE) for details.
+Revenue generated through pgModeler Plus directly funds the continuous development and long-term sustainability of the project.
 
-:heart: pgModeler needs your support!
--------------------
+For detailed feature comparisons, screenshots, and tutorials, visit [pgmodeler.io](https://pgmodeler.io).
 
-* :moneybag: **Financial support:** a lot of knowledge and effort is being put into this project during the last **17 years** so that a reliable and constantly improved product can be delivered to the community. pgModeler is an independent project and has no sponsorship, living exclusively from [donations](https://pgmodeler.io/#donationForm) and [pre-compiled packages purchases](https://www.pgmodeler.io/purchase). If you like pgModeler and think it deserves a financial contribution, go ahead and help it!
+---
 
-* :man_technologist: **Developers:** pgModeler has reached a state where its solo developer can't handle all the modifications and new feature requests by himself anymore in a reasonable time. So if you know how to code in C++ using the Qt framework, and want to contribute to the development, let me know! I'll be grateful for any help with the project maintenance!
+## :hammer_and_wrench: Build & installation
 
-* :speaking_head: **Other contributors:** developer or not you can always help this project by spreading the word about it. Share this repository in your social networks, workplaces, family & friends. The more the people know about pgModeler the bigger will be the support for the project, thus creating a virtuous cycle.
+As a multiplatform project, pgModeler supports Linux, Windows, and macOS. The build process is optimized for each environment to ensure native performance and consistent behavior across platforms.
 
-:bookmark_tabs: Changelog
-----------
+You can find detailed, step-by-step guides for compiling from source in our [installation section](https://www.pgmodeler.io/support/installation).
 
-The detailed changelog can be seen on [CHANGELOG.md](https://github.com/pgmodeler/pgmodeler/blob/main/CHANGELOG.md) file.
+Want to add custom functionality? Explore the [official plugin repository](https://github.com/pgmodeler/plugins) to learn how plugins can extend the platform capabilities.
 
-:card_file_box: Older Releases & Code
--------------------
+---
 
-Older releases of pgModeler can be found on [Sourceforge.net](http://sourceforge.net/projects/pgmodeler).
+## :heart: Support & professional services
 
-:bomb: Known Issues
------------
+For nearly two decades, pgModeler has evolved through continuous community feedback and independent development. Today, the project is officially backed by **Nullptr Labs**, focused on ensuring long-term sustainability, professional reliability, and continuous innovation around the PostgreSQL ecosystem.
 
-* Due to the usage of Qt's raster engine to draw objects, the process of handling objects on the canvas tends to get slower as lots of objects are created causing constant CPU usage. Heavy performance degradation can be noticed when dealing with models with ~500+ tables and/or relationships. There're plans to improve the speed of drawing operations, for large models, in future releases. Changing the relationship connection mode and render smoothness options may help in the performance when handling big database models.
- 
-* The diff process still presents false-positive results due to its limitations. Sometimes, there is the need to run the process twice and/or tweaking the options to get the full changes.
+### Ways to support the project:
+* **Use pgModeler Plus:** By purchasing a **Plus** license on our [official website](https://www.pgmodeler.io/purchase), you gain access to advanced lifecycle management features while directly funding the development of the platform.
+* **Official pre-compiled packages:** Save time and ensure a stable environment with professionally packaged binaries for Linux, Windows, and macOS.
+* **Contribute code:** We are always looking for talented **C++ and Qt framework** developers. If you want to help improve performance, fix bugs, or implement new features, your contributions are highly appreciated.
+* **Spread the word:** Share pgModeler with your colleagues, teams, and PostgreSQL communities to help strengthen the ecosystem around the project.
 
-* pgModeler does not fully support the [quoted identifier notation](http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS). The non-printable characters, some special UTF8 characters, some special characters, and upper case letters in the objects' names will automatically trigger the usage of quoted identifier notation. The following characters are considered special in pgModeler's implementation: '_-.@ $:()/<>+*\=~!#%^&|?{}[]`;
+---
 
-* pgModeler can't be compiled with Microsoft Visual Studio due to the use of some GCC and clang extensions.
+## :bomb: Technical notes (Known issues)
 
-* Compiling the source using '-Wconversion' (disabled by Qt in its defaults) generates a lot of warnings. These warnings are 99% harmless and there are no plans to fix them in a near future.
+* **Large-scale models:** Due to the Qt raster rendering engine, very large models containing hundreds of tables may experience rendering slowdowns depending on hardware and relationship complexity.
+* **Quoted identifiers:** Special characters, uppercase names, or reserved keywords automatically trigger quoted identifier generation to preserve SQL standard compatibility.
+* **Windows compilation:** The source code currently relies on GCC/Clang-specific extensions and is not compatible with Microsoft Visual Studio (MSVC) compilers.
+* **Thread-intensive operations:** Extremely large exports, validations, or model processing operations may still expose race conditions in specific scenarios. Improvements in thread safety are continuously being implemented.
 
-* pgModeler can sometimes crash during the export, import, validation or diff processes due to some threaded operations that, depending on the size and the arrangement of the model, cause race conditions between threads. 
+---
 
-* Due to the particularities of executing bundles on macOS, the file association does not work correctly on this system. So it's not possible to open a model file by clicking it on Finder.
+### :bookmark_tabs: Licensing
+
+The pgModeler Community Edition is free software distributed under the terms of the **GNU General Public License v3 (GPLv3)**.
+
+See the [LICENSE](https://github.com/nullptrlabs/pgmodeler/blob/main/LICENSE) file for complete details.
+
+The names **pgModeler**, **Nullptr Labs**, and their associated logos and visual identities are registered trademarks and intellectual property of Nullptr Labs. Forks and redistributed versions derived from the open-source codebase must adopt distinct branding and may not present themselves as official pgModeler distributions without prior authorization.

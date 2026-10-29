@@ -66,6 +66,9 @@ void BaseObjectView::blink()
 
 void BaseObjectView::fade(bool fd_in, int duration, int loop_cnt, qreal final_opacity)
 {
+	if(fade_tl.state() == QTimeLine::Running)
+		return;
+
 	fade_tl.setDirection(fd_in ? QTimeLine::Forward : QTimeLine::Backward);
 	fade_tl.setLoopCount(loop_cnt);
 	fade_tl.setDuration(duration);
@@ -106,6 +109,7 @@ void BaseObjectView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		m_event->setButton(Qt::LeftButton);
 
 		QGraphicsItemGroup::mousePressEvent(m_event);
+		delete m_event;
 		event->ignore();
 	}
 	else if(event->button()==Qt::LeftButton)
@@ -207,6 +211,14 @@ BaseObject *BaseObjectView::getUnderlyingObject()
 	return reinterpret_cast<BaseObject *>(this->data(0).value<void *>());
 }
 
+void BaseObjectView::detachFromObject()
+{
+	BaseGraphicObject *graph_obj = dynamic_cast<BaseGraphicObject *>(getUnderlyingObject());
+
+	if(graph_obj)
+		graph_obj->setReceiverObject(nullptr);
+}
+
 void BaseObjectView::setFontStyle(const QString &id, QTextCharFormat font_fmt)
 {
 	/* If the font style is not the global one we use the settings
@@ -252,7 +264,7 @@ QColor BaseObjectView::getElementColor(const QString &id, ColorId color_id)
 	if(color_config.count(id) > 0 && color_id <= ColorId::BorderColor)
 		return color_config[id][enum_t(color_id)];
 
-	return QColor(0,0,0);
+	return { 0, 0, 0 };
 }
 
 void BaseObjectView::getFillStyle(const QString &id, QColor &color1, QColor &color2)
@@ -318,8 +330,8 @@ QTextCharFormat BaseObjectView::getFontStyle(const QString &id)
 {
 	if(font_config.count(id))
 		return font_config[id];
-	else
-		return QTextCharFormat();
+	
+	return { };
 }
 
 void BaseObjectView::setPlaceholderEnabled(bool value)
@@ -395,13 +407,14 @@ QRectF BaseObjectView::boundingRect() const
 
 void BaseObjectView::toggleProtectionIcon(bool value)
 {
-	BaseGraphicObject *obj_graf=dynamic_cast<BaseGraphicObject *>(this->getUnderlyingObject());
+	BaseGraphicObject *graph_obj = dynamic_cast<BaseGraphicObject *>(this->getUnderlyingObject());
+	bool changed = protected_icon->isVisible() != value;
 
 	protected_icon->setVisible(value);
 	this->setFlag(QGraphicsItem::ItemIsMovable, !value);
 
-	if(obj_graf)
-		obj_graf->setModified(true);
+	if(graph_obj && changed)
+		graph_obj->setModified(true);
 }
 
 void BaseObjectView::configureObjectShadow()
@@ -422,7 +435,7 @@ void BaseObjectView::configureObjectSelection()
 	{
 		rect_item->setRect(this->boundingRect());
 		rect_item->setPos(0, 0);
-		rect_item->setBorderRadius(12);
+		rect_item->setBorderRadius(RoundedRectItem::DefaultRadius);
 		rect_item->setBrush(this->getFillStyle(Attributes::ObjSelection));
 		rect_item->setPen(this->getBorderStyle(Attributes::ObjSelection));
 	}
@@ -558,8 +571,8 @@ unsigned BaseObjectView::getSelectionOrder()
 
 QPointF BaseObjectView::getCenter()
 {
-	return QPointF(this->pos().x() + this->boundingRect().width()/2.0,
-								 this->pos().y() + this->boundingRect().height()/2.0);
+	return { this->pos().x() + (this->boundingRect().width() / 2.0),
+			 		 this->pos().y() + (this->boundingRect().height() / 2.0) };
 }
 
 void BaseObjectView::togglePlaceholder(bool visible)

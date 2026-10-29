@@ -42,7 +42,6 @@
 {spc} [lock-page-delim-resize="] %if {lock-page-delim-resize} %then true %else false %end ["] \n
 {spc} [align-objs-to-grid="] %if {align-objs-to-grid} %then true %else false %end ["] \n
 {spc} [history-max-length="] {history-max-length} ["] \n
-{spc} [use-curved-lines="] %if {use-curved-lines} %then true %else false %end ["] \n
 {spc} [compact-view="] %if {compact-view} %then true %else false %end ["] \n
 {spc} [save-restore-geometry="] %if {save-restore-geometry} %then true %else false %end ["] \n
 {spc} [low-verbosity="] %if {low-verbosity} %then true %else false %end ["] \n
@@ -55,9 +54,15 @@
 {spc} [disable-inline-editor="] %if {disable-inline-editor} %then true %else false %end ["] \n
 {spc} [alert-unsaved-models="] {alert-unsaved-models} ["] \n
 {spc} [alert-open-sqltabs="] {alert-open-sqltabs} ["] \n
+{spc} [alert-apply-metadata="] {alert-apply-metadata} ["] \n
+{spc} [alert-disable-quoting="] {alert-disable-quoting} ["] \n
+{spc} [alert-resize-rows-cols="] {alert-resize-rows-cols} ["] \n
 {spc} [use-def-disambiguation="] {use-def-disambiguation} ["] \n
+{spc} [alert-save-reload-model="] {alert-save-reload-model} ["] \n
 {spc} [hide-objects-sel-info="] %if {hide-objects-sel-info} %then true %else false %end ["] \n
 {spc} [hide-cur-pos-zoom-info="] %if {hide-cur-pos-zoom-info} %then true %else false %end ["] \n
+{spc} [hide-empty-obj-groups="] %if {hide-empty-obj-groups} %then true %else false %end ["] \n
+{spc} [disable-name-quoting="] %if {disable-name-quoting} %then true %else false %end ["] \n
 
 %if {source-editor-app} %then
 	{spc} [source-editor-app="] &{source-editor-app} ["] \n

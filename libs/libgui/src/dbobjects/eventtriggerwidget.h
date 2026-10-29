@@ -45,10 +45,7 @@ class __libgui EventTriggerWidget: public BaseObjectWidget, public Ui::EventTrig
 		void setAttributes(DatabaseModel *model, OperationList *op_list, EventTrigger *event_trig);
 		
 	public slots:
-		void applyConfiguration();
-		
-	private slots:
-		void handleTagValue(int row);
+		void applyConfiguration() override;
 };
 
 #endif

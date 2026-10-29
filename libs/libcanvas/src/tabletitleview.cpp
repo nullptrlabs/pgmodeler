@@ -23,6 +23,7 @@
 #include "schema.h"
 #include "tag.h"
 #include "physicaltable.h"
+#include "databasemodel.h"
 
 TableTitleView::TableTitleView() : BaseObjectView(nullptr)
 {
@@ -56,10 +57,11 @@ void TableTitleView::configureObject(BaseGraphicObject *object)
 
 	//Raises an error if the object related to the title is not allocated
 	if(!object)
-		throw Exception(ErrorCode::OprNotAllocatedObject, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
+
 	//Raises an error if the object is invalid
-	else if(!BaseTable::isBaseTable(object->getObjectType()))
-		throw Exception(ErrorCode::OprObjectInvalidType, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+	if(!BaseTable::isBaseTable(object->getObjectType()))
+		throw Exception(ErrorCode::OprObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	schema=dynamic_cast<Schema *>(object->getSchema());
 	tag=dynamic_cast<BaseTable *>(object)->getTag();
@@ -92,7 +94,12 @@ void TableTitleView::configureObject(BaseGraphicObject *object)
 	else
 		schema_name->setBrush(tag->getElementColor(schema_name_attrib, ColorId::FillColor1));
 
-	if(schema->isRectVisible())
+	/* When segmentation mode is turned on (by schema or threshold) the schema
+	 * name is always visible because schemas rectangle are hidden
+	 * by design in thes modes */
+	if(schema->isRectVisible() && schema->getDatabase() &&
+		 dynamic_cast<DatabaseModel *>(schema->getDatabase())->getSegmentationMode() ==
+		 DatabaseModel::NoSegmentation)
 		schema_name->setText(" ");
 	else
 	{

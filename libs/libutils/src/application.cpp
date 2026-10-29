@@ -21,6 +21,9 @@
 #include "application.h"
 #include "exception.h"
 #include <QTranslator>
+#include <QFontDatabase>
+#include "customuistyle.h"
+#include "utilsns.h"
 
 void logMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -46,14 +49,28 @@ QtMessageHandler Application::message_handler = qInstallMessageHandler(logMessag
 Application::Application(int &argc, char **argv) : QApplication(argc,argv)
 {
 	/* Checking if the user specified another widget style using the -style param
-	 * If no custom style is specified we force the usage of Fusion (the default for Qt and pgModeler) */
+	 * If no custom style is specified we force the usage of Fusion (the default for Qt and pgModeler)
+	 * via CustomUiStyle so additional UI effects can be applied */
 	if(!arguments().contains(GlobalAttributes::UiStyleOption))
-		setStyle(GlobalAttributes::DefaultQtStyle);
+		setStyle(new CustomUiStyle(GlobalAttributes::DefaultQtStyle));
+
+#ifdef	Q_OS_MAC
+	setAttribute(Qt::AA_DontShowIconsInMenus, false);
+#endif
 }
 
 void Application::loadTranslation(const QString &lang_id, const QString &directory)
 {
-	if(lang_id.isEmpty() || !QFileInfo::exists(directory + GlobalAttributes::DirSeparator + lang_id + ".qm"))
+	/* The original UI texts are in English (US), so no dictionary is loaded for it even if
+	 * there is a file with that name. This is how the user can force the original texts */
+	if(lang_id.isEmpty() || lang_id == GlobalAttributes::OriginalUiLanguage)
+		return;
+
+	/* The dictionary can be specific to a region (e.g. pt_BR) or generic to the language (e.g. es), so a language
+	 * with a region that has no dictionary of its own (e.g. es_MX) uses the generic one (es). The fallback itself
+	 * is done by QTranslator::load() below, here we only check if there is a file to be loaded. */
+	if(!QFileInfo::exists(GlobalAttributes::getPath(directory, lang_id + ".qm")) &&
+		 !QFileInfo::exists(GlobalAttributes::getPath(directory, lang_id.section('_', 0, 0) + ".qm")))
 		return;
 
 	QTranslator *translator = new QTranslator(this);
@@ -61,7 +78,71 @@ void Application::loadTranslation(const QString &lang_id, const QString &directo
 	/* Tries to load the ui translation according to the system's locale,
 	 * and in case of success install it in the application */
 	if(!translator->load(lang_id, directory) || !installTranslator(translator))
-		delete(translator);
+		delete translator;
+}
+
+void Application::loadCustomFonts(const QString &def_font_attr, const QString &def_size_attr)
+{
+	QString def_font_fam = GlobalAttributes::getConfigParamFromFile(def_font_attr, GlobalAttributes::AppearanceConf),
+			def_font_size = GlobalAttributes::getConfigParamFromFile(def_size_attr, GlobalAttributes::AppearanceConf);
+
+	loadCustomFonts(def_font_fam, def_font_size.toDouble());
+}
+
+void Application::loadCustomFonts(const QString &def_font, double def_size)
+{
+	//Install the custom fonts in .qrc file(s)
+	static const QStringList font_names { "exo2", "montserrat", "source-code-pro" };
+	static const QString path { QString(":fonts/fonts/%1%2.ttf") };
+
+	for(auto &f_name : font_names)
+	{
+		QFontDatabase::addApplicationFont(path.arg(f_name, ""));
+		QFontDatabase::addApplicationFont(path.arg(f_name, "-bold"));
+		QFontDatabase::addApplicationFont(path.arg(f_name, "-italic"));
+		QFontDatabase::addApplicationFont(path.arg(f_name, "-bold-italic"));
+	}
+
+	// Checking if the provided default font name exists in the font database
+	QStringList families = QFontDatabase::families();
+	int font_idx = families.indexOf(def_font);
+
+	// If exists we use it as the default font for the whole application
+	if(font_idx >= 0)
+	{
+		// Adjusting the default font size if its invalid
+		if(def_size <= 0)
+			def_size = font().pointSizeF();
+
+		QFont custom_fnt(def_font, def_size);
+
+		// Workaround on Windows to avoid distorted fonts on some resolutions
+		custom_fnt.setHintingPreference(QFont::PreferNoHinting);
+		custom_fnt.setStyleStrategy(QFont::PreferAntialias);
+
+		/* We save the custom font in the original-font property
+		 * of the application instance so it can be retrieved
+		 * when needed, e.g., during on-the-fly UI font preview */
+		setProperty(UtilsNs::OrigFontProp, custom_fnt);
+		setFont(custom_fnt);
+	}
+	else
+		setProperty(UtilsNs::OrigFontProp, font());
+}
+
+QString Application::getUiLanguage()
+{
+	QString lang_id = GlobalAttributes::getConfigParamFromFile(GlobalAttributes::UiLanguageParam, GlobalAttributes::GeneralConf);
+
+	if(lang_id.isEmpty())
+		lang_id = QLocale::system().name();
+
+	return lang_id;
+}
+
+void Application::loadTranslations(bool incl_plugins_tr)
+{
+	loadTranslations(getUiLanguage(), incl_plugins_tr);
 }
 
 void Application::loadTranslations(const QString &lang_id, bool incl_plugins_tr)
@@ -72,24 +153,13 @@ void Application::loadTranslations(const QString &lang_id, bool incl_plugins_tr)
 	// Trying to load the plugins translations
 	if(incl_plugins_tr)
 	{
-		QStringList dir_list = QDir(GlobalAttributes::getPluginsPath() +
-																GlobalAttributes::DirSeparator,
+		QStringList dir_list = QDir(GlobalAttributes::getPluginsPath(),
 																"*", QDir::Name, QDir::AllDirs | QDir::NoDotAndDotDot).entryList();
 
-		QString plugin_name, plugin_lang_dir;
-
-		while(!dir_list.isEmpty())
+		for(auto &plugin_name : dir_list)
 		{
-			plugin_name = dir_list.front();
-			dir_list.pop_front();
-
-			//Configure the path to "lang" subdir at current plugin directory
-			plugin_lang_dir = GlobalAttributes::getPluginsPath() +
-											GlobalAttributes::DirSeparator + plugin_name +
-											GlobalAttributes::DirSeparator + "lang" +
-											GlobalAttributes::DirSeparator;
-
-			loadTranslation(lang_id, plugin_lang_dir);
+			//The dictionaries are in the "lang" subdir at current plugin directory
+			loadTranslation(lang_id, GlobalAttributes::getPath(GlobalAttributes::getPluginsPath(), plugin_name, "lang"));
 		}
 	}
 }
@@ -120,7 +190,10 @@ void Application::createUserConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(ErrorCode::InitialUserConfigNotCreated).arg(GlobalAttributes::getConfigurationsPath(), GlobalAttributes::getTmplConfigurationPath()), ErrorCode::InitialUserConfigNotCreated,__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(ErrorCode::InitialUserConfigNotCreated)
+										.arg(GlobalAttributes::getConfigurationsPath(),
+												 GlobalAttributes::getTmplConfigurationPath()),
+										ErrorCode::InitialUserConfigNotCreated, PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -131,7 +204,7 @@ void Application::copyFilesRecursively(const QString &src_path, const QString &d
 	if(!src_file.exists())
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotAccessed).arg(src_path),
-										__PRETTY_FUNCTION__, __FILE__, __LINE__);
+										PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	if(src_file.isDir())
@@ -141,7 +214,7 @@ void Application::copyFilesRecursively(const QString &src_path, const QString &d
 		if(!dst_dir.exists() && !dst_dir.mkpath(dst_path))
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotWritten).arg(dst_path),
-											 __PRETTY_FUNCTION__, __FILE__, __LINE__);
+											 PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
 
 		QString new_src_path, new_dst_path;
@@ -166,9 +239,9 @@ void Application::copyFilesRecursively(const QString &src_path, const QString &d
 			new_dst_path = dst_path + dst_dir.separator() + filename;
 			fi.setFile(new_src_path);
 
-			// Ignoring the files icons-*.conf, ui-*.conf
+			// Ignoring the files icons-*.conf, ui-*.conf, *-highlight.conf, appearance.conf
 			if((filename.startsWith("icons-") ||
-					filename.startsWith("ui-")) ||
+					filename.startsWith(GlobalAttributes::UiStyleConf)) ||
 
 					/* Ignore the file if it exists in the destination and we are creating
 					 * the missing files */
@@ -191,7 +264,10 @@ void Application::copyFilesRecursively(const QString &src_path, const QString &d
 
 		/* Forcing the removal of files that are not backward compatible
 		 * if they already exists in the destination folder */
-		if(dst_path.contains("-highlight"))
+		if(dst_path.contains(GlobalAttributes::HighlightFileSuffix) ||
+			 dst_path.contains(GlobalAttributes::DiffPresetsConf) ||
+			 dst_path.contains(GlobalAttributes::HighlightFileSuffix) ||
+			 dst_path.contains(GlobalAttributes::AppearanceConf))
 			QFile::remove(dst_path);
 
 		file_copied = QFile::copy(src_path, dst_path);
@@ -199,9 +275,10 @@ void Application::copyFilesRecursively(const QString &src_path, const QString &d
 		if(!file_exists && !file_copied)
 		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotWritten).arg(dst_path),
-											__PRETTY_FUNCTION__, __FILE__, __LINE__);
+											PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
-		else if(file_exists || file_copied)
+
+		if(file_exists || file_copied)
 		{
 			// Set write permissions when copying file with read-only permissions
 			QFile file(dst_path);

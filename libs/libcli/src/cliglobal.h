@@ -3,7 +3,7 @@
 
 #include <QtCore/QtGlobal>
 
-#if defined(CLI_SYMBOLS)
+#ifdef CLI_SYMBOLS
 	#define __libcli Q_DECL_EXPORT
 #else
 	#define __libcli Q_DECL_IMPORT

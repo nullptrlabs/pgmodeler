@@ -21,25 +21,29 @@
 
 #include "welcomewidget.h"
 #include "guiutilsns.h"
+#include <QDesktopServices>
 
 WelcomeWidget::WelcomeWidget(QWidget *parent): QWidget(parent)
 {
 	setupUi(this);
+	nullptrlabs_lbl->installEventFilter(this);
 
 	QList<QToolButton *> btns= { new_tb, load_tb, recent_tb, last_session_tb, sample_tb, support_tb };
 	QFont fnt;
 
 	for(auto &btn : btns)
 	{
-		GuiUtilsNs::createDropShadow(btn, 1, 1, 10);
 		fnt = btn->font();
 		fnt.setWeight(QFont::Normal);
 		btn->setFont(fnt);
-
-#ifdef Q_OS_LINUX
-		GuiUtilsNs::__configureWidgetFont(btn, 1.20);
-#else
-		GuiUtilsNs::__configureWidgetFont(btn, 1.40);
-#endif
+		GuiUtilsNs::__configureWidgetFont(btn, BtnFontFactor);
 	}
+}
+
+bool WelcomeWidget::eventFilter(QObject *object, QEvent *event)
+{
+	if(object == nullptrlabs_lbl && event->type() == QEvent::MouseButtonPress)
+		QDesktopServices::openUrl(GlobalAttributes::NullptrLabsSite);
+
+	return QWidget::eventFilter(object, event);
 }

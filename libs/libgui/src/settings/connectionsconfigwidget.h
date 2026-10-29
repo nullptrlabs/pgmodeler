@@ -50,17 +50,17 @@ class __libgui ConnectionsConfigWidget: public BaseConfigWidget, public Ui::Conn
 		//! \brief Configures the passed connection setting it's attributes using the values from the form
 		void configureConnection(Connection *conn, bool is_update);
 
-		virtual void hideEvent(QHideEvent *event) override;
-		virtual void showEvent(QShowEvent *event) override;
+		void hideEvent(QHideEvent *event) override;
+		void showEvent(QShowEvent *event) override;
 		void updateConnectionsCombo();
 		
 	public:
 		ConnectionsConfigWidget(QWidget * parent = nullptr);
-		virtual ~ConnectionsConfigWidget();
-		
-		virtual void saveConfiguration() override;
+		~ConnectionsConfigWidget() override = default;
 
-		virtual void loadConfiguration() override;
+		void saveConfiguration() override;
+
+		void loadConfiguration() override;
 
 		/*! \brief Puts the connection editing form in one-time edit mode.
 		 *  In this mode, the connection handling buttons are hidden and the
@@ -110,9 +110,10 @@ class __libgui ConnectionsConfigWidget: public BaseConfigWidget, public Ui::Conn
 		void destroyConnections();
 		
 	public slots:
-		virtual void restoreDefaults() override;
-		
+		void restoreDefaults() override;
+
 	private slots:
+		void resetForm();
 		void newConnection();
 		void duplicateConnection();
 		void handleConnection();
@@ -121,9 +122,9 @@ class __libgui ConnectionsConfigWidget: public BaseConfigWidget, public Ui::Conn
 		void removeConnection();
 		void enableCertificates();
 		void enableConnectionTest();
-		virtual void applyConfiguration(void) override {}
-		
-		friend class ConfigurationForm;
+		void applyConfiguration(void) override {}
+
+		friend class ConfigurationWidget;
 };
 
 #endif

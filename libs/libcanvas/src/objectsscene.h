@@ -37,6 +37,8 @@
 #include "basetableview.h"
 #include "doublenan.h"
 
+class RelationshipView;
+
 class __libcanvas ObjectsScene: public QGraphicsScene {
 	Q_OBJECT
 
@@ -78,6 +80,13 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		std::vector<BaseObjectView *> removed_objs;
 
+		/*! \brief The tables/views and relationships added to the scene. They are kept apart because
+		 * items() visits every child item of the tables, which is too slow for the queries made by
+		 * the routing of the orthogonal lines (see getTableViews() and getRelationshipViews()) */
+		std::vector<BaseTableView *> table_views;
+
+		std::vector<RelationshipView *> rel_views;
+
 		//! \brief Holds the tables/views which have selected children objects
 		QList<BaseTableView *> tabs_sel_children;
 
@@ -89,6 +98,17 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		static constexpr int SceneMoveStep=20,
 		SceneMoveTimeout=20,
 		SceneMoveThreshold=100;
+
+		/*! \brief Timer that postpones the calculation of the bumps of the orthogonal lines so it's done
+		 * only once after a series of relationship updates */
+		QTimer bumps_timer;
+
+		/*! \brief Indicates that the bumps update was requested while objects were being moved. In this case
+		 * the update is performed only when the movement ends */
+		bool bumps_update_pending;
+
+		//! \brief Stores the last value of getLayersSignature() to detect changes in the layer rects
+		QString layers_signature;
 
 		//! \brief Timer responsible to move the scene
 		QTimer scene_move_timer,
@@ -172,6 +192,19 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		//! \brief Performs the final steps when moving the objects like adjusting position to grid, moving children object, etc
 		void finishObjectsMove(const QPointF &pnt_end);
 
+		/*! \brief Returns the rects drawn around the object by each of the active layers it belongs to, in the order of the
+		 * object's layers. Each layer rect is larger than the previous one so they appear nested around the object */
+		QList<std::pair<unsigned, QRectF>> getObjectLayerRects(BaseObjectView *obj, const QFontMetricsF &fm);
+
+		/*! \brief Returns a string that changes whenever something that alters the layer rects around the objects
+		 * changes (visibility of rects and names, active layers and the layers of the objects), but not
+		 * when the objects are only moved */
+		QString getLayersSignature();
+
+		/*! \brief Finds the places where the orthogonal lines of the relationships cross each other and
+		 * makes the horizontal ones hop over the vertical ones */
+		void updateRelationshipBumps();
+
 		/*! \brief Performs the scene position adjustment when pressing/releasing the arrow keys to avoid objects to be hidden in the corners.
 		This method will adjust the scene size automatically when moving objects right or down if the selected items bounding rects
 		exceeds the scene's size limits */
@@ -182,15 +215,23 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		void clearTablesChildrenSelection();
 
-	protected:
-		void drawBackground(QPainter *painter, const QRectF &rect);
+		/*! \brief Detaches item from this scene (disconnects its signals, removes it from Qt's
+		 * internal item list) without marking it for deletion -- called by removeItem() right
+		 * before the item is queued for deletion. Returns the item cast to BaseObjectView, or
+		 * nullptr if it isn't one */
+		BaseObjectView *detachItem(QGraphicsItem *item);
 
-		void mousePressEvent(QGraphicsSceneMouseEvent *event);
-		void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-		void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-		void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void keyReleaseEvent(QKeyEvent *event);
+		void selectObjectsInLayers(const QList<unsigned int> &layers_idxs);
+
+	protected:
+		void drawBackground(QPainter *painter, const QRectF &rect) override;
+
+		void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+		void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+		void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+		void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+		void keyPressEvent(QKeyEvent *event) override;
+		void keyReleaseEvent(QKeyEvent *event) override;
 
 		//! \brief Draws a line from the point 'p_start' to the cursor position and simulates the relationship creation
 		void showRelationshipLine(bool value, const QPointF &p_start=QPointF(DNaN,DNaN));
@@ -235,9 +276,9 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		static constexpr unsigned DefaultLayer = 0;
 
-		ObjectsScene();
+		ObjectsScene(QObject *parent = nullptr);
 
-		virtual ~ObjectsScene();
+		~ObjectsScene() override;
 
 		/*! \brief Add a new layer to the scene. In case of duplicated name this method
 		 * automatically does the desambiguation. The name of the new layer is returned. */
@@ -257,7 +298,7 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		void setActiveLayers(QStringList act_layers);
 
 		//! \brief Set the layers with the provided indexes as active. Activating a layer causes objects attached to it to be visible
-		void setActiveLayers(QList<unsigned> ids);
+		void setActiveLayers(QList<unsigned> layer_ids);
 
 		//! \brief Returns true when the named layer is currenctly activated
 		bool isLayerActive(const QString &name);
@@ -324,6 +365,17 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		static QPageLayout getPageLayout();
 
 		void addItem(QGraphicsItem *item, bool blink_new = false);
+
+		//! \brief Returns the tables/views added to the scene, in no particular order
+		const std::vector<BaseTableView *> &getTableViews() const;
+
+		//! \brief Returns the relationships added to the scene, in no particular order
+		const std::vector<RelationshipView *> &getRelationshipViews() const;
+
+		/*! \brief Removes the table/view or relationship from the lists above. It's called by the destructors
+		 * of those items, since an item deleted while in the scene doesn't go through removeItem() */
+		void forgetItem(QGraphicsItem *item);
+
 		void removeItem(QGraphicsItem *item);
 
 		/*! \brief Define the geometry of the scene. If the rectangle is invalid or
@@ -362,6 +414,14 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		bool isRelationshipLineVisible();
 		bool isMovingObjects();
 
+		/*! \brief Returns the rect occupied by the object including the layer rects displayed around it.
+		 * If the layer rects are not visible this is the object's own rect */
+		QRectF getObjectLayersRect(BaseObjectView *obj);
+
+		/*! \brief Requests the update of the bumps of the orthogonal lines. It's performed after a short delay
+		 * or, if objects are being moved, only after the movement ends */
+		void requestBumpsUpdate();
+
 		QList<QGraphicsItem *> selectedItems(void) const;
 		bool hasOnlyTableChildrenSelection(void) const;
 
@@ -383,6 +443,10 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		/*! \brief Expand the scene rect to the specified direction.
 		 * The size expanded is determined by the current page layout used by the scene. */
 		void expandSceneRect(ExpandDirection exp_dir);
+
+		/*! \brief Forces the update of the routes of the orthogonal lines of all relationships.
+		 * When force is true, the lines are reconfigured whatever the current line style is */
+		void invalidateRelationshipsRoutes(bool force = false);
 
 	public slots:
 		//! \brief Force the update of all layer rectangles
@@ -439,6 +503,9 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 		//! \brief Signal emitted when the user double-click a object
 		void s_objectDoubleClicked(BaseGraphicObject *objeto);
 
+		//! \brief Signal emitted when the user double-clicks a relationship marker. Carries the table the marker is attached to
+		void s_relMarkerDoubleClicked(BaseTable *table);
+
 		//! \brief Signal emitted when a object is selected
 		void s_objectSelected(BaseGraphicObject *objeto, bool selecionado);
 
@@ -447,6 +514,9 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		//! \brief Signal emitted when a blank area of the canvas is pressed
 		void s_scenePressed(Qt::MouseButtons);
+
+		//! \brief Signal emitted when a click on this scene resets its own selection (empty area, or a plain click replacing a previous selection)
+		void s_selectionResetTriggered();
 
 		//! \brief Signal emitted when the active layers change
 		void s_activeLayersChanged();
@@ -471,7 +541,7 @@ class __libcanvas ObjectsScene: public QGraphicsScene {
 
 		friend class ModelWidget;
 		friend class PgModelerCliApp;
-		friend class DatabaseImportForm;
+		friend class DatabaseImportWidget;
 };
 
 #endif

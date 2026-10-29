@@ -37,6 +37,18 @@ class __libgui BaseForm: public QDialog, public Ui::BaseForm {
 	Q_OBJECT
 
 	private:
+		bool track_changes,
+
+		has_changes,
+
+		prevent_close;
+
+		//! \brief Store the reference to the main widget
+		QWidget *main_wgt;
+
+		//! \brief Store the reference to the installed tab order manager in main widget
+		QObject *tab_order_mng;
+
 		/*! \brief Resizes the dialog according to the minimum sizes of the provided widget.
 				If the widget size exceed 70% of the screen size a scroll area will be created and
 				the widget reparented to it. If the minimum size of the widget is 0 then the size
@@ -44,15 +56,32 @@ class __libgui BaseForm: public QDialog, public Ui::BaseForm {
 				try to preserve the minimum width */
 		void resizeForm(QWidget *widget);
 
-		void closeEvent(QCloseEvent *);
+		void closeEvent(QCloseEvent *event) override;
 
 	public:
 		BaseForm(QWidget * parent = nullptr, Qt::WindowFlags f = Qt::Widget);
 
 		void setButtonConfiguration(Messagebox::ButtonsId button_conf = Messagebox::OkCancelButtons);
 
+		/*! \brief Prevents the form closing by rejecting the QCloseEvent instance
+		 *  in closeEvent().This method is useful for control whether the form
+		 *  can be closed during specific operations */
+		void setPreventClose(bool value);
+
+		/*! \brief Toggles the fields' change statuses. If a single field is changed
+		 *  and the user hits ESC or tries to close the form, a confirmation message
+		 *  will appear. This avoids data loss by accidental closing.
+		 *  A list of excluded widget names can be provided. If those widget names
+		 *  are found they will not have changes tracked */
+		void enableTrackChanges(bool enable, QStringList excl_wgts = {});
+
 		//! \brief Sets the current form size as the minimum size
 		void adjustMinimumSize();
+
+		/*! \brief Install an instace of TabOrderManager in the form so
+		 *  tab order can be properly handled no matter the positions of the
+		 *	fields in the main widget */
+		void installTabManager();
 
 		/*! \brief Injects the specified object into the form and turns it the main widget.
 		 * The widget is reparented to the stack widget within the form. */
@@ -61,9 +90,20 @@ class __libgui BaseForm: public QDialog, public Ui::BaseForm {
 		/*! \brief Injects the specified object into the form and turns it the main widget.
 		 * The widget is reparented to the stack widget within the form.
 		 * The accept_slot is the fucntion pointer to the slot from the provided widget that can be
-		 * optionally used to replace the default accept() of the form's footer aplly button. */
+		 * optionally used to replace the default accept() of the form's footer aplly button.
+		 * The accept_on_return when true causes BaseForm to auto-accept when accept_slot
+		 * successfully returns (not throws exception) */
 		template <class Class, typename Slot>
-		void setMainWidget(Class *widget, Slot accept_slot);
+		void setMainWidget(Class *widget, Slot accept_slot, bool accept_on_return = false);
+
+		/*! \brief Injects the specified object into the form and turns it the main widget.
+		 * The widget is reparented to the stack widget within the form.
+		 * The accept_slot is the fucntion pointer to the slot from the provided widget that can be
+		 * optionally used to replace the default accept() of the form's footer aplly button.
+		 * The cancel_slot is the fucntion pointer to the slot from the provided widget that can be
+		 * optionally used to replace the default reject() of the form's footer cancel button.*/
+		template <class Class, typename Slot>
+		void setMainWidget(Class *widget, Slot accept_slot, Slot cancel_slot);
 
 		/*! \brief Injects the specified object into the form and turns it the main widget.
 		 *  The widget is reparented to the stack widget within the form. This version of method
@@ -80,27 +120,54 @@ class __libgui BaseForm: public QDialog, public Ui::BaseForm {
 			else
 				setWindowTitle(widget->windowTitle());
 
-			apply_ok_btn->setDisabled(widget->isHandledObjectProtected());
+			accept_btn->setDisabled(widget->isHandledObjectProtected());
 			resizeForm(widget);
 			setButtonConfiguration(Messagebox::OkCancelButtons);
 
-			connect(cancel_btn, &QPushButton::clicked, widget, __slot(widget, Class::cancelConfiguration));
-			connect(cancel_btn, &QPushButton::clicked, this, &BaseForm::reject);
+			connect(reject_btn, &QPushButton::clicked, widget, __slot(widget, Class::cancelConfiguration));
+			connect(reject_btn, &QPushButton::clicked, this, &BaseForm::reject);
 
-			connect(apply_ok_btn, &QPushButton::clicked, widget, __slot(widget, Class::applyConfiguration));
+			connect(accept_btn, &QPushButton::clicked, widget, __slot(widget, Class::applyConfiguration));
 			connect(widget, &BaseObjectWidget::s_closeRequested, this, &BaseForm::accept);
 		}
+
+	private slots:
+		void setFieldChanged();
+
+	public slots:
+		void reject() override;
 };
 
 template <class Class, typename Slot>
-void BaseForm::setMainWidget(Class *widget, Slot accept_slot)
+void BaseForm::setMainWidget(Class *widget, Slot accept_slot, bool accept_on_return)
 {
 	if(!widget)
 		return;
 
 	setMainWidget(widget);
-	disconnect(apply_ok_btn, nullptr, this, nullptr);
-	connect(apply_ok_btn, &QPushButton::clicked, widget, accept_slot);
+	disconnect(accept_btn, nullptr, this, nullptr);
+
+	if(accept_on_return)
+	{
+		connect(accept_btn, &QPushButton::clicked, this, [this, widget, accept_slot](){
+			__trycatch (
+				std::invoke(accept_slot, widget);
+				accept();
+			)
+		});
+	}
+	else
+		connect(accept_btn, &QPushButton::clicked, widget, accept_slot);
+}
+
+template <class Class, typename Slot>
+void BaseForm::setMainWidget(Class *widget, Slot accept_slot, Slot cancel_slot)
+{
+	if(!widget)
+		return;
+
+	setMainWidget(widget, accept_slot);
+	connect(this, &BaseForm::rejected, widget, cancel_slot);
 }
 
 #endif

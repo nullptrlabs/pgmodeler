@@ -65,7 +65,7 @@
       <number>5</number>
      </property>
      <property name="bottomMargin">
-      <number>5</number>
+      <number>0</number>
      </property>
      <item>
       <widget class="QToolButton" name="validate_tb">
@@ -104,16 +104,16 @@
         <string>F5</string>
        </property>
        <property name="popupMode">
-        <enum>QToolButton::InstantPopup</enum>
+        <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
        </property>
        <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonTextBesideIcon</enum>
+        <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
        </property>
        <property name="autoRaise">
         <bool>false</bool>
        </property>
        <property name="arrowType">
-        <enum>Qt::NoArrow</enum>
+        <enum>Qt::ArrowType::NoArrow</enum>
        </property>
       </widget>
      </item>
@@ -154,16 +154,16 @@
         <string>Ctrl+I</string>
        </property>
        <property name="popupMode">
-        <enum>QToolButton::MenuButtonPopup</enum>
+        <enum>QToolButton::ToolButtonPopupMode::MenuButtonPopup</enum>
        </property>
        <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonTextBesideIcon</enum>
+        <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
        </property>
        <property name="autoRaise">
         <bool>false</bool>
        </property>
        <property name="arrowType">
-        <enum>Qt::NoArrow</enum>
+        <enum>Qt::ArrowType::NoArrow</enum>
        </property>
       </widget>
      </item>
@@ -204,7 +204,7 @@
         <string>Ctrl+/</string>
        </property>
        <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonTextBesideIcon</enum>
+        <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
        </property>
        <property name="autoRaise">
         <bool>false</bool>
@@ -245,10 +245,10 @@
         </size>
        </property>
        <property name="popupMode">
-        <enum>QToolButton::InstantPopup</enum>
+        <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
        </property>
        <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonTextBesideIcon</enum>
+        <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
        </property>
        <property name="autoRaise">
         <bool>false</bool>
@@ -292,23 +292,23 @@
         <bool>true</bool>
        </property>
        <property name="popupMode">
-        <enum>QToolButton::InstantPopup</enum>
+        <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
        </property>
        <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonTextBesideIcon</enum>
+        <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
        </property>
        <property name="autoRaise">
         <bool>false</bool>
        </property>
        <property name="arrowType">
-        <enum>Qt::NoArrow</enum>
+        <enum>Qt::ArrowType::NoArrow</enum>
        </property>
       </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -323,7 +323,6 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../../libs/libgui/res/resources.qrc"/>
   <include location="../../../libs/libgui/res/resources.qrc"/>
  </resources>
  <connections/>

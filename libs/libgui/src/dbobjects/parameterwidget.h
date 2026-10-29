@@ -45,7 +45,7 @@ class __libgui ParameterWidget: public BaseObjectWidget, public Ui::ParameterWid
 		Parameter getParameter();
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 
 	private slots:
 		void enableVariadic();

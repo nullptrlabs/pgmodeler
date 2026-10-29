@@ -35,11 +35,15 @@
 class __libgui AboutWidget: public QWidget, public Ui::AboutWidget {
 	Q_OBJECT
 
+	protected:
+		bool eventFilter(QObject *object, QEvent *event) override;
+
 	public:
 		AboutWidget(QWidget *parent = nullptr);
 		
 	signals:
 		void s_hideRequested();
+
 };
 
 #endif

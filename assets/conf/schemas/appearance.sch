@@ -16,6 +16,10 @@
 	\s custom-scale="{custom-scale}"
 %end
 
+%if {ui-font} %then
+	\s ui-font="{ui-font}" \s ui-font-size="{ui-font-size}"
+%end
+
 > \n
 
 \n \t <design
@@ -39,6 +43,7 @@
 \s highlight-lines=" %if {highlight-lines} %then true %else false %end "
 \s line-numbers-color="{line-numbers-color}" \n
 {spc} line-numbers-bg-color="{line-numbers-bg-color}"
+\s line-numbers-hl-color="{line-numbers-hl-color}"
 \s line-highlight-color="{line-highlight-color}"
 [/>] \n
 
@@ -68,6 +73,7 @@
 {spc} [<font id="label" color="] {label-fcolor} [" italic="] {label-italic} [" bold="] {label-bold} [" underline="] {label-underline} ["/>] \n
 {spc} [<font id="constraints" color="] {constraints-fcolor} [" italic="] {constraints-italic} [" bold="] {constraints-bold} [" underline="] {constraints-underline} ["/>] \n
 {spc} [<font id="pos-info" color="] {pos-info-fcolor} [" italic="] {pos-info-italic} [" bold="] {pos-info-bold} [" underline="] {pos-info-underline} ["/>] \n
+{spc} [<font id="rel-marker" color="] {rel-marker-fcolor} [" italic="] {rel-marker-italic} [" bold="] {rel-marker-bold} [" underline="] {rel-marker-underline} ["/>] \n
 {spc} [<font id="tag" color="] {tag-fcolor} [" italic="] {tag-italic} [" bold="] {tag-bold} [" underline="] {tag-underline} ["/>] \n
 {spc} [<font id="foreigntable-name" color="] {foreigntable-name-fcolor} [" italic="] {foreigntable-name-italic} [" bold="] {foreigntable-name-bold} [" underline="] {foreigntable-name-underline} ["/>] \n
 {spc} [<font id="foreigntable-schema-name" color="] {foreigntable-schema-name-fcolor} [" italic="] {foreigntable-schema-name-italic} [" bold="] {foreigntable-schema-name-bold} [" underline="] {foreigntable-schema-name-underline} ["/>] \n
@@ -102,6 +108,7 @@
 {spc} [<object id="obj-selection" fill-color="] {obj-selection-color} [" border-color="] {obj-selection-bcolor} ["/>] \n
 {spc} [<object id="obj-shadow" fill-color="] {obj-shadow-color} ["/>] \n
 {spc} [<object id="pos-info" fill-color="] {pos-info-color} [" border-color="] {pos-info-bcolor} ["/>] \n
+{spc} [<object id="rel-marker" fill-color="] {rel-marker-color} [" border-color="] {rel-marker-bcolor} ["/>] \n
 {spc} [<object id="tag" fill-color="] {tag-color} [" border-color="] {tag-bcolor} ["/>] \n
 {spc} [<object id="placeholder" fill-color="] {placeholder-color} [" border-color="] {placeholder-bcolor} ["/>] \n
 {spc} [<object id="foreigntable-title" fill-color="] {foreigntable-title-color} [" border-color="] {foreigntable-title-bcolor} ["/>] \n

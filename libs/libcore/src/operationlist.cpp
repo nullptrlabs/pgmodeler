@@ -24,12 +24,12 @@
 
 unsigned OperationList::max_size {500};
 
-OperationList::OperationList(DatabaseModel *model)
+OperationList::OperationList(DatabaseModel *model, QObject *parent) : QObject(parent)
 {
 	/* Raises an error if the user tries to allocate an operation list linked to
 		to an unallocated model */
 	if(!model)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	this->model=model;
 	xmlparser=model->getXMLParser();
@@ -144,7 +144,7 @@ void OperationList::setMaximumSize(unsigned max)
 {
 	//Raises an error if a zero max size is assigned to the list
 	if(max==0)
-		throw Exception(ErrorCode::AsgInvalidMaxSizeOpList,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidMaxSizeOpList,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	max_size=max;
 }
@@ -158,7 +158,7 @@ void OperationList::addToPool(BaseObject *object, Operation::OperType op_type)
 
 		//Raises an error if the object to be added is not allocated
 		if(!object)
-			throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		obj_type=object->getObjectType();
 
@@ -171,14 +171,14 @@ void OperationList::addToPool(BaseObject *object, Operation::OperType op_type)
 			if(obj_type!=ObjectType::BaseObject && obj_type!=ObjectType::Database)
 				CoreUtilsNs::copyObject(&copy_obj, object, obj_type);
 			else
-				throw Exception(ErrorCode::AsgObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+				throw Exception(ErrorCode::AsgObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 			//Raises an error if the copy fails (returning a null object)
 			if(!copy_obj)
-				throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-			else
-				//Inserts the copy on the pool
-				object_pool.push_back(copy_obj);
+				throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+			
+			//Inserts the copy on the pool
+			object_pool.push_back(copy_obj);
 		}
 		else
 			//Inserts the original object on the pool (in case of adition or deletion operations)
@@ -186,7 +186,7 @@ void OperationList::addToPool(BaseObject *object, Operation::OperType op_type)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -220,52 +220,64 @@ void OperationList::removeOperations()
 	//Case there is not removed object
 	while(!not_removed_objs.empty())
 	{
-		object=not_removed_objs.back();
+		object = not_removed_objs.back();
 
 		//If the object is not an invalid one, proceed with its deallocation
-		if(std::find(invalid_objs.begin(), invalid_objs.end(), object)==invalid_objs.end())
+		if(std::find(invalid_objs.begin(), invalid_objs.end(), object) == invalid_objs.end())
 		{
-			if(unallocated_objs.count(object)==0)
-				tab_obj=dynamic_cast<TableObject *>(object);
+			if(unallocated_objs.count(object) == 0)
+				tab_obj = dynamic_cast<TableObject *>(object);
 
 			//Deletes the object if its not unallocated already or referenced on the model
-			if(unallocated_objs.count(object)==0 &&
+			if(unallocated_objs.count(object) == 0 &&
 					(!tab_obj && model->getObjectIndex(object) < 0))
 			{
-				if(object->getObjectType()==ObjectType::Table)
-				{
-					std::vector<BaseObject *> list=dynamic_cast<Table *>(object)->getObjects();
+				BaseTable *base_tab = dynamic_cast<BaseTable *>(object);
 
-					while(!list.empty())
+				/* If the object is a table/view/foreign table
+				 * we force the destruction of all its children as
+				 * well as flag them as unallocated too, so, they are not
+				 * unallocated again (double-free) in case we are destroying
+				 * an operation registered for that child object too */
+				if(base_tab)
+				{
+					for(auto &tb_obj : base_tab->getObjects())
 					{
-						unallocated_objs[list.back()]=true;
-						list.pop_back();
+						/* We destroy the child object only if it was
+						 * not destroyed before */
+						if(unallocated_objs.count(tb_obj) == 0)
+							unallocated_objs[tb_obj] = true;
 					}
 				}
 
-				unallocated_objs[object]=true;
+				unallocated_objs[object] = true;
 				delete object;
 			}
-			else if(tab_obj && unallocated_objs.count(tab_obj)==0)
+			/* If the object is a table child object and was not destroyed yet.
+			 * This can happen when only a table child object (column, constraint, index, etc)
+			 * is registered in a operation but the parent table itself was not touched
+			 * by any operation. So we have to destroy that child object only */
+			else if(tab_obj && unallocated_objs.count(tab_obj) == 0)
 			{
-				tab=dynamic_cast<BaseTable *>(tab_obj->getParentTable());
+				tab = tab_obj->getParentTable();
 
 				//Deletes the object if its not unallocated already or referenced by some table
 				if(!tab ||
-						(unallocated_objs.count(tab)==1) ||
-						(tab && unallocated_objs.count(tab)==0 && tab->getObjectIndex(tab_obj) < 0))
+						(unallocated_objs.count(tab) == 1) ||
+						(tab && unallocated_objs.count(tab) == 0 &&
+						 tab->getObjectIndex(tab_obj, true) < 0))
 				{
-					unallocated_objs[tab_obj]=true;
+					unallocated_objs[tab_obj] = true;
 					delete tab_obj;
 				}
 			}
 		}
 
 		not_removed_objs.pop_back();
-		tab_obj=nullptr;
+		tab_obj = nullptr;
 	}
 
-	current_index=0;
+	current_index = 0;
 	unallocated_objs.clear();
 }
 
@@ -301,7 +313,7 @@ bool OperationList::isObjectOnPool(BaseObject *object)
 	std::vector<BaseObject *>::iterator itr, itr_end;
 
 	if(!object)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	itr=object_pool.begin();
 	itr_end=object_pool.end();
@@ -352,18 +364,21 @@ int OperationList::registerObject(BaseObject *object, Operation::OperType op_typ
 	{
 		//Raises an error if the user tries to register an operation with null object
 		if(!object)
-			throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		obj_type=object->getObjectType();
-		if(tab_obj && !parent_obj)
-			throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
 
-		else if(parent_obj &&
+		if(tab_obj && !parent_obj)
+			throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+		if(parent_obj &&
 				(((obj_type==ObjectType::Column || obj_type==ObjectType::Constraint) &&
 					(parent_obj->getObjectType()!=ObjectType::Relationship && !PhysicalTable::isPhysicalTable(parent_obj->getObjectType()))) ||
 
 				 ((obj_type==ObjectType::Trigger || obj_type==ObjectType::Rule || obj_type==ObjectType::Index) && !dynamic_cast<BaseTable *>(parent_obj))))
-			throw Exception(ErrorCode::OprObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		{
+			throw Exception(ErrorCode::OprObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
+		}		
 
 		//If the operations list is full makes the automatic cleaning before inserting a new operation
 		if(current_index == static_cast<int>(max_size-1))
@@ -461,7 +476,7 @@ int OperationList::registerObject(BaseObject *object, Operation::OperType op_typ
 			}
 			//Raises an error if both parent table / relationship isn't allocated
 			else
-				throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+				throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 		}
 		else
 		{
@@ -499,14 +514,14 @@ int OperationList::registerObject(BaseObject *object, Operation::OperType op_typ
 			removeFromPool(object_pool.size()-1);
 			delete operation;
 		}
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
 const Operation *OperationList::getOperation(unsigned oper_idx)
 {
 	if(oper_idx >= operations.size())
-		throw Exception(ErrorCode::RefObjectInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefObjectInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return operations[oper_idx];
 }
@@ -603,7 +618,7 @@ void OperationList::undoOperation()
 			  operation->getChainType()!=Operation::NoChain);
 
 		if(error.getErrorCode()!=ErrorCode::Custom)
-			throw Exception(ErrorCode::UndoRedoOperationInvalidObject,__PRETTY_FUNCTION__,__FILE__,__LINE__, &error);
+			throw Exception(ErrorCode::UndoRedoOperationInvalidObject,PGM_FUNC,PGM_FILE,PGM_LINE, &error);
 	}
 }
 
@@ -652,7 +667,7 @@ void OperationList::redoOperation()
 			  operation->getChainType()!=Operation::NoChain);
 
 		if(error.getErrorCode()!=ErrorCode::Custom)
-			throw Exception(ErrorCode::UndoRedoOperationInvalidObject,__PRETTY_FUNCTION__,__FILE__,__LINE__, &error);
+			throw Exception(ErrorCode::UndoRedoOperationInvalidObject,PGM_FUNC,PGM_FILE,PGM_LINE, &error);
 	}
 }
 
@@ -733,11 +748,11 @@ void OperationList::executeOperation(Operation *oper, bool redo)
 
 			//Gets the object in the current state from the parent object
 			if(parent_tab)
-				orig_obj=dynamic_cast<TableObject *>(parent_tab->getObject(obj_idx, obj_type));
+				orig_obj = dynamic_cast<TableObject *>(parent_tab->getObject(obj_idx, obj_type));
 			else if(parent_rel)
-				orig_obj=dynamic_cast<TableObject *>(parent_rel->getObject(obj_idx, obj_type));
+				orig_obj = parent_rel->getObject(obj_idx, obj_type);
 			else
-				orig_obj=model->getObject(obj_idx, obj_type);
+				orig_obj = model->getObject(obj_idx, obj_type);
 
 			if(aux_obj)
 				oper->setXMLDefinition(orig_obj->getSourceCode(SchemaParser::XmlCode));
@@ -756,17 +771,27 @@ void OperationList::executeOperation(Operation *oper, bool redo)
 			if(op_type == Operation::ObjModified)
 				orig_obj->clearDependencies();
 
-			CoreUtilsNs::copyObject(reinterpret_cast<BaseObject **>(&bkp_obj), orig_obj, obj_type);
-			CoreUtilsNs::copyObject(reinterpret_cast<BaseObject **>(&orig_obj), object, obj_type);
-			CoreUtilsNs::copyObject(reinterpret_cast<BaseObject **>(&object), bkp_obj, obj_type);
-			object=orig_obj;
+			CoreUtilsNs::copyObject((&bkp_obj), orig_obj, obj_type);
+			CoreUtilsNs::copyObject((&orig_obj), object, obj_type);
+			CoreUtilsNs::copyObject((&object), bkp_obj, obj_type);
+			object = orig_obj;
 
 			// Updating the original object dependencies after restoring the previous state
 			if(op_type != Operation::ObjMoved)
 				orig_obj->updateDependencies();
 
 			if(aux_obj)
-				CoreUtilsNs::copyObject(reinterpret_cast<BaseObject **>(&object), aux_obj, obj_type);
+			{
+				CoreUtilsNs::copyObject(&object, aux_obj, obj_type);
+				Column *aux_col = dynamic_cast<Column *>(object);
+
+				/* When restoring modified columns, in some cases, the parent table
+				 * is null (when the column is created from xml), in that case
+				 * we need to force the assignment of parent table to the
+				 * restored object */
+				if(aux_col && !aux_col->getParentTable() && parent_tab)
+					aux_col->setParentTable(parent_tab);
+			}
 
 			//For pk constraint, after restore the previous configuration, check the not-null flag of the new source columns
 			if(obj_type==ObjectType::Constraint)
@@ -781,7 +806,7 @@ void OperationList::executeOperation(Operation *oper, bool redo)
 						(op_type==Operation::ObjCreated && redo))
 		{
 			if(aux_obj)
-				CoreUtilsNs::copyObject(reinterpret_cast<BaseObject **>(&object), aux_obj, obj_type);
+				CoreUtilsNs::copyObject(&object, aux_obj, obj_type);
 
 			if(parent_tab)
 			{
@@ -902,20 +927,22 @@ void OperationList::executeOperation(Operation *oper, bool redo)
 				if(bkp_obj)
 					dynamic_cast<BaseGraphicObject *>(bkp_obj->getSchema())->setModified(op_type==Operation::ObjModified);
 			}
-		}
-		else if(op_type==Operation::ObjModified)
-		{			
-			if(obj_type==ObjectType::Schema)
-			{
+
+			if(obj_type == ObjectType::Schema && op_type == Operation::ObjModified && bkp_obj)
 				model->validateSchemaRenaming(dynamic_cast<Schema *>(object), bkp_obj->getName());
-				dynamic_cast<Schema *>(object)->setModified(true);
-			}
-			else if(obj_type==ObjectType::Tag)
-			{
-				for(auto &obj : object->getReferences())
-					dynamic_cast<BaseTable *>(obj)->setModified(true);
-			}
 		}
+		else if(op_type==Operation::ObjModified && obj_type==ObjectType::Tag)
+		{
+			for(auto &obj : object->getReferences())
+				dynamic_cast<BaseTable *>(obj)->setModified(true);
+		}
+
+		/* bkp_obj/aux_obj are temporary snapshots allocated above purely for this function's own
+		 * restore dance -- CoreUtilsNs::copyObject() allocates them on demand (see its "allocates if
+		 * not allocated" branch) and neither is ever attached to the model or the operation pool, so
+		 * they leak if not freed here */
+		delete bkp_obj;
+		delete aux_obj;
 
 		//Case the object is a type update the tables that are referencing it
 		if(op_type==Operation::ObjModified &&
@@ -929,6 +956,8 @@ void OperationList::executeOperation(Operation *oper, bool redo)
 					dynamic_cast<Column *>(obj)->getParentTable()->setModified(true);
 			}
 		}
+
+		emit s_operationExecuted(object, op_type);
 	}
 }
 
@@ -972,8 +1001,15 @@ void OperationList::removeLastOperation()
 			next_op_chain=Operation::ChainStart;
 
 		//Erasing the excluded operations
+		std::vector<Operation *>::iterator aux_itr;
+
 		for(int i=operations.size()-1; i > oper_idx ; i--)
-			operations.erase(operations.begin() + i);
+		{
+			aux_itr = (operations.begin() + i);
+			oper = *aux_itr;
+			operations.erase(aux_itr);
+			delete oper;
+		}
 
 		//Validates the remaining operations
 		validateOperations();
@@ -991,7 +1027,7 @@ void OperationList::updateObjectIndex(BaseObject *object, unsigned new_idx)
 	Operation *oper=nullptr;
 
 	if(!object)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	itr=operations.begin();
 	itr_end=operations.end();

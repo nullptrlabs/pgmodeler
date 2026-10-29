@@ -138,45 +138,46 @@ PgSqlType PgSqlType::parseString(const QString &str)
 	unsigned dim=0, srid=0;
 	int prec=-1, len = -1;
 	int start=-1, end=-1;
-	QStringList value, intervals;
+	QStringList value;
 	PgSqlType type;
 
 	//Checking if the string contains one of interval types
-	intervals = IntervalType::getTypes();
-	while(!intervals.isEmpty())
+	for(auto &interv : IntervalType::getTypes())
 	{
-		interv=intervals.back();
-		intervals.pop_back();
+		start = type_str.indexOf(QRegularExpression("( )" + interv.toLower()));
 
-		start=type_str.indexOf(QRegularExpression("( )" + interv.toLower()));
-		if(start>=0)
+		if(start >= 0)
 		{
 			type_str.remove(start, interv.size()+1);
 			break;
 		}
-		else
-			interv.clear();
 	}
 
 	//Check if the type contains "with time zone" descriptor
 	with_tz = QRegularExpression(QRegularExpression::anchoredPattern("(.)*(with time zone)(.)*")).match(type_str).hasMatch();
 
 	//Removes the timezone descriptor
-	type_str.remove(QRegularExpression("(with)(out)*( time zone)"));
+	static const QRegularExpression time_zone_regexp("(with)(out)*( time zone)");
+	type_str.remove(time_zone_regexp);
 
 	//Count the dimension of the type and removes the array descriptor
 	dim=type_str.count("[]");
 	type_str.remove("[]");
 
+	static const QRegularExpression length_regexp("(.)+\\(( )*[0-9]+( )*\\)"),
+			numeric_regexp("(.)+\\(( )*[0-9]+( )*(,)( )*[0-9]+( )*\\)"),
+			spatial_regexp("(.)+\\(( )*[a-z]+(( )*(,)( )*[0-9]+( )*)?\\)",
+											QRegularExpression::CaseInsensitiveOption);
+
 	//Check if the type is a variable length type, e.g varchar(200)
-	if(QRegularExpression("(.)+\\(( )*[0-9]+( )*\\)").match(type_str).hasMatch())
+	if(length_regexp.match(type_str).hasMatch())
 	{
 		start=type_str.indexOf('(');
 		end=type_str.indexOf(')', start);
 		len=type_str.mid(start+1, end-start-1).toInt();
 	}
 	//Check if the type is a numeric type, e.g, numeric(10,2)
-	else if(QRegularExpression("(.)+\\(( )*[0-9]+( )*(,)( )*[0-9]+( )*\\)").match(type_str).hasMatch())
+	else if(numeric_regexp.match(type_str).hasMatch())
 	{
 		start=type_str.indexOf('(');
 		end=type_str.indexOf(')', start);
@@ -185,8 +186,7 @@ PgSqlType PgSqlType::parseString(const QString &str)
 		prec=value[1].toUInt();
 	}
 	//Check if the type is a spatial type (PostGiS), e.g, geography(POINTZ, 4296)
-	else if(QRegularExpression("(.)+\\(( )*[a-z]+(( )*(,)( )*[0-9]+( )*)?\\)",
-														 QRegularExpression::CaseInsensitiveOption).match(type_str).hasMatch())
+	else if(spatial_regexp.match(type_str).hasMatch())
 	{
 		start=type_str.indexOf('(');
 		end=type_str.indexOf(')', start);
@@ -251,7 +251,7 @@ PgSqlType PgSqlType::parseString(const QString &str)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e, str);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e, str);
 	}
 }
 
@@ -311,7 +311,7 @@ PgSqlType::TypeCategory PgSqlType::getCategory()
 unsigned PgSqlType::setType(unsigned type_id)
 {
 	if(type_id == Null)
-		throw Exception(ErrorCode::AsgInvalidTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidTypeObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(type_id >= static_cast<unsigned>(type_names.size()))
 		return setUserType(type_id);
@@ -327,7 +327,7 @@ unsigned PgSqlType::setType(const QString &type_name)
 	usr_type_id = getUserTypeIndex(type_name, nullptr);
 
 	if(type_id == Null && usr_type_id == Null)
-		throw Exception(ErrorCode::AsgInvalidTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidTypeObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(type_id != Null)
 		return TemplateType<PgSqlType>::setType(type_id, type_names);
@@ -349,8 +349,10 @@ BaseObject *PgSqlType::getObject()
 {
 	if(this->isUserType())
 	{
-		return reinterpret_cast<BaseObject *>(
-				user_types[this->type_idx - (PseudoEnd + 1)].ptype);
+		/* return reinterpret_cast<BaseObject *>(
+				user_types[this->type_idx - (PseudoEnd + 1)].ptype);*/
+
+		return user_types[this->type_idx - (PseudoEnd + 1)].ptype;
 	}
 
 	return nullptr;
@@ -389,30 +391,36 @@ QString PgSqlType::getTypeName(bool incl_dimension)
 QString PgSqlType::getTypeSql()
 {
 	QString fmt_type, type, aux;
-	//unsigned idx;
 
 	type = ~(*this);
 	fmt_type = type;
 
 	//Generation the definition for the spatial types (PostGiS)
-	if(type=="geometry" || type=="geography")
+	if(type == "geometry" || type == "geography")
 		fmt_type=type + (*spatial_type);
 	else if(hasVariableLength())
 	{
 		//Configuring the precision
-		if((type=="numeric" || type=="decimal") && length >= 1 && precision>=0 && precision<=static_cast<int>(length))
-			aux=QString("%1(%2,%3)").arg(type_names[type_idx]).arg(length).arg(precision);
+		if((type == "numeric" || type == "decimal") &&
+			 length >= 1 && precision >= 0 &&
+			 precision <= static_cast<int>(length))
+			aux = QString("%1(%2,%3)").arg(type_names[type_idx]).arg(length).arg(precision);
+
 		//Configuring the length for the type
 		else if(length >= 1)
-			aux=QString("%1(%2)").arg(type_names[type_idx]).arg(length);
+		{
+			aux = QString("%1(%2)").arg(isUserType() ?
+																	getUserTypeName(type_idx) : type_names[type_idx])
+														 .arg(length);
+		}
 		else
-			aux=type;
+			aux = type;
 
 		fmt_type=aux;
 	}
-	else if(type!="numeric" && type!="decimal" && acceptsPrecision())
+	else if(type != "numeric" && type != "decimal" && acceptsPrecision())
 	{
-		if(type!="interval")
+		if(type != "interval")
 		{
 			aux = type_names[type_idx];
 
@@ -434,14 +442,10 @@ QString PgSqlType::getTypeSql()
 		}
 
 		fmt_type=aux;
-		}
-
-
-	if(type!="void" && dimension > 0)
-	{
-		//for(idx=0; idx < dimension; idx++)
-		fmt_type+=QString("[]").repeated(dimension);
 	}
+
+	if(type != "void" && dimension > 0)
+		fmt_type += QString("[]").repeated(dimension);
 
 	return fmt_type;
 }
@@ -543,16 +547,16 @@ void PgSqlType::setWithTimezone(bool with_tz)
 unsigned PgSqlType::setUserType(unsigned type_id)
 {
 	unsigned lim1 = PseudoEnd + 1,
-			lim2 = lim1 + PgSqlType::user_types.size();
+					 lim2 = lim1 + PgSqlType::user_types.size();
 
 	if(user_types.size() > 0 &&
-		(type_id >= lim1 && type_id < lim2))
+		 (type_id >= lim1 && type_id < lim2))
 	{
 		type_idx = type_id;
 		return type_idx;
 	}
-	else
-		throw Exception(ErrorCode::AsgInvalidTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+
+	throw Exception(ErrorCode::AsgInvalidTypeObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 }
 
 unsigned PgSqlType::setUserType(BaseObject *ptype)
@@ -560,13 +564,12 @@ unsigned PgSqlType::setUserType(BaseObject *ptype)
 	int idx = getUserTypeIndex("", ptype);
 
 	if(idx <= 0)
-		throw Exception(ErrorCode::AsgInvalidTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidTypeObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	type_idx = idx;
 	return type_idx;
 }
 
-//void PgSqlType::addUserType(const QString &type_name, BaseObject *ptype, DatabaseModel *pmodel, UserTypeConfig::TypeConf type_conf)
 void PgSqlType::addUserType(const QString &type_name, BaseObject *ptype, UserTypeConfig::TypeConf type_conf)
 {
 	if(!type_name.isEmpty() && ptype && ptype->getDatabase() &&
@@ -583,28 +586,38 @@ void PgSqlType::addUserType(const QString &type_name, BaseObject *ptype, UserTyp
 	}
 }
 
-void PgSqlType::removeUserType(const QString &type_name, BaseObject *ptype)
+void PgSqlType::invalidateUserType(UserTypeConfig &cfg)
 {
-	if(PgSqlType::user_types.size() > 0 &&
-			!type_name.isEmpty() && ptype)
+	cfg.name = "__invalidated_type__";
+	cfg.ptype = nullptr;
+	cfg.pmodel = nullptr;
+	cfg.invalidated = true;
+}
+
+void PgSqlType::invalidateUserType(const QString &type_name, BaseObject *ptype)
+{
+	if(type_name.isEmpty() || !ptype)
+		return;
+
+	for(auto &cfg : user_types)
 	{
-		std::vector<UserTypeConfig>::iterator itr, itr_end;
-
-		itr=PgSqlType::user_types.begin();
-		itr_end=PgSqlType::user_types.end();
-
-		while(itr!=itr_end)
+		if(cfg.name == type_name && cfg.ptype == ptype)
 		{
-			if(itr->name==type_name && itr->ptype==ptype) break;
-			else itr++;
+			invalidateUserType(cfg);
+			break;
 		}
+	}
+}
 
-		if(itr!=itr_end)
-		{
-			itr->name="__invalidated_type__";
-			itr->ptype=nullptr;
-			itr->invalidated=true;
-		}
+void PgSqlType::invalidateUserTypes(BaseObject *pmodel)
+{
+	if(!pmodel)
+		return;
+
+	for(auto &cfg : user_types)
+	{
+		if(cfg.pmodel == pmodel)
+			invalidateUserType(cfg);
 	}
 }
 
@@ -624,36 +637,13 @@ void PgSqlType::renameUserType(const QString &type_name, BaseObject *ptype, cons
 	}
 }
 
-void PgSqlType::removeUserTypes(BaseObject *pmodel)
-{
-	if(!pmodel)
-		return;
-
-	std::vector<UserTypeConfig>::iterator itr;
-	unsigned idx=0;
-
-	itr=user_types.begin();
-	while(itr!=user_types.end())
-	{
-		if(itr->pmodel==pmodel)
-		{
-			user_types.erase(itr);
-			itr=user_types.begin() + idx;
-		}
-		else
-		{
-			idx++;
-			itr++;
-		}
-	}
-}
-
 unsigned PgSqlType::getBaseTypeIndex(const QString &type_name)
 {
 	QString aux_name=type_name;
+	static const QRegularExpression with_time_zone_regexp("( )(with)(out)?(.)*");
 
 	aux_name.remove("[]");
-	aux_name.remove(QRegularExpression("( )(with)(out)?(.)*"));
+	aux_name.remove(with_time_zone_regexp);
 	aux_name=aux_name.trimmed();
 	return getType(aux_name, type_names);
 }
@@ -688,10 +678,8 @@ unsigned PgSqlType::getUserTypeIndex(const QString &type_name, BaseObject* ptype
 
 QString PgSqlType::getUserTypeName(unsigned type_id)
 {
-	unsigned lim1, lim2;
-
-	lim1=PseudoEnd + 1;
-	lim2=lim1 + user_types.size();
+	unsigned lim1 = PseudoEnd + 1,
+			lim2 = lim1 + user_types.size();
 
 	if(user_types.size() > 0 &&
 			(type_id >= lim1 && type_id < lim2))
@@ -730,15 +718,13 @@ QString PgSqlType::operator ~ ()
 {
 	if(type_idx >= PseudoEnd + 1)
 		return (user_types[type_idx - (PseudoEnd + 1)].name);
-	else
-	{
-		QString name = type_names[type_idx];
 
-		if(with_timezone && (name=="time" || name=="timestamp"))
-			 name+=" with time zone";
+	QString name = type_names[type_idx];
 
-		return name;
-	}
+	if(with_timezone && (name=="time" || name=="timestamp"))
+		 name+=" with time zone";
+
+	return name;
 }
 
 bool PgSqlType::isArrayType()
@@ -865,19 +851,25 @@ bool PgSqlType::isIntegerType()
 
 bool PgSqlType::hasVariableLength()
 {
-	QString curr_type=(!isUserType() ? type_names[this->type_idx] : "");
+	QString curr_type = (!isUserType() ? type_names[this->type_idx] : "");
 
-	return (!isUserType() &&
-					(curr_type=="numeric" || curr_type=="decimal" ||
-					 curr_type=="character varying" || curr_type=="varchar" ||
-					 curr_type=="character" || curr_type=="char" ||
-					 curr_type=="bit" || curr_type=="bit varying" ||
-					 curr_type=="varbit"));
+	/* If the current type is a user type and it handles a
+	 * common/base data type or a domain, then we make it
+	 * with variable length */
+	return (getUserTypeConfig() == UserTypeConfig::BaseType ||
+
+					/* Otherwise, only the types below has variable length
+					 * as documented by PostgreSQL docs */
+					(curr_type == "numeric" || curr_type=="decimal" ||
+					 curr_type == "character varying" || curr_type=="varchar" ||
+					 curr_type == "character" || curr_type=="char" ||
+					 curr_type == "bit" || curr_type=="bit varying" ||
+					 curr_type == "varbit"));
 }
 
 bool PgSqlType::isCharacterType()
 {
-	QString curr_type = getTypeName(false); //(!isUserType() ? type_names[this->type_idx] : "");
+	QString curr_type = getTypeName(false);
 
 	return !isUserType() &&
 				 (curr_type=="\"char\"" || curr_type=="char" ||
@@ -1083,18 +1075,18 @@ PgSqlType PgSqlType::getAliasType()
 	if(!isUserType())
 	{
 		if(type_names[this->type_idx]=="serial")
-			return (PgSqlType("integer"));
+			return { "integer" };
 
 		if(type_names[this->type_idx]=="smallserial")
-			return (PgSqlType("smallint"));
+			return { "smallint" };
 
 		if(type_names[this->type_idx]=="bigserial")
-			return (PgSqlType("bigint"));
+			return { "bigint" };
 
-		return (PgSqlType(type_names[this->type_idx]));
+		return { type_names[this->type_idx] };
 	}
-	else
-		return *this;
+
+	return *this;
 }
 
 void PgSqlType::setDimension(unsigned dim)
@@ -1104,7 +1096,7 @@ void PgSqlType::setDimension(unsigned dim)
 		int idx=getUserTypeIndex(~(*this), nullptr) - (PseudoEnd + 1);
 		if(static_cast<unsigned>(idx) < user_types.size() &&
 				user_types[idx].type_conf==UserTypeConfig::SequenceType)
-			throw Exception(ErrorCode::AsgInvalidSequenceTypeArray,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgInvalidSequenceTypeArray,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	dimension=dim;
@@ -1122,13 +1114,13 @@ void PgSqlType::setPrecision(int prec)
 		//Raises an error if the user tries to specify a precision > length
 		if(((type_names[type_idx]=="numeric" ||
 			 type_names[type_idx]=="decimal") && prec > static_cast<int>(length)))
-			throw Exception(ErrorCode::AsgInvalidPrecision,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgInvalidPrecision,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		//Raises an error if the precision is greater thant 6
 		if(((type_names[type_idx]=="time" ||
 					type_names[type_idx]=="timestamp" ||
 					type_names[type_idx]=="interval") && prec > 6))
-			throw Exception(ErrorCode::AsgInvalidPrecisionTimestamp,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgInvalidPrecisionTimestamp,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		this->precision=prec;
 	}

@@ -102,7 +102,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="inspect_tb">
+         <widget class="QPushButton" name="inspect_btn">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -137,16 +137,10 @@
           <property name="shortcut">
            <string>Shift+Del</string>
           </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
-          </property>
-          <property name="autoRaise">
-           <bool>false</bool>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="clear_tb">
+         <widget class="QPushButton" name="clear_btn">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -181,12 +175,6 @@
           <property name="shortcut">
            <string>Shift+Del</string>
           </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
-          </property>
-          <property name="autoRaise">
-           <bool>false</bool>
-          </property>
          </widget>
         </item>
         <item>
@@ -212,7 +200,7 @@
           </property>
           <property name="icon">
            <iconset resource="../../res/resources.qrc">
-            <normaloff>:/icons/icons/close1.png</normaloff>:/icons/icons/close1.png</iconset>
+            <normaloff>:/icons/icons/closetab.png</normaloff>:/icons/icons/closetab.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -231,9 +219,9 @@
        </layout>
       </item>
       <item>
-       <widget class="QGroupBox" name="summary_gb">
-        <property name="title">
-         <string/>
+       <widget class="QFrame" name="summary_frm">
+        <property name="frameShape">
+         <enum>QFrame::Shape::StyledPanel</enum>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <property name="spacing">
@@ -570,11 +558,10 @@
  </widget>
  <tabstops>
   <tabstop>persisted_chk</tabstop>
-  <tabstop>clear_tb</tabstop>
+  <tabstop>clear_btn</tabstop>
   <tabstop>hide_tb</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

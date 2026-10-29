@@ -20,27 +20,148 @@
 */
 
 #include "messagebox.h"
+#include "customuistyle.h"
 #include "guiutilsns.h"
 #include "utilsns.h"
+#include <qobject.h>
 
 Messagebox::Messagebox(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f)
 {
 	setupUi(this);
 
 	setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
-	show_errors_tb->setVisible(false);
+	show_errors_btn->setVisible(false);
 	custom_option_chk->setVisible(false);
 	raw_stack_txt = nullptr;
+	adjust_size_on_show = fixing_height = false;
 
 	connect(yes_ok_btn, &QPushButton::clicked, this, &Messagebox::handleYesOkClick);
 	connect(no_btn, &QPushButton::clicked, this, &Messagebox::handleNoCancelClick);
 	connect(cancel_btn, &QPushButton::clicked, this, &Messagebox::handleNoCancelClick);
 
-	connect(show_errors_tb, &QToolButton::toggled, this, [this](bool checked){
+	connect(show_errors_btn, &QPushButton::toggled, this, [this](bool checked){
 		objs_group_wgt->setCurrentIndex(checked ? 1 : 0);
-		resize(baseSize().width() * (checked ? 1.25 : 1),
-					 baseSize().height() * (checked ? 3 : 1));
+		updateStackPolicies();
+		layout()->activate();
+
+		resize(boundedSize(QSize(baseSize().width() * (checked ? 1.25 : 1),
+														 baseSize().height() * (checked ? 3 : 1))));
 	});
+}
+
+void Messagebox::updateStackPolicies()
+{
+	for(int i = 0; i < objs_group_wgt->count(); i++)
+	{
+		QSizePolicy::Policy policy = (i == objs_group_wgt->currentIndex() ?
+																		QSizePolicy::Preferred : QSizePolicy::Ignored);
+
+		objs_group_wgt->widget(i)->setSizePolicy(policy, policy);
+	}
+}
+
+void Messagebox::updateButtonsMinimumSize()
+{
+	for(auto &btn : { yes_ok_btn, no_btn, cancel_btn, show_errors_btn })
+	{
+		/* The buttons have a fixed horizontal policy, so their size hint is the size they must have.
+		 * It is calculated after the widgets are polished, otherwise it doesn't reflect the final font and style. */
+		btn->updateGeometry();
+		btn->setMinimumSize(btn->sizeHint());
+	}
+}
+
+QSize Messagebox::boundedSize(const QSize &sz)
+{
+	QSize min_sz = layout()->totalMinimumSize(),
+				bounded_sz = sz.expandedTo(min_sz);
+	QRect avail_rect = screen()->availableGeometry();
+
+	/* The screen size is a limit only when the layout minimum fits in it, otherwise
+	 * the dialog must be as large as required to display its contents properly */
+	if(min_sz.width() <= avail_rect.width())
+		bounded_sz.setWidth(qMin(bounded_sz.width(), avail_rect.width()));
+
+	if(min_sz.height() <= avail_rect.height())
+		bounded_sz.setHeight(qMin(bounded_sz.height(), avail_rect.height()));
+
+	return bounded_sz;
+}
+
+int Messagebox::requiredHeightForWidth(int width)
+{
+	constexpr int DefMinHeight = 175, MaxAttempts = 4;
+	QLayout *lt = layout();
+	int h = qMax(DefMinHeight, lt->totalMinimumSize().height());
+
+	/* The message label is shorter than the wrapped text when the dialog is too short for it.
+	 * As the layout rearranges the widgets synchronously (the dialog is visible), the missing height
+	 * is the difference between what the label needs and what it got. The attempts are repeated
+	 * because the extra height can make the layout redistribute the space differently. */
+	for(int i = 0; i < MaxAttempts; i++)
+	{
+		resize(width, h);
+		lt->activate();
+
+		if(objs_group_wgt->currentIndex() != 0)
+			break;
+
+		int missing_h = msg_lbl->heightForWidth(msg_lbl->width()) - msg_lbl->height();
+
+		if(missing_h <= 0)
+			break;
+
+		h += missing_h;
+	}
+
+	return h;
+}
+
+void Messagebox::adjustSizeToContents()
+{
+	/* The width grows in two phases. The first one gets the dialog to a comfortable height
+	 * (up to a fraction of the screen height, using at most a fraction of the screen width). If the
+	 * message still doesn't fit the screen height the second phase uses (almost) the whole screen width. */
+	constexpr double WidthFactor = 0.25, MaxWidthFactor = 0.6, MaxHeightFactor = 0.6,
+									 ExtremeWidthFactor = 0.9, ExtremeHeightFactor = 0.95;
+	constexpr int DefMinWidth = 530;
+
+	QRect avail_rect = screen()->availableGeometry();
+	int min_w = qMax(DefMinWidth, static_cast<int>(avail_rect.width() * WidthFactor)),
+			max_w = qMax(min_w, static_cast<int>(avail_rect.width() * MaxWidthFactor)),
+			max_h = static_cast<int>(avail_rect.height() * MaxHeightFactor),
+			extreme_w = qMax(max_w, static_cast<int>(avail_rect.width() * ExtremeWidthFactor)),
+			extreme_h = static_cast<int>(avail_rect.height() * ExtremeHeightFactor),
+			w = qMax(min_w, layout()->totalMinimumSize().width()), h = 0;
+
+	h = requiredHeightForWidth(w);
+
+	/* A very long message wrapped in a narrow dialog results in a tall one. So, the width is increased
+	 * until the height gets reasonable or there is no more room to grow. */
+	for(auto &limits : { std::pair<int, int>(max_w, max_h), std::pair<int, int>(extreme_w, extreme_h) })
+	{
+		while(h > limits.second && w < limits.first)
+		{
+			w = qMin(limits.first, static_cast<int>(w * 1.1) + 1);
+			h = requiredHeightForWidth(w);
+		}
+	}
+
+	resize(boundedSize(QSize(w, h)));
+	setBaseSize(size());
+}
+
+void Messagebox::showEvent(QShowEvent *event)
+{
+	/* The size is adjusted before the base class handles the event because it is
+	 * where the dialog is positioned (centered) according to its size */
+	if(adjust_size_on_show && !event->spontaneous())
+	{
+		adjust_size_on_show = false;
+		adjustSizeToContents();
+	}
+
+	QDialog::showEvent(event);
 }
 
 void Messagebox::handleYesOkClick()
@@ -110,8 +231,9 @@ bool Messagebox::isCustomOptionChecked()
 	return custom_option_chk->isChecked();
 }
 
-int Messagebox::show(Exception e, const QString &msg, IconType icon_type, ButtonsId buttons, const QString &yes_lbl, const QString &no_lbl, const QString &cancel_lbl,
-											const QString &yes_ico, const QString &no_ico, const QString &cancel_ico)
+int Messagebox::show(Exception e, const QString &msg, MessageType icon_type, ButtonsId buttons,
+										 const QString &yes_lbl, const QString &no_lbl, const QString &cancel_lbl,
+										 const QString &yes_ico, const QString &no_ico, const QString &cancel_ico)
 {
 	QString fmt_msg, title;
 
@@ -119,11 +241,10 @@ int Messagebox::show(Exception e, const QString &msg, IconType icon_type, Button
 	{
 		raw_stack_txt = GuiUtilsNs::createNumberedTextEditor(stacktrace_tbw->widget(2), true);
 		raw_stack_txt->setReadOnly(true);
-		raw_stack_txt->setLineNumbersVisible(false);
+		raw_stack_txt->showLineNumbers(false);
 		raw_stack_txt->setWordWrap(true);
 		GuiUtilsNs::configureTextEditFont(raw_stack_txt, font().pointSizeF());
-		stacktrace_tbw->widget(2)->layout()->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin,
-																														GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
+		stacktrace_tbw->widget(2)->layout()->setContentsMargins(GuiUtilsNs::LtMargins);
 	}
 
 	raw_stack_txt->setPlainText(e.getExceptionsText());
@@ -134,29 +255,34 @@ int Messagebox::show(Exception e, const QString &msg, IconType icon_type, Button
 	exceptions_trw->expandAll();
 	exceptions_trw->scrollToTop();
 
-	if(msg.isEmpty())
-		fmt_msg = UtilsNs::formatMessage(e.getErrorMessage());
-	else
-		fmt_msg = UtilsNs::formatMessage(msg);
-
-	return show(title, fmt_msg, icon_type, buttons, yes_lbl, no_lbl, cancel_lbl, yes_ico, no_ico, cancel_ico);
+	return show(title,
+							msg.isEmpty() ? e.getErrorMessage() : msg,
+							icon_type, buttons,
+							yes_lbl, no_lbl, cancel_lbl,
+							yes_ico, no_ico, cancel_ico, true);
 }
 
-int Messagebox::show(const QString &msg, IconType icon_type, ButtonsId buttons)
+int Messagebox::show(const QString &title, const QString &msg, MessageType icon_type, ButtonsId buttons, bool format_msg)
 {
-	return show("", msg,  icon_type, buttons);
+	return show(title, msg, icon_type, buttons,
+							"", "", "", "", "", "", format_msg);
 }
 
-void Messagebox::error(const QString &msg)
+int Messagebox::show(const QString &msg, MessageType icon_type, ButtonsId buttons, bool format_msg)
 {
-	Messagebox msgbox;
-	msgbox.show(msg, ErrorIcon);
+	return show("", msg, icon_type, buttons, format_msg);
 }
 
 void Messagebox::error(const QString &title, const QString &msg)
 {
 	Messagebox msgbox;
-	msgbox.show(title, msg, ErrorIcon);
+	msgbox.show(title, msg, Error, OkButton, true);
+}
+
+void Messagebox::error(const QString &msg)
+{
+	Messagebox msgbox;
+	msgbox.show(msg, Error, OkButton, true);
 }
 
 void Messagebox::error(const QString &msg, ErrorCode error_code, const QString &method, const QString &file, int line, Exception *e)
@@ -181,26 +307,32 @@ void Messagebox::error(Exception &e, const QString &method, const QString &file,
 	error(e.getErrorMessage(), e.getErrorCode(), method, file, line, &e);
 }
 
+void Messagebox::alert(const QString &title, const QString &msg)
+{
+	Messagebox msgbox;
+	msgbox.show(title, msg, Alert, OkButton, true);
+}
+
 void Messagebox::alert(const QString &msg, Exception *ex)
 {
 	Messagebox msgbox;
 
 	if(ex)
-		msgbox.show(*ex, msg, AlertIcon);
+		msgbox.show(*ex, msg, Alert);
 	else
-		msgbox.show(msg, AlertIcon);
-}
-
-void Messagebox::alert(const QString &title, const QString &msg)
-{
-	Messagebox msgbox;
-	msgbox.show(title, msg, AlertIcon);
+		msgbox.show(msg, Alert, OkButton, true);
 }
 
 void Messagebox::info(const QString &msg)
 {
 	Messagebox msgbox;
-	msgbox.show(msg, InfoIcon);
+	msgbox.show(msg, Info, OkButton, true);
+}
+
+void Messagebox::success(const QString &msg)
+{
+	Messagebox msgbox;
+	msgbox.show(msg, Success, OkButton, true);
 }
 
 int Messagebox::confirm(const QString &msg, ButtonsId btns_id,
@@ -208,17 +340,38 @@ int Messagebox::confirm(const QString &msg, ButtonsId btns_id,
 												const QString &yes_ico, const QString &no_ico, const QString &cancel_ico)
 {
 	Messagebox msgbox;
-	return msgbox.show("", msg, ConfirmIcon, btns_id,
+	return msgbox.show("", msg, Confirm, btns_id,
 										 yes_lbl, no_lbl, cancel_lbl,
-										 yes_ico, no_ico, cancel_ico);
+										 yes_ico, no_ico, cancel_ico, true);
 }
 
-int Messagebox::show(const QString &title, const QString &msg, IconType icon_type, ButtonsId buttons,
-										 const QString &yes_lbl, const QString &no_lbl, const QString &cancel_lbl,
-										 const QString &yes_ico, const QString &no_ico, const QString &cancel_ico)
+int Messagebox::confirm(const QString &title, const QString &msg, ButtonsId btns_id,
+												const QString &yes_lbl, const QString &no_lbl, const QString &cancel_lbl,
+												const QString &yes_ico, const QString &no_ico, const QString &cancel_ico)
 {
-	QString icon_name, aux_title=title;
-	QWidgetList btns = { yes_ok_btn, no_btn, cancel_btn, show_errors_tb };
+	Messagebox msgbox;
+	return msgbox.show(title, msg, Confirm, btns_id,
+										 yes_lbl, no_lbl, cancel_lbl,
+										 yes_ico, no_ico, cancel_ico, true);
+}
+
+int Messagebox::confirm(const QString &msg, MessageType icon_type, ButtonsId btns_id,
+												const QString &yes_lbl, const QString &no_lbl, const QString &cancel_lbl,
+												const QString &yes_ico, const QString &no_ico, const QString &cancel_ico)
+{
+	Messagebox msgbox;
+	return msgbox.show("", msg, icon_type, btns_id,
+										 yes_lbl, no_lbl, cancel_lbl,
+										 yes_ico, no_ico, cancel_ico, true);
+}
+
+int Messagebox::show(const QString &title, const QString &msg, MessageType icon_type, ButtonsId buttons,
+										 const QString &yes_lbl, const QString &no_lbl, const QString &cancel_lbl,
+										 const QString &yes_ico, const QString &no_ico, const QString &cancel_ico,
+										 bool format_msg)
+{
+	QString icon_name, aux_title;
+	CustomUiStyle::StyleHint style_hint = CustomUiStyle::NoHint;
 
 	if(!yes_lbl.isEmpty())
 		yes_ok_btn->setText(yes_lbl);
@@ -239,100 +392,84 @@ int Messagebox::show(const QString &title, const QString &msg, IconType icon_typ
 	if(!yes_ico.isEmpty())
 		yes_ok_btn->setIcon(QIcon(yes_ico));
 	else
-		yes_ok_btn->setIcon(buttons != CloseButton ? QIcon(GuiUtilsNs::getIconPath("confirm")) : QIcon(GuiUtilsNs::getIconPath("close1")));
+		yes_ok_btn->setIcon(buttons != CloseButton ?
+												GuiUtilsNs::getIcon("confirm") : GuiUtilsNs::getIcon("close1"));
 
-	no_btn->setText(!no_lbl.isEmpty() ? no_lbl : tr("&No"));
-	no_btn->setIcon(!no_ico.isEmpty() ? QIcon(no_ico) : QIcon(GuiUtilsNs::getIconPath("close1")));
+	no_btn->setText(!no_lbl.isEmpty() ? no_lbl :
+									(buttons == OkCloseButtons ? tr("&Close") : tr("&No")));
+	no_btn->setIcon(!no_ico.isEmpty() ?
+									QIcon(no_ico) : GuiUtilsNs::getIcon("close1"));
 
 	cancel_btn->setText(!cancel_lbl.isEmpty() ? cancel_lbl : tr("&Cancel"));
-	cancel_btn->setIcon(!cancel_ico.isEmpty() ? QIcon(cancel_ico) : QIcon(GuiUtilsNs::getIconPath("cancel")));
+	cancel_btn->setIcon(!cancel_ico.isEmpty() ? QIcon(cancel_ico) : GuiUtilsNs::getIcon("cancel"));
 
-	no_btn->setVisible(buttons==YesNoButtons || buttons==AllButtons);
+	no_btn->setVisible(buttons==YesNoButtons || buttons==OkCloseButtons || buttons==AllButtons);
 	cancel_btn->setVisible(buttons==OkCancelButtons || buttons==AllButtons);
-
-	for(auto &btn : btns)
-	{
-		btn->adjustSize();
-		btn->setMinimumSize(btn->size());
-	}
-
-	if(title.isEmpty())
-	{
-		switch(icon_type)
-		{
-		case ErrorIcon:
-			aux_title=tr("Error");
-			break;
-
-		case AlertIcon:
-			aux_title=tr("Alert");
-			break;
-
-		case InfoIcon:
-			aux_title=tr("Information");
-			break;
-
-		case ConfirmIcon:
-			aux_title=tr("Confirmation");
-			break;
-
-		default:
-			break;
-		}
-	}
 
 	switch(icon_type)
 	{
-	case ErrorIcon:
-		icon_name="error";
+		case Error:
+			icon_name = "error";
+			aux_title = title.isEmpty() ? tr("Error") : title;
+			style_hint = CustomUiStyle::ErrorFrmHint;
 		break;
 
-	case InfoIcon:
-		icon_name="info";
+		case Info:
+			icon_name = "info";
+			aux_title = title.isEmpty() ? tr("Information") : title;
+			style_hint = CustomUiStyle::InfoFrmHint;
 		break;
 
-	case AlertIcon:
-		icon_name="alert";
+		case Alert:
+			icon_name = "alert";
+			aux_title = title.isEmpty() ? tr("Alert") : title;
+			style_hint = CustomUiStyle::AlertFrmHint;
 		break;
 
-	case ConfirmIcon:
-		icon_name="question";
+		case Confirm:
+			icon_name = "question";
+			aux_title = title.isEmpty() ? tr("Confirmation") : title;
+			style_hint = CustomUiStyle::ConfirmFrmHint;
 		break;
 
-	default:
-		icon_name="";
+		case Success:
+			icon_name = "success";
+			aux_title = title.isEmpty() ? tr("Success") : title;
+			style_hint = CustomUiStyle::SuccessFrmHint;
+		break;
+
+		default:
+			icon_name = "";
+			aux_title = title;
 		break;
 	}
 
 	icon_lbl->setVisible(!icon_name.isEmpty());
 
 	if(!icon_name.isEmpty())
-		icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(icon_name)));
+		icon_lbl->setPixmap(GuiUtilsNs::getPixmap(icon_name));
 
-	msg_lbl->setText(msg);
+	msg_lbl->setText(format_msg ? UtilsNs::formatMessage(msg) : msg);
 
 	setWindowTitle(aux_title);
 	objs_group_wgt->setCurrentIndex(0);
-	show_errors_tb->setChecked(false);
-	show_errors_tb->setVisible(exceptions_trw->topLevelItemCount() > 0);
+	show_errors_btn->setChecked(false);
+	show_errors_btn->setVisible(exceptions_trw->topLevelItemCount() > 0);
 
-	double w_factor = 0.25, h_factor = 0.15;
-	QSize sz = screen()->size();
+	CustomUiStyle::setStyleHint(style_hint, frame);
 
-	if(sz.width() * w_factor > minimumWidth())
-		setMinimumWidth(sz.width() * w_factor);
+	/* The size is calculated only after everything that can change the size of the widgets (texts, icons,
+	 * visible buttons, styles) is configured and the widgets are polished. Then, the buttons get the size they need,
+	 * and the dialog the size needed by the message (wrapped according to the width) and the buttons row */
+	updateStackPolicies();
+	ensurePolished();
+	updateButtonsMinimumSize();
+	layout()->activate();
 
-	setMinimumHeight(sz.height() * h_factor);
-
-	int ln_cnt = QString(msg).replace(QRegularExpression("(<)(br)(/)?(>)",
-																		QRegularExpression::CaseInsensitiveOption),
-																		"\n").count('\n');
-
-	if(ln_cnt > 0)
-		adjustSize();
-	else
-		resize(minimumSize());
-
+	/* The dialog is sized once it is visible because the height required by the message
+	 * is only known when the layouts are arranged (see showEvent()) */
+	adjust_size_on_show = true;
+	resize(layout()->totalMinimumSize());
 	setBaseSize(size());
 
 	return exec();
@@ -351,5 +488,18 @@ int Messagebox::exec()
 
 void Messagebox::resizeEvent(QResizeEvent *event)
 {
-	QWidget::resizeEvent(event);
+	QDialog::resizeEvent(event);
+
+	if(fixing_height || !isVisible() || objs_group_wgt->currentIndex() != 0)
+		return;
+
+	// The layout was already arranged for the new size at this point
+	int missing_h = msg_lbl->heightForWidth(msg_lbl->width()) - msg_lbl->height();
+
+	if(missing_h > 0)
+	{
+		fixing_height = true;
+		resize(boundedSize(QSize(width(), height() + missing_h)));
+		fixing_height = false;
+	}
 }

@@ -23,6 +23,7 @@
 #include "messagebox.h"
 #include "guiutilsns.h"
 #include "qtconnectmacros.h"
+#include "customuistyle.h"
 
 const QString CrashHandlerForm::AnalysisMode {"-analysis-mode"};
 
@@ -30,8 +31,10 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 {
 	QFile input;
 	QString buf;
-	QWidget *wgt=new QWidget;
-	QHBoxLayout *layout=new QHBoxLayout;
+	QWidget *wgt = new QWidget;
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, hint_frm);
+	QHBoxLayout *layout = GuiUtilsNs::createHBoxLayout(GuiUtilsNs::LtMargin);
 
 	setWindowTitle(tr("pgModeler crash handler"));
 	setWindowIcon(QPixmap(":/images/images/crashhandler.png"));
@@ -42,19 +45,17 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 	stack_txt->setLineWrapMode(QPlainTextEdit::NoWrap);
 
 	layout->addWidget(stack_txt);
-	layout->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
 	wgt->setLayout(layout);
 
 	logo_lbl->setPixmap(QPixmap(":/images/images/crashhandler.png"));
-	report_twg->addTab(wgt, QIcon(GuiUtilsNs::getIconPath("alert")), tr("Stack trace"));
+	report_twg->addTab(wgt, GuiUtilsNs::getIcon("alert"), tr("Stack trace"));
 
 	//Open for reading the stack trace file generated on the last crash
 	input.setFileName(GlobalAttributes::getTemporaryFilePath(GlobalAttributes::StacktraceFile));
-	input.open(QFile::ReadOnly);
 
-	if(input.isOpen())
+	if(input.open(QFile::ReadOnly))
 	{
-		buf=input.readAll();
+		buf = input.readAll();
 		input.close();
 
 		//Removes the stack trace file
@@ -66,26 +67,25 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 	}
 
 	//Creating an input field in order to select the input report file
-	input_wgt=new QWidget(this);
+	input_wgt = new QWidget(this);
 	input_wgt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-	layout=new QHBoxLayout(input_wgt);
-	layout->setContentsMargins(0, 0, 0, 0);
+	layout = GuiUtilsNs::createHBoxLayout(0, GuiUtilsNs::LtSpacing, input_wgt);
 
-	input_lbl=new QLabel(input_wgt);
-	input_lbl->setText(tr("Input:"));
+	input_lbl = new QLabel(input_wgt);
+	input_lbl->setText(tr("Input"));
 	layout->addWidget(input_lbl);
 
-	input_sel = new FileSelectorWidget(this);
+	input_sel = new PathSelectorWidget(this);
 	input_sel->setFileDialogTitle(tr("Select bug report file"));
-	input_sel->setFileMustExist(true);
+	input_sel->setPathMustExist(true);
 	input_sel->setAcceptMode(QFileDialog::AcceptOpen);
 	input_sel->setNameFilters({ tr("pgModeler bug report (*.bug)"), tr("All files (*.*)") });
 	input_sel->setToolTip(tr("Load report file for analysis"));
 	layout->addWidget(input_sel);
 
 	save_tb=new QToolButton(input_wgt);
-	save_tb->setIcon(QIcon(GuiUtilsNs::getIconPath("save")));
+	save_tb->setIcon(GuiUtilsNs::getIcon("save"));
 	save_tb->setSizePolicy(attach_tb->sizePolicy());
 	save_tb->setToolButtonStyle(attach_tb->toolButtonStyle());
 	save_tb->setIconSize(attach_tb->iconSize());
@@ -104,12 +104,12 @@ CrashHandlerForm::CrashHandlerForm(bool analysis_mode, QWidget *parent, Qt::Wind
 
 	setAnalysisMode(analysis_mode);
 
-	connect(input_sel, &FileSelectorWidget::s_fileSelected, this, __slot_n(this, CrashHandlerForm::loadReport));
+	connect(input_sel, &PathSelectorWidget::s_pathSelected, this, __slot_n(this, CrashHandlerForm::loadReport));
 	connect(save_tb, &QToolButton::clicked, this, __slot(this, CrashHandlerForm::saveModel));
 
-	connect(input_sel, &FileSelectorWidget::s_selectorCleared, model_txt, &QPlainTextEdit::clear);
-	connect(input_sel, &FileSelectorWidget::s_selectorCleared, details_txt, &QPlainTextEdit::clear);
-	connect(input_sel, &FileSelectorWidget::s_selectorCleared, stack_txt, &QPlainTextEdit::clear);
+	connect(input_sel, &PathSelectorWidget::s_selectorCleared, model_txt, &QPlainTextEdit::clear);
+	connect(input_sel, &PathSelectorWidget::s_selectorCleared, details_txt, &QPlainTextEdit::clear);
+	connect(input_sel, &PathSelectorWidget::s_selectorCleared, stack_txt, &QPlainTextEdit::clear);
 
 	connect(model_txt, &QPlainTextEdit::textChanged, this, [this](){
 		save_tb->setEnabled(!model_txt->toPlainText().isEmpty());
@@ -124,13 +124,12 @@ void CrashHandlerForm::loadReport(QString filename)
 
 	fi.setFile(filename);
 	input.setFileName(filename);
-	input.open(QFile::ReadOnly);
 
 	//Raises an error if the file could not be opened
-	if(!input.isOpen())
+	if(!input.open(QFile::ReadOnly))
 	{
 		Messagebox::error(Exception::getErrorMessage(ErrorCode::FileDirectoryNotAccessed).arg(filename),
-											ErrorCode::FileDirectoryNotAccessed, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+											ErrorCode::FileDirectoryNotAccessed, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 	else
 	{
@@ -140,7 +139,7 @@ void CrashHandlerForm::loadReport(QString filename)
 		QPlainTextEdit *txt_widgets[]={ details_txt, model_txt , stack_txt};
 
 		//Creates a text buffer
-		buf=new char[fi.size()];
+		buf = new char[fi.size()];
 
 		//Reads the file storing it on the buffer
 		input.read(buf, fi.size());
@@ -183,7 +182,7 @@ void CrashHandlerForm::saveModel()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -205,7 +204,7 @@ void CrashHandlerForm::setAnalysisMode(bool value)
 	else
 	{
 		title_lbl->setText(tr("Oh no! pgModeler just crashed!"));
-		msg_lbl->setText(tr("We apologize for what happened! It's clear that a nasty bug caused that. Please, fill out the form below describing your actions that somehow caused the unexpected closing. This will help us to investigate the causes and provide the proper fix for the problem."));
+		msg_lbl->setText(tr("We apologize for what happened! It is clear that a nasty bug caused that. Please, fill out the form below describing your actions that somehow caused the unexpected closing. This will help us to investigate the causes and provide the proper fix for the problem."));
 	}
 }
 

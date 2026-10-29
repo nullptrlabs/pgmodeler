@@ -26,11 +26,11 @@
 
 const QString GlobalAttributes::PgModelerVersion {
 	/** Base version number **/
-	QString("1.2.3")
+	QString("2.0.0")
 
 /* Appending the snapshot build number to the version number
  * when the external variable SNAPSHOT_BUILD is defined */
-#if defined(SNAPSHOT_BUILD)
+#ifdef SNAPSHOT_BUILD
 			+ QString("_snapshot%1").arg(BUILDDATE)
 #endif
 };
@@ -42,29 +42,31 @@ const QString GlobalAttributes::PgModelerVersion {
  * This is used to automatically copy configuration files config from a previous
  * version to the new one. More details in Application::createUserConfiguration()
  * !!! ALWAYS UPDATE THESE VARIABLES WHEN UPGRADING THE MAJOR VERSION !!! */
-const QString GlobalAttributes::PgModelerAppName {"pgmodeler-1.2"};
+const QString GlobalAttributes::PgModelerAppName {"pgmodeler-2.0"};
 
 /* In versions 1.0.x and 1.1.x there was no distinction in the configuration directory.
- * So, until we upgrade to 1.3, we have to use the pgmodeler-1.0 as the previous
+ * So, until we upgrade to 1.2, we have to use the pgmodeler-1.0 as the previous
  * version configuration directory */
-const QString GlobalAttributes::PgModelerOldAppName {"pgmodeler-1.0"};
+const QString GlobalAttributes::PgModelerOldAppName {"pgmodeler-1.2"};
 
 const QString GlobalAttributes::PgModelerURI {"pgmodeler.io"};
-const QString GlobalAttributes::PgModelerBuildNumber { QString("%1.%2").arg(BUILDDATE).arg(BUILDNUM) };
+const QString GlobalAttributes::PgModelerBuildNumber { QString("%1.%2").arg(BUILDDATE, BUILDNUM) };
 
 const QString GlobalAttributes::PgModelerSite {
 #ifdef PGMODELER_DEBUG
-    "http://localhost:8000"
+	 "http://localhost:8000"
 #else
 	"https://pgmodeler.io"
 #endif
 };
 
-const QString GlobalAttributes::PgModelerSupport { PgModelerSite + "/support/docs" };
-const QString GlobalAttributes::PgModelerSourceURL {"https://github.com/pgmodeler/pgmodeler/releases" };
+const QString GlobalAttributes::PgModelerSupport { PgModelerSite + "/docs" };
+const QString GlobalAttributes::PgModelerSourceURL { "https://github.com/nullptrlabs/pgmodeler/releases" };
 const QString GlobalAttributes::PgModelerDownloadURL { PgModelerSite + "/download" };
-const QString GlobalAttributes::PgModelerDonateURL { PgModelerSite + "/#donationForm" };
+const QString GlobalAttributes::PgModelerDonateURL { PgModelerSite + "/donate" };
 const QString GlobalAttributes::PgModelerUpdateCheckURL { PgModelerSite + "/checkupdate?version=%1&mode=%2" };
+
+const QString GlobalAttributes::NullptrLabsSite { "https://nullptrlabs.io" };
 
 const QString GlobalAttributes::EnvSchemasPath {"PGMODELER_SCHEMAS_PATH"};
 const QString GlobalAttributes::EnvConfPath {"PGMODELER_CONF_PATH"};
@@ -88,6 +90,8 @@ const QString GlobalAttributes::DbModelExt {".dbm"};
 const QString GlobalAttributes::DbModelBkpExt {".dbk"};
 const QString GlobalAttributes::ObjMetadataExt {".omf"};
 const QString GlobalAttributes::DirSeparator {"/"};
+const QString GlobalAttributes::UiLanguageParam {"ui-language"};
+const QString GlobalAttributes::OriginalUiLanguage {"en_US"};
 const QString GlobalAttributes::ResourcesDir {"res"};
 const QString GlobalAttributes::ConfigurationsDir {"conf"};
 const QString GlobalAttributes::DefaultConfsDir {"defaults"};
@@ -119,6 +123,7 @@ const QString GlobalAttributes::ConnectionsConf {"connections"};
 const QString GlobalAttributes::RelationshipsConf {"relationships"};
 const QString GlobalAttributes::SnippetsConf {"snippets"};
 const QString GlobalAttributes::DiffPresetsConf {"diff-presets"};
+const QString GlobalAttributes::ThemeConf {"theme"};
 
 const QString GlobalAttributes::SQLHighlightConf {"sql-highlight"};
 const QString GlobalAttributes::XMLHighlightConf {"xml-highlight"};
@@ -273,17 +278,14 @@ QString GlobalAttributes::getConfigParamFromFile(const QString &param_name, cons
 	if(input.open(QFile::ReadOnly) && !param_name.isEmpty())
 	{
 		QString buf = QString(input.readAll());
-		QRegularExpression regexp = QRegularExpression(QString("(%1)(.*)(=)(\\\")(.)+(\\\")(\\\n)*").arg(param_name));
+		QRegularExpression regexp = QRegularExpression(QString("(%1)\\s*=\\s*\\\"([^\\\"]*)\\\"").arg(param_name));
 		QRegularExpressionMatch match;
 		int idx =	-1;
 
 		match =	regexp.match(buf);
-		idx = match.capturedStart();
 
-					 //Extract the value of the attribute in the conf file
-		attr_val = buf.mid(idx, match.capturedLength());
-		attr_val.remove(param_name);
-		attr_val.remove(QChar('"')).remove(QChar('=')).remove(QChar('\n'));
+		if(match.hasMatch())
+			attr_val = match.capturedTexts().constLast();
 	}
 
 	return attr_val;
@@ -291,13 +293,13 @@ QString GlobalAttributes::getConfigParamFromFile(const QString &param_name, cons
 
 void GlobalAttributes::setConfigFilesPaths()
 {
-#if defined(Q_OS_WINDOWS)
-	ConfigurationsPath=getPathFromEnv(EnvConfPath, QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QString("/%1").arg(PgModelerAppName));
-	TemporaryPath=getPathFromEnv(EnvTmpPath, QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QString("/%1/tmp").arg(PgModelerAppName));
-#else
-	ConfigurationsPath=getPathFromEnv(EnvConfPath, QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + QString("/%1").arg(PgModelerAppName));
-	TemporaryPath=getPathFromEnv(EnvTmpPath, QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + QString("/%1/tmp").arg(PgModelerAppName));
-#endif
+	#ifdef Q_OS_WINDOWS
+		ConfigurationsPath=getPathFromEnv(EnvConfPath, QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QString("/%1").arg(PgModelerAppName));
+		TemporaryPath=getPathFromEnv(EnvTmpPath, QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QString("/%1/tmp").arg(PgModelerAppName));
+	#else
+		ConfigurationsPath=getPathFromEnv(EnvConfPath, QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + QString("/%1").arg(PgModelerAppName));
+		TemporaryPath=getPathFromEnv(EnvTmpPath, QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + QString("/%1/tmp").arg(PgModelerAppName));
+	#endif
 
 	SQLHighlightConfPath=ConfigurationsPath + DirSeparator + SQLHighlightConf + ConfigurationExt;
 	XMLHighlightConfPath=ConfigurationsPath + DirSeparator + XMLHighlightConf + ConfigurationExt;
@@ -346,13 +348,13 @@ void GlobalAttributes::setSearchPath(const QString &search_path)
 	TmplConfigurationPath=getPathFromEnv(EnvTmplConfPath, CONFDIR, QString("%1/%2").arg(search_path, ConfigurationsDir));
 	PluginsPath=getPathFromEnv(EnvPluginsPath, PLUGINSDIR, QString("%1/%2").arg(search_path, PluginsDir));
 
-#if defined(Q_OS_UNIX)
-#if defined(Q_OS_MAC)
-																																																					 //For MacOSX the crash handler path is fixed (inside bundle)
-	PgModelerCHandlerPath=getPathFromEnv(EnvPgModelerChPath, QString("%1/pgmodeler-ch").arg(BINDIR), QString("%1/pgmodeler-ch").arg(search_path));
-#else
-	PgModelerCHandlerPath=getPathFromEnv(EnvPgModelerChPath, QString("%1/pgmodeler-ch").arg(PRIVATEBINDIR), QString("%1/pgmodeler-ch").arg(search_path));
-#endif
+	#ifdef Q_OS_UNIX
+	#ifdef Q_OS_MACOS
+		//For MacOSX the crash handler path is fixed (inside bundle)
+		PgModelerCHandlerPath=getPathFromEnv(EnvPgModelerChPath, QString("%1/pgmodeler-ch").arg(BINDIR), QString("%1/pgmodeler-ch").arg(search_path));
+	#else
+		PgModelerCHandlerPath=getPathFromEnv(EnvPgModelerChPath, QString("%1/pgmodeler-ch").arg(PRIVATEBINDIR), QString("%1/pgmodeler-ch").arg(search_path));
+	#endif
 
 	PgModelerCLIPath=getPathFromEnv(EnvPgModelerCliPath, QString("%1/pgmodeler-cli").arg(BINDIR), QString("%1/pgmodeler-cli").arg(search_path));
 	PgModelerAppPath=getPathFromEnv(EnvPgModelerPath, QString("%1/pgmodeler").arg(BINDIR), QString("%1/pgmodeler").arg(search_path));
@@ -370,11 +372,11 @@ void GlobalAttributes::init(const QString &search_path, bool apply_ui_factor)
 {
 	QRegularExpression ver_rx("(\\-)?(alpha|beta|snapshot)(\\_)?(\\d)*");
 
-#if !defined(APPIMAGE_BUILD)
+#ifndef APPIMAGE_BUILD
 	QFileInfo fi(search_path);
 	GlobalAttributes::setSearchPath(fi.isDir() ? search_path : fi.absolutePath());
 #else
-#warning "AppImage: hard coding search path to temporary path /tmp/pgmodelerXXXXX!"
+	#warning "AppImage: hard coding search path to temporary path /tmp/pgmodelerXXXXX!"
 	GlobalAttributes::setSearchPath(getenv("APPDIR"));
 #endif
 

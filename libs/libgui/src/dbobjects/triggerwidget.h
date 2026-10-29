@@ -64,7 +64,7 @@ class __libgui TriggerWidget: public BaseObjectWidget, public Ui::TriggerWidget 
 		void enableTransitionTableNames();
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

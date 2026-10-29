@@ -20,19 +20,102 @@
 */
 
 #include "sceneinfowidget.h"
+#include "customuistyle.h"
 #include "guiutilsns.h"
 #include "relationshipview.h"
 
 SceneInfoWidget::SceneInfoWidget(QWidget *parent): QWidget(parent)
 {
 	setupUi(this);
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::TabBarFrmHint,
+															{ cursor_pos_info_frm, separator_ln,
+																obj_sel_info_frm, separator_ln2,
+																separator_ln3, separator_ln4,
+																seg_mode_frm });
+
+	GuiUtilsNs::configureWidgetsFont({ scenes_cmb, seg_modes_cmb, threshold_spb,
+																		 mouse_pos_info_lbl, zoom_info_lbl, sel_obj_count_lbl,
+																		 obj_pos_info_lbl, threshold_spb->findChild<QLineEdit *>() },
+																	 GuiUtilsNs::MediumFontFactor);
+
+	threshold_spb->setValue(DatabaseModel::DefaultSegThreshold);
+	threshold_spb->setSingleStep(DatabaseModel::DefaultSegThreshold / 2);
+	threshold_spb->setMinimum(DatabaseModel::DefaultSegThreshold);
+	threshold_spb->setMaximum(DatabaseModel::DefaultSegThreshold * 5);
+	threshold_spb->setVisible(false);
+
+	connect(scenes_cmb, &QComboBox::activated, this, &SceneInfoWidget::s_activeSceneSelected);
+
+	connect(seg_modes_cmb, &QComboBox::currentIndexChanged, this, [this](int idx) {
+		DatabaseModel::SegmentationMode mode = static_cast<DatabaseModel::SegmentationMode>(idx);
+		threshold_spb->setVisible(mode == DatabaseModel::SegByThreshold);
+		emit s_segmentationModeSelected(mode);
+	});
+
+	connect(threshold_spb, &QSpinBox::editingFinished, this, [this](){
+		emit s_thresholdSelected(static_cast<unsigned>(threshold_spb->value()));
+	});
+
+	// The button is checked while the relationships are visible, the opposite of the model's option
+	connect(toggle_rels_tb, &QToolButton::toggled, this, [this](bool visible) {
+		emit s_hideRelationshipsToggled(!visible);
+	});
+
+	connect(next_tb, &QToolButton::clicked, this, [this](){
+		scenes_cmb->setCurrentIndex(scenes_cmb->currentIndex() + 1);
+		emit s_activeSceneSelected(scenes_cmb->currentIndex());
+		enableNavigationButtons();
+	});
+
+	connect(previous_tb, &QToolButton::clicked, this, [this](){
+		scenes_cmb->setCurrentIndex(scenes_cmb->currentIndex() - 1);
+		emit s_activeSceneSelected(scenes_cmb->currentIndex());
+		enableNavigationButtons();
+	});
+}
+
+void SceneInfoWidget::updateScenesCombo(const QStringList &names, int active_idx)
+{
+	scenes_cmb->blockSignals(true);
+	scenes_cmb->clear();
+	scenes_cmb->addItems(names);
+	scenes_cmb->setCurrentIndex(active_idx);
+	scenes_cmb->blockSignals(false);
+	enableNavigationButtons();
+}
+
+void SceneInfoWidget::updateHideRelationships(bool hide)
+{
+	toggle_rels_tb->blockSignals(true);
+	toggle_rels_tb->setChecked(!hide);
+	toggle_rels_tb->blockSignals(false);
+}
+
+void SceneInfoWidget::updateSegmentationInfo(DatabaseModel::SegmentationMode mode, unsigned threshold)
+{
+	seg_modes_cmb->blockSignals(true);
+	seg_modes_cmb->setCurrentIndex(static_cast<int>(mode));
+	seg_modes_cmb->blockSignals(false);
+
+	threshold_spb->blockSignals(true);
+
+	//Widens the ceiling instead of silently clamping a legitimately larger persisted/loaded value
+	if(static_cast<int>(threshold) > threshold_spb->maximum())
+		threshold_spb->setMaximum(static_cast<int>(threshold));
+
+	threshold_spb->setValue(static_cast<int>(threshold));
+	threshold_spb->setVisible(mode == DatabaseModel::SegByThreshold);
+	threshold_spb->blockSignals(false);
+
+	scene_nav_wgt->setVisible(mode != DatabaseModel::NoSegmentation);
 }
 
 void SceneInfoWidget::updateSelectedObject(BaseObjectView *object)
 {
 	if(!object)
 	{
-		sel_obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("close1")));
+		sel_obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap("close1"));
 		sel_obj_count_lbl->setText(tr("None"));
 		obj_pos_info_lbl->setText(tr("None"));
 	}
@@ -62,7 +145,7 @@ void SceneInfoWidget::updateSelectedObjects(int obj_count, const QRectF &objs_re
 	if(!rect.isValid())
 		rect = QRect(0,0,0,0);
 
-	sel_obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath("selectmove")));
+	sel_obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap("selectmove"));
 	sel_obj_count_lbl->setText(tr("Selected: <strong>%1</strong>").arg(obj_count));
 	obj_pos_info_lbl->setText(QString("(%1, %2) [w: %3, h: %4]")
 														.arg(rect.left())
@@ -79,4 +162,10 @@ void SceneInfoWidget::updateMousePosition(const QPointF &mouse_pos)
 void SceneInfoWidget::updateSceneZoom(double zoom)
 {
 	zoom_info_lbl->setText(QString("%1%").arg(zoom * 100));
+}
+
+void SceneInfoWidget::enableNavigationButtons()
+{
+	previous_tb->setEnabled(scenes_cmb->currentIndex() > 0 && scenes_cmb->count() > 1);
+	next_tb->setEnabled(scenes_cmb->currentIndex() >= 0 && scenes_cmb->currentIndex() != (scenes_cmb->count() - 1));
 }

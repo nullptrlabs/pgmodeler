@@ -6,53 +6,99 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>672</width>
-    <height>435</height>
+    <width>358</width>
+    <height>170</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string/>
   </property>
-  <widget class="QLabel" name="from_sql_func_lbl">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>100</y>
-     <width>107</width>
-     <height>31</height>
-    </rect>
+  <layout class="QVBoxLayout" name="transform_lt">
+   <property name="spacing">
+    <number>5</number>
    </property>
-   <property name="text">
-    <string>From SQL:</string>
+   <property name="leftMargin">
+    <number>5</number>
    </property>
-  </widget>
-  <widget class="QLabel" name="to_sql_func_lbl">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>210</y>
-     <width>77</width>
-     <height>31</height>
-    </rect>
+   <property name="topMargin">
+    <number>5</number>
    </property>
-   <property name="text">
-    <string>To SQL:</string>
+   <property name="rightMargin">
+    <number>5</number>
    </property>
-  </widget>
-  <widget class="QLabel" name="language_lbl">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>30</y>
-     <width>107</width>
-     <height>31</height>
-    </rect>
+   <property name="bottomMargin">
+    <number>5</number>
    </property>
-   <property name="text">
-    <string>Language:</string>
-   </property>
-  </widget>
+   <item>
+    <widget class="QTabWidget" name="attributes_tbw">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="attributes_tab">
+      <attribute name="icon">
+       <iconset resource="../../res/resources.qrc">
+        <normaloff>:/icons/icons/attribute.png</normaloff>:/icons/icons/attribute.png</iconset>
+      </attribute>
+      <attribute name="title">
+       <string>Attributes</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="attributes_lt">
+       <property name="spacing">
+        <number>5</number>
+       </property>
+       <property name="leftMargin">
+        <number>5</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>5</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <layout class="QVBoxLayout" name="language_lt">
+         <item>
+          <widget class="QLabel" name="language_lbl">
+           <property name="text">
+            <string>Language</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="from_sql_func_lt">
+         <item>
+          <widget class="QLabel" name="from_sql_func_lbl">
+           <property name="text">
+            <string>From SQL</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="to_sql_func_lt">
+         <item>
+          <widget class="QLabel" name="to_sql_func_lbl">
+           <property name="text">
+            <string>To SQL</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../res/resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

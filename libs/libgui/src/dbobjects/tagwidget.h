@@ -45,7 +45,7 @@ class __libgui TagWidget: public BaseObjectWidget, public Ui::TagWidget {
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Tag *tag);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

@@ -74,9 +74,20 @@ class __libcore BaseGraphicObject: public QObject, public BaseObject {
 		//! \brief Stores the table's Z position in the canvas
 		int z_value;
 
+		/*! \brief Index of the ObjectsScene bucket this object belongs to, in
+		 * threshold-segmentation mode, or a manually reassigned scene (any segmentation mode,
+		 * subtask 4.2). -1 means unset -- the object routes through whatever the current
+		 * segmentation mode's default logic decides. Originally a BaseTable-only attribute
+		 * (subtask 2.2); moved up here so Textbox can carry its own manual scene reassignment
+		 * too, the same way it already shares position/faded-out/layers with every other
+		 * graphical object type regardless of whether a given subtype's own getSourceCode()
+		 * override actually calls setSceneIndexAttribute() to persist it */
+		int scene_idx;
+
 		/*! \brief Method that defines the objects position attributes used in generation
-		 of XML code definition */
+		 *  of XML code definition */
 		void setPositionAttribute();
+		void setPositionAttribute(const QPointF &pos, const QString &pos_attr, const QString &id = "");
 
 		//! \brief Defines the receveir objects that represents the 'this' object on the QGraphicsScene
 		void setReceiverObject(QObject *obj);
@@ -85,23 +96,24 @@ class __libcore BaseGraphicObject: public QObject, public BaseObject {
 
 		void setLayersAttribute();
 
+		void setSceneIndexAttribute();
+
 	public:
 		static constexpr int MaxZValue = 50,
 		MinZValue = -50;
 
 		BaseGraphicObject();
-
-		virtual ~BaseGraphicObject() {}
+		~BaseGraphicObject() override = default;
 
 		/*! \brief Sets whether the object is protected or not (method overloading
 		 from base class BaseObject) the difference is that this method
 		 emits the signal s_objectProtected() */
-		virtual void setProtected(bool value) override;
+		void setProtected(bool value) override;
 
 		/*! \brief Sets whether the object is system or not (method overloading
 		 from base class BaseObject) the difference is that this method
 		 emits the same signal s_objectProtected() */
-		virtual void setSystemObject(bool value) override;
+		void setSystemObject(bool value) override;
 
 		//! \brief Sets the object's position
 		virtual void setPosition(const QPointF &pos);
@@ -110,7 +122,7 @@ class __libcore BaseGraphicObject: public QObject, public BaseObject {
 		 This method emits the signal s_objectModified() */
 		virtual void setModified(bool value);
 
-		virtual void setSQLDisabled(bool value) override;
+		void setSQLDisabled(bool value) override;
 
 		//! \brief Sets the fade out status of the receiver object
 		void setFadedOut(bool value);
@@ -125,13 +137,13 @@ class __libcore BaseGraphicObject: public QObject, public BaseObject {
 		QPointF getPosition();
 
 		//! \brief Assigns on object to other mading the correct attribute copy
-		void operator = (BaseGraphicObject &obj);
+		void operator =(BaseGraphicObject &obj);
 
 		//! \brief Gets the current overlying (top object, scene object) that graphically represents the 'this' object
 		QObject *getOverlyingObject();
 
 		//! \brief Returns the code definition of the object
-		virtual QString getSourceCode(SchemaParser::CodeType) override = 0;
+		QString getSourceCode(SchemaParser::CodeType) override = 0;
 
 		//! \brief Returns if the passed type one that has a graphical representation (table, view, schema, relationship or textbox)
 		static bool isGraphicObject(ObjectType type);
@@ -160,6 +172,15 @@ class __libcore BaseGraphicObject: public QObject, public BaseObject {
 		virtual void setZValue(int z_value);
 
 		int getZValue();
+
+		//! \brief Defines the ObjectsScene bucket index this object belongs to (threshold-segmentation mode, or a manual reassignment)
+		void setSceneIndex(int idx);
+
+		//! \brief Returns the ObjectsScene bucket index this object belongs to, or -1 if unset
+		int getSceneIndex();
+
+		//! \brief Clears the scene bucket index, reverting it to unset (-1)
+		void resetSceneIndex();
 
 		static void setUpdatesEnabled(bool value);
 

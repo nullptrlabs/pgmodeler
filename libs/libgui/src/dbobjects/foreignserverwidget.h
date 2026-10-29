@@ -45,7 +45,7 @@ class __libgui ForeignServerWidget: public BaseObjectWidget, public Ui::ForeignS
 		void setAttributes(DatabaseModel *model, OperationList *op_list, ForeignServer *server);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

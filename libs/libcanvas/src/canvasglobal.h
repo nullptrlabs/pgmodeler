@@ -3,7 +3,7 @@
 
 #include <QtCore/QtGlobal>
 
-#if defined(CANVAS_SYMBOLS)
+#ifdef CANVAS_SYMBOLS
 	#define __libcanvas Q_DECL_EXPORT
 #else
 	#define __libcanvas Q_DECL_IMPORT

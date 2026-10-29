@@ -27,29 +27,25 @@ ModelNavigationWidget::ModelNavigationWidget(QWidget *parent): QWidget(parent)
 {
 	setupUi(this);
 
-	connect(models_cmb, &QComboBox::currentIndexChanged, this, &ModelNavigationWidget::setCurrentModel);
-
 	connect(close_tb, &QToolButton::clicked, this, [this](){
 		emit s_modelCloseRequested(models_cmb->currentIndex());
 	});
 
 	connect(next_tb, &QToolButton::clicked, this, [this](){
-		models_cmb->setCurrentIndex(models_cmb->currentIndex()+1);
+		models_cmb->setCurrentIndex(models_cmb->currentIndex() + 1);
 	});
 
 	connect(previous_tb, &QToolButton::clicked, this, [this](){
-		models_cmb->setCurrentIndex(models_cmb->currentIndex()-1);
+		models_cmb->setCurrentIndex(models_cmb->currentIndex() - 1);
 	});
+
+	connect(models_cmb, &QComboBox::currentIndexChanged, this, &ModelNavigationWidget::setCurrentModel);
 
 	connect(models_cmb, &QComboBox::highlighted, this, &ModelNavigationWidget::showTooltip);
 
 	previous_tb->setToolTip(previous_tb->toolTip() + QString(" (%1)").arg(previous_tb->shortcut().toString()));
 	next_tb->setToolTip(next_tb->toolTip() + QString(" (%1)").arg(next_tb->shortcut().toString()));
 	close_tb->setToolTip(close_tb->toolTip() + QString(" (%1)").arg(close_tb->shortcut().toString()));
-
-	GuiUtilsNs::createDropShadow(previous_tb, 1, 1, 5);
-	GuiUtilsNs::createDropShadow(next_tb, 1, 1, 5);
-	GuiUtilsNs::createDropShadow(close_tb, 1, 1, 5);
 }
 
 int ModelNavigationWidget::getCurrentIndex()
@@ -61,8 +57,8 @@ QString ModelNavigationWidget::getText(int idx)
 {
 	if(idx < 0 || idx >= models_cmb->count())
 		return "";
-	else
-		return models_cmb->itemText(idx);
+
+	return models_cmb->itemText(idx);
 }
 
 QList<ModelWidget *> ModelNavigationWidget::getModelWidgets()
@@ -72,28 +68,37 @@ QList<ModelWidget *> ModelNavigationWidget::getModelWidgets()
 
 void ModelNavigationWidget::addModel(ModelWidget *model)
 {
-	if(model)
-	{
-		QString tooltip;
+	insertModel(model, -1);
+}
 
-		setEnabled(true);
-		models_cmb->blockSignals(true);
+void ModelNavigationWidget::insertModel(ModelWidget *model, int idx)
+{
+	if(!model)
+		return;
 
-		tooltip=model->getFilename();
+	QString tooltip;
 
-		if(tooltip.isEmpty())
-			tooltip=tr("(model not saved yet)");
+	setEnabled(true);
+	models_cmb->blockSignals(true);
+	tooltip = model->getFilename();
 
-		models_cmb->addItem(model->getDatabaseModel()->getName(), tooltip);
-		models_cmb->setCurrentIndex(models_cmb->count()-1);
-		models_cmb->setToolTip(tooltip);
+	if(tooltip.isEmpty())
+		tooltip = tr("(Model not saved yet)");
 
-		models_cmb->blockSignals(false);
+	if(models_cmb->count() == 0)
+		idx = 0;
+	else if(idx < 0 || idx > models_cmb->count())
+		idx = models_cmb->count();
 
-		model_wgts.append(model);
+	models_cmb->insertItem(idx, model->getDatabaseModel()->getName(), tooltip);
+	models_cmb->setCurrentIndex(idx);
+	models_cmb->setToolTip(tooltip);
 
-		enableNavigationButtons();
-	}
+	models_cmb->blockSignals(false);
+	model_wgts.insert(idx, model);
+
+	setCurrentModelModified(model->isModified());
+	enableNavigationButtons();
 }
 
 void ModelNavigationWidget::updateModelText(int idx, const QString &text, const QString &filename)
@@ -114,17 +119,21 @@ void ModelNavigationWidget::setCurrentModelModified(bool modified)
 		return;
 
 	models_cmb->setItemIcon(models_cmb->currentIndex(),
-													modified ? QIcon(GuiUtilsNs::getIconPath("save")) : QIcon());
+													modified ? GuiUtilsNs::getIcon("save") : QIcon());
 }
 
 void ModelNavigationWidget::removeModel(int idx)
 {
+	if(idx < 0 || idx >= models_cmb->count())
+		return;
+
 	models_cmb->blockSignals(true);
 	models_cmb->removeItem(idx);
 	this->setEnabled(models_cmb->count() >= 1);
 
 	if(models_cmb->count() >= 1)
 		models_cmb->setToolTip(models_cmb->currentData().toString());
+
 	models_cmb->blockSignals(false);
 
 	model_wgts.removeAt(idx);
@@ -151,6 +160,9 @@ void ModelNavigationWidget::enableNavigationButtons()
 
 void ModelNavigationWidget::showTooltip(int idx)
 {
-	QString tooltip=models_cmb->itemData(idx).toString();
+	if(idx < 0 || idx >= models_cmb->count())
+		return;
+
+	QString tooltip = models_cmb->itemData(idx).toString();
 	QToolTip::showText(QCursor::pos(), tooltip);
 }

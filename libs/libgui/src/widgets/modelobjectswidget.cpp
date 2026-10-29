@@ -20,23 +20,28 @@
 */
 
 #include "modelobjectswidget.h"
-#include "tools/databaseimportform.h"
 #include "guiutilsns.h"
 #include "settings/generalconfigwidget.h"
 #include "customtablewidget.h"
+#include "customuistyle.h"
 #include <QScrollBar>
 
 ModelObjectsWidget::ModelObjectsWidget(bool simplified_view, QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
+
+	GuiUtilsNs::configureBuddyWidgets(filter_wgt);
+	CustomUiStyle::setStyleHint(CustomUiStyle::GroupBoxFrmHint, content_frm);
+	GuiUtilsNs::configureWidgetFont(title_lbl, GuiUtilsNs::SmallFontFactor, true);
+
 	obj_types_wgt = nullptr;
 	model_wgt=nullptr;
 	db_model=nullptr;
 	setModel(db_model);
 
 	title_wgt->setVisible(!simplified_view);
-	this->simplified_view=simplified_view;
-	this->save_tree_state=!simplified_view;
+	this->simplified_view = simplified_view;
+	this->save_tree_state = !simplified_view;
 	enable_obj_creation=simplified_view;
 
 	select_tb->setVisible(simplified_view);
@@ -45,9 +50,11 @@ ModelObjectsWidget::ModelObjectsWidget(bool simplified_view, QWidget *parent) : 
 	visibleobjects_grp->setVisible(false);
 	filter_wgt->setVisible(simplified_view);
 
+	if(simplified_view)
+		model_objs_grid->setContentsMargins(GuiUtilsNs::LtMargins);
+
 	connect(objectstree_tw, &QTreeWidget::itemPressed, this, &ModelObjectsWidget::selectObject);
 	connect(objectstree_tw, &QTreeWidget::itemPressed, this, &ModelObjectsWidget::showObjectMenu);
-	//connect(objectstree_tw, &QTreeWidget::itemSelectionChanged, this, &ModelObjectsWidget::selectObject);
 
 	connect(objectstree_tw, &QTreeWidget::itemCollapsed, this, [this](){
 		objectstree_tw->resizeColumnToContents(0);
@@ -91,13 +98,10 @@ ModelObjectsWidget::ModelObjectsWidget(bool simplified_view, QWidget *parent) : 
 		connect(hide_tb, &QToolButton::clicked, this, &ModelObjectsWidget::hide);
 
 		setAllObjectsVisible(true);	
-		objectstree_tw->installEventFilter(this);
 		objectstree_tw->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	}
 	else
 	{
-		model_objs_grid->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin,
-																				GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
 		setMinimumSize(250, 300);
 		setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint | Qt::WindowTitleHint);
 		setWindowModality(Qt::ApplicationModal);
@@ -112,17 +116,14 @@ ModelObjectsWidget::ModelObjectsWidget(bool simplified_view, QWidget *parent) : 
 
 bool ModelObjectsWidget::eventFilter(QObject *object, QEvent *event)
 {
-	if(event->type() == QEvent::FocusOut && object==objectstree_tw)
+	if(event->type() == QEvent::FocusIn &&
+		 model_wgt && (object == model_wgt->viewport))
 	{
-		QFocusEvent *evnt=dynamic_cast<QFocusEvent *>(event);
+		QFocusEvent *evnt = dynamic_cast<QFocusEvent *>(event);
 
-		if(evnt->reason()==Qt::MouseFocusReason)
+		if(evnt->reason() == Qt::MouseFocusReason)
 		{
-			clearSelectedObject();
-
-			if(model_wgt)
-				model_wgt->configurePopupMenu(nullptr);
-
+			clearSelectedObjects();
 			return true;
 		}
 	}
@@ -176,7 +177,7 @@ void ModelObjectsWidget::editObject()
 		else
 			model_wgt->editObject();
 
-		clearSelectedObject();
+		clearSelectedObjects();
 	}
 }
 
@@ -194,6 +195,12 @@ void ModelObjectsWidget::selectObject()
 
 	selected_objs.clear();
 	QTreeWidgetItem *tree_item = objectstree_tw->currentItem();
+
+	/* Avoiding selecting the object if the model has
+	 * interaction disabled */
+	if(!model_wgt ||
+		 (model_wgt && !model_wgt->isInteractive()))
+		return;
 
 	if(tree_item)
 	{
@@ -231,7 +238,7 @@ void ModelObjectsWidget::selectObject()
 		if(simplified_view && enable_obj_creation)
 			connect(model_wgt->getDatabaseModel(), &DatabaseModel::s_objectAdded, this, &ModelObjectsWidget::selectCreatedObject, Qt::QueuedConnection);
 
-		p_act->setIcon(QIcon(GuiUtilsNs::getIconPath(obj_type)));
+		p_act->setIcon(GuiUtilsNs::getIcon(obj_type));
 		p_act->setText(tr("New") + " " + BaseObject::getTypeName(obj_type));
 		popup.addAction(p_act);
 		popup.exec(QCursor::pos());
@@ -255,6 +262,10 @@ void ModelObjectsWidget::selectObject()
 				return;
 
 			QGraphicsItem *scn_item = dynamic_cast<QGraphicsItem *>(graph_obj->getOverlyingObject());
+
+			// Cross-scene relationships have no graphical item to highlight
+			if(!scn_item)
+				return;
 
 			scn_item->setSelected(true);
 			model_wgt->scene->views().at(0)->centerOn(scn_item);
@@ -280,44 +291,44 @@ QVariant ModelObjectsWidget::generateItemData(BaseObject *object)
 
 QTreeWidgetItem *ModelObjectsWidget::createItemForObject(BaseObject *object, QTreeWidgetItem *root, bool update_perms)
 {
-	QTreeWidgetItem *item=nullptr;
+	QTreeWidgetItem *item = nullptr;
 	QFont font;
 	ObjectType obj_type;
-	TableObject *tab_obj=nullptr;
+	TableObject *tab_obj = nullptr;
 	QString obj_name;
 
 	if(!object)
-		throw Exception(ErrorCode::OprNotAllocatedObject ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
-	obj_type=object->getObjectType();
-	tab_obj=dynamic_cast<TableObject *>(object);
-	item=new QTreeWidgetItem(root);
+	obj_type = object->getObjectType();
+	tab_obj = dynamic_cast<TableObject *>(object);
+	item = new QTreeWidgetItem(root);
 
 	if(BaseFunction::isBaseFunction(obj_type))
 	{
 		BaseFunction *func = dynamic_cast<BaseFunction *>(object);
 		func->createSignature(false);
-		item->setText(0,func->getSignature());
+		item->setText(0, func->getSignature());
 		obj_name = func->getSignature();
 		func->createSignature(true);
 	}
-	else if(obj_type==ObjectType::Operator)
+	else if(obj_type == ObjectType::Operator)
 	{
-		Operator *oper=dynamic_cast<Operator *>(object);
+		Operator *oper = dynamic_cast<Operator *>(object);
 		item->setText(0, oper->getSignature(false));
-		obj_name=oper->getSignature(false);
+		obj_name = oper->getSignature(false);
 	}
-	else if(obj_type==ObjectType::OpClass || obj_type == ObjectType::OpFamily)
+	else if(obj_type == ObjectType::OpClass || obj_type == ObjectType::OpFamily)
 	{
-		obj_name=object->getSignature(false);
+		obj_name = object->getSignature(false);
 		obj_name.replace(QRegularExpression("( )+(USING)( )+"), " [");
 		obj_name+=QChar(']');
-		item->setText(0,obj_name);
+		item->setText(0, obj_name);
 	}
 	else
 	{
 		item->setText(0,object->getName());
-		obj_name=object->getName();
+		obj_name = object->getName();
 	}
 
 	item->setToolTip(0, QString("%1 (id: %2)").arg(obj_name).arg(object->getObjectId()));
@@ -327,7 +338,7 @@ QTreeWidgetItem *ModelObjectsWidget::createItemForObject(BaseObject *object, QTr
 	if(update_perms)
 		updatePermissionTree(item, object);
 
-	font=item->font(0);
+	font = item->font(0);
 	font.setStrikeOut(object->isSQLDisabled() && !object->isSystemObject());
 
 	if(tab_obj && tab_obj->isAddedByRelationship())
@@ -341,7 +352,7 @@ QTreeWidgetItem *ModelObjectsWidget::createItemForObject(BaseObject *object, QTr
 		item->setForeground(0, CustomTableWidget::getTableItemColor(CustomTableWidget::ProtItemAltFgColor));
 	}
 
-	item->setFont(0,font);
+	item->setFont(0, font);
 
 	int sub_type = -1;
 
@@ -350,7 +361,7 @@ QTreeWidgetItem *ModelObjectsWidget::createItemForObject(BaseObject *object, QTr
 	else if(obj_type == ObjectType::Constraint)
 		sub_type = dynamic_cast<Constraint *>(object)->getConstraintType().getTypeId();
 
-	item->setIcon(0, QIcon(GuiUtilsNs::getIconPath(obj_type, sub_type)));
+	item->setIcon(0, GuiUtilsNs::getIcon(obj_type, sub_type));
 	item->setData(2, Qt::UserRole, QString("%1_%2").arg(object->getObjectId()).arg(object->getSchemaName()));
 
 	return item;
@@ -412,7 +423,10 @@ void ModelObjectsWidget::collapseAll()
 
 void ModelObjectsWidget::filterObjects()
 {
-	DatabaseImportForm::filterObjects(objectstree_tw, filter_edt->text(), (by_id_chk->isChecked() ? 1 : 0), simplified_view);
+	GuiUtilsNs::filterObjects(objectstree_tw,
+														filter_edt->text(),
+														(by_id_chk->isChecked() ? 2 : 0),
+														simplified_view);
 }
 
 void ModelObjectsWidget::updateObjectsView()
@@ -434,7 +448,7 @@ void ModelObjectsWidget::updateSchemaTree(QTreeWidgetItem *root)
 		QTreeWidgetItem *item = nullptr, *item1=nullptr, *item2=nullptr;
 		std::vector<ObjectType> types = BaseObject::getChildObjectTypes(ObjectType::Schema);
 		int count = 0;
-		QPixmap group_icon=QPixmap(GuiUtilsNs::getIconPath(QString(BaseObject::getSchemaName(ObjectType::Schema))));
+		QIcon group_icon=GuiUtilsNs::getIcon(QString(BaseObject::getSchemaName(ObjectType::Schema)));
 
 		//Removing the ObjectType::Table and ObjectType::View types since they are handled separetedly
 		types.erase(std::find(types.begin(), types.end(), ObjectType::Table));
@@ -477,7 +491,7 @@ void ModelObjectsWidget::updateSchemaTree(QTreeWidgetItem *root)
 					if(visible_objs_map[type])
 					{
 						item2 = new QTreeWidgetItem(item1);
-						item2->setIcon(0,QPixmap(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(type))));
+						item2->setIcon(0,GuiUtilsNs::getPixmap(BaseObject::getSchemaName(type)));
 
 						//Get the objects that belongs to the current schema
 						obj_list = db_model->getObjects(type, schema);
@@ -497,7 +511,7 @@ void ModelObjectsWidget::updateSchemaTree(QTreeWidgetItem *root)
 		}
 		catch(Exception &e)
 		{
-			throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+			throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 		}
 	}
 }
@@ -511,7 +525,7 @@ void ModelObjectsWidget::updateTableTree(QTreeWidgetItem *root, BaseObject *sche
 		QTreeWidgetItem *item = nullptr, *item1 = nullptr, *item2 = nullptr;
 		QFont font;
 		std::vector<ObjectType> types = BaseObject::getChildObjectTypes(table_type);
-		QPixmap group_icon = QPixmap(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(table_type)));
+		QIcon group_icon = GuiUtilsNs::getIcon(BaseObject::getSchemaName(table_type));
 
 		try
 		{
@@ -540,7 +554,7 @@ void ModelObjectsWidget::updateTableTree(QTreeWidgetItem *root, BaseObject *sche
 					if(visible_objs_map[type])
 					{
 						item2 = new QTreeWidgetItem(item1);
-						item2->setIcon(0,QPixmap(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(type))));
+						item2->setIcon(0,GuiUtilsNs::getPixmap(BaseObject::getSchemaName(type)));
 						font = item2->font(0);
 						font.setItalic(true);
 						item2->setFont(0, font);
@@ -556,7 +570,7 @@ void ModelObjectsWidget::updateTableTree(QTreeWidgetItem *root, BaseObject *sche
 		}
 		catch(Exception &e)
 		{
-			throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+			throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 		}
 	}
 }
@@ -570,7 +584,7 @@ void ModelObjectsWidget::updateViewTree(QTreeWidgetItem *root, BaseObject *schem
 		QTreeWidgetItem *item = nullptr, *item1 = nullptr, *item2 = nullptr;
 		QFont font;
 		std::vector<ObjectType> types = BaseObject::getChildObjectTypes(ObjectType::View);
-		QPixmap group_icon = QPixmap(GuiUtilsNs::getIconPath(QString(BaseObject::getSchemaName(ObjectType::View))));
+		QIcon group_icon = GuiUtilsNs::getIcon(QString(BaseObject::getSchemaName(ObjectType::View)));
 
 		try
 		{
@@ -599,7 +613,7 @@ void ModelObjectsWidget::updateViewTree(QTreeWidgetItem *root, BaseObject *schem
 					if(visible_objs_map[type])
 					{
 						item2 = new QTreeWidgetItem(item1);
-						item2->setIcon(0,QPixmap(GuiUtilsNs::getIconPath(BaseObject::getSchemaName(type))));
+						item2->setIcon(0,GuiUtilsNs::getPixmap(BaseObject::getSchemaName(type)));
 						font = item2->font(0);
 						font.setItalic(true);
 						item2->setFont(0, font);
@@ -615,7 +629,7 @@ void ModelObjectsWidget::updateViewTree(QTreeWidgetItem *root, BaseObject *schem
 		}
 		catch(Exception &e)
 		{
-			throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+			throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 		}
 	}
 }
@@ -632,7 +646,7 @@ void ModelObjectsWidget::updatePermissionTree(QTreeWidgetItem *root, BaseObject 
 			QFont font=item->font(0);
 
 			db_model->getPermissions(object, perms);
-			item->setIcon(0,QPixmap(GuiUtilsNs::getIconPath("permission")));
+			item->setIcon(0,GuiUtilsNs::getPixmap("permission"));
 
 			font.setItalic(true);
 			item->setFont(0, font);
@@ -646,7 +660,7 @@ void ModelObjectsWidget::updatePermissionTree(QTreeWidgetItem *root, BaseObject 
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -693,7 +707,7 @@ void ModelObjectsWidget::updateDatabaseTree()
 						item1 = new QTreeWidgetItem(root);
 						str_aux = QString(BaseObject::getSchemaName(type));
 
-						item1->setIcon(0, QPixmap(GuiUtilsNs::getIconPath(str_aux)));
+						item1->setIcon(0, GuiUtilsNs::getIcon(str_aux));
 						item1->setData(1, Qt::UserRole, QVariant(enum_t(type)));
 
 						obj_list=(*db_model->getObjectList(type));
@@ -731,7 +745,7 @@ void ModelObjectsWidget::updateDatabaseTree()
 		catch(Exception &e)
 		{
 			objectstree_tw->setUpdatesEnabled(true);
-			Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+			Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
 
 		objectstree_tw->sortByColumn(0, Qt::AscendingOrder);
@@ -779,7 +793,10 @@ void ModelObjectsWidget::setModel(ModelWidget *model_wgt)
 	this->model_wgt=model_wgt;
 
 	if(model_wgt)
+	{
 		setModel(model_wgt->db_model);
+		model_wgt->viewport->installEventFilter(this);
+	}
 	else
 		setModel(static_cast<DatabaseModel *>(nullptr));
 }
@@ -789,7 +806,7 @@ void ModelObjectsWidget::setModel(DatabaseModel *db_model)
 	bool enable = (db_model!=nullptr);
 
 	this->db_model=db_model;
-	content_wgt->setEnabled(enable);
+	content_frm->setEnabled(enable);
 	updateObjectsView();	
 	expand_all_tb->setEnabled(enable);
 	collapse_all_tb->setEnabled(enable);
@@ -887,14 +904,18 @@ void ModelObjectsWidget::saveTreeState(bool value)
 	save_tree_state=(!simplified_view && value);
 }
 
-void ModelObjectsWidget::clearSelectedObject()
+void ModelObjectsWidget::clearSelectedObjects()
 {
 	objectstree_tw->blockSignals(true);
 	objectstree_tw->clearSelection();
 	objectstree_tw->blockSignals(false);
 	selected_objs.clear();
-	model_wgt->configurePopupMenu(nullptr);
-	model_wgt->emitSceneInteracted();
+
+	//if(model_wgt)
+	//{
+		//model_wgt->configurePopupMenu(nullptr);
+		//model_wgt->emitSceneInteracted();
+	//}
 }
 
 void ModelObjectsWidget::saveTreeState(QStringList &exp_items_ids, int &v_scroll_pos)

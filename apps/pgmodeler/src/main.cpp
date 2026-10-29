@@ -20,77 +20,41 @@
 */
 
 #include "pgmodelerapp.h"
-#include "mainwindow.h"
+#include "utilsns.h"
+#include <signal.h>
 #include <QSplashScreen>
 
-#ifndef Q_OS_WIN
-#include "execinfo.h"
-#endif
-
-#ifdef PRIVATE_PLUGINS_SYMBOLS
+#ifdef PRIV_CODE_SYMBOLS
 	#include "privcoreinit.h"
 	#include "privcoreclasses.h"
-#endif
-
-void startCrashHandler(int signal)
-{
-	QFile output;
-	QString lin, cmd;
-
-	/** At the moment the backtrace function does not exists on MingW (Windows) this way
-	 the code that generates the stacktrace is available only on Linux/Unix systems */
-#ifndef Q_OS_WIN
-	void *stack[30];
-	size_t stack_size;
-	char **symbols=nullptr;
-	stack_size = backtrace(stack, 30);
-	symbols = backtrace_symbols(stack, stack_size);
-#endif
-
-	cmd=QString("\"%1\"").arg(GlobalAttributes::getPgModelerCHandlerPath()) + " -style " + GlobalAttributes::DefaultQtStyle;
-
-	//Creates the stacktrace file
-	output.setFileName(GlobalAttributes::getTemporaryFilePath(GlobalAttributes::StacktraceFile));
-	output.open(QFile::WriteOnly);
-
-	if(output.isOpen())
-	{
-		lin=QString("** pgModeler crashed after receive signal: %1 **\n\nDate/Time: %2 \nVersion: %3 \nBuild: %4 \n")
-			.arg(signal)
-			.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
-			.arg(GlobalAttributes::PgModelerVersion)
-			.arg(GlobalAttributes::PgModelerBuildNumber);
-
-		lin+=QString("Compilation Qt version: %1\nRunning Qt version: %2\n\n")
-			 .arg(QT_VERSION_STR)
-			 .arg(qVersion());
-
-		output.write(lin.toStdString().c_str(), lin.size());
-
-#ifndef Q_OS_WIN
-		for(size_t i=0; i < stack_size; i++)
-		{
-			lin=QString("[%1] ").arg(stack_size-1-i) + QString(symbols[i]) + "\n";
-			output.write(lin.toStdString().c_str(), lin.size());
-		}
-		free(symbols);
+	#include "privmainwindow.h"
 #else
-		lin = "** Stack trace unavailable on Windows system **";
-		output.write(lin.toStdString().c_str(), lin.size());
+	#include "mainwindow.h"
 #endif
 
-		output.close();
+namespace {
+	void startCrashHandler(int signal)
+	{
+		try
+		{
+			QString chandler_cmd = QString("\"%1\"").arg(GlobalAttributes::getPgModelerCHandlerPath()) + " -style " + GlobalAttributes::DefaultQtStyle;
+			QFile output;
+			UtilsNs::saveFile(GlobalAttributes::getTemporaryFilePath(GlobalAttributes::StacktraceFile),
+												UtilsNs::generateStackTrace(signal).toUtf8());
+
+			/* Changing the working dir to the main executable in order to call the crash handler
+			 * if the PGMODELER_CHANDLER_PATH isn't set */
+			QDir dir;
+			dir.cd(QApplication::applicationDirPath());
+			exit(1 + system(chandler_cmd.toStdString().c_str()));
+		}
+		catch(Exception &e)
+		{
+			qDebug().noquote() << "** Failed to save stacktrace file! Crash handler aborted.";
+			qDebug().noquote() << e.getExceptionsText();
+		}
 	}
-
-	/* Changing the working dir to the main executable in order to call the crash handler
-  if the PGMODELER_CHANDLER_PATH isn't set */
-	QDir dir;
-	dir.cd(QApplication::applicationDirPath());
-
-	exit(1 + system(cmd.toStdString().c_str()));
 }
-
-
 
 int main(int argc, char **argv)
 {
@@ -104,7 +68,7 @@ int main(int argc, char **argv)
 		PgModelerApp app(argc,argv);
 		int res=0;
 
-		//Loading the application splash screen
+		// Loading the application splash screen
 		QSplashScreen splash;
 		QPixmap pix(":images/images/pgmodeler_splash.png");
 
@@ -115,27 +79,32 @@ int main(int argc, char **argv)
 
 		splash.setPixmap(pix);
 		splash.show();
+		splash.raise();
 		app.processEvents();
 
-		//Creates the main form
-		MainWindow fmain;
-
-		#ifdef PRIVATE_PLUGINS_SYMBOLS
-			__pgm_plus_gui_init
+		#ifdef PRIV_CODE_SYMBOLS
+			PrivMainWindow fmain;
+		#else
+			MainWindow fmain;
 		#endif
 
-		fmain.show();
-		splash.finish(&fmain);
+		fmain.initMainWindow();
+
+		// Displaying the splash for one and a half second after displaying the main window
+		QTimer::singleShot(1500, &splash, [&splash, &fmain]() {
+			fmain.show();
+			splash.finish(&fmain);
+		 });
 
 		//Loading models via command line on MacOSX are disabled until the file association work correclty on that system
-#ifndef Q_OS_MAC
-		QStringList params=app.arguments();
-		params.pop_front();
+		#ifndef Q_OS_MACOS
+			QStringList params = app.arguments();
+			params.pop_front();
 
-		//If the user specifies a list of files to be loaded
-		if(!params.isEmpty())
-			fmain.loadModels(params);
-#endif
+			//If the user specifies a list of files to be loaded
+			if(!params.isEmpty())
+				fmain.loadModels(params);
+		#endif
 
 		res = app.exec();
 		app.closeAllWindows();

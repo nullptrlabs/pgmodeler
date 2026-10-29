@@ -110,14 +110,18 @@ void Type::addAttribute(TypeAttribute attrib)
 {
 	//Raises an error if the attribute has an empty name or null type
 	if(attrib.getName().isEmpty() || attrib.getType()==PgSqlType::Null)
-		throw Exception(ErrorCode::InsInvalidTypeAttribute,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::InsInvalidTypeAttribute,PGM_FUNC,PGM_FILE,PGM_LINE);
+
 	//Raises an error if the passed attribute has the same type as the defining type (this)
-	else if(PgSqlType::getUserTypeIndex(this->getName(true), this) == !attrib.getType())
+	if(PgSqlType::getUserTypeIndex(this->getName(true), this) == !attrib.getType())
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvUserTypeSelfReference).arg(this->getName(true)),
-						ErrorCode::InvUserTypeSelfReference,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										ErrorCode::InvUserTypeSelfReference,PGM_FUNC,PGM_FILE,PGM_LINE);
+	}
+
 	//Raises an error when the attribute already exists
-	else if(getAttributeIndex(attrib.getName()) >= 0)
-		throw Exception(ErrorCode::InsDuplicatedItems,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+	if(getAttributeIndex(attrib.getName()) >= 0)
+		throw Exception(ErrorCode::InsDuplicatedItems,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	type_attribs.push_back(attrib);
 	setCodeInvalidated(true);
@@ -127,7 +131,7 @@ void Type::removeAttribute(unsigned attrib_idx)
 {
 	//Raises an error if the attribute index is out of bound
 	if(attrib_idx >= type_attribs.size())
-		throw Exception(ErrorCode::RefAttributeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefAttributeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	type_attribs.erase(type_attribs.begin() + attrib_idx);
 	setCodeInvalidated(true);
@@ -143,14 +147,18 @@ void Type::addEnumeration(const QString &enum_name)
 {
 	//Raises an error if the enumaration name is empty
 	if(enum_name.isEmpty())
-		throw Exception(ErrorCode::InsInvalidEnumerationItem,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::InsInvalidEnumerationItem,PGM_FUNC,PGM_FILE,PGM_LINE);
+
 	//Raises an error if the enumeration name is invalid (exceeds the maximum length)
-	else if(enum_name.size() > BaseObject::ObjectNameMaxLength)
+	if(enum_name.size() > BaseObject::ObjectNameMaxLength)
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgEnumLongName).arg(enum_name).arg(this->getName(true)),
-						ErrorCode::AsgEnumLongName,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										ErrorCode::AsgEnumLongName,PGM_FUNC,PGM_FILE,PGM_LINE);
+	}
+
 	//Raises an error if the enumeration already exists
-	else if(enumerations.contains(enum_name))
-		throw Exception(ErrorCode::InsDuplicatedEnumerationItem,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+	if(enumerations.contains(enum_name))
+		throw Exception(ErrorCode::InsDuplicatedEnumerationItem,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	enumerations.append(enum_name);
 	setCodeInvalidated(true);
@@ -159,7 +167,7 @@ void Type::addEnumeration(const QString &enum_name)
 void Type::removeEnumeration(unsigned enum_idx)
 {
 	if(enum_idx >= static_cast<unsigned>(enumerations.size()))
-		throw Exception(ErrorCode::RefEnumerationInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefEnumerationInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	enumerations.removeAt(enum_idx);
 	setCodeInvalidated(true);
@@ -175,13 +183,13 @@ void Type::setConfiguration(TypeConfig conf)
 {
 	//Raises an error if the configuration type is invalid
 	if(conf > RangeType)
-		throw Exception(ErrorCode::AsgInvalidTypeConfiguration,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgInvalidTypeConfiguration,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	type_attribs.clear();
 	enumerations.clear();
 
-	for(unsigned idx=0; idx < sizeof(functions)/sizeof(Function *); idx++)
-		functions[idx]=nullptr;
+	for(auto &func : functions)
+		func = nullptr;
 
 	setCollation(nullptr);
 	subtype_opclass=nullptr;
@@ -205,7 +213,7 @@ void Type::setFunction(FunctionId func_id, Function *func)
 
 	//Raises an error if the function id is invalid
 	if(func_id > SubtypeDiffFunc)
-		throw Exception(ErrorCode::RefFunctionInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefFunctionInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(func)
 		param_count=func->getParameterCount();
@@ -214,37 +222,43 @@ void Type::setFunction(FunctionId func_id, Function *func)
 	to the type's configuraiton */
 	if((config==BaseType && func_id >= CanonicalFunc) ||
 			(config==RangeType && func_id <= AnalyzeFunc))
-		throw Exception(ErrorCode::RefInvalidFunctionIdTypeConfig,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefInvalidFunctionIdTypeConfig,PGM_FUNC,PGM_FILE,PGM_LINE);
+
 	/* Raises an error if the function isn't defined and the function id is INPUT or OUTPUT,
 		because this function is mandatory for base types */
-	else if(!func && (func_id==InputFunc || func_id==OutputFunc))
+	if(!func && (func_id==InputFunc || func_id==OutputFunc))
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgNotAllocatedFunction)
-						.arg(this->getName(true))
-						.arg(BaseObject::getTypeName(ObjectType::Type)),
-						ErrorCode::AsgNotAllocatedFunction,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										.arg(this->getName(true))
+										.arg(BaseObject::getTypeName(ObjectType::Type)),
+										ErrorCode::AsgNotAllocatedFunction,PGM_FUNC,PGM_FILE,PGM_LINE);
+	}
 
-	else if(func)
+	if(func)
 	{
 		/* Raises an error if the function language is not C.
 		 Functions assigned to base type must be written in C */
 		if((func_id!=CanonicalFunc && func_id!=SubtypeDiffFunc) &&
 				func->getLanguage()->getName().toLower() != DefaultLanguages::C &&
 				func->getLanguage()->getName().toLower() != DefaultLanguages::Internal)
-			throw Exception(ErrorCode::AsgFunctionInvalidLanguage,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::AsgFunctionInvalidLanguage,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		/* Raises an error if the parameter count for INPUT and RECV functions
 		 is different from 1 or 3. */
-		else if((param_count!=1 && param_count!=3 &&
+		if((param_count!=1 && param_count!=3 &&
 				 (func_id==InputFunc || func_id==RecvFunc)) ||
 				(param_count!=2 && func_id==SubtypeDiffFunc) ||
 				(param_count!=1 &&
 				 (func_id==OutputFunc   || func_id==SendFunc ||
 				  func_id==TpmodInFunc || func_id==TpmodOutFunc ||
 				  func_id==AnalyzeFunc  || func_id==CanonicalFunc)))
+		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParamCount)
-							.arg(this->getName())
-							.arg(BaseObject::getTypeName(ObjectType::Type)),
-							ErrorCode::AsgFunctionInvalidParamCount,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											.arg(this->getName())
+											.arg(BaseObject::getTypeName(ObjectType::Type)),
+											ErrorCode::AsgFunctionInvalidParamCount,PGM_FUNC,PGM_FILE,PGM_LINE);
+		}
+
 		/* Checking the return types of function in relation to type.
 		 INPUT, RECV and CANONICAL functions must return the data type that is being defined according to the
 		 documentation, but to facilitate the implementation the function must return data type
@@ -252,7 +266,7 @@ void Type::setFunction(FunctionId func_id, Function *func)
 		 OUTPUT and TPMOD_OUT should return cstring.
 		 The other functions SEND, TPMOD_IN and ANALYZE should return bytea, integer and boolean,
 		 respectively. Raises an error if some of conditions above is not satisfied. */
-		else if((func_id==InputFunc && func->getReturnType()!="\"any\"") ||
+		if((func_id==InputFunc && func->getReturnType()!="\"any\"") ||
 				(func_id==OutputFunc && func->getReturnType()!="cstring") ||
 				(func_id==RecvFunc && func->getReturnType()!="\"any\"") ||
 				(func_id==SendFunc && func->getReturnType()!="bytea") ||
@@ -261,10 +275,12 @@ void Type::setFunction(FunctionId func_id, Function *func)
 				(func_id==AnalyzeFunc && func->getReturnType()!="boolean") ||
 				(func_id==CanonicalFunc && func->getReturnType()!="\"any\"") ||
 				(func_id==SubtypeDiffFunc && func->getReturnType()!="double precision"))
+		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidReturnType)
-							.arg(this->getName())
-							.arg(BaseObject::getTypeName(ObjectType::Type)),
-							ErrorCode::AsgFunctionInvalidReturnType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											.arg(this->getName())
+											.arg(BaseObject::getTypeName(ObjectType::Type)),
+											ErrorCode::AsgFunctionInvalidReturnType,PGM_FUNC,PGM_FILE,PGM_LINE);
+		}
 
 		/* Validating the parameter types of function in relation to the type configuration.
 		 The INPUT function must have parameters with type (cstring, oid, integer).
@@ -275,7 +291,7 @@ void Type::setFunction(FunctionId func_id, Function *func)
 		 TPMOD_OUT function must have a parameter of type (integer).
 		 The ANALYZE function must have a parameter of type (internal).
 		 Raises an error if some of above conditions is not satisfied.*/
-		else if((func_id==InputFunc &&
+		if((func_id==InputFunc &&
 				 (func->getParameter(0).getType()!="cstring" ||
 				  (param_count==3 &&
 					 (func->getParameter(1).getType()!="oid" ||
@@ -293,10 +309,12 @@ void Type::setFunction(FunctionId func_id, Function *func)
 				(func_id==SubtypeDiffFunc &&
 				 (func->getParameter(0).getType()!=this->subtype ||
 				  func->getParameter(1).getType()!=this->subtype)))
+		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParameters)
-							.arg(this->getName())
-							.arg(this->getTypeName()),
-							ErrorCode::AsgFunctionInvalidParameters,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											.arg(this->getName())
+											.arg(this->getTypeName()),
+											ErrorCode::AsgFunctionInvalidParameters,PGM_FUNC,PGM_FILE,PGM_LINE);
+		}
 
 		func->setProtected(false);
 	}
@@ -307,8 +325,7 @@ void Type::setFunction(FunctionId func_id, Function *func)
 
 void Type::convertFunctionParameters(bool inverse_conv)
 {
-	unsigned i, conf_funcs[]={ InputFunc, RecvFunc,
-							   OutputFunc, SendFunc };
+	unsigned i, conf_funcs[]={ InputFunc, RecvFunc, OutputFunc, SendFunc };
 	Parameter param;
 	Function *func=nullptr;
 
@@ -366,7 +383,7 @@ void Type::setAlignment(PgSqlType type)
 	//Raises an error if the type assigned to the alignment is invalid according to the rule
 	if(tp!="char" && tp!="smallint" && tp!="integer" && tp!="double precision")
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgInvalidAlignmentType).arg(this->getName(true)),
-						ErrorCode::AsgInvalidAlignmentType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgInvalidAlignmentType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(alignment != type);
 	alignment=tp;
@@ -389,13 +406,18 @@ void Type::setDefaultValue(const QString &value)
 void Type::setElement(PgSqlType elem)
 {
 	if(PgSqlType::getUserTypeIndex(this->getName(true), this) == !elem)
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvUserTypeSelfReference).arg(this->getName(true)),
-						ErrorCode::InvUserTypeSelfReference,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else if(elem!="\"any\"" &&
+										ErrorCode::InvUserTypeSelfReference,PGM_FUNC,PGM_FILE,PGM_LINE);
+	}
+
+	if(elem!="\"any\"" &&
 			(elem.isOidType() || elem.isPseudoType() ||
 			 elem.isUserType() || elem.isArrayType()))
+	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgInvalidElementType).arg(this->getName(true)),
-						ErrorCode::AsgInvalidElementType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+										ErrorCode::AsgInvalidElementType,PGM_FUNC,PGM_FILE,PGM_LINE);
+	}
 
 	elem.reset();
 	setCodeInvalidated(element != elem);
@@ -464,7 +486,7 @@ void Type::setLikeType(PgSqlType like_type)
 {
 	if(PgSqlType::getUserTypeIndex(this->getName(true), this) == !like_type)
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvUserTypeSelfReference).arg(this->getName(true)),
-						ErrorCode::InvUserTypeSelfReference,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::InvUserTypeSelfReference,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	like_type.reset();
 	setCodeInvalidated(this->like_type != like_type);
@@ -475,7 +497,7 @@ void Type::setSubtype(PgSqlType subtype)
 {
 	if(PgSqlType::getUserTypeIndex(this->getName(true), this) == !subtype)
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvUserTypeSelfReference).arg(this->getName(true)),
-						ErrorCode::InvUserTypeSelfReference,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::InvUserTypeSelfReference,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	subtype.reset();
 	setCodeInvalidated(this->subtype != subtype);
@@ -488,7 +510,7 @@ void Type::setSubtypeOpClass(OperatorClass *opclass)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgInvalidOpClassObject)
 						.arg(this->getName(true))
 						.arg(this->getTypeName()),
-						ErrorCode::AsgInvalidOpClassObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgInvalidOpClassObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(subtype_opclass != opclass);
 	subtype_opclass=opclass;
@@ -497,7 +519,7 @@ void Type::setSubtypeOpClass(OperatorClass *opclass)
 TypeAttribute Type::getAttribute(unsigned attrib_idx)
 {
 	if(attrib_idx >= type_attribs.size())
-		throw Exception(ErrorCode::RefAttributeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefAttributeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return type_attribs[attrib_idx];
 }
@@ -510,7 +532,7 @@ unsigned Type::getAttributeCount()
 QString Type::getEnumeration(unsigned idx_enum)
 {
 	if(idx_enum >= static_cast<unsigned>(enumerations.size()))
-		throw Exception(ErrorCode::RefEnumerationInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefEnumerationInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return enumerations[idx_enum];
 }
@@ -523,7 +545,7 @@ unsigned Type::getEnumerationCount()
 Function *Type::getFunction(FunctionId func_id)
 {
 	if(func_id > SubtypeDiffFunc)
-		throw Exception(ErrorCode::RefFunctionInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefFunctionInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return functions[func_id];
 }
@@ -705,7 +727,7 @@ QString Type::getAlterCode(BaseObject *object)
 	Type *type=dynamic_cast<Type *>(object);
 
 	if(!type)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
@@ -798,7 +820,7 @@ QString Type::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 

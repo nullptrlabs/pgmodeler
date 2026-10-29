@@ -115,7 +115,7 @@ class __libcanvas BaseObjectView: public QObject, public QGraphicsItemGroup {
 
 		void configurePlaceholder();
 
-		virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+		void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 
 		void setSelectionOrder(bool selected);
 
@@ -138,6 +138,9 @@ class __libcanvas BaseObjectView: public QObject, public QGraphicsItemGroup {
 		 *  The min_opacity is used in fade out operation to determine a minimum opacity value. */
 		void fade(bool fd_in, int duration, int loop_cnt = 1, qreal final_opacity = 1);
 
+		//! \brief Controls the changes during the object's selection and moving
+		QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+
 	public:
 		static constexpr double VertSpacing=2.0,
 		HorizSpacing=2.0,
@@ -147,23 +150,20 @@ class __libcanvas BaseObjectView: public QObject, public QGraphicsItemGroup {
 		ObjectShadowXPos=8,
 		ObjectShadowYPos=8;
 
-		static constexpr int ObjectAlphaChannel=128,
+		static constexpr int ObjectAlphaChannel=150,
 		ObjectShadowAlphaChannel=50;
 
 		BaseObjectView(BaseObject *object=nullptr);
-		virtual ~BaseObjectView();
+		~BaseObjectView() override;
 
 		//! \brief Returns the object selection order
 		unsigned getSelectionOrder();
-
-		//! \brief Controls the changes during the object's selection and moving
-		virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
 		//! \brief Returns the object that is representend by the graphical object
 		BaseObject *getUnderlyingObject();
 
 		//! \brief Returns the objects bounding rect in local coordination
-		virtual QRectF boundingRect() const override;
+		QRectF boundingRect() const override;
 
 		//! \brief Returns the fill style in a form of gradient for the specified element id
 		static QLinearGradient getFillStyle(const QString &id);
@@ -201,6 +201,14 @@ class __libcanvas BaseObjectView: public QObject, public QGraphicsItemGroup {
 
 		//! \brief Defines the object that the view represents
 		void setSourceObject(BaseObject *object);
+
+		/*! \brief Clears the underlying object's back-reference to this view (getOverlyingObject()
+		 * starts returning nullptr immediately) without deleting or otherwise touching the view
+		 * itself. Used when a view is discarded but its model object is meant to survive -- e.g. a
+		 * RelationshipView destroyed by a cross-scene demotion, where scene->removeItem() only
+		 * queues the item for deletion once the scene itself is destroyed, which would otherwise
+		 * leave the relationship's getOverlyingObject() pointing at a soon-to-be-dangling view */
+		void detachFromObject();
 
 		//! \brief Pure virtual object (the derived classes must implement it)
 		virtual void configureObject(void)=0;

@@ -4,6 +4,7 @@
 [<view name=] "&{name}"
 
 %if {layers} %then [ layers=] "{layers}" %end
+%if {scene} %then [ scene=] "{scene}" %end
 %if {alias} %then [ alias=] "&{alias}" %end
 %if {protected} %then [ protected=] "true" %end
 %if {materialized} %then [ materialized=] "true" %end
@@ -31,6 +32,7 @@
 %if {prepended-sql} %then {prepended-sql} %end
 
 {position}
+%if {rel-marker-pos} %then {rel-marker-pos} %end
 
 %if {references} %then {references} %end
 

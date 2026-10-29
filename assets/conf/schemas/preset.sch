@@ -2,9 +2,9 @@
 
 \t [<preset ] name="&{name}"
 
-%if {current-model} %then
-	{spacer} current-model="true"
-%else
+{spacer} diff-mode="{diff-mode}"
+
+%if {input-db} %then
 	{spacer} input-db="&{input-db}"
 %end
 
@@ -45,6 +45,7 @@
 	{spacer} ignore-error-codes="{ignore-error-codes}"
 %end
 
+{spacer} debug-mode="{debug-mode}" 
 {spacer} match-by-signature="{match-by-signature}"
 {spacer} only-matching="{only-matching}" 
 

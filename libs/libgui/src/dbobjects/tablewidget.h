@@ -43,8 +43,6 @@ class __libgui TableWidget: public BaseObjectWidget, public Ui::TableWidget {
 
 		ObjectSelectorWidget *tag_sel, *server_sel;
 
-		QFrame *warn_frame;
-
 		//! \brief Stores the objects tables used to handle columns, constraints, indexes, rules and triggers
 		std::map<ObjectType, CustomTableWidget *> objects_tab_map;
 
@@ -97,8 +95,8 @@ class __libgui TableWidget: public BaseObjectWidget, public Ui::TableWidget {
 		void editData();
 
 	public slots:
-		void applyConfiguration();
-		void cancelConfiguration();
+		void applyConfiguration() override;
+		void cancelConfiguration() override;
 };
 
 #endif

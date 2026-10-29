@@ -22,6 +22,7 @@
 #include "connectionsconfigwidget.h"
 #include "guiutilsns.h"
 #include "utilsns.h"
+#include "secretsns.h"
 #include "baseform.h"
 
 const QString ConnectionsConfigWidget::DefaultFor {"default-for-%1"};
@@ -31,9 +32,12 @@ std::map<QString, attribs_map> ConnectionsConfigWidget::config_params;
 ConnectionsConfigWidget::ConnectionsConfigWidget(QWidget * parent) : BaseConfigWidget(parent)
 {
 	Ui_ConnectionsConfigWidget::setupUi(this);
+
 	GuiUtilsNs::createPasswordShowAction(passwd_edt);
+	GuiUtilsNs::configureWidgetsFont<QLabel>(this, GuiUtilsNs::SmallFontFactor, true);
 
 	one_time_conn_edit = false;
+	one_time_test_tb->setVisible(false);
 
 	connect(ssl_mode_cmb, &QComboBox::currentIndexChanged, this, &ConnectionsConfigWidget::enableCertificates);
 
@@ -47,6 +51,7 @@ ConnectionsConfigWidget::ConnectionsConfigWidget(QWidget * parent) : BaseConfigW
 	connect(remove_tb, &QToolButton::clicked, this, &ConnectionsConfigWidget::removeConnection);
 
 	connect(test_tb, &QPushButton::clicked, this, &ConnectionsConfigWidget::testConnection);
+	connect(one_time_test_tb, &QPushButton::clicked, this, &ConnectionsConfigWidget::testConnection);
 	connect(add_tb, &QPushButton::clicked, this, __slot(this, ConnectionsConfigWidget::handleConnection));
 
 	connect(alias_edt, &QLineEdit::textChanged, this, &ConnectionsConfigWidget::enableConnectionTest);
@@ -59,11 +64,6 @@ ConnectionsConfigWidget::ConnectionsConfigWidget(QWidget * parent) : BaseConfigW
 	cancel_tb->setVisible(false);
 }
 
-ConnectionsConfigWidget::~ConnectionsConfigWidget()
-{
-
-}
-
 void ConnectionsConfigWidget::hideEvent(QHideEvent *event)
 {
 	if(!event->spontaneous())
@@ -72,7 +72,7 @@ void ConnectionsConfigWidget::hideEvent(QHideEvent *event)
 		one_time_conn_edit = false;
 		host_edt->setEnabled(true);
 		port_sbp->setEnabled(true);
-		conn_btns_wgt->setVisible(true);
+		conn_btns_grp->setVisible(true);
 		add_tb->setVisible(true);
 	}
 }
@@ -80,11 +80,7 @@ void ConnectionsConfigWidget::hideEvent(QHideEvent *event)
 void ConnectionsConfigWidget::showEvent(QShowEvent *event)
 {
 	if(!event->spontaneous())
-	{
-		updateConnectionsCombo();
-		newConnection();
-		conn_attribs_tbw->setCurrentIndex(0);
-	}
+		resetForm();
 }
 
 void ConnectionsConfigWidget::updateConnectionsCombo()
@@ -92,7 +88,7 @@ void ConnectionsConfigWidget::updateConnectionsCombo()
 	connections_cmb->clear();
 
 	for(auto &conn : connections)
-		connections_cmb->addItem(QIcon(GuiUtilsNs::getIconPath("server")), conn->getConnectionId());
+		connections_cmb->addItem(GuiUtilsNs::getIcon("server"), conn->getConnectionId());
 }
 
 void ConnectionsConfigWidget::destroyConnections()
@@ -123,6 +119,9 @@ void ConnectionsConfigWidget::loadConfiguration()
 
 		BaseConfigWidget::loadConfiguration(GlobalAttributes::ConnectionsConf, config_params, { Attributes::Alias });
 
+		// The file holds passwords, so its access is restricted to the owner
+		UtilsNs::setOwnerOnlyAccess(GlobalAttributes::getConfigurationFilePath(GlobalAttributes::ConnectionsConf));
+
 		for(auto &itr : config_params)
 		{
 			conn=new Connection;
@@ -131,7 +130,10 @@ void ConnectionsConfigWidget::loadConfiguration()
 			conn->setConnectionParam(Connection::ParamServerFqdn, itr.second[Connection::ParamServerFqdn]);
 			conn->setConnectionParam(Connection::ParamPort, itr.second[Connection::ParamPort]);
 			conn->setConnectionParam(Connection::ParamUser, itr.second[Connection::ParamUser]);
-			conn->setConnectionParam(Connection::ParamPassword,itr.second[Connection::ParamPassword]);
+			/* The password is stored encrypted in the file. Legacy plain text passwords
+			 * are returned as they are and get encrypted the next time the file is saved. */
+			auto [pwd, pwd_res] = SecretsNs::decrypt(itr.second[Connection::ParamPassword]);
+			conn->setConnectionParam(Connection::ParamPassword, pwd);
 			conn->setConnectionParam(Connection::ParamDbName, itr.second[Connection::ParamDbName]);
 			conn->setConnectionParam(Connection::ParamConnTimeout, itr.second[Attributes::ConnectionTimeout]);
 			conn->setConnectionParam(Connection::ParamSslMode, itr.second[Connection::ParamSslMode]);
@@ -159,14 +161,15 @@ void ConnectionsConfigWidget::loadConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e, e.getExtraInfo());
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e, e.getExtraInfo());
 	}
 }
 
 void ConnectionsConfigWidget::setOneTimeEditMode(bool one_time_edit, const QString &conn_alias, const QString &dbname, const QString &host, int port, const QString &username, const QString &password)
 {
 	one_time_conn_edit = one_time_edit;
-	conn_btns_wgt->setVisible(!one_time_edit);
+	conn_btns_grp->setVisible(!one_time_edit);
+	one_time_test_tb->setVisible(one_time_edit);
 	add_tb->setVisible(!one_time_edit);
 	host_edt->setDisabled(one_time_edit && !host.isEmpty());
 	port_sbp->setDisabled(one_time_edit && port > 0);
@@ -193,13 +196,16 @@ void ConnectionsConfigWidget::enableCertificates()
 void ConnectionsConfigWidget::enableConnectionTest()
 {
 	test_tb->setEnabled(!alias_edt->text().isEmpty() &&
-						!host_edt->text().isEmpty() &&
-						!user_edt->text().isEmpty() &&
-						!conn_db_edt->text().isEmpty());
+											!host_edt->text().isEmpty() &&
+											!user_edt->text().isEmpty() &&
+											!conn_db_edt->text().isEmpty());
+
+	one_time_test_tb->setEnabled(test_tb->isEnabled());
+
 	add_tb->setEnabled(test_tb->isEnabled());
 	update_tb->setEnabled(test_tb->isEnabled());
 
-	if(!isConfigurationChanged())
+	if(!isConfigurationChanged() && test_tb->isEnabled())
 		setConfigurationChanged(true);
 }
 
@@ -263,16 +269,14 @@ void ConnectionsConfigWidget::duplicateConnection()
 		connections.push_back(new_conn);
 
 		new_conn->setConnectionParam(Connection::ParamAlias, QString("cp_%1").arg(conn->getConnectionParam(Connection::ParamAlias)));
-		connections_cmb->addItem(QIcon(GuiUtilsNs::getIconPath("server")), new_conn->getConnectionId());
+		connections_cmb->addItem(GuiUtilsNs::getIcon("server"), new_conn->getConnectionId());
 		connections_cmb->setCurrentIndex(connections_cmb->count()-1);
 		setConfigurationChanged(true);
 	}
 	catch(Exception &e)
 	{
-		if(new_conn)
-			delete new_conn;
-
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		delete new_conn;
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -286,7 +290,7 @@ void ConnectionsConfigWidget::handleConnection()
 		{
 			conn=new Connection;
 			this->configureConnection(conn, false);
-			connections_cmb->addItem(QIcon(GuiUtilsNs::getIconPath("server")), conn->getConnectionId());
+			connections_cmb->addItem(GuiUtilsNs::getIcon("server"), conn->getConnectionId());
 			connections.push_back(conn);
 		}
 		else
@@ -306,7 +310,7 @@ void ConnectionsConfigWidget::handleConnection()
 		if(add_tb->isVisible())
 			delete conn;
 
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -464,14 +468,15 @@ void ConnectionsConfigWidget::testConnection()
 		conn.connect();
 		srv_info = conn.getServerInfo();
 
-		Messagebox::info(UtilsNs::formatMessage(tr("Connection successfully established!\n\nServer details:\n\nPID: `%1'\nProtocol: `%2'\nVersion: `%3'"))
-										 .arg(srv_info[Connection::ServerPid])
-										 .arg(srv_info[Connection::ServerProtocol])
-										 .arg(srv_info[Connection::ServerVersion]));
+		Messagebox::success(UtilsNs::formatMessage(tr("Connection successfully established!\n\nServer details:\n\nPID: `%1'\nProtocol: `%2'\nVersion: `%3'\nEncoding: `%4'"))
+										 .arg(srv_info[Connection::ServerPid],
+													srv_info[Connection::ServerProtocol],
+													srv_info[Connection::ServerVersion],
+													srv_info[Connection::ServerEncoding]));
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -494,8 +499,14 @@ void ConnectionsConfigWidget::restoreDefaults()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
+}
+
+void ConnectionsConfigWidget::resetForm()
+{
+	updateConnectionsCombo();
+	newConnection();
 }
 
 void ConnectionsConfigWidget::saveConfiguration()
@@ -537,6 +548,7 @@ void ConnectionsConfigWidget::saveConfiguration()
 				if(attribs[Connection::ParamServerFqdn].isEmpty())
 					attribs[Connection::ParamServerFqdn]=attribs[Connection::ParamServerIp];
 
+				attribs[Connection::ParamPassword]=SecretsNs::encrypt(attribs[Connection::ParamPassword]);
 				attribs[Attributes::Alias]=attribs[Connection::ParamAlias];
 				attribs[Attributes::AutoBrowseDb]=(conn->isAutoBrowseDB() ? Attributes::True : "");
 				attribs[Attributes::ConnectionTimeout]=attribs[Connection::ParamConnTimeout];
@@ -559,11 +571,12 @@ void ConnectionsConfigWidget::saveConfiguration()
 		schparser.ignoreUnkownAttributes(true);
 		BaseConfigWidget::saveConfiguration(GlobalAttributes::ConnectionsConf, config_params);
 		schparser.ignoreUnkownAttributes(false);
-		//setConfigurationChanged(false);
+		UtilsNs::setOwnerOnlyAccess(GlobalAttributes::getConfigurationFilePath(GlobalAttributes::ConnectionsConf));
+		setConfigurationChanged(false);
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -600,7 +613,7 @@ void ConnectionsConfigWidget::fillConnectionsComboBox(QComboBox *combo, bool inc
 	Connection *def_conn=nullptr;
 
 	if(!combo)
-		throw Exception(ErrorCode::OprNotAllocatedObject ,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject ,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	getConnections(connections);
 
@@ -617,14 +630,14 @@ void ConnectionsConfigWidget::fillConnectionsComboBox(QComboBox *combo, bool inc
 
 	for(auto &itr : connections)
 	{
-		combo->addItem(QIcon(GuiUtilsNs::getIconPath("server")), itr.first, QVariant::fromValue<void *>(itr.second));
+		combo->addItem(GuiUtilsNs::getIcon("server"), itr.first, QVariant::fromValue<void *>(itr.second));
 
 		if(!def_conn && itr.second->isDefaultForOperation(check_def_for))
 			def_conn=itr.second;
 	}
 
 	if(incl_placeholder)
-		combo->addItem(QIcon(GuiUtilsNs::getIconPath("connection")), tr("Edit connections"));
+		combo->addItem(GuiUtilsNs::getIcon("connection"), tr("Edit connections"));
 
 	if(def_conn)
 		combo->setCurrentText(def_conn->getConnectionId());
@@ -640,7 +653,7 @@ bool ConnectionsConfigWidget::openConnectionsConfiguration(bool one_time_edit,
 	ConnectionsConfigWidget conn_cfg_wgt;
 	bool conns_changed = false;
 
-	connect(parent_form.cancel_btn, &QPushButton::clicked, &parent_form, [&conn_cfg_wgt, &conns_changed]() {
+	connect(parent_form.reject_btn, &QPushButton::clicked, &parent_form, [&conn_cfg_wgt, &conns_changed]() {
 		__trycatch(
 			if(conn_cfg_wgt.isConfigurationChanged())
 			{
@@ -651,7 +664,7 @@ bool ConnectionsConfigWidget::openConnectionsConfiguration(bool one_time_edit,
 		)
 	});
 
-	connect(parent_form.apply_ok_btn, &QPushButton::clicked, &parent_form, [&conn_cfg_wgt, &parent_form, &conns_changed](){
+	connect(parent_form.accept_btn, &QPushButton::clicked, &parent_form, [&conn_cfg_wgt, &parent_form, &conns_changed](){
 		__trycatch(
 			conn_cfg_wgt.saveConfiguration();
 			parent_form.accept();
@@ -660,6 +673,11 @@ bool ConnectionsConfigWidget::openConnectionsConfiguration(bool one_time_edit,
 	});
 
 	conn_cfg_wgt.setOneTimeEditMode(one_time_edit, conn_alias, dbname, host, port, username, password);
+	
+	/* Workaround to hide the border of the bg_frame when running
+	 * ConnectionsConfigWidget in standalone mode */
+	conn_cfg_wgt.bg_frame->setStyleSheet("QFrame { border: none; }");
+
 	parent_form.setWindowTitle(tr("Edit database connections"));
 	parent_form.setWindowFlags(Qt::Dialog | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
 	parent_form.setMainWidget(&conn_cfg_wgt);

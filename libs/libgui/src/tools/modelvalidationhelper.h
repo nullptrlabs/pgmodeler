@@ -83,17 +83,19 @@ class __libgui ModelValidationHelper: public QObject {
 
 		void checkSpObjectBrokenRefs(BaseObject *object);
 
+		void checkExtBrokenTypeRefs(BaseObject *object);
+
 		void checkConstrNameConflicts();
 
 		void checkMissingPostgisExt();
 
 		void checkInvalidatedRels();
 
-		void checkUselessUqConstrs();
+		void checkConstraintSemantics();
 
 	public:
 		ModelValidationHelper();
-		virtual ~ModelValidationHelper();
+		~ModelValidationHelper() override;
 
 		/*! \brief Validates the specified model. If a connection is specifies executes the
 		SQL validation directly on DBMS */

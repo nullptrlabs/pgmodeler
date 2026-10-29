@@ -34,6 +34,10 @@ Additionally, this class, saves, loads and generates the XML/SQL definition of a
 #include <QObject>
 #include <QStringList>
 #include <QDateTime>
+#include <QHash>
+#include <QSet>
+#include <QMap>
+#include <functional>
 #include "baseobject.h"
 #include "table.h"
 #include "function.h"
@@ -73,6 +77,27 @@ class ModelWidget;
 class __libcore DatabaseModel:  public QObject, public BaseObject {
 	Q_OBJECT
 
+	public:
+		/*! \brief Constants used to determine the code generation mode:
+		 *  OriginalSql: generates the SQL for the object only (original behavior)
+		 *  DependenciesSql: generates the original SQL code + dependencies SQL
+		 *  ChildrenSql: generates the original SQL code + children SQL
+		 *  GroupByType: generates the original SQL code but grouping them in a single file
+		 *  for each object type. */
+		enum CodeGenMode: unsigned {
+			OriginalSql,
+			DependenciesSql,
+			ChildrenSql,
+			GroupByType
+		};
+
+		//! \brief Constants used to determine how the model's ObjectsScene collection is segmented
+		enum SegmentationMode: unsigned {
+			NoSegmentation,
+			SegBySchema,
+			SegByThreshold
+		};
+
 	private:
 		//! \brief Constants used to access the tuple columns in the internal changelog
 		enum LogFields: unsigned {
@@ -90,6 +115,37 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		/*! \brief Stores the references to all object lists of each type. This map is used by getObjectList() in order
 		 * to return the list according to the provided type */
 		std::map<ObjectType, std::vector<BaseObject *> *> obj_lists;
+
+		/*! \brief Per-type lookup indexes that mirror obj_lists, keyed by the raw name and by the
+		 * formatted signature of each object, so getObject() can resolve by either key in O(1)
+		 * instead of scanning obj_lists linearly.
+		 * Kept in sync by indexObject()/unindexObject() (called from __addObject()/__removeObject())
+		 * and by updateObjectIndex() (called from BaseObject::setName()/setSchema()). */
+		std::map<ObjectType, QHash<QString, BaseObject *>> name_idx,
+		sig_idx;
+
+		/*! \brief Objects taken out of the model by __removeObject() and not yet put back by __addObject().
+		 * They may have been deleted since (e.g. by the operation list), so the pointers in this set
+		 * are only ever compared, never dereferenced */
+		QSet<BaseObject *> removed_objs;
+
+		//! \brief Builds the lookup key for an object's raw name, honoring the current quoting/case mode
+		static QString getNameIndexKey(BaseObject *object);
+
+		//! \brief Builds the lookup key for an object's signature, honoring the current quoting/case mode
+		static QString getSignatureIndexKey(BaseObject *object);
+
+		//! \brief Inserts the object into name_idx/sig_idx. Called once the object is actually part of obj_lists
+		void indexObject(BaseObject *object);
+
+		//! \brief Removes the object from name_idx/sig_idx using its current (in-sync) keys
+		void unindexObject(BaseObject *object);
+
+		/*! \brief Resolves an object by name/signature through name_idx/sig_idx, without determining
+		 * its position in obj_lists. Used by getObject(name, type) -- the most commonly called
+		 * overload -- so that a caller who doesn't need the object's index isn't charged for the
+		 * linear scan that computing it requires (see getObject(name, type, obj_idx)). */
+		BaseObject *findIndexedObject(const QString &name, ObjectType obj_type);
 
 		/*! \brief Stores the references to the methods that create objects from XML code. This map is used by createObject() in order
 		 * to return the created object */
@@ -122,8 +178,26 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		 * model is rendered by a scene for the first time after loading the model. */
 		QRectF scene_rect;
 
-		//! \brief Stores the layer information of FK relationships during the model loading
-		std::map<QString, QStringList> fk_rel_layers;
+		/*! \brief Per-scene rectangles (key: scene index, matching LastScene/<scene id="">), only
+		 * meaningful when the model is segmented into more than one scene. Restored when each scene
+		 * is rendered for the first time after loading the model, same purpose as scene_rect but one
+		 * entry per scene instead of a single one for the whole model */
+		QMap<int, QRectF> scene_rects;
+
+		/*! \brief What the user customized in a FK relationship (the way it is drawn). It's stored during the model loading
+		 * because the relationship can be destroyed and recreated at the end of the process, see restoreFKRelationshipsCustomization() */
+		struct FKRelCustomization {
+			QString name, alias, src_table, dst_table, fk_name;
+			QList<unsigned> layers;
+			std::vector<QPointF> points;
+			QPointF labels_dist[3];
+			std::map<unsigned, BaseRelationship::SegmentShift> segment_shifts;
+			QColor custom_color;
+			bool faded_out, rel_protected;
+		};
+
+		//! \brief Stores the customization of the FK relationships during the model loading
+		std::vector<FKRelCustomization> fk_rels_custom;
 
 		//! \brief Stores the model widget that is managing this database model instance
 		ModelWidget *model_wgt;
@@ -215,6 +289,11 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Indicates if the model is being loaded
 		bool loading_model,
 
+		/*! \brief True for the duration of a loadModel() call whose discard_scene_idx argument was
+		 * true -- checked by the Table/View/ForeignTable parsing methods to skip restoring their
+		 * saved scene index (see loadModel()) */
+		discard_scene_idx,
+
 		/*! \brief Indicates if the model was invalidated due to operations like insert / remove objects.
 		When this flag is set it's recommend to revalidate the model using the Model validation tool */
 		invalidated,
@@ -229,6 +308,34 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		QPoint last_pos;
 
 		double last_zoom;
+
+		//! \brief Stores how the model's ObjectsScene collection is segmented in the current session
+		SegmentationMode scene_seg_mode;
+
+		/*! \brief Stores the segmentation mode to be written to the file on the next save. Editing
+		 * this does not affect scene_seg_mode -- a mode change only takes effect after the model is
+		 * reloaded */
+		SegmentationMode saved_seg_mode;
+
+		//! \brief Number of Table/View/ForeignTable insertions per scene, in SegByThreshold mode, for the current session
+		unsigned seg_threshold;
+
+		/*! \brief Threshold value to be written to the file on the next save. Editing this does not
+		 * affect seg_threshold -- a threshold change only takes effect after the model is reloaded */
+		unsigned saved_seg_threshold;
+
+		//! \brief Indicates that, in the current session, the relationships between tables of the same scene are not drawn
+		bool hide_rels;
+
+		/*! \brief Value of hide_rels to be written to the file on the next save. Editing this does not
+		 * affect hide_rels -- the change takes effect only after the model is reloaded */
+		bool saved_hide_rels;
+
+		/*! \brief Index (within the ObjectsScene collection, in creation order) of the scene that was
+		 * focused when the model was last saved -- unlike scene_seg_mode/seg_threshold, this has no
+		 * "active vs. saved" split: focusing a different scene is an ordinary runtime action, not one
+		 * that needs a reload to take effect */
+		int last_scene;
 
 		//! \brief Returns an object seaching it by its name and type. The third parameter stores the object index
 		BaseObject *getObject(const QString &name, ObjectType obj_type, int &obj_idx);
@@ -280,8 +387,15 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Updates all the relationships in such a way to create the missing columns/constraints
 		void updateRelsGeneratedObjects();
 
-		//! \brief Restore the layer information of FK relationship during loading process
-		void restoreFKRelationshipLayers();
+		/*! \brief Restores the customization of the FK relationships (layers, points, labels, displaced segments, color,
+		 * alias and the faded out and protected states) that were recreated at the end of the loading process. The
+		 * name is not restored */
+		void restoreFKRelationshipsCustomization();
+
+		/*! \brief This method returns the value of the flag loading_model
+		 *  which is set by loadModel to indicate that objects are being
+		 *  read from dbm file. At the end of the load process, the flag is reset */
+		bool isModelLoading();
 
 	protected:
 		//! \brief Set the layer names (only to be written in the XML definition)
@@ -328,20 +442,10 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief This convenience method forces the redrawn of the tables of a relationship as well as their respective schemas
 		void setRelTablesModified(BaseRelationship *rel);
 
-	public:
-		/*! \brief Constants used to determine the code generation mode:
-		 *  OriginalSql: generates the SQL for the object only (original behavior)
-		 *  DependenciesSql: generates the original SQL code + dependencies SQL
-		 *  ChildrenSql: generates the original SQL code + children SQL
-		 *  GroupByType: generates the original SQL code but grouping them in a single file
-		 *  for each object type. */
-		enum CodeGenMode: unsigned {
-			OriginalSql,
-			DependenciesSql,
-			ChildrenSql,
-			GroupByType
-		};
+		void saveDropScript(const QString &path, std::map<unsigned int, BaseObject *> &objects,
+												CodeGenMode code_gen_mode, bool is_split);
 
+	public:
 		enum MetaAttrOptions: unsigned {
 			MetaNoOpts=0,
 			MetaDbAttributes=1,	//! \brief Handle database model attribute when save/load metadata file
@@ -367,7 +471,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Creates a database model and assign the model widget which will manage this instance
 		explicit DatabaseModel(ModelWidget *model_wgt);
 
-		virtual ~DatabaseModel();
+		~DatabaseModel() override;
 
 		//! \brief Returns the model widget that is managing the current database instance
 		ModelWidget *getModelWidget();
@@ -403,7 +507,8 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Returns the object index searching by its name
 		int getObjectIndex(const QString &name, ObjectType obj_type);
 
-		//! \brief Retuns the passed object index
+		/*! \brief Retuns the passed object index, or -1 if it's not in the model. Pointers of objects
+		 * already removed from the model (even if deleted afterwards) are safely reported as -1 */
 		int getObjectIndex(BaseObject *object);
 
 		//! \brief Adds an object to the model
@@ -415,10 +520,20 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Returns an object from the model using its index and type
 		BaseObject *getObject(unsigned obj_idx, ObjectType obj_type);
 
-		/*! \brief Loads a database model from a file. In case of loading errors
-		the objects in the model will not be destroyed automatically. The user need to call
-		destroyObjects() or delete the entire model */
-		void loadModel(const QString &filename);
+		/*! \brief Loads a database model from a file. On errors the objects already created are not
+		destroyed: the caller must call destroyObjects() or delete the model.
+		- override_seg_mode: ovr_seg_mode/ovr_seg_threshold replace the file's segmentation values
+		(they also become the saved ones).
+		- discard_scene_idx: ignores the scene index saved in each table/view/foreign table, so the
+		scene placement is derived again from scratch.
+		- is_canceled: polled after each loaded object; returning true aborts the load by throwing an
+		Exception with ErrorCode::OperationCancelled.
+		- force_hide_rels: hides the relationships even if the file doesn't ask for it (it also becomes
+		the saved value). */
+		void loadModel(const QString &filename, bool override_seg_mode = false,
+										SegmentationMode ovr_seg_mode = NoSegmentation, unsigned ovr_seg_threshold = 0,
+										bool discard_scene_idx = false, std::function<bool()> is_canceled = nullptr,
+										bool force_hide_rels = false);
 
 		//! \brief Sets the database encoding
 		void setEncoding(EncodingType encod);
@@ -436,7 +551,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		void setAuthor(const QString &author);
 
 		//! \brief Sets the protection for all objects on the model
-		void setProtected(bool value);
+		void setProtected(bool value) override;
 
 		//! \brief Sets the sql appending at end of entire model definition
 		void setAppendAtEOD(bool value);
@@ -471,6 +586,8 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 
 		unsigned getObjectsCount(const std::vector<ObjectType> &obj_types);
 
+		unsigned getObjectCount(bool incl_tab_objs);
+
 		unsigned getMaxObjectCount();
 
 		//! \brief Retuns the specified localization value
@@ -497,7 +614,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		void setInvalidated(bool value);
 
 		//! \brief Saves the specified code definition for the model on the specified filename
-		void saveModel(const QString &filename, SchemaParser::CodeType def_type);
+		void saveModel(const QString &filename, SchemaParser::CodeType def_type, bool gen_drop_file = false);
 
 		/*! \brief Saves the model's SQL code definition by creating separated files for each object
 		 * The provided path must be a directory. If it does not exists then the method will create
@@ -507,10 +624,10 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		/*! \brief Returns the complete SQL/XML defintion for the entire model (including all the other objects).
 		 The parameter 'export_file' is used to format the generated code in a way that can be saved
 		 in na SQL file and executed later on the DBMS server. This parameter is only used for SQL definition. */
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool export_file) final;
+		QString getSourceCode(SchemaParser::CodeType def_type, bool export_file) final;
 
 		//! \brief Returns the complete SQL/XML definition for the entire model (including all the other objects).
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
 		//! \brief Returns the code definition only for the database (excluding the definition of the other objects)
 		QString __getSourceCode(SchemaParser::CodeType def_type);
@@ -521,8 +638,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		 *  DependenciesSql: generates the original code plus all dependencies needed to properly create the object.
 		 *  ChildrenSql: generates the original code plus all object's children SQL code. This option is used only by schemas, tables and views.
 		 */
-		//QString getSQLDefinition(BaseObject *object, CodeGenMode code_gen_mode = OriginalSql);
-		QString getSQLDefinition(const std::vector<BaseObject *> objects, CodeGenMode code_gen_mode);
+		QString getSQLDefinition(const std::vector<BaseObject *> objects, CodeGenMode code_gen_mode, bool is_preview = false);
 
 		/*! \brief Returns the creation order of objects in each definition type (SQL or XML).
 
@@ -630,13 +746,13 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		OperatorClass *getOperatorClass(unsigned obj_idx);
 		OperatorClass *getOperatorClass(const QString &name);
 
-		void addOperatorFamily(OperatorFamily *familia_op, int obj_idx=-1);
+		void addOperatorFamily(OperatorFamily *op_family, int obj_idx=-1);
 		void removeOperatorFamily(OperatorFamily *op_family, int obj_idx=-1);
 		OperatorFamily *getOperatorFamily(unsigned obj_idx);
 		OperatorFamily *getOperatorFamily(const QString &name);
 
 		void addDomain(Domain *domain, int obj_idx=-1);
-		void removeDomain(Domain *dominio, int obj_idx=-1);
+		void removeDomain(Domain *domain, int obj_idx=-1);
 		Domain *getDomain(unsigned obj_idx);
 		Domain *getDomain(const QString &name);
 
@@ -723,6 +839,18 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		 *  tries to match the name parameter against the object's name */
 		BaseObject *getObject(const QString &name, ObjectType obj_type);
 
+		/*! \brief Called by BaseObject::setName()/setSchema() right after an already-indexed object
+		 * has its name or schema changed, so name_idx/sig_idx keep matching the object's current
+		 * name/signature. prev_name/prev_signature are the values captured by the caller *before*
+		 * the change was applied. */
+		void updateObjectIndex(BaseObject *object, const QString &prev_name, const QString &prev_signature);
+
+		/*! \brief Rebuilds sig_idx from scratch for every indexed type. Used as a safety net for
+		 * changes that affect more than one object's signature at once (e.g. a schema rename, which
+		 * changes the signature of every object it contains) instead of trying to patch every
+		 * affected entry individually. */
+		void rebuildSignatureIndex();
+
 		void configureDatabase(attribs_map &attribs);
 		PgSqlType createPgSQLType();
 		BaseObject *createObject(ObjectType obj_type);
@@ -789,7 +917,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 
 		/*! \brief Marks the graphical objects of the provided types as modified forcing their redraw. User can specify only a set of
 	 graphical objects to be marked */
-		void setObjectsModified(std::vector<ObjectType> types={});
+		void setObjectsModified(const std::vector<ObjectType> &types={});
 
 		//! \brief Marks the graphical objects in the list as modified forcing their redraw.
 		void setObjectsModified(std::vector<BaseObject *> &objects);
@@ -828,6 +956,33 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		void setLastZoomFactor(double zoom);
 		double getLastZoomFactor();
 
+		void setLastScene(int idx);
+		int getLastScene();
+
+		//! \brief Default number of Table/View/ForeignTable insertions per scene in SegByThreshold mode
+		static constexpr unsigned DefaultSegThreshold = 500;
+
+		void setSegmentationMode(SegmentationMode mode);
+		SegmentationMode getSegmentationMode();
+
+		//! \brief Defines the segmentation mode to be persisted on the next save (takes effect only after a reload)
+		void setSavedSegmentationMode(SegmentationMode mode);
+		SegmentationMode getSavedSegmentationMode();
+
+		void setSegThreshold(unsigned value);
+		unsigned getSegThreshold();
+
+		//! \brief Defines the segmentation threshold to be persisted on the next save (takes effect only after a reload)
+		void setSavedSegThreshold(unsigned value);
+		unsigned getSavedSegThreshold();
+
+		void setHideRelationships(bool value);
+		bool isHideRelationships();
+
+		//! \brief Defines the hide relationships flag to be persisted on the next save (takes effect only after a reload)
+		void setSavedHideRelationships(bool value);
+		bool isSavedHideRelationships();
+
 		/*! \brief This method exposes the XML parser for the outside world. In order to create objects from xml code inside the current
 		 database model you need first get the parser (through this method), populate the parser with the desired XML and then call
 		 the create* method.
@@ -836,7 +991,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		XmlParser *getXMLParser();
 
 		//! \brief Returns the ALTER definition between the current model and the provided one
-		virtual QString getAlterCode(BaseObject *object) final;
+		QString getAlterCode(BaseObject *object) final;
 
 		//! \brief Returns the data dictionary of all tables in a single HTML code
 		void getDataDictionary(attribs_map &datadict, bool browsable, bool split, bool md_format);
@@ -889,10 +1044,17 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 		//! \brief Returns the XML code for the changelog
 		QString getChangelogDefinition(bool csv_format = false);
 
+		//! \brief Returns the XML code for the <scenes> block (empty when there's only one scene)
+		QString getSceneRectsDefinition();
+
 		/*! \brief Defines the current scene rectangle in which the model is being rendered
 		 *  This is used to restore the original scene geometry when the model is loaded from file */
 		void setSceneRect(const QRectF &rect);
 		QRectF getSceneRect();
+
+		//! \brief Defines/returns the per-scene rectangles (key: scene index), see scene_rects
+		void setSceneRects(const QMap<int, QRectF> &rects);
+		QMap<int, QRectF> getSceneRects();
 
 		//! \brief Toggles the generation of SQL code of object with code disabled
 		void setGenDisabledObjsCode(bool value);
@@ -914,6 +1076,7 @@ class __libcore DatabaseModel:  public QObject, public BaseObject {
 
 	friend class DatabaseImportHelper;
 	friend class ModelExportHelper;
+	friend class ModelValidationHelper;
 	friend class ModelWidget;
 	friend class PgModelerCliApp;
 	friend class OperationList;

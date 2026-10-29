@@ -38,6 +38,9 @@ class __libgui ModelOverviewWidget: public QWidget, public Ui::ModelOverviewWidg
 		//! \brief Model which object are drawn on the overview widget
 		ModelWidget *model;
 
+		//! \brief Scene this widget is currently connected to
+		ObjectsScene *connected_scene;
+
 		//! \brief Zoom factor applied to the visualization
 		double zoom_factor,
 
@@ -61,16 +64,19 @@ class __libgui ModelOverviewWidget: public QWidget, public Ui::ModelOverviewWidg
 		//! \brief The screen size threshold used to determine if the scroll area must be displayed or not
 		static constexpr double ScreenSzThreshold = 0.50;
 
-		void mousePressEvent(QMouseEvent *event);
-		void mouseReleaseEvent(QMouseEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void closeEvent(QCloseEvent *event);
-		void showEvent(QShowEvent *event);
-		bool eventFilter(QObject *object, QEvent *event);
+		void mousePressEvent(QMouseEvent *event) override;
+		void mouseReleaseEvent(QMouseEvent *event) override;
+		void mouseMoveEvent(QMouseEvent *event) override;
+		void closeEvent(QCloseEvent *event) override;
+		void showEvent(QShowEvent *event) override;
+		bool eventFilter(QObject *object, QEvent *event) override;
 
 		/*! \brief Updates the overview with the last modifications on the scene. The bool parameter
 		is used to force the update even if the overview widget is not visible */
 		void updateOverview(bool force_update);
+
+		//! \brief Connects to the model's currently active scene, dropping the previous scene connection first
+		void connectToActiveScene();
 
 	public:
 		ModelOverviewWidget(QWidget *parent = nullptr);

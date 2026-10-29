@@ -54,7 +54,7 @@ class	__libgui	FragmentInfo: public MatchInfo {
 		FragmentInfo(const QString &grp, int start, int end,
 								 bool open, bool closed, bool allow_compl);
 
-		~FragmentInfo(){}
+		~FragmentInfo() = default;
 
 		QString getGroup() const;
 		bool isOpen() const;

@@ -35,7 +35,9 @@ class __libgui FunctionWidget: public BaseFunctionWidget, public Ui::FunctionWid
 	Q_OBJECT
 
 	private:
-		QWidget *ret_type_parent;
+		static constexpr int SimpleReturn = 0,
+		SetOfReturn = 1,
+		TableReturn = 2;
 
 		//! \brief Widget used to configure the function's return type
 		PgSQLTypeWidget *ret_type;
@@ -64,7 +66,7 @@ class __libgui FunctionWidget: public BaseFunctionWidget, public Ui::FunctionWid
 		void duplicateParameter(int curr_row, int new_row);
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

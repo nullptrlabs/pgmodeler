@@ -63,6 +63,7 @@ CustomTableWidget::CustomTableWidget(ButtonConf button_conf, bool conf_exclusion
 
 	connect(table_tbw, &QTableWidget::cellClicked, this, &CustomTableWidget::s_cellClicked);
 	connect(table_tbw, &QTableWidget::cellChanged, this, &CustomTableWidget::s_cellChanged);
+	connect(table_tbw, &QTableWidget::cellDoubleClicked, this, &CustomTableWidget::s_cellDoubleClicked);
 
 	connect(table_tbw, &QTableWidget::customContextMenuRequested, this, [this](const QPoint &pnt){
 		emit s_contextMenuRequested(table_tbw->mapToGlobal(pnt),
@@ -70,8 +71,7 @@ CustomTableWidget::CustomTableWidget(ButtonConf button_conf, bool conf_exclusion
 	});
 
 	connect(table_tbw, &QTableWidget::itemSelectionChanged, this, [this](){
-		if(table_tbw->selectedRanges().isEmpty())
-			emit s_selectionCleared();
+		emit s_selectionChanged(hasSelection());
 	});
 
 	connect(resize_cols_tb, &QToolButton::clicked, this, &CustomTableWidget::resizeContents);
@@ -94,6 +94,11 @@ CustomTableWidget::CustomTableWidget(ButtonConf button_conf, bool conf_exclusion
 	move_down_tb->setToolTip(move_down_tb->toolTip() + QString(" (%1)").arg(move_down_tb->shortcut().toString()));
 }
 
+void CustomTableWidget::setAutoScroll(bool value)
+{
+	table_tbw->setAutoScroll(value);
+}
+
 void CustomTableWidget::setTableItemColor(TableItemColor color_idx, const QColor color)
 {
 	if(color_idx > RelAddedItemAltFgColor)
@@ -105,7 +110,7 @@ void CustomTableWidget::setTableItemColor(TableItemColor color_idx, const QColor
 QColor CustomTableWidget::getTableItemColor(TableItemColor color_idx)
 {
 	if(color_idx > RelAddedItemAltFgColor)
-		return QColor();
+		return {};
 
 	return item_colors[color_idx];
 }
@@ -154,12 +159,17 @@ void CustomTableWidget::setSelectionMode(QAbstractItemView::SelectionMode sel_mo
 QTableWidgetItem *CustomTableWidget::getItem(unsigned row_idx, unsigned col_idx)
 {
 	if(row_idx >= static_cast<unsigned>(table_tbw->rowCount()))
-		throw Exception(ErrorCode::RefRowObjectTabInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefRowObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(col_idx >= static_cast<unsigned>(table_tbw->columnCount()))
-		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
-	return table_tbw->item(row_idx, col_idx);
+	QTableWidgetItem *item = table_tbw->item(row_idx, col_idx);
+
+	if(!item)
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	return item;
 }
 
 void CustomTableWidget::updateVerticalHeader()
@@ -179,10 +189,13 @@ void CustomTableWidget::adjustColumnToContents(int col)
 	table_tbw->resizeRowsToContents();
 }
 
-void CustomTableWidget::setVerticalHeaderVisible(bool value)
+void CustomTableWidget::setHeaderVisible(Qt::Orientation orientation, bool value)
 {
-	table_tbw->verticalHeader()->setVisible(value);
-	table_tbw->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+	QHeaderView *header_vw = orientation == Qt::Vertical ?
+													 table_tbw->verticalHeader() :
+													 table_tbw->horizontalHeader();
+
+	header_vw->setVisible(value);
 }
 
 void CustomTableWidget::setSortingEnabled(bool value)
@@ -200,17 +213,42 @@ void CustomTableWidget::setAddRowOnTabPress(bool value)
 		disconnect(table_tbw, &QTableWidget::currentCellChanged, this, &CustomTableWidget::addRowOnTabPress);
 }
 
-void CustomTableWidget::addCustomButton(QToolButton *btn)
+QToolButton *CustomTableWidget::addCustomButton(const QIcon &icon, const QKeySequence &shortcut,
+																								const QString &tooltip, const QString &btn_name,
+																								Qt::Alignment btn_align)
 {
-	if(!btn)
-		throw Exception(ErrorCode::OprNotAllocatedObject, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+	QToolButton *btn = new QToolButton(this);
 
-	buttons_lt->addWidget(btn);
+	if(btn_align == Qt::AlignRight)
+		buttons_lt->addWidget(btn);
+	else
+		buttons_lt->insertWidget(0, btn);
+
+	btn->setObjectName(btn_name);
+	btn->setToolTip(tooltip +
+									(!shortcut.isEmpty() ?
+										QString(" (%1)").arg(shortcut.toString()) : ""));
+	btn->setIcon(icon);
+	btn->setShortcut(shortcut);
 	btn->setIconSize(add_tb->iconSize());
 	btn->setToolButtonStyle(add_tb->toolButtonStyle());
 	btn->setSizePolicy(add_tb->sizePolicy());
 	btn->setMaximumSize(add_tb->maximumSize());
-	btn->setParent(this);
+
+	return btn;
+}
+
+bool CustomTableWidget::hasSelection()
+{
+	return !table_tbw->selectedRanges().isEmpty();
+}
+
+QScrollBar *CustomTableWidget::getScrollBar(Qt::Orientation orientation)
+{
+	if(orientation == Qt::Horizontal)
+		return table_tbw->horizontalScrollBar();
+
+	return table_tbw->verticalScrollBar();
 }
 
 void CustomTableWidget::setColumnCount(unsigned col_count)
@@ -234,21 +272,21 @@ void CustomTableWidget::setColumnCount(unsigned col_count)
 
 void CustomTableWidget::setHeaderLabel(const QString &label, unsigned col_idx)
 {
-	QTableWidgetItem *item=nullptr;
+	QTableWidgetItem *item = nullptr;
 
 	if(col_idx >= static_cast<unsigned>(table_tbw->columnCount()))
-		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefColObjectTabInvalidIndex, PGM_FUNC, PGM_FILE, PGM_LINE);
 
-	item=table_tbw->horizontalHeaderItem(col_idx);
+	item = table_tbw->horizontalHeaderItem(col_idx);
 	item->setText(label);
 }
 
 void CustomTableWidget::setHeaderVisible(unsigned col_idx, bool visible)
 {
-  if(col_idx >= static_cast<unsigned>(table_tbw->columnCount()))
-		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+	if(col_idx >= static_cast<unsigned>(table_tbw->columnCount()))
+		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
-  table_tbw->horizontalHeader()->setSectionHidden(col_idx, !visible);
+	table_tbw->horizontalHeader()->setSectionHidden(col_idx, !visible);
 }
 
 void CustomTableWidget::setHeaderIcon(const QIcon &icon, unsigned col_idx)
@@ -256,7 +294,7 @@ void CustomTableWidget::setHeaderIcon(const QIcon &icon, unsigned col_idx)
 	QTableWidgetItem *item=nullptr;
 
 	if(col_idx >= static_cast<unsigned>(table_tbw->columnCount()))
-		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	item=table_tbw->horizontalHeaderItem(col_idx);
 	item->setIcon(icon);
@@ -272,9 +310,29 @@ void CustomTableWidget::setCellText(const QString &text, unsigned row_idx, unsig
 	getItem(row_idx, col_idx)->setText(text);
 }
 
+void CustomTableWidget::setCellTextAlignment(int row_idx, int col_idx, Qt::Alignment align)
+{
+	getItem(row_idx, col_idx)->setTextAlignment(align);
+}
+
 void CustomTableWidget::setCellFlags(Qt::ItemFlags flags, unsigned int row_idx, unsigned int col_idx)
 {
 	getItem(row_idx, col_idx)->setFlags(flags);
+}
+
+void CustomTableWidget::setCellColors(int row_idx, int col_idx, const QColor &fg_color, const QColor &bg_color)
+{
+	QTableWidgetItem *item = getItem(row_idx, col_idx);
+
+	item->setForeground(fg_color);
+	item->setBackground(bg_color);
+}
+
+void CustomTableWidget::setCellFont(int row_idx, int col_idx, const QFont &font)
+{
+	QTableWidgetItem *item = getItem(row_idx, col_idx);
+
+	item->setFont(font);
 }
 
 void CustomTableWidget::clearCellText(unsigned row_idx, unsigned col_idx)
@@ -285,14 +343,14 @@ void CustomTableWidget::clearCellText(unsigned row_idx, unsigned col_idx)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
 void CustomTableWidget::setRowFont(int row_idx, const QFont &font)
 {
 	if(row_idx >= table_tbw->rowCount())
-		throw Exception(ErrorCode::RefRowObjectTabInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefRowObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	int col_count = table_tbw->columnCount();
 
@@ -303,21 +361,12 @@ void CustomTableWidget::setRowFont(int row_idx, const QFont &font)
 void CustomTableWidget::setRowColors(int row_idx, const QColor &fg_color, const QColor &bg_color)
 {
 	if(row_idx >= table_tbw->rowCount())
-		throw Exception(ErrorCode::RefRowObjectTabInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefRowObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
-	QTableWidgetItem *item=nullptr;
 	int col_count = table_tbw->columnCount();
 
 	for(int col = 0; col < col_count; col++)
-	{
-		item = table_tbw->item(row_idx, col);
-
-		if(!item)
-			continue;
-
-		item->setForeground(fg_color);
-		item->setBackground(bg_color);
-	}
+		setCellColors(row_idx, col, fg_color, bg_color);
 }
 
 void CustomTableWidget::setRowData(const QVariant &data, unsigned row_idx)
@@ -325,7 +374,7 @@ void CustomTableWidget::setRowData(const QVariant &data, unsigned row_idx)
 	QTableWidgetItem *item=nullptr;
 
 	if(row_idx >= static_cast<unsigned>(table_tbw->rowCount()))
-		throw Exception(ErrorCode::RefRowObjectTabInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefRowObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Gets the vertical header of the row. This header stores the whole row data.
 	item=table_tbw->verticalHeaderItem(row_idx);
@@ -347,7 +396,7 @@ QString CustomTableWidget::getHeaderLabel(unsigned col_idx)
 	QTableWidgetItem *item=nullptr;
 
 	if(col_idx >= static_cast<unsigned>(table_tbw->columnCount()))
-		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	item=table_tbw->horizontalHeaderItem(col_idx);
 	return item->text();
@@ -361,7 +410,7 @@ QString CustomTableWidget::getCellText(unsigned row_idx, unsigned col_idx)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -383,7 +432,7 @@ QStringList CustomTableWidget::getCellTexts(unsigned int section_idx, Qt::Orient
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 
 	return texts;
@@ -419,7 +468,7 @@ QVariant CustomTableWidget::getRowData(unsigned row_idx)
 	QTableWidgetItem *item=nullptr;
 
 	if(row_idx >= static_cast<unsigned>(table_tbw->rowCount()))
-		throw Exception(ErrorCode::RefRowObjectTabInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefRowObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	item=table_tbw->verticalHeaderItem(row_idx);
 	return item->data(Qt::UserRole);
@@ -428,6 +477,19 @@ QVariant CustomTableWidget::getRowData(unsigned row_idx)
 int CustomTableWidget::getSelectedRow()
 {
 	return table_tbw->currentRow();
+}
+
+QList<int> CustomTableWidget::getSelectedRows()
+{
+	QList<int> sel_rows;
+
+	for(auto &range : table_tbw->selectedRanges())
+	{
+		for(int row = range.topRow(); row <= range.bottomRow(); row++)
+			sel_rows.append(row);
+	}
+
+	return sel_rows;
 }
 
 int CustomTableWidget::getRowIndex(const QVariant &data)
@@ -489,7 +551,7 @@ void CustomTableWidget::addRow(unsigned lin_idx)
 
 	for(col_idx=0; col_idx < col_cont; col_idx++)
 	{
-		item=new QTableWidgetItem;		
+		item = new QTableWidgetItem;
 		table_tbw->setItem(lin_idx,col_idx,item);
 	}
 
@@ -502,7 +564,6 @@ int CustomTableWidget::addRow()
 {
 	this->addRow(table_tbw->rowCount());
 	setButtonsEnabled();
-	table_tbw->resizeRowsToContents();
 
 	emit s_rowAdded(table_tbw->rowCount() - 1);
 	emit s_rowCountChanged(table_tbw->rowCount());
@@ -516,7 +577,7 @@ void CustomTableWidget::removeRow(unsigned row_idx)
 	bool conf = false;
 
 	if(row_idx >= static_cast<unsigned>(table_tbw->rowCount()))
-		throw Exception(ErrorCode::RefRowObjectTabInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefRowObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	//Before remove the row, clears the selection
 	table_tbw->clearSelection();
@@ -556,7 +617,7 @@ void CustomTableWidget::removeRow()
 	unsigned row_idx = table_tbw->currentRow();
 
 	if(conf_exclusion)
-		res = Messagebox::confirm(tr("Do you really want to remove the selected item(s)?"));
+		res = Messagebox::confirm(tr("Are you sure you want to remove the selected item(s)?"));
 
 	if(!conf_exclusion || (conf_exclusion && Messagebox::isAccepted(res)))
 	{
@@ -612,7 +673,7 @@ void CustomTableWidget::removeRows()
 		/* Only shows the confirmation message if the conf_exclusion is set and the user called the method
 			 activating the 'remove_all_tb' button */
 		if(conf_exclusion && sender_obj == remove_all_tb)
-			res = Messagebox::confirm(tr("Do you really want to remove all the items?"));
+			res = Messagebox::confirm(tr("Are you sure you want to remove all the items?"));
 
 		if(!conf_exclusion || (conf_exclusion && sender_obj != remove_all_tb) ||
 				(conf_exclusion &&  sender_obj == remove_all_tb && Messagebox::isAccepted(res)))
@@ -630,7 +691,7 @@ void CustomTableWidget::removeRows()
 void CustomTableWidget::removeColumn(unsigned col_idx)
 {
 	if(col_idx >= static_cast<unsigned>(table_tbw->columnCount()))
-		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	table_tbw->removeColumn(col_idx);
 	table_tbw->clearSelection();
@@ -794,9 +855,16 @@ void CustomTableWidget::setCellsEditable(bool value)
 
 void CustomTableWidget::resizeContents()
 {
-	table_tbw->resizeColumnsToContents();
+	int col_cnt = getColumnCount();
+
+	if(col_cnt == 0)
+		return;
+
+	for(int col = 0; col < col_cnt; col++)
+		table_tbw->resizeColumnToContents(col);
+
 	table_tbw->resizeRowsToContents();
-	table_tbw->horizontalHeader()->setSectionResizeMode(table_tbw->horizontalHeader()->count() - 1, QHeaderView::Stretch);
+	table_tbw->horizontalHeader()->setSectionResizeMode(col_cnt - 1, QHeaderView::Stretch);
 }
 
 void CustomTableWidget::setButtonsEnabled()

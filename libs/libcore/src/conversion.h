@@ -54,8 +54,7 @@ class __libcore Conversion: public BaseObject {
 		};
 
 		Conversion();
-
-		virtual ~Conversion(){}
+		~Conversion() override = default;
 
 		//! \brief Defines whether the conversion is the default for the encodings
 		void setDefault(bool value);
@@ -76,9 +75,9 @@ class __libcore Conversion: public BaseObject {
 		bool isDefault();
 
 		//! \brief Returns the SQL/XML code definition for the conversion
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 };
 
 #endif

@@ -21,6 +21,7 @@
 
 #include "newobjectoverlaywidget.h"
 #include "modelwidget.h"
+#include "customuistyle.h"
 
 NewObjectOverlayWidget::NewObjectOverlayWidget(ModelWidget *parent): QWidget(parent)
 {
@@ -112,31 +113,49 @@ NewObjectOverlayWidget::NewObjectOverlayWidget(ModelWidget *parent): QWidget(par
 		connect(itr.first, &QToolButton::clicked, this, &NewObjectOverlayWidget::executeAction, Qt::QueuedConnection);
 }
 
-void NewObjectOverlayWidget::setSelectedObjects(std::vector<BaseObject *> &sel_objs)
+bool NewObjectOverlayWidget::setSelectedObjects(std::vector<BaseObject *> &sel_objs)
 {
-	ObjectType obj_type=ObjectType::BaseObject;
+	ObjectType obj_type = ObjectType::BaseObject;
+	unsigned sel_objs_cnt = sel_objs.size();
 
-	if(sel_objs.size()==1)
-		obj_type=sel_objs.at(0)->getObjectType();
+	if(sel_objs_cnt == 1)
+		obj_type = sel_objs.at(0)->getObjectType();
 	else if(sel_objs.empty())
-		obj_type=ObjectType::Database;
+		obj_type = ObjectType::Database;
 
-	db_objs_grp->setVisible(obj_type==ObjectType::Database);
-	sch_objs_grp->setVisible(obj_type==ObjectType::Database || obj_type==ObjectType::Schema);
+	db_objs_grp->setVisible(obj_type == ObjectType::Database);
+	sch_objs_grp->setVisible(obj_type == ObjectType::Database ||
+													 obj_type == ObjectType::Schema);
 
-	tab_objs_grp->setVisible(BaseTable::isBaseTable(obj_type) || obj_type==ObjectType::Relationship);
-	column_tb->setVisible(obj_type!=ObjectType::View);
-	constraint_tb->setVisible(obj_type!=ObjectType::View);
-	index_tb->setVisible(obj_type==ObjectType::Table || obj_type==ObjectType::View);
-	rule_tb->setVisible(obj_type==ObjectType::Table || obj_type==ObjectType::View);
+	tab_objs_grp->setVisible(BaseTable::isBaseTable(obj_type) ||
+													 obj_type == ObjectType::Relationship);
+
+	column_tb->setVisible(obj_type != ObjectType::View);
+	constraint_tb->setVisible(obj_type != ObjectType::View);
+
+	index_tb->setVisible(obj_type == ObjectType::Table ||
+											 obj_type == ObjectType::View);
+
+	rule_tb->setVisible(obj_type == ObjectType::Table ||
+											obj_type == ObjectType::View);
+
 	trigger_tb->setVisible(BaseTable::isBaseTable(obj_type));
-	policy_tb->setVisible(obj_type==ObjectType::Table);
-	tab_perms_tb->setVisible(obj_type==ObjectType::Table || obj_type==ObjectType::View);
-	rels_grp->setVisible((sel_objs.size()==1 && sel_objs.at(0)->getObjectType()==ObjectType::Table) ||
-											 (sel_objs.size()==2 && sel_objs.at(0)->getObjectType()==ObjectType::Table && sel_objs.at(1)->getObjectType()==ObjectType::Table));
+	policy_tb->setVisible(obj_type == ObjectType::Table);
+
+	tab_perms_tb->setVisible(obj_type == ObjectType::Table ||
+													 obj_type == ObjectType::View);
+
+	rels_grp->setVisible(sel_objs_cnt == 0 ||
+											 (sel_objs_cnt == 1 && obj_type == ObjectType::Table) ||
+											 (sel_objs_cnt == 2 &&
+												sel_objs.at(0)->getObjectType() == ObjectType::Table &&
+												sel_objs.at(1)->getObjectType() == ObjectType::Table));
 
 	overlay_frm->adjustSize();
 	this->adjustSize();
+
+	return !db_objs_grp->isHidden() || !sch_objs_grp->isHidden() ||
+				 !tab_objs_grp->isHidden() || !rels_grp->isHidden();
 }
 
 void NewObjectOverlayWidget::executeAction()

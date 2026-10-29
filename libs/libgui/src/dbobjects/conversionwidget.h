@@ -44,7 +44,7 @@ class __libgui ConversionWidget: public BaseObjectWidget, public Ui::ConversionW
 	private slots:
 		
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

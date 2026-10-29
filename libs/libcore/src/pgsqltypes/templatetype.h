@@ -43,6 +43,7 @@ https://www.fluentcpp.com/2017/05/12/curiously-recurring-template-pattern/
 
 #include "../coreglobal.h"
 #include <QStringList>
+#include "utilsns.h"
 #include "exception.h"
 
 template<class Class>
@@ -101,7 +102,7 @@ TemplateType<Class>::TemplateType()
 }
 
 template<class Class>
-TemplateType<Class>::~TemplateType(){ }
+TemplateType<Class>::~TemplateType() = default;
 
 template<class Class>
 unsigned TemplateType<Class>::operator = (unsigned type_id)
@@ -126,11 +127,14 @@ unsigned TemplateType<Class>::setType(unsigned type_id, const QStringList &type_
 {
 	//Raises an error if the type count is invalid
 	if(type_list.isEmpty())
-		throw Exception(ErrorCode::ObtTypesInvalidQuantity,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::ObtTypesInvalidQuantity, PGM_FUNC, PGM_FILE, PGM_LINE);
+
 	//Raises an error if the type id is invalid
-	else if(!isTypeValid(type_id, type_list))
-		throw Exception(ErrorCode::AsgInvalidTypeObject,__PRETTY_FUNCTION__,__FILE__,__LINE__,
-										nullptr, QString(QT_TR_NOOP("Type id: %1")).arg(static_cast<int>(type_id)));
+	if(!isTypeValid(type_id, type_list))
+	{
+		throw Exception(ErrorCode::AsgInvalidTypeObject, PGM_FUNC, PGM_FILE, PGM_LINE,
+										nullptr, UtilsNs::pgmTr(PGM_TR2("Global", "Type id: %1")).arg(static_cast<int>(type_id)));
+	}
 
 	type_idx = type_id;
 	return type_idx;
@@ -145,8 +149,8 @@ unsigned TemplateType<Class>::setType(const QString &type_name, const QStringLis
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e,
-										QString(QT_TR_NOOP("Type name: %1")).arg(type_name));
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e,
+										UtilsNs::pgmTr(PGM_TR2("Global", "Type name: %1")).arg(type_name));
 	}
 }
 
@@ -170,22 +174,20 @@ unsigned TemplateType<Class>::getType(const QString &type_name, const QStringLis
 {
 	if(type_name.isEmpty())
 		return Class::Null;
-	else
-	{
-		int idx = type_list.indexOf(type_name);
 
-		if(idx >= 0)
-			return static_cast<unsigned>(idx);
+	int idx = type_list.indexOf(type_name);
 
-		return Class::Null;
-	}
+	if(idx >= 0)
+		return static_cast<unsigned>(idx);
+
+	return Class::Null;
 }
 
 template<class Class>
 QString TemplateType<Class>::getTypeName(unsigned type_id, const QStringList &type_list)
 {
 	if(type_id > static_cast<unsigned>(type_list.size()))
-		throw Exception(ErrorCode::RefTypeInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefTypeInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return type_list[static_cast<int>(type_id)];
 }

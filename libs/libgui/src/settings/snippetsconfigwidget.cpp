@@ -37,13 +37,15 @@ SnippetsConfigWidget::SnippetsConfigWidget(QWidget * parent) : BaseConfigWidget(
 	QPixmap ico;
 	QString gen_purpose=tr("General purpose");
 	std::map<QString, ObjectType> types_map;
-	std::vector<ObjectType> types=BaseObject::getObjectTypes(true, {ObjectType::Relationship, ObjectType::Tag, ObjectType::Textbox,
+	std::vector<ObjectType> types=BaseObject::getObjectTypes(true,
+																													 { ObjectType::Relationship, ObjectType::Tag, ObjectType::Textbox,
 																														 ObjectType::Permission, ObjectType::BaseRelationship });
 
 	setupUi(this);
+	GuiUtilsNs::configureBuddyWidgets(this);
 
 	for(ObjectType type : types)
-		types_map[BaseObject::getTypeName(type)]=type;
+		types_map[BaseObject::getTypeName(type)] = type;
 
 	//Creates a combo with the accepted object type
 	for(auto &itr : types_map)
@@ -101,8 +103,8 @@ attribs_map SnippetsConfigWidget::getSnippetById(const QString &snip_id)
 {
 	if(config_params.count(snip_id))
 		return config_params[snip_id];
-	else
-		return attribs_map();
+
+	return {};
 }
 
 QStringList SnippetsConfigWidget::getSnippetsIdsByObject(ObjectType obj_type)
@@ -189,7 +191,7 @@ QString SnippetsConfigWidget::parseSnippet(attribs_map snippet, attribs_map attr
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -255,8 +257,8 @@ bool SnippetsConfigWidget::isSnippetValid(attribs_map &attribs, const QString &o
 		Messagebox::error(err_msg);
 		return false;
 	}
-	else
-		return true;
+
+	return true;
 }
 
 void SnippetsConfigWidget::hideEvent(QHideEvent *)
@@ -289,7 +291,7 @@ void SnippetsConfigWidget::loadConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e, e.getExtraInfo());
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e, e.getExtraInfo());
 	}
 }
 
@@ -434,7 +436,7 @@ void SnippetsConfigWidget::parseSnippet()
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -465,7 +467,7 @@ void SnippetsConfigWidget::saveConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -479,7 +481,7 @@ void SnippetsConfigWidget::restoreDefaults()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -523,7 +525,7 @@ void SnippetsConfigWidget::configureSnippetsMenu(QMenu *snip_menu, std::vector<O
 				type_name=tr("General");
 			}
 			else
-				ico=QPixmap(GuiUtilsNs::getIconPath(object));
+				ico=GuiUtilsNs::getPixmap(object);
 
 			menu=new QMenu(type_name, snip_menu);
 			menu->setIcon(ico);
@@ -537,7 +539,7 @@ void SnippetsConfigWidget::configureSnippetsMenu(QMenu *snip_menu, std::vector<O
 		}
 
 		//Creating the action for the current snippet
-		act=new QAction(QPixmap(GuiUtilsNs::getIconPath("codesnippet")), snip_id, submenus[object]);
+		act=new QAction(GuiUtilsNs::getIcon("codesnippet"), snip_id, submenus[object]);
 		act->setToolTip(snip[Attributes::Label]);
 		submenus[object]->addAction(act);
 	}

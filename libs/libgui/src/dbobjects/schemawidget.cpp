@@ -24,19 +24,16 @@
 SchemaWidget::SchemaWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Schema)
 {
 	Ui_SchemaWidget::setupUi(this);
-	QHBoxLayout *hbox = dynamic_cast<QHBoxLayout *>(attributes_gb->layout());
-
-	configureFormLayout(schema_grid, ObjectType::Schema);
 
 	fill_color_picker = new ColorPickerWidget(1, this);
-	hbox->insertWidget(1, fill_color_picker);
+	fill_color_lt->addWidget(fill_color_picker);
 
 	name_color_picker = new ColorPickerWidget(1, this);
-	hbox->insertWidget(3, name_color_picker);
+	name_color_lt->addWidget(name_color_picker);
 
-	configureTabOrder({ fill_color_picker, name_color_picker, show_rect_chk });
+	configureTabbedLayout(false);
 
-	setMinimumSize(480, 140);
+	setMinimumSize(550, 400);
 }
 
 void SchemaWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema)
@@ -64,6 +61,10 @@ void SchemaWidget::setAttributes(DatabaseModel *model, OperationList *op_list, S
 	}
 	else
 		fill_color_picker->setColor(0, QColor(225,225,225));
+
+	show_rect_chk->setEnabled(model->getSegmentationMode() == DatabaseModel::NoSegmentation);
+	show_rect_chk->setToolTip(model->getSegmentationMode() != DatabaseModel::NoSegmentation ?
+														tr("<p>Schema rectangle is disabled when the model is segmented in multiple scenes</p>") : "");
 }
 
 void SchemaWidget::applyConfiguration()
@@ -86,7 +87,7 @@ void SchemaWidget::applyConfiguration()
 	catch(Exception &e)
 	{
 		cancelConfiguration();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

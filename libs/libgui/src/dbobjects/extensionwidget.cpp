@@ -5,25 +5,22 @@ ExtensionWidget::ExtensionWidget(QWidget * parent) : BaseObjectWidget(parent, Ob
 {
 	Ui_ExtensionWidget::setupUi(this);
 
-	types_tab = new CustomTableWidget(CustomTableWidget::AddButton |
-																		 CustomTableWidget::RemoveButton |
-																		 CustomTableWidget::RemoveAllButton, true, this);
+	types_tab = GuiUtilsNs::createWidgetInParent<CustomTableWidget>(GuiUtilsNs::LtMargin,
+																																	CustomTableWidget::AddButton |
+																																	CustomTableWidget::RemoveButton |
+																																	CustomTableWidget::RemoveAllButton,
+																																	true, types_gb);
 	types_tab->setCellsEditable(true);
 	types_tab->setColumnCount(2);
 	types_tab->setHeaderLabel(tr("Name"), 0);
-	types_tab->setHeaderIcon(QIcon(GuiUtilsNs::getIconPath("uid")), 0);
+	types_tab->setHeaderIcon(GuiUtilsNs::getIcon("uid"), 0);
 	types_tab->setHeaderLabel(tr("Schema"), 1);
-	types_tab->setHeaderIcon(QIcon(GuiUtilsNs::getIconPath("schema")), 1);
+	types_tab->setHeaderIcon(GuiUtilsNs::getIcon("schema"), 1);
 
-	QVBoxLayout *vbox = new QVBoxLayout(types_gb);
-	vbox->addWidget(types_tab);
-	vbox->setContentsMargins(GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin,
-													 GuiUtilsNs::LtMargin, GuiUtilsNs::LtMargin);
+	configureTabbedLayout(ext_attribs_tbw);
+	//configureTabOrder({ cur_ver_edt, old_ver_edt, types_tab });
 
-	configureFormLayout(extension_grid, ObjectType::Extension);
-	configureTabOrder({ cur_ver_edt, old_ver_edt, types_tab });
-
-	setMinimumSize(500, 500);
+	setMinimumSize(550, 350);
 }
 
 void ExtensionWidget::setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, Extension *ext)
@@ -82,6 +79,6 @@ void ExtensionWidget::applyConfiguration()
 	catch(Exception &e)
 	{
 		cancelConfiguration();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }

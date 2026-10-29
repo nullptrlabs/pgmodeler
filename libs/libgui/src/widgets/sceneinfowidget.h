@@ -31,6 +31,7 @@
 #include "guiglobal.h"
 #include "ui_sceneinfowidget.h"
 #include "baseobjectview.h"
+#include "databasemodel.h"
 
 class __libgui SceneInfoWidget: public QWidget, public Ui::SceneInfoWidget {
 	Q_OBJECT
@@ -43,6 +44,31 @@ class __libgui SceneInfoWidget: public QWidget, public Ui::SceneInfoWidget {
 		void updateSelectedObjects(int obj_count, const QRectF &objs_rect);
 		void updateMousePosition(const QPointF &mouse_pos);
 		void updateSceneZoom(double zoom);
+
+		//! \brief Repopulates scenes_cmb from names, selecting active_idx without emitting s_activeSceneSelected
+		void updateScenesCombo(const QStringList &names, int active_idx);
+
+		//! \brief Reflects mode/threshold on seg_modes_cmb/threshold_spb without emitting the selection signals
+		void updateSegmentationInfo(DatabaseModel::SegmentationMode mode, unsigned threshold);
+
+		//! \brief Reflects the hide relationships option on toggle_rels_tb (checked when the relationships are visible) without emitting s_hideRelationshipsToggled
+		void updateHideRelationships(bool value);
+
+	signals:
+		//! \brief Emitted when the user picks a different scene in scenes_cmb
+		void s_activeSceneSelected(int idx);
+
+		//! \brief Emitted when the user picks a different segmentation mode in seg_modes_cmb
+		void s_segmentationModeSelected(DatabaseModel::SegmentationMode mode);
+
+		//! \brief Emitted when the user commits a new value in threshold_spb
+		void s_thresholdSelected(unsigned value);
+
+		//! \brief Emitted when the user toggles toggle_rels_tb, carrying the new value of the hide relationships option
+		void s_hideRelationshipsToggled(bool value);
+
+	private slots:
+		void enableNavigationButtons();
 };
 
 #endif

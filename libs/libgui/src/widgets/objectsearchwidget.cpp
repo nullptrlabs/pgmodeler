@@ -22,10 +22,14 @@
 #include "objectsearchwidget.h"
 #include "guiutilsns.h"
 #include "objectslistmodel.h"
+#include "tabordermanager.h"
 
 ObjectSearchWidget::ObjectSearchWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
+
+	installEventFilter(new TabOrderManager(this));
+	GuiUtilsNs::configureWidgetFont(pattern_lbl, GuiUtilsNs::SmallFontFactor, true);
 
 	filter_wgt = new QWidget(this);
 	obj_types_lst = new ObjectTypesListWidget(this);
@@ -43,23 +47,22 @@ ObjectSearchWidget::ObjectSearchWidget(QWidget *parent) : QWidget(parent)
 
 	_search_attrs_cmb = new QComboBox(this);
 	_search_attrs_lbl = new QLabel(this);
-	_search_attrs_lbl->setText(tr("Search field:"));
+	_search_attrs_lbl->setText(tr("Search field"));
 	_search_attrs_lbl->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	GuiUtilsNs::configureWidgetFont(_search_attrs_lbl, GuiUtilsNs::SmallFontFactor, true);
 
 	QHBoxLayout *hbox = new QHBoxLayout;
 	hbox->addWidget(_search_attrs_lbl);
 	hbox->addWidget(_search_attrs_cmb);
 
-	QVBoxLayout *vbox = new QVBoxLayout(filter_wgt);
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(GuiUtilsNs::LtMargin,
+																									 GuiUtilsNs::LtSpacing,
+																									 filter_wgt);
 	vbox->addLayout(hbox);
 	vbox->addWidget(obj_types_lst);
 	vbox->addWidget(regexp_chk);
 	vbox->addWidget(exact_match_chk);
 	vbox->addWidget(case_sensitive_chk);
-
-	vbox->setContentsMargins(GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin,GuiUtilsNs::LtMargin);
-	vbox->setSpacing(GuiUtilsNs::LtSpacing);
-	filter_wgt->setLayout(vbox);
 
 	QWidgetAction *wgt_act_filter = new QWidgetAction(this);
 	wgt_act_filter->setDefaultWidget(filter_wgt);
@@ -78,9 +81,9 @@ ObjectSearchWidget::ObjectSearchWidget(QWidget *parent) : QWidget(parent)
 		search_btn->setEnabled(!txt.isEmpty());
 	});
 
-	connect(search_btn, &QToolButton::clicked, this, &ObjectSearchWidget::findObjects);
-	connect(hide_tb, &QToolButton::clicked, this, &ObjectSearchWidget::hide);
-	connect(clear_res_btn, &QToolButton::clicked, this, &ObjectSearchWidget::clearResult);
+	connect(search_btn, &QPushButton::clicked, this, &ObjectSearchWidget::findObjects);
+	connect(hide_tb, &QPushButton::clicked, this, &ObjectSearchWidget::hide);
+	connect(clear_res_btn, &QPushButton::clicked, this, &ObjectSearchWidget::clearResult);
 
 	connect(result_view, &QTableView::doubleClicked, this, &ObjectSearchWidget::editObject);
 	connect(result_view, &QTableView::pressed, this, &ObjectSearchWidget::showObjectMenu);
@@ -289,7 +292,7 @@ void ObjectSearchWidget::selectObject()
 {
 	selected_obj = nullptr;
 	selected_objs.clear();
-	model_wgt->scene->clearSelection();
+	model_wgt->clearSelectionInAllScenes();
 
 	BaseGraphicObject *graph_obj = nullptr;
 	BaseObjectView *obj_view = nullptr;
@@ -327,6 +330,20 @@ void ObjectSearchWidget::selectObject()
 	TableObject *tab_obj = nullptr;
 	BaseTableView *tab_view = nullptr;
 
+	/* Each object in turn brings its own scene to the front before being centered/selected -- this
+	 * mimics how clicking through results used to work back when there was only one scene to show
+	 * them in, and it's what makes centerOn() below mean anything: it operates on the viewport's
+	 * current scene, so an object elsewhere would otherwise be centered on a scene the user isn't
+	 * even looking at */
+	auto followObjectScene = [this](QGraphicsItem *item)
+	{
+		ObjectsScene *item_scene = item ? dynamic_cast<ObjectsScene *>(item->scene()) : nullptr;
+		int scn_idx = item_scene ? model_wgt->getScenes().indexOf(item_scene) : -1;
+
+		if(scn_idx >= 0)
+			model_wgt->setActiveScene(scn_idx);
+	};
+
 	for(auto &obj : selected_objs)
 	{
 		graph_obj = dynamic_cast<BaseGraphicObject *>(obj);
@@ -338,6 +355,7 @@ void ObjectSearchWidget::selectObject()
 
 			if(obj_view)
 			{
+				followObjectScene(obj_view);
 				model_wgt->viewport->centerOn(obj_view);
 				obj_view->setSelected(true);
 			}
@@ -345,6 +363,7 @@ void ObjectSearchWidget::selectObject()
 		else if(tab_obj)
 		{
 			tab_view = dynamic_cast<BaseTableView *>(tab_obj->getParentTable()->getOverlyingObject());
+			followObjectScene(tab_view);
 			tab_view->setChildSelected(tab_obj);
 			model_wgt->viewport->centerOn(tab_view);
 		}
@@ -362,7 +381,7 @@ void ObjectSearchWidget::showObjectMenu()
 
 void ObjectSearchWidget::editObject()
 {
-	if(selected_obj)
+	if(selected_obj && model_wgt->isInteractive())
 	{
 		if(selected_obj->getObjectType() == ObjectType::Permission)
 			model_wgt->showObjectForm(ObjectType::Permission, dynamic_cast<Permission *>(selected_obj)->getObject());

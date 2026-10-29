@@ -135,7 +135,8 @@ class __libconnector Connection {
 		//! \brief Constants used to reference the server info details (see getServerInfo())
 		ServerVersion,
 		ServerProtocol,
-		ServerPid;
+		ServerPid,
+		ServerEncoding;
 
 		//! \brief Constants used to reference the default usage in model operations (see setDefaultForOperation())
 		enum ConnOperation: unsigned {

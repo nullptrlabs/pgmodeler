@@ -24,6 +24,7 @@
 			%if {layersconfig} %then
 				[ id="layersconfig"]
 				[ rels-follow-tabs-visibility="] %if {rels-follow-tabs-visibility} %then true %else false %end ["]
+				[ sel-objs-in-layers="] %if {sel-objs-in-layers} %then true %else false %end ["]
 			%else
 				%if {id} %then
 					[ id="] {id} ["]

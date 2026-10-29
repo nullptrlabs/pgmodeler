@@ -20,7 +20,8 @@
 */
 
 #include "tabledatawidget.h"
-#include "tools/sqlexecutionwidget.h"
+#include "customuistyle.h"
+#include "messagebox.h"
 #include "guiutilsns.h"
 #include "csvparser.h"
 #include "utils/plaintextitemdelegate.h"
@@ -31,19 +32,15 @@ const QString TableDataWidget::PlaceholderColumn {"$placeholder$"};
 TableDataWidget::TableDataWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::BaseObject)
 {
 	Ui_TableDataWidget::setupUi(this);
+
 	configureFormLayout(tabledata_grid, ObjectType::BaseObject);
 
-	obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(ObjectType::Table)));
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
+	CustomUiStyle::setStyleHint(CustomUiStyle::InfoFrmHint, hint_frm);
 
-	comment_lbl->setVisible(false);
-	comment_edt->setVisible(false);
-
+	obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(ObjectType::Table));
 	data_tbw->setItemDelegate(new PlainTextItemDelegate(this, false));
-
-	QFont font=name_edt->font();
-	font.setItalic(true);
 	name_edt->setReadOnly(true);
-	name_edt->setFont(font);
 
 	add_row_tb->setToolTip(add_row_tb->toolTip() + QString(" (%1)").arg(add_row_tb->shortcut().toString()));
 	del_rows_tb->setToolTip(del_rows_tb->toolTip() + QString(" (%1)").arg(del_rows_tb->shortcut().toString()));
@@ -55,12 +52,7 @@ TableDataWidget::TableDataWidget(QWidget *parent): BaseObjectWidget(parent, Obje
 	data_tbw->removeEventFilter(this);
 	csv_load_parent->setVisible(false);
 
-	csv_load_wgt = new CsvLoadWidget(this, true);
-	QVBoxLayout *layout = new QVBoxLayout;
-
-	layout->addWidget(csv_load_wgt);
-	layout->setContentsMargins(0,0,0,0);
-	csv_load_parent->setLayout(layout);
+	csv_load_wgt = GuiUtilsNs::createWidgetInParent< CsvLoadWidget>(0, csv_load_parent, true);
 	csv_load_parent->setMinimumSize(csv_load_wgt->minimumSize());
 
 	setMinimumSize(640, 480);
@@ -104,7 +96,7 @@ TableDataWidget::TableDataWidget(QWidget *parent): BaseObjectWidget(parent, Obje
 	});
 
 	connect(copy_tb, &QToolButton::clicked, this, [this](){
-		SQLExecutionWidget::copySelection(data_tbw, false, true);
+		GuiUtilsNs::copySelection(data_tbw, false, true);
 		paste_tb->setEnabled(qApp->clipboard()->ownsClipboard());
 	});
 
@@ -194,7 +186,7 @@ void TableDataWidget::deleteRows()
 
 void TableDataWidget::deleteColumns()
 {
-	int res = Messagebox::confirm(tr("Delete columns is an irreversible action! Do you really want to proceed?"));
+	int res = Messagebox::confirm(tr("Deleting columns is an irreversible action! Are you sure you want to proceed?"));
 
 	if(Messagebox::isAccepted(res))
 	{
@@ -228,7 +220,7 @@ void TableDataWidget::clearRows(bool confirm)
 	int res = Messagebox::Rejected;
 
 	if(confirm)
-		res = Messagebox::confirm(tr("Remove all rows is an irreversible action! Do you really want to proceed?"));
+		res = Messagebox::confirm(tr("Removing all rows is an irreversible action! Are you sure you want to proceed?"));
 
 	if(!confirm || Messagebox::isAccepted(res))
 	{
@@ -240,7 +232,7 @@ void TableDataWidget::clearRows(bool confirm)
 
 void TableDataWidget::clearColumns()
 {
-	int res = Messagebox::confirm(tr("Remove all columns is an irreversible action! Do you really want to proceed?"));
+	int res = Messagebox::confirm(tr("Removing all columns is an irreversible action! Are you sure you want to proceed?"));
 
 	if(Messagebox::isAccepted(res))
 	{
@@ -332,10 +324,9 @@ void TableDataWidget::enableButtons()
 void TableDataWidget::setAttributes(DatabaseModel *model, PhysicalTable *table)
 {
 	BaseObjectWidget::setAttributes(model, table, nullptr);
-	bool enable=(object != nullptr);
+	bool enable = (object != nullptr);
 
 	protected_obj_frm->setVisible(false);
-	obj_id_lbl->setVisible(false);
 	data_tbw->setEnabled(enable);
 	add_row_tb->setEnabled(enable);
 
@@ -372,7 +363,7 @@ void TableDataWidget::populateDataGrid(const CsvDocument &csv_doc)
 			Messagebox msgbox;
 			msgbox.show(e,
 									tr("Failed to parse the table's initial data, check the stack trace for more detail. Do you want to dump the data into an external file in order to fix and import them back into the table?"),
-									Messagebox::AlertIcon,
+									Messagebox::Alert,
 									Messagebox::YesNoButtons);
 
 			if(msgbox.isAccepted())
@@ -386,7 +377,7 @@ void TableDataWidget::populateDataGrid(const CsvDocument &csv_doc)
 				catch(Exception &e)
 				{
 					//msgbox.show(e);
-					Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+					Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 				}
 			}
 		}
@@ -629,7 +620,7 @@ void TableDataWidget::applyConfiguration()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

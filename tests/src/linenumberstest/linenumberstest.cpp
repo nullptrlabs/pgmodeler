@@ -37,7 +37,7 @@ void LineNumbersTest::handleLineSelectionUsingMouse()
 	NumberedTextEditor *edt=new NumberedTextEditor(dlg, true);
   QHBoxLayout *layout=new QHBoxLayout(dlg);
 
-	LineNumbersWidget::setColors(Qt::darkGray, QColor(230,230,230));
+	LineNumbersWidget::setColors(Qt::darkGray, QColor(230,230,230), Qt::blue);
 
   layout->addWidget(edt);
 	dlg->setMinimumSize(800,600);

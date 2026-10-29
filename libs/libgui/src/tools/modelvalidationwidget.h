@@ -74,8 +74,8 @@ class __libgui ModelValidationWidget: public QWidget, public Ui::ModelValidation
 		void generateOutputItemText(QTreeWidgetItem *item, QString &output, int level);
 
 	protected:
-		void resizeEvent(QResizeEvent *event);
-		bool eventFilter(QObject *object, QEvent *event);
+		void resizeEvent(QResizeEvent *event) override;
+		bool eventFilter(QObject *object, QEvent *event) override;
 
 	public:
 		ModelValidationWidget(QWidget * parent = nullptr);
@@ -84,7 +84,12 @@ class __libgui ModelValidationWidget: public QWidget, public Ui::ModelValidation
 		void setModel(ModelWidget *model_wgt);
 
 		//! \brief Returns if there is a validation in progress
-		bool isValidationRunning();
+		bool isThreadRunning();
+
+		//! \brief Updates the connections combo with the latest loaded connection settings
+		void updateConnections();
+
+		bool hasValidationErrors();
 
 	private slots:
 		void applyFixes();
@@ -117,7 +122,7 @@ class __libgui ModelValidationWidget: public QWidget, public Ui::ModelValidation
 
 		/*! \brief This signal is emitted whenever the user changes the connections settings
 		within this widget without use the main configurations dialog */
-		void s_connectionsUpdateRequest();
+		void s_connectionsUpdateRequested();
 };
 
 #endif

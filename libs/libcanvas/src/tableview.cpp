@@ -274,20 +274,23 @@ void TableView::configureObject()
 	configureTag();
 	configureSQLDisabledInfo();
 
-	if((old_width!=0 && this->bounding_rect.width()!=old_width) ||
-			(old_height!=0 && this->bounding_rect.height()!=old_height))
-		emit s_objectDimensionChanged();
-	else
-		requestRelationshipsUpdate();
+	if(!BaseTable::isGeomChangesIgnored())
+	{
+		if((old_width!=0 && this->bounding_rect.width()!=old_width) ||
+			 (old_height!=0 && this->bounding_rect.height()!=old_height))
+			emit s_objectDimensionChanged();
+		else
+			requestRelationshipsUpdate();
+	}
 }
 
 QPointF TableView::getConnectionPoints(TableObject *tab_obj, ConnectionPoint conn_pnt)
 {
 	if(!tab_obj)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(conn_pnt > RightConnPoint)
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	if(conn_points.count(tab_obj)==0)
 		//Returns the center point in case of the connection point of the table object wasn't calculated already

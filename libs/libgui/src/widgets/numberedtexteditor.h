@@ -108,10 +108,11 @@ class __libgui NumberedTextEditor : public QPlainTextEdit {
 		void keyPressEvent(QKeyEvent *event)  override;
 
 	public:
-		NumberedTextEditor(QWidget * parent = nullptr, bool edit_btns_enabled = false, qreal custom_fnt_size = 0);
-		virtual ~NumberedTextEditor();
+		NumberedTextEditor(QWidget * parent = nullptr, bool act_btns_enabled = false, qreal custom_fnt_size = 0);
+		~NumberedTextEditor() override;
 
 		static void setDefaultFont(const QFont &font);
+		static QFont getDefaultFont();
 		static void setLineNumbersVisible(bool value);
 		static void setHighlightLines(bool value);
 		static bool isHighlightLines();
@@ -128,7 +129,7 @@ class __libgui NumberedTextEditor : public QPlainTextEdit {
 		void setCustomContextMenuEnabled(bool enabled);
 
 		//! \brief Configure the filename filters for the save action
-		void setFilenameFilters(const QStringList &list, const QString &default_ext);
+		void setFilenameFilters(const QStringList &list, const QString &def_ext);
 
 	private slots:
 		void showContextMenu();

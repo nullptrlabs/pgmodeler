@@ -39,8 +39,7 @@ class __libcore OperatorFamily: public BaseObject {
 
 	public:
 		OperatorFamily();
-
-		virtual ~OperatorFamily(){}
+		~OperatorFamily() override = default;
 
 		//! \brief Sets the indexing type of the operator family
 		void setIndexingType(IndexingType idx_type);
@@ -49,10 +48,10 @@ class __libcore OperatorFamily: public BaseObject {
 		IndexingType getIndexingType();
 
 		//! \brief Returns the SQL / XML code definition for the operator family
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
-		virtual QString getSignature(bool format=true) final;
+		QString getSignature(bool format=true) final;
 };
 
 #endif

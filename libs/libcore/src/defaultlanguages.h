@@ -31,7 +31,7 @@
 #include <QString>
 
 namespace DefaultLanguages {
-	static const QString Sql ("sql"),
+	inline const QString Sql ("sql"),
 	C("c"),
 	PlPgsql("plpgsql"),
 	PlTcl("pltcl"),

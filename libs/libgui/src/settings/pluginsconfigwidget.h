@@ -32,7 +32,7 @@
 #include "ui_pluginsconfigwidget.h"
 #include "widgets/customtablewidget.h"
 #include "pgmodelerguiplugin.h"
-#include "widgets/fileselectorwidget.h"
+#include "widgets/pathselectorwidget.h"
 
 class __libgui PluginsConfigWidget: public BaseConfigWidget, public Ui::PluginsConfigWidget {
 	Q_OBJECT
@@ -44,23 +44,23 @@ class __libgui PluginsConfigWidget: public BaseConfigWidget, public Ui::PluginsC
 		//! \brief Table used to show the loaded plugins
 		CustomTableWidget *plugins_tab;
 
-		FileSelectorWidget *root_dir_sel;
+		PathSelectorWidget *root_dir_sel;
 
 		/* Disabled methods */
-		virtual void applyConfiguration() override {}
-		virtual void saveConfiguration() override {}
-		virtual void restoreDefaults() override {}
+		void applyConfiguration() override {}
+		void saveConfiguration() override {}
+		void restoreDefaults() override {}
 		void addConfigurationParam(const QString &, const attribs_map &){}
 
 	public:
 		PluginsConfigWidget(QWidget *parent = nullptr);
 
-		virtual ~PluginsConfigWidget();
+		~PluginsConfigWidget() override;
 
 		//! \brief Since plugins has its own configurations this method load all plugins instead
-		virtual void loadConfiguration() override;
+		void loadConfiguration() override;
 
-		 //! \brief Performs the initialization of all loaded plugins (see PgModelerPlugin::initPlugin())
+		//! \brief Performs the initialization of all loaded plugins (see PgModelerPlugin::initPlugin())
 		void initPlugins(MainWindow *main_window);
 
 		//! \brief Execute the post initialization of all loaded plugins

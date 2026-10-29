@@ -3,7 +3,7 @@
 
 #include <QtCore/QtGlobal>
 
-#if defined(CORE_SYMBOLS)
+#ifdef CORE_SYMBOLS
 	#define __libcore Q_DECL_EXPORT
 #else
 	#define __libcore Q_DECL_IMPORT

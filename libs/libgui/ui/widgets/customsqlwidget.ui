@@ -25,26 +25,26 @@
   <property name="windowTitle">
    <string>Add custom SQL code</string>
   </property>
-  <layout class="QGridLayout" name="sqlappend_grid">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
+  <layout class="QVBoxLayout" name="customsql_lt">
    <property name="spacing">
     <number>5</number>
    </property>
-   <item row="0" column="0">
+   <property name="leftMargin">
+    <number>5</number>
+   </property>
+   <property name="topMargin">
+    <number>5</number>
+   </property>
+   <property name="rightMargin">
+    <number>5</number>
+   </property>
+   <property name="bottomMargin">
+    <number>5</number>
+   </property>
+   <item>
     <widget class="QGroupBox" name="sqlcode_grp">
      <property name="title">
-      <string>S&amp;QL code</string>
+      <string>SQL code</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <property name="spacing">
@@ -70,7 +70,7 @@
         <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -81,7 +81,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QToolButton" name="select_tb">
+         <widget class="QPushButton" name="select_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -103,7 +103,7 @@
            <string>Puts an SELECT command template at current cursor position.</string>
           </property>
           <property name="text">
-           <string>&amp;SELECT</string>
+           <string>SELECT</string>
           </property>
           <property name="icon">
            <iconset resource="../../res/resources.qrc">
@@ -115,16 +115,10 @@
             <height>25</height>
            </size>
           </property>
-          <property name="popupMode">
-           <enum>QToolButton::InstantPopup</enum>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="insert_tb">
+         <widget class="QPushButton" name="insert_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -146,7 +140,7 @@
            <string>Puts an INSERT command template at current cursor position.</string>
           </property>
           <property name="text">
-           <string>&amp;INSERT</string>
+           <string>INSERT</string>
           </property>
           <property name="icon">
            <iconset resource="../../res/resources.qrc">
@@ -158,16 +152,10 @@
             <height>25</height>
            </size>
           </property>
-          <property name="popupMode">
-           <enum>QToolButton::InstantPopup</enum>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="update_tb">
+         <widget class="QPushButton" name="update_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -189,7 +177,7 @@
            <string>Puts an UPDATE command template at current cursor position.</string>
           </property>
           <property name="text">
-           <string>&amp;UPDATE</string>
+           <string>UPDATE</string>
           </property>
           <property name="icon">
            <iconset resource="../../res/resources.qrc">
@@ -201,16 +189,10 @@
             <height>25</height>
            </size>
           </property>
-          <property name="popupMode">
-           <enum>QToolButton::InstantPopup</enum>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="delete_tb">
+         <widget class="QPushButton" name="delete_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -232,7 +214,7 @@
            <string>Puts an DELETE command template at current cursor position.</string>
           </property>
           <property name="text">
-           <string>&amp;DELETE</string>
+           <string>DELETE</string>
           </property>
           <property name="icon">
            <iconset resource="../../res/resources.qrc">
@@ -244,16 +226,10 @@
             <height>25</height>
            </size>
           </property>
-          <property name="popupMode">
-           <enum>QToolButton::InstantPopup</enum>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="clear_tb">
+         <widget class="QPushButton" name="clear_btn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -269,7 +245,7 @@
            <string/>
           </property>
           <property name="text">
-           <string>&amp;Clear</string>
+           <string>Clear</string>
           </property>
           <property name="icon">
            <iconset resource="../../res/resources.qrc">
@@ -281,15 +257,12 @@
             <height>25</height>
            </size>
           </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
          </widget>
         </item>
         <item>
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -333,7 +306,7 @@
 Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE command.</string>
             </property>
             <property name="text">
-             <string>Append at end of model definition.</string>
+             <string>Append at end of model definition</string>
             </property>
            </widget>
           </item>
@@ -369,7 +342,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
 Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE command.</string>
             </property>
             <property name="text">
-             <string>Prepend at beginning of model definition.</string>
+             <string>Prepend at beginning of model definition</string>
             </property>
            </widget>
           </item>
@@ -395,10 +368,10 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
          </size>
         </property>
         <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
+         <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+         <enum>QFrame::Shadow::Raised</enum>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
          <property name="leftMargin">
@@ -428,7 +401,7 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
             <string/>
            </property>
            <property name="textFormat">
-            <enum>Qt::AutoText</enum>
+            <enum>Qt::TextFormat::AutoText</enum>
            </property>
            <property name="pixmap">
             <pixmap resource="../../res/resources.qrc">:/icons/icons/alert.png</pixmap>
@@ -440,14 +413,6 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
          </item>
          <item row="0" column="1">
           <widget class="QLabel" name="message_lbl">
-           <property name="font">
-            <font>
-             <bold>false</bold>
-             <underline>false</underline>
-             <strikeout>false</strikeout>
-             <kerning>true</kerning>
-            </font>
-           </property>
            <property name="text">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use custom commands with extreme caution because you can change the semantics of the entire model when running SQL validation or export processes. Additionally, depending on the amount of commands, those processes can have their performance sensibly degradated.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
@@ -465,14 +430,13 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
   </layout>
  </widget>
  <tabstops>
-  <tabstop>select_tb</tabstop>
-  <tabstop>insert_tb</tabstop>
-  <tabstop>update_tb</tabstop>
-  <tabstop>delete_tb</tabstop>
-  <tabstop>clear_tb</tabstop>
+  <tabstop>select_btn</tabstop>
+  <tabstop>insert_btn</tabstop>
+  <tabstop>update_btn</tabstop>
+  <tabstop>delete_btn</tabstop>
+  <tabstop>clear_btn</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

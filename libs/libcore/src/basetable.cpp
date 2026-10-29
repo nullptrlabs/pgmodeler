@@ -22,7 +22,11 @@
 #include "basetable.h"
 #include "utilsns.h"
 #include "coreutilsns.h"
-#include "column.h"
+#include "tableobject.h"
+#include "doublenan.h"
+#include <cmath>
+
+bool BaseTable::geom_changes_ignored { false };
 
 BaseTable::BaseTable()
 {
@@ -35,8 +39,10 @@ BaseTable::BaseTable()
 	attributes[Attributes::AttribsPage]="";
 	attributes[Attributes::ExtAttribsPage]="";
 	attributes[Attributes::ZValue]="";
+	attributes[Attributes::RelMarkerPos]="";
 	pagination_enabled = false;
 	collapse_mode = CollapseMode::NotCollapsed;
+	rel_marker_pos = QPointF(DNaN, DNaN);
 	resetCurrentPages();
 }
 
@@ -63,6 +69,16 @@ Tag *BaseTable::getTag()
 	return tag;
 }
 
+void BaseTable::setGeomChangesIgnored(bool value)
+{
+	geom_changes_ignored = value;
+}
+
+bool BaseTable::isGeomChangesIgnored()
+{
+	return geom_changes_ignored;
+}
+
 bool BaseTable::isBaseTable(ObjectType obj_tp)
 {
 	return (obj_tp == ObjectType::Table ||
@@ -78,7 +94,7 @@ QString BaseTable::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -110,7 +126,7 @@ bool BaseTable::isPaginationEnabled()
 void BaseTable::setCurrentPage(TableSection section_id, unsigned value)
 {
 	if(section_id > ExtAttribsSection)
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	setCodeInvalidated(curr_page[section_id] != value);
 	curr_page[section_id] = value;
@@ -119,7 +135,7 @@ void BaseTable::setCurrentPage(TableSection section_id, unsigned value)
 unsigned BaseTable::getCurrentPage(TableSection section_id)
 {
 	if(section_id > ExtAttribsSection)
-		throw Exception(ErrorCode::RefElementInvalidIndex,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::RefElementInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	return curr_page[section_id];
 }
@@ -180,6 +196,22 @@ void BaseTable::setPosition(const QPointF &pos)
 {
 	BaseGraphicObject::setPosition(pos);
 	resetHashCode();
+}
+
+void BaseTable::setRelMarkerPosition(const QPointF &pos)
+{
+	rel_marker_pos = pos;
+	setCodeInvalidated(true);
+}
+
+QPointF BaseTable::getRelMarkerPosition()
+{
+	return rel_marker_pos;
+}
+
+void BaseTable::resetRelMarkerPosition()
+{
+	setRelMarkerPosition(QPointF(DNaN, DNaN));
 }
 
 std::vector<BaseObject *> BaseTable::getDependencies(bool inc_indirect_deps, const std::vector<ObjectType> &excl_types, bool rem_duplicates)

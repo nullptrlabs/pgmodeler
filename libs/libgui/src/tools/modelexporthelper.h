@@ -28,7 +28,10 @@
 #ifndef MODEL_EXPORT_HELPER_H
 #define MODEL_EXPORT_HELPER_H
 
-#include "widgets/modelwidget.h"
+#include "guiglobal.h"
+#include <QGraphicsView>
+#include "objectsscene.h"
+#include "databasemodel.h"
 #include "connection.h"
 
 class __libgui ModelExportHelper: public QObject {
@@ -164,6 +167,8 @@ class __libgui ModelExportHelper: public QObject {
 		to the main loop, depending on the mode the helper is being used (in a thread or locally) */
 		void abortExport(Exception &e);
 
+		void finishExport();
+
 		/*! brief Handles the provided exception related to the sql command can
 		1) emit a ignored error signal if the error code in the exception is one of the ignored ones
 		2) append the error in a list of errors generated during the export process
@@ -210,7 +215,7 @@ class __libgui ModelExportHelper: public QObject {
 		This form receive a database model as input and the sql code to be exported will be generated from it.
 		\note The params drop_db and drop_objs can't be true at the same time. */
 		void setExportToDBMSParams(DatabaseModel *db_model, Connection *conn, const QString &pgsql_ver="", bool ignore_dup=false,
-															 bool drop_db=false, bool drop_objs=false, bool simulate=false, bool use_tmp_names=false,
+															 bool drop_db=false, bool drop_objs=false, bool simulate=false, bool use_rand_names=false,
 															 bool force_db_drop = false, bool transactional = false);
 
 		/*! \brief Configures the DBMS export params before start the export thread (when in thread mode).
@@ -224,7 +229,7 @@ class __libgui ModelExportHelper: public QObject {
 		/*! \brief Configures the PNG export params before start the export thread (when in thread mode).
 		This form receive the objects scene, a viewport, the output filename, zoom factor, grid options and page by page export options */
 		void setExportToPNGParams(ObjectsScene *scene, QGraphicsView *viewp, const QString &filename, double zoom,
-															bool show_grid, bool show_delim, bool use_orig_bg_color, bool page_by_page);
+															bool show_grid, bool show_delim, bool page_by_page, bool override_bg_color);
 
 		/*! \brief Configures the SVG export params before start the export thread (when in thread mode).
 		This form receive the objects scene, the output filename, grid options. */

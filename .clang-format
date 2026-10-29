@@ -1,0 +1,74 @@
+---
+# Configuração do clang-format para pgmodeler
+# Baseado no estilo LLVM com customizações para o projeto
+
+# Estilo base
+BasedOnStyle: LLVM
+
+# Indentação e tabs
+IndentWidth: 4
+UseTab: Always
+TabWidth: 4
+
+# Alinhamento de parâmetros
+AlignAfterOpenBracket: DontAlign
+BinPackParameters: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowAllArgumentsOnNextLine: true
+
+# Estilo de chaves (Allman - chaves em nova linha)
+BreakBeforeBraces: Allman
+
+# Limite de colunas
+ColumnLimit: 0
+
+# Alinhamentos
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignTrailingComments: true
+
+# Funções e statements curtos
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Empty
+
+# Quebras de linha
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeColon
+
+# Espaçamento
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: Never
+SpaceInEmptyParentheses: false
+
+# Ponteiros e referências
+PointerAlignment: Right
+ReferenceAlignment: Right
+
+# Includes
+SortIncludes: true
+IncludeBlocks: Preserve
+
+# Comentários
+ReflowComments: true
+
+# Macros e defines
+IndentPPDirectives: None
+
+# Namespace
+NamespaceIndentation: None
+
+# Access modifiers (public, private, protected)
+AccessModifierOffset: -4
+
+# Continuação de linhas
+ContinuationIndentWidth: 16
+IndentWrappedFunctionNames: false
+AlignOperands: DontAlign
+
+# Parâmetros específicos para C++
+Standard: c++17

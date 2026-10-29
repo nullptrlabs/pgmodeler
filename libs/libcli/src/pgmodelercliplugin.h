@@ -34,7 +34,7 @@
 #include "attribsmap.h"
 #include "pgmodelerplugin.h"
 
-#if defined(PRIVATE_PLUGINS_SYMBOLS)
+#ifdef PRIV_CODE_SYMBOLS
 	#include "privpluginsns.h"
 #endif
 
@@ -66,8 +66,7 @@ class __libcli PgModelerCliPlugin: public PgModelerPlugin {
 		};
 
 		PgModelerCliPlugin();
-
-		virtual ~PgModelerCliPlugin();
+		virtual ~PgModelerCliPlugin() = default;
 
 		//! \brief Returns the plugin's title
 		virtual QString getPluginTitle() = 0;

@@ -3,7 +3,9 @@
 CAUTION: Do not modify this file unless you know what you are doing.
  Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="1.1.0-alpha1" use-changelog="false" last-position="88,180" last-zoom="1" max-obj-count="25"
+<dbmodel pgmodeler-ver="2.0.0" use-changelog="false" max-obj-count="25"
+	 gen-disabled-objs-code="false" show-sys-schemas-rects="false" seg-mode="0" seg-threshold="500"
+	 last-position="120,137" last-zoom="0.65" scene-rect="0,0,4656.61,2286.52" last-scene="0"
 	 default-schema="public" default-owner="postgres"
 	 layers="Default layer"
 	 active-layers="0"
@@ -35,7 +37,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="markets" layers="0" collapse-mode="2" max-obj-count="9" z-value="0">
 	<schema name="economy"/>
 	<role name="cryptoapi"/>
-	<position x="160" y="880"/>
+	<position x="226.667" y="744.444"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -69,7 +71,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="sales" layers="0" collapse-mode="2" max-obj-count="20" z-value="0">
 	<schema name="economy"/>
 	<role name="cryptoapi"/>
-	<position x="880" y="960"/>
+	<position x="779.394" y="754.545"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -142,7 +144,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="users" layers="0" collapse-mode="2" max-obj-count="10" z-value="0">
 	<schema name="people"/>
 	<role name="cryptoapi"/>
-	<position x="2840" y="360"/>
+	<position x="2018.68" y="373.116"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -182,7 +184,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="wallets" layers="0" collapse-mode="2" max-obj-count="8" z-value="0">
 	<schema name="economy"/>
 	<role name="cryptoapi"/>
-	<position x="1560" y="1080"/>
+	<position x="1202.05" y="1051.62"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -215,7 +217,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="assets" layers="0" collapse-mode="2" max-obj-count="9" z-value="0">
 	<schema name="economy"/>
 	<role name="cryptoapi"/>
-	<position x="1880" y="1920"/>
+	<position x="1445.16" y="1506.73"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -291,7 +293,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="prices" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
 	<schema name="economy"/>
 	<role name="cryptoapi"/>
-	<position x="840" y="380"/>
+	<position x="768.889" y="404.444"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -320,7 +322,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="currencies" layers="0" collapse-mode="2" max-obj-count="8" z-value="0">
 	<schema name="economy"/>
 	<role name="cryptoapi"/>
-	<position x="1480" y="360"/>
+	<position x="1224.44" y="382.222"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -356,7 +358,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="wallet_entries" layers="0" unlogged="true" collapse-mode="2" max-obj-count="12" z-value="0">
 	<schema name="economy"/>
 	<role name="cryptoapi"/>
-	<position x="1120" y="1880"/>
+	<position x="947.677" y="1481.41"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -402,7 +404,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="sellers" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
 	<schema name="economy"/>
 	<role name="cryptoapi"/>
-	<position x="120" y="1960"/>
+	<position x="216.768" y="1514.75"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -431,7 +433,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="media" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
 	<schema name="people"/>
 	<role name="cryptoapi"/>
-	<position x="4360" y="1720"/>
+	<position x="2583.57" y="1378.01"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -460,7 +462,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="identities" layers="0" collapse-mode="2" max-obj-count="15" z-value="0">
 	<schema name="people"/>
 	<role name="cryptoapi"/>
-	<position x="3480" y="400"/>
+	<position x="2530.99" y="379.27"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -522,7 +524,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="sessions" layers="0" collapse-mode="2" max-obj-count="10" z-value="0">
 	<schema name="people"/>
 	<role name="cryptoapi"/>
-	<position x="4240" y="360"/>
+	<position x="3050.99" y="385.423"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -566,6 +568,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#a448dd"
 	 src-table="people.users"
 	 dst-table="economy.wallets"
@@ -573,12 +576,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<label ref-type="name-label">
 		<position x="171.378" y="36.8853"/>
 	</label>
+	<segment index="1" orientation="2" value="13.4048"/>
 </relationship>
 
 <relationship name="currencies_has_many_prices" type="rel1n" layers="0"
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#7196b4"
 	 src-table="economy.currencies"
 	 dst-table="economy.prices"
@@ -592,6 +597,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#f55b5d"
 	 src-table="economy.exchanges"
 	 dst-table="economy.prices"
@@ -605,6 +611,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#1d24a5"
 	 src-table="economy.markets"
 	 dst-table="economy.sales"
@@ -615,7 +622,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </relationship>
 
 <index name="sales_fkidx_markets" table="economy.sales"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="markets_id"/>
@@ -623,7 +630,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="prices_fkidx_exchanges" table="economy.prices"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="exchanges_id"/>
@@ -631,7 +638,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="wallets_fk_users_idx" table="economy.wallets"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="users_id"/>
@@ -641,7 +648,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="collections" layers="0" collapse-mode="2" pagination="true" attribs-page="0" ext-attribs-page="0" max-obj-count="9" z-value="0">
 	<schema name="people"/>
 	<role name="cryptoapi"/>
-	<position x="2840" y="1720"/>
+	<position x="2062.04" y="1347.24"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -676,6 +683,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#816213"
 	 src-table="people.collections"
 	 dst-table="economy.assets"
@@ -686,7 +694,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </relationship>
 
 <index name="assets_fkidx_collections" table="economy.assets"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="collections_id"/>
@@ -696,7 +704,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="contacts" layers="0" collapse-mode="2" max-obj-count="9" z-value="0">
 	<schema name="people"/>
 	<role name="cryptoapi"/>
-	<position x="2840" y="1000"/>
+	<position x="2029.45" y="828.5"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -732,6 +740,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#cf042e"
 	 src-table="people.collections"
 	 dst-table="people.contacts"
@@ -745,13 +754,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#8b5181"
 	 src-table="people.users"
 	 dst-table="people.contacts"
 	 src-required="true" dst-required="false"/>
 
 <index name="contacts_fk_users_idx" table="people.contacts"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="users_id"/>
@@ -759,7 +769,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="contacts_fk_collections_idx" table="people.contacts"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="collections_id"/>
@@ -769,7 +779,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="collection_media" layers="0" collapse-mode="2" max-obj-count="12" z-value="0">
 	<schema name="people"/>
 	<role name="cryptoapi"/>
-	<position x="3520" y="1440"/>
+	<position x="2514.06" y="922.347"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -813,6 +823,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#38c278"
 	 src-table="people.collections"
 	 dst-table="people.collection_media"
@@ -822,13 +833,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#96c91d"
 	 src-table="people.media"
 	 dst-table="people.collection_media"
 	 src-required="true" dst-required="false"/>
 
 <index name="collection_platforms_fk_platforms_idx" table="people.collection_media"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="media_id"/>
@@ -836,7 +848,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="collection_platforms_fk_collections_idx" table="people.collection_media"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="collections_id"/>
@@ -847,6 +859,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#70c4a3"
 	 src-table="people.users"
 	 dst-table="people.identities"
@@ -860,6 +873,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#cb3610"
 	 src-table="people.identities"
 	 dst-table="people.sessions"
@@ -872,7 +886,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="asset_totals" layers="0" collapse-mode="2" max-obj-count="8" z-value="0">
 	<schema name="economy"/>
 	<role name="cryptoapi"/>
-	<position x="2200" y="1120"/>
+	<position x="1673.85" y="1135.04"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -905,6 +919,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#549004"
 	 src-table="economy.assets"
 	 dst-table="economy.asset_totals"
@@ -918,6 +933,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#763519"
 	 src-table="economy.wallets"
 	 dst-table="economy.asset_totals"
@@ -926,7 +942,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="currency_totals" layers="0" collapse-mode="2" max-obj-count="8" z-value="0">
 	<schema name="economy"/>
 	<role name="cryptoapi"/>
-	<position x="2160" y="400"/>
+	<position x="1492.99" y="710.598"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -960,6 +976,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#d4b02f"
 	 src-table="economy.currencies"
 	 dst-table="economy.currency_totals"
@@ -968,7 +985,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="buyers" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
 	<schema name="economy"/>
 	<role name="cryptoapi"/>
-	<position x="120" y="1360"/>
+	<position x="215.556" y="1133.33"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -998,6 +1015,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#f94eb5"
 	 src-table="economy.sales"
 	 dst-table="economy.sellers"
@@ -1011,6 +1029,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#e8194a"
 	 src-table="economy.sales"
 	 dst-table="economy.buyers"
@@ -1020,15 +1039,19 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#0b6131"
 	 src-table="economy.wallet_entries"
 	 dst-table="economy.sellers"
-	 src-required="false" dst-required="false"/>
+	 src-required="false" dst-required="false">
+	<segment index="2" orientation="1" value="-0.466667"/>
+</relationship>
 
 <relationship name="wallet_entries_has_many_buyers" type="rel1n" layers="0"
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#2549f8"
 	 src-table="economy.wallet_entries"
 	 dst-table="economy.buyers"
@@ -1036,10 +1059,11 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<label ref-type="name-label">
 		<position x="0" y="0"/>
 	</label>
+	<segment index="1" orientation="2" value="50.9091"/>
 </relationship>
 
 <index name="sellers_fkidx_wallet_entries" table="economy.sellers"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="wallet_entries_id"/>
@@ -1047,7 +1071,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="sellers_fkidx_sales" table="economy.sellers"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="sales_id"/>
@@ -1055,7 +1079,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="buyers_fkidx_wallet_entries" table="economy.buyers"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="wallet_entries_id"/>
@@ -1063,7 +1087,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="buyers_fkidx_sales" table="economy.buyers"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="sales_id"/>
@@ -1074,6 +1098,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#680e04"
 	 src-table="economy.wallets"
 	 dst-table="economy.wallet_entries"
@@ -1084,7 +1109,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </relationship>
 
 <index name="wallet_entries_fkidx_wallets" table="economy.wallet_entries"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="wallets_id"/>
@@ -1092,7 +1117,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="prices_fkidx_currencies" table="economy.prices"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="currencies_id"/>
@@ -1102,7 +1127,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="media_identities" layers="0" collapse-mode="2" max-obj-count="9" z-value="0">
 	<schema name="people"/>
 	<role name="cryptoapi"/>
-	<position x="4280" y="1000"/>
+	<position x="3066.65" y="1032.7"/>
 	<column name="id" not-null="true" default-value="encode(gen_random_bytes(6), 'hex');">
 		<type name="varchar" length="12"/>
 	</column>
@@ -1139,6 +1164,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#0da862"
 	 src-table="people.media"
 	 dst-table="people.media_identities"
@@ -1152,13 +1178,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
 	 custom-color="#344de0"
 	 src-table="people.identities"
 	 dst-table="people.media_identities"
 	 src-required="true" dst-required="false"/>
 
 <index name="identities_fkidx_users" table="people.identities"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="users_id"/>
@@ -1166,7 +1193,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="sessions_idx_last_active" table="people.sessions"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="true" nulls-first="false" asc-order="false">
 			<column name="last_activity_time"/>
@@ -1174,15 +1201,15 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="sessions_idx_key" table="people.sessions"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="0">
 		<idxelement use-sorting="false">
 			<column name="key"/>
 		</idxelement>
 </index>
 
-<textbox name="cryptoconcept_desc" layers="0" z-value="0" width="456.547" font-size="11">
-	<position x="120" y="200"/>
+<textbox name="cryptoconcept_desc" layers="0" z-value="0" width="386.25" font-size="11">
+	<position x="204.444" y="227.179"/>
 	<comment> <![CDATA[[ cryptoconcept database ]
 
 Database sample kindly provided by Peter Pierce at truenorth.us.]]> </comment>

@@ -40,17 +40,21 @@ class __libgui ViewWidget: public BaseObjectWidget, public Ui::ViewWidget {
 	Q_OBJECT
 
 	private:
+		static int constexpr Ordinary = 0,
+		Recursive = 1,
+		Materialized = 2;
+
 		SimpleColumnsWidget *custom_cols_wgt;
 
 		ReferencesWidget *obj_refs_wgt;
 
 		ObjectSelectorWidget *tag_sel;
 
-		NumberedTextEditor *sql_preview_txt, *sql_definition_txt;
+		NumberedTextEditor *sql_definition_txt;
 
 		std::map<ObjectType, CustomTableWidget *> objects_tab_map;
 
-		SyntaxHighlighter *sql_preview_hl, *sql_definition_hl;
+		SyntaxHighlighter *sql_definition_hl;
 
 		//! \brief Returns the object table according with the child type
 		CustomTableWidget *getObjectTable(ObjectType obj_type);
@@ -72,7 +76,6 @@ class __libgui ViewWidget: public BaseObjectWidget, public Ui::ViewWidget {
 		void setAttributes(DatabaseModel *model, OperationList *op_list, Schema *schema, View *view, double px, double py);
 
 	private slots:
-		//! \brief Updates the sql code field of the view form
 		void updateCodePreview();
 
 		//! \brief Adds or edit a object on the object table that calls the slot
@@ -88,8 +91,8 @@ class __libgui ViewWidget: public BaseObjectWidget, public Ui::ViewWidget {
 		void removeObjects();
 
 	public slots:
-		void applyConfiguration();
-		void cancelConfiguration();
+		void applyConfiguration() override;
+		void cancelConfiguration() override;
 };
 
 #endif

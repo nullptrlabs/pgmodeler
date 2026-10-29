@@ -48,11 +48,16 @@ class __libgui ModelNavigationWidget: public QWidget, public Ui::ModelNavigation
 		//! \brief Returns the text of the combo's current index
 		QString getText(int idx);
 
-		QList<ModelWidget *> getModelWidgets();
+		QList<ModelWidget *> getModelWidgets();		
 
 	public slots:
-		//! \brief Adds the model to the listing
+		//! \brief Adds the model at the end of models listing
 		void addModel(ModelWidget *model);
+
+		/*! \brief Inserts the model at the specified index.
+		 *  If the index is negative or out of listing range,
+		 *  the model added at the end of listing */
+		void insertModel(ModelWidget *model, int idx);
 
 		//! \brief Updates a model's info on the listing
 		void updateModelText(int idx, const QString &text, const QString &filename);

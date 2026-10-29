@@ -33,7 +33,7 @@ ObjectTypesListWidget::ObjectTypesListWidget(QWidget *parent, const std::vector<
 	for(auto &type : BaseObject::getObjectTypes(true, excluded_types))
 	{
 		item = new QListWidgetItem(BaseObject::getTypeName(type));
-		item->setIcon(QIcon(GuiUtilsNs::getIconPath(type)));
+		item->setIcon(GuiUtilsNs::getIcon(type));
 		item->setData(Qt::UserRole, QVariant::fromValue<ObjectType>(type));
 		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
 		item->setCheckState(Qt::Checked);
@@ -42,11 +42,11 @@ ObjectTypesListWidget::ObjectTypesListWidget(QWidget *parent, const std::vector<
 
 	obj_types_lst->adjustSize();
 
-	connect(check_all_tb, &QToolButton::clicked, this, [this](){
+	connect(check_all_btn, &QPushButton::clicked, this, [this](){
 		setTypesCheckState(Qt::Checked);
 	});
 
-	connect(uncheck_all_tb, &QToolButton::clicked, this, [this](){
+	connect(uncheck_all_btn, &QPushButton::clicked, this, [this](){
 		setTypesCheckState(Qt::Unchecked);
 	});
 

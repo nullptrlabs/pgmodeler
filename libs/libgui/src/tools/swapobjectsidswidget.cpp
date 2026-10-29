@@ -1,7 +1,7 @@
 #include "swapobjectsidswidget.h"
+#include "customuistyle.h"
 #include "guiutilsns.h"
-
-const QString SwapObjectsIdsWidget::IdLabel {"ID: <strong>%1</strong>"};
+#include "objectslistmodel.h"
 
 SwapObjectsIdsWidget::SwapObjectsIdsWidget(QWidget *parent, Qt::WindowFlags f) : QWidget(parent, f)
 {
@@ -11,36 +11,33 @@ SwapObjectsIdsWidget::SwapObjectsIdsWidget(QWidget *parent, Qt::WindowFlags f) :
 																																	 ObjectType::Constraint });
 	setupUi(this);
 
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
+	GuiUtilsNs::configureWidgetsFont({ create_lbl, before_lbl },
+																	 GuiUtilsNs::SmallFontFactor, true);
+
 	sort_column = 0;
 	sort_order = Qt::AscendingOrder;
-
 	selector_idx = 0;
-	src_object_sel=nullptr;
-	dst_object_sel=nullptr;
-
 	filter_lt->setAlignment(filter_btn, Qt::AlignLeft);
 
-	QHBoxLayout *hbox = new QHBoxLayout(src_sel_parent);
-	hbox->setContentsMargins(0,0,0,0);
-	src_object_sel=new ObjectSelectorWidget(types, src_sel_parent);
+	src_object_sel = new ObjectSelectorWidget(types, this, true);
 	src_object_sel->enableObjectCreation(false);
-	hbox->addWidget(src_object_sel);
+	create_lt->addWidget(src_object_sel);
 
-	hbox = new QHBoxLayout(dst_sel_parent);
-	hbox->setContentsMargins(0,0,0,0);
-	dst_object_sel=new ObjectSelectorWidget(types, dst_sel_parent);
+	dst_object_sel = new ObjectSelectorWidget(types, this, true);
 	dst_object_sel->enableObjectCreation(false);
-	hbox->addWidget(dst_object_sel);
+	dst_object_sel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	before_lt->addWidget(dst_object_sel);
 
 	setModel(nullptr);
 	filter_wgt->setVisible(false);
 
-	connect(filter_btn, &QToolButton::toggled, filter_wgt, &QWidget::setVisible);
+	connect(filter_btn, &QPushButton::toggled, filter_wgt, &QWidget::setVisible);
 
-	connect(src_object_sel, &ObjectSelectorWidget::s_objectSelected, this, &SwapObjectsIdsWidget::showObjectId);
-	connect(dst_object_sel, &ObjectSelectorWidget::s_objectSelected, this, &SwapObjectsIdsWidget::showObjectId);
-	connect(src_object_sel, &ObjectSelectorWidget::s_selectorCleared, this, &SwapObjectsIdsWidget::showObjectId);
-	connect(dst_object_sel, &ObjectSelectorWidget::s_selectorCleared, this, &SwapObjectsIdsWidget::showObjectId);
+	connect(src_object_sel, &ObjectSelectorWidget::s_objectSelected, this, &SwapObjectsIdsWidget::enableSwap);
+	connect(dst_object_sel, &ObjectSelectorWidget::s_objectSelected, this, &SwapObjectsIdsWidget::enableSwap);
+	connect(src_object_sel, &ObjectSelectorWidget::s_selectorCleared, this, &SwapObjectsIdsWidget::enableSwap);
+	connect(dst_object_sel, &ObjectSelectorWidget::s_selectorCleared, this, &SwapObjectsIdsWidget::enableSwap);
 
 	connect(swap_values_tb, &QToolButton::clicked, this, [this](){
 		BaseObject *obj = src_object_sel->getSelectedObject();
@@ -63,7 +60,7 @@ SwapObjectsIdsWidget::SwapObjectsIdsWidget(QWidget *parent, Qt::WindowFlags f) :
 	connect(hide_sys_objs_chk, &QCheckBox::toggled, this, &SwapObjectsIdsWidget::filterObjects);
 
 	objects_view->installEventFilter(this);
-	setMinimumSize(640,480);
+	setMinimumSize(600, 500);
 }
 
 void SwapObjectsIdsWidget::setModel(DatabaseModel *model)
@@ -107,7 +104,9 @@ void SwapObjectsIdsWidget::fillCreationOrderGrid()
 	objects_view->horizontalHeader()->blockSignals(true);
 	GuiUtilsNs::populateObjectsTable(objects_view, objects, "");
 
-	if(!filter_edt->text().isEmpty() || hide_rels_chk->isChecked() || hide_sys_objs_chk->isChecked())
+	if(!filter_edt->text().isEmpty() ||
+		 hide_rels_chk->isChecked() ||
+		 hide_sys_objs_chk->isChecked())
 		filterObjects();
 
 	objects_view->sortByColumn(sort_column, sort_order);
@@ -175,45 +174,13 @@ bool SwapObjectsIdsWidget::eventFilter(QObject *object, QEvent *event)
 	return QWidget::eventFilter(object, event);
 }
 
-void SwapObjectsIdsWidget::showObjectId()
+void SwapObjectsIdsWidget::enableSwap()
 {
-	QLabel *ico_lbl=nullptr, *id_lbl=nullptr;
-	BaseObject *sel_obj=nullptr;
+	bool enable = src_object_sel->getSelectedObject() &&
+								dst_object_sel->getSelectedObject();
 
-	if(sender()==src_object_sel)
-	{
-		ico_lbl=src_ico_lbl;
-		id_lbl=src_id_lbl;
-		sel_obj=src_object_sel->getSelectedObject();
-	}
-	else
-	{
-		ico_lbl=dst_ico_lbl;
-		id_lbl=dst_id_lbl;
-		sel_obj=dst_object_sel->getSelectedObject();
-	}
-
-	id_lbl->clear();
-	if(sel_obj)
-	{
-		id_lbl->setText(IdLabel.arg(sel_obj->getObjectId()));
-		ico_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(sel_obj->getObjectType())));
-		ico_lbl->setToolTip(sel_obj->getTypeName());
-
-		id_lbl->setVisible(true);
-		ico_lbl->setVisible(true);
-	}
-	else
-	{
-		id_lbl->setVisible(false);
-		ico_lbl->setVisible(false);
-	}
-
-	swap_values_tb->setEnabled(src_object_sel->getSelectedObject() &&
-														 dst_object_sel->getSelectedObject());
-
-	emit s_objectsIdsSwapReady(src_object_sel->getSelectedObject() &&
-														 dst_object_sel->getSelectedObject());
+	swap_values_tb->setEnabled(enable);
+	emit s_objectsIdsSwapReady(enable);
 }
 
 void SwapObjectsIdsWidget::swapObjectsIds()
@@ -232,7 +199,7 @@ void SwapObjectsIdsWidget::swapObjectsIds()
 		 (src_obj->getObjectType() != dst_obj->getObjectType()))
 	{
 		Messagebox::error(Exception::getErrorMessage(ErrorCode::InvRelationshipIdSwap),
-											ErrorCode::InvRelationshipIdSwap, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+											ErrorCode::InvRelationshipIdSwap, PGM_FUNC, PGM_FILE, PGM_LINE);
 		return;
 	}
 
@@ -267,16 +234,12 @@ void SwapObjectsIdsWidget::swapObjectsIds()
 		model->setInvalidated(true);
 		fillCreationOrderGrid();
 
-		src_id_lbl->setText(IdLabel.arg(src_object_sel->getSelectedObject()->getObjectId()));
-		dst_id_lbl->setText(IdLabel.arg(dst_object_sel->getSelectedObject()->getObjectId()));
-
 		qApp->restoreOverrideCursor();
 		emit s_objectsIdsSwapped();
 	}
 	catch(Exception &e)
 	{
-		//qApp->restoreOverrideCursor();
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -286,7 +249,9 @@ void SwapObjectsIdsWidget::filterObjects()
 	bool is_rel = false, is_sys_obj = false;
 
 	QAbstractItemModel *model = objects_view->model();
-	QList<QModelIndex> indexes = model->match(model->index(0,0), Qt::DisplayRole, filter_edt->text(),	-1);
+	QList<QModelIndex> indexes = model->match(model->index(0, ObjectsListModel::ObjName),
+																						Qt::DisplayRole,
+																						filter_edt->text(),	-1);
 	QModelIndex index;
 
 	for(int row = 0; row < objects_view->model()->rowCount(); row++)
@@ -303,7 +268,8 @@ void SwapObjectsIdsWidget::filterObjects()
 			continue;
 		}
 
-		is_rel = (object->getObjectType() == ObjectType::BaseRelationship || object->getObjectType() == ObjectType::Relationship);
+		is_rel = (object->getObjectType() == ObjectType::BaseRelationship ||
+							object->getObjectType() == ObjectType::Relationship);
 		is_sys_obj = object->isSystemObject();
 
 		if((!is_rel && !is_sys_obj) ||
@@ -317,7 +283,8 @@ void SwapObjectsIdsWidget::filterObjects()
 
 void SwapObjectsIdsWidget::selectItem(const QModelIndex &index)
 {
-	QModelIndex aux_index = index.column() == 0 ? index : objects_view->model()->index(index.row(), 0);
+	QModelIndex aux_index = index.column() == ObjectsListModel::ObjId ?
+													index : objects_view->model()->index(index.row(),  ObjectsListModel::ObjId);
 	BaseObject *obj = reinterpret_cast<BaseObject *>(aux_index.data(Qt::UserRole).value<void *>());
 
 	if(selector_idx == 0)

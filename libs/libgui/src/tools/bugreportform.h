@@ -31,7 +31,7 @@
 #include <QDialog>
 #include "ui_bugreportform.h"
 #include "utils/syntaxhighlighter.h"
-#include "widgets/fileselectorwidget.h"
+#include "widgets/pathselectorwidget.h"
 
 class __libgui BugReportForm : public QDialog, public Ui::BugReportForm {
 	Q_OBJECT
@@ -40,7 +40,7 @@ class __libgui BugReportForm : public QDialog, public Ui::BugReportForm {
 		//! \brief Syntax highlight for model text widget
 		SyntaxHighlighter *hl_model_txt;
 
-		FileSelectorWidget *output_sel;
+		PathSelectorWidget *output_sel;
 		
 	protected:
 		//! \brief Delimiter character which separates the sections of the compressed file

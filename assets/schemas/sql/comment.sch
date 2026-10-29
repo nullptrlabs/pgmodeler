@@ -2,7 +2,7 @@
 # CAUTION: Do not modify this file unless you know what you are doing.
 # Code generation can be broken if incorrect changes are made.
 
-%if {comment} %or ({comment}=="unset") %then
+%if ({obj-type} != "genericsql") %and {comment} %or ({comment}=="unset") %then
 	@include "ddlend"
 
 	[COMMENT ON ] {sql-object} $sp 

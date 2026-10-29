@@ -29,7 +29,7 @@
    <item row="0" column="0" colspan="4">
     <widget class="QListWidget" name="obj_types_lst">
      <property name="sizeAdjustPolicy">
-      <enum>QAbstractScrollArea::AdjustIgnored</enum>
+      <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustIgnored</enum>
      </property>
      <property name="alternatingRowColors">
       <bool>true</bool>
@@ -45,8 +45,21 @@
      </property>
     </widget>
    </item>
+   <item row="2" column="0" colspan="2">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
    <item row="2" column="3">
-    <widget class="QToolButton" name="uncheck_all_tb">
+    <widget class="QPushButton" name="uncheck_all_btn">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -81,13 +94,10 @@
      <property name="checkable">
       <bool>false</bool>
      </property>
-     <property name="toolButtonStyle">
-      <enum>Qt::ToolButtonTextBesideIcon</enum>
-     </property>
     </widget>
    </item>
    <item row="2" column="2">
-    <widget class="QToolButton" name="check_all_tb">
+    <widget class="QPushButton" name="check_all_btn">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -122,28 +132,11 @@
      <property name="checkable">
       <bool>false</bool>
      </property>
-     <property name="toolButtonStyle">
-      <enum>Qt::ToolButtonTextBesideIcon</enum>
-     </property>
     </widget>
-   </item>
-   <item row="2" column="0" colspan="2">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

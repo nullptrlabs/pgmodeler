@@ -22,7 +22,9 @@
 #include <QLabel>
 #include <QGraphicsDropShadowEffect>
 #include <QSettings>
+#include <QRadioButton>
 #include "guiutilsns.h"
+#include "customuistyle.h"
 #include "messagebox.h"
 #include "widgets/numberedtexteditor.h"
 #include "baseform.h"
@@ -32,27 +34,18 @@
 #include "objectslistmodel.h"
 #include "customsortproxymodel.h"
 #include <unordered_map>
+#include <QClipboard>
 
 namespace GuiUtilsNs {
-
 	NumberedTextEditor *createNumberedTextEditor(QWidget *parent, bool act_btns_enabled, qreal custom_fnt_size)
 	{
-		NumberedTextEditor *editor=new NumberedTextEditor(parent, act_btns_enabled, custom_fnt_size);
-
-		if(parent && !parent->layout())
-		{
-			QHBoxLayout *layout=new QHBoxLayout(parent);
-			layout->setContentsMargins(0,0,0,0);
-			layout->addWidget(editor);
-		}
-
-		return editor;
+		return createWidgetInParent<NumberedTextEditor>(0, parent, act_btns_enabled, custom_fnt_size);
 	}
 
-	QTreeWidgetItem *createOutputTreeItem(QTreeWidget *output_trw, const QString &text, const QPixmap &ico, QTreeWidgetItem *parent, bool expand_item, bool word_wrap)
+	QTreeWidgetItem *createOutputTreeItem(QTreeWidget *output_trw, const QString &text, const QIcon &ico, QTreeWidgetItem *parent, bool expand_item, bool word_wrap)
 	{
 		if(!output_trw)
-			throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		QTreeWidgetItem *item=nullptr;
 
@@ -88,10 +81,10 @@ namespace GuiUtilsNs {
 		return item;
 	}
 
-	void createOutputListItem(QListWidget *output_lst, const QString &text, const QPixmap &ico, bool is_formated)
+	void createOutputListItem(QListWidget *output_lst, const QString &text, const QIcon &ico, bool is_formated)
 	{
 		if(!output_lst)
-			throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+			throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 		QListWidgetItem *item=new QListWidgetItem;
 
@@ -137,7 +130,7 @@ namespace GuiUtilsNs {
 			{
 				throw Exception(Exception::getErrorMessage(ErrorCode::OprReservedObject)
 								.arg(object->getName(true), object->getTypeName()),
-								ErrorCode::OprReservedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+								ErrorCode::OprReservedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 			}
 
 			object->setSQLDisabled(disable);
@@ -147,8 +140,8 @@ namespace GuiUtilsNs {
 
 			if(obj_type != ObjectType::Database && curr_val != disable)
 			{
-				int res = Messagebox::confirm(QString(QT_TR_NOOP("Do you want to apply the <strong>SQL %1 status</strong> to the object's references too? This will avoid problems when exporting or validating the model."))
-																			.arg(disable ? QT_TR_NOOP("disabling") : QT_TR_NOOP("enabling")));
+				int res = Messagebox::confirm(UtilsNs::pgmTr(PGM_TR2("Global", "Do you want to apply the <strong>SQL %1 status</strong> to the object's references as well? This will prevent issues when exporting or validating the model."))
+																			.arg(disable ? UtilsNs::pgmTr(PGM_TR2("Global", "disabling")) : UtilsNs::pgmTr(PGM_TR2("Global", "enabling"))));
 
 				if(Messagebox::isAccepted(res))
 					disableReferencesSQL(object);
@@ -219,38 +212,54 @@ namespace GuiUtilsNs {
 		}
 	}
 
-	void configureWidgetFont(QWidget *widget, FontFactorId factor_id)
+	void configureWidgetFont(QWidget *widget, FontFactorId factor_id, bool bold, bool italic, bool underline)
 	{
-		double factor = 1;
+		double factor = 0;
 
 		switch(factor_id)
 		{
 			case SmallFontFactor:
-				factor=0.80;
+				factor = 0.80;
 			break;
 			case MediumFontFactor:
-				factor=0.90;
+				factor = 0.90;
 			break;
 			case BigFontFactor:
-				factor=1.10;
+				factor = 1.10;
 			break;
 			case HugeFontFactor:
+				factor = 1.40;
+			break;
 			default:
-				factor=1.40;
+				factor = 1;
 			break;
 		}
 
-		__configureWidgetFont(widget, factor);
+		__configureWidgetFont(widget, factor, bold, italic, underline);
 	}
 
-	void __configureWidgetFont(QWidget *widget, double factor)
+	void __configureWidgetFont(QWidget *widget, double factor, bool bold, bool italic, bool underline)
 	{
 		if(!widget)
 			return;
 
-		QFont font=widget->font();
-		font.setPointSizeF(font.pointSizeF() * factor);
-		widget->setFont(font);
+		/* Ensure that the font configuration is pushed to the end of the Qt's event queue
+		 * via QTimer::singleShot(0). This will cause the widget to have its font
+		 * changed after all events (including visual ones) are processed */
+		QTimer::singleShot(0, widget, [widget, factor, bold, italic, underline]() {
+			QFont font = qApp->font();
+			font.setPointSizeF(font.pointSizeF() * factor);
+			font.setBold(bold);
+			font.setItalic(italic);
+			font.setUnderline(underline);
+			widget->setFont(font);
+		});
+	}
+
+	void configureWidgetsFont(const QWidgetList &widgets, FontFactorId factor_id, bool bold, bool italic)
+	{
+		for(auto &wgt : widgets)
+			configureWidgetFont(wgt, factor_id, bold, italic);
 	}
 
 	void createExceptionsTree(QTreeWidget *exceptions_trw, Exception &e, QTreeWidgetItem *root)
@@ -271,20 +280,20 @@ namespace GuiUtilsNs {
 		while(itr != itr_end)
 		{
 			text=QString("[%1] - %2").arg(idx).arg(itr->getMethod());
-			item=createOutputTreeItem(exceptions_trw, text, QPixmap(getIconPath("function1")), root, false, true);
+			item=createOutputTreeItem(exceptions_trw, text, getIcon("function1"), root, false, true);
 
 			text=QString("%1 (%2)").arg(itr->getFile()).arg(itr->getLine());
-			createOutputTreeItem(exceptions_trw, text, QPixmap(getIconPath("sourcecode")), item, false, true);
+			createOutputTreeItem(exceptions_trw, text, getIcon("sourcecode"), item, false, true);
 
 			text=QString("%1 (%2)").arg(Exception::getErrorCode(itr->getErrorCode())).arg(enum_t(itr->getErrorCode()));
-			createOutputTreeItem(exceptions_trw, text, QPixmap(getIconPath("alert")), item, false, true);
+			createOutputTreeItem(exceptions_trw, text, getIcon("alert"), item, false, true);
 
-			child_item=createOutputTreeItem(exceptions_trw, itr->getErrorMessage(), QPixmap(getIconPath("error")), item, false, true);
+			child_item=createOutputTreeItem(exceptions_trw, itr->getErrorMessage(), getIcon("error"), item, false, true);
 			exceptions_trw->itemWidget(child_item, 0)->setStyleSheet("color: #ff0000;");
 
 			if(!itr->getExtraInfo().isEmpty())
 			{
-				child_item=createOutputTreeItem(exceptions_trw, itr->getExtraInfo(), QPixmap(getIconPath("info")), item, false, true);
+				child_item=createOutputTreeItem(exceptions_trw, itr->getExtraInfo(), getIcon("info"), item, false, true);
 				exceptions_trw->itemWidget(child_item, 0)->setStyleSheet("font-style: italic;");
 			}
 
@@ -294,9 +303,9 @@ namespace GuiUtilsNs {
 			 * the production or reduntant/useless information on the exception message box */
 			if(static_cast<unsigned>(idx) >= Exception::MaximumStackSize)
 			{
-				text = QT_TR_NOOP("Other %1 error(s) were suppressed due to stacktrace size limits.");
+				text = UtilsNs::pgmTr(PGM_TR2("Global", "An additional of %1 error(s) were suppressed due to the stack trace size limit."));
 				text = text.arg(list.size() - idx);
-				createOutputTreeItem(exceptions_trw, text, QPixmap(getIconPath("alert")), item, false, false);
+				createOutputTreeItem(exceptions_trw, text, getIcon("alert"), item, false, false);
 				break;
 			}
 		}
@@ -353,7 +362,27 @@ namespace GuiUtilsNs {
 		return getIconPath(BaseObject::getSchemaName(obj_type) + suffix);
 	}
 
-	void resizeDialog(QWidget *widget)
+	QIcon getIcon(const QString &icon_name)
+	{
+		return { QIcon(getIconPath(icon_name)) };
+	}
+
+	QIcon getIcon(ObjectType obj_type, int sub_type)
+	{
+		return { QIcon(getIconPath(obj_type, sub_type)) };
+	}
+
+	QPixmap getPixmap(const QString &icon_name)
+	{
+		return { QPixmap(getIconPath(icon_name)) };
+	}
+
+	QPixmap getPixmap(ObjectType obj_type, int sub_type)
+	{
+		return { QPixmap(getIconPath(obj_type, sub_type)) };
+	}
+
+	void resizeWidget(QWidget *widget)
 	{
 		if(!widget)
 			return;
@@ -427,7 +456,7 @@ namespace GuiUtilsNs {
 
 		base_form.setMainWidget(col_data_edit_wgt);
 		base_form.setButtonConfiguration(Messagebox::OkCancelButtons);
-		base_form.apply_ok_btn->setShortcut(QKeySequence("Ctrl+Return"));
+		base_form.accept_btn->setShortcut(QKeySequence("Ctrl+Return"));
 
 		if(results_tbw->selectedItems().size() == 1)
 			col_data_edit_wgt->setData(results_tbw->currentItem()->text());
@@ -440,7 +469,7 @@ namespace GuiUtilsNs {
 		{
 			QList<QTableWidgetSelectionRange> sel_ranges=results_tbw->selectedRanges();
 
-			for(auto range : sel_ranges)
+			for(auto &range : sel_ranges)
 			{
 				for(int row = range.topRow(); row <= range.bottomRow(); row++)
 				{
@@ -569,7 +598,7 @@ namespace GuiUtilsNs {
 		QFileDialog file_dlg;
 
 		file_dlg.setWindowIcon(QIcon(getIconPath("pgmodeler_logo")));
-		file_dlg.setWindowTitle(title);
+		file_dlg.setWindowTitle(UtilsNs::pgmTr(title));
 		file_dlg.setDefaultSuffix(default_suffix);
 		file_dlg.selectFile(selected_file);
 		file_dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
@@ -584,6 +613,35 @@ namespace GuiUtilsNs {
 		file_dlg.setAcceptMode(accept_mode);
 		file_dlg.setModal(true);
 
+		/* If we have more than one name filter
+		 * we configure */
+		if(name_filters.count() > 1)
+		{
+			static const QRegularExpression ext_re("\\*\\.([^\\)]+)");
+			QMap<QString, QString> filter_exts;
+			QRegularExpressionMatch match;
+
+			/* Extracts each extensions from name filters
+			 * storing them in a map to dynamically switch
+			 * the default extension */
+			for(auto &filter : name_filters)
+			{
+				match = ext_re.match(filter);
+
+				if(match.hasMatch())
+					filter_exts[filter] = match.captured(1);
+				else
+					filter_exts[filter] = default_suffix;
+			}
+
+			QObject::connect(&file_dlg, &QFileDialog::filterSelected, [&file_dlg, filter_exts](const QString &filter){
+				/* Forcing the default suffix to the current name filter's extesion.
+				 * This is not done by default by Qt, so we have to work with this
+				 * workaround */
+				file_dlg.setDefaultSuffix(filter_exts[filter]);
+			});
+		}
+
 		GuiUtilsNs::restoreFileDialogState(&file_dlg);
 		file_dlg.exec();
 		GuiUtilsNs::saveFileDialogState(&file_dlg);
@@ -591,7 +649,7 @@ namespace GuiUtilsNs {
 		if(file_dlg.result() == QDialog::Accepted)
 			return file_dlg.selectedFiles();
 
-		return QStringList();
+		return {};
 	}
 
 	void populateTable(QTableWidget *tab_wgt, const CsvDocument &csv_doc)
@@ -653,7 +711,7 @@ namespace GuiUtilsNs {
 		}
 		catch(Exception &e)
 		{
-			throw Exception(e.getErrorMessage(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+			throw Exception(e.getErrorMessage(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 		}
 	}
 
@@ -682,7 +740,7 @@ namespace GuiUtilsNs {
 		}
 		catch(Exception &e)
 		{
-			throw Exception(e.getErrorMessage(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+			throw Exception(e.getErrorMessage(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 		}
 	}
 
@@ -700,15 +758,13 @@ namespace GuiUtilsNs {
 
 	void updateDropShadow(QWidget *wgt)
 	{
-		QColor color(0, 0, 0, 80);
+		QColor color { qApp->palette().color(QPalette::Shadow) };
 		int radius = 6, x = 1, y = 1;
 
-		if(!AppearanceConfigWidget::isDarkUiTheme())
-		{
+		color.setAlpha(80);
+
+		if(!CustomUiStyle::isDarkPalette())
 			radius = 1;
-			color.setRgb(225, 225, 225);
-			color.setAlpha(255);
-		}
 
 		if(!wgt->graphicsEffect())
 			createDropShadow(wgt, x, y, radius, color);
@@ -936,5 +992,388 @@ namespace GuiUtilsNs {
 
 		widget->move(event->globalPosition().x() - widget->width() + (event_wgt->width() / 2),
 								 event->globalPosition().y() - (widget->height() - (event_wgt->height() / 2)));
+	}
+
+	void configureBuddyWidgets(QWidget *widget)
+	{
+		if(!widget)
+			return;
+
+		QList<QBoxLayout *> layouts;
+		QLayoutItem *item = nullptr;
+		QBoxLayout *box_lt = nullptr;
+		QGridLayout *grid_lt = nullptr;
+		int item_cnt = 0;
+
+		for(auto &layout : widget->findChildren<QBoxLayout *>())
+		{
+			item_cnt = layout->count();
+			layouts.clear();
+			layouts.append(layout);
+
+			/* Collecting children layouts of the current layout
+			 * so we don't miss internal layouts that fits the
+			 * conditions to configure a buddy label */
+			for(int idx = 0; idx < item_cnt; idx++)
+			{
+				item = layout->itemAt(idx);
+				box_lt = qobject_cast<QBoxLayout *>(item->layout());
+				grid_lt = qobject_cast<QGridLayout *>(item->layout());
+
+				if(box_lt)
+				{
+					layouts.append(box_lt);
+					layouts.append(box_lt->findChildren<QBoxLayout *>());
+				}
+				else if(grid_lt)
+					layouts.append(grid_lt->findChildren<QBoxLayout *>());
+			}
+
+			for(auto &lt : layouts)
+				configureBuddyWidget(lt);
+		}
+	}
+
+	void configureBuddyWidgets(const QWidgetList &wgt_list)
+	{
+		for(auto &wgt : wgt_list)
+			configureBuddyWidgets(wgt);
+	}
+
+	QLayout *createBuddyWidgetLayout(QLabel *label, QWidget *widget, QWidget *append_widget, int margin, int spacing)
+	{
+		if(!widget || !label)
+			throw Exception(ErrorCode::OprNotAllocatedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
+
+		QVBoxLayout *layout = GuiUtilsNs::createLayout<QVBoxLayout>(margin, spacing);
+		layout->addWidget(label);
+		layout->addWidget(widget);
+		configureBuddyWidget(layout);
+
+		if(!append_widget)
+			return layout;
+		
+		QHBoxLayout *h_layout =GuiUtilsNs::createLayout<QHBoxLayout>(margin, LtSpacing);
+		h_layout->addLayout(layout);
+		h_layout->addWidget(append_widget);
+
+		return h_layout;
+	}
+
+	void configureBuddyWidget(QLayout *lt)
+	{
+		QBoxLayout *box_lt = qobject_cast<QBoxLayout *>(lt);
+
+		/* Ignoring layout if:
+		 * - It contains a invalid count (we need a layout with 2 widgets)
+		 * - It not contains at least two items. */
+		if(!box_lt ||
+				box_lt->count() < 2 ||
+			 !box_lt->itemAt(0)->widget())
+			return;
+
+		QWidget *buddy_wgt = box_lt->itemAt(0)->widget(),
+				*lt_wgt = box_lt->itemAt(1)->widget();
+		QLabel *label = qobject_cast<QLabel *>(buddy_wgt);
+		QCheckBox *chkbox = qobject_cast<QCheckBox *>(buddy_wgt);
+
+		/* We also ignore the layout if:
+		 * - It contains two widgets (a QLabel/QCheckbox and another QWidget) but the
+		 *   buddy was already configured for the widget.
+		 * - The buddy widget is not QLabel or QCheckbox */
+		if((!label && !chkbox) ||
+			 (label && (label->text().isEmpty())) ||
+			 (chkbox && (qobject_cast<QCheckBox *>(lt_wgt) || qobject_cast<QRadioButton *>(lt_wgt))) ||
+			 (buddy_wgt && buddy_wgt->property(FontAdjustedProp).toBool()))
+			return;
+
+		if(label)
+			label->setBuddy(lt_wgt);
+
+		buddy_wgt->setProperty(FontAdjustedProp, true);
+		configureWidgetFont(buddy_wgt, SmallFontFactor, true);
+
+		if(qobject_cast<QHBoxLayout *>(box_lt))
+			box_lt->setSpacing(LtSpacing);
+		else if(qobject_cast<QVBoxLayout *>(box_lt) && chkbox)
+			box_lt->setSpacing(0);
+		else if(label)
+			box_lt->setSpacing(LtSpacing / 2);
+	}
+
+	QVBoxLayout *createVBoxLayout(int lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QVBoxLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	QVBoxLayout *createVBoxLayout(QMargins lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QVBoxLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	QHBoxLayout *createHBoxLayout(int lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QHBoxLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	QHBoxLayout *createHBoxLayout(QMargins lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QHBoxLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	QGridLayout *createGridLayout(int lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QGridLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	QGridLayout *createGridLayout(QMargins lt_margins, int lt_spacing, QWidget *parent)
+	{
+		return createLayout<QGridLayout>(lt_margins, lt_spacing, parent);
+	}
+
+	void filterObjects(QTreeWidget *tree_wgt, const QString &pattern, int search_column, bool sel_single_leaf)
+	{
+		if(!tree_wgt)
+			throw Exception(ErrorCode::OprNotAllocatedObject, PGM_FUNC, PGM_FILE, PGM_LINE);
+
+		QList<QTreeWidgetItem*> items;
+		QTreeWidgetItemIterator it(tree_wgt);
+		QTreeWidgetItem *item = nullptr;
+		QString text, data;
+
+		while(*it)
+		{
+			item = *it;
+			text = item->text(search_column);
+			data = item->data(search_column, Qt::UserRole).toString();
+
+			// We operate over the item only if it is not forcibly hidden
+			if(!item->data(ItemHiddenCol, Qt::UserRole).toBool())
+			{
+				if(!pattern.isEmpty() &&
+					 (text.startsWith(pattern, Qt::CaseInsensitive) ||
+						data.startsWith(pattern, Qt::CaseInsensitive)))
+					items.append(item);
+				else
+					item->setHidden(!pattern.isEmpty());
+			}
+
+			++it;
+		}
+
+		tree_wgt->blockSignals(true);
+		tree_wgt->setUpdatesEnabled(false);
+		tree_wgt->collapseAll();
+		tree_wgt->clearSelection();
+
+		if(pattern.isEmpty())
+		{
+			tree_wgt->topLevelItem(0)->setExpanded(true);
+		}
+		else
+		{
+			QTreeWidgetItem *parent=nullptr, *item = nullptr, *leaf = nullptr;
+			int leaf_count = 0;
+
+			for(auto &item : items)
+			{
+				item->setExpanded(true);
+				item->setHidden(false);
+				parent = item->parent();
+
+				while(parent)
+				{
+					parent->setHidden(false);
+					parent->setExpanded(true);
+					parent = parent->parent();
+				}
+
+				//Counting the leaf items found so far
+				if(sel_single_leaf && item->childCount() == 0 && item->parent())
+				{
+					leaf_count++;
+					leaf = item;
+				}
+			}
+
+			//Selecting the single leaf item
+			if(sel_single_leaf && leaf_count == 1 && leaf)
+			{
+				leaf->setSelected(true);
+				tree_wgt->setCurrentItem(leaf);
+			}
+		}
+
+		tree_wgt->setUpdatesEnabled(true);
+		tree_wgt->blockSignals(false);
+	}
+
+	void copySelection(QTableView *results_tbw, bool use_popup, bool csv_is_default, bool incl_col_names)
+	{
+		if(!results_tbw)
+			return;
+
+		try
+		{
+			QItemSelectionModel *selection = results_tbw->selectionModel();
+
+			if(selection && (!use_popup || (use_popup && QApplication::mouseButtons()==Qt::RightButton)))
+			{
+				QMenu copy_menu, copy_mode_menu, save_menu;
+				QAction *act = nullptr, *act_csv = nullptr, *act_txt = nullptr,
+								*act_save = nullptr, *act_save_txt = nullptr, *act_save_csv = nullptr;
+
+				if(use_popup)
+				{
+					act = copy_mode_menu.menuAction();
+					act->setText(UtilsNs::pgmTr(PGM_TR2("Global", "Selection")));
+					act->setIcon(GuiUtilsNs::getIcon("selection"));
+
+					act_txt = copy_mode_menu.addAction(UtilsNs::pgmTr(PGM_TR2("Global", "Copy as text")));
+					act_txt->setIcon(GuiUtilsNs::getIcon("txtfile"));
+
+					act_csv = copy_mode_menu.addAction(UtilsNs::pgmTr(PGM_TR2("Global", "Copy as CSV")));
+					act_csv->setIcon(GuiUtilsNs::getIcon("csvfile"));
+
+					act_save = save_menu.menuAction();
+					act_save->setText(UtilsNs::pgmTr(PGM_TR2("Global", "Save as...")));
+					act_save->setIcon(GuiUtilsNs::getIcon("saveas"));
+					copy_mode_menu.addAction(act_save);
+
+					act_save_txt = save_menu.addAction(UtilsNs::pgmTr(PGM_TR2("Global", "Text file")));
+					act_save_txt->setIcon(GuiUtilsNs::getIcon("txtfile"));
+
+					act_save_csv = save_menu.addAction(UtilsNs::pgmTr(PGM_TR2("Global", "CSV file")));
+					act_save_csv->setIcon(GuiUtilsNs::getIcon("csvfile"));
+
+					copy_menu.addAction(act);
+					act = copy_menu.exec(QCursor::pos());
+				}
+
+				if(!use_popup || act)
+				{
+					QByteArray buffer;
+
+					bool is_csv = ((!use_popup && csv_is_default) ||
+												 (use_popup && (act == act_csv || act == act_save_csv))),
+
+							is_save = (use_popup && (act == act_save_txt || act == act_save_csv));
+
+					buffer = is_csv ?
+										generateCSVBuffer(results_tbw, incl_col_names) :
+										generateTextBuffer(results_tbw, incl_col_names);
+
+					if(!is_save)
+						qApp->clipboard()->setText(buffer);
+					else
+					{
+						GuiUtilsNs::selectAndSaveFile(buffer,
+																					 PGM_TR2("Global", "Save file"),
+																					 QFileDialog::AnyFile,
+																					 { is_csv ? UtilsNs::pgmTr(PGM_TR2("Global", "CSV file (*.csv)")) :
+																											UtilsNs::pgmTr(PGM_TR2("Global", "Text file (*.txt)")),
+																						 UtilsNs::pgmTr(PGM_TR2("Global", "All files (*.*)")) },
+																					 {}, is_csv ? "csv" : "txt");
+					}
+				}
+			}
+		}
+		catch(Exception &e)
+		{
+			Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
+		}
+	}
+
+	QByteArray generateCSVBuffer(QTableView *results_tbw, bool inc_col_names)
+	{
+		return generateBuffer(results_tbw, CsvDocument::Separator, inc_col_names, true);
+	}
+
+	QByteArray generateTextBuffer(QTableView *results_tbw, bool inc_col_names)
+	{
+		return generateBuffer(results_tbw, QChar('\t'), inc_col_names, false);
+	}
+
+	QByteArray generateBuffer(QTableView *results_tbw, QChar separator, bool incl_col_names, bool csv_format)
+	{
+		if(!results_tbw)
+			throw Exception(ErrorCode::OprNotAllocatedObject ,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+		if((results_tbw->model() && results_tbw->model()->rowCount() == 0) ||
+			 !results_tbw->selectionModel())
+			return {};
+
+		QAbstractItemModel *model = results_tbw->model();
+		QModelIndexList sel_indexes;
+		QByteArray buf;
+		QStringList line;
+		QModelIndex index;
+		QString str_pattern = csv_format ?
+														QString("%1%2%1").arg(CsvDocument::TextDelimiter).arg("%1") :
+														QString("%1"),
+				value;
+		int start_row = -1, start_col = -1,
+				row_cnt = 0, col_cnt = 0;
+
+		sel_indexes = results_tbw->selectionModel()->selectedIndexes();
+		start_row = sel_indexes.at(0).row();
+		start_col = sel_indexes.at(0).column();
+		row_cnt = (sel_indexes.last().row() - start_row) + 1;
+		col_cnt = (sel_indexes.last().column() - start_col) + 1;
+
+		int col=0, row=0,
+				max_col=start_col + col_cnt,
+				max_row=start_row + row_cnt;
+
+		if(incl_col_names)
+		{
+			//Creating the header
+			for(col=start_col; col < max_col; col++)
+			{
+				if(results_tbw->isColumnHidden(col))
+					continue;
+
+				value = model->headerData(col, Qt::Horizontal).toString().trimmed();
+
+				if(csv_format)
+					value.replace(CsvDocument::TextDelimiter, QString("%1%1").arg(CsvDocument::TextDelimiter));
+
+				line.append(str_pattern.arg(value));
+			}
+
+			buf.append(line.join(separator).toUtf8());
+			buf.append(CsvDocument::LineBreak.unicode());
+			line.clear();
+		}
+
+		//Creating the content
+		for(row=start_row; row < max_row; row++)
+		{
+			for(col=start_col; col < max_col; col++)
+			{
+				if(results_tbw->isColumnHidden(col))
+					continue;
+
+				index = model->index(row, col);
+				value = index.data().toString();
+
+				/* If the index value is empty but it has a check state value
+				 * we assume the value of the columns as true/false to reflect
+				 * the check state of the item */
+				if(value.isEmpty() && !index.data(Qt::CheckStateRole).isNull())
+					value = index.data(Qt::CheckStateRole) == Qt::Checked ? Attributes::True : Attributes::False;
+
+				if(csv_format)
+					value.replace(CsvDocument::TextDelimiter, QString("%1%1").arg(CsvDocument::TextDelimiter));
+
+				line.append(str_pattern.arg(value));
+			}
+
+			buf.append(line.join(separator).toUtf8());
+			line.clear();
+			buf.append(CsvDocument::LineBreak.unicode());
+		}
+
+		return buf;
 	}
 }

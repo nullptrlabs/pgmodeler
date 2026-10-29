@@ -35,7 +35,7 @@
 <!ATTLIST configuration source-editor-app CDATA #IMPLIED>
 <!ATTLIST configuration source-editor-args CDATA #IMPLIED>
 <!ATTLIST configuration ui-language CDATA #IMPLIED>
-<!ATTLIST configuration use-curved-lines (false|true) "false">
+<!ATTLIST configuration use-curved-lines CDATA #IMPLIED>
 <!ATTLIST configuration compact-view (false|true) "false">
 <!ATTLIST configuration save-restore-geometry (false|true) "false">
 <!ATTLIST configuration low-verbosity (false|true) "false">
@@ -50,9 +50,15 @@
 <!ATTLIST configuration column-trunc-threshold CDATA #IMPLIED>
 <!ATTLIST configuration alert-unsaved-models (false|true) "true">
 <!ATTLIST configuration alert-open-sqltabs (false|true) "true">
+<!ATTLIST configuration alert-apply-metadata (false|true) "true">
+<!ATTLIST configuration alert-disable-quoting (false|true) "true">
+<!ATTLIST configuration alert-resize-rows-cols (false|true) "true">
 <!ATTLIST configuration use-def-disambiguation (false|true) "true">
+<!ATTLIST configuration alert-save-reload-model (false|true) "true">
 <!ATTLIST configuration hide-objects-sel-info (false|true) "false">
 <!ATTLIST configuration hide-cur-pos-zoom-info (false|true) "false">
+<!ATTLIST configuration hide-empty-obj-groups (false|true) "false">
+<!ATTLIST configuration disable-name-quoting (false|true) "false">
 
 <!ELEMENT session (file+)>
 <!ELEMENT recent-models (file+)>
@@ -76,6 +82,7 @@
 <!ATTLIST widget show-attributes-grid (false|true) "true">
 <!ATTLIST widget show-source-pane (false|true) "true">
 <!ATTLIST widget rels-follow-tabs-visibility (false|true) "true">
+<!ATTLIST widget sel-objs-in-layers (false|true) "true">
 <!ATTLIST widget x CDATA #IMPLIED>
 <!ATTLIST widget y CDATA #IMPLIED>
 <!ATTLIST widget width CDATA #IMPLIED>

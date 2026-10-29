@@ -33,6 +33,9 @@
 #include "tag.h"
 
 class __libcore BaseTable: public BaseGraphicObject {
+	private:
+		static bool geom_changes_ignored;
+
 	public:
 		//! \brief This enum is used to control the collapsing of the tables
 		enum CollapseMode: unsigned {
@@ -55,6 +58,10 @@ class __libcore BaseTable: public BaseGraphicObject {
 
 		QString hash_code;
 
+		/*! \brief Relationship marker position offset, relative to its default anchor point.
+		 * A NaN point means no custom position was set -- the marker uses the default anchor */
+		QPointF rel_marker_pos;
+
 	public:
 		enum TableSection: unsigned {
 			AttribsSection,
@@ -62,14 +69,17 @@ class __libcore BaseTable: public BaseGraphicObject {
 		};
 
 		BaseTable();
-
-		virtual ~BaseTable() {}
+		~BaseTable() override = default;
 
 		QString getHashCode();
 
 		virtual void setTag(Tag *tag);
 
 		virtual Tag *getTag();
+
+		static void setGeomChangesIgnored(bool value);
+
+		static bool isGeomChangesIgnored();
 
 		//! \brief Returns true if the provided table is considered a base table (Table, ForeignTable, View)
 		static bool isBaseTable(ObjectType obj_tp);
@@ -96,18 +106,28 @@ class __libcore BaseTable: public BaseGraphicObject {
 		 that objects added by relationship must be counted */
 		virtual unsigned getObjectCount(ObjectType obj_type, bool inc_added_by_rel=true)=0;
 
+		/*! \brief Returns the total children objects count in the table
+		 *  This method makes no distinction between relationship-added
+		 *  object and user-created ones */
+		virtual unsigned getObjectCount() = 0;
+
 		//! \brief Gets the object index using its name and type
 		virtual int getObjectIndex(const QString &name, ObjectType obj_type)=0;
 
-		//! \brief Returns the index for the specified table object
-		virtual int getObjectIndex(BaseObject *obj)=0;
+		/*! \brief Returns the index for the specified table object.
+		 *  The parameter strict, when true, causes the comparison to be made
+		 *  strictly by matching the object's parent table address and its own address.
+		 *
+		 *  When strict is false, the comparison ocurrs ALSO by matching object's name
+		 *  against others of the same type in the parent table. */
+		virtual int getObjectIndex(BaseObject *obj, bool strict = false) = 0;
 
 		//! \brief Returns all children objects of the table but excluding the ones of the provided type
 		virtual std::vector<BaseObject *> getObjects(const std::vector<ObjectType> &excl_types = {})=0;
 
-		virtual QString getSourceCode(SchemaParser::CodeType tipo_def) override = 0;
+		QString getSourceCode(SchemaParser::CodeType tipo_def) override = 0;
 
-		virtual QString getAlterCode(BaseObject *object) override;
+		QString getAlterCode(BaseObject *object) override;
 
 		/*! \brief Set the initial capacity of the objects list for a optimized memory usage.
 		 * This method should be called prior to adding the first object to the table because, depending o the capacity,
@@ -134,7 +154,7 @@ class __libcore BaseTable: public BaseGraphicObject {
 
 		bool isPaginationEnabled();
 
-		virtual void setZValue(int z_value) override;
+		void setZValue(int z_value) override;
 
 		/*! \brief Defines the current page visible on the table. Calling this method direclty
 		 * will not update the geometry of the graphical representation of this object. For that,
@@ -148,21 +168,30 @@ class __libcore BaseTable: public BaseGraphicObject {
 		 * saved in separated files. This changes the way links are generated inside the data dictionaries */
 		virtual QString getDataDictionary(bool split, bool md_format, const attribs_map &extra_attribs = {}) = 0;
 
-		virtual void setCodeInvalidated(bool value) override;
+		void setCodeInvalidated(bool value) override;
 
-		virtual void setModified(bool value) override;
+		void setModified(bool value) override;
 
 		virtual void generateHashCode();
 
 		void resetHashCode();
 
-		virtual void setPosition(const QPointF &pos) override;
+		void setPosition(const QPointF &pos) override;
 
-		virtual void updateDependencies() override = 0;
+		/*! \brief Defines the relationship marker's position offset relative to its default anchor
+		 * point. Pass an invalid (NaN) point to clear a previously set custom position */
+		void setRelMarkerPosition(const QPointF &pos);
 
-		virtual std::vector<BaseObject *> getDependencies(bool inc_indirect_deps = false,
-																											 const std::vector<ObjectType> &excl_types = {},
-																											 bool rem_duplcates = false) override;
+		QPointF getRelMarkerPosition();
+
+		//! \brief Clears any custom relationship marker position, reverting it to the default anchor
+		void resetRelMarkerPosition();
+
+		void updateDependencies() override = 0;
+
+		std::vector<BaseObject *> getDependencies(bool inc_indirect_deps = false,
+																							const std::vector<ObjectType> &excl_types = {},
+																							bool rem_duplicates = false) override;
 
 		void updateDependencies(const std::vector<BaseObject *> &deps, const std::vector<BaseObject *> &old_deps = {});
 

@@ -38,7 +38,7 @@ class __libcanvas GraphicalView: public BaseTableView {
 		GraphicalView(View *view);
 
 	private slots:
-		void configureObject();
+		void configureObject() override;
 };
 
 #endif

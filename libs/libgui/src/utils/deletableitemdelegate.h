@@ -49,6 +49,8 @@ class __libgui DeletableItemDelegate: public QStyledItemDelegate {
 
 		void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
+		QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
 	signals:
 		//! \brief Signal emitted whenever the delete button is triggered either from click or shortcut
 		void s_itemDeleteRequested(int index);

@@ -130,7 +130,7 @@ class __libgui SyntaxHighlighter: public QSyntaxHighlighter {
 
 		/*! \brief This event filter is used to nullify the line breaks when the highlighter
 		 is created in single line edit model */
-		bool eventFilter(QObject *object, QEvent *event);
+		bool eventFilter(QObject *object, QEvent *event) override;
 
 		/*! \brief Performas a global match of the expression 'expr' in 'text' starting from 'txt_pos'.
 		 * If the expression matches any portion of the text then 'matches' will store
@@ -196,12 +196,13 @@ class __libgui SyntaxHighlighter: public QSyntaxHighlighter {
 		//! \brief Sets the default font for all instances of this class
 		static void setDefaultFont(const QFont &fnt);
 
-	private slots:
-		//! \brief Highlight a line of the text
-		void highlightBlock(const QString &text);
-
+	public slots:
 		//! \brief Clears the loaded configuration
 		void clearConfiguration();
+
+	private slots:
+		//! \brief Highlight a line of the text
+		void highlightBlock(const QString &text) override;
 };
 
 #endif

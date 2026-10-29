@@ -37,12 +37,30 @@ DonateWidget::DonateWidget(QWidget *parent) : QWidget(parent)
 		emit s_hideRequested();
 	});
 
-	connect(donate_tb, &QToolButton::clicked, this, [this](){
+	connect(donate_btn, &QPushButton::clicked, this, [this](){
 		QDesktopServices::openUrl(QUrl(GlobalAttributes::PgModelerDonateURL));
 		hide();
 		emit s_hideRequested();
 	});
 
-	GuiUtilsNs::configureWidgetFont(title_lbl, GuiUtilsNs::BigFontFactor);
+	connect(learn_btn, &QPushButton::clicked, this, [this](){
+		QDesktopServices::openUrl(QUrl(GlobalAttributes::PgModelerSite + "/editions"));
+		hide();
+		emit s_hideRequested();
+	});
+
+	connect(upgrade_btn, &QPushButton::clicked, this, [this](){
+		QDesktopServices::openUrl(QUrl(GlobalAttributes::PgModelerSite + "/purchase"));
+		hide();
+		emit s_hideRequested();
+	});
+
+	connect(cancel_btn, &QPushButton::clicked, this, [this](){
+		hide();
+		emit s_hideRequested();
+	});
+
+	GuiUtilsNs::configureWidgetFont(title_lbl, GuiUtilsNs::BigFontFactor, true);
+
 	this->adjustSize();
 }

@@ -6,30 +6,30 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>683</width>
-    <height>275</height>
+    <width>501</width>
+    <height>175</height>
    </rect>
   </property>
-  <layout class="QGridLayout" name="column_grid">
+  <layout class="QVBoxLayout" name="column_lt">
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <property name="leftMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
-   <property name="spacing">
-    <number>5</number>
-   </property>
-   <item row="0" column="0">
+   <item>
     <widget class="QGroupBox" name="default_value_grp">
      <property name="title">
-      <string>&amp;Default Value:</string>
+      <string>Default value</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
@@ -50,7 +50,7 @@
       <item row="0" column="0">
        <widget class="QRadioButton" name="expression_rb">
         <property name="text">
-         <string>E&amp;xpression:</string>
+         <string>Expression</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -77,7 +77,7 @@
            </size>
           </property>
           <property name="frameShadow">
-           <enum>QFrame::Sunken</enum>
+           <enum>QFrame::Shadow::Sunken</enum>
           </property>
           <property name="lineWidth">
            <number>1</number>
@@ -86,10 +86,10 @@
            <number>0</number>
           </property>
           <property name="verticalScrollBarPolicy">
-           <enum>Qt::ScrollBarAlwaysOff</enum>
+           <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
           </property>
           <property name="horizontalScrollBarPolicy">
-           <enum>Qt::ScrollBarAlwaysOff</enum>
+           <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
           </property>
           <property name="tabChangesFocus">
            <bool>true</bool>
@@ -114,14 +114,14 @@
       <item row="1" column="0">
        <widget class="QRadioButton" name="sequence_rb">
         <property name="text">
-         <string>Se&amp;quence:</string>
+         <string>Sequence</string>
         </property>
        </widget>
       </item>
       <item row="2" column="0">
        <widget class="QRadioButton" name="identity_rb">
         <property name="text">
-         <string>Identity:</string>
+         <string>Identity</string>
         </property>
        </widget>
       </item>
@@ -147,7 +147,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>&amp;NOT NULL</string>
+         <string>NOT NULL</string>
         </property>
        </widget>
       </item>
@@ -180,7 +180,7 @@
       <item row="2" column="4">
        <spacer name="horizontalSpacer">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -190,8 +190,24 @@
         </property>
        </spacer>
       </item>
+      <item row="1" column="1" colspan="4">
+       <layout class="QHBoxLayout" name="sequence_lt"/>
+      </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
@@ -201,7 +217,6 @@
   <tabstop>sequence_rb</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res/resources.qrc"/>
   <include location="../../res/resources.qrc"/>
  </resources>
  <connections/>

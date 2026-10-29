@@ -21,18 +21,27 @@
 
 #include <QTranslator>
 #include "pgmodelercliapp.h"
+#include "utilsns.h"
+#include <signal.h>
+
+namespace {
+	void dumpStackTrace(int signal)
+	{
+		qDebug().noquote() << "**";
+		qDebug().noquote() << UtilsNs::generateStackTrace(signal);
+		qDebug().noquote() << "**";
+		exit(1);
+	}
+}
 
 int main(int argc, char **argv)
 {
+	//Install a signal handler to dump stacktrace when SIGSEGV or SIGABRT is emitted
+	signal(SIGSEGV, dumpStackTrace);
+	signal(SIGABRT, dumpStackTrace);
+
 	QTextStream out(stdout);
 
-#ifdef DEMO_VERSION
-	out << Qt::endl;
-	out << "pgModeler " << GlobalAttributes::PgModelerVersion << QT_TR_NOOP(" command line interface.") << Qt::endl;
-	out << QT_TR_NOOP("PostgreSQL Database Modeler Project - pgmodeler.io") << Qt::endl;
-	out << QT_TR_NOOP("Copyright 2006-2024 Raphael Araújo e Silva <raphael@pgmodeler.io>") << Qt::endl;
-	out << QT_TR_NOOP("\n** CLI disabled in demonstration version! **") << Qt::endl << Qt::endl;
-#else
 	try
 	{
 		#ifdef Q_OS_LINUX
@@ -48,7 +57,7 @@ int main(int argc, char **argv)
 
 		GlobalAttributes::init(argv[0], false);
 		PgModelerCliApp pgmodeler_cli(argc, argv);
-		pgmodeler_cli.loadTranslations(QLocale::system().name(), true);
+		pgmodeler_cli.loadTranslations(true);
 
 		//Executes the cli
 		return pgmodeler_cli.exec();
@@ -57,8 +66,7 @@ int main(int argc, char **argv)
 	{
 		out << Qt::endl;
 		out << e.getExceptionsText();
-		out << QT_TR_NOOP("** pgmodeler-cli aborted due to critical error(s). **") << Qt::endl << Qt::endl;
+		out << UtilsNs::pgmTr(PGM_TR2("Global", "** pgmodeler-cli aborted due to critical error(s). **")) << Qt::endl << Qt::endl;
 		return (e.getErrorCode()==ErrorCode::Custom ? -1 : enum_t(e.getErrorCode()));
 	}
-#endif
 }

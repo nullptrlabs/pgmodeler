@@ -21,10 +21,15 @@
 
 #include "operationlistwidget.h"
 #include "guiutilsns.h"
+#include "customuistyle.h"
 
 OperationListWidget::OperationListWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
+
+	CustomUiStyle::setStyleHint(CustomUiStyle::GroupBoxFrmHint, content_frm);
+	GuiUtilsNs::configureWidgetFont(title_lbl, GuiUtilsNs::SmallFontFactor, true);
+
 	setModel(nullptr);
 
 	operations_tw->headerItem()->setHidden(true);
@@ -57,7 +62,7 @@ void OperationListWidget::selectItem(QTreeWidgetItem *item, int)
 
 void OperationListWidget::updateOperationList()
 {
-	content_wgt->setEnabled(this->model_wgt!=nullptr);
+	content_frm->setEnabled(this->model_wgt!=nullptr);
 
 	if(!model_wgt)
 	{
@@ -99,7 +104,7 @@ void OperationListWidget::updateOperationList()
 			if(op_info.obj_type == ObjectType::BaseRelationship)
 				str_aux += "tv";
 
-			item->setIcon(0, QPixmap(GuiUtilsNs::getIconPath(str_aux)));
+			item->setIcon(0, GuiUtilsNs::getIcon(str_aux));
 
 			operations_tw->insertTopLevelItem(i,item);
 			item->setFont(0, font);
@@ -127,7 +132,7 @@ void OperationListWidget::updateOperationList()
 			}
 
 			item1 = new QTreeWidgetItem(item);
-			item1->setIcon(0, QPixmap(GuiUtilsNs::getIconPath(op_icon)));
+			item1->setIcon(0, GuiUtilsNs::getIcon(op_icon));
 			item1->setFont(0, font);
 			item1->setText(0, op_name);
 
@@ -169,10 +174,10 @@ void OperationListWidget::undoOperation()
 		if(e.getErrorCode()==ErrorCode::UndoRedoOperationInvalidObject)
 		{
 			Messagebox msg_box;
-			msg_box.show(e, "", Messagebox::AlertIcon);
+			msg_box.show(e, "", Messagebox::Alert);
 		}
 		else
-			Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+			Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -194,16 +199,16 @@ void OperationListWidget::redoOperation()
 		if(e.getErrorCode()==ErrorCode::UndoRedoOperationInvalidObject)
 		{
 			Messagebox msg_box;
-			msg_box.show(e, "", Messagebox::AlertIcon);
+			msg_box.show(e, "", Messagebox::Alert);
 		}
 		else
-			Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+			Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
 void OperationListWidget::removeOperations()
 {
-	int res = Messagebox::confirm(tr("Delete the executed operations history is an irreversible action, do you want to continue?"));
+	int res = Messagebox::confirm(tr("Deleting the executed operations history is an irreversible action. Do you want to continue?"));
 
 	if(Messagebox::isAccepted(res))
 	{

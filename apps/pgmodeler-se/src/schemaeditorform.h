@@ -32,7 +32,7 @@
 #include "ui_schemaeditorform.h"
 #include "widgets/numberedtexteditor.h"
 #include "utils/syntaxhighlighter.h"
-#include "widgets/fileselectorwidget.h"
+#include "widgets/pathselectorwidget.h"
 
 class SchemaEditorForm: public QWidget, public Ui::SchemaEditorForm {
 	Q_OBJECT
@@ -44,7 +44,7 @@ class SchemaEditorForm: public QWidget, public Ui::SchemaEditorForm {
 
 		SyntaxHighlighter *syntax_hl, *dtd_hl;
 
-		FileSelectorWidget *syntax_conf_sel;
+		PathSelectorWidget *syntax_conf_sel;
 
 		QActionGroup *stx_action_grp;
 

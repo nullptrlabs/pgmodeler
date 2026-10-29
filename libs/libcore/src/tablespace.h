@@ -40,10 +40,9 @@ class __libcore Tablespace: public BaseObject{
 
 	public:
 		Tablespace();
+		~Tablespace() override = default;
 
-		virtual ~Tablespace(){}
-
-		virtual void setName(const QString &name) override;
+		void setName(const QString &name) override;
 
 		//! \brief Sets the directory where tablespace resides
 		void setDirectory(const QString &dir);
@@ -52,7 +51,7 @@ class __libcore Tablespace: public BaseObject{
 		QString getDirectory();
 
 		//! \brief Returns the SQL / XML code for the tablespace
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 };
 
 #endif

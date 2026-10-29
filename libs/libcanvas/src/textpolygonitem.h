@@ -43,10 +43,13 @@ class __libcanvas TextPolygonItem : public QGraphicsPolygonItem {
 
 	public:
 		TextPolygonItem(QGraphicsItem *parent = nullptr);
-		virtual ~TextPolygonItem();
+		~TextPolygonItem() override;
 
 		//! \brief Defines the text displayed by the item
 		void setText(const QString &text);
+
+		//! \brief Defines the text displayed by the item, interpreting basic HTML (e.g.: <b>, <i>)
+		void setHtml(const QString &html);
 
 		//! \brief Defines the position of the text element (in local coordinate)
 		void setTextPos(const QPointF &pos);
@@ -67,7 +70,7 @@ class __libcanvas TextPolygonItem : public QGraphicsPolygonItem {
 
 		QFont getFont();
 
-		virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr);
+		void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
 };
 
 #endif

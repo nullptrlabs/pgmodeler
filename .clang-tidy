@@ -1,0 +1,81 @@
+---
+# clang-tidy configuration for pgModeler
+# This file is read by clang-tidy during compilation (CMake build)
+# The .clangd file is read by clangd LSP for editor analysis
+
+# Checks to enable/disable
+# Use 'category-*' to enable all checks in a category
+# Use '-check-name' to disable specific checks
+Checks: >
+  -*,
+  -misc-*,
+  -misc-header-include-cycle,
+  -misc-include-cleaner,
+  clang-*,
+  -clang-analyzer-optin.cplusplus.VirtualCall,
+  -clang-analyzer-cplusplus.NewDeleteLeaks,
+  -clang-analyzer-optin.core.EnumCastOutOfRange,
+  -clang-analyzer-core.CallAndMessage,
+  cplusplus.*,
+  bugprone.*,
+  misc-definitions-in-headers,
+  misc-misleading-bidirectional,
+  misc-misleading-identifier,
+  misc-misplaced-const,
+  misc-new-delete-overloads,
+  misc-non-copyable-objects,
+  misc-override-with-different-visibility,
+  misc-redundant-expression,
+  misc-static-assert,
+  misc-throw-by-value-catch-by-reference,
+  # misc-unconventional-assign-operator,
+  misc-uniqueptr-reset-release,
+  misc-unused-alias-decls,
+  misc-unused-parameters,
+  misc-unused-using-decls,
+  misc-use-anonymous-namespace,
+  misc-use-internal-linkage,
+  modernize-loop-convert,
+  modernize-return-braced-init-list,
+  modernize-type-traits,
+  modernize-use-bool-literals,
+  modernize-use-equals-default,
+  modernize-use-equals-delete,
+  # modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-using,
+  readability-delete-null-pointer,
+  readability-duplicate-include,
+  readability-else-after-return,
+  readability-enum-initial-value,
+  readability-inconsistent-declaration-parameter-name,
+  # readability-magic-numbers,
+  readability-math-missing-parentheses,
+  # readability-misleading-indentation,
+  readability-misplaced-array-index,
+  readability-redundant-casting,
+  readability-redundant-control-flow,
+  readability-redundant-declaration,
+  readability-redundant-function-ptr-dereference,
+  readability-redundant-inline-specifier,
+  readability-redundant-member-init,
+  readability-redundant-parentheses,
+  readability-redundant-preprocessor,
+  readability-reference-to-constructed-temporary,
+  # readability-static-accessed-through-instance,
+  readability-static-definition-in-anonymous-namespace,
+  readability-use-concise-preprocessor-directives,
+
+# Treat warnings as errors (empty = no errors)
+WarningsAsErrors: ''
+
+# Regex to filter which headers to analyze
+# Only analyze headers from pgModeler project directories
+# This regex matches absolute paths containing /pgmodeler/ followed by apps, libs, or priv-plugins
+HeaderFilterRegex: '.*/pgmodeler/(apps|libs|plugins|priv-plugins)/.*\.(h|hpp|cpp)$'
+
+# Enable all checks by default in system headers (off for performance)
+SystemHeaders: false
+
+# Format style for fix suggestions (follow .clang-format if available)
+FormatStyle: file

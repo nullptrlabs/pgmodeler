@@ -28,32 +28,23 @@
 
 ColumnWidget::ColumnWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType::Column)
 {
-	QSpacerItem *spacer=new QSpacerItem(10,10,QSizePolicy::Fixed,QSizePolicy::Expanding);
-	QStringList list;
-
 	Ui_ColumnWidget::setupUi(this);
 	edit_seq_btn->setVisible(false);
 
 	identity_type_cmb->addItems(IdentityType::getTypes());
 
-	data_type=nullptr;
-	data_type=new PgSQLTypeWidget(this);
+	data_type = new PgSQLTypeWidget(this);
 
-	hl_default_value=nullptr;
-	hl_default_value=new SyntaxHighlighter(def_value_txt, true, false, font().pointSizeF());
+	hl_default_value = new SyntaxHighlighter(def_value_txt, true, false, font().pointSizeF());
 	hl_default_value->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
 
-	sequence_sel=new ObjectSelectorWidget(ObjectType::Sequence, this);
+	sequence_sel = new ObjectSelectorWidget(ObjectType::Sequence, this);
 	sequence_sel->setEnabled(false);
+	sequence_lt->addWidget(sequence_sel);
+	column_lt->insertWidget(0, data_type);
 
-	column_grid->addWidget(data_type,0,0,1,0);
-	column_grid->addWidget(default_value_grp,1,0,1,1);
-
-	column_grid->addItem(spacer,column_grid->count(),0);
-	dynamic_cast<QGridLayout *>(default_value_grp->layout())->addWidget(sequence_sel, 1, 1, 1, 6);
-
-	configureFormLayout(column_grid, ObjectType::Column);
-	configureTabOrder({ data_type });
+	configureTabbedLayout(false);
+	//configureTabOrder({ data_type });
 
 	std::map<QString, std::vector<QWidget *> > fields_map;
 	fields_map[generateVersionsInterval(AfterVersion, PgSqlVersions::PgSqlVersion120)].push_back(generated_chk);
@@ -70,7 +61,7 @@ ColumnWidget::ColumnWidget(QWidget *parent): BaseObjectWidget(parent, ObjectType
 
 	connect(edit_seq_btn, &QPushButton::clicked, this, __slot(this, ColumnWidget::editSequenceAttributes));
 
-	setMinimumSize(540, 480);
+	setMinimumSize(600, 580);
 }
 
 void ColumnWidget::enableDefaultValueFields()
@@ -93,7 +84,7 @@ void ColumnWidget::setAttributes(DatabaseModel *model, OperationList *op_list, B
 	PgSqlType type;
 
 	if(!parent_obj)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	BaseObjectWidget::setAttributes(model, op_list, column, parent_obj);
 	sequence_sel->setModel(model);
@@ -194,7 +185,7 @@ void ColumnWidget::applyConfiguration()
 				throw Exception(Exception::getErrorMessage(ErrorCode::NullPrimaryKeyColumn)
 												.arg(column->getName())
 												.arg(pk->getParentTable()->getSignature(true)),
-												ErrorCode::NullPrimaryKeyColumn,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+												ErrorCode::NullPrimaryKeyColumn,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 			// Separating fks in which the column is part so the fk relationships can be properly updated
 			for(unsigned idx = 0; idx < parent_tab->getConstraintCount(); idx++)
@@ -228,7 +219,7 @@ void ColumnWidget::applyConfiguration()
 	catch(Exception &e)
 	{
 		cancelConfiguration();
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 

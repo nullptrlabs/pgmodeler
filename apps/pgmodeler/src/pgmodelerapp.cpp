@@ -35,7 +35,7 @@ PgModelerApp::PgModelerApp(int &argc, char **argv) : Application(argc,argv)
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	//Changing the current working dir to the executable's directory in
@@ -55,17 +55,14 @@ PgModelerApp::PgModelerApp(int &argc, char **argv) : Application(argc,argv)
 		{
 			Messagebox msg;
 			msg.show(Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotWritten).arg(GlobalAttributes::getTemporaryPath()),
-												 ErrorCode::FileDirectoryNotWritten, __PRETTY_FUNCTION__,__FILE__,__LINE__));
+												 ErrorCode::FileDirectoryNotWritten, PGM_FUNC,PGM_FILE,PGM_LINE));
 		}
 	}
 
-	//Trying to identify if the user defined a custom UI language in the pgmodeler.conf file
-	QString lang_id = GlobalAttributes::getConfigParamFromFile(Attributes::UiLanguage, GlobalAttributes::GeneralConf);
+	//Loading the translations of the UI language defined by the user or the system's one
+	loadTranslations(true);
 
-	if(lang_id.isEmpty())
-		lang_id = QLocale::system().name();
-
-	loadTranslations(lang_id, true);
+	loadCustomFonts(Attributes::UiFont, Attributes::UiFontSize);
 }
 
 bool PgModelerApp::notify(QObject *receiver, QEvent *event)
@@ -76,13 +73,13 @@ bool PgModelerApp::notify(QObject *receiver, QEvent *event)
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 		return false;
 	}
 	catch(...)
 	{
 		Messagebox::error(tr("Unknown exception caught!"), ErrorCode::Custom,
-											__PRETTY_FUNCTION__, __FILE__, __LINE__);
+											PGM_FUNC, PGM_FILE, PGM_LINE);
 		return false;
 	}
 }

@@ -57,7 +57,7 @@ void Transform::setName(const QString &)
 void Transform::setType(PgSqlType tp)
 {
 	if(tp == PgSqlType::Null)
-		throw Exception(ErrorCode::AsgInvalidTypeObject, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(ErrorCode::AsgInvalidTypeObject, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	try
 	{
@@ -71,14 +71,14 @@ void Transform::setType(PgSqlType tp)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
 void Transform::setLanguage(Language *lang)
 {
 	if(!lang)
-		throw Exception(ErrorCode::AsgNotAllocatedLanguage, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(ErrorCode::AsgNotAllocatedLanguage, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	setCodeInvalidated(language != lang);
 	language = lang;
@@ -95,14 +95,14 @@ void Transform::setFunction(Function *func, FunctionId func_id)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
 void Transform::validateFunction(Function *func, FunctionId func_id)
 {
 	if(func_id > ToSqlFunc)
-		throw Exception(ErrorCode::RefFunctionInvalidType, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(ErrorCode::RefFunctionInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	if(!func)
 		return;
@@ -113,7 +113,7 @@ void Transform::validateFunction(Function *func, FunctionId func_id)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParamCount)
 						.arg(this->getName())
 						.arg(this->getTypeName()),
-						ErrorCode::AsgFunctionInvalidParamCount,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgFunctionInvalidParamCount,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	// The function must have a single parameter of the type "internal"
@@ -122,7 +122,7 @@ void Transform::validateFunction(Function *func, FunctionId func_id)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidParameters)
 						.arg(this->getName())
 						.arg(this->getTypeName()),
-						ErrorCode::AsgFunctionInvalidParameters,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgFunctionInvalidParameters,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
 	/* ToSqlFunc must return a type that is equivalent to the type being handled by the transform
@@ -133,7 +133,7 @@ void Transform::validateFunction(Function *func, FunctionId func_id)
 		throw Exception(Exception::getErrorMessage(ErrorCode::AsgFunctionInvalidReturnType)
 						.arg(this->getName())
 						.arg(this->getTypeName()),
-						ErrorCode::AsgFunctionInvalidReturnType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+						ErrorCode::AsgFunctionInvalidReturnType,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 }
 
@@ -150,7 +150,7 @@ Language *Transform::getLanguage()
 Function *Transform::getFunction(FunctionId func_id)
 {
 	if(func_id > ToSqlFunc)
-		throw Exception(ErrorCode::RefFunctionInvalidType, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		throw Exception(ErrorCode::RefFunctionInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
 
 	return functions[func_id];
 }

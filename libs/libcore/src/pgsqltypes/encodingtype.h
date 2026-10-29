@@ -49,7 +49,7 @@ class __libcore EncodingType: public TemplateType<EncodingType>{
 		bool operator == (const char *type_name);
 		bool operator != (const QString &type_name);
 		bool operator != (EncodingType type);
-		bool operator != (unsigned tipo_id) override;
+		bool operator != (unsigned type_id) override;
 };
 
 #endif 

@@ -60,7 +60,7 @@ class __libcore OperatorClass: public BaseObject {
 	public:
 		OperatorClass();
 
-		virtual ~OperatorClass();
+		~OperatorClass() override;
 
 		//! \brief Sets the data type that the operator class works on
 		void setDataType(PgSqlType data_type);
@@ -89,12 +89,12 @@ class __libcore OperatorClass: public BaseObject {
 		unsigned getElementCount();
 
 		//! \brief Returns the SQL/XML code definition for operator class
-		virtual QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
-		virtual QString getSourceCode(SchemaParser::CodeType def_type) final;
+		QString getSourceCode(SchemaParser::CodeType def_type, bool reduced_form) final;
+		QString getSourceCode(SchemaParser::CodeType def_type) final;
 
-		virtual QString getSignature(bool format=true) final;
+		QString getSignature(bool format = true) final;
 
-		virtual void updateDependencies() override;
+		void updateDependencies() override;
 };
 
 #endif

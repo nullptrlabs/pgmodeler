@@ -65,7 +65,7 @@ void Column::setName(const QString &name)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -73,15 +73,16 @@ void Column::setType(PgSqlType tp)
 {
 	//An error is raised if the column receive a pseudo-type as data type.
 	if(tp.isPseudoType())
-		throw Exception(ErrorCode::AsgPseudoTypeColumn,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else if(this->identity_type != IdentityType::Null && !tp.isIntegerType())
+		throw Exception(ErrorCode::AsgPseudoTypeColumn,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(this->identity_type != IdentityType::Null && !tp.isIntegerType())
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvalidIdentityColumn).arg(getSignature()),
-										ErrorCode::InvalidIdentityColumn, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::InvalidIdentityColumn, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	setCodeInvalidated(this->type != tp);
-	this->type=tp;
+	this->type = tp;
 }
 
 void Column::setIdentityType(IdentityType id_type)
@@ -89,7 +90,7 @@ void Column::setIdentityType(IdentityType id_type)
 	if(id_type != IdentityType::Null && !type.isIntegerType())
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvalidIdentityColumn).arg(getSignature()),
-										ErrorCode::InvalidIdentityColumn, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+										ErrorCode::InvalidIdentityColumn, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
 	setCodeInvalidated(identity_type != id_type);
@@ -154,8 +155,8 @@ QString Column::getTypeReference()
 {
 	if(getParentTable())
 		return getParentTable()->getName(true) + QString(".") + this->getName(true) + QString("%TYPE");
-	else
-		return "";
+	
+	return "";
 }
 
 QString Column::getDefaultValue()
@@ -167,25 +168,30 @@ QString Column::getOldName(bool format)
 {
 	if(format)
 		return BaseObject::formatName(old_name);
-	else
-		return old_name;
+	
+	return old_name;
 }
 
 void Column::setSequence(BaseObject *seq)
 {
 	if(seq)
 	{
-		if(seq->getObjectType()!=ObjectType::Sequence)
+		if(seq->getObjectType() != ObjectType::Sequence)
+		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::AsgInvalidObjectType)
-							.arg(this->obj_name)
-							.arg(this->getTypeName())
-							.arg(BaseObject::getTypeName(ObjectType::Sequence)),
-							ErrorCode::AsgInvalidObjectType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-		else if(!type.isIntegerType() && !type.isNumericType())
+											.arg(this->obj_name)
+											.arg(this->getTypeName())
+											.arg(BaseObject::getTypeName(ObjectType::Sequence)),
+											ErrorCode::AsgInvalidObjectType, PGM_FUNC, PGM_FILE, PGM_LINE);
+		}
+
+		if(!type.isIntegerType() && !type.isNumericType())
+		{
 			throw Exception(Exception::getErrorMessage(ErrorCode::IncompColumnTypeForSequence)
-							.arg(seq->getName(true))
-							.arg(this->obj_name),
-							ErrorCode::IncompColumnTypeForSequence,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+											.arg(seq->getName(true))
+											.arg(this->obj_name),
+											ErrorCode::IncompColumnTypeForSequence, PGM_FUNC, PGM_FILE, PGM_LINE);
+		}
 
 		default_value="";
 		identity_type=IdentityType::Null;
@@ -289,7 +295,7 @@ QString Column::getAlterCode(BaseObject *object)
 	Column *col=dynamic_cast<Column *>(object);
 
 	if(!col)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
@@ -309,14 +315,26 @@ QString Column::getAlterCode(BaseObject *object)
 			attribs[Attributes::Type]=col->type.getSourceCode(SchemaParser::SqlCode);
 
 		if(col->sequence)
-			def_val=NextValFuncTmpl.arg(col->sequence->getSignature());
+			def_val = NextValFuncTmpl.arg(col->sequence->getSignature());
 		else
-			def_val=col->default_value;
+			def_val = col->default_value;
 
-		// Generated columns can't have their default value changes after being created
-		if(!this->isGenerated() && !col->isGenerated() &&
-			 this->default_value.simplified().toLower() != def_val.simplified().toLower())
-			attribs[Attributes::DefaultValue]=(def_val.isEmpty() ? Attributes::Unset : def_val);
+		QString this_def_val = this->default_value.simplified().toLower().toLower(),
+				col_def_val = col->getDefaultValue().simplified().toLower();
+
+		attribs[Attributes::Generated] = "";
+
+		if(!this->isGenerated() && !col->isGenerated() && this_def_val != col_def_val)
+			attribs[Attributes::DefaultValue] = (def_val.isEmpty() ? Attributes::Unset : def_val);
+		else if(this->isGenerated() && col->isGenerated() && this_def_val != col_def_val)
+			attribs[Attributes::Generated] = col->getDefaultValue();
+		else if(this->isGenerated() && !col->isGenerated())
+		{
+			attribs[Attributes::Generated] = Attributes::Unset;
+
+			if(!col->getDefaultValue().isEmpty())
+				attribs[Attributes::DefaultValue] = col->getDefaultValue();
+		}
 
 		if(this->not_null!=col->not_null)
 			attribs[Attributes::NotNull]=(!col->not_null ? Attributes::Unset : Attributes::True);
@@ -390,7 +408,7 @@ QString Column::getAlterCode(BaseObject *object)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__,&e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE,&e);
 	}
 }
 
@@ -451,7 +469,7 @@ QString Column::getDataDictionary(bool md_format, const attribs_map &extra_attri
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 

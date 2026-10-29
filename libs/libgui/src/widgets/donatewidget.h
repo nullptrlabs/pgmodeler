@@ -21,7 +21,7 @@
 
 /**
 \ingroup libgui
-\class DonateWidget
+\class PlusOfferWidget
 \brief Implements a basic dialog to ask for donations shown as a popup widget on main window.
 */
 

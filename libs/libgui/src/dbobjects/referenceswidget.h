@@ -59,6 +59,9 @@ class __libgui ReferencesWidget: public QWidget, Ui::ReferencesWidget {
 		void handleReference(int row);
 		void editReference(int row);
 		void clearReferenceForm();
+
+	signals:
+		void s_referencesChanged();
 };
 
 #endif

@@ -52,7 +52,7 @@ class __libgui IndexWidget: public BaseObjectWidget, public Ui::IndexWidget {
 		void selectIndexingType();
 
 	public slots:
-		void applyConfiguration();
+		void applyConfiguration() override;
 };
 
 #endif

@@ -59,13 +59,19 @@ class __libgui LineNumbersWidget : public QWidget {
 		static QColor font_color,
 
 		//! \brief Widget's background color
-		bg_color;
+		bg_color,
+
+		//! \brief Font color when the line is selected
+		hl_color;
+
+		//! \brief Selects the lines between the one at start_sel_line and the one under evnt_cursor
+		void selectLines(QTextCursor evnt_cursor);
 
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void mousePressEvent(QMouseEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void mouseReleaseEvent(QMouseEvent *);
+		void paintEvent(QPaintEvent *event) override;
+		void mousePressEvent(QMouseEvent *event) override;
+		void mouseMoveEvent(QMouseEvent *event) override;
+		void mouseReleaseEvent(QMouseEvent *) override;
 
 	public:
 		explicit LineNumbersWidget(QPlainTextEdit *parent);
@@ -77,7 +83,7 @@ class __libgui LineNumbersWidget : public QWidget {
 		void drawLineNumbers(int first_line, int line_count, int dy, int blk_height);
 
 		//! \brief Configures the lines for both font and widget's background
-		static void setColors(const QColor &font_color, const QColor &bg_color);
+		static void setColors(const QColor &font_color, const QColor &bg_color, const QColor &hl_color);
 
 		static QColor getBackgroundColor();
 

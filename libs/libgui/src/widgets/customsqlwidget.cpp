@@ -21,24 +21,25 @@
 
 #include "customsqlwidget.h"
 #include "guiutilsns.h"
+#include "customuistyle.h"
 
 CustomSQLWidget::CustomSQLWidget(QWidget *parent) : BaseObjectWidget(parent)
 {
-	QFont font;
-
 	Ui_CustomSQLWidget::setupUi(this);
-	configureFormLayout(sqlappend_grid, ObjectType::BaseObject);
 
-	append_sql_txt=GuiUtilsNs::createNumberedTextEditor(append_sql_wgt, true);
-	prepend_sql_txt=GuiUtilsNs::createNumberedTextEditor(prepend_sql_wgt, true);
+	configureFormLayout(customsql_lt, ObjectType::BaseObject);
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
-	append_sql_hl=new SyntaxHighlighter(append_sql_txt);
+	append_sql_txt = GuiUtilsNs::createNumberedTextEditor(append_sql_wgt, true);
+	prepend_sql_txt = GuiUtilsNs::createNumberedTextEditor(prepend_sql_wgt, true);
+
+	append_sql_hl = new SyntaxHighlighter(append_sql_txt);
 	append_sql_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
-	append_sql_cp=new CodeCompletionWidget(append_sql_txt, true);
+	append_sql_cp = new CodeCompletionWidget(append_sql_txt, true);
 
-	prepend_sql_hl=new SyntaxHighlighter(prepend_sql_txt);
+	prepend_sql_hl = new SyntaxHighlighter(prepend_sql_txt);
 	prepend_sql_hl->loadConfiguration(GlobalAttributes::getSQLHighlightConfPath());
-	prepend_sql_cp=new CodeCompletionWidget(prepend_sql_txt, true);
+	prepend_sql_cp = new CodeCompletionWidget(prepend_sql_txt, true);
 
 	name_edt->setReadOnly(true);
 	comment_edt->setVisible(false);
@@ -75,11 +76,11 @@ CustomSQLWidget::CustomSQLWidget(QWidget *parent) : BaseObjectWidget(parent)
 	delete_menu.addAction(action_tab_delete);
 	delete_menu.addAction(action_gen_delete);
 
-	connect(clear_tb, &QToolButton::clicked, this, &CustomSQLWidget::clearCode);
-	connect(insert_tb, &QToolButton::clicked, this, &CustomSQLWidget::addCommand);
-	connect(select_tb, &QToolButton::clicked, this, &CustomSQLWidget::addCommand);
-	connect(update_tb, &QToolButton::clicked, this, &CustomSQLWidget::addCommand);
-	connect(delete_tb, &QToolButton::clicked, this, &CustomSQLWidget::addCommand);
+	connect(clear_btn, &QPushButton::clicked, this, &CustomSQLWidget::clearCode);
+	connect(insert_btn, &QPushButton::clicked, this, &CustomSQLWidget::addCommand);
+	connect(select_btn, &QPushButton::clicked, this, &CustomSQLWidget::addCommand);
+	connect(update_btn, &QPushButton::clicked, this, &CustomSQLWidget::addCommand);
+	connect(delete_btn, &QPushButton::clicked, this, &CustomSQLWidget::addCommand);
 	connect(action_gen_insert, &QAction::triggered, this, &CustomSQLWidget::addCommand);
 	connect(action_inc_serials, &QAction::triggered, this, &CustomSQLWidget::addCommand);
 	connect(action_exc_serials, &QAction::triggered, this, &CustomSQLWidget::addCommand);
@@ -95,8 +96,8 @@ CustomSQLWidget::CustomSQLWidget(QWidget *parent) : BaseObjectWidget(parent)
 
 void CustomSQLWidget::configureMenus()
 {
-	ObjectType obj_type=this->object->getObjectType();
-	QToolButton *btns[]={ insert_tb, select_tb , delete_tb, update_tb };
+	ObjectType obj_type = this->object->getObjectType();
+	QPushButton *btns[] { insert_btn, select_btn, delete_btn, update_btn };
 
 	for(auto &btn : btns)
 		btn->setMenu(nullptr);
@@ -105,27 +106,26 @@ void CustomSQLWidget::configureMenus()
 	{
 		if(PhysicalTable::isPhysicalTable(obj_type))
 		{
-			insert_tb->setMenu(&insert_menu);
-			delete_tb->setMenu(&delete_menu);
-			update_tb->setMenu(&update_menu);
+			insert_btn->setMenu(&insert_menu);
+			delete_btn->setMenu(&delete_menu);
+			update_btn->setMenu(&update_menu);
 		}
 
-		select_tb->setMenu(&select_menu);
+		select_btn->setMenu(&select_menu);
 	}
 }
 
 void CustomSQLWidget::setAttributes(DatabaseModel *model, BaseObject *object)
 {
 	if(!object)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
-	else if(!BaseObject::acceptsCustomSQL(object->getObjectType()))
-		throw Exception(ErrorCode::OprObjectInvalidType,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	if(!BaseObject::acceptsCustomSQL(object->getObjectType()))
+		throw Exception(ErrorCode::OprObjectInvalidType,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
 		BaseObjectWidget::setAttributes(model, object, nullptr);
-
-		name_edt->setText(QString("%1 (%2)").arg(object->getSignature()).arg(object->getTypeName()));
 
 		if(object->getObjectType()==ObjectType::Database)
 		{
@@ -145,15 +145,13 @@ void CustomSQLWidget::setAttributes(DatabaseModel *model, BaseObject *object)
 
 		end_of_model_chk->setVisible(object->getObjectType()==ObjectType::Database);
 		begin_of_model_chk->setVisible(object->getObjectType()==ObjectType::Database);
-
-		obj_id_lbl->setVisible(false);
-		obj_icon_lbl->setPixmap(QPixmap(GuiUtilsNs::getIconPath(object->getObjectType())));
+		obj_icon_lbl->setPixmap(GuiUtilsNs::getPixmap(object->getObjectType()));
 
 		configureMenus();
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(),e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 
 }

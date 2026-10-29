@@ -20,6 +20,7 @@
 */
 
 #include "modelvalidationhelper.h"
+#include "messagebox.h"
 #include <QThread>
 
 const QString ModelValidationHelper::SignalMsg { "`%1' (%2)" };
@@ -58,7 +59,8 @@ void ModelValidationHelper::generateValidationInfo(ValidationInfo::ValType val_t
 		//Configures a validation info
 		ValidationInfo info = ValidationInfo(val_type, object, refs);
 
-		if(val_type == ValidationInfo::UniqueSameAsPk)
+		if(val_type == ValidationInfo::UniqueSameAsPk ||
+			 val_type == ValidationInfo::FkSetNullNotNullCol)
 			warn_count++;
 		else
 			error_count++;
@@ -158,8 +160,8 @@ void ModelValidationHelper::resolveConflict(ValidationInfo &info)
 
 			if(rename_obj)
 			{
-				table=dynamic_cast<BaseTable *>(dynamic_cast<TableObject *>(obj)->getParentTable());
-				obj_type=obj->getObjectType();
+				table = dynamic_cast<TableObject *>(obj)->getParentTable();
+				obj_type = obj->getObjectType();
 
 				do
 				{
@@ -184,12 +186,12 @@ void ModelValidationHelper::resolveConflict(ValidationInfo &info)
 				//Tables and view aren't renamed only table child objects (constraints, indexes)
 				if(tab_obj && !tab_obj->isAddedByRelationship())
 				{
-					table=dynamic_cast<BaseTable *>(tab_obj->getParentTable());
+					table = tab_obj->getParentTable();
 
 					do
 					{
 						//Configures a new name for the object [name]_[suffix]
-						new_name=QString("%1_%2").arg(tab_obj->getName()).arg(suffix);
+						new_name = QString("%1_%2").arg(tab_obj->getName()).arg(suffix);
 						suffix++;
 					}
 					//Generates a new name until no object is found on parent table
@@ -216,7 +218,7 @@ void ModelValidationHelper::resolveConflict(ValidationInfo &info)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(),__PRETTY_FUNCTION__,__FILE__,__LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
 	}
 }
 
@@ -238,7 +240,7 @@ unsigned ModelValidationHelper::getErrorCount()
 void ModelValidationHelper::setValidationParams(DatabaseModel *model, Connection *conn, const QString &pgsql_ver, bool use_tmp_names)
 {
 	if(!model)
-		throw Exception(ErrorCode::AsgNotAllocattedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::AsgNotAllocattedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	fix_mode=false;
 	valid_canceled=false;
@@ -264,7 +266,7 @@ bool ModelValidationHelper::isInFixMode()
 void ModelValidationHelper::validateModel()
 {
 	if(!db_model)
-		throw Exception(ErrorCode::OprNotAllocatedObject,__PRETTY_FUNCTION__,__FILE__,__LINE__);
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
 	try
 	{
@@ -320,6 +322,9 @@ void ModelValidationHelper::validateModel()
 				// Validating broken references to the object
 				checkObjectBrokenRefs(object);
 
+				// Validating extension's broken references to its data types
+				checkExtBrokenTypeRefs(object);
+
 				/* Validating a special object. The validation made here is to check if the special object
 				 * (constraint/index/trigger/view) references a column added by a relationship and
 				 *  that relationship is being created after the creation of the special object */
@@ -345,12 +350,19 @@ void ModelValidationHelper::validateModel()
 		 * is the need to do a revalidation of all relationships */
 		checkInvalidatedRels();
 
-		/*Step 5: Checking if unique constraints on tables reference the same columns as the primary keys.
-		 * In this, pgModeler emits an alert instead of a validation error this because PostgreSQL will
-		 * ignore the unique constraint having the mentioned configuration but without warn the user.
+		/*Step 5: Checking constraint semantics. The first one is if unique constraints on tables reference
+		 * the same columns as the primary keys. In this, pgModeler emits an alert instead of a validation
+		 * error this because PostgreSQL will ignore the unique constraint having the mentioned configuration
+		 * but without warn the user.
+		 *
+		 * The second checking is to verify if foreign key constraints that have SET NULL actions references
+		 * not null columns. Despite being possible to create this (PostgreSQL don't validate the DDL semantics)
+		 * errors may be raised by the RDBMS when the foreign key constraint tries to update the columns
+		 * when a operation happens over a row.
+		 *
 		 * So this step is just here to help the user to understand why PostgreSQL doesn't create the
-		 * constraints */
-		checkUselessUqConstrs();
+		 * unique constraints or errors are raised even the foreign key is "correctly" configured */
+		checkConstraintSemantics();
 
 		if(!valid_canceled && !fix_mode)
 		{
@@ -374,14 +386,14 @@ void ModelValidationHelper::validateModel()
 				{
 					warn_count++;
 					emitValidationFinished();
-					emit s_validationInfoGenerated(ValidationInfo(tr("There are pending errors! SQL validation will not be executed.")));
+					emit s_validationInfoGenerated(ValidationInfo(tr("There are pending errors! SQL validation will not be performed.")));
 				}
 			}
 		}
 	}
 	catch(Exception &e)
 	{
-		Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }
 
@@ -408,6 +420,7 @@ void ModelValidationHelper::checkObjectBrokenRefs(BaseObject *object)
 	TableObject *tab_obj = nullptr;
 	Constraint *constr = nullptr;
 	Column *col = nullptr;
+	unsigned obj_id = object->getObjectId();
 
 	for(auto &obj : object->getReferences())
 	{
@@ -418,10 +431,9 @@ void ModelValidationHelper::checkObjectBrokenRefs(BaseObject *object)
 		 * An example is a schema created by an extension, in this case,
 		 * since the schema is created by pgModeler there is no need
 		 * to check for broken reference */
-		if(obj->isSystemObject())
+		if(obj->isSystemObject() && obj->getObjectType() != ObjectType::Type)
 			continue;
 
-		//Checking if the referrer object is a table object. In this case its parent table is considered
 		tab_obj = dynamic_cast<TableObject *>(obj);
 		constr = dynamic_cast<Constraint *>(tab_obj);
 		col = dynamic_cast<Column *>(tab_obj);
@@ -435,8 +447,8 @@ void ModelValidationHelper::checkObjectBrokenRefs(BaseObject *object)
 		if(object != obj &&
 			 (
 				 ((col || (constr && constr->getConstraintType() != ConstraintType::ForeignKey)) &&
-					(tab_obj->getParentTable()->getObjectId() <= object->getObjectId())) ||
-				 (!constr && !col && obj->getObjectId() <= object->getObjectId()))
+					(tab_obj->getParentTable()->getObjectId() <= obj_id)) ||
+				 (!constr && !col && obj->getObjectId() <= obj_id))
 			 )
 		{
 			if(col || constr)
@@ -449,6 +461,61 @@ void ModelValidationHelper::checkObjectBrokenRefs(BaseObject *object)
 	}
 
 	generateValidationInfo(ValidationInfo::BrokenReference, object, refs_aux);
+}
+
+void ModelValidationHelper::checkExtBrokenTypeRefs(BaseObject *object)
+{
+	Extension *ext = dynamic_cast<Extension *>(object);
+
+	if(!ext)
+		return;
+
+	std::vector<BaseObject *> refs;
+	std::vector<Extension::ExtObject> ext_objs = ext->getObjects(ObjectType::Type);
+	Type *type = nullptr;
+	TableObject *tab_obj = nullptr;
+	unsigned ext_id = ext->getObjectId();
+	QString sch_name = ext->getSchema()->getSignature(),
+			type_name;
+
+	/* Special case: For types owned by extensions, we need to consider the extension id
+	 * in the comparision instead of the type id itself. This will avoid the validator
+	 * to ignore cases when the extension that handles data types are created after
+	 * a table that uses its types, for example. */
+	for(auto &ext_obj : ext_objs)
+	{
+		if(ext_obj.getParent().isEmpty())
+			type_name += sch_name + "." + ext_obj.getName();
+		else
+			type_name = ext_obj.getSignature();
+
+		type = db_model->getType(type_name);
+
+		/* If the type doens't exist of
+		 * if the type is not a child of the extension.
+		 * THIS SHOULDN'T HAPPEN but if it happens means a bug
+		 * and we discard the type to avoid false-positive
+		 * validation info generation */
+		if(!type || !type->isDependingOn(ext))
+			continue;
+
+		for(auto &ref_obj : type->getReferences())
+		{
+			tab_obj = dynamic_cast<TableObject *>(ref_obj);
+
+			/* If ref_obj is a table object (column, constraint, etc)
+			 * we compare the id of the parent table with the extension id */
+			if(tab_obj && tab_obj->getParentTable() &&
+				 tab_obj->getParentTable()->getObjectId() < ext_id)
+				refs.push_back(tab_obj->getParentTable());
+			/* For all other objects that depends on the type we
+			 * compare the object id itself with the extension id */
+			else if(ref_obj->getObjectId() < ext_id)
+				refs.push_back(ref_obj);
+		}
+	}
+
+	generateValidationInfo(ValidationInfo::BrokenReference, ext, refs);
 }
 
 void ModelValidationHelper::checkSpObjectBrokenRefs(BaseObject *object)
@@ -714,10 +781,11 @@ void ModelValidationHelper::checkInvalidatedRels()
 	}
 }
 
-void ModelValidationHelper::checkUselessUqConstrs()
+void ModelValidationHelper::checkConstraintSemantics()
 {
 	PhysicalTable *table = nullptr;
-	Constraint *pk = nullptr, *uq = nullptr;
+	Constraint *pk = nullptr;
+	Constraint *constr = nullptr;
 	std::vector<BaseObject *> tabs;
 
 	tabs.assign(db_model->getObjectList(ObjectType::Table)->begin(),
@@ -735,17 +803,32 @@ void ModelValidationHelper::checkUselessUqConstrs()
 		table = dynamic_cast<PhysicalTable *>(tab);
 		pk = table->getPrimaryKey();
 
-		if(!pk)
-			continue;
-
 		for(auto &tab_obj : *table->getObjectList(ObjectType::Constraint))
 		{
-			uq = dynamic_cast<Constraint *>(tab_obj);
+			constr = dynamic_cast<Constraint *>(tab_obj);
 
-			if(uq->getConstraintType() == ConstraintType::Unique &&
-				 uq->isColumnsExist(pk->getColumns(Constraint::SourceCols), Constraint::SourceCols, true))
+			if(pk &&
+				 constr->getConstraintType() == ConstraintType::Unique &&
+				 constr->isColumnsExist(pk->getColumns(Constraint::SourceCols),
+																							 Constraint::SourceCols, true))
 			{
-				generateValidationInfo(ValidationInfo::UniqueSameAsPk, uq, { pk });
+				generateValidationInfo(ValidationInfo::UniqueSameAsPk, constr, { pk });
+			}
+			else if(constr->getConstraintType() == ConstraintType::ForeignKey &&
+							(constr->getActionType(Constraint::DeleteAction) == ActionType::SetNull ||
+							 constr->getActionType(Constraint::UpdateAction) == ActionType::SetNull))
+			{
+				/* Validating if the foreign key is SET NULL on delete or update but
+				 * references columns that are not nullable. Despite this is accepted by
+				 * PostgreSQL we generate a warning */
+				for(auto &col : constr->getColumns(Constraint::SourceCols))
+				{
+					if(col->isNotNull())
+					{
+						generateValidationInfo(ValidationInfo::FkSetNullNotNullCol, constr, { col });
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -830,10 +913,13 @@ void ModelValidationHelper::applyFixes()
 
 void ModelValidationHelper::cancelValidation()
 {
-	valid_canceled=true;
-	fix_mode=false;
+	valid_canceled = true;
+	fix_mode = false;
 	val_infos.clear();
+
 	export_helper.cancelExport();
+	db_model->setCancelSaving(false);
+
 	emitValidationCanceled();
 }
 

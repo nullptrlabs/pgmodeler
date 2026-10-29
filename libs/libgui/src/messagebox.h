@@ -39,27 +39,63 @@ class __libgui Messagebox: public QDialog, public Ui::Messagebox {
 	private:
 		NumberedTextEditor *raw_stack_txt;
 
+		//! \brief Indicates that the dialog must be sized according to its contents when it's shown
+		bool adjust_size_on_show;
+
+		//! \brief Avoids the recursion while the height of the dialog is being corrected in resizeEvent()
+		bool fixing_height;
+
 		int exec() override;
 
+		/*! \brief Makes only the current page of the stacked widget contribute to the minimum/size hint
+		 * of the dialog. Without this, the largest page (the stack trace one) always inflates the size
+		 * required by the message page */
+		void updateStackPolicies();
+
+		/*! \brief Makes the minimum size of the buttons match what their texts and icons really need,
+		 * so the layout never squeezes them. Must be called after the buttons were configured and polished */
+		void updateButtonsMinimumSize();
+
+		//! \brief Returns the size, bounded by what the layout requires and by the screen size, to be used by the dialog
+		QSize boundedSize(const QSize &sz);
+
+		/*! \brief Resizes the dialog according to the message text and the buttons: the width starts at a
+		 * comfortable value (a fraction of the screen width) but never goes under what the buttons row needs.
+		 * It is increased up to a limit when the message would otherwise take too much of the screen height.
+		 * The height is the one required by the message wrapped at the chosen width. This method needs the dialog
+		 * to be visible because the height required by the wrapped message is only known after the layouts
+		 * (some of them, like the stacked widget, don't propagate the height-for-width) are arranged for real. */
+		void adjustSizeToContents();
+
+		//! \brief Resizes the dialog (visible) to the specified width and returns the height required by the message at that width
+		int requiredHeightForWidth(int width);
+
 	protected:
-		void resizeEvent(QResizeEvent *) override;
+		/*! \brief Keeps the message entirely visible when the size of the dialog changes (e.g., the user resizes it).
+		 * The layout alone can't do that: the stacked widget that holds the message doesn't propagate the
+		 * height-for-width of the wrapped text, so the minimum height of the dialog doesn't depend on its width */
+		void resizeEvent(QResizeEvent *event) override;
+
+		void showEvent(QShowEvent *event) override;
 
 	public:
 		static constexpr int Canceled = 2;
 
 		//! \brief Constants used to define the message icon
-		enum IconType: unsigned {
-			NoIcon,
-			ErrorIcon,
-			InfoIcon,
-			AlertIcon,
-			ConfirmIcon
+		enum MessageType: unsigned {
+			None,
+			Error,
+			Info,
+			Alert,
+			Confirm,
+			Success
 		};
 
 		//! \brief Constants used to configure the visible buttons
 		enum ButtonsId {
 			YesNoButtons,
 			OkCancelButtons,
+			OkCloseButtons,
 			OkButton,
 			CloseButton,
 			AllButtons
@@ -70,17 +106,23 @@ class __libgui Messagebox: public QDialog, public Ui::Messagebox {
 		/*! \brief Shows the message box defining the icons and available buttons.
 		User can specify custom button labels as well custom icons. The icons can be a path to a local file
 		or a Qt  resource icon ':/path/icon' and will be enabled only specifing custom labels for the respective button. */
-		int show(const QString &title, const QString &msg, IconType icon_type=NoIcon, ButtonsId buttons=OkButton,
-							const QString &yes_lbl="", const QString &no_lbl="", const QString &cancel_lbl="",
-							const QString &yes_ico="", const QString &no_ico="", const QString &cancel_ico="");
+		int show(const QString &title, const QString &msg, MessageType icon_type=None, ButtonsId buttons = OkButton,
+						 const QString &yes_lbl = "", const QString &no_lbl = "", const QString &cancel_lbl = "",
+						 const QString &yes_ico = "", const QString &no_ico = "", const QString &cancel_ico = "",
+						 bool format_msg = false);
 
 		//! \brief Shows the message box using an excpetion as message
-		int show(Exception e, const QString &msg="", IconType icon_type=ErrorIcon, ButtonsId buttons=OkButton,
-							const QString &yes_lbl="", const QString &no_lbl="", const QString &cancel_lbl="",
-							const QString &yes_ico="", const QString &no_ico="", const QString &cancel_ico="");
+		int show(Exception e, const QString &msg = "", MessageType icon_type = Error, ButtonsId buttons = OkButton,
+						 const QString &yes_lbl = "", const QString &no_lbl = "", const QString &cancel_lbl = "",
+						 const QString &yes_ico = "", const QString &no_ico = "", const QString &cancel_ico = "");
+
+		//! \brief Shows a simple message box with a custom title
+		int show(const QString &title, const QString &msg, MessageType icon_type = None,
+						 ButtonsId buttons = OkButton, bool format_msg = false);
 
 		//! \brief Shows a simple message box with the title automatically defined by the icon type
-		int show(const QString &msg, IconType icon_type=NoIcon, ButtonsId buttons=OkButton);
+		int show(const QString &msg, MessageType icon_type = None,
+						 ButtonsId buttons = OkButton, bool format_msg = false);
 
 		/*! \brief Shows an error message box in which can an error code and exact local of the code is specified.
 		 *  Additionally, a reference to a captured exception can be specified and will be used to fill up the stack trace.
@@ -117,8 +159,21 @@ class __libgui Messagebox: public QDialog, public Ui::Messagebox {
 		//! \brief Shows an info message box with the provided message, an info icon and only OK button
 		static void info(const QString &msg);
 
+		//! \brief Shows an success message box with the provided message, an success icon and only OK button
+		static void success(const QString &msg);
+
 		//! \brief Shows an confirmation message box with the provided message, a confirmation icon and the defined buttons id
 		static int confirm(const QString &msg, ButtonsId btns_id = YesNoButtons,
+											 const QString &yes_lbl="", const QString &no_lbl="", const QString &cancel_lbl="",
+											 const QString &yes_ico="", const QString &no_ico="", const QString &cancel_ico="");
+
+		//! \brief Shows an confirmation message box with the provided title, message, a confirmation icon and the defined buttons id
+		static int confirm(const QString &title, const QString &msg, ButtonsId btns_id = YesNoButtons,
+											 const QString &yes_lbl="", const QString &no_lbl="", const QString &cancel_lbl="",
+											 const QString &yes_ico="", const QString &no_ico="", const QString &cancel_ico="");
+
+		//! \brief Shows an confirmation message box with the provided message, a custom message icon and the defined buttons id
+		static int confirm(const QString &msg, MessageType icon_type, ButtonsId btns_id = YesNoButtons,
 											 const QString &yes_lbl="", const QString &no_lbl="", const QString &cancel_lbl="",
 											 const QString &yes_ico="", const QString &no_ico="", const QString &cancel_ico="");
 

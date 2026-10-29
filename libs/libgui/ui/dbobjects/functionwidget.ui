@@ -22,354 +22,13 @@
     <height>216</height>
    </size>
   </property>
-  <widget class="QSpinBox" name="exec_cost_spb">
+  <widget class="QGroupBox" name="ret_table_grp">
    <property name="geometry">
     <rect>
-     <x>741</x>
-     <y>85</y>
-     <width>108</width>
-     <height>44</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimum">
-    <number>1</number>
-   </property>
-   <property name="maximum">
-    <number>10000</number>
-   </property>
-  </widget>
-  <widget class="QLabel" name="func_type_lbl">
-   <property name="geometry">
-    <rect>
-     <x>11</x>
-     <y>31</y>
-     <width>147</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>16777215</height>
-    </size>
-   </property>
-   <property name="text">
-    <string>Function type:</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="func_type_cmb">
-   <property name="geometry">
-    <rect>
-     <x>185</x>
-     <y>33</y>
-     <width>123</width>
-     <height>39</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>28</width>
-     <height>28</height>
-    </size>
-   </property>
-  </widget>
-  <widget class="QSpinBox" name="rows_ret_spb">
-   <property name="geometry">
-    <rect>
-     <x>741</x>
-     <y>31</y>
-     <width>171</width>
-     <height>44</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="maximum">
-    <number>1000000000</number>
-   </property>
-  </widget>
-  <widget class="QLabel" name="exec_cost_lbl">
-   <property name="geometry">
-    <rect>
-     <x>568</x>
-     <y>85</y>
-     <width>160</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>0</width>
-     <height>0</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>16777215</height>
-    </size>
-   </property>
-   <property name="text">
-    <string>Execution cost:</string>
-   </property>
-   <property name="indent">
-    <number>5</number>
-   </property>
-  </widget>
-  <widget class="QLabel" name="behavior_lbl">
-   <property name="geometry">
-    <rect>
-     <x>11</x>
-     <y>85</y>
-     <width>98</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>16777215</height>
-    </size>
-   </property>
-   <property name="text">
-    <string>Behavior:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="return_rows_lbl">
-   <property name="geometry">
-    <rect>
-     <x>568</x>
-     <y>31</y>
-     <width>163</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>16777215</height>
-    </size>
-   </property>
-   <property name="text">
-    <string>Rows returned:</string>
-   </property>
-   <property name="indent">
-    <number>5</number>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="behavior_cmb">
-   <property name="geometry">
-    <rect>
-     <x>185</x>
-     <y>87</y>
-     <width>123</width>
-     <height>39</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>28</width>
-     <height>28</height>
-    </size>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="window_func_chk">
-   <property name="geometry">
-    <rect>
-     <x>183</x>
-     <y>160</y>
-     <width>217</width>
-     <height>37</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="text">
-    <string>Window</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="leakproof_chk">
-   <property name="geometry">
-    <rect>
-     <x>410</x>
-     <y>160</y>
-     <width>144</width>
-     <height>37</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Leakproof</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="options_lbl">
-   <property name="geometry">
-    <rect>
-     <x>8</x>
-     <y>159</y>
-     <width>88</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>16777215</height>
-    </size>
-   </property>
-   <property name="text">
-    <string>Options:</string>
-   </property>
-  </widget>
-  <widget class="QFrame" name="hline_frm">
-   <property name="geometry">
-    <rect>
-     <x>11</x>
-     <y>15</y>
+     <x>10</x>
+     <y>400</y>
      <width>980</width>
-     <height>1</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>0</width>
-     <height>1</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>1</height>
-    </size>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Sunken</enum>
-   </property>
-  </widget>
-  <widget class="QFrame" name="hline1_frm">
-   <property name="geometry">
-    <rect>
-     <x>11</x>
-     <y>192</y>
-     <width>980</width>
-     <height>1</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>0</width>
-     <height>1</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>1</height>
-    </size>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Sunken</enum>
-   </property>
-  </widget>
-  <widget class="QLabel" name="ret_method_lbl">
-   <property name="geometry">
-    <rect>
-     <x>11</x>
-     <y>208</y>
-     <width>164</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>16777215</height>
-    </size>
-   </property>
-   <property name="text">
-    <string>Return method:</string>
-   </property>
-  </widget>
-  <widget class="QGroupBox" name="ret_table_gb">
-   <property name="geometry">
-    <rect>
-     <x>11</x>
-     <y>257</y>
-     <width>980</width>
-     <height>493</height>
+     <height>361</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -379,16 +38,16 @@
     </sizepolicy>
    </property>
    <property name="title">
-    <string>&amp;Return table</string>
+    <string>Return table</string>
    </property>
   </widget>
-  <widget class="QRadioButton" name="simple_rb">
+  <widget class="QGroupBox" name="settings_grp">
    <property name="geometry">
     <rect>
-     <x>186</x>
-     <y>209</y>
-     <width>108</width>
-     <height>37</height>
+     <x>10</x>
+     <y>10</y>
+     <width>451</width>
+     <height>151</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -397,23 +56,306 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <property name="text">
-    <string>Si&amp;mple</string>
+   <property name="title">
+    <string>Settings</string>
    </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="autoExclusive">
-    <bool>true</bool>
-   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>5</number>
+    </property>
+    <property name="topMargin">
+     <number>5</number>
+    </property>
+    <property name="rightMargin">
+     <number>5</number>
+    </property>
+    <property name="bottomMargin">
+     <number>5</number>
+    </property>
+    <item row="1" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QLabel" name="behavior_lbl">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Behavior type</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="behavior_cmb">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>28</width>
+          <height>28</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="3">
+     <layout class="QVBoxLayout" name="verticalLayout_5">
+      <item>
+       <widget class="QLabel" name="exec_cost_lbl">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Execution cost</string>
+        </property>
+        <property name="indent">
+         <number>5</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="exec_cost_spb">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>10000</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLabel" name="func_type_lbl">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Function type</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="func_type_cmb">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>28</width>
+          <height>28</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="1">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QLabel" name="parallel_lbl">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Parallelism type</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="parallel_cmb">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>28</width>
+          <height>28</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="1">
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="return_rows_lbl">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Rows returned</string>
+        </property>
+        <property name="indent">
+         <number>5</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="rows_ret_spb">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximum">
+         <number>1000000000</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="3">
+     <widget class="QFrame" name="func_opts_frm">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>55</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <property name="leftMargin">
+        <number>5</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>5</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <widget class="QCheckBox" name="leakproof_chk">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Leakproof</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="window_func_chk">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Window</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
   </widget>
-  <widget class="QRadioButton" name="set_rb">
+  <widget class="QWidget" name="opts_ret_met_wgt" native="true">
    <property name="geometry">
     <rect>
-     <x>304</x>
-     <y>209</y>
-     <width>71</width>
-     <height>37</height>
+     <x>10</x>
+     <y>190</y>
+     <width>404</width>
+     <height>69</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -422,94 +364,104 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <property name="text">
-    <string>Set</string>
-   </property>
-   <property name="autoExclusive">
-    <bool>true</bool>
-   </property>
+   <layout class="QHBoxLayout" name="opts_return_lt">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>10</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <layout class="QVBoxLayout" name="return_method_lt">
+      <item>
+       <widget class="QLabel" name="ret_method_lbl">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Return method</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="ret_method_cmb">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <item>
+         <property name="text">
+          <string>Simple</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Set</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Table</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+   </layout>
   </widget>
-  <widget class="QRadioButton" name="table_rb">
+  <widget class="QWidget" name="ret_type_parent" native="true">
    <property name="geometry">
     <rect>
-     <x>385</x>
-     <y>209</y>
-     <width>93</width>
-     <height>37</height>
+     <x>10</x>
+     <y>300</y>
+     <width>581</width>
+     <height>80</height>
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+    <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
-   </property>
-   <property name="text">
-    <string>Tab&amp;le</string>
-   </property>
-   <property name="autoExclusive">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="parallel_cmb">
-   <property name="geometry">
-    <rect>
-     <x>180</x>
-     <y>130</y>
-     <width>123</width>
-     <height>39</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>28</width>
-     <height>28</height>
-    </size>
-   </property>
-  </widget>
-  <widget class="QLabel" name="parallel_lbl">
-   <property name="geometry">
-    <rect>
-     <x>16</x>
-     <y>118</y>
-     <width>98</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>16777215</height>
-    </size>
-   </property>
-   <property name="text">
-    <string>Parallel:</string>
    </property>
   </widget>
  </widget>
  <tabstops>
   <tabstop>func_type_cmb</tabstop>
-  <tabstop>rows_ret_spb</tabstop>
   <tabstop>behavior_cmb</tabstop>
   <tabstop>exec_cost_spb</tabstop>
   <tabstop>parallel_cmb</tabstop>
-  <tabstop>window_func_chk</tabstop>
-  <tabstop>leakproof_chk</tabstop>
-  <tabstop>simple_rb</tabstop>
-  <tabstop>set_rb</tabstop>
-  <tabstop>table_rb</tabstop>
  </tabstops>
  <resources/>
  <connections/>

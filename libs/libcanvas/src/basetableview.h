@@ -38,6 +38,9 @@
 #include "baserelationship.h"
 #include "textpolygonitem.h"
 #include "attributestoggleritem.h"
+#include "relmarkeritem.h"
+
+class RelationshipView;
 
 class __libcanvas BaseTableView: public BaseObjectView {
 	Q_OBJECT
@@ -50,6 +53,23 @@ class __libcanvas BaseTableView: public BaseObjectView {
 
 		/*! \brief Stores the references to the relationships connected to this table. */
 		std::vector<BaseRelationship *> connected_rels;
+
+		/*! \brief Stores the area the table occupied when the user started moving it. It's used to
+		 * update the orthogonal relationships that were routed around the table's previous position */
+		QRectF move_origin_rect;
+
+		/*! \brief Stores the references to the relationships that connect this table to a table
+		 * placed in a different scene. These relationships have no RelationshipView of their own,
+		 * being represented instead by a relationship marker on each side. */
+		QList<BaseRelationship *> external_rels;
+
+		/*! \brief Stores the references to the relationships that connect this table to a table
+		 * placed in the same scene but are not drawn because the model hides its relationships.
+		 * Like external_rels, they have no RelationshipView and are represented by the marker. */
+		QList<BaseRelationship *> hidden_rels;
+
+		//! \brief Marker representing external_rels and hidden_rels on the canvas. Null while both are empty
+		RelMarkerItem *rel_marker_item;
 
 	protected:		
 		//! \brief Stores the selected child objects in order to retrieve them in ObjectScene/ModelWidget
@@ -94,7 +114,7 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		//! \brief Stores the original table's tool tip
 		QString table_tooltip;
 
-		QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+		QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
 		void addConnectedRelationship(BaseRelationship *base_rel);
 
@@ -103,6 +123,13 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		/*! \brief Returns the index of the relationship in the list of the connected relationships
 		 * If 'only_self_rels' is true then only self relationship are searched */
 		int getConnectedRelationshipIndex(BaseRelationship *base_rel, bool only_self_rels = false);
+
+		/*! \brief Registers a relationship that is not drawn and shows it in the relationship marker.
+		 * The relationship is kept as hidden (partner in the same scene) or external (partner in another scene) */
+		void addMarkedRelationship(BaseRelationship *base_rel, bool hidden);
+
+		//! \brief Removes a relationship registered by addMarkedRelationship(), whichever kind it was
+		void removeMarkedRelationship(BaseRelationship *base_rel);
 
 		//! \brief Configures the tag object when the source object has one.
 		void configureTag();
@@ -127,7 +154,11 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		 * the section (BaseTable::AttribsSection | ExtAttribsSection) and the total amount of attributes in the section.
 		 * The other paramenters start_attr and end_attr are reference parameters that will hold the indexes of items
 		 * to be displayed in the current page. See configureObject() on TableView and GraphicalView */
-		bool configurePaginationParams(BaseTable::TableSection page_id, unsigned total_attrs, unsigned &start_attr, unsigned &end_attr);
+		bool configurePaginationParams(BaseTable::TableSection section_id, unsigned total_attrs, unsigned &start_attr, unsigned &end_attr);
+
+		void hoverLeaveEvent(QGraphicsSceneHoverEvent *) override;
+		void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
+		void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 
 	public:
 		enum ConnectionPoint: unsigned {
@@ -136,11 +167,7 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		};
 
 		BaseTableView(BaseTable *base_tab);
-		virtual ~BaseTableView();
-
-		void hoverLeaveEvent(QGraphicsSceneHoverEvent *);
-		void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
-		void mousePressEvent(QGraphicsSceneMouseEvent *event);
+		~BaseTableView() override;
 
 		//! brief Defines the amount of attributes per page to be displayed
 		static void setAttributesPerPage(BaseTable::TableSection section_id, unsigned value);
@@ -163,11 +190,42 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		//! \brief Returns the current count of connected relationships
 		int getConnectRelsCount();
 
+		//! \brief Returns the current count of external (cross-scene) relationships
+		int getExternalRelsCount();
+
+		//! \brief Returns the list of relationships that connect this table to a table placed in a different scene
+		QList<BaseRelationship *> getExternalRelationships();
+
+		//! \brief Returns the current count of hidden (same scene, not drawn) relationships
+		int getHiddenRelsCount();
+
+		//! \brief Returns the list of relationships that connect this table to a table of the same scene but are not drawn
+		QList<BaseRelationship *> getHiddenRelationships();
+
+		/*! \brief Returns, in scene coordinates, the point the relationship marker's line attaches to
+		 * (title's right edge, vertically centered on the title) */
+		QPointF getRelMarkerAnchorPoint();
+
+		//! \brief Returns the relationship marker currently attached to this table, or nullptr if it has none
+		RelMarkerItem *getRelMarkerItem();
+
 		//! \brief This method just emits the signal to indicate that the relationships attached must be updated
 		void requestRelationshipsUpdate();
 
+		/*! \brief Forces the update of the orthogonal relationships routed near the table, which includes the
+		 * area it occupied before being moved. Relationships connected to the table are only updated if
+		 * include_connected is true, since they are already updated by the table's own signals. Does nothing
+		 * when the orthogonal line style is not in use. */
+		void invalidateNearbyRoutes(bool include_connected = false);
+
+		/*! \brief Returns the orthogonal relationships routed near the table, including the area it occupied
+		 * before being moved (which is forgotten by this call). It's the list invalidateNearbyRoutes()
+		 * updates, so the caller can merge the lists of several tables and update each relationship only once.
+		 * The list is empty when the orthogonal line style is not in use. */
+		std::vector<RelationshipView *> getNearbyRoutes(bool include_connected = false);
+
 		//! \brief Toggles the placeholder object when there is at least one relationship connected to the object
-		virtual void togglePlaceholder(bool value);
+		void togglePlaceholder(bool value) override;
 
 		unsigned getConnectedRelsCount(BaseTable *src_tab, BaseTable *dst_tab);
 
@@ -224,6 +282,7 @@ class __libcanvas BaseTableView: public BaseObjectView {
 		void s_sceneClearRequested();
 
 		friend class RelationshipView;
+		friend class ModelWidget;
 };
 
 #endif

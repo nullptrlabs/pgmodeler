@@ -20,11 +20,12 @@
 */
 
 #include "schemaeditorform.h"
+#include "customuistyle.h"
 #include "guiutilsns.h"
 #include "globalattributes.h"
+#include "messagebox.h"
 #include "settings/appearanceconfigwidget.h"
 #include "settings/generalconfigwidget.h"
-#include "guiutilsns.h"
 #include "sourceeditorwidget.h"
 #include "aboutsewidget.h"
 #include "baseform.h"
@@ -33,7 +34,7 @@
 #include <QActionGroup>
 #include <QTemporaryFile>
 
-const QString SchemaEditorForm::UntitledFile { QT_TR_NOOP("(untitled)") };
+const QString SchemaEditorForm::UntitledFile { PGM_TR2("Global", "(untitled)") };
 
 SchemaEditorForm::SchemaEditorForm(QWidget *parent) : QWidget(parent)
 {
@@ -42,16 +43,17 @@ SchemaEditorForm::SchemaEditorForm(QWidget *parent) : QWidget(parent)
 
 	setupUi(this);
 	setWindowTitle(windowTitle() + " " + GlobalAttributes::PgModelerVersion);
+	CustomUiStyle::setStyleHint(CustomUiStyle::AlertFrmHint, alert_frm);
 
-	for(auto &obj : bnts_parent_wgt->children())
+	for(auto &obj : btns_parent_wgt->children())
 	{
 		btn = dynamic_cast<QToolButton *>(obj);
-		if(!btn) continue;
 
-		fnt = btn->font();
-		fnt.setWeight(QFont::Normal);
-		btn->setFont(fnt);
-		GuiUtilsNs::createDropShadow(btn, 1, 1, 5);
+		if(!btn)
+			continue;
+
+		// Forcing custom font configuration on buttons
+		btn->setFont(qApp->font());
 
 		if(!btn->toolTip().isEmpty() && !btn->shortcut().toString().isEmpty())
 			btn->setToolTip(btn->toolTip() + QString(" (%1)").arg(btn->shortcut().toString()));
@@ -77,12 +79,11 @@ SchemaEditorForm::SchemaEditorForm(QWidget *parent) : QWidget(parent)
 
 	SourceEditorWidget::setDefaultEditorPalette(syntax_txt->palette());
 
-	syntax_conf_sel = new FileSelectorWidget(syntax_conf_wgt);
+	syntax_conf_sel = new PathSelectorWidget(syntax_conf_wgt);
 	syntax_conf_sel->setReadOnly(true);
 
-	QVBoxLayout *vbox = new QVBoxLayout(syntax_conf_wgt);
+	QVBoxLayout *vbox = GuiUtilsNs::createVBoxLayout(0, 0, syntax_conf_wgt);
 	vbox->addWidget(syntax_conf_sel);
-	vbox->setContentsMargins(0, 0, 0, 0);
 
 	syntax_conf_sel->setNameFilters({ tr("Syntax highlight config file (*%1)").arg(GlobalAttributes::ConfigurationExt) });
 
@@ -242,7 +243,7 @@ void SchemaEditorForm::loadSyntaxConfig()
 	try
 	{
 		syntax_txt->setPlainText(UtilsNs::loadFile(filename));
-		syntax_conf_sel->setSelectedFile(filename);
+		syntax_conf_sel->setSelectedPath(filename);
 
 		if(dtd_txt->toPlainText().isEmpty())
 		{
@@ -261,7 +262,7 @@ void SchemaEditorForm::loadSyntaxConfig()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -276,15 +277,14 @@ void SchemaEditorForm::applySyntaxConfig(bool from_temp_file)
 	{
 		tmp_file.setAutoRemove(false);
 		tmp_file.setFileTemplate(GlobalAttributes::getTemporaryFilePath(QString("temp_XXXXXX%1").arg(GlobalAttributes::ConfigurationExt)));
-		tmp_file.open();
-		filename = tmp_file.fileName();
 
-		if(!tmp_file.isOpen())
+		if(!tmp_file.open())
 		{
-			throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotAccessed).arg(filename),
-											ErrorCode::FileDirectoryNotAccessed, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+			throw Exception(Exception::getErrorMessage(ErrorCode::FileDirectoryNotAccessed).arg(tmp_file.fileName()),
+											ErrorCode::FileDirectoryNotAccessed, PGM_FUNC, PGM_FILE, PGM_LINE);
 		}
 
+		filename = tmp_file.fileName();
 		tmp_file.write(syntax_txt->toPlainText().toUtf8());
 		tmp_file.close();
 	}
@@ -311,7 +311,7 @@ void SchemaEditorForm::applySyntaxConfig(bool from_temp_file)
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 
 	if(from_temp_file)
@@ -320,7 +320,7 @@ void SchemaEditorForm::applySyntaxConfig(bool from_temp_file)
 
 void SchemaEditorForm::saveSyntaxConfig()
 {
-	UtilsNs::saveFile(syntax_conf_sel->getSelectedFile(), syntax_txt->toPlainText().toUtf8());
+	UtilsNs::saveFile(syntax_conf_sel->getSelectedPath(), syntax_txt->toPlainText().toUtf8());
 	alert_frm->setVisible(false);
 	applySyntaxConfig(true);
 }
@@ -390,7 +390,7 @@ void SchemaEditorForm::saveAll()
 		}
 		catch(Exception &e)
 		{
-			Messagebox::error(e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+			Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 			break;
 		}
 	}
@@ -472,7 +472,7 @@ void SchemaEditorForm::loadFile()
 	}
 	catch(Exception &e)
 	{
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -490,7 +490,7 @@ void SchemaEditorForm::loadFiles(const QStringList &filenames)
 	catch(Exception &e)
 	{
 		//qApp->restoreOverrideCursor();
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 }
 
@@ -511,10 +511,10 @@ void SchemaEditorForm::addEditorTab(const QString &filename)
 	catch(Exception &e)
 	{
 		delete editor_wgt;
-		throw Exception(e.getErrorMessage(), e.getErrorCode(), __PRETTY_FUNCTION__, __FILE__, __LINE__, &e);
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
 	}
 
-	editors_tbw->addTab(editor_wgt, filename.isEmpty() ? UntitledFile : fi.fileName());
+	editors_tbw->addTab(editor_wgt, filename.isEmpty() ? UtilsNs::pgmTr(UntitledFile) : fi.fileName());
 	editors_tbw->setTabToolTip(editors_tbw->count() - 1, filename.isEmpty() ? "" : fi.absoluteFilePath());
 	editors_tbw->setCurrentIndex(editors_tbw->count() - 1);
 	save_as_tb->setEnabled(true);
