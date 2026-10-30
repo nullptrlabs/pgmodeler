@@ -560,8 +560,10 @@ QPointF BaseRelationship::getLabelDistance(LabelId label_id)
 
 void BaseRelationship::setCustomColor(const QColor &color)
 {
+	if(color != custom_color)
+		setCodeInvalidated(true);
+
 	custom_color=color;
-	setCodeInvalidated(color != custom_color);
 }
 
 QColor BaseRelationship::getCustomColor()
