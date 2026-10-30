@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Farba oddeľovačov</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Šírka čiar vzťahov</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Určuje šírku čiar vzťahov ako percento predvolenej šírky.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Atribúty na stránku</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Tieto číselníky určujú minimálny počet atribútov viditeľných na stránke v každej sekcii tabuliek a pohľadov, ak je v nich zapnuté stránkovanie. Tento určuje počet rozšírených atribútov (obmedzení, indexov, spúšťačov, pravidiel, politík) zobrazených na stránku.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Šírka okrajov objektov</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Určuje šírku okrajov objektov (okrem vzťahov) ako percento predvolenej šírky. Tlačidlá prepínania atribútov a deskriptory položiek tabuľky (stĺpce, obmedzenia atď.) nie sú ovplyvnené.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Vlastnosti: %1</translation>
+        <translation type="vanished">Vlastnosti: %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Ak je voľba vypnutá, SQL sa pripojí na koniec príkazu CREATE DATABASE.</tran
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Nebezpečná zóna</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Na potvrdenie zadajte do poľa nižšie &lt;strong&gt;%1&lt;/strong&gt;:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Odkazované stĺpce: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Demonštračná verzia môže vytvoriť iba `%1&apos; inštancií každého typu objektu. Tento limit bol dosiahnutý pre typ: `%2&apos;</translation>
+        <translation>Demonštračná verzia môže vytvoriť iba `%1&apos; inštancií každého typu objektu. Tento limit bol dosiahnutý pre typ: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ Požadovaná veľkosť %1 x %2 bola príliš veľká a nebolo dosť pamäte na j
         <translation>90° + 90° (vodorovne)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Farba čiary</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Náhodná</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Objekt databázy</translation>
     </message>
@@ -13547,6 +13582,18 @@ dostupné v GUI. Všetky dostupné voľby sú popísané nižšie.</translation>
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;POZOR:&lt;/strong&gt; Chystáte sa odstrániť celú databázu &lt;strong&gt;%1&lt;/strong&gt; zo servera &lt;strong&gt;%2&lt;/strong&gt;. Všetky údaje budú úplne vymazané. Naozaj chcete pokračovať?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Túto akciu nie je možné vrátiť späť!&lt;/strong&gt; Databáza &lt;strong&gt;%1&lt;/strong&gt; a všetky jej údaje budú natrvalo odstránené zo servera &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Všetky existujúce pripojenia k nej budú zatvorené.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Odstrániť databázu</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15396,6 +15443,13 @@ dostupné v GUI. Všetky dostupné voľby sú popísané nižšie.</translation>
     <message>
         <source>Support</source>
         <translation>Podpora</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Vlastnosti: %1</translation>
     </message>
 </context>
 </TS>

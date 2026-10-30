@@ -510,7 +510,7 @@ void BaseTableView::__configureObject(double width)
 		togg_brush = BaseObjectView::getFillStyle(togg_body_color_id);
 		togg_pen = BaseObjectView::getBorderStyle(togg_body_color_id);
 		togg_btns_brush = BaseObjectView::getFillStyle(togg_btn_color_id);
-		togg_btns_pen = BaseObjectView::getBorderStyle(togg_btn_color_id);
+		togg_btns_pen = BaseObjectView::getBorderStyle(togg_btn_color_id, false);
 	}
 
 	attribs_toggler->setBrush(togg_brush);

@@ -76,6 +76,7 @@
 #include "tableview.h"
 #include "pgmodelerguiplugin.h"
 #include <QScrollBar>
+#include <QRandomGenerator>
 
 QList<const PgModelerGuiPlugin *> ModelWidget::plugins;
 
@@ -497,6 +498,20 @@ ModelWidget::ModelWidget(QWidget *parent) : QWidget(parent)
 	connect(action, &QAction::triggered, this, qOverload<>(&ModelWidget::breakRelationshipLine));
 	action->setData(BreakHoriz2NinetyDegrees);
 	break_rel_menu.addAction(action);
+
+	action_rel_color = rel_color_menu.menuAction();
+	action_rel_color->setIcon(GuiUtilsNs::getIcon("appearance"));
+	action_rel_color->setText(tr("Line color"));
+
+	action = new QAction(GuiUtilsNs::getIcon("random"), tr("Random"), this);
+	connect(action, &QAction::triggered, this, &ModelWidget::changeRelationshipsColor);
+	action->setData(true);
+	rel_color_menu.addAction(action);
+
+	action = new QAction(GuiUtilsNs::getIcon("cancel"), tr("Disable"), this);
+	connect(action, &QAction::triggered, this, &ModelWidget::changeRelationshipsColor);
+	action->setData(false);
+	rel_color_menu.addAction(action);
 
 	//Alocatting the object creation actions
 	for(auto &type : types_vect)
@@ -6056,6 +6071,8 @@ void ModelWidget::configureBasicActions(BaseObject *obj)
 				popup_menu.addAction(action_convert_rel1n);
 			}
 
+			popup_menu.addAction(action_rel_color);
+
 			if(!rel->isSelfRelationship())
 			{
 				//The points added by the user are ignored by the orthogonal lines
@@ -6242,6 +6259,9 @@ void ModelWidget::configurePopupMenu(const std::vector<BaseObject *> &objects)
 		{
 			action_remove_rel_points->setData(QVariant());
 			popup_menu.addAction(action_remove_rel_points);
+
+			if(!model_protected)
+				popup_menu.addAction(action_rel_color);
 		}
 	}
 
@@ -6731,6 +6751,61 @@ void ModelWidget::removeRelationshipPoints()
 	}
 	catch(Exception &e)
 	{
+		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
+	}
+}
+
+void ModelWidget::changeRelationshipsColor()
+{
+	QAction *action = dynamic_cast<QAction *>(sender());
+	bool random_color = action->data().toBool();
+	BaseRelationship *rel = nullptr;
+	bool changed = false;
+	int op_id = -1, op_curr_idx = op_list->getCurrentIndex();
+
+	try
+	{
+		op_list->startOperationChain();
+
+		for(auto &obj : selected_objects)
+		{
+			rel = dynamic_cast<BaseRelationship *>(obj);
+
+			// Protected relationships and those without custom color (when disabling it) are left untouched
+			if(!rel || rel->isProtected() ||
+				 (!random_color && rel->getCustomColor() == Qt::transparent))
+				continue;
+
+			op_id = op_list->registerObject(rel, Operation::ObjModified, -1);
+
+			if(random_color)
+			{
+				QRandomGenerator *rand_gen = QRandomGenerator::global();
+				rel->setCustomColor(QColor(rand_gen->bounded(256), rand_gen->bounded(256), rand_gen->bounded(256)));
+			}
+			else
+				rel->setCustomColor(Qt::transparent);
+
+			rel->setModified(true);
+			changed = true;
+		}
+
+		op_list->finishOperationChain();
+
+		// Selected lines are drawn with the selection color, so the selection is cleared to show the new colors
+		scene->clearSelection();
+
+		if(changed)
+		{
+			this->setModified(true);
+			emit s_objectModified();
+		}
+	}
+	catch(Exception &e)
+	{
+		if(op_id >= 0 && op_id > op_curr_idx)
+			op_list->removeLastOperation();
+
 		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 }

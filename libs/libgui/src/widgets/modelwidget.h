@@ -236,6 +236,9 @@ class __libgui ModelWidget: public QWidget {
 
 		break_rel_menu,
 
+		//! \brief Stores the actions that change the custom color of the relationships
+		rel_color_menu,
+
 		fade_menu,
 
 		fade_in_all_menu,
@@ -460,6 +463,7 @@ class __libgui ModelWidget: public QWidget {
 		*action_conv_int_serial,
 		*action_break_rel_line,
 		*action_remove_rel_points,
+		*action_rel_color,
 		*action_set_tag,
 		*action_set_layer,
 		*action_disable_sql,
@@ -855,6 +859,10 @@ class __libgui ModelWidget: public QWidget {
 
 		//! \brief Removes any user added point from relationship
 		void removeRelationshipPoints();
+
+		/*! \brief Sets a random custom color in the selected relationships or disables their custom color.
+		 * The action that triggers the slot stores true in its data to set a random color */
+		void changeRelationshipsColor();
 
 		//! \brief Highlights the object stored on the action that triggers the slot
 		void highlightObject();

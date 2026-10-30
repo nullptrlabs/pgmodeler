@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Kleur van de scheidingstekens</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Breedte van relatielijnen</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Bepaalt de breedte van de lijnen van relaties als percentage van de standaardbreedte.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Attributen per pagina</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Deze draaiknoppen bepalen het minimale aantal attributen dat per pagina zichtbaar is in elke sectie van tabellen en weergaven wanneer paginering daarop is ingeschakeld. Deze bepaalt het aantal uitgebreide attributen (beperkingen, indexen, triggers, regels, beleid) dat per pagina wordt getoond.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Breedte van objectranden</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Bepaalt de breedte van de randen van objecten (behalve relaties) als percentage van de standaardbreedte. De schakelknoppen voor attributen en de descriptors van de tabelelementen (kolommen, beperkingen, enz.) worden hierdoor niet beïnvloed.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Eigenschappen van %1</translation>
+        <translation type="vanished">Eigenschappen van %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Als deze optie is uitgeschakeld, wordt de SQL aan het einde van de CREATE DATABA
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Gevarenzone</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Typ ter bevestiging &lt;strong&gt;%1&lt;/strong&gt; in het onderstaande veld:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Doelkolommen: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">De demoversie kan slechts `%1&apos; instanties van elk objecttype maken. Deze limiet is bereikt voor het type: `%2&apos;</translation>
+        <translation>De demoversie kan slechts `%1&apos; instanties van elk objecttype maken. Deze limiet is bereikt voor het type: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ De gevraagde grootte %1 x %2 was te groot en er was onvoldoende geheugen om deze
         <translation>90° + 90° (horizontaal)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Lijnkleur</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Willekeurig</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Databaseobject</translation>
     </message>
@@ -13547,6 +13582,18 @@ die in de GUI beschikbaar zijn. Alle beschikbare opties worden hieronder beschre
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;PAS OP:&lt;/strong&gt; U staat op het punt de volledige database &lt;strong&gt;%1&lt;/strong&gt; van de server &lt;strong&gt;%2&lt;/strong&gt; te verwijderen. Alle gegevens worden volledig gewist. Wilt u echt doorgaan?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Deze actie is onomkeerbaar!&lt;/strong&gt; De database &lt;strong&gt;%1&lt;/strong&gt; en alle bijbehorende gegevens worden permanent verwijderd van de server &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Alle bestaande verbindingen ermee worden gesloten.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Database verwijderen</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15396,6 +15443,13 @@ die in de GUI beschikbaar zijn. Alle beschikbare opties worden hieronder beschre
     <message>
         <source>Support</source>
         <translation>Ondersteuning</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Eigenschappen van %1</translation>
     </message>
 </context>
 </TS>

@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Boja graničnika</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Širina linija odnosa</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Određuje širinu linija odnosa kao postotak zadane širine.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Atributi po stranici</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Ovi brojači određuju minimalan broj atributa vidljivih po stranici u svakom odjeljku tablica i pogleda kada je na njima omogućeno straničenje. Ovaj određuje broj proširenih atributa (ograničenja, indeksa, okidača, pravila, politika) prikazanih po stranici.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Širina obruba objekata</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Određuje širinu obruba objekata (osim odnosa) kao postotak zadane širine. Ova postavka ne utječe na gumbe za prebacivanje atributa i oznake stavki tablice (stupci, ograničenja itd.).&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Svojstva: %1</translation>
+        <translation type="vanished">Svojstva: %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Ako se ovo isključi, SQL će biti dodan na kraj naredbe CREATE DATABASE.</trans
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Opasna zona</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Za potvrdu upišite &lt;strong&gt;%1&lt;/strong&gt; u polje ispod:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Referencirani stupac(i): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Demonstracijska verzija može izraditi samo `%1&apos; instanci svakog tipa objekta! Dosegnuli ste ovo ograničenje za tip: `%2&apos;</translation>
+        <translation>Demonstracijska verzija može izraditi samo `%1&apos; instanci svakog tipa objekta! Dosegnuli ste ovo ograničenje za tip: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ Traženi je format %1 x %2 bio prevelik i nije bilo dovoljno memorije za njegovu
         <translation>90° + 90° (vodoravno)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Boja linije</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Nasumična</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Objekt baze podataka</translation>
     </message>
@@ -13547,6 +13582,18 @@ dostupne u grafičkom sučelju. Sve dostupne opcije opisane su u nastavku.</tran
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;OPREZ:&lt;/strong&gt; spremate se obrisati cijelu bazu podataka &lt;strong&gt;%1&lt;/strong&gt; s poslužitelja &lt;strong&gt;%2&lt;/strong&gt;! Svi podaci bit će potpuno izbrisani. Želite li doista nastaviti?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Ova radnja je nepovratna!&lt;/strong&gt; Baza podataka &lt;strong&gt;%1&lt;/strong&gt; i svi njezini podaci bit će trajno obrisani s poslužitelja &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Sve postojeće veze s njom bit će zatvorene.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Obriši bazu podataka</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15398,6 +15445,13 @@ dostupne u grafičkom sučelju. Sve dostupne opcije opisane su u nastavku.</tran
     <message>
         <source>Support</source>
         <translation>Podrška</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Svojstva: %1</translation>
     </message>
 </context>
 </TS>

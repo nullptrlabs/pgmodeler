@@ -62,6 +62,11 @@ class __libcanvas BaseObjectView: public QObject, public QGraphicsItemGroup {
 		//! \brief Indicate if the graphical element representing object's shadow must be hidden.
 		static bool hide_shadow;
 
+		/*! \brief Percentage of the default border width used in the pens of all objects but relationships.
+		 * 100 is the default width, 120 is the default width plus 20% and so on. The width of the
+		 * relationships' lines is controlled by RelationshipView::border_width_pct */
+		static unsigned border_width_pct;
+
 		/*! \brief Stores the selection order of the current object. This attribute is used to
 		 know when an item was selected before another in the scene because the implementation of
 		 the method QGraphicsScene :: selectedItem() the selected objects are returned without
@@ -172,8 +177,9 @@ class __libcanvas BaseObjectView: public QObject, public QGraphicsItemGroup {
 		 for the specified element id */
 		static void getFillStyle(const QString &id, QColor &color1, QColor &color2);
 
-		//! \brief Returns the border style for the specified element id
-		static QPen getBorderStyle(const QString &id);
+		/*! \brief Returns the border style for the specified element id. When adjust_width is false
+		 * the pen width is not affected by the border width percentage (see setBorderWidthPercent()) */
+		static QPen getBorderStyle(const QString &id, bool adjust_width = true);
 
 		//! \brief Returns the font style for the specified element id
 		static QTextCharFormat getFontStyle(const QString &id);
@@ -189,6 +195,11 @@ class __libcanvas BaseObjectView: public QObject, public QGraphicsItemGroup {
 		static void setShadowHidden(bool value);
 
 		static bool isShadowHidden();
+
+		//! \brief Sets the percentage of the default border width used by the objects (except relationships)
+		static void setBorderWidthPercent(unsigned value);
+
+		static unsigned getBorderWidthPercent();
 
 		//! \brief Sets the  font style for the specified element id
 		static void setFontStyle(const QString &id, QTextCharFormat font_fmt);

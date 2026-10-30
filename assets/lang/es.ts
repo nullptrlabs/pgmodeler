@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Color de los delimitadores</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Ancho de las líneas de las relaciones</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Define el ancho de las líneas de las relaciones como un porcentaje del ancho predeterminado.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Atributos por página</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Estos controles definen la cantidad mínima de atributos visibles por página en cada sección de tablas y vistas cuando la paginación está habilitada en ellas. Este define el número de atributos extendidos (restricciones, índices, disparadores, reglas, políticas) mostrados por página.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Ancho del borde de los objetos</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Define el ancho de los bordes de los objetos (excepto las relaciones) como un porcentaje del ancho predeterminado. Los botones de alternancia de atributos y los descriptores de los elementos de las tablas (columnas, restricciones, etc.) no se ven afectados.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Propiedades de %1</translation>
+        <translation type="vanished">Propiedades de %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Si se desmarca, el SQL se agregará al final del comando CREATE DATABASE.</trans
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Zona de peligro</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Para confirmar, escriba &lt;strong&gt;%1&lt;/strong&gt; en el campo siguiente:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Columnas referenciadas: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">La versión de demostración solo puede crear `%1&apos; instancias de cada tipo de objeto. Se alcanzó este límite para el tipo: `%2&apos;</translation>
+        <translation>La versión de demostración solo puede crear `%1&apos; instancias de cada tipo de objeto. Se alcanzó este límite para el tipo: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ El tamaño solicitado %1 x %2 era demasiado grande y no había memoria suficient
         <translation>90° + 90° (horizontal)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Color de línea</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Aleatorio</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Objeto de base de datos</translation>
     </message>
@@ -13547,6 +13582,18 @@ disponibles en la GUI. A continuación se describen todas las opciones disponibl
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;PRECAUCIÓN:&lt;/strong&gt; Está a punto de eliminar toda la base de datos &lt;strong&gt;%1&lt;/strong&gt; del servidor &lt;strong&gt;%2&lt;/strong&gt;. Todos los datos se borrarán por completo. ¿Desea realmente continuar?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;¡Esta acción es irreversible!&lt;/strong&gt; La base de datos &lt;strong&gt;%1&lt;/strong&gt; y todos sus datos se eliminarán de forma permanente del servidor &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Todas las conexiones existentes con ella se cerrarán.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Eliminar base de datos</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15396,6 +15443,13 @@ disponibles en la GUI. A continuación se describen todas las opciones disponibl
     <message>
         <source>Support</source>
         <translation>Soporte</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Propiedades de %1</translation>
     </message>
 </context>
 </TS>

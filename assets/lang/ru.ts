@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Цвет ограничителей</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Ширина линий связей</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Определяет ширину линий связей в процентах от ширины по умолчанию.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Атрибутов на странице</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Эти счётчики задают минимальное количество атрибутов, видимых на странице в каждом разделе таблиц и представлений, когда в них включено разбиение на страницы. Этот задаёт количество расширенных атрибутов (ограничений, индексов, триггеров, правил, политик), отображаемых на странице.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Ширина границ объектов</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Определяет ширину границ объектов (кроме связей) в процентах от ширины по умолчанию. Кнопки переключения атрибутов и дескрипторы элементов таблицы (столбцы, ограничения и т. д.) не затрагиваются.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Свойства %1</translation>
+        <translation type="vanished">Свойства %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Опасная зона</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Для подтверждения введите &lt;strong&gt;%1&lt;/strong&gt; в поле ниже:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Демонстрационная версия может создавать только `%1&apos; экземпляров каждого типа объектов. Этот предел достигнут для типа: `%2&apos;</translation>
+        <translation>Демонстрационная версия может создавать только `%1&apos; экземпляров каждого типа объектов. Этот предел достигнут для типа: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
         <translation>90° + 90° (горизонтально)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Цвет линии</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Случайный</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Объект базы данных</translation>
     </message>
@@ -13547,6 +13582,18 @@ available in GUI. All available options are described below.</source>
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;ОСТОРОЖНО:&lt;/strong&gt; Вы собираетесь удалить всю базу данных &lt;strong&gt;%1&lt;/strong&gt; с сервера &lt;strong&gt;%2&lt;/strong&gt;. Все данные будут полностью стёрты. Вы действительно хотите продолжить?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Это действие необратимо!&lt;/strong&gt; База данных &lt;strong&gt;%1&lt;/strong&gt; и все её данные будут безвозвратно удалены с сервера &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Все существующие подключения к ней будут закрыты.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Удалить базу данных</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15396,6 +15443,13 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Support</source>
         <translation>Поддержка</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Свойства %1</translation>
     </message>
 </context>
 </TS>

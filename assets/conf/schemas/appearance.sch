@@ -33,6 +33,8 @@
 \s attribs-per-page="{attribs-per-page}"
 \s ext-attribs-per-page="{ext-attribs-per-page}"
 \s expansion-factor="{expansion-factor}"
+\s obj-border-width="{obj-border-width}"
+\s rel-border-width="{rel-border-width}"
 [/>] \n
 
 \n \t <code

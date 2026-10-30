@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>구분자 색상</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>관계 선 너비</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;관계 선의 너비를 기본 너비에 대한 백분율로 지정합니다.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>페이지당 속성</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;이 스핀 컨트롤은 페이지네이션이 활성화된 경우 테이블과 뷰의 각 섹션에서 페이지당 표시되는 속성의 최소 개수를 설정합니다. 이 항목은 페이지당 표시되는 확장 속성(제약 조건, 인덱스, 트리거, 규칙, 정책)의 개수를 설정합니다.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>객체 테두리 너비</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;객체(관계 제외)의 테두리 너비를 기본 너비에 대한 백분율로 지정합니다. 속성 전환 버튼과 테이블 항목(열, 제약 조건 등)의 설명자는 영향을 받지 않습니다.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>%1 속성</translation>
+        <translation type="vanished">%1 속성</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>위험 영역</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>확인하려면 아래 입력란에 &lt;strong&gt;%1&lt;/strong&gt;을(를) 입력하십시오:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">데모 버전에서는 객체 유형마다 `%1&apos;개의 인스턴스만 만들 수 있습니다. 유형 `%2&apos;에서 이 제한에 도달했습니다.</translation>
+        <translation>데모 버전에서는 객체 유형마다 `%1&apos;개의 인스턴스만 만들 수 있습니다. 유형 `%2&apos;에서 이 제한에 도달했습니다.</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
         <translation>90° + 90° (가로)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>선 색상</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>무작위</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>데이터베이스 객체</translation>
     </message>
@@ -13547,6 +13582,18 @@ available in GUI. All available options are described below.</source>
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;주의:&lt;/strong&gt; 서버 &lt;strong&gt;%2&lt;/strong&gt;에서 데이터베이스 &lt;strong&gt;%1&lt;/strong&gt; 전체를 삭제하려고 합니다. 모든 데이터가 완전히 삭제됩니다. 정말 계속하시겠습니까?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;이 작업은 되돌릴 수 없습니다!&lt;/strong&gt; 데이터베이스 &lt;strong&gt;%1&lt;/strong&gt;과(와) 모든 데이터가 서버 &lt;strong&gt;%2&lt;/strong&gt;에서 영구적으로 삭제됩니다.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>해당 데이터베이스에 대한 모든 기존 연결이 닫힙니다.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>데이터베이스 삭제</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15398,6 +15445,13 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Support</source>
         <translation>지원</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>%1 속성</translation>
     </message>
 </context>
 </TS>

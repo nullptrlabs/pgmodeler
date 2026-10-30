@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Farge på skilletegn</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Relasjonslinjenes bredde</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Angir bredden på relasjonenes linjer som en prosentandel av standardbredden.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Attributter per side</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Disse tellerne angir minste antall attributter som er synlige per side i hver seksjon av tabeller og visninger når sideinndeling er aktivert. Denne angir antall utvidede attributter (begrensninger, indekser, triggere, regler, retningslinjer) som vises per side.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Objektenes kantbredde</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Angir bredden på objektenes kanter (unntatt relasjoner) som en prosentandel av standardbredden. Vekslingsknappene for attributter og beskrivelsene av tabellelementene (kolonner, begrensninger osv.) påvirkes ikke.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Egenskaper for %1</translation>
+        <translation type="vanished">Egenskaper for %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Hvis alternativet er slått av, legges SQL til på slutten av kommandoen CREATE 
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Faresone</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Skriv &lt;strong&gt;%1&lt;/strong&gt; i feltet nedenfor for å bekrefte:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Referte kolonner: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Demoversjonen kan bare opprette `%1&apos; forekomster av hver objekttype. Denne grensen er nådd for typen: `%2&apos;</translation>
+        <translation>Demoversjonen kan bare opprette `%1&apos; forekomster av hver objekttype. Denne grensen er nådd for typen: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ Den forespurte størrelsen %1 x %2 var for stor, og det var ikke nok minne til �
         <translation>90° + 90° (vannrett)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Linjefarge</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Tilfeldig</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Databaseobjekt</translation>
     </message>
@@ -13547,6 +13582,18 @@ som er tilgjengelige i det grafiske brukergrensesnittet. Alle tilgjengelige alte
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;FORSIKTIG:&lt;/strong&gt; Du er i ferd med å slette hele databasen &lt;strong&gt;%1&lt;/strong&gt; fra serveren &lt;strong&gt;%2&lt;/strong&gt;. Alle data slettes fullstendig. Vil du virkelig fortsette?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Denne handlingen kan ikke angres!&lt;/strong&gt; Databasen &lt;strong&gt;%1&lt;/strong&gt; og alle dataene i den slettes permanent fra serveren &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Alle eksisterende tilkoblinger til den lukkes.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Slett database</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15396,6 +15443,13 @@ som er tilgjengelige i det grafiske brukergrensesnittet. Alle tilgjengelige alte
     <message>
         <source>Support</source>
         <translation>Brukerstøtte</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Egenskaper for %1</translation>
     </message>
 </context>
 </TS>

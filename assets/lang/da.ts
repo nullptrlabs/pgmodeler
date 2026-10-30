@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Farve for skilletegn</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Relationslinjernes bredde</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Angiver bredden af relationernes linjer som en procentdel af standardbredden.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Attributter pr. side</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Disse tællere angiver det mindste antal attributter, der er synlige pr. side i hver sektion af tabeller og visninger, når sideinddeling er aktiveret. Denne angiver antallet af udvidede attributter (begrænsninger, indeks, triggere, regler, politikker), der vises pr. side.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Objekternes kantbredde</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Angiver bredden af objekternes kanter (undtagen relationer) som en procentdel af standardbredden. Skifteknapperne til attributter og beskrivelserne af tabellens elementer (kolonner, begrænsninger osv.) påvirkes ikke.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Egenskaber for %1</translation>
+        <translation type="vanished">Egenskaber for %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Hvis indstillingen er slået fra, tilføjes SQL til sidst i kommandoen CREATE DA
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Farezone</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Skriv &lt;strong&gt;%1&lt;/strong&gt; i feltet nedenfor for at bekræfte:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Refererede kolonner: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Demoversionen kan kun oprette `%1&apos; instanser af hver objekttype. Denne grænse er nået for typen: `%2&apos;</translation>
+        <translation>Demoversionen kan kun oprette `%1&apos; instanser af hver objekttype. Denne grænse er nået for typen: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ Den anmodede størrelse %1 x %2 var for stor, og der var ikke hukommelse nok til
         <translation>90° + 90° (vandret)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Linjefarve</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Tilfældig</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Databaseobjekt</translation>
     </message>
@@ -13547,6 +13582,18 @@ som er tilgængelige i den grafiske brugerflade. Alle tilgængelige indstillinge
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;FORSIGTIG:&lt;/strong&gt; Du er ved at slette hele databasen &lt;strong&gt;%1&lt;/strong&gt; fra serveren &lt;strong&gt;%2&lt;/strong&gt;. Alle data bliver slettet helt. Vil du virkelig fortsætte?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Denne handling kan ikke fortrydes!&lt;/strong&gt; Databasen &lt;strong&gt;%1&lt;/strong&gt; og alle dens data slettes permanent fra serveren &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Alle eksisterende forbindelser til den lukkes.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Slet database</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15396,6 +15443,13 @@ som er tilgængelige i den grafiske brugerflade. Alle tilgængelige indstillinge
     <message>
         <source>Support</source>
         <translation>Support</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Egenskaber for %1</translation>
     </message>
 </context>
 </TS>

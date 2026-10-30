@@ -105,6 +105,12 @@ class __libgui AppearanceConfigWidget: public BaseConfigWidget, public Ui::Appea
 		
 		bool show_grid, show_delimiters;
 
+		//! \brief Indicates if the last saved configuration changed the relationships line width
+		bool rel_border_width_changed { false };
+
+		//! \brief Stores the relationships line width (in percent) last applied/saved
+		unsigned applied_rel_border_width { 100 };
+
 		void loadThemesConfiguration();
 
 		//! \brief Loads the example model from file (conf/exampledb.dbm)
@@ -142,6 +148,9 @@ class __libgui AppearanceConfigWidget: public BaseConfigWidget, public Ui::Appea
 
 		void loadConfiguration() override;
 
+		//! \brief Returns if the relationships line width was changed by the last saved configuration
+		bool isRelBorderWidthChanged();
+
 		//! \brief Applies the selected ui theme to the whole application
 		void applyUiTheme();
 
@@ -154,6 +163,10 @@ class __libgui AppearanceConfigWidget: public BaseConfigWidget, public Ui::Appea
 		void applyElementColor(unsigned color_idx, QColor color);
 		void previewCodeFontStyle();
 		void previewCanvasColors();
+
+		//! \brief Applies the border widths set in the spinboxes to the example model so the user can preview them
+		void previewBorderWidths();
+
 		void applySyntaxHighlightTheme();
 
 		void applyConfiguration() override;

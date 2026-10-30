@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Erottimien väri</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Suhteiden viivojen leveys</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Määrittää suhteiden viivojen leveyden prosentteina oletusleveydestä.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Attribuutteja sivulla</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Nämä lukukentät määrittävät sivulla näkyvien attribuuttien vähimmäismäärän taulukoiden ja näkymien kussakin osiossa, kun sivutus on niissä käytössä. Tämä määrittää sivulla näytettävien laajennettujen attribuuttien (rajoitteiden, indeksien, liipaisimien, sääntöjen, käytäntöjen) määrän.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Objektien reunojen leveys</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Määrittää objektien (suhteita lukuun ottamatta) reunojen leveyden prosentteina oletusleveydestä. Asetus ei vaikuta attribuuttien vaihtopainikkeisiin eikä taulukon kohteiden (sarakkeet, rajoitteet jne.) kuvaajiin.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Kohteen %1 ominaisuudet</translation>
+        <translation type="vanished">Kohteen %1 ominaisuudet</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Jos asetus ei ole valittuna, SQL lisätään CREATE DATABASE -komennon loppuun.<
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Vaaravyöhyke</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Vahvista kirjoittamalla &lt;strong&gt;%1&lt;/strong&gt; alla olevaan kenttään:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Viitatut sarakkeet: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Esittelyversio voi luoda vain `%1&apos; esiintymää kutakin objektityyppiä kohden. Tämä raja on saavutettu tyypille: `%2&apos;</translation>
+        <translation>Esittelyversio voi luoda vain `%1&apos; esiintymää kutakin objektityyppiä kohden. Tämä raja on saavutettu tyypille: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ Pyydetty koko %1 x %2 oli liian suuri, eikä muistia ollut riittävästi sen var
         <translation>90° + 90° (vaaka)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Viivan väri</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Satunnainen</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Tietokantaobjekti</translation>
     </message>
@@ -13547,6 +13582,18 @@ käytettävissä oleville tärkeimmille toiminnoille. Kaikki käytettävissä ol
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;VAROVAISUUTTA:&lt;/strong&gt; Olet poistamassa koko tietokannan &lt;strong&gt;%1&lt;/strong&gt; palvelimelta &lt;strong&gt;%2&lt;/strong&gt;. Kaikki tiedot pyyhitään kokonaan. Haluatko varmasti jatkaa?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Tätä toimintoa ei voi peruuttaa!&lt;/strong&gt; Tietokanta &lt;strong&gt;%1&lt;/strong&gt; ja kaikki sen tiedot poistetaan pysyvästi palvelimelta &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Kaikki sen olemassa olevat yhteydet suljetaan.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Poista tietokanta</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15396,6 +15443,13 @@ käytettävissä oleville tärkeimmille toiminnoille. Kaikki käytettävissä ol
     <message>
         <source>Support</source>
         <translation>Tuki</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Kohteen %1 ominaisuudet</translation>
     </message>
 </context>
 </TS>
