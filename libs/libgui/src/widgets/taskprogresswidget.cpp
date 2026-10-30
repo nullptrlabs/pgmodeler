@@ -139,16 +139,6 @@ void TaskProgressWidget::updateProgress(int progress, QString text, unsigned ico
 	 * cancelable): this dialog is application-modal (see the .ui file), so nothing other than it
 	 * can receive input while it's up, regardless of whether cancel_btn itself is visible */
 	qApp->processEvents(QEventLoop::AllEvents, 1);
-
-	/* MacOSX workaround: The event loop below is needed because on this system
-		 the task progress is not correctly updated. The event loop causes a little
-		 delay (1ms) and it`s sufficient to update the entire widget */
-#ifdef Q_OS_MACOS
-	QEventLoop event_loop;
-	//Gives 5ms to the task to be shown and update its contents
-	QTimer::singleShot(5, &event_loop, &QEventLoop::quit);
-	event_loop.exec(QEventLoop::AllEvents);
-#endif
 }
 
 void TaskProgressWidget::close()
