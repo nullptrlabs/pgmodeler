@@ -31,6 +31,7 @@
 #include "guiglobal.h"
 #include "ui_taskprogresswidget.h"
 #include <map>
+#include <QElapsedTimer>
 
 class __libgui TaskProgressWidget: public QDialog, public Ui::TaskProgressWidget {
 	Q_OBJECT
@@ -48,6 +49,9 @@ class __libgui TaskProgressWidget: public QDialog, public Ui::TaskProgressWidget
 		 * makes the dialog (and so its children) visible, so isVisible() would misreport false even
 		 * right after setCancelable(true) */
 		bool cancelable;
+
+		//! \brief Tracks the time since the last macOS event loop wait in updateProgress()
+		QElapsedTimer last_refresh;
 
 	protected:
 		bool eventFilter(QObject *object, QEvent *event) override;
