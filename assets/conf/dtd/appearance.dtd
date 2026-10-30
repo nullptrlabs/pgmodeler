@@ -19,6 +19,8 @@
 <!ATTLIST design attribs-per-page CDATA #IMPLIED>
 <!ATTLIST design ext-attribs-per-page CDATA #IMPLIED>
 <!ATTLIST design expansion-factor CDATA #IMPLIED>
+<!ATTLIST design obj-border-width CDATA #IMPLIED>
+<!ATTLIST design rel-border-width CDATA #IMPLIED>
 
 <!ELEMENT code EMPTY>
 <!ATTLIST code font CDATA #IMPLIED>

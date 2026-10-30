@@ -31,6 +31,7 @@ unsigned BaseObjectView::global_sel_order {1};
 
 bool BaseObjectView::use_placeholder {true};
 bool BaseObjectView::compact_view {false};
+unsigned BaseObjectView::border_width_pct {100};
 bool BaseObjectView::hide_shadow {false};
 
 std::map<QString, QTextCharFormat> BaseObjectView::font_config;
@@ -304,7 +305,7 @@ QLinearGradient BaseObjectView::getFillStyle(const QString &id)
 	return grad;
 }
 
-QPen BaseObjectView::getBorderStyle(const QString &id)
+QPen BaseObjectView::getBorderStyle(const QString &id, bool adjust_width)
 {
 	QPen pen(Qt::NoPen);
 
@@ -317,7 +318,7 @@ QPen BaseObjectView::getBorderStyle(const QString &id)
 			if(id==Attributes::ObjSelection)
 				colors[2].setAlpha(ObjectAlphaChannel);
 
-			pen.setWidthF(ObjectBorderWidth * getScreenDpiFactor());
+			pen.setWidthF(ObjectBorderWidth * getScreenDpiFactor() * (adjust_width ? border_width_pct / 100.0 : 1));
 			pen.setColor(colors[2]);
 			pen.setStyle(Qt::SolidLine);
 		}
@@ -342,6 +343,16 @@ void BaseObjectView::setPlaceholderEnabled(bool value)
 bool BaseObjectView::isPlaceholderEnabled()
 {
 	return use_placeholder;
+}
+
+void BaseObjectView::setBorderWidthPercent(unsigned value)
+{
+	border_width_pct = value;
+}
+
+unsigned BaseObjectView::getBorderWidthPercent()
+{
+	return border_width_pct;
 }
 
 void BaseObjectView::setCompactViewEnabled(bool value)

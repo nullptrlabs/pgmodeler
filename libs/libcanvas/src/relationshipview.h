@@ -89,6 +89,10 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		//! \brief Specifies how the lines of all relationships are rendered
 		static LineStyle line_style;
 
+		/*! \brief Percentage of the default width used in the pens of the relationships' lines.
+		 * 100 is the default width, 120 is the default width plus 20% and so on */
+		static unsigned border_width_pct;
+
 		/*! \brief Indicate that the line is being configured/updated. This flag is used to evict
 		 that the configureLine() method is exceedingly called during the table moving. */
 		bool configuring_line,
@@ -103,6 +107,9 @@ class __libcanvas RelationshipView: public BaseObjectView {
 		BaseTableView *tables[2];
 
 		QString tab_hashes[2];
+
+		//! \brief Custom color of the relationship used in the last line configuration
+		QColor applied_custom_color;
 
 		/*! \brief Stores the points on tables where the relationship line is connected.
 		This attribute is updated every time the configureLine() method is called.
@@ -528,6 +535,11 @@ class __libcanvas RelationshipView: public BaseObjectView {
 
 		//! \brief Returns the style of the lines used by the relationships
 		static LineStyle getLineStyle();
+
+		//! \brief Sets the percentage of the default width used by the relationships' lines
+		static void setBorderWidthPercent(unsigned value);
+
+		static unsigned getBorderWidthPercent();
 
 		//! \brief Enables the usage of Crow's foot notation for all relationships
 		static void setCrowsFoot(bool value);

@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Boja graničnika</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Širina linija odnosa</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Određuje širinu linija odnosa kao procenat podrazumevane širine.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Atributi po stranici</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Ovi brojači definišu minimalan broj atributa vidljivih po stranici u svakom odeljku tabela i pogleda kada je na njima omogućeno straničenje. Ovaj definiše broj proširenih atributa (ograničenja, indeksa, okidača, pravila, politika) prikazanih po stranici.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Širina ivica objekata</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Određuje širinu ivica objekata (osim odnosa) kao procenat podrazumevane širine. Ovo podešavanje ne utiče na dugmad za prebacivanje atributa i oznake stavki tabele (kolone, ograničenja itd.).&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -2245,6 +2261,17 @@ Ako se ovo isključi, SQL će biti dodat na kraj komande CREATE DATABASE.</trans
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Opasna zona</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Za potvrdu upišite &lt;strong&gt;%1&lt;/strong&gt; u polje ispod:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Referencirana kolona(e): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Demonstraciona verzija može kreirati samo `%1&apos; instanci svakog tipa objekta! Dostigli ste ovo ograničenje za tip: `%2&apos;</translation>
+        <translation>Demonstraciona verzija može kreirati samo `%1&apos; instanci svakog tipa objekta! Dostigli ste ovo ograničenje za tip: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5707,11 +5734,11 @@ Poruka koju je vratio SUBP: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation type="vanished">Zamenjuje sve prave linije u odnosima zakrivljenim radi boljeg prikaza modela.</translation>
+        <translation>Zamenjuje sve prave linije u odnosima zakrivljenim radi boljeg prikaza modela.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation type="vanished">Koristi zakrivljene linije za odnose</translation>
+        <translation>Koristi zakrivljene linije za odnose</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -7153,7 +7180,7 @@ Poruka koju je vratio SUBP: `%1&apos;</translation>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation type="vanished">Validacija licence za pgModeler Plus nije uspela! Morate je validirati u grafičkom interfejsu pre korišćenja interfejsa komandne linije.</translation>
+        <translation>Validacija licence za pgModeler Plus nije uspela! Morate je validirati u grafičkom interfejsu pre korišćenja interfejsa komandne linije.</translation>
     </message>
     <message>
         <source>License error code: %1</source>
@@ -7161,11 +7188,11 @@ Poruka koju je vratio SUBP: `%1&apos;</translation>
     </message>
     <message>
         <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation type="vanished">Interfejs komandne linije nije dostupan u probnoj verziji! Nadogradite licencu da biste ga koristili.</translation>
+        <translation>Interfejs komandne linije nije dostupan u probnoj verziji! Nadogradite licencu da biste ga koristili.</translation>
     </message>
     <message>
         <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation type="vanished">Period van mrežnog korišćenja je istekao! Morate validirati licencu u grafičkom interfejsu da biste nastavili da koristite interfejs komandne linije.</translation>
+        <translation>Period van mrežnog korišćenja je istekao! Morate validirati licencu u grafičkom interfejsu da biste nastavili da koristite interfejs komandne linije.</translation>
     </message>
     <message>
         <source>A valid pgModeler Plus license is required to use this feature.</source>
@@ -9833,6 +9860,14 @@ Zatražena veličina %1 x %2 bila je prevelika i nije bilo dovoljno memorije za 
     <message>
         <source>90° + 90° (horizontal)</source>
         <translation>90° + 90° (horizontalno)</translation>
+    </message>
+    <message>
+        <source>Line color</source>
+        <translation>Boja linije</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Nasumična</translation>
     </message>
     <message>
         <source>Database object</source>
@@ -13547,6 +13582,18 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;OPREZ:&lt;/strong&gt; spremate se da obrišete celu bazu podataka &lt;strong&gt;%1&lt;/strong&gt; sa servera &lt;strong&gt;%2&lt;/strong&gt;! Svi podaci biće potpuno izbrisani. Da li zaista želite da nastavite?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Ova radnja je neopoziva!&lt;/strong&gt; Baza podataka &lt;strong&gt;%1&lt;/strong&gt; i svi njeni podaci biće trajno obrisani sa servera &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Sve postojeće veze sa njom biće zatvorene.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Obriši bazu podataka</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -13584,7 +13631,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     </message>
     <message>
         <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
-        <translation type="vanished">&lt;p&gt;Skriva odnose između tabela iste scene. Predstavljeni su oznakom odnosa svake tabele, čiji se detalji prikazuju dvostrukim klikom. Namenjeno velikim modelima u kojima nacrtani odnosi gube svrhu.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NAPOMENA:&lt;/strong&gt; Promena stupa na snagu tek nakon čuvanja i ponovnog učitavanja modela.&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Skriva odnose između tabela iste scene. Predstavljeni su oznakom odnosa svake tabele, čiji se detalji prikazuju dvostrukim klikom. Namenjeno velikim modelima u kojima nacrtani odnosi gube svrhu.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NAPOMENA:&lt;/strong&gt; Promena stupa na snagu tek nakon čuvanja i ponovnog učitavanja modela.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14461,7 +14508,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
-        <translation type="vanished">Odnosi između scena</translation>
+        <translation>Odnosi između scena</translation>
     </message>
     <message>
         <source>Table relationships</source>
@@ -14469,7 +14516,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     </message>
     <message>
         <source>Table:</source>
-        <translation type="vanished">Tabela:</translation>
+        <translation>Tabela:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14477,7 +14524,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation type="vanished">Unakr. odnosi</translation>
+        <translation>Unakr. odnosi</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -15396,6 +15443,13 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     <message>
         <source>Support</source>
         <translation>Podrška</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Svojstva: %1</translation>
     </message>
 </context>
 </TS>

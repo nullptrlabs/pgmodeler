@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Χρώμα οριοθετών</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Πλάτος γραμμών σχέσεων</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Ορίζει το πλάτος των γραμμών των σχέσεων ως ποσοστό του προεπιλεγμένου πλάτους.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Χαρακτηριστικά ανά σελίδα</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Αυτά τα πεδία αύξησης ορίζουν τον ελάχιστο αριθμό χαρακτηριστικών που είναι ορατά ανά σελίδα σε κάθε ενότητα πινάκων και προβολών όταν είναι ενεργοποιημένη η σελιδοποίηση. Αυτό ορίζει τον αριθμό των εκτεταμένων χαρακτηριστικών (περιορισμοί, ευρετήρια, σκανδάλες, κανόνες, πολιτικές) που εμφανίζονται ανά σελίδα.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Πλάτος περιγράμματος αντικειμένων</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Ορίζει το πλάτος των περιγραμμάτων των αντικειμένων (εκτός από τις σχέσεις) ως ποσοστό του προεπιλεγμένου πλάτους. Τα κουμπιά εναλλαγής χαρακτηριστικών και οι περιγραφείς των στοιχείων του πίνακα (στήλες, περιορισμοί κ.λπ.) δεν επηρεάζονται.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Ιδιότητες %1</translation>
+        <translation type="vanished">Ιδιότητες %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Επικίνδυνη ζώνη</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Για επιβεβαίωση, πληκτρολογήστε &lt;strong&gt;%1&lt;/strong&gt; στο παρακάτω πεδίο:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Η δοκιμαστική έκδοση μπορεί να δημιουργήσει μόνο `%1&apos; στιγμιότυπα κάθε τύπου αντικειμένου! Φτάσατε σε αυτό το όριο για τον τύπο: `%2&apos;</translation>
+        <translation>Η δοκιμαστική έκδοση μπορεί να δημιουργήσει μόνο `%1&apos; στιγμιότυπα κάθε τύπου αντικειμένου! Φτάσατε σε αυτό το όριο για τον τύπο: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
         <translation>90° + 90° (οριζόντια)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Χρώμα γραμμής</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Τυχαίο</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Αντικείμενο βάσης δεδομένων</translation>
     </message>
@@ -13547,6 +13582,18 @@ available in GUI. All available options are described below.</source>
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;ΠΡΟΣΟΧΗ:&lt;/strong&gt; πρόκειται να διαγράψετε ολόκληρη τη βάση δεδομένων &lt;strong&gt;%1&lt;/strong&gt; από τον διακομιστή &lt;strong&gt;%2&lt;/strong&gt;! Όλα τα δεδομένα θα διαγραφούν εντελώς. Θέλετε πράγματι να συνεχίσετε;</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Αυτή η ενέργεια είναι μη αναστρέψιμη!&lt;/strong&gt; Η βάση δεδομένων &lt;strong&gt;%1&lt;/strong&gt; και όλα τα δεδομένα της θα διαγραφούν οριστικά από τον διακομιστή &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Όλες οι υπάρχουσες συνδέσεις με αυτήν θα κλείσουν.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Διαγραφή βάσης δεδομένων</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15398,6 +15445,13 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Support</source>
         <translation>Υποστήριξη</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Ιδιότητες %1</translation>
     </message>
 </context>
 </TS>
