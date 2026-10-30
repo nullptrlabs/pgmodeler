@@ -22,6 +22,8 @@ v2.0.0
 * [New] Added `UtilsNs::setOwnerOnlyAccess()` to restrict a file to its owner (no effect on Windows).
 * [New] Added unit tests for the secrets encryption (`secretsnstest`).
 * [New] Added `DangerZoneWidget`, a dialog that asks the user to type a given text (e.g., the name of a database) before a destructive operation proceeds; `DangerZoneWidget::confirm()` shows it as a fixed-size form whose confirm button is enabled only when the typed text matches exactly.
+* [New] Added the "Objects border width" and "Relationships line width" settings to the Canvas group of the appearance settings (`obj-border-width` and `rel-border-width` attributes of the `design` element in `appearance.conf`). They are percentages of the default width (50% to 200%, in steps of 5%, 100% is the default) applied to the pens of the borders of the objects (`BaseObjectView::setBorderWidthPercent()`/`getBorderWidthPercent()`) and of the relationships lines (`RelationshipView::setBorderWidthPercent()`/`getBorderWidthPercent()`). The change is previewed in the example model while editing and applied to the opened models when the settings are saved. The attribute toggler buttons and the descriptors of the table items are not affected, for this `BaseObjectView::getBorderStyle()` gained the `adjust_width` parameter.
+* [New] Added the "Line color" submenu to the context menu of relationships (`ModelWidget::changeRelationshipsColor()`), displayed when the selection has only relationships, with the actions to set a random custom color or to disable the custom color of one or more relationships. The changes are registered in the operations list.
 * [Change] Selection, the Object Search Widget, and Layers operations now operate across every scene (or follow the clicked object's own scene) instead of assuming a single canvas.
 * [Change] The "Rearrange objects" menu is now scoped to the active scene instead of the whole model.
 * [Change] PNG/SVG export now produces one image per scene instead of a single image of the whole model.
@@ -44,13 +46,14 @@ v2.0.0
 * [Change] Split `RelationshipView::configureLine()` into smaller methods, by connection mode (`configureSelfRelGeometry()`, `configureCenterGeometry()`, `configureFkToPkGeometry()`), by drawing stage and by update guard.
 * [Change] The relationship descriptor of orthogonal lines is kept away from the corners of the route, at the beginning or end of a segment, unless the descriptor is hidden (crow's foot notation on 1:1, 1:n, n:n and fk relationships).
 * [Change] Moving tables now updates only the orthogonal relationships whose routes touch the area of the moved tables, and reconfigures each nearby relationship once when several tables are moved.
-* [Change] Updated the UI dictionaries of all languages with the new texts (relationship line style, FK index pattern, table relationships dialog); translations other than pt_BR are AI generated and pending native review.
+* [Change] Updated the UI dictionaries of all languages with the new texts (relationship line style, FK index pattern, table relationships dialog, border width settings, relationship line color actions, drop database confirmation); translations other than pt_BR are AI generated and pending native review.
 * [Change] The documentation and donation URLs now point to `/docs` and `/donate` on the pgModeler website.
 * [Change] `CustomTableWidget::getItem()` now throws when the item is not allocated.
 * [Change] The Columns tab of `ConstraintWidget` is hidden for CHECK and EXCLUDE constraints.
 * [Change] The database connection passwords (`connections.conf`) and the SSH tunnel passwords (`sshtunnel.conf`) are now saved encrypted through `SecretsNs`, and both files are restricted to their owner. Existing plain text passwords keep working and are encrypted the next time the settings are saved. Older versions read the encrypted value as the password itself, so connections need their password retyped after a downgrade.
 * [Change] The Versioning plugin now masks the credentials embedded in remote URLs in the debug log, in the error and warning messages and in the remote URL shown by the versioning widget (`GitWrapper::maskUrlCredentials()`): the whole user info of http(s) URLs is hidden (`https://******@host`), since an access token can't be told apart from a user name, and only the password is hidden in URLs of other schemes (`ssh://user:******@host`).
 * [Change] Dropping a database in the SQL tool (`SQLToolWidget::dropDatabase()`, reached from the database explorer's toolbar and the database list) now requires, after the confirmation message, typing the name of the database in a "Danger zone" dialog (`DangerZoneWidget`) before the `DROP DATABASE` is executed.
+* [Change] The built-in themes now use 150% for the objects border width and 110% for the relationships line width.
 * [Fix] Fixed SQL code completion (SQL Tool) losing track of which statement the cursor is in when the buffer has more than one statement, causing it to use the wrong table/command context or list unrelated keywords as implicit table aliases.
 * [Fix] Fixed a table's graphical item, cross-scene relationship classification, position, and relationship marker not consistently following it when it changes schema or scene.
 * [Fix] Fixed cascade schema deletion missing transitively-referenced child objects due to a discarded result in `BaseObject::getLinkedObjects()`.
@@ -87,6 +90,8 @@ v2.0.0
 * [Fix] Fixed an empty `NewObjectOverlayWidget` being shown when two tables are selected, and skipped showing it when no button is visible.
 * [Fix] Fixed the context menu opening when right clicking a relationship marker.
 * [Fix] Added a left margin to the enumerations table of `TypeWidget` and fixed the FK index tooltip and the form height in the relationships settings.
+* [Fix] Fixed `BaseRelationship::setCustomColor()` not invalidating the cached code of the relationship, which kept the old custom color in the saved XML.
+* [Fix] Fixed `RelationshipView` not redrawing the line when the custom color of the relationship changes (including undo/redo), since the line was reconfigured only when the hash codes of the tables changed.
 
 v2.0.0-beta1
 ------
