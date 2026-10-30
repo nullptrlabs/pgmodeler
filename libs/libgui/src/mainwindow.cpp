@@ -1811,9 +1811,10 @@ void MainWindow::applyConfigurations()
 	qApp->setOverrideCursor(Qt::WaitCursor);
 
 	/* The hash codes of the tables, which the relationships use to skip the reconfiguration
-	 * of their lines, don't change with the line style, so we force the reconfiguration */
+	 * of their lines, don't change with the line style or width, so we force the reconfiguration */
 	bool line_style_changed =
-			configuration_wgt->getConfigurationWidget<RelationshipConfigWidget>()->isLineStyleChanged();
+			configuration_wgt->getConfigurationWidget<RelationshipConfigWidget>()->isLineStyleChanged() ||
+			configuration_wgt->getConfigurationWidget<AppearanceConfigWidget>()->isRelBorderWidthChanged();
 
 	//Force the update of all opened models
 	for(auto &model : models_tbw->findChildren<ModelWidget *>())

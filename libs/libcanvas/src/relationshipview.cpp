@@ -33,6 +33,7 @@ bool RelationshipView::use_crows_foot {true};
 RelationshipView::LineConnectionMode RelationshipView::line_conn_mode { RelationshipView::ConnectFkToPk };
 
 RelationshipView::LineStyle RelationshipView::line_style { RelationshipView::OrthogonalLines };
+unsigned RelationshipView::border_width_pct {100};
 
 template<class T>
 void RelationshipView::trimGroupItems(QGraphicsItemGroup *group, std::vector<T *> &items, size_t count)
@@ -227,6 +228,16 @@ void RelationshipView::setLineStyle(LineStyle style)
 RelationshipView::LineStyle RelationshipView::getLineStyle()
 {
 	return line_style;
+}
+
+void RelationshipView::setBorderWidthPercent(unsigned value)
+{
+	border_width_pct = value;
+}
+
+unsigned RelationshipView::getBorderWidthPercent()
+{
+	return border_width_pct;
 }
 
 void RelationshipView::invalidateRoute(bool reset_retries)
@@ -3691,20 +3702,22 @@ void RelationshipView::configureLabelPosition(BaseRelationship::LabelId label_id
 double RelationshipView::getDefaultPenWidth()
 {
 	Relationship *rel = dynamic_cast<Relationship *>(getUnderlyingObject());
+	double width = 0;
 
 	// Adjusting the relationship lines thickness according to the screen dpi
 	if(BaseObjectView::getScreenDpiFactor() > 1)
 	{
 		if(rel && rel->isIdentifier())
-			return  ObjectBorderWidth * BaseObjectView::getScreenDpiFactor() * 2;
-
-		return  ObjectBorderWidth * BaseObjectView::getScreenDpiFactor() * 1.25;
+			width = ObjectBorderWidth * BaseObjectView::getScreenDpiFactor() * 2;
+		else
+			width = ObjectBorderWidth * BaseObjectView::getScreenDpiFactor() * 1.25;
 	}
+	else if(rel && rel->isIdentifier())
+		width = ObjectBorderWidth * 2.25;
+	else
+		width = ObjectBorderWidth * 1.50;
 
-	if(rel && rel->isIdentifier())
-		return ObjectBorderWidth * 2.25;
-
-	return ObjectBorderWidth * 1.50;
+	return width * border_width_pct / 100.0;
 }
 
 void RelationshipView::configureBoundingRect()

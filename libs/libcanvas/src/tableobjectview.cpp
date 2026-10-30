@@ -112,7 +112,7 @@ void TableObjectView::configureDescriptor(ConstraintType constr_type)
 
 			desc->setBrush(this->getFillStyle(attrib));
 
-			pen = this->getBorderStyle(attrib);
+			pen = this->getBorderStyle(attrib, false);
 			pen.setWidthF(pen.widthF() * 1.15);
 			desc->setPen(pen);
 		}
@@ -152,7 +152,7 @@ void TableObjectView::configureDescriptor(ConstraintType constr_type)
 			desc->setPolygon(pol);
 			desc->setBrush(this->getFillStyle(attrib));
 
-			pen = this->getBorderStyle(attrib);
+			pen = this->getBorderStyle(attrib, false);
 			pen.setWidthF(pen.widthF() * 1.15);
 			desc->setPen(pen);
 		}
@@ -173,7 +173,7 @@ void TableObjectView::configureDescriptor(ConstraintType constr_type)
 		desc->setPolygon(pol);
 		desc->setBrush(this->getFillStyle(tab_obj->getSchemaName()));
 
-		pen = this->getBorderStyle(tab_obj->getSchemaName());
+		pen = this->getBorderStyle(tab_obj->getSchemaName(), false);
 		pen.setWidthF(pen.widthF() * 1.15);
 		desc->setPen(pen);
 	}
@@ -184,7 +184,7 @@ void TableObjectView::configureDescriptor(ConstraintType constr_type)
 		desc->setRect(QRectF(QPointF(0,0), QSizeF(9.0 * factor, 9.0 * factor)));
 		desc->setBrush(this->getFillStyle(Attributes::Reference));
 
-		pen = this->getBorderStyle(Attributes::Reference);
+		pen = this->getBorderStyle(Attributes::Reference, false);
 		pen.setWidthF(pen.widthF() * 1.15);
 		desc->setPen(pen);
 	}
