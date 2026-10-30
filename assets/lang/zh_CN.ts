@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>分隔线颜色</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>关系线条宽度</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;以默认宽度的百分比定义关系线条的宽度。&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>每页属性数</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;这些数值框定义了在启用分页时，表和视图的每个部分每页可见的最少属性数。此项定义每页显示的扩展属性（约束、索引、触发器、规则、策略）数量。&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>对象边框宽度</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;以默认宽度的百分比定义对象（关系除外）的边框宽度。属性切换按钮和表项（列、约束等）的描述符不受影响。&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>%1 的属性</translation>
+        <translation type="vanished">%1 的属性</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>危险区域</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>要确认，请在下方字段中输入 &lt;strong&gt;%1&lt;/strong&gt;：</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">演示版每种对象类型只能创建 `%1&apos; 个实例。类型 `%2&apos; 已达到此限制。</translation>
+        <translation>演示版每种对象类型只能创建 `%1&apos; 个实例。类型 `%2&apos; 已达到此限制。</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
         <translation>90° + 90°（水平）</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>线条颜色</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>随机</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>数据库对象</translation>
     </message>
@@ -13547,6 +13582,18 @@ available in GUI. All available options are described below.</source>
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;注意：&lt;/strong&gt;您即将从服务器 &lt;strong&gt;%2&lt;/strong&gt; 删除整个数据库 &lt;strong&gt;%1&lt;/strong&gt;。所有数据都将被彻底清除。确定要继续吗？</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;此操作不可撤销！&lt;/strong&gt;数据库 &lt;strong&gt;%1&lt;/strong&gt; 及其所有数据将从服务器 &lt;strong&gt;%2&lt;/strong&gt; 上永久删除。</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>与其建立的所有现有连接都将被关闭。</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>删除数据库</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15394,6 +15441,13 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Support</source>
         <translation>支持</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>%1 的属性</translation>
     </message>
 </context>
 </TS>

@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Warna pembatas</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Lebar garis hubungan</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Menentukan lebar garis hubungan sebagai peratusan daripada lebar lalai.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Atribut setiap halaman</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Pemutar ini menentukan bilangan minimum atribut yang kelihatan bagi setiap halaman dalam setiap bahagian jadual dan paparan apabila penomboran halaman diaktifkan padanya. Pemutar ini menentukan bilangan atribut lanjutan (kekangan, indeks, pencetus, peraturan, dasar) yang dipaparkan bagi setiap halaman.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Lebar sempadan objek</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Menentukan lebar sempadan objek (kecuali hubungan) sebagai peratusan daripada lebar lalai. Butang togol atribut dan pemerihal item jadual (lajur, kekangan, dll.) tidak terjejas.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Sifat %1</translation>
+        <translation type="vanished">Sifat %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Jika dinyahtanda, SQL akan ditambah pada hujung arahan CREATE DATABASE.</transla
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Zon bahaya</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Untuk mengesahkan, taip &lt;strong&gt;%1&lt;/strong&gt; dalam medan di bawah:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Lajur rujukan: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Versi demonstrasi hanya boleh mencipta `%1&apos; tika bagi setiap jenis objek! Anda telah mencapai had ini untuk jenis: `%2&apos;</translation>
+        <translation>Versi demonstrasi hanya boleh mencipta `%1&apos; tika bagi setiap jenis objek! Anda telah mencapai had ini untuk jenis: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ Saiz yang diminta %1 x %2 terlalu besar dan tiada memori yang mencukupi untuk di
         <translation>90° + 90° (mendatar)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Warna garis</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Rawak</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Objek pangkalan data</translation>
     </message>
@@ -13547,6 +13582,18 @@ yang terdapat dalam GUI. Semua pilihan yang tersedia diterangkan di bawah.</tran
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;BERHATI-HATI:&lt;/strong&gt; anda akan menggugurkan keseluruhan pangkalan data &lt;strong&gt;%1&lt;/strong&gt; daripada pelayan &lt;strong&gt;%2&lt;/strong&gt;! Semua data akan dipadam sepenuhnya. Adakah anda benar-benar ingin meneruskan?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Tindakan ini tidak boleh dibuat asal!&lt;/strong&gt; Pangkalan data &lt;strong&gt;%1&lt;/strong&gt; dan semua datanya akan dipadam secara kekal daripada pelayan &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Semua sambungan sedia ada kepadanya akan ditutup.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Padam pangkalan data</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15396,6 +15443,13 @@ yang terdapat dalam GUI. Semua pilihan yang tersedia diterangkan di bawah.</tran
     <message>
         <source>Support</source>
         <translation>Sokongan</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Sifat %1</translation>
     </message>
 </context>
 </TS>

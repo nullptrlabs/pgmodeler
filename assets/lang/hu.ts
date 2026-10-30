@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Határolók színe</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Kapcsolatok vonalainak szélessége</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Meghatározza a kapcsolatok vonalainak szélességét az alapértelmezett szélesség százalékában.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Attribútumok oldalanként</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Ezek a léptetők meghatározzák az oldalanként látható attribútumok minimális számát a táblák és nézetek egyes szakaszaiban, ha azokon engedélyezve van a lapozás. Ez az oldalanként megjelenített kiterjesztett attribútumok (megszorítások, indexek, triggerek, szabályok, szabályzatok) számát határozza meg.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Objektumok szegélyének szélessége</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Meghatározza az objektumok (a kapcsolatok kivételével) szegélyének szélességét az alapértelmezett szélesség százalékában. Az attribútumváltó gombokat és a táblaelemek (oszlopok, megszorítások stb.) jelölőit ez nem érinti.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>%1 tulajdonságai</translation>
+        <translation type="vanished">%1 tulajdonságai</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Ha ez nincs bejelölve, az SQL a CREATE DATABASE parancs végéhez kerül.</tran
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Veszélyes zóna</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>A megerősítéshez be kell írni a(z) &lt;strong&gt;%1&lt;/strong&gt; értéket az alábbi mezőbe:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Hivatkozott oszlop(ok): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">A bemutató verzió objektumtípusonként csak `%1&apos; példányt hozhat létre! Elérte ezt a korlátot a következő típusnál: `%2&apos;</translation>
+        <translation>A bemutató verzió objektumtípusonként csak `%1&apos; példányt hozhat létre! Elérte ezt a korlátot a következő típusnál: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ A kért %1 x %2 méret túl nagy volt, és nem volt elég memória a lefoglalás
         <translation>90° + 90° (vízszintes)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Vonal színe</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Véletlenszerű</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Adatbázis-objektum</translation>
     </message>
@@ -13547,6 +13582,18 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;VIGYÁZAT:&lt;/strong&gt; a(z) &lt;strong&gt;%1&lt;/strong&gt; teljes adatbázist készül eldobni a(z) &lt;strong&gt;%2&lt;/strong&gt; kiszolgálóról! Minden adat teljesen törlődik. Valóban folytatni szeretné?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Ez a művelet nem vonható vissza!&lt;/strong&gt; A(z) &lt;strong&gt;%1&lt;/strong&gt; adatbázis és az összes adata véglegesen törlődik a(z) &lt;strong&gt;%2&lt;/strong&gt; kiszolgálóról.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Az adatbázishoz meglévő összes csatlakozás le lesz zárva.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Adatbázis eldobása</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15398,6 +15445,13 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
     <message>
         <source>Support</source>
         <translation>Támogatás</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>%1 tulajdonságai</translation>
     </message>
 </context>
 </TS>

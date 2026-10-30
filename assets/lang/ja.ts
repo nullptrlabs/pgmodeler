@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>区切り線の色</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>リレーションシップの線の幅</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;リレーションシップの線の幅を、既定の幅に対する割合で指定します。&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>ページあたりの属性数</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;これらのスピンボックスは、ページ分割が有効な場合に、テーブルとビューの各セクションでページごとに表示される属性の最小数を設定します。これはページごとに表示される拡張属性（制約、インデックス、トリガー、ルール、ポリシー）の数を設定します。&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>オブジェクトの枠線の幅</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;オブジェクト（リレーションシップを除く）の枠線の幅を、既定の幅に対する割合で指定します。属性切り替えボタンおよびテーブル項目（列、制約など）の記述子は影響を受けません。&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>%1 のプロパティ</translation>
+        <translation type="vanished">%1 のプロパティ</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>危険ゾーン</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>確認のため、下の欄に &lt;strong&gt;%1&lt;/strong&gt; を入力してください:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">デモ版では、オブジェクトの種類ごとに `%1&apos; 個のインスタンスしか作成できません。種類 `%2&apos; でこの上限に達しました。</translation>
+        <translation>デモ版では、オブジェクトの種類ごとに `%1&apos; 個のインスタンスしか作成できません。種類 `%2&apos; でこの上限に達しました。</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
         <translation>90° + 90° (横)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>線の色</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>ランダム</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>データベースオブジェクト</translation>
     </message>
@@ -13547,6 +13582,18 @@ available in GUI. All available options are described below.</source>
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;注意:&lt;/strong&gt; サーバー &lt;strong&gt;%2&lt;/strong&gt; からデータベース &lt;strong&gt;%1&lt;/strong&gt; 全体を削除しようとしています。すべてのデータが完全に消去されます。本当に続行しますか？</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;この操作は元に戻せません！&lt;/strong&gt; データベース &lt;strong&gt;%1&lt;/strong&gt; とそのすべてのデータが、サーバー &lt;strong&gt;%2&lt;/strong&gt; から完全に削除されます。</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>このデータベースへの既存の接続はすべて切断されます。</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>データベースを削除</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15398,6 +15445,13 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Support</source>
         <translation>サポート</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>%1 のプロパティ</translation>
     </message>
 </context>
 </TS>

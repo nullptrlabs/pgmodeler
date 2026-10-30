@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Norobežotāju krāsa</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Attiecību līniju platums</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Nosaka attiecību līniju platumu kā procentuālu daļu no noklusējuma platuma.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Atribūti lappusē</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Šie skaitītāji nosaka minimālo atribūtu skaitu, kas redzami lappusē katrā tabulu un skatu sadaļā, kad tajās ir iespējota lappušu dalīšana. Šis nosaka lappusē attēloto paplašināto atribūtu (ierobežojumu, indeksu, trigeru, noteikumu, politiku) skaitu.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Objektu apmales platums</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Nosaka objektu (izņemot attiecības) apmales platumu kā procentuālu daļu no noklusējuma platuma. Atribūtu pārslēgšanas pogas un tabulas vienumu (kolonnas, ierobežojumi u. c.) apzīmētāji netiek ietekmēti.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>%1 rekvizīti</translation>
+        <translation type="vanished">%1 rekvizīti</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Ja šī opcija ir noņemta, SQL tiks pievienots komandas CREATE DATABASE beigās
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Bīstamā zona</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Lai apstiprinātu, laukā zemāk ievadiet &lt;strong&gt;%1&lt;/strong&gt;:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Atsauces kolonna(s): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Demonstrācijas versija var izveidot tikai `%1&apos; katra objekta tipa instances! Jūs sasniedzāt šo ierobežojumu tipam: `%2&apos;</translation>
+        <translation>Demonstrācijas versija var izveidot tikai `%1&apos; katra objekta tipa instances! Jūs sasniedzāt šo ierobežojumu tipam: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ Pieprasītais izmērs %1 x %2 bija pārāk liels, un nepietika atmiņas tā pie�
         <translation>90° + 90° (horizontāli)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Līnijas krāsa</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Nejauša</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Datubāzes objekts</translation>
     </message>
@@ -13547,6 +13582,18 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;UZMANĪBU:&lt;/strong&gt; jūs gatavojaties dzēst visu datubāzi &lt;strong&gt;%1&lt;/strong&gt; no servera &lt;strong&gt;%2&lt;/strong&gt;! Visi dati tiks pilnībā dzēsti. Vai tiešām vēlaties turpināt?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Šī darbība ir neatgriezeniska!&lt;/strong&gt; Datubāze &lt;strong&gt;%1&lt;/strong&gt; un visi tās dati tiks neatgriezeniski dzēsti no servera &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Visi esošie savienojumi ar to tiks aizvērti.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Dzēst datubāzi</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15396,6 +15443,13 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
     <message>
         <source>Support</source>
         <translation>Atbalsts</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>%1 rekvizīti</translation>
     </message>
 </context>
 </TS>

@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Färg för avgränsare</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Relationslinjernas bredd</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Anger bredden på relationernas linjer som en procentandel av standardbredden.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Attribut per sida</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Dessa räknare anger det minsta antalet attribut som är synliga per sida i varje avsnitt av tabeller och vyer när sidindelning är aktiverad. Denna anger antalet utökade attribut (villkor, index, triggers, regler, policyer) som visas per sida.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Objektens kantbredd</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Anger bredden på objektens kanter (utom relationer) som en procentandel av standardbredden. Växlingsknapparna för attribut och beskrivningarna av tabellelementen (kolumner, villkor osv.) påverkas inte.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Egenskaper för %1</translation>
+        <translation type="vanished">Egenskaper för %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Om alternativet är avmarkerat läggs SQL till i slutet av kommandot CREATE DATA
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Farozon</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Skriv &lt;strong&gt;%1&lt;/strong&gt; i fältet nedan för att bekräfta:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Refererade kolumner: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Demoversionen kan bara skapa `%1&apos; instanser av varje objekttyp. Gränsen har nåtts för typen: `%2&apos;</translation>
+        <translation>Demoversionen kan bara skapa `%1&apos; instanser av varje objekttyp. Gränsen har nåtts för typen: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ Den begärda storleken %1 x %2 var för stor och det fanns inte tillräckligt me
         <translation>90° + 90° (vågrätt)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Linjefärg</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Slumpmässig</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Databasobjekt</translation>
     </message>
@@ -13547,6 +13582,18 @@ som finns i det grafiska användargränssnittet. Alla tillgängliga alternativ b
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;OBSERVERA:&lt;/strong&gt; Du är på väg att ta bort hela databasen &lt;strong&gt;%1&lt;/strong&gt; från servern &lt;strong&gt;%2&lt;/strong&gt;. Alla data raderas helt. Vill du verkligen fortsätta?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Den här åtgärden kan inte ångras!&lt;/strong&gt; Databasen &lt;strong&gt;%1&lt;/strong&gt; och alla dess data tas bort permanent från servern &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Alla befintliga anslutningar till den stängs.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Ta bort databas</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15396,6 +15443,13 @@ som finns i det grafiska användargränssnittet. Alla tillgängliga alternativ b
     <message>
         <source>Support</source>
         <translation>Support</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Egenskaper för %1</translation>
     </message>
 </context>
 </TS>

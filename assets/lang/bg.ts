@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Цвят на разделителите</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Ширина на линиите на релациите</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Определя ширината на линиите на релациите като процент от ширината по подразбиране.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Атрибути на страница</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Тези плъзгачи задават минималния брой атрибути, видими на страница във всеки раздел на таблиците и изгледите, когато е включено страницирането. Този задава броя на разширените атрибути (ограничения, индекси, тригери, правила, политики), показвани на страница.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Ширина на контура на обектите</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Определя ширината на контурите на обектите (с изключение на релациите) като процент от ширината по подразбиране. Бутоните за превключване на атрибути и дескрипторите на елементите на таблицата (колони, ограничения и др.) не са засегнати.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Свойства на %1</translation>
+        <translation type="vanished">Свойства на %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Опасна зона</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>За потвърждение въведете &lt;strong&gt;%1&lt;/strong&gt; в полето по-долу:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Демонстрационната версия може да създаде само `%1&apos; екземпляра от всеки тип обект! Достигнахте това ограничение за типа: `%2&apos;</translation>
+        <translation>Демонстрационната версия може да създаде само `%1&apos; екземпляра от всеки тип обект! Достигнахте това ограничение за типа: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
         <translation>90° + 90° (хоризонтално)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Цвят на линията</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Случаен</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Обект на база данни</translation>
     </message>
@@ -13547,6 +13582,18 @@ available in GUI. All available options are described below.</source>
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;ВНИМАНИЕ:&lt;/strong&gt; на път сте да изтриете цялата база данни &lt;strong&gt;%1&lt;/strong&gt; от сървъра &lt;strong&gt;%2&lt;/strong&gt;! Всички данни ще бъдат изтрити напълно. Наистина ли искате да продължите?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Това действие е необратимо!&lt;/strong&gt; Базата данни &lt;strong&gt;%1&lt;/strong&gt; и всички нейни данни ще бъдат окончателно изтрити от сървъра &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Всички съществуващи връзки към нея ще бъдат затворени.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Изтриване на база данни</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15396,6 +15443,13 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Support</source>
         <translation>Поддръжка</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Свойства на %1</translation>
     </message>
 </context>
 </TS>

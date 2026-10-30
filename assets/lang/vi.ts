@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Màu dấu phân cách</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Chiều rộng đường quan hệ</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Xác định chiều rộng của các đường quan hệ theo phần trăm của chiều rộng mặc định.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Thuộc tính mỗi trang</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Các nút xoay này xác định số thuộc tính tối thiểu hiển thị trên mỗi trang ở từng phần của bảng và khung nhìn khi bật phân trang. Nút này xác định số thuộc tính mở rộng (ràng buộc, chỉ mục, trigger, quy tắc, chính sách) hiển thị trên mỗi trang.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Chiều rộng viền đối tượng</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Xác định chiều rộng viền của các đối tượng (trừ quan hệ) theo phần trăm của chiều rộng mặc định. Các nút chuyển đổi thuộc tính và bộ mô tả của các mục trong bảng (cột, ràng buộc, v.v.) không bị ảnh hưởng.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Thuộc tính của %1</translation>
+        <translation type="vanished">Thuộc tính của %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Nếu bỏ chọn, SQL sẽ được thêm vào cuối lệnh CREATE DATABASE.</
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Vùng nguy hiểm</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Để xác nhận, hãy nhập &lt;strong&gt;%1&lt;/strong&gt; vào trường bên dưới:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Cột được tham chiếu: %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Phiên bản trình diễn chỉ có thể tạo `%1&apos; thể hiện cho mỗi loại đối tượng! Bạn đã đạt giới hạn này cho loại: `%2&apos;</translation>
+        <translation>Phiên bản trình diễn chỉ có thể tạo `%1&apos; thể hiện cho mỗi loại đối tượng! Bạn đã đạt giới hạn này cho loại: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ Kích thước yêu cầu %1 x %2 quá lớn và không đủ bộ nhớ để c
         <translation>90° + 90° (ngang)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Màu đường</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Ngẫu nhiên</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Đối tượng cơ sở dữ liệu</translation>
     </message>
@@ -13547,6 +13582,18 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;THẬN TRỌNG:&lt;/strong&gt; bạn sắp xóa toàn bộ cơ sở dữ liệu &lt;strong&gt;%1&lt;/strong&gt; khỏi máy chủ &lt;strong&gt;%2&lt;/strong&gt;! Mọi dữ liệu sẽ bị xóa hoàn toàn. Bạn có thực sự muốn tiếp tục không?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Hành động này không thể hoàn tác!&lt;/strong&gt; Cơ sở dữ liệu &lt;strong&gt;%1&lt;/strong&gt; và toàn bộ dữ liệu của nó sẽ bị xóa vĩnh viễn khỏi máy chủ &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Tất cả các kết nối hiện có tới cơ sở dữ liệu này sẽ bị đóng.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Xóa cơ sở dữ liệu</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15396,6 +15443,13 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
     <message>
         <source>Support</source>
         <translation>Hỗ trợ</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Thuộc tính của %1</translation>
     </message>
 </context>
 </TS>

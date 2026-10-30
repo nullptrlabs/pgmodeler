@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Culoarea delimitatorilor</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>Lățimea liniilor relațiilor</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Definește lățimea liniilor relațiilor ca procent din lățimea implicită.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>Atribute pe pagină</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Aceste casete rotative definesc numărul minim de atribute vizibile pe pagină în fiecare secțiune a tabelelor și vizualizărilor atunci când paginarea este activată pentru acestea. Aceasta definește numărul de atribute extinse (constrângeri, indecși, declanșatoare, reguli, politici) afișate pe pagină.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>Lățimea marginilor obiectelor</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Definește lățimea marginilor obiectelor (cu excepția relațiilor) ca procent din lățimea implicită. Butoanele de comutare a atributelor și descriptorii elementelor tabelului (coloane, constrângeri etc.) nu sunt afectate.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Proprietățile %1</translation>
+        <translation type="vanished">Proprietățile %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Dacă se debifează, SQL-ul va fi adăugat la sfârșitul comenzii CREATE DATABA
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>Zonă periculoasă</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>Pentru confirmare, introduceți &lt;strong&gt;%1&lt;/strong&gt; în câmpul de mai jos:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Coloană(e) referențiată(e): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">Versiunea demonstrativă poate crea doar `%1&apos; instanțe din fiecare tip de obiect! Ați atins această limită pentru tipul: `%2&apos;</translation>
+        <translation>Versiunea demonstrativă poate crea doar `%1&apos; instanțe din fiecare tip de obiect! Ați atins această limită pentru tipul: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ Dimensiunea cerută %1 x %2 a fost prea mare și nu a existat suficientă memori
         <translation>90° + 90° (orizontal)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>Culoarea liniei</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Aleatorie</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>Obiect de bază de date</translation>
     </message>
@@ -13547,6 +13582,18 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;ATENȚIE:&lt;/strong&gt; sunteți pe cale să ștergeți întreaga bază de date &lt;strong&gt;%1&lt;/strong&gt; de pe serverul &lt;strong&gt;%2&lt;/strong&gt;! Toate datele vor fi șterse complet. Doriți într-adevăr să continuați?</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;Această acțiune este ireversibilă!&lt;/strong&gt; Baza de date &lt;strong&gt;%1&lt;/strong&gt; și toate datele sale vor fi șterse definitiv de pe serverul &lt;strong&gt;%2&lt;/strong&gt;.</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>Toate conexiunile existente la aceasta vor fi închise.</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>Șterge baza de date</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15398,6 +15445,13 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
     <message>
         <source>Support</source>
         <translation>Suport</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>Proprietățile %1</translation>
     </message>
 </context>
 </TS>

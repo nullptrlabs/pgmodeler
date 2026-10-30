@@ -299,6 +299,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>สีของตัวคั่น</translation>
     </message>
     <message>
+        <source>Relationships line width</source>
+        <translation>ความกว้างของเส้นความสัมพันธ์</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the relationships lines as a percentage of the default width.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;กำหนดความกว้างของเส้นความสัมพันธ์เป็นเปอร์เซ็นต์ของความกว้างเริ่มต้น&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Attributes per page</source>
         <translation>แอตทริบิวต์ต่อหน้า</translation>
     </message>
@@ -309,6 +317,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <source>&lt;p&gt;These spinners define the minimum amount of attributes visible per page in each section of tables and views when the pagination is enabled on them. This one defines the number of extended attributes (constraints, indexes, trigger, rules, policies) displayed per page.&lt;/p&gt;</source>
         <translation>&lt;p&gt;สปินเนอร์เหล่านี้กำหนดจำนวนแอตทริบิวต์ขั้นต่ำที่มองเห็นได้ต่อหน้าในแต่ละส่วนของตารางและมุมมองเมื่อเปิดใช้การแบ่งหน้า สปินเนอร์นี้กำหนดจำนวนแอตทริบิวต์ขยาย (ข้อจำกัด ดัชนี ทริกเกอร์ กฎ นโยบาย) ที่แสดงต่อหน้า&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Objects border width</source>
+        <translation>ความกว้างของขอบวัตถุ</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Defines the width of the borders of the objects (except relationships) as a percentage of the default width. The attribute toggler buttons and the descriptors of the table items (columns, constraints, etc) are not affected.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;กำหนดความกว้างของขอบวัตถุ (ยกเว้นความสัมพันธ์) เป็นเปอร์เซ็นต์ของความกว้างเริ่มต้น ปุ่มสลับแอตทริบิวต์และตัวบ่งชี้ของรายการในตาราง (คอลัมน์ ข้อจำกัด ฯลฯ) จะไม่ได้รับผลกระทบ&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Objects</source>
@@ -717,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>คุณสมบัติของ %1</translation>
+        <translation type="vanished">คุณสมบัติของ %1</translation>
     </message>
 </context>
 <context>
@@ -2245,6 +2261,17 @@ Unchecking this will cause the SQL to be appended at the end of CREATE DATABASE 
     </message>
 </context>
 <context>
+    <name>DangerZoneWidget</name>
+    <message>
+        <source>Danger zone</source>
+        <translation>เขตอันตราย</translation>
+    </message>
+    <message>
+        <source>To confirm, type &lt;strong&gt;%1&lt;/strong&gt; in the field below:</source>
+        <translation>เพื่อยืนยัน ให้พิมพ์ &lt;strong&gt;%1&lt;/strong&gt; ในช่องด้านล่าง:</translation>
+    </message>
+</context>
+<context>
     <name>DataGridWidget</name>
     <message>
         <source>Form</source>
@@ -3367,7 +3394,7 @@ Ref. column(s): %2</source>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation type="vanished">เวอร์ชันสาธิตสร้างได้เพียง `%1&apos; อินสแตนซ์ต่อวัตถุแต่ละชนิด! คุณถึงขีดจำกัดนี้แล้วสำหรับชนิด: `%2&apos;</translation>
+        <translation>เวอร์ชันสาธิตสร้างได้เพียง `%1&apos; อินสแตนซ์ต่อวัตถุแต่ละชนิด! คุณถึงขีดจำกัดนี้แล้วสำหรับชนิด: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -9835,6 +9862,14 @@ The requested size %1 x %2 was too large and there was not enough memory to allo
         <translation>90° + 90° (แนวนอน)</translation>
     </message>
     <message>
+        <source>Line color</source>
+        <translation>สีเส้น</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>สุ่ม</translation>
+    </message>
+    <message>
         <source>Database object</source>
         <translation>วัตถุฐานข้อมูล</translation>
     </message>
@@ -13547,6 +13582,18 @@ available in GUI. All available options are described below.</source>
         <source>&lt;strong&gt;CAUTION:&lt;/strong&gt; You are about to drop the entire database &lt;strong&gt;%1&lt;/strong&gt; from the server &lt;strong&gt;%2&lt;/strong&gt;! All data will be completely wiped out. Do you really want to proceed?</source>
         <translation>&lt;strong&gt;ข้อควรระวัง:&lt;/strong&gt; คุณกำลังจะลบฐานข้อมูล &lt;strong&gt;%1&lt;/strong&gt; ทั้งหมดออกจากเซิร์ฟเวอร์ &lt;strong&gt;%2&lt;/strong&gt;! ข้อมูลทั้งหมดจะถูกลบจนหมด ต้องการดำเนินการต่อจริงหรือไม่</translation>
     </message>
+    <message>
+        <source>&lt;strong&gt;This action is irreversible!&lt;/strong&gt; The database &lt;strong&gt;%1&lt;/strong&gt; and all of its data will be permanently destroyed on the server &lt;strong&gt;%2&lt;/strong&gt;.</source>
+        <translation>&lt;strong&gt;การดำเนินการนี้ไม่สามารถย้อนกลับได้!&lt;/strong&gt; ฐานข้อมูล &lt;strong&gt;%1&lt;/strong&gt; และข้อมูลทั้งหมดจะถูกลบอย่างถาวรจากเซิร์ฟเวอร์ &lt;strong&gt;%2&lt;/strong&gt;</translation>
+    </message>
+    <message>
+        <source>All the existing connections to it will be terminated.</source>
+        <translation>การเชื่อมต่อทั้งหมดที่มีอยู่จะถูกปิด</translation>
+    </message>
+    <message>
+        <source>Drop database</source>
+        <translation>ลบฐานข้อมูล</translation>
+    </message>
 </context>
 <context>
     <name>SceneInfoWidget</name>
@@ -15396,6 +15443,13 @@ available in GUI. All available options are described below.</source>
     <message>
         <source>Support</source>
         <translation>การสนับสนุน</translation>
+    </message>
+</context>
+<context>
+    <name>std</name>
+    <message>
+        <source>%1 properties</source>
+        <translation>คุณสมบัติของ %1</translation>
     </message>
 </context>
 </TS>
