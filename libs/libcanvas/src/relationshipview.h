@@ -108,6 +108,9 @@ class __libcanvas RelationshipView: public BaseObjectView {
 
 		QString tab_hashes[2];
 
+		//! \brief Custom color of the relationship used in the last line configuration
+		QColor applied_custom_color;
+
 		/*! \brief Stores the points on tables where the relationship line is connected.
 		This attribute is updated every time the configureLine() method is called.
 		When the relationship uses the classical link mode (center points) this attribute

@@ -767,7 +767,8 @@ bool RelationshipView::isLineUpdateNeeded()
 
 	/* We skip the line configuration if the line is still being configured, or the bounding rectangles
 	 * of the involved tables are not valid (they wasn't rendered/configured yet) or the
-	 * hash codes of both tables are unchanged since the last call to this method */
+	 * hash codes of both tables and the custom color of the relationship are unchanged since
+	 * the last call to this method */
 	return !(configuring_line ||
 
 					 BaseTable::isGeomChangesIgnored() ||
@@ -782,7 +783,9 @@ bool RelationshipView::isLineUpdateNeeded()
 						 tab_hashes[src_tab] == base_rel->getTable(src_tab)->getHashCode()) &&
 
 						(!tab_hashes[dst_tab].isEmpty() &&
-						 tab_hashes[dst_tab] == base_rel->getTable(dst_tab)->getHashCode())));
+						 tab_hashes[dst_tab] == base_rel->getTable(dst_tab)->getHashCode()) &&
+
+						applied_custom_color == base_rel->getCustomColor()));
 }
 
 void RelationshipView::updateTablesHashes()
@@ -791,6 +794,7 @@ void RelationshipView::updateTablesHashes()
 
 	tab_hashes[BaseRelationship::SrcTable] = base_rel->getTable(BaseRelationship::SrcTable)->getHashCode();
 	tab_hashes[BaseRelationship::DstTable] = base_rel->getTable(BaseRelationship::DstTable)->getHashCode();
+	applied_custom_color = base_rel->getCustomColor();
 }
 
 void RelationshipView::syncPlaceholderConnection()
