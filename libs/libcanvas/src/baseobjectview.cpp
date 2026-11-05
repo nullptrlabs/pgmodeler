@@ -31,6 +31,7 @@ unsigned BaseObjectView::global_sel_order {1};
 
 bool BaseObjectView::use_placeholder {true};
 bool BaseObjectView::compact_view {false};
+unsigned BaseObjectView::border_width_pct {100};
 bool BaseObjectView::hide_shadow {false};
 
 std::map<QString, QTextCharFormat> BaseObjectView::font_config;
@@ -66,6 +67,9 @@ void BaseObjectView::blink()
 
 void BaseObjectView::fade(bool fd_in, int duration, int loop_cnt, qreal final_opacity)
 {
+	if(fade_tl.state() == QTimeLine::Running)
+		return;
+
 	fade_tl.setDirection(fd_in ? QTimeLine::Forward : QTimeLine::Backward);
 	fade_tl.setLoopCount(loop_cnt);
 	fade_tl.setDuration(duration);
@@ -106,6 +110,7 @@ void BaseObjectView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		m_event->setButton(Qt::LeftButton);
 
 		QGraphicsItemGroup::mousePressEvent(m_event);
+		delete m_event;
 		event->ignore();
 	}
 	else if(event->button()==Qt::LeftButton)
@@ -207,6 +212,14 @@ BaseObject *BaseObjectView::getUnderlyingObject()
 	return reinterpret_cast<BaseObject *>(this->data(0).value<void *>());
 }
 
+void BaseObjectView::detachFromObject()
+{
+	BaseGraphicObject *graph_obj = dynamic_cast<BaseGraphicObject *>(getUnderlyingObject());
+
+	if(graph_obj)
+		graph_obj->setReceiverObject(nullptr);
+}
+
 void BaseObjectView::setFontStyle(const QString &id, QTextCharFormat font_fmt)
 {
 	/* If the font style is not the global one we use the settings
@@ -292,7 +305,7 @@ QLinearGradient BaseObjectView::getFillStyle(const QString &id)
 	return grad;
 }
 
-QPen BaseObjectView::getBorderStyle(const QString &id)
+QPen BaseObjectView::getBorderStyle(const QString &id, bool adjust_width)
 {
 	QPen pen(Qt::NoPen);
 
@@ -305,7 +318,7 @@ QPen BaseObjectView::getBorderStyle(const QString &id)
 			if(id==Attributes::ObjSelection)
 				colors[2].setAlpha(ObjectAlphaChannel);
 
-			pen.setWidthF(ObjectBorderWidth * getScreenDpiFactor());
+			pen.setWidthF(ObjectBorderWidth * getScreenDpiFactor() * (adjust_width ? border_width_pct / 100.0 : 1));
 			pen.setColor(colors[2]);
 			pen.setStyle(Qt::SolidLine);
 		}
@@ -330,6 +343,16 @@ void BaseObjectView::setPlaceholderEnabled(bool value)
 bool BaseObjectView::isPlaceholderEnabled()
 {
 	return use_placeholder;
+}
+
+void BaseObjectView::setBorderWidthPercent(unsigned value)
+{
+	border_width_pct = value;
+}
+
+unsigned BaseObjectView::getBorderWidthPercent()
+{
+	return border_width_pct;
 }
 
 void BaseObjectView::setCompactViewEnabled(bool value)
@@ -395,13 +418,14 @@ QRectF BaseObjectView::boundingRect() const
 
 void BaseObjectView::toggleProtectionIcon(bool value)
 {
-	BaseGraphicObject *obj_graf=dynamic_cast<BaseGraphicObject *>(this->getUnderlyingObject());
+	BaseGraphicObject *graph_obj = dynamic_cast<BaseGraphicObject *>(this->getUnderlyingObject());
+	bool changed = protected_icon->isVisible() != value;
 
 	protected_icon->setVisible(value);
 	this->setFlag(QGraphicsItem::ItemIsMovable, !value);
 
-	if(obj_graf)
-		obj_graf->setModified(true);
+	if(graph_obj && changed)
+		graph_obj->setModified(true);
 }
 
 void BaseObjectView::configureObjectShadow()

@@ -292,7 +292,7 @@ void ObjectSearchWidget::selectObject()
 {
 	selected_obj = nullptr;
 	selected_objs.clear();
-	model_wgt->scene->clearSelection();
+	model_wgt->clearSelectionInAllScenes();
 
 	BaseGraphicObject *graph_obj = nullptr;
 	BaseObjectView *obj_view = nullptr;
@@ -330,6 +330,20 @@ void ObjectSearchWidget::selectObject()
 	TableObject *tab_obj = nullptr;
 	BaseTableView *tab_view = nullptr;
 
+	/* Each object in turn brings its own scene to the front before being centered/selected -- this
+	 * mimics how clicking through results used to work back when there was only one scene to show
+	 * them in, and it's what makes centerOn() below mean anything: it operates on the viewport's
+	 * current scene, so an object elsewhere would otherwise be centered on a scene the user isn't
+	 * even looking at */
+	auto followObjectScene = [this](QGraphicsItem *item)
+	{
+		ObjectsScene *item_scene = item ? dynamic_cast<ObjectsScene *>(item->scene()) : nullptr;
+		int scn_idx = item_scene ? model_wgt->getScenes().indexOf(item_scene) : -1;
+
+		if(scn_idx >= 0)
+			model_wgt->setActiveScene(scn_idx);
+	};
+
 	for(auto &obj : selected_objs)
 	{
 		graph_obj = dynamic_cast<BaseGraphicObject *>(obj);
@@ -341,6 +355,7 @@ void ObjectSearchWidget::selectObject()
 
 			if(obj_view)
 			{
+				followObjectScene(obj_view);
 				model_wgt->viewport->centerOn(obj_view);
 				obj_view->setSelected(true);
 			}
@@ -348,6 +363,7 @@ void ObjectSearchWidget::selectObject()
 		else if(tab_obj)
 		{
 			tab_view = dynamic_cast<BaseTableView *>(tab_obj->getParentTable()->getOverlyingObject());
+			followObjectScene(tab_view);
 			tab_view->setChildSelected(tab_obj);
 			model_wgt->viewport->centerOn(tab_view);
 		}

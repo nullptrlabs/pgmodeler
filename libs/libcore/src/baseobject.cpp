@@ -20,9 +20,14 @@
 */
 
 #include "baseobject.h"
+#include "utilsns.h"
 #include "coreutilsns.h"
 #include "exception.h"
 #include <QApplication>
+
+// Needed so setName()/setSchema() can keep DatabaseModel's name/signature lookup index
+// in sync after the object is renamed/reparented
+#include "databasemodel.h"
 
 QString BaseObject::pgsql_ver { PgSqlVersions::DefaulVersion };
 
@@ -79,19 +84,19 @@ const QString BaseObject::obj_type_names[ObjectTypeCount] {
 };
 
 const attribs_map BaseObject::search_attribs_i18n {
-	{ Attributes::Name, QT_TR_NOOP("Name") },
-	{ Attributes::Comment, QT_TR_NOOP("Comment") },
-	{ Attributes::Signature, QT_TR_NOOP("Signature") },
-	{ Attributes::Schema, QT_TR_NOOP("Schema") },
-	{ Attributes::Owner, QT_TR_NOOP("Owner") },
-	{ Attributes::Tablespace, QT_TR_NOOP("Tablespace") },
-	{ Attributes::Type, QT_TR_NOOP("Data type") },
-	{ Attributes::ReturnType, QT_TR_NOOP("Return type") },
-	{ Attributes::SrcTable, QT_TR_NOOP("Source table") },
-	{ Attributes::DstTable, QT_TR_NOOP("Destination table") },
-	{ Attributes::RelatedForeignKey, QT_TR_NOOP("Related foreign key") },
-	{ Attributes::SrcColumns, QT_TR_NOOP("Source column(s)") },
-	{ Attributes::RefColumns, QT_TR_NOOP("Referenced column(s)") }
+	{ Attributes::Name, PGM_TR2("Global", "Name") },
+	{ Attributes::Comment, PGM_TR2("Global", "Comment") },
+	{ Attributes::Signature, PGM_TR2("Global", "Signature") },
+	{ Attributes::Schema, PGM_TR2("Global", "Schema") },
+	{ Attributes::Owner, PGM_TR2("Global", "Owner") },
+	{ Attributes::Tablespace, PGM_TR2("Global", "Tablespace") },
+	{ Attributes::Type, PGM_TR2("Global", "Data type") },
+	{ Attributes::ReturnType, PGM_TR2("Global", "Return type") },
+	{ Attributes::SrcTable, PGM_TR2("Global", "Source table") },
+	{ Attributes::DstTable, PGM_TR2("Global", "Destination table") },
+	{ Attributes::RelatedForeignKey, PGM_TR2("Global", "Related foreign key") },
+	{ Attributes::SrcColumns, PGM_TR2("Global", "Source column(s)") },
+	{ Attributes::RefColumns, PGM_TR2("Global", "Referenced column(s)") }
 };
 
 const QStringList BaseObject::search_attribs_names {
@@ -293,9 +298,10 @@ QString BaseObject::formatName(const QString &name, bool is_operator)
 bool BaseObject::isValidName(const QString &name)
 {
 	QString aux_name = name;
+	static const QRegularExpression quoted_name_regexp(QRegularExpression::anchoredPattern("(\")(.)+(\")"));
 
 	// Remove the quotes from the start/end of the name to calculate the exact length
-	if(aux_name.contains(QRegularExpression::anchoredPattern("(\")(.)+(\")")))
+	if(aux_name.contains(quoted_name_regexp))
 	{
 		aux_name.remove(0,1);
 		aux_name.remove(aux_name.size()-1,1);
@@ -415,7 +421,8 @@ void BaseObject::setProtected(bool value)
 void BaseObject::setName(const QString &name)
 {
 	QString aux_name=name;
-	bool is_quoted=aux_name.contains(QRegularExpression("^(\")(.)+(\")$"));
+	static const QRegularExpression quoted_name_regexp("^(\")(.)+(\")$");
+	bool is_quoted=aux_name.contains(quoted_name_regexp);
 
 	//Raises an error if the passed name is invalid
 	if(!isValidName(aux_name))
@@ -430,9 +437,18 @@ void BaseObject::setName(const QString &name)
 		throw Exception(ErrorCode::AsgInvalidNameObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 	}
 
+	QString prev_name = this->obj_name;
+	QString prev_signature = this->getSignature();
+
 	aux_name.remove('"');
 	setCodeInvalidated(this->obj_name!=aux_name);
 	this->obj_name=aux_name;
+
+	// Keep the owning model's lookup index in sync
+	DatabaseModel *dbmodel = dynamic_cast<DatabaseModel *>(this->database);
+
+	if(dbmodel)
+		dbmodel->updateObjectIndex(this, prev_name, prev_signature);
 }
 
 void BaseObject::setAlias(const QString &alias)
@@ -625,8 +641,18 @@ void BaseObject::setSchema(BaseObject *schema)
 	if(!acceptsSchema())
 		throw Exception(ErrorCode::AsgInvalidSchemaObject,PGM_FUNC,PGM_FILE,PGM_LINE);
 
+	QString prev_name = this->obj_name;
+	QString prev_signature = this->getSignature();
+
 	setCodeInvalidated(this->schema != schema);
 	this->schema = schema;
+
+	// The signature is schema-qualified, so reparenting the object changes it
+	// even though its own name didn't change
+	DatabaseModel *dbmodel = dynamic_cast<DatabaseModel *>(this->database);
+
+	if(dbmodel)
+		dbmodel->updateObjectIndex(this, prev_name, prev_signature);
 }
 
 void BaseObject::setOwner(BaseObject *owner)
@@ -1230,7 +1256,8 @@ QString BaseObject::getSearchAttributeI18N(const QString &search_attr)
 	if(!search_attribs_i18n.count(search_attr))
 		return "";
 
-	return search_attribs_i18n.at(search_attr);
+	// The texts are only marked for translation where they are declared (PGM_TR2), so they are translated here
+	return UtilsNs::pgmTr(search_attribs_i18n.at(search_attr));
 }
 
 QStringList BaseObject::getSearchAttributesNames()
@@ -1543,8 +1570,7 @@ std::vector<BaseObject *> BaseObject::getLinkedObjects(ObjLinkType lnk_type, boo
 		if(!excl_types.empty())
 			linked_objs = CoreUtilsNs::filterObjectsByType(linked_objs, excl_types);
 	}
-
-	if(!excl_types.empty())
+	else if(!excl_types.empty())
 		linked_objs = CoreUtilsNs::filterObjectsByType(*obj_list, excl_types);
 	else
 		linked_objs = *obj_list;

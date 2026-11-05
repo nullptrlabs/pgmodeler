@@ -74,9 +74,20 @@ class __libcore BaseGraphicObject: public QObject, public BaseObject {
 		//! \brief Stores the table's Z position in the canvas
 		int z_value;
 
+		/*! \brief Index of the ObjectsScene bucket this object belongs to, in
+		 * threshold-segmentation mode, or a manually reassigned scene (any segmentation mode,
+		 * subtask 4.2). -1 means unset -- the object routes through whatever the current
+		 * segmentation mode's default logic decides. Originally a BaseTable-only attribute
+		 * (subtask 2.2); moved up here so Textbox can carry its own manual scene reassignment
+		 * too, the same way it already shares position/faded-out/layers with every other
+		 * graphical object type regardless of whether a given subtype's own getSourceCode()
+		 * override actually calls setSceneIndexAttribute() to persist it */
+		int scene_idx;
+
 		/*! \brief Method that defines the objects position attributes used in generation
-		 of XML code definition */
+		 *  of XML code definition */
 		void setPositionAttribute();
+		void setPositionAttribute(const QPointF &pos, const QString &pos_attr, const QString &id = "");
 
 		//! \brief Defines the receveir objects that represents the 'this' object on the QGraphicsScene
 		void setReceiverObject(QObject *obj);
@@ -84,6 +95,8 @@ class __libcore BaseGraphicObject: public QObject, public BaseObject {
 		void setFadedOutAttribute();
 
 		void setLayersAttribute();
+
+		void setSceneIndexAttribute();
 
 	public:
 		static constexpr int MaxZValue = 50,
@@ -159,6 +172,15 @@ class __libcore BaseGraphicObject: public QObject, public BaseObject {
 		virtual void setZValue(int z_value);
 
 		int getZValue();
+
+		//! \brief Defines the ObjectsScene bucket index this object belongs to (threshold-segmentation mode, or a manual reassignment)
+		void setSceneIndex(int idx);
+
+		//! \brief Returns the ObjectsScene bucket index this object belongs to, or -1 if unset
+		int getSceneIndex();
+
+		//! \brief Clears the scene bucket index, reverting it to unset (-1)
+		void resetSceneIndex();
 
 		static void setUpdatesEnabled(bool value);
 

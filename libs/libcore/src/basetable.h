@@ -33,6 +33,9 @@
 #include "tag.h"
 
 class __libcore BaseTable: public BaseGraphicObject {
+	private:
+		static bool geom_changes_ignored;
+
 	public:
 		//! \brief This enum is used to control the collapsing of the tables
 		enum CollapseMode: unsigned {
@@ -55,6 +58,10 @@ class __libcore BaseTable: public BaseGraphicObject {
 
 		QString hash_code;
 
+		/*! \brief Relationship marker position offset, relative to its default anchor point.
+		 * A NaN point means no custom position was set -- the marker uses the default anchor */
+		QPointF rel_marker_pos;
+
 	public:
 		enum TableSection: unsigned {
 			AttribsSection,
@@ -69,6 +76,10 @@ class __libcore BaseTable: public BaseGraphicObject {
 		virtual void setTag(Tag *tag);
 
 		virtual Tag *getTag();
+
+		static void setGeomChangesIgnored(bool value);
+
+		static bool isGeomChangesIgnored();
 
 		//! \brief Returns true if the provided table is considered a base table (Table, ForeignTable, View)
 		static bool isBaseTable(ObjectType obj_tp);
@@ -166,6 +177,15 @@ class __libcore BaseTable: public BaseGraphicObject {
 		void resetHashCode();
 
 		void setPosition(const QPointF &pos) override;
+
+		/*! \brief Defines the relationship marker's position offset relative to its default anchor
+		 * point. Pass an invalid (NaN) point to clear a previously set custom position */
+		void setRelMarkerPosition(const QPointF &pos);
+
+		QPointF getRelMarkerPosition();
+
+		//! \brief Clears any custom relationship marker position, reverting it to the default anchor
+		void resetRelMarkerPosition();
 
 		void updateDependencies() override = 0;
 

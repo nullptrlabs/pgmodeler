@@ -14,6 +14,7 @@
 <!ATTLIST expression type (none|using-exp|check-exp) "none">
 
 <!ELEMENT position EMPTY>
+<!ATTLIST position id CDATA #IMPLIED>
 <!ATTLIST position x CDATA "0">
 <!ATTLIST position y CDATA "0">
 

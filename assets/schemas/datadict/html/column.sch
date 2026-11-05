@@ -16,7 +16,7 @@
 	%end
 
 	{spc} <td \s class="bool-field"> {not-null} </td>
-	{spc} <td \s class="value"> {default-value} </td>
+	{spc} <td \s class="value"> &{default-value} </td>
 	{spc} <td><p \s class="max-td-wth"><em> {comment} </em></p></td>
 %end
 

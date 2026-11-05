@@ -766,3 +766,8 @@ void ModelValidationWidget::updateConnections()
 {
 	ConnectionsConfigWidget::fillConnectionsComboBox(connections_cmb, true, Connection::OpValidation);
 }
+
+bool ModelValidationWidget::hasValidationErrors()
+{
+	return error_count_lbl->text().toInt() > 0;
+}

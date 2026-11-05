@@ -196,6 +196,7 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		void resizeEvent(QResizeEvent *) override;
 
 		void showEvent(QShowEvent *) override;
+		bool eventFilter(QObject *object, QEvent *event) override;
 
 		void setBottomFloatingWidgetPos(QWidget *widget, QAbstractButton *btn);
 
@@ -282,7 +283,7 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		 * The confirm parameter indicates if the user must be asked to save
 		 * a file before closing it .
 		 * This method returns a bool value indicating the model closing */
-		bool closeModel(int model_id = -1, bool keep_tab = false, bool confirm = true);
+		bool closeModel(int model_id = -1, bool confirm = true);
 
 		/*! \brief Closes/destroys the model in the specified index 'model_id',
 		 *  load a new one and assign it to the parent tab of the closed model */
@@ -396,6 +397,10 @@ class __libgui MainWindow: public QMainWindow, public Ui::MainWindow {
 		void toggleAboutWidget(bool show);
 		void toggleDonateWidget(bool show);
 		void removeModelActions();
+
+		//! \brief Makes all the buttons in the tools toolbar have the same width as the widest one
+		void adjustToolsButtonsWidth();
+
 		void changeCurrentView(bool checked);
 		void reportBug();
 		void removeOperations();

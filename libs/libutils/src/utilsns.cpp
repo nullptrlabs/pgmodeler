@@ -88,6 +88,21 @@ namespace UtilsNs {
 		output.close();
 	}
 
+	bool setOwnerOnlyAccess(const QString &filename)
+	{
+		#ifdef Q_OS_WIN
+			Q_UNUSED(filename)
+			return true;
+		#else
+			QFile file(filename);
+
+			if(!file.exists())
+				return true;
+
+			return file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
+		#endif
+	}
+
 	QByteArray loadFile(const QString &filename, qint64 max_len)
 	{
 		QFile input;
@@ -112,11 +127,35 @@ namespace UtilsNs {
 		return input.read(max_len);
 	}
 
+	QString pgmTr(const char *text)
+	{
+		return QCoreApplication::translate(TrContext, text);
+	}
+
+	QString pgmTr(const QString &text)
+	{
+		return pgmTr(text.toUtf8().constData());
+	}
+
 	QString convertToXmlEntities(QString value)
 	{
+		bool has_special_chr = false;
+
 		/* If the extracted value has one of the expected special chars
-		 * in order to perform the replacemnt to xml entities */
-		if(value.contains(QRegularExpression("(&|\\<|\\>|\")")))
+		 * in order to perform the replacemnt to xml entities. This is a plain scan
+		 * because building a regular expression on each call is far more expensive
+		 * than the replacements themselves and this function is called for every &{attribute}
+		 * the schema parser finds */
+		for(const QChar &chr : std::as_const(value))
+		{
+			if(chr == '&' || chr == '<' || chr == '>' || chr == '"')
+			{
+				has_special_chr = true;
+				break;
+			}
+		}
+
+		if(has_special_chr)
 		{
 			if(!value.contains(UtilsNs::EntityQuot) && !value.contains(UtilsNs::EntityLt) &&
 				 !value.contains(UtilsNs::EntityGt) && !value.contains(UtilsNs::EntityAmp) &&
@@ -138,7 +177,20 @@ namespace UtilsNs {
 
 	QString getStringHash(const QByteArray &string, QCryptographicHash::Algorithm algorithm)
 	{
-		return QCryptographicHash::hash(string, algorithm).toHex();
+		/* If the algorithm is not Md5 we just use the QCryptographicHash::hash() method 
+		 * to get the hash of the string. By default all objetcs in pgModeler are hashed using
+		 * Md5 algorithm because it is the fastest one and it is enough for our needs. */
+		if(algorithm != QCryptographicHash::Md5)
+			return QCryptographicHash::hash(string, algorithm).toHex();
+
+		/* Md5 is the only algorithm used in hot paths (object hash codes), so one hasher
+		 * per thread is reused. When Qt hashes through OpenSSL, each new QCryptographicHash
+		 * loads/unloads an OpenSSL provider, which is costly when creating one per call. */
+		thread_local QCryptographicHash hasher(QCryptographicHash::Md5);
+
+		hasher.reset();
+		hasher.addData(string);
+		return hasher.result().toHex();
 	}
 
 	QString formatMessage(const QString &msg)

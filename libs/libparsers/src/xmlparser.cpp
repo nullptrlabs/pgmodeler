@@ -175,8 +175,8 @@ void XmlParser::readBuffer()
 		if(xml_error)
 		{
 			QString msg, file, extra_info {
-								QString(QT_TR_NOOP("XML file: %1")).arg(xml_doc_filename) + "\n" +
-								QString(QT_TR_NOOP("DTD decl: %1")).arg(dtd_decl) };
+								UtilsNs::pgmTr(PGM_TR2("Global", "XML file: %1")).arg(xml_doc_filename) + "\n" +
+								UtilsNs::pgmTr(PGM_TR2("Global", "DTD decl: %1")).arg(dtd_decl) };
 
 			//Formats the error
 			msg = xml_error->message;

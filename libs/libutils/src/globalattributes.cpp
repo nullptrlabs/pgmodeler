@@ -26,7 +26,7 @@
 
 const QString GlobalAttributes::PgModelerVersion {
 	/** Base version number **/
-	QString("2.0.0-beta1")
+	QString("2.0.0")
 
 /* Appending the snapshot build number to the version number
  * when the external variable SNAPSHOT_BUILD is defined */
@@ -60,10 +60,10 @@ const QString GlobalAttributes::PgModelerSite {
 #endif
 };
 
-const QString GlobalAttributes::PgModelerSupport { PgModelerSite + "/support/docs" };
+const QString GlobalAttributes::PgModelerSupport { PgModelerSite + "/docs" };
 const QString GlobalAttributes::PgModelerSourceURL { "https://github.com/nullptrlabs/pgmodeler/releases" };
 const QString GlobalAttributes::PgModelerDownloadURL { PgModelerSite + "/download" };
-const QString GlobalAttributes::PgModelerDonateURL { PgModelerSite + "/#donationForm" };
+const QString GlobalAttributes::PgModelerDonateURL { PgModelerSite + "/donate" };
 const QString GlobalAttributes::PgModelerUpdateCheckURL { PgModelerSite + "/checkupdate?version=%1&mode=%2" };
 
 const QString GlobalAttributes::NullptrLabsSite { "https://nullptrlabs.io" };
@@ -90,6 +90,8 @@ const QString GlobalAttributes::DbModelExt {".dbm"};
 const QString GlobalAttributes::DbModelBkpExt {".dbk"};
 const QString GlobalAttributes::ObjMetadataExt {".omf"};
 const QString GlobalAttributes::DirSeparator {"/"};
+const QString GlobalAttributes::UiLanguageParam {"ui-language"};
+const QString GlobalAttributes::OriginalUiLanguage {"en_US"};
 const QString GlobalAttributes::ResourcesDir {"res"};
 const QString GlobalAttributes::ConfigurationsDir {"conf"};
 const QString GlobalAttributes::DefaultConfsDir {"defaults"};

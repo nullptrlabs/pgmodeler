@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 		QStringList args = app.arguments();
 		SchemaEditorForm syntaxchk;
 
-		app.loadTranslations(QLocale::system().name(), false);
+		app.loadTranslations(false);
 
 		args.pop_front();
 		syntaxchk.loadFiles(args);

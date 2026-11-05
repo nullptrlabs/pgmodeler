@@ -23,6 +23,10 @@
 #include "utilsns.h"
 #include "coreutilsns.h"
 #include "tableobject.h"
+#include "doublenan.h"
+#include <cmath>
+
+bool BaseTable::geom_changes_ignored { false };
 
 BaseTable::BaseTable()
 {
@@ -35,8 +39,10 @@ BaseTable::BaseTable()
 	attributes[Attributes::AttribsPage]="";
 	attributes[Attributes::ExtAttribsPage]="";
 	attributes[Attributes::ZValue]="";
+	attributes[Attributes::RelMarkerPos]="";
 	pagination_enabled = false;
 	collapse_mode = CollapseMode::NotCollapsed;
+	rel_marker_pos = QPointF(DNaN, DNaN);
 	resetCurrentPages();
 }
 
@@ -61,6 +67,16 @@ void BaseTable::setTag(Tag *tag)
 Tag *BaseTable::getTag()
 {
 	return tag;
+}
+
+void BaseTable::setGeomChangesIgnored(bool value)
+{
+	geom_changes_ignored = value;
+}
+
+bool BaseTable::isGeomChangesIgnored()
+{
+	return geom_changes_ignored;
 }
 
 bool BaseTable::isBaseTable(ObjectType obj_tp)
@@ -180,6 +196,22 @@ void BaseTable::setPosition(const QPointF &pos)
 {
 	BaseGraphicObject::setPosition(pos);
 	resetHashCode();
+}
+
+void BaseTable::setRelMarkerPosition(const QPointF &pos)
+{
+	rel_marker_pos = pos;
+	setCodeInvalidated(true);
+}
+
+QPointF BaseTable::getRelMarkerPosition()
+{
+	return rel_marker_pos;
+}
+
+void BaseTable::resetRelMarkerPosition()
+{
+	setRelMarkerPosition(QPointF(DNaN, DNaN));
 }
 
 std::vector<BaseObject *> BaseTable::getDependencies(bool inc_indirect_deps, const std::vector<ObjectType> &excl_types, bool rem_duplicates)

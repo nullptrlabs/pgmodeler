@@ -61,6 +61,10 @@ void SchemaWidget::setAttributes(DatabaseModel *model, OperationList *op_list, S
 	}
 	else
 		fill_color_picker->setColor(0, QColor(225,225,225));
+
+	show_rect_chk->setEnabled(model->getSegmentationMode() == DatabaseModel::NoSegmentation);
+	show_rect_chk->setToolTip(model->getSegmentationMode() != DatabaseModel::NoSegmentation ?
+														tr("<p>Schema rectangle is disabled when the model is segmented in multiple scenes</p>") : "");
 }
 
 void SchemaWidget::applyConfiguration()

@@ -76,3 +76,6 @@ tests/src/xmlparsertest/xmlparsertest
 tests/src/datadicttest/datadicttest
 tests/src/usermappingtest/usermappingtest
 tests/src/transformtest/transformtest
+
+# Private development plans (separate repository)
+dev-plans/

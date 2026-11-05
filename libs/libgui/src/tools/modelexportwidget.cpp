@@ -27,6 +27,7 @@
 #include "pgsqlversions.h"
 #include <QThread>
 #include <QButtonGroup>
+#include <QFileInfo>
 #include "tabordermanager.h"
 
 bool ModelExportWidget::low_verbosity {false};
@@ -291,10 +292,20 @@ void ModelExportWidget::exportModel()
 		//Export to png
 		if(export_to_img_tb->isChecked())
 		{
-			QGraphicsView *viewp = new QGraphicsView(model_wgt->scene);
+			QList<ObjectsScene *> all_scenes = model_wgt->getScenes();
+			QString base_path = img_file_sel->getSelectedPath();
+			QFileInfo base_finfo(base_path);
 
 			emit s_exportStarted();
 			qApp->setOverrideCursor(Qt::WaitCursor);
+
+			/* Only segmented models can actually have an empty scene left behind (e.g. every table
+			 * that used to live there got moved/removed) -- in NoSegmentation there's always exactly
+			 * one scene, and it being empty just means the model itself is empty, not an artifact to skip */
+			bool skip_empty_scenes = model_wgt->getDatabaseModel()->getSegmentationMode() != DatabaseModel::NoSegmentation;
+
+			//Tracks how many files were actually written, so skipped scenes don't leave gaps in the "_<n>" suffix
+			int file_idx = 0;
 
 			/* Due to the nature of Qt Graphics Scene thread affinity limitations,
 			 * the export to png/svg runs sincronously even in GUI. A scene from
@@ -302,23 +313,50 @@ void ModelExportWidget::exportModel()
 			 * Qt raises warnings in console. So to avoid this kind of problem the
 			 * export to image runs in a single shot, not giving the user a chance
 			 * to abort the operation */
-			if(img_fmt_cmb->currentIndex() == 0)
+			for(int idx = 0; idx < all_scenes.size(); idx++)
 			{
-				export_hlp.setExportToPNGParams(model_wgt->scene, viewp, img_file_sel->getSelectedPath(),
-																				zoom_cmb->itemData(zoom_cmb->currentIndex()).toDouble(),
-																				show_grid_chk->isChecked(), show_delim_chk->isChecked(),
-																				 page_by_page_chk->isChecked(), override_bg_color_chk->isChecked());
-				export_hlp.exportToPNG();
-			}
-			else
-			{
-				export_hlp.setExportToSVGParams(model_wgt->scene, img_file_sel->getSelectedPath(),
-																				show_grid_chk->isChecked(),
-																				show_delim_chk->isChecked());
-				export_hlp.exportToSVG();
+				ObjectsScene *scn = all_scenes.at(idx);
+
+				//Nothing to draw -- skip it instead of writing out a tiny, empty image file
+				if(skip_empty_scenes && scn->itemsBoundingRect(true, false, true).isEmpty())
+					continue;
+
+				file_idx++;
+
+				/* Each scene is exported to its own file. With a single scene the path is used
+				 * as-is; with more than one, a "_<index>" suffix is inserted before the extension */
+				QString out_path = base_path;
+
+				if(all_scenes.size() > 1)
+				{
+					out_path = base_finfo.absolutePath() + GlobalAttributes::DirSeparator +
+										 base_finfo.baseName() + QString("_%1").arg(file_idx);
+
+					if(!base_finfo.completeSuffix().isEmpty())
+						out_path += "." + base_finfo.completeSuffix();
+				}
+
+				QGraphicsView *viewp = new QGraphicsView(scn);
+
+				if(img_fmt_cmb->currentIndex() == 0)
+				{
+					export_hlp.setExportToPNGParams(scn, viewp, out_path,
+																					zoom_cmb->itemData(zoom_cmb->currentIndex()).toDouble(),
+																					show_grid_chk->isChecked(), show_delim_chk->isChecked(),
+																					 page_by_page_chk->isChecked(), override_bg_color_chk->isChecked());
+					export_hlp.exportToPNG();
+				}
+				else
+				{
+					export_hlp.setExportToSVGParams(scn, out_path,
+																					show_grid_chk->isChecked(),
+																					show_delim_chk->isChecked());
+					export_hlp.exportToSVG();
+				}
+
+				delete viewp;
 			}
 
-			delete viewp;
 			qApp->restoreOverrideCursor();
 		}
 		else

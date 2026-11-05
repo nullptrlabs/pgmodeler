@@ -376,6 +376,7 @@ void BaseFunction::createSignature(bool format, bool prepend_schema)
 {
 	QString aux_str;
 	QStringList fmt_params;
+	static const QRegularExpression arg_mode_regexp("^(IN)?( )*(OUT)?( )");
 
 	for(auto &param : parameters)
 	{
@@ -388,7 +389,7 @@ void BaseFunction::createSignature(bool format, bool prepend_schema)
 			 * So in order to avoid signature conflicts (mainly whe diff functions) we remove it.
 			 * The keyword OUT is also removed for IN OUT parameters, since removing the IN parameter the OUT keyword will remain which
 			 * forms an invalid signature. */
-			aux_str = param.getSourceCode(SchemaParser::SqlCode, true).replace(QRegularExpression("^(IN)?( )*(OUT)?( )"),"").trimmed();
+			aux_str = param.getSourceCode(SchemaParser::SqlCode, true).replace(arg_mode_regexp,"").trimmed();
 			aux_str.remove(',');
 			fmt_params.append(aux_str);
 			param.setCodeInvalidated(true);

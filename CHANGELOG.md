@@ -1,6 +1,98 @@
 Changelog
 ---------
 
+v2.0.0
+------
+*Release date: October 30, 2026*
+
+* [New] Added multi-scene support: a model's canvas can now be segmented into multiple scenes, either one per schema or by an object-count threshold, keeping the editor responsive on databases with thousands of tables. See `DatabaseModel::SegmentationMode`, the new per-scene API in `ModelWidget` (`getScene()`/`getScenes()`, `setActiveScene()`, `s_activeSceneChanged`), and the new `SceneInfoWidget` for switching between scenes, with previous/next navigation buttons.
+* [New] A table that has a relationship to a table in a different scene now shows a marker (`RelMarkerItem`) instead of a relationship line crossing scenes; double-clicking it opens `TableRelsWidget`, a read-only, sortable grid listing those cross-scene relationships (and, when enabled, the table's own hidden relationships), with double-click navigation to the relationship or the related table.
+* [New] Added an option to hide the relationships between tables of the same scene as well, representing them through the same marker. Available when segmenting a model in the GUI, when importing a database (`DatabaseImportWidget`'s "Hide relationships" option), and in `pgmodeler-cli --import-db` (`--hide-rels`/`-hr`).
+* [New] `pgmodeler-cli --import-db` gained `--seg-mode`/`--seg-threshold` to segment a model right from the database import, matching the GUI's reverse-engineering form.
+* [New] Opening a model whose objects are concentrated in very few scenes now prompts to switch segmentation mode.
+* [New] `pgmodeler-cli`'s model fix (`--fix-model`/`--fix-sdbm`) now preserves a model's segmentation data (mode, threshold, per-scene rects, last active scene) instead of discarding it.
+* [New] Added menu actions to create a tag or a layer directly from one or more selected schemas.
+* [New] Added the `update_ts` CMake target to regenerate the UI translation sources (`.ts`) from the source code.
+* [New] Added UI translations for all supported languages, including Brazilian Portuguese (pt_BR), generated with AI assistance; human review of these translations is still pending.
+* [New] Added the orthogonal line style for relationships (`RelationshipView::OrthogonalLines`): lines are routed with horizontal and vertical segments only, around the tables, their layer rects and the crow's foot areas of other relationships, and hop over the lines they cross through arcs (`BezierCurveItem::HopArc`) stroked with a gradient at the apex that shows which line is on top (darker for convex, lighter for concave). The route search lives in `RelationshipView::getOrthogonalRoute()`, and `BezierCurveItem::setPoints()` gained the polyline mode used to draw it.
+* [New] The segments of orthogonal lines can be moved perpendicularly by dragging them with SHIFT pressed; the end segments are displaced through a jog (a corner next to the table) that can be dragged as well. ALT+SHIFT+click discards the displacements. They are stored per segment index in `BaseRelationship` (`SegmentShift`, `setSegmentShifts()`, `getSegmentShifts()`, `resetSegmentShifts()`), saved as `<segment index orientation value jog/>` elements (new `segment.sch`/`segment.dtd`) in the model file and in the objects metadata, and discarded when one of the linked tables moves or is resized.
+* [New] Added the "Line style" setting (straight, curved or orthogonal) to the relationships configuration (`line-style` attribute in `relationships.conf`, `RelationshipView::setLineStyle()`/`getLineStyle()`), with orthogonal as the default.
+* [New] Added unit tests for the orthogonal relationship lines (`relationshiplinestest`), the persistence of the segment displacements (`relationshippersistencetest`) and the line style settings (`relationshipsettingstest`).
+* [New] Added `SecretsNs` (`secretsns.h`), a dependency-free way to obfuscate secrets stored in configuration files: `SecretsNs::encrypt()` and `SecretsNs::decrypt()` produce values in the form `pgm-enc1:<base64>`; values without the prefix are legacy plain text and are read as they are.
+* [New] Added `UtilsNs::setOwnerOnlyAccess()` to restrict a file to its owner (no effect on Windows).
+* [New] Added unit tests for the secrets encryption (`secretsnstest`).
+* [New] Added `DangerZoneWidget`, a dialog that asks the user to type a given text (e.g., the name of a database) before a destructive operation proceeds; `DangerZoneWidget::confirm()` shows it as a fixed-size form whose confirm button is enabled only when the typed text matches exactly.
+* [New] Added the "Objects border width" and "Relationships line width" settings to the Canvas group of the appearance settings (`obj-border-width` and `rel-border-width` attributes of the `design` element in `appearance.conf`). They are percentages of the default width (50% to 200%, in steps of 5%, 100% is the default) applied to the pens of the borders of the objects (`BaseObjectView::setBorderWidthPercent()`/`getBorderWidthPercent()`) and of the relationships lines (`RelationshipView::setBorderWidthPercent()`/`getBorderWidthPercent()`). The change is previewed in the example model while editing and applied to the opened models when the settings are saved. The attribute toggler buttons and the descriptors of the table items are not affected, for this `BaseObjectView::getBorderStyle()` gained the `adjust_width` parameter.
+* [New] Added the "Line color" submenu to the context menu of relationships (`ModelWidget::changeRelationshipsColor()`), displayed when the selection has only relationships, with the actions to set a random custom color or to disable the custom color of one or more relationships. The changes are registered in the operations list.
+* [Change] Selection, the Object Search Widget, and Layers operations now operate across every scene (or follow the clicked object's own scene) instead of assuming a single canvas.
+* [Change] The "Rearrange objects" menu is now scoped to the active scene instead of the whole model.
+* [Change] PNG/SVG export now produces one image per scene instead of a single image of the whole model.
+* [Change] Every private executable now follows the configured UI language instead of only the main GUI.
+* [Change] Validating the database form (`BaseObjectWidget`) now only regenerates the `CREATE DATABASE` SQL instead of the whole model's SQL, eliminating a multi-second stall on large models when applying database-level changes.
+* [Change] `SchemaParser` now caches a schema file's already-processed content (comments stripped, `@include` resolved) keyed by its path, instead of re-reading and reprocessing it on every use; `Catalog`'s own ad hoc query cache was replaced by this central one.
+* [Change] `SchemaParser`'s interpreter was substantially reworked for speed: removed per-call regular expression construction (attribute name validation, XML entity conversion, and several similar fixed patterns across `BaseObject`, `PgSqlType`, `BaseFunction` and `BaseGraphicObject`), stopped copying the full attribute map for every object generated, and simplified its internal dispatch (metacharacters, comparison operators, conditional branches). Parsing a schema file now takes roughly a third of the CPU instructions it used to, and SQL/XML generation on real-world models is 50-70% faster.
+* [Change] Attribute names in `.sch` schema files no longer accept the Unicode Kelvin sign (K) or long s (ſ) as letters, matching the documented `[A-Za-z]` rule; only affects custom or plugin schemas that relied on those exact characters.
+* [Change] Indexed `DatabaseModel::getObject()` by name and signature, avoiding a linear scan for lookups that don't need the fallback.
+* [Change] Reduced redundant layer/scene refresh work during large model loads.
+* [Change] Debounced relationship redraw during batched table/model updates.
+* [Change] Bounded background grid/page delimiter rendering to the exposed area.
+* [Change] Dropped antialiasing while the scene is being panned/zoomed/dragged.
+* [Change] Dropped antialiasing when painting relationship curves at low zoom.
+* [Change] `BezierCurveItem`'s click-detection stroke is now computed lazily.
+* [Change] Avoided a needless re-render cascade when propagating protected state.
+* [Change] Self-relationship loop corners are now rounded when curved lines are enabled.
+* [Change] Tools toolbar buttons now share the width of the widest one.
+* [Change] BREAKING: The "Use curved lines" option (`use-curved-lines` in `general.conf`, `RelationshipView::setCurvedLines()`) was replaced by the line style setting of the relationships configuration; the old value is ignored and the default style is now orthogonal.
+* [Change] Split `RelationshipView::configureLine()` into smaller methods, by connection mode (`configureSelfRelGeometry()`, `configureCenterGeometry()`, `configureFkToPkGeometry()`), by drawing stage and by update guard.
+* [Change] The relationship descriptor of orthogonal lines is kept away from the corners of the route, at the beginning or end of a segment, unless the descriptor is hidden (crow's foot notation on 1:1, 1:n, n:n and fk relationships).
+* [Change] Moving tables now updates only the orthogonal relationships whose routes touch the area of the moved tables, and reconfigures each nearby relationship once when several tables are moved.
+* [Change] Updated the UI dictionaries of all languages with the new texts (relationship line style, FK index pattern, table relationships dialog, border width settings, relationship line color actions, drop database confirmation); translations other than pt_BR are AI generated and pending native review.
+* [Change] The documentation and donation URLs now point to `/docs` and `/donate` on the pgModeler website.
+* [Change] `CustomTableWidget::getItem()` now throws when the item is not allocated.
+* [Change] The Columns tab of `ConstraintWidget` is hidden for CHECK and EXCLUDE constraints.
+* [Change] The database connection passwords (`connections.conf`) and the SSH tunnel passwords (`sshtunnel.conf`) are now saved encrypted through `SecretsNs`, and both files are restricted to their owner. Existing plain text passwords keep working and are encrypted the next time the settings are saved. Older versions read the encrypted value as the password itself, so connections need their password retyped after a downgrade.
+* [Change] The Versioning plugin now masks the credentials embedded in remote URLs in the debug log, in the error and warning messages and in the remote URL shown by the versioning widget (`GitWrapper::maskUrlCredentials()`): the whole user info of http(s) URLs is hidden (`https://******@host`), since an access token can't be told apart from a user name, and only the password is hidden in URLs of other schemes (`ssh://user:******@host`).
+* [Change] Dropping a database in the SQL tool (`SQLToolWidget::dropDatabase()`, reached from the database explorer's toolbar and the database list) now requires, after the confirmation message, typing the name of the database in a "Danger zone" dialog (`DangerZoneWidget`) before the `DROP DATABASE` is executed.
+* [Change] The built-in themes now use 150% for the objects border width and 110% for the relationships line width.
+* [Fix] Fixed SQL code completion (SQL Tool) losing track of which statement the cursor is in when the buffer has more than one statement, causing it to use the wrong table/command context or list unrelated keywords as implicit table aliases.
+* [Fix] Fixed a table's graphical item, cross-scene relationship classification, position, and relationship marker not consistently following it when it changes schema or scene.
+* [Fix] Fixed cascade schema deletion missing transitively-referenced child objects due to a discarded result in `BaseObject::getLinkedObjects()`.
+* [Fix] Fixed segmentation threshold changes not taking effect after saving and reloading a model.
+* [Fix] Fixed objects being left outside their scene's rectangle after threshold rebucketing.
+* [Fix] Fixed `pg_catalog`/`public` leaking into the scene name, or auto-activating, outside schema segmentation.
+* [Fix] Fixed `--fix-sdbm` discarding almost every object of a split model saved with ID comments.
+* [Fix] Fixed the Versioning plugin displaying the "Repository successfully synchronized" message after a failed pull or push (e.g., when the credentials dialog is canceled, on merge conflicts or rejected pushes) in `VersioningWidget::syncChanges()`; the push is now skipped unless the pull succeeds.
+* [Fix] Fixed the spelling of the synchronization success message of the Versioning plugin and the missing translation of the "Merge conflict detected" and tags synchronization messages.
+* [Fix] Fixed `DatabaseModel` not being destroyed together with its `ModelWidget`, leaking memory on every model close.
+* [Fix] Fixed a use-after-free when pasting or duplicating table objects.
+* [Fix] Fixed a `PGresult` leak in `Connection::executeDMLCommand` on failed commands.
+* [Fix] Fixed missing self-relationship geometry in `configureBoundingRect()`.
+* [Fix] Fixed a leak of `RelationshipView`'s optional-cardinality crow's foot circle.
+* [Fix] Gave `Element` a virtual destructor, fixing undefined behavior on polymorphic delete.
+* [Fix] Fixed `BaseObjectView::mousePressEvent()` leaking its synthetic `QGraphicsSceneMouseEvent`.
+* [Fix] Fixed `BaseObjectView::fade()` reentering while its `QTimeLine` was already running.
+* [Fix] Fixed `TaskProgressWidget` not restoring the cursor when a task is canceled.
+* [Fix] Fixed `Messagebox` size not fitting the message text and the buttons.
+* [Fix] Fixed the code completion list being emptied while filtering live database items.
+* [Fix] Fixed an unescaped value in default column values in the HTML data dictionary.
+* [Fix] Duplicating a table now copies its children with the default name disambiguation.
+* [Fix] Disabled the scene info panel and the plugins dock area while a model is being validated, preventing operations that the running validation pass wouldn't account for.
+* [Fix] Fixed `SchemaParser` hanging indefinitely on a stray `]` or `}` inside a `%set` value instead of reporting a syntax error, reachable by typing a malformed snippet in the Snippets tool.
+* [Fix] Fixed a data race in `SchemaParser`'s shared schema file cache when multiple threads (export, validation, import, diff) parse schemas concurrently.
+* [Fix] Fixed `SchemaParser` changing the application's current working directory while loading an included schema file.
+* [Fix] Fixed the line number reported in errors that occur in a schema file after an `@include`.
+* [Fix] Fixed `SchemaParser` treating an escaped `\]` as closing a plain-text block while stripping comments, which could corrupt schemas combining a literal `]` with a following `#`.
+* [Fix] Fixed `SchemaParser` failing to parse past a `%set` whose value spans multiple lines when it sits inside a branch whose condition is false.
+* [Fix] Fixed the `InvalidAttribute` error message of `SchemaParser` not naming the offending attribute.
+* [Fix] Fixed the diff emitting an empty `SET EXPRESSION AS ()` (or `SET EXPRESSION AS (true)`) for columns that are not generated.
+* [Fix] Fixed the customization of FK relationships (alias, layers, points, label positions, displaced segments, color, faded out and protected states) being lost when the relationship is recreated at the end of a model loading.
+* [Fix] Fixed two crashes in the displacement of orthogonal line segments: an out-of-range write caused by a segment index from the model file overflowing 32 bits, and a queued reconfiguration running on a view already discarded by the scene.
+* [Fix] Fixed an empty `NewObjectOverlayWidget` being shown when two tables are selected, and skipped showing it when no button is visible.
+* [Fix] Fixed the context menu opening when right clicking a relationship marker.
+* [Fix] Added a left margin to the enumerations table of `TypeWidget` and fixed the FK index tooltip and the form height in the relationships settings.
+* [Fix] Fixed `BaseRelationship::setCustomColor()` not invalidating the cached code of the relationship, which kept the old custom color in the saved XML.
+* [Fix] Fixed `RelationshipView` not redrawing the line when the custom color of the relationship changes (including undo/redo), since the line was reconfigured only when the hash codes of the tables changed.
+
 v2.0.0-beta1
 ------
 *Release date: September 14, 2026*

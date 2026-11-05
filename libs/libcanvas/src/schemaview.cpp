@@ -78,8 +78,8 @@ void SchemaView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void SchemaView::fetchChildren()
 {
-	Schema *schema=dynamic_cast<Schema *>(this->getUnderlyingObject());
-	DatabaseModel *model=dynamic_cast<DatabaseModel *>(schema->getDatabase());
+	Schema *schema = dynamic_cast<Schema *>(this->getUnderlyingObject());
+	DatabaseModel *model = dynamic_cast<DatabaseModel *>(schema->getDatabase());
 	std::vector<BaseObject *> objs, list;
 	std::vector<ObjectType> types = { ObjectType::Table, ObjectType::ForeignTable, ObjectType::View };
 
@@ -91,42 +91,31 @@ void SchemaView::fetchChildren()
 	}
 
 	children.clear();
-	while(!objs.empty())
-	{
-		children.push_front(dynamic_cast<BaseObjectView *>(dynamic_cast<BaseGraphicObject *>(objs.back())->getOverlyingObject()));
-		objs.pop_back();
-	}
+	for(auto &obj : objs)
+		children.push_front(dynamic_cast<BaseObjectView *>(dynamic_cast<BaseGraphicObject *>(obj)->getOverlyingObject()));
 }
 
 void SchemaView::selectChildren()
 {
-	QList<BaseObjectView *>::Iterator itr=children.begin();
-
 	//Clears the current scene selection because only one schema and its children can be selected at once
 	this->scene()->clearSelection();
-	all_selected=true;
+	all_selected = true;
 
-	while(itr!=children.end())
-	{
-		(*itr)->setSelected(true);
-		itr++;
-	}
+	for(auto &chld : children)
+		chld->setSelected(true);
 
 	this->setSelected(true);
 }
 
 bool SchemaView::isChildrenSelected()
 {
-	QList<BaseObjectView *>::Iterator itr=children.begin();
-	bool selected=true;
-
-	while(itr!=children.end() && selected)
+	for(auto &chld : children)
 	{
-		selected=(*itr)->isSelected();
-		itr++;
+		if(!chld->isSelected())
+			return false;
 	}
 
-	return selected;
+	return true;
 }
 
 QVariant SchemaView::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)

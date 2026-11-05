@@ -3,9 +3,9 @@
 CAUTION: Do not modify this file unless you know what you are doing.
  Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="2.0.0-alpha" use-changelog="false" max-obj-count="16"
-	 gen-disabled-objs-code="false" show-sys-schemas-rects="false"
-	 last-position="0,0" last-zoom="0.55" scene-rect="0,-248.985,2615.14,1850.56"
+<dbmodel pgmodeler-ver="2.0.0" use-changelog="false" max-obj-count="16"
+	 gen-disabled-objs-code="false" show-sys-schemas-rects="false" seg-mode="0" seg-threshold="500"
+	 last-position="0,-114" last-zoom="0.7" scene-rect="0,-240.5,2582.85,1745.15" last-scene="0"
 	 default-schema="public" default-owner="postgres"
 	 layers="Default layer"
 	 active-layers="0"
@@ -59,7 +59,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="customer_demographics" layers="0" collapse-mode="2" max-obj-count="2" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1080" y="0"/>
+	<position x="850.769" y="36.9231"/>
 	<column name="customer_type_id" not-null="true">
 		<type name="character varying" length="5"/>
 	</column>
@@ -179,7 +179,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="employee_territories" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1640" y="1060"/>
+	<position x="1683.08" y="1093.85"/>
 	<column name="employee_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -194,7 +194,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="order_details" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1060" y="440"/>
+	<position x="752.028" y="412.867"/>
 	<column name="order_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -308,7 +308,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="region" layers="0" collapse-mode="1" max-obj-count="2" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="2200" y="1080"/>
+	<position x="2207.69" y="970.769"/>
 	<column name="region_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -323,7 +323,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="shippers" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="580" y="660"/>
+	<position x="550.769" y="636.923"/>
 	<column name="shipper_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -341,7 +341,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="suppliers" layers="0" collapse-mode="2" max-obj-count="14" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="540" y="1140"/>
+	<position x="530.769" y="1030.77"/>
 	<column name="supplier_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -386,7 +386,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="territories" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1880" y="1420"/>
+	<position x="1645.31" y="675.804"/>
 	<column name="territory_id" not-null="true">
 		<type name="character varying" length="20"/>
 	</column>
@@ -404,7 +404,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="us_states" layers="0" collapse-mode="2" max-obj-count="4" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1680" y="-20"/>
+	<position x="1412.31" y="21.5385"/>
 	<column name="state_id" not-null="true">
 		<type name="smallint" length="0"/>
 	</column>
@@ -422,8 +422,8 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</constraint>
 </table>
 
-<textbox name="northwind_desc" layers="0" z-value="0" width="561.703" font-size="12">
-	<position x="120" y="-220"/>
+<textbox name="northwind_desc" layers="0" z-value="0" width="563.516" font-size="12">
+	<position x="133.846" y="-129.231"/>
 	<comment> <![CDATA[[ northwind sample database ]
 
 A representation of the famous northwind example database, adapted for PostgreSQL.
@@ -519,7 +519,9 @@ This model was reverse engineered from the original database available on this l
 	 custom-color="#e34f0e"
 	 src-table="public.customer_customer_demo"
 	 dst-table="public.customers" reference-fk="fk_customer_customer_demo_customers"
-	 src-required="false" dst-required="true"/>
+	 src-required="false" dst-required="true">
+	<segment index="0" orientation="1" value="75.3846"/>
+</relationship>
 
 <relationship name="rel_employees_employees" type="relfk" layers="0"
 	 custom-color="#a8d261"
@@ -527,9 +529,9 @@ This model was reverse engineered from the original database available on this l
 	 dst-table="public.employees" reference-fk="fk_employees_employees"
 	 src-required="false" dst-required="false">
 	<line>
-		<position x="2512.7" y="487.308"/>
-	<position x="2512.7" y="287"/>
-	<position x="2366.46" y="287"/>
+		<position x="2509.22" y="451.975"/>
+	<position x="2509.22" y="290"/>
+	<position x="2366.15" y="290"/>
 	</line>
 </relationship>
 
@@ -552,7 +554,6 @@ This model was reverse engineered from the original database available on this l
 	 src-required="false" dst-required="true"/>
 
 <relationship name="rel_order_details_orders" type="relfk" layers="0"
-	 custom-color="#d0babc"
 	 src-table="public.order_details"
 	 dst-table="public.orders" reference-fk="fk_order_details_orders"
 	 src-required="false" dst-required="true"/>
@@ -561,19 +562,26 @@ This model was reverse engineered from the original database available on this l
 	 custom-color="#efab18"
 	 src-table="public.orders"
 	 dst-table="public.customers" reference-fk="fk_orders_customers"
-	 src-required="false" dst-required="false"/>
+	 src-required="false" dst-required="false">
+	<segment index="1" orientation="1" value="92.7935"/>
+	<segment index="3" orientation="1" value="56.9231"/>
+</relationship>
 
 <relationship name="rel_orders_employees" type="relfk" layers="0"
 	 custom-color="#3bb00e"
 	 src-table="public.orders"
 	 dst-table="public.employees" reference-fk="fk_orders_employees"
-	 src-required="false" dst-required="false"/>
+	 src-required="false" dst-required="false">
+	<segment index="1" orientation="2" value="-95.3846"/>
+</relationship>
 
 <relationship name="rel_orders_shippers" type="relfk" layers="0"
 	 custom-color="#ddef08"
 	 src-table="public.orders"
 	 dst-table="public.shippers" reference-fk="fk_orders_shippers"
-	 src-required="false" dst-required="false"/>
+	 src-required="false" dst-required="false">
+	<segment index="1" orientation="1" value="-21.5385"/>
+</relationship>
 
 <relationship name="rel_products_categories" type="relfk" layers="0"
 	 custom-color="#d747eb"

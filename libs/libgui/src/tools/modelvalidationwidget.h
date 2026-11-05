@@ -89,6 +89,8 @@ class __libgui ModelValidationWidget: public QWidget, public Ui::ModelValidation
 		//! \brief Updates the connections combo with the latest loaded connection settings
 		void updateConnections();
 
+		bool hasValidationErrors();
+
 	private slots:
 		void applyFixes();
 		void updateValidation(ValidationInfo val_info);

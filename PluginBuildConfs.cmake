@@ -126,6 +126,14 @@ function(pgm_install_plugin TARGET)
     set_target_properties(${TARGET} PROPERTIES
         INSTALL_RPATH "${PGM_PLUGIN_INSTALL_RPATH}")
 
+    # Compiling the plugin's translations (lang/*.ts in the plugin's folder) and deploying the
+    # .qm files to the lang folder, in the same folder where the plugin's library is installed
+    file(GLOB _TS_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lang/*.ts)
+
+    if(_TS_FILES)
+        pgm_add_translations(${TARGET}_translations ${PGM_PLUGINSDIR}/${TARGET}/lang ${_TS_FILES})
+    endif()
+
     install(TARGETS ${TARGET}
         LIBRARY DESTINATION ${PGM_PLUGINSDIR}/${TARGET}
         FRAMEWORK DESTINATION ${PGM_PLUGINSDIR}/${TARGET}

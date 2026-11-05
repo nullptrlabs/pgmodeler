@@ -140,8 +140,8 @@ namespace GuiUtilsNs {
 
 			if(obj_type != ObjectType::Database && curr_val != disable)
 			{
-				int res = Messagebox::confirm(QString(QT_TR_NOOP("Do you want to apply the <strong>SQL %1 status</strong> to the object's references as well? This will prevent issues when exporting or validating the model."))
-																			.arg(disable ? QT_TR_NOOP("disabling") : QT_TR_NOOP("enabling")));
+				int res = Messagebox::confirm(UtilsNs::pgmTr(PGM_TR2("Global", "Do you want to apply the <strong>SQL %1 status</strong> to the object's references as well? This will prevent issues when exporting or validating the model."))
+																			.arg(disable ? UtilsNs::pgmTr(PGM_TR2("Global", "disabling")) : UtilsNs::pgmTr(PGM_TR2("Global", "enabling"))));
 
 				if(Messagebox::isAccepted(res))
 					disableReferencesSQL(object);
@@ -303,7 +303,7 @@ namespace GuiUtilsNs {
 			 * the production or reduntant/useless information on the exception message box */
 			if(static_cast<unsigned>(idx) >= Exception::MaximumStackSize)
 			{
-				text = QT_TR_NOOP("An additional of %1 error(s) were suppressed due to the stack trace size limit.");
+				text = UtilsNs::pgmTr(PGM_TR2("Global", "An additional of %1 error(s) were suppressed due to the stack trace size limit."));
 				text = text.arg(list.size() - idx);
 				createOutputTreeItem(exceptions_trw, text, getIcon("alert"), item, false, false);
 				break;
@@ -598,7 +598,7 @@ namespace GuiUtilsNs {
 		QFileDialog file_dlg;
 
 		file_dlg.setWindowIcon(QIcon(getIconPath("pgmodeler_logo")));
-		file_dlg.setWindowTitle(title);
+		file_dlg.setWindowTitle(UtilsNs::pgmTr(title));
 		file_dlg.setDefaultSuffix(default_suffix);
 		file_dlg.selectFile(selected_file);
 		file_dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
@@ -1226,24 +1226,24 @@ namespace GuiUtilsNs {
 				if(use_popup)
 				{
 					act = copy_mode_menu.menuAction();
-					act->setText(QT_TR_NOOP("Selection"));
+					act->setText(UtilsNs::pgmTr(PGM_TR2("Global", "Selection")));
 					act->setIcon(GuiUtilsNs::getIcon("selection"));
 
-					act_txt = copy_mode_menu.addAction(QT_TR_NOOP("Copy as text"));
+					act_txt = copy_mode_menu.addAction(UtilsNs::pgmTr(PGM_TR2("Global", "Copy as text")));
 					act_txt->setIcon(GuiUtilsNs::getIcon("txtfile"));
 
-					act_csv = copy_mode_menu.addAction(QT_TR_NOOP("Copy as CSV"));
+					act_csv = copy_mode_menu.addAction(UtilsNs::pgmTr(PGM_TR2("Global", "Copy as CSV")));
 					act_csv->setIcon(GuiUtilsNs::getIcon("csvfile"));
 
 					act_save = save_menu.menuAction();
-					act_save->setText(QT_TR_NOOP("Save as..."));
+					act_save->setText(UtilsNs::pgmTr(PGM_TR2("Global", "Save as...")));
 					act_save->setIcon(GuiUtilsNs::getIcon("saveas"));
 					copy_mode_menu.addAction(act_save);
 
-					act_save_txt = save_menu.addAction(QT_TR_NOOP("Text file"));
+					act_save_txt = save_menu.addAction(UtilsNs::pgmTr(PGM_TR2("Global", "Text file")));
 					act_save_txt->setIcon(GuiUtilsNs::getIcon("txtfile"));
 
-					act_save_csv = save_menu.addAction(QT_TR_NOOP("CSV file"));
+					act_save_csv = save_menu.addAction(UtilsNs::pgmTr(PGM_TR2("Global", "CSV file")));
 					act_save_csv->setIcon(GuiUtilsNs::getIcon("csvfile"));
 
 					copy_menu.addAction(act);
@@ -1268,11 +1268,11 @@ namespace GuiUtilsNs {
 					else
 					{
 						GuiUtilsNs::selectAndSaveFile(buffer,
-																					 QT_TR_NOOP("Save file"),
+																					 PGM_TR2("Global", "Save file"),
 																					 QFileDialog::AnyFile,
-																					 { is_csv ? QT_TR_NOOP("CSV file (*.csv)") :
-																											QT_TR_NOOP("Text file (*.txt)"),
-																						 QT_TR_NOOP("All files (*.*)") },
+																					 { is_csv ? UtilsNs::pgmTr(PGM_TR2("Global", "CSV file (*.csv)")) :
+																											UtilsNs::pgmTr(PGM_TR2("Global", "Text file (*.txt)")),
+																						 UtilsNs::pgmTr(PGM_TR2("Global", "All files (*.*)")) },
 																					 {}, is_csv ? "csv" : "txt");
 					}
 				}

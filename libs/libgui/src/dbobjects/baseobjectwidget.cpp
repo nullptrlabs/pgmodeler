@@ -968,8 +968,12 @@ void BaseObjectWidget::finishConfiguration()
 			else
 			{
 				//If the object is being updated, validates its SQL definition
-				if(obj_type==ObjectType::BaseRelationship || obj_type==ObjectType::Textbox || obj_type==ObjectType::Tag)
+				if(obj_type == ObjectType::BaseRelationship || 
+					 obj_type == ObjectType::Textbox || 
+					 obj_type == ObjectType::Tag)
 					this->object->getSourceCode(SchemaParser::XmlCode);
+				else if(obj_type == ObjectType::Database)
+					dynamic_cast<DatabaseModel *>(this->object)->__getSourceCode(SchemaParser::SqlCode);
 				else
 					this->object->getSourceCode(SchemaParser::SqlCode);
 			}

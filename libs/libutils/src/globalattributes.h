@@ -179,6 +179,8 @@ class __libutils GlobalAttributes {
 		DbModelBkpExt,
 		ObjMetadataExt,
 		DirSeparator,
+		UiLanguageParam,		 //! \brief Name of the general config parameter that stores the UI language (same value as Attributes::UiLanguage, which is not available in libutils)
+		OriginalUiLanguage,	 //! \brief Id of the language of the original UI texts (en_US), which has no dictionary to be loaded
 		ResourcesDir,				 //! \brief Directory name which holds the pgModeler's plug-ins resources directory (res)
 		ConfigurationsDir,	 //! \brief Default name for the configurations directory
 		DefaultConfsDir,		 //! \brief Default name for the default configurations directory

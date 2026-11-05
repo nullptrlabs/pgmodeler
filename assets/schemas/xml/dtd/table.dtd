@@ -13,9 +13,10 @@
 <!ELEMENT partitioning (partitionkey+)>
 <!ATTLIST partitioning type CDATA #REQUIRED>
 
-<!ELEMENT table (schema,role?,tablespace?,comment?,tag?, appended-sql?,prepended-sql?,position,column*,constraint*,customidxs*,partitioning?,initial-data?)>
+<!ELEMENT table (schema,role?,tablespace?,comment?,tag?, appended-sql?,prepended-sql?,position,position?,column*,constraint*,customidxs*,partitioning?,initial-data?)>
 <!ATTLIST table name CDATA #REQUIRED>
 <!ATTLIST table layers CDATA #IMPLIED>
+<!ATTLIST table scene CDATA #IMPLIED>
 <!ATTLIST table alias CDATA #IMPLIED>
 <!ATTLIST table oids (true | false) "false">
 <!ATTLIST table gen-alter-cmds (true | false) "false">

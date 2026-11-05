@@ -34,6 +34,7 @@
 #include <QPixmap>
 #include <QFileDialog>
 #include "baseobject.h"
+#include "utilsns.h"
 #include "widgets/numberedtexteditor.h"
 #include "csvdocument.h"
 #include "settings/appearanceconfigwidget.h"
@@ -188,7 +189,7 @@ namespace GuiUtilsNs {
 
 	/*! \brief Opens an instance of QFileDialog with the provided attributes.
 	 *  The method returns the files/directories selected by the user in the dialog */
-	__libgui QStringList selectFiles(const QString &title = QT_TR_NOOP("Select file..."), QFileDialog::FileMode file_mode = QFileDialog::AnyFile,
+	__libgui QStringList selectFiles(const QString &title = PGM_TR2("Global", "Select file..."), QFileDialog::FileMode file_mode = QFileDialog::AnyFile,
 																					QFileDialog::AcceptMode accept_mode = QFileDialog::AcceptOpen,	const QStringList &name_filters = {},
 																					const QStringList &mime_filters = {}, const QString &default_suffix = "", const QString &selected_file = "");
 
@@ -196,7 +197,7 @@ namespace GuiUtilsNs {
 	 * Custom attributes for the QFileDialog instance can be provided.
 	 * Raises an exception in case of the file couldn't be saved.
 	 * The method does nothing if file_mode is different from QFileDialog::ExistingFile and QFileDialog::AnyFile */
-	__libgui bool selectAndSaveFile(const QByteArray &buffer, const QString &title = QT_TR_NOOP("Save file..."),
+	__libgui bool selectAndSaveFile(const QByteArray &buffer, const QString &title = PGM_TR2("Global", "Save file..."),
 																	 QFileDialog::FileMode file_mode = QFileDialog::AnyFile, const QStringList &name_filters = {},
 																	 const QStringList &mime_filters = {}, const QString &default_suffix = "", const QString &selected_file = "");
 
@@ -205,7 +206,7 @@ namespace GuiUtilsNs {
 	 * Raises an exception in case of the file couldn't be loaded.
 	 * The method does nothing if file_mode is different from QFileDialog::ExistingFile and QFileDialog::AnyFile */
 	__libgui  bool selectAndLoadFile(QByteArray &buffer,
-																		const QString &title = QT_TR_NOOP("Load file..."), QFileDialog::FileMode file_mode = QFileDialog::AnyFile,
+																		const QString &title = PGM_TR2("Global", "Load file..."), QFileDialog::FileMode file_mode = QFileDialog::AnyFile,
 																		const QStringList &name_filters = {}, const QStringList &mime_filters = {}, const QString &selected_file = "");
 
 	//! \brief Creates an action in a QLineEdit that controls the visibility of passwords

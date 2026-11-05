@@ -88,6 +88,7 @@ void BaseRelationship::configureRelationship()
 	attributes[Attributes::SrcTable]="";
 	attributes[Attributes::DstTable]="";
 	attributes[Attributes::Points]="";
+	attributes[Attributes::Segments]="";
 	attributes[Attributes::Columns]="";
 	attributes[Attributes::Constraints]="";
 	attributes[Attributes::Elements]="";
@@ -187,6 +188,17 @@ void BaseRelationship::setName(const QString &name)
 	catch(Exception &e)
 	{
 		throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e);
+	}
+}
+
+void BaseRelationship::setModified(bool value)
+{
+	BaseGraphicObject::setModified(value);
+
+	for(unsigned lbl_id = SrcCardLabel; lbl_id <= RelNameLabel; lbl_id++)
+	{
+		if(lables[lbl_id])
+			lables[lbl_id]->setModified(value);
 	}
 }
 
@@ -336,51 +348,76 @@ bool BaseRelationship::isSelfRelationship()
 
 void BaseRelationship::setRelationshipAttributes()
 {
-	unsigned count, i;
-	QString str_aux,
-			label_attribs[3]={ Attributes::SrcLabel,
-							   Attributes::DstLabel,
-							   Attributes::NameLabel};
-
-	attributes[Attributes::Type]=getRelTypeAttribute();
-	attributes[Attributes::SrcRequired]=(src_mandatory ? Attributes::True : "");
-	attributes[Attributes::DstRequired]=(dst_mandatory ? Attributes::True : "");
-
-	if(src_table)
-		attributes[Attributes::SrcTable]=src_table->getName(true);
-
-	if(dst_table)
-		attributes[Attributes::DstTable]=dst_table->getName(true);
-
-
-	count=points.size();
-	for(i=0; i < count; i++)
+	try
 	{
-		attributes[Attributes::XPos]=QString("%1").arg(points[i].x());
-		attributes[Attributes::YPos]=QString("%1").arg(points[i].y());
-		str_aux+=schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
-	}
-	attributes[Attributes::Points]=str_aux;
+		attributes[Attributes::Type] = getRelTypeAttribute();
+		attributes[Attributes::SrcRequired] = (src_mandatory ? Attributes::True : "");
+		attributes[Attributes::DstRequired] = (dst_mandatory ? Attributes::True : "");
 
-	str_aux="";
-	for(i=0; i < 3; i++)
-	{
-		if(!std::isnan(lables_dist[i].x()))
+		if(src_table)
+			attributes[Attributes::SrcTable] = src_table->getName(true);
+
+		if(dst_table)
+			attributes[Attributes::DstTable] = dst_table->getName(true);
+
+		attributes[Attributes::Points] = "";
+		for(auto &pnt : points)
 		{
-			attributes[Attributes::XPos]=QString("%1").arg(lables_dist[i].x());
-			attributes[Attributes::YPos]=QString("%1").arg(lables_dist[i].y());
-			attributes[Attributes::Position]=schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
-			attributes[Attributes::RefType]=label_attribs[i];
-			str_aux+=schparser.getSourceCode(Attributes::Label, attributes, SchemaParser::XmlCode);
+			attributes[Attributes::Id] = "";
+			attributes[Attributes::XPos] = QString("%1").arg(pnt.x());
+			attributes[Attributes::YPos] = QString("%1").arg(pnt.y());
+			attributes[Attributes::Points] +=
+					schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
 		}
+
+		attributes[Attributes::Segments] = "";
+		for(auto &itr : segment_shifts)
+		{
+			attributes[Attributes::Index] = QString::number(itr.first);
+			attributes[Attributes::Orientation] = QString::number(itr.second.orientation);
+			attributes[Attributes::Value] = QString::number(itr.second.value);
+			attributes[Attributes::Jog] = (itr.second.jog != 0 ? QString::number(itr.second.jog) : "");
+			attributes[Attributes::Segments] +=
+					schparser.getSourceCode(Attributes::Segment, attributes, SchemaParser::XmlCode);
+		}
+
+		QStringList label_attribs {
+			Attributes::SrcLabel,
+			Attributes::DstLabel,
+			Attributes::NameLabel
+		};
+
+		unsigned lbl_idx = 0;
+		attributes[Attributes::LabelsPos] = "";
+
+		for(auto &lbl_dist : lables_dist)
+		{
+			if(!std::isnan(lbl_dist.x()))
+			{
+				attributes[Attributes::Id] = "";
+				attributes[Attributes::XPos] = QString("%1").arg(lbl_dist.x());
+				attributes[Attributes::YPos] = QString("%1").arg(lbl_dist.y());
+				attributes[Attributes::Position] =
+						schparser.getSourceCode(Attributes::Position, attributes, SchemaParser::XmlCode);
+
+				attributes[Attributes::RefType] = label_attribs[lbl_idx];
+				attributes[Attributes::LabelsPos] +=
+						schparser.getSourceCode(Attributes::Label, attributes, SchemaParser::XmlCode);
+			}
+
+			lbl_idx++;
+		}
+
+		attributes[Attributes::CustomColor] = (custom_color != Qt::transparent ? custom_color.name() : "");
+		attributes[Attributes::ReferenceFk] = (reference_fk ? reference_fk->getName() : "");
+
+		setFadedOutAttribute();
+		setLayersAttribute();
 	}
-
-	attributes[Attributes::LabelsPos]=str_aux;
-	attributes[Attributes::CustomColor]=(custom_color!=Qt::transparent ? custom_color.name() : "");
-	attributes[Attributes::ReferenceFk]=(reference_fk ? reference_fk->getName() : "");
-
-	setFadedOutAttribute();
-	setLayersAttribute();
+	catch(Exception &e)
+	{
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+	}
 }
 
 QString BaseRelationship::getCachedCode(unsigned def_type)
@@ -469,7 +506,8 @@ QString BaseRelationship::getSourceCode(SchemaParser::CodeType def_type)
 	bool reduced_form;
 	setRelationshipAttributes();
 	reduced_form=(attributes[Attributes::Points].isEmpty() &&
-								attributes[Attributes::LabelsPos].isEmpty());
+								attributes[Attributes::LabelsPos].isEmpty() &&
+								attributes[Attributes::Segments].isEmpty());
 
 	if(!reduced_form)
 		cached_reduced_code.clear();
@@ -481,6 +519,26 @@ void BaseRelationship::setPoints(const std::vector<QPointF> &points)
 {
 	setCodeInvalidated(true);
 	this->points=points;
+}
+
+void BaseRelationship::setSegmentShifts(const std::map<unsigned, SegmentShift> &shifts)
+{
+	setCodeInvalidated(true);
+	segment_shifts=shifts;
+}
+
+std::map<unsigned, BaseRelationship::SegmentShift> BaseRelationship::getSegmentShifts()
+{
+	return segment_shifts;
+}
+
+void BaseRelationship::resetSegmentShifts()
+{
+	if(segment_shifts.empty())
+		return;
+
+	setCodeInvalidated(true);
+	segment_shifts.clear();
 }
 
 void BaseRelationship::setLabelDistance(LabelId label_id, QPointF label_dist)
@@ -502,8 +560,10 @@ QPointF BaseRelationship::getLabelDistance(LabelId label_id)
 
 void BaseRelationship::setCustomColor(const QColor &color)
 {
+	if(color != custom_color)
+		setCodeInvalidated(true);
+
 	custom_color=color;
-	setCodeInvalidated(color != custom_color);
 }
 
 QColor BaseRelationship::getCustomColor()
@@ -530,6 +590,7 @@ void BaseRelationship::operator = (BaseRelationship &rel)
 	this->dst_table=rel.dst_table;
 	this->rel_type=rel.rel_type;
 	this->points=rel.points;
+	this->segment_shifts=rel.segment_shifts;
 	this->custom_color=rel.custom_color;
 
 	for(int i=0; i < 3; i++)

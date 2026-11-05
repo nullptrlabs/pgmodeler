@@ -33,6 +33,7 @@ Messagebox::Messagebox(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f)
 	show_errors_btn->setVisible(false);
 	custom_option_chk->setVisible(false);
 	raw_stack_txt = nullptr;
+	adjust_size_on_show = fixing_height = false;
 
 	connect(yes_ok_btn, &QPushButton::clicked, this, &Messagebox::handleYesOkClick);
 	connect(no_btn, &QPushButton::clicked, this, &Messagebox::handleNoCancelClick);
@@ -40,9 +41,127 @@ Messagebox::Messagebox(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f)
 
 	connect(show_errors_btn, &QPushButton::toggled, this, [this](bool checked){
 		objs_group_wgt->setCurrentIndex(checked ? 1 : 0);
-		resize(baseSize().width() * (checked ? 1.25 : 1),
-					 baseSize().height() * (checked ? 3 : 1));
+		updateStackPolicies();
+		layout()->activate();
+
+		resize(boundedSize(QSize(baseSize().width() * (checked ? 1.25 : 1),
+														 baseSize().height() * (checked ? 3 : 1))));
 	});
+}
+
+void Messagebox::updateStackPolicies()
+{
+	for(int i = 0; i < objs_group_wgt->count(); i++)
+	{
+		QSizePolicy::Policy policy = (i == objs_group_wgt->currentIndex() ?
+																		QSizePolicy::Preferred : QSizePolicy::Ignored);
+
+		objs_group_wgt->widget(i)->setSizePolicy(policy, policy);
+	}
+}
+
+void Messagebox::updateButtonsMinimumSize()
+{
+	for(auto &btn : { yes_ok_btn, no_btn, cancel_btn, show_errors_btn })
+	{
+		/* The buttons have a fixed horizontal policy, so their size hint is the size they must have.
+		 * It is calculated after the widgets are polished, otherwise it doesn't reflect the final font and style. */
+		btn->updateGeometry();
+		btn->setMinimumSize(btn->sizeHint());
+	}
+}
+
+QSize Messagebox::boundedSize(const QSize &sz)
+{
+	QSize min_sz = layout()->totalMinimumSize(),
+				bounded_sz = sz.expandedTo(min_sz);
+	QRect avail_rect = screen()->availableGeometry();
+
+	/* The screen size is a limit only when the layout minimum fits in it, otherwise
+	 * the dialog must be as large as required to display its contents properly */
+	if(min_sz.width() <= avail_rect.width())
+		bounded_sz.setWidth(qMin(bounded_sz.width(), avail_rect.width()));
+
+	if(min_sz.height() <= avail_rect.height())
+		bounded_sz.setHeight(qMin(bounded_sz.height(), avail_rect.height()));
+
+	return bounded_sz;
+}
+
+int Messagebox::requiredHeightForWidth(int width)
+{
+	constexpr int DefMinHeight = 175, MaxAttempts = 4;
+	QLayout *lt = layout();
+	int h = qMax(DefMinHeight, lt->totalMinimumSize().height());
+
+	/* The message label is shorter than the wrapped text when the dialog is too short for it.
+	 * As the layout rearranges the widgets synchronously (the dialog is visible), the missing height
+	 * is the difference between what the label needs and what it got. The attempts are repeated
+	 * because the extra height can make the layout redistribute the space differently. */
+	for(int i = 0; i < MaxAttempts; i++)
+	{
+		resize(width, h);
+		lt->activate();
+
+		if(objs_group_wgt->currentIndex() != 0)
+			break;
+
+		int missing_h = msg_lbl->heightForWidth(msg_lbl->width()) - msg_lbl->height();
+
+		if(missing_h <= 0)
+			break;
+
+		h += missing_h;
+	}
+
+	return h;
+}
+
+void Messagebox::adjustSizeToContents()
+{
+	/* The width grows in two phases. The first one gets the dialog to a comfortable height
+	 * (up to a fraction of the screen height, using at most a fraction of the screen width). If the
+	 * message still doesn't fit the screen height the second phase uses (almost) the whole screen width. */
+	constexpr double WidthFactor = 0.25, MaxWidthFactor = 0.6, MaxHeightFactor = 0.6,
+									 ExtremeWidthFactor = 0.9, ExtremeHeightFactor = 0.95;
+	constexpr int DefMinWidth = 530;
+
+	QRect avail_rect = screen()->availableGeometry();
+	int min_w = qMax(DefMinWidth, static_cast<int>(avail_rect.width() * WidthFactor)),
+			max_w = qMax(min_w, static_cast<int>(avail_rect.width() * MaxWidthFactor)),
+			max_h = static_cast<int>(avail_rect.height() * MaxHeightFactor),
+			extreme_w = qMax(max_w, static_cast<int>(avail_rect.width() * ExtremeWidthFactor)),
+			extreme_h = static_cast<int>(avail_rect.height() * ExtremeHeightFactor),
+			w = qMax(min_w, layout()->totalMinimumSize().width()), h = 0;
+
+	h = requiredHeightForWidth(w);
+
+	/* A very long message wrapped in a narrow dialog results in a tall one. So, the width is increased
+	 * until the height gets reasonable or there is no more room to grow. */
+	for(auto &limits : { std::pair<int, int>(max_w, max_h), std::pair<int, int>(extreme_w, extreme_h) })
+	{
+		while(h > limits.second && w < limits.first)
+		{
+			w = qMin(limits.first, static_cast<int>(w * 1.1) + 1);
+			h = requiredHeightForWidth(w);
+		}
+	}
+
+	resize(boundedSize(QSize(w, h)));
+	setBaseSize(size());
+}
+
+void Messagebox::showEvent(QShowEvent *event)
+{
+	/* The size is adjusted before the base class handles the event because it is
+	 * where the dialog is positioned (centered) according to its size */
+	if(adjust_size_on_show && !event->spontaneous())
+	{
+		adjust_size_on_show = false;
+		adjustSizeToContents();
+	}
+
+	QDialog::showEvent(event);
 }
 
 void Messagebox::handleYesOkClick()
@@ -252,8 +371,7 @@ int Messagebox::show(const QString &title, const QString &msg, MessageType icon_
 										 bool format_msg)
 {
 	QString icon_name, aux_title;
-	QWidgetList btns = { yes_ok_btn, no_btn, cancel_btn, show_errors_btn };
-	CustomUiStyle::StyleHint style_hint;
+	CustomUiStyle::StyleHint style_hint = CustomUiStyle::NoHint;
 
 	if(!yes_lbl.isEmpty())
 		yes_ok_btn->setText(yes_lbl);
@@ -287,12 +405,6 @@ int Messagebox::show(const QString &title, const QString &msg, MessageType icon_
 
 	no_btn->setVisible(buttons==YesNoButtons || buttons==OkCloseButtons || buttons==AllButtons);
 	cancel_btn->setVisible(buttons==OkCancelButtons || buttons==AllButtons);
-
-	for(auto &btn : btns)
-	{
-		btn->adjustSize();
-		btn->setMinimumSize(btn->size());
-	}
 
 	switch(icon_type)
 	{
@@ -344,26 +456,21 @@ int Messagebox::show(const QString &title, const QString &msg, MessageType icon_
 	show_errors_btn->setChecked(false);
 	show_errors_btn->setVisible(exceptions_trw->topLevelItemCount() > 0);
 
-	double w_factor = 0.25, h_factor = 0.15;
-	QSize sz = screen()->size();
-
-	if(sz.width() * w_factor > minimumWidth())
-		setMinimumWidth(sz.width() * w_factor);
-
-	setMinimumHeight(sz.height() * h_factor);
-
-	int ln_cnt = QString(msg_lbl->text())
-							 .replace(QRegularExpression("(<)(br)(/)?(>)",
-																					 QRegularExpression::CaseInsensitiveOption),
-												"\n").count('\n');
-
-	if(ln_cnt > 0)
-		adjustSize();
-	else
-		resize(minimumSize());
-
-	setBaseSize(size());
 	CustomUiStyle::setStyleHint(style_hint, frame);
+
+	/* The size is calculated only after everything that can change the size of the widgets (texts, icons,
+	 * visible buttons, styles) is configured and the widgets are polished. Then, the buttons get the size they need,
+	 * and the dialog the size needed by the message (wrapped according to the width) and the buttons row */
+	updateStackPolicies();
+	ensurePolished();
+	updateButtonsMinimumSize();
+	layout()->activate();
+
+	/* The dialog is sized once it is visible because the height required by the message
+	 * is only known when the layouts are arranged (see showEvent()) */
+	adjust_size_on_show = true;
+	resize(layout()->totalMinimumSize());
+	setBaseSize(size());
 
 	return exec();
 }
@@ -381,5 +488,18 @@ int Messagebox::exec()
 
 void Messagebox::resizeEvent(QResizeEvent *event)
 {
-	QWidget::resizeEvent(event);
+	QDialog::resizeEvent(event);
+
+	if(fixing_height || !isVisible() || objs_group_wgt->currentIndex() != 0)
+		return;
+
+	// The layout was already arranged for the new size at this point
+	int missing_h = msg_lbl->heightForWidth(msg_lbl->width()) - msg_lbl->height();
+
+	if(missing_h > 0)
+	{
+		fixing_height = true;
+		resize(boundedSize(QSize(width(), height() + missing_h)));
+		fixing_height = false;
+	}
 }

@@ -3,7 +3,9 @@
 CAUTION: Do not modify this file unless you know what you are doing.
  Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="1.1.0-alpha1" use-changelog="false" last-position="0,0" last-zoom="0.75" max-obj-count="12"
+<dbmodel pgmodeler-ver="2.0.0" use-changelog="false" max-obj-count="12"
+	 gen-disabled-objs-code="false" show-sys-schemas-rects="false" seg-mode="0" seg-threshold="500"
+	 last-position="0,158" last-zoom="0.75" scene-rect="0,0,2443.62,2075.12" last-scene="0"
 	 layers="Default layer"
 	 active-layers="0"
 	 layer-name-colors="#000000"
@@ -14,13 +16,13 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<tablespace name="pg_default"/>
 </database>
 
-<schema name="public" layers="0" rect-visible="true" fill-color="#e1e1e1" name-color="#000000" sql-disabled="true">
+<schema name="public" layers="0" fill-color="#e1e1e1" name-color="#000000" sql-disabled="true">
 </schema>
 
 <table name="data_src" layers="0" collapse-mode="2" max-obj-count="10" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="120" y="520"/>
+	<position x="112" y="598.667"/>
 	<column name="datasrc_id" not-null="true">
 		<type name="character" length="6"/>
 	</column>
@@ -56,7 +58,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="datsrcln" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="40" y="1200"/>
+	<position x="104" y="1036"/>
 	<column name="ndb_no" not-null="true">
 		<type name="character" length="5"/>
 	</column>
@@ -71,10 +73,10 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</constraint>
 </table>
 
-<table name="deriv_cd" layers="0" collapse-mode="2" max-obj-count="2" z-value="0">
+<table name="deriv_cd" layers="0" collapse-mode="2" pagination="true" attribs-page="0" ext-attribs-page="0" max-obj-count="2" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="40" y="1880"/>
+	<position x="136" y="1505.33"/>
 	<column name="deriv_cd" not-null="true">
 		<type name="text" length="1"/>
 	</column>
@@ -89,7 +91,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="fd_group" layers="0" collapse-mode="2" max-obj-count="2" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1320" y="720"/>
+	<position x="1157.33" y="708"/>
 	<column name="fdgrp_cd" not-null="true">
 		<type name="character" length="4"/>
 	</column>
@@ -104,7 +106,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="food_des" layers="0" collapse-mode="2" max-obj-count="16" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="2040" y="560"/>
+	<position x="1902.67" y="676"/>
 	<column name="ndb_no" not-null="true">
 		<type name="character" length="5"/>
 	</column>
@@ -155,7 +157,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="footnote" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="2120" y="1840"/>
+	<position x="1613.33" y="1382.67"/>
 	<column name="ndb_no" not-null="true">
 		<type name="character" length="5"/>
 	</column>
@@ -176,7 +178,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="nut_data" layers="0" collapse-mode="2" max-obj-count="20" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="720" y="1200"/>
+	<position x="724" y="830.667"/>
 	<column name="ndb_no" not-null="true">
 		<type name="character" length="5"/>
 	</column>
@@ -236,7 +238,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="nutr_def" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1320" y="1880"/>
+	<position x="774.667" y="1513.33"/>
 	<column name="nutr_no" not-null="true">
 		<type name="character" length="3"/>
 	</column>
@@ -278,7 +280,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="weight" layers="0" collapse-mode="2" max-obj-count="8" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1680" y="1400"/>
+	<position x="1133.33" y="1072"/>
 	<column name="ndb_no" not-null="true">
 		<type name="character" length="5"/>
 	</column>
@@ -306,7 +308,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </table>
 
 <index name="datsrcln_datasrc_id_idx" table="public.datsrcln"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="90">
 		<idxelement use-sorting="false">
 			<column name="datasrc_id"/>
@@ -314,7 +316,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="food_des_fdgrp_cd_idx" table="public.food_des"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="90">
 		<idxelement use-sorting="false">
 			<column name="fdgrp_cd"/>
@@ -322,7 +324,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="footnote_ndb_no_idx" table="public.footnote"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="90">
 		<idxelement use-sorting="false">
 			<column name="ndb_no"/>
@@ -333,7 +335,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="nut_data_deriv_cd_idx" table="public.nut_data"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="90">
 		<idxelement use-sorting="false">
 			<column name="deriv_cd"/>
@@ -341,7 +343,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="nut_data_nutr_no_idx" table="public.nut_data"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="90">
 		<idxelement use-sorting="false">
 			<column name="nutr_no"/>
@@ -349,15 +351,15 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </index>
 
 <index name="nut_data_src_cd_idx" table="public.nut_data"
-	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 concurrent="false" unique="false" fast-update="false" buffering="false" nulls-not-distinct="false"
 	 index-type="btree" factor="90">
 		<idxelement use-sorting="false">
 			<column name="src_cd"/>
 		</idxelement>
 </index>
 
-<textbox name="usda_desc" layers="0" z-value="0" width="564.594" font-size="11">
-	<position x="40" y="60"/>
+<textbox name="usda_desc" layers="0" z-value="0" width="570.734" font-size="11">
+	<position x="102.667" y="245.333"/>
 	<comment> <![CDATA[[ usda sample database ]
 
 The USDA Food Database is published by the US Department of Agriculture.

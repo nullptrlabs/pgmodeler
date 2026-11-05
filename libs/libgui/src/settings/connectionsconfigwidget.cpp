@@ -22,6 +22,7 @@
 #include "connectionsconfigwidget.h"
 #include "guiutilsns.h"
 #include "utilsns.h"
+#include "secretsns.h"
 #include "baseform.h"
 
 const QString ConnectionsConfigWidget::DefaultFor {"default-for-%1"};
@@ -118,6 +119,9 @@ void ConnectionsConfigWidget::loadConfiguration()
 
 		BaseConfigWidget::loadConfiguration(GlobalAttributes::ConnectionsConf, config_params, { Attributes::Alias });
 
+		// The file holds passwords, so its access is restricted to the owner
+		UtilsNs::setOwnerOnlyAccess(GlobalAttributes::getConfigurationFilePath(GlobalAttributes::ConnectionsConf));
+
 		for(auto &itr : config_params)
 		{
 			conn=new Connection;
@@ -126,7 +130,10 @@ void ConnectionsConfigWidget::loadConfiguration()
 			conn->setConnectionParam(Connection::ParamServerFqdn, itr.second[Connection::ParamServerFqdn]);
 			conn->setConnectionParam(Connection::ParamPort, itr.second[Connection::ParamPort]);
 			conn->setConnectionParam(Connection::ParamUser, itr.second[Connection::ParamUser]);
-			conn->setConnectionParam(Connection::ParamPassword,itr.second[Connection::ParamPassword]);
+			/* The password is stored encrypted in the file. Legacy plain text passwords
+			 * are returned as they are and get encrypted the next time the file is saved. */
+			auto [pwd, pwd_res] = SecretsNs::decrypt(itr.second[Connection::ParamPassword]);
+			conn->setConnectionParam(Connection::ParamPassword, pwd);
 			conn->setConnectionParam(Connection::ParamDbName, itr.second[Connection::ParamDbName]);
 			conn->setConnectionParam(Connection::ParamConnTimeout, itr.second[Attributes::ConnectionTimeout]);
 			conn->setConnectionParam(Connection::ParamSslMode, itr.second[Connection::ParamSslMode]);
@@ -541,6 +548,7 @@ void ConnectionsConfigWidget::saveConfiguration()
 				if(attribs[Connection::ParamServerFqdn].isEmpty())
 					attribs[Connection::ParamServerFqdn]=attribs[Connection::ParamServerIp];
 
+				attribs[Connection::ParamPassword]=SecretsNs::encrypt(attribs[Connection::ParamPassword]);
 				attribs[Attributes::Alias]=attribs[Connection::ParamAlias];
 				attribs[Attributes::AutoBrowseDb]=(conn->isAutoBrowseDB() ? Attributes::True : "");
 				attribs[Attributes::ConnectionTimeout]=attribs[Connection::ParamConnTimeout];
@@ -563,6 +571,7 @@ void ConnectionsConfigWidget::saveConfiguration()
 		schparser.ignoreUnkownAttributes(true);
 		BaseConfigWidget::saveConfiguration(GlobalAttributes::ConnectionsConf, config_params);
 		schparser.ignoreUnkownAttributes(false);
+		UtilsNs::setOwnerOnlyAccess(GlobalAttributes::getConfigurationFilePath(GlobalAttributes::ConnectionsConf));
 		setConfigurationChanged(false);
 	}
 	catch(Exception &e)

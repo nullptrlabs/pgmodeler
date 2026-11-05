@@ -1,4 +1,5 @@
 #include "extension.h"
+#include "utilsns.h"
 #include "pgsqltypes/pgsqltype.h"
 
 Extension::Extension()
@@ -61,7 +62,7 @@ void Extension::addObject(const ExtObject &ext_obj)
 	{
 		throw Exception(Exception::getErrorMessage(ErrorCode::InvExtensionObject).arg(obj_name),
 										ErrorCode::InvExtensionObject, PGM_FUNC, PGM_FILE, PGM_LINE, nullptr,
-										QString(QT_TR_NOOP("Invalid object: %1 (%2)")).arg(ext_obj.getSignature(),
+										UtilsNs::pgmTr(PGM_TR2("Global", "Invalid object: %1 (%2)")).arg(ext_obj.getSignature(),
 																																			 BaseObject::getTypeName(ext_obj.getType())));
 	}
 
@@ -85,7 +86,7 @@ const std::vector<Extension::ExtObject> &Extension::getObjects(ObjectType obj_ty
 	if(obj_type != ObjectType::Type && obj_type != ObjectType::Schema)
 	{
 		throw Exception(ErrorCode::ObtObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE, nullptr,
-										QString(QT_TR_NOOP("Invalid object type: %1")).arg(BaseObject::getTypeName(obj_type)));
+										UtilsNs::pgmTr(PGM_TR2("Global", "Invalid object type: %1")).arg(BaseObject::getTypeName(obj_type)));
 	}
 
 	return ext_objects[obj_type];

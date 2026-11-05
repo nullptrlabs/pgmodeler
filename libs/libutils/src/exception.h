@@ -29,6 +29,7 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
+#include <QCoreApplication>
 #include "utilsglobal.h"
 #include <QObject>
 #include <vector>
@@ -317,12 +318,16 @@ enum class ErrorCode: unsigned {
 	InvExprMultilineGroup,
 	InvExprPersistentGroup,
 	InvExtensionObject,
-	AsgInvSchemaExtension
+	AsgInvSchemaExtension,
+	OperationCancelled
 };
 
 class __libutils Exception {
+	//! \brief Gives the class its own tr(), so the texts it translates are in the context Exception
+	Q_DECLARE_TR_FUNCTIONS(Exception)
+
 	private:
-		static constexpr unsigned ErrorCount=271;
+		static constexpr unsigned ErrorCount=272;
 
 		//! \brief Constants used to access the error details
 		static constexpr unsigned ErrorCodeId=0, ErrorMessage=1;

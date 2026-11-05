@@ -20,6 +20,7 @@
 */
 
 #include "databasemodel.h"
+#include <set>
 #include "coreutilsns.h"
 #include "defaultlanguages.h"
 #include <QtDebug>
@@ -58,7 +59,11 @@ DatabaseModel::DatabaseModel()
 
 	conn_limit=-1;
 	last_zoom=1;
-	loading_model=invalidated=append_at_eod=prepend_at_bod=false;
+	last_scene=0;
+	scene_seg_mode=saved_seg_mode=NoSegmentation;
+	seg_threshold=saved_seg_threshold=DefaultSegThreshold;
+	hide_rels=saved_hide_rels=false;
+	loading_model=discard_scene_idx=invalidated=append_at_eod=prepend_at_bod=false;
 	attributes[Attributes::Encoding]="";
 	attributes[Attributes::TemplateDb]="";
 	attributes[Attributes::ConnLimit]="";
@@ -484,6 +489,8 @@ void DatabaseModel::__addObject(BaseObject *object, int obj_idx)
 	}
 
 	object->setDatabase(this);
+	indexObject(object);
+	removed_objs.remove(object);
 	emit s_objectAdded(object);
 	this->setInvalidated(true);
 }
@@ -547,6 +554,8 @@ void DatabaseModel::__removeObject(BaseObject *object, int obj_idx, bool check_r
 			removePermissions(object);
 
 		obj_list->erase(obj_list->begin() + obj_idx);
+		unindexObject(object);
+		removed_objs.insert(object);
 	}
 
 	object->clearAllDepsRefs();
@@ -602,42 +611,116 @@ std::vector<BaseObject *> DatabaseModel::getObjects(BaseObject *schema)
 	return sel_list;
 }
 
-BaseObject *DatabaseModel::getObject(const QString &name, ObjectType obj_type, int &obj_idx)
+/* name_idx/sig_idx keys are normalized to lower-case whenever object name quoting is disabled,
+ * mirroring the Qt::CaseInsensitive comparison that getObject() used to do via a linear scan */
+QString DatabaseModel::getNameIndexKey(BaseObject *object)
 {
-	BaseObject *object = nullptr;
-	std::vector<BaseObject *> *obj_list=nullptr;
-	std::vector<BaseObject *>::iterator itr, itr_end;
-	bool found = false;
-	QString aux_name1;
-	Qt::CaseSensitivity case_mode = BaseObject::isQuotingDisabled() ?
-																	Qt::CaseInsensitive : Qt::CaseSensitive;
+	QString key = object->getName(false);
 
-	obj_list = getObjectList(obj_type);
+	if(BaseObject::isQuotingDisabled())
+		key = key.toLower();
 
-	if(!obj_list)
-		throw Exception(ErrorCode::ObtObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
-	
-	itr = obj_list->begin();
-	itr_end = obj_list->end();
-	obj_idx = -1;
-	aux_name1 = QString(name).remove('"');
+	return key;
+}
 
-	while(itr!=itr_end && !found)
+QString DatabaseModel::getSignatureIndexKey(BaseObject *object)
+{
+	QString key = object->getSignature();
+	key.remove('"');
+
+	if(BaseObject::isQuotingDisabled())
+		key = key.toLower();
+
+	return key;
+}
+
+void DatabaseModel::indexObject(BaseObject *object)
+{
+	if(!object || obj_lists.count(object->getObjectType()) == 0)
+		return;
+
+	ObjectType obj_type = object->getObjectType();
+	name_idx[obj_type][getNameIndexKey(object)] = object;
+	sig_idx[obj_type][getSignatureIndexKey(object)] = object;
+}
+
+void DatabaseModel::unindexObject(BaseObject *object)
+{
+	if(!object || obj_lists.count(object->getObjectType()) == 0)
+		return;
+
+	ObjectType obj_type = object->getObjectType();
+	name_idx[obj_type].remove(getNameIndexKey(object));
+	sig_idx[obj_type].remove(getSignatureIndexKey(object));
+}
+
+void DatabaseModel::updateObjectIndex(BaseObject *object, const QString &prev_name, const QString &prev_signature)
+{
+	if(!object || obj_lists.count(object->getObjectType()) == 0)
+		return;
+
+	ObjectType obj_type = object->getObjectType();
+	QString prev_name_key = prev_name, prev_sig_key = prev_signature;
+	prev_sig_key.remove('"');
+
+	if(BaseObject::isQuotingDisabled())
 	{
-		if((*itr)->getSignature().remove("\"").compare(aux_name1, case_mode) == 0 ||
-			 (*itr)->getName(false).compare(aux_name1, case_mode) == 0)
-		{
-			found = true;
-			break;
-		}
-
-		itr++;
+		prev_name_key = prev_name_key.toLower();
+		prev_sig_key = prev_sig_key.toLower();
 	}
 
-	if(found)
+	name_idx[obj_type].remove(prev_name_key);
+	sig_idx[obj_type].remove(prev_sig_key);
+
+	name_idx[obj_type][getNameIndexKey(object)] = object;
+	sig_idx[obj_type][getSignatureIndexKey(object)] = object;
+}
+
+void DatabaseModel::rebuildSignatureIndex()
+{
+	for(auto &itr : obj_lists)
 	{
-		object = (*itr);
-		obj_idx = (itr - obj_list->begin());
+		QHash<QString, BaseObject *> rebuilt;
+
+		for(auto &obj : *itr.second)
+			rebuilt[getSignatureIndexKey(obj)] = obj;
+
+		sig_idx[itr.first] = rebuilt;
+	}
+}
+
+BaseObject *DatabaseModel::findIndexedObject(const QString &name, ObjectType obj_type)
+{
+	if(!getObjectList(obj_type))
+		throw Exception(ErrorCode::ObtObjectInvalidType, PGM_FUNC, PGM_FILE, PGM_LINE);
+
+	QString aux_name1 = QString(name).remove('"');
+
+	if(BaseObject::isQuotingDisabled())
+		aux_name1 = aux_name1.toLower();
+
+	BaseObject *object = sig_idx[obj_type].value(aux_name1, nullptr);
+
+	if(!object)
+		object = name_idx[obj_type].value(aux_name1, nullptr);
+
+	return object;
+}
+
+BaseObject *DatabaseModel::getObject(const QString &name, ObjectType obj_type, int &obj_idx)
+{
+	obj_idx = -1;
+
+	BaseObject *object = findIndexedObject(name, obj_type);
+
+	/* obj_idx (the object's current position in obj_list) is only computed when an object is
+	 * actually found, so a miss -- the common case while checking for duplicates during model
+	 * loading -- stays O(1) instead of paying for a scan */
+	if(object)
+	{
+		std::vector<BaseObject *> *obj_list = getObjectList(obj_type);
+		auto pos = std::find(obj_list->begin(), obj_list->end(), object);
+		obj_idx = static_cast<int>(pos - obj_list->begin());
 	}
 
 	return object;
@@ -918,6 +1001,8 @@ void DatabaseModel::destroyObjects()
 		for(auto type : rem_obj_types)
 			getObjectList(type)->clear();
 	}
+
+	removed_objs.clear();
 
 	BaseGraphicObject::setUpdatesEnabled(true);
 	BaseObject::setClearDepsInDtor(true);
@@ -1709,22 +1794,55 @@ void DatabaseModel::updateTablesFKRelationships()
 	}
 }
 
-void DatabaseModel::restoreFKRelationshipLayers()
+void DatabaseModel::restoreFKRelationshipsCustomization()
 {
 	BaseRelationship *rel = nullptr;
+	Constraint *fk = nullptr;
 
 	for(auto &obj : base_relationships)
 	{
 		rel = dynamic_cast<BaseRelationship *>(obj);
 
-		if(rel->getRelationshipType() != BaseRelationship::RelationshipFk ||
-			 !fk_rel_layers.count(rel->getName()))
+		if(rel->getRelationshipType() != BaseRelationship::RelationshipFk)
 			continue;
 
-		rel->setLayers(fk_rel_layers.at(rel->getName()));
+		fk = rel->getReferenceForeignKey();
+
+		/* The relationship is identified by the tables and the foreign key it comes from, which are the same in the
+		 * recreated one. The name is not restored: the recreated relationship receives a generated name that can be the
+		 * one of another relationship, so it's only used to identify the relationships stored without their foreign key
+		 * (models generated by old versions) */
+		auto itr = std::find_if(fk_rels_custom.begin(), fk_rels_custom.end(), [&](const FKRelCustomization &cust) {
+			return fk && !cust.fk_name.isEmpty() && cust.fk_name == fk->getName() &&
+						 cust.src_table == rel->getTable(BaseRelationship::SrcTable)->getSignature() &&
+						 cust.dst_table == rel->getTable(BaseRelationship::DstTable)->getSignature();
+		});
+
+		if(itr == fk_rels_custom.end())
+		{
+			itr = std::find_if(fk_rels_custom.begin(), fk_rels_custom.end(), [&](const FKRelCustomization &cust) {
+				return cust.fk_name.isEmpty() && cust.name == rel->getName();
+			});
+		}
+
+		if(itr == fk_rels_custom.end())
+			continue;
+
+		rel->setAlias(itr->alias);
+		rel->setLayers(itr->layers);
+		rel->setPoints(itr->points);
+		rel->setSegmentShifts(itr->segment_shifts);
+		rel->setCustomColor(itr->custom_color);
+		rel->setFadedOut(itr->faded_out);
+
+		for(unsigned id = BaseRelationship::SrcCardLabel; id <= BaseRelationship::RelNameLabel; id++)
+			rel->setLabelDistance(static_cast<BaseRelationship::LabelId>(id), itr->labels_dist[id]);
+
+		rel->setProtected(itr->rel_protected);
+		fk_rels_custom.erase(itr);
 	}
 
-	fk_rel_layers.clear();
+	fk_rels_custom.clear();
 }
 
 bool DatabaseModel::isModelLoading()
@@ -3359,8 +3477,7 @@ int DatabaseModel::getPermissionIndex(Permission *perm, bool exact_match)
 
 BaseObject *DatabaseModel::getObject(const QString &name, ObjectType obj_type)
 {
-	int idx;
-	return getObject(name, obj_type, idx);
+	return findIndexedObject(name, obj_type);
 }
 
 int DatabaseModel::getObjectIndex(const QString &name, ObjectType obj_type)
@@ -3372,7 +3489,9 @@ int DatabaseModel::getObjectIndex(const QString &name, ObjectType obj_type)
 
 int DatabaseModel::getObjectIndex(BaseObject *object)
 {
-	if(!object)
+	/* Removed objects are checked first, by pointer only, since they can already be deleted
+	 * and getObjectType() below would read freed memory */
+	if(!object || removed_objs.contains(object))
 		return -1;
 
 	ObjectType obj_type=object->getObjectType();
@@ -3417,12 +3536,16 @@ void DatabaseModel::configureDatabase(attribs_map &attribs)
 	setBasicAttributes(this);
 }
 
-void DatabaseModel::loadModel(const QString &filename)
+void DatabaseModel::loadModel(const QString &filename, bool override_seg_mode,
+															 SegmentationMode ovr_seg_mode, unsigned ovr_seg_threshold,
+															 bool discard_scene_idx, std::function<bool()> is_canceled,
+															 bool force_hide_rels)
 {
 	if(filename.isEmpty())
 		return;
 
 	BaseGraphicObject::setUpdatesEnabled(false);
+	this->discard_scene_idx = discard_scene_idx;
 
 	QString dtd_file, str_aux, elem_name;
 	ObjectType obj_type;
@@ -3479,6 +3602,36 @@ void DatabaseModel::loadModel(const QString &filename)
 			scene_rect.setWidth(pos_str[2].toDouble());
 			scene_rect.setHeight(pos_str[3].toDouble());
 		}
+
+		/* A mode/threshold change made through the UI only takes effect on the next load -- so
+		 * whatever is read here becomes both the active value for this session and the starting
+		 * point of the saved value, keeping the two in sync until the user edits them again.
+		 * override_seg_mode (ModelWidget::checkAlternateSegmentation() accepted before this call started) takes
+		 * priority over the file's own values so routing during this same load already reflects it */
+		if(override_seg_mode)
+		{
+			scene_seg_mode = ovr_seg_mode;
+			seg_threshold = (ovr_seg_threshold == 0) ? DefaultSegThreshold : ovr_seg_threshold;
+		}
+		else
+		{
+			scene_seg_mode = attribs[Attributes::SegMode].isEmpty() ?
+												NoSegmentation : static_cast<SegmentationMode>(attribs[Attributes::SegMode].toUInt());
+
+			seg_threshold = attribs[Attributes::SegThreshold].toUInt();
+
+			if(seg_threshold == 0)
+				seg_threshold = DefaultSegThreshold;
+		}
+
+		saved_seg_mode = scene_seg_mode;
+		saved_seg_threshold = seg_threshold;
+
+		hide_rels = saved_hide_rels = (force_hide_rels || attribs[Attributes::HideRels] == Attributes::True);
+
+		/* No "active vs. saved" split here -- focusing a scene is an ordinary runtime action, unlike
+		 * the mode/threshold above, so whatever is read becomes the active value right away */
+		last_scene = attribs[Attributes::LastScene].isEmpty() ? 0 : attribs[Attributes::LastScene].toInt();
 
 		this->is_template = attribs[Attributes::IsTemplate] == Attributes::True;
 		this->allow_conns = (attribs[Attributes::AllowConns].isEmpty() ||
@@ -3589,6 +3742,25 @@ void DatabaseModel::loadModel(const QString &filename)
 
 						xmlparser.restorePosition();
 					}
+					else if(elem_name == Attributes::Scenes)
+					{
+						attribs_map scene_attr;
+						xmlparser.savePosition();
+
+						if(xmlparser.accessElement(XmlParser::ChildElement))
+						{
+							do
+							{
+								xmlparser.getElementAttributes(scene_attr);
+								scene_rects[scene_attr[Attributes::Id].toInt()] =
+										QRectF(QPointF(scene_attr[Attributes::Left].toDouble(), scene_attr[Attributes::Top].toDouble()),
+													 QPointF(scene_attr[Attributes::Right].toDouble(), scene_attr[Attributes::Bottom].toDouble()));
+							}
+							while(xmlparser.accessElement(XmlParser::NextElement));
+						}
+
+						xmlparser.restorePosition();
+					}
 					else if(obj_type == ObjectType::Database)
 					{
 						xmlparser.getElementAttributes(attribs);
@@ -3613,6 +3785,15 @@ void DatabaseModel::loadModel(const QString &filename)
 																		tr("Loading: `%1' (%2)")
 																				.arg(object->getName(), object->getTypeName()),
 																		enum_t(obj_type));
+
+								/* Checked once per object, right after the progress tick above -- that signal
+								 * is what gives the GUI side (see TaskProgressWidget::updateProgress()) its one
+								 * chance to pump the event queue and actually notice a pending cancel click */
+								if(is_canceled && is_canceled())
+								{
+									throw Exception(Exception::getErrorMessage(ErrorCode::OperationCancelled),
+																	ErrorCode::OperationCancelled, PGM_FUNC, PGM_FILE, PGM_LINE);
+								}
 							}
 
 							xmlparser.restorePosition();
@@ -3652,6 +3833,7 @@ void DatabaseModel::loadModel(const QString &filename)
 		}
 
 		loading_model=false;
+		discard_scene_idx=false;
 
 		//If there are relationship make a relationship validation to recreate any special object left behind
 		if(!relationships.empty())
@@ -3667,19 +3849,30 @@ void DatabaseModel::loadModel(const QString &filename)
 		emit s_objectLoaded(100, tr("Validating relationships..."), enum_t(ObjectType::Relationship));
 
 		updateTablesFKRelationships();
-		restoreFKRelationshipLayers();
+		restoreFKRelationshipsCustomization();
 
 		BaseGraphicObject::setUpdatesEnabled(true);
 		setObjectsModified();
+
 		emit s_objectLoaded(100, tr("Rendering database model..."), enum_t(ObjectType::BaseObject));
 	}
 	catch(Exception &e)
 	{
 		QString extra_info;
 		loading_model = false;
+		discard_scene_idx = false;
+
+		//Previously only set back to true on the success path below -- left every subsequent model's
+		//rendering silently disabled whenever a load failed partway through, cancellation included
+		BaseGraphicObject::setUpdatesEnabled(true);
 
 		if(xmlparser.getCurrentElement())
 			extra_info = QObject::tr("%1 (line: %2)").arg(xmlparser.getLoadedFilename()).arg(xmlparser.getCurrentElement()->line);
+
+		//Propagated as-is: a cancellation is neither a syntax error nor worth the generic
+		//"file not loaded" wrapping below, and callers need the original error code intact to detect it
+		if(e.getErrorCode() == ErrorCode::OperationCancelled)
+			throw Exception(e.getErrorMessage(),e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e, extra_info);
 
 		if(e.getErrorCode() != ErrorCode::FileDirectoryNotAccessed &&
 			 e.getErrorCode() >= ErrorCode::InvalidSyntax)
@@ -3823,14 +4016,18 @@ void DatabaseModel::setBasicAttributes(BaseObject *object)
 				{
 					xmlparser.getElementAttributes(attribs);
 
-					if(elem_name==Attributes::Position &&
-							(obj_type_aux!=ObjectType::Relationship &&
-							 obj_type_aux!=ObjectType::BaseRelationship))
+					if(obj_type_aux!=ObjectType::Relationship && obj_type_aux!=ObjectType::BaseRelationship)
 					{
-						dynamic_cast<BaseGraphicObject *>(object)->setPosition(QPointF(attribs[Attributes::XPos].toDouble(),
-																				 attribs[Attributes::YPos].toDouble()));
+						QPointF pos(attribs[Attributes::XPos].toDouble(), attribs[Attributes::YPos].toDouble());
 
-
+						// A "relationship marker" id marks this <position> as the relationship marker's, not the object's own
+						if(attribs[Attributes::Id]==Attributes::RelMarker)
+						{
+							if(BaseTable::isBaseTable(obj_type_aux))
+								dynamic_cast<BaseTable *>(object)->setRelMarkerPosition(pos);
+						}
+						else
+							dynamic_cast<BaseGraphicObject *>(object)->setPosition(pos);
 					}
 				}
 			}
@@ -3932,6 +4129,76 @@ void DatabaseModel::setLastZoomFactor(double zoom)
 double DatabaseModel::getLastZoomFactor()
 {
 	return last_zoom;
+}
+
+void DatabaseModel::setLastScene(int idx)
+{
+	last_scene=idx;
+}
+
+int DatabaseModel::getLastScene()
+{
+	return last_scene;
+}
+
+void DatabaseModel::setSegmentationMode(SegmentationMode mode)
+{
+	scene_seg_mode=mode;
+}
+
+DatabaseModel::SegmentationMode DatabaseModel::getSegmentationMode()
+{
+	return scene_seg_mode;
+}
+
+void DatabaseModel::setSavedSegmentationMode(SegmentationMode mode)
+{
+	saved_seg_mode=mode;
+}
+
+DatabaseModel::SegmentationMode DatabaseModel::getSavedSegmentationMode()
+{
+	return saved_seg_mode;
+}
+
+void DatabaseModel::setSegThreshold(unsigned value)
+{
+	seg_threshold=value;
+}
+
+unsigned DatabaseModel::getSegThreshold()
+{
+	return seg_threshold;
+}
+
+void DatabaseModel::setSavedSegThreshold(unsigned value)
+{
+	saved_seg_threshold=value;
+}
+
+unsigned DatabaseModel::getSavedSegThreshold()
+{
+	return saved_seg_threshold;
+}
+
+void DatabaseModel::setHideRelationships(bool value)
+{
+	hide_rels=value;
+}
+
+bool DatabaseModel::isHideRelationships()
+{
+	return hide_rels;
+}
+
+void DatabaseModel::setSavedHideRelationships(bool value)
+{
+	saved_hide_rels=value;
+}
+
+bool DatabaseModel::isSavedHideRelationships()
+{
+	return saved_hide_rels;
 }
 
 Role *DatabaseModel::createRole()
@@ -6759,6 +7026,8 @@ View *DatabaseModel::createView()
 		view->setCurrentPage(BaseTable::ExtAttribsSection, attribs[Attributes::ExtAttribsPage].toUInt());
 		view->setFadedOut(attribs[Attributes::FadedOut]==Attributes::True);
 		view->setLayers(attribs[Attributes::Layers].split(','));
+		if(!discard_scene_idx)
+			view->setSceneIndex(attribs[Attributes::Scene].isEmpty() ? -1 : attribs[Attributes::Scene].toInt());
 
 		if(xmlparser.accessElement(XmlParser::ChildElement))
 		{
@@ -7024,6 +7293,8 @@ Textbox *DatabaseModel::createTextbox()
 
 		if(!attribs[Attributes::FontSize].isEmpty())
 			txtbox->setFontSize(attribs[Attributes::FontSize].toDouble());
+
+		txtbox->setSceneIndex(attribs[Attributes::Scene].isEmpty() ? -1 : attribs[Attributes::Scene].toInt());
 	}
 	catch(Exception &e)
 	{
@@ -7123,14 +7394,6 @@ BaseRelationship *DatabaseModel::createRelationship()
 				base_rel->setName(attribs[Attributes::Name]);
 				base_rel->setAlias(attribs[Attributes::Alias]);
 				addRelationship(base_rel);
-
-				/* Workaround: in very specific cases when the FK relationship is generated from a FK that references
-				 * columns created by a relationship in the referenced table, we have to save the layers information
-				 * of that relatinship because that one can be destroyed and recreated at the end of the loading process
-				 * leading to the loss of the original layer configuration. This way, we store the layers in a special
-				 * map which is read at DatabaseModel::restoreFKRelationshipLayer (called at the end of DatabaseModel::loadModel) */
-				if(loading_model)
-					fk_rel_layers[attribs[Attributes::Name]] = layers;
 
 				/* If the source table doesn't have any fk that references the destination table indicates that the relationship
 				is being created before the fk that represents it or the fk is invalid (inconsistence!). In this case an error is raised. */
@@ -7301,6 +7564,17 @@ BaseRelationship *DatabaseModel::createRelationship()
 						base_rel->setPoints(points);
 						xmlparser.restorePosition();
 					}
+					else if(elem==Attributes::Segment)
+					{
+						std::map<unsigned, BaseRelationship::SegmentShift> shifts = base_rel->getSegmentShifts();
+
+						xmlparser.getElementAttributes(attribs);
+						shifts[attribs[Attributes::Index].toUInt()] =
+								{ static_cast<Qt::Orientation>(attribs[Attributes::Orientation].toInt()), attribs[Attributes::Value].toDouble(),
+									attribs[Attributes::Jog].toDouble() };
+
+						base_rel->setSegmentShifts(shifts);
+					}
 					else if(elem==Attributes::Label)
 					{
 						xmlparser.getElementAttributes(attribs);
@@ -7353,6 +7627,34 @@ BaseRelationship *DatabaseModel::createRelationship()
 	base_rel->setProtected(protect);
 	base_rel->setCustomColor(custom_color);
 	base_rel->setLayers(layers);
+
+	/* Workaround: in very specific cases when the FK relationship is generated from a FK that references
+	 * columns created by a relationship in the referenced table, the relationship can be destroyed and recreated
+	 * at the end of the loading process, leading to the loss of everything the user customized in it. So that's
+	 * stored in a special list, which is read at DatabaseModel::restoreFKRelationshipsCustomization
+	 * (called at the end of DatabaseModel::loadModel) */
+	if(loading_model && base_rel->getObjectType()==ObjectType::BaseRelationship &&
+		 base_rel->getRelationshipType()==BaseRelationship::RelationshipFk)
+	{
+		FKRelCustomization cust;
+
+		cust.name = base_rel->getName();
+		cust.alias = base_rel->getAlias();
+		cust.src_table = base_rel->getTable(BaseRelationship::SrcTable)->getSignature();
+		cust.dst_table = base_rel->getTable(BaseRelationship::DstTable)->getSignature();
+		cust.fk_name = (base_rel->getReferenceForeignKey() ? base_rel->getReferenceForeignKey()->getName() : "");
+		cust.layers = base_rel->getLayers();
+		cust.points = base_rel->getPoints();
+		cust.segment_shifts = base_rel->getSegmentShifts();
+		cust.custom_color = base_rel->getCustomColor();
+		cust.faded_out = faded_out;
+		cust.rel_protected = protect;
+
+		for(unsigned id = BaseRelationship::SrcCardLabel; id <= BaseRelationship::RelNameLabel; id++)
+			cust.labels_dist[id] = base_rel->getLabelDistance(static_cast<BaseRelationship::LabelId>(id));
+
+		fk_rels_custom.push_back(cust);
+	}
 
 	/* If the FK relationship does not reference a foreign key (models generated in older versions)
 	 * we need to assign them to the respective relationships */
@@ -7904,6 +8206,29 @@ void DatabaseModel::setDatabaseModelAttributes(attribs_map &attribs, SchemaParse
 			attribs[Attributes::Changelog] = persist_changelog ? getChangelogDefinition() : "";
 			attribs[Attributes::GenDisabledObjsCode]= gen_dis_objs_code ? Attributes::True : Attributes::False;
 			attribs[Attributes::ShowSysSchemasRects]= show_sys_sch_rects ? Attributes::True : Attributes::False;
+
+			//Persists the saved (pending) mode/threshold, not the active one -- see loadModel()
+			attribs[Attributes::SegMode] = QString::number(saved_seg_mode);
+			attribs[Attributes::SegThreshold] = QString::number(saved_seg_threshold);
+
+			//Only written when enabled, keeping the file format unchanged for the usual case
+			attribs[Attributes::HideRels] = saved_hide_rels ? Attributes::True : "";
+
+			/* Table/View/ForeignTable count backing the scene distribution saved below (the <scenes>
+			 * element) -- only meaningful in threshold-segmentation mode, where that distribution comes
+			 * from replaying this count against seg-threshold, not from anything derivable from the
+			 * objects themselves (unlike schema-segmentation). Lets a reload detect a seg-threshold
+			 * changed since this save (ModelWidget::needsThresholdRebucketing()) and re-bucket instead of
+			 * trusting a distribution that no longer matches the current threshold */
+			attribs[Attributes::SegObjCount] = (saved_seg_mode != SegByThreshold) ? "" :
+					QString::number(getObjectCount(ObjectType::Table) +
+													getObjectCount(ObjectType::View) +
+													getObjectCount(ObjectType::ForeignTable));
+
+			/* Only meaningful with more than one scene -- with a single scene (segmentation off),
+			 * the legacy scene-rect attribute below is the whole story, keeping the file format
+			 * unchanged for that (still the common) case */
+			attribs[Attributes::Scenes] = (scene_rects.size() > 1) ? getSceneRectsDefinition() : "";
 		}
 		catch (Exception &e)
 		{
@@ -7925,6 +8250,7 @@ void DatabaseModel::setDatabaseModelAttributes(attribs_map &attribs, SchemaParse
 		attribs[Attributes::Protected] = (this->is_protected ? Attributes::True : "");
 		attribs[Attributes::LastPosition] = QString("%1,%2").arg(last_pos.x()).arg(last_pos.y());
 		attribs[Attributes::LastZoom] = QString::number(last_zoom);
+		attribs[Attributes::LastScene] = QString::number(last_scene);
 		attribs[Attributes::DefaultSchema] = (default_objs[ObjectType::Schema] ? default_objs[ObjectType::Schema]->getName(true) : "");
 		attribs[Attributes::DefaultOwner] = (default_objs[ObjectType::Role] ? default_objs[ObjectType::Role]->getName(true) : "");
 		attribs[Attributes::DefaultTablespace] = (default_objs[ObjectType::Tablespace] ? default_objs[ObjectType::Tablespace]->getName(true) : "");
@@ -8728,55 +9054,71 @@ void DatabaseModel::setObjectsModified(std::vector<BaseObject *> &objects)
 	}
 }
 
-void DatabaseModel::setObjectsModified(std::vector<ObjectType> types)
+void DatabaseModel::setObjectsModified(const std::vector<ObjectType> &types)
 {
-	ObjectType obj_types[]={
-							ObjectType::Table, ObjectType::View, ObjectType::ForeignTable,
-							ObjectType::Relationship, ObjectType::BaseRelationship,
-							ObjectType::Textbox, ObjectType::Schema };
-	std::vector<BaseObject *>::iterator itr, itr_end;
-	std::vector<BaseObject *> *obj_list = nullptr;
-	Textbox *label = nullptr;
-	BaseRelationship *rel = nullptr;
+	static const std::vector<ObjectType> all_types {
+		ObjectType::Table, ObjectType::View, ObjectType::ForeignTable,
+		ObjectType::Schema, ObjectType::Textbox,
+		ObjectType::Relationship, ObjectType::BaseRelationship
+	};
+
 	BaseGraphicObject *graph_obj = nullptr;
-	unsigned i1 = 0;
+	bool upd_rels = false;
+	ObjectType obj_tp;
+	std::vector<ObjectType>::const_iterator itr, itr_end;
 
-	for(auto &obj_type : obj_types)
+	if(!types.empty())
 	{
-		if(types.empty() || std::find(types.begin(), types.end(), obj_type) != types.end())
+		itr = types.begin();
+		itr_end = types.end();
+	}
+	else
+	{
+		itr = all_types.begin();
+		itr_end = all_types.end();
+	}
+
+	BaseTable::setGeomChangesIgnored(true);
+
+	while(itr != itr_end)
+	{
+		obj_tp = *itr;
+		itr++;
+
+		if(!BaseGraphicObject::isGraphicObject(obj_tp))
+			continue;
+
+		if(!upd_rels)
 		{
-			obj_list = getObjectList(obj_type);
-			itr = obj_list->begin();
-			itr_end = obj_list->end();
-
-			while(itr != itr_end)
-			{
-				graph_obj = dynamic_cast<BaseGraphicObject *>(*itr);
-
-				if(BaseTable::isBaseTable(obj_type))
-				{
-					/* We call the BaseTable::resetHashCode version to force
-					 * to force table to be redrawn by overriding the
-					 * hash validation in TableView::configureObject */
-					dynamic_cast<BaseTable *>(graph_obj)->resetHashCode();
-				}
-
-				graph_obj->setModified(true);
-
-				//For relationships is needed to set the labels as modified too
-				if(obj_type == ObjectType::Relationship || obj_type == ObjectType::BaseRelationship)
-				{
-					rel=dynamic_cast<BaseRelationship *>(*itr);
-					for(i1 = BaseRelationship::SrcCardLabel; i1 <= BaseRelationship::RelNameLabel; i1++)
-					{
-						label = rel->getLabel(static_cast<BaseRelationship::LabelId>(i1));
-						if(label) label->setModified(true);
-					}
-				}
-
-				itr++;
-			}
+			upd_rels = (obj_tp == ObjectType::BaseRelationship ||
+									obj_tp == ObjectType::Relationship);
 		}
+
+		for(auto &obj : *getObjectList(obj_tp))
+		{
+			graph_obj = dynamic_cast<BaseGraphicObject *>(obj);
+
+			if(BaseTable::isBaseTable(obj_tp))
+			{
+				/* We call the BaseTable::resetHashCode version to force
+				 * to force table to be redrawn by overriding the
+				 * hash validation in TableView::configureObject */
+				dynamic_cast<BaseTable *>(graph_obj)->resetHashCode();
+			}
+
+			graph_obj->setModified(true);
+		}
+	}
+
+	BaseTable::setGeomChangesIgnored(false);
+
+	if(upd_rels)
+	{
+		for(auto &rel : relationships)
+			dynamic_cast<Relationship *>(rel)->setModified(true);
+
+		for(auto &base_rel : base_relationships)
+			dynamic_cast<BaseRelationship *>(base_rel)->setModified(true);
 	}
 }
 
@@ -8861,6 +9203,12 @@ void DatabaseModel::validateSchemaRenaming(Schema *schema, const QString &prev_s
 
 		refs.clear();
 	}
+
+	/* This method marks every child/reference as modified to force their redraw, but never the
+	 * renamed schema itself -- callers (ObjectRenameWidget, SchemaWidget, OperationList undo/redo)
+	 * all route a schema rename through here, so it's also the one place that can reliably notify
+	 * whatever's listening to the schema's own s_objectModified() (e.g. a scene-name display) */
+	schema->setModified(true);
 }
 
 void DatabaseModel::createSystemObjects(bool create_public)
@@ -9461,6 +9809,7 @@ void DatabaseModel::saveObjectsMetadata(const QString &filename, MetaAttrOptions
 						pnt=rel->getLabelDistance(static_cast<BaseRelationship::LabelId>(id));
 						if(!std::isnan(pnt.x()) && !std::isnan(pnt.y()))
 						{
+							aux_attribs[Attributes::Id]="";
 							aux_attribs[Attributes::XPos]=QString::number(pnt.x());
 							aux_attribs[Attributes::YPos]=QString::number(pnt.y());
 							aux_attribs[Attributes::RefType]=labels_attrs[id];
@@ -9472,6 +9821,18 @@ void DatabaseModel::saveObjectsMetadata(const QString &filename, MetaAttrOptions
 																																				 aux_attribs);
 
 						}
+					}
+
+					//Saving the displacements of the orthogonal line's segments
+					for(auto &itr : rel->getSegmentShifts())
+					{
+						aux_attribs[Attributes::Index]=QString::number(itr.first);
+						aux_attribs[Attributes::Orientation]=QString::number(itr.second.orientation);
+						aux_attribs[Attributes::Value]=QString::number(itr.second.value);
+						aux_attribs[Attributes::Jog]=(itr.second.jog != 0 ? QString::number(itr.second.jog) : "");
+
+						attribs[Attributes::Position]+=schparser.getSourceCode(GlobalAttributes::getSchemaFilePath(GlobalAttributes::XMLSchemaDir, Attributes::Segment),
+																																	 aux_attribs);
 					}
 				}
 			}
@@ -9564,6 +9925,7 @@ void DatabaseModel::loadObjectsMetadata(const QString &filename, MetaAttrOptions
 	BaseObject *object=nullptr, *new_object=nullptr, *aux_obj = nullptr;
 	BaseTable *src_tab=nullptr, *dst_tab=nullptr, *base_tab=nullptr;
 	std::vector<QPointF> points;
+	std::map<unsigned, BaseRelationship::SegmentShift> seg_shifts;
 	std::map<QString, unsigned> labels_attrs;
 	std::vector<QPointF> labels_pos={ QPointF(DNaN,DNaN), QPointF(DNaN,DNaN), QPointF(DNaN,DNaN) };
 	BaseRelationship *rel=nullptr;
@@ -9796,6 +10158,13 @@ void DatabaseModel::loadObjectsMetadata(const QString &filename, MetaAttrOptions
 
 										xmlparser.restorePosition();
 									}
+									//Retrieving and storing the displacements of the orthogonal line's segments
+									else if(aux_elem==Attributes::Segment)
+									{
+										seg_shifts[aux_attrib[Attributes::Index].toUInt()] =
+												{ static_cast<Qt::Orientation>(aux_attrib[Attributes::Orientation].toInt()), aux_attrib[Attributes::Value].toDouble(),
+													aux_attrib[Attributes::Jog].toDouble() };
+									}
 									else if(load_custom_sql && aux_elem==Attributes::AppendedSql &&
 													attribs[Attributes::AppendedSql].isEmpty())
 									{
@@ -9837,6 +10206,7 @@ void DatabaseModel::loadObjectsMetadata(const QString &filename, MetaAttrOptions
 									if(load_objs_pos)
 									{
 										rel->setPoints(points);
+										rel->setSegmentShifts(seg_shifts);
 
 										for(unsigned id=BaseRelationship::SrcCardLabel; id <= BaseRelationship::RelNameLabel; id++)
 										{
@@ -9861,6 +10231,7 @@ void DatabaseModel::loadObjectsMetadata(const QString &filename, MetaAttrOptions
 							}
 
 							points.clear();
+							seg_shifts.clear();
 
 						}
 						else if(!object)
@@ -10116,6 +10487,8 @@ TableClass *DatabaseModel::createPhysicalTable()
 		table->setCurrentPage(BaseTable::ExtAttribsSection, attribs[Attributes::ExtAttribsPage].toUInt());
 		table->setFadedOut(attribs[Attributes::FadedOut]==Attributes::True);
 		table->setLayers(attribs[Attributes::Layers].split(','));
+		if(!discard_scene_idx)
+			table->setSceneIndex(attribs[Attributes::Scene].isEmpty() ? -1 : attribs[Attributes::Scene].toInt());
 
 		if(xmlparser.accessElement(XmlParser::ChildElement))
 		{
@@ -10469,6 +10842,34 @@ QString DatabaseModel::getChangelogDefinition(bool csv_format)
 	}
 }
 
+QString DatabaseModel::getSceneRectsDefinition()
+{
+	try
+	{
+		QString buffer;
+		attribs_map attribs;
+
+		for(auto itr = scene_rects.begin(); itr != scene_rects.end(); itr++)
+		{
+			attribs[Attributes::Id] = QString::number(itr.key());
+			attribs[Attributes::Left] = QString::number(itr.value().left());
+			attribs[Attributes::Top] = QString::number(itr.value().top());
+			attribs[Attributes::Right] = QString::number(itr.value().right());
+			attribs[Attributes::Bottom] = QString::number(itr.value().bottom());
+			buffer += schparser.getSourceCode(Attributes::Scene, attribs, SchemaParser::XmlCode);
+		}
+
+		attribs.clear();
+		attribs[Attributes::Scene] = buffer;
+		schparser.ignoreEmptyAttributes(true);
+		return schparser.getSourceCode(Attributes::Scenes, attribs, SchemaParser::XmlCode);
+	}
+	catch(Exception &e)
+	{
+		throw Exception(e.getErrorMessage(), e.getErrorCode(), PGM_FUNC, PGM_FILE, PGM_LINE, &e);
+	}
+}
+
 void DatabaseModel::setSceneRect(const QRectF &rect)
 {
 	if(!rect.isValid())
@@ -10481,6 +10882,17 @@ void DatabaseModel::setSceneRect(const QRectF &rect)
 QRectF DatabaseModel::getSceneRect()
 {
 	return scene_rect;
+}
+
+void DatabaseModel::setSceneRects(const QMap<int, QRectF> &rects)
+{
+	setCodeInvalidated(rects != scene_rects);
+	scene_rects = rects;
+}
+
+QMap<int, QRectF> DatabaseModel::getSceneRects()
+{
+	return scene_rects;
 }
 
 void DatabaseModel::setGenDisabledObjsCode(bool value)

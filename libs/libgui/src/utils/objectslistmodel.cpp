@@ -29,8 +29,8 @@
 #include "utilsns.h"
 
 const QStringList ObjectsListModel::HeaderTexts {
-	QT_TR_NOOP("ID"), QT_TR_NOOP("Object"), QT_TR_NOOP("Type"),
-	QT_TR_NOOP("Parent"), QT_TR_NOOP("Parent type")
+	PGM_TR2("Global", "ID"), PGM_TR2("Global", "Object"), PGM_TR2("Global", "Type"),
+	PGM_TR2("Global", "Parent"), PGM_TR2("Global", "Parent type")
 };
 
 const QStringList ObjectsListModel::HeaderIcons {
@@ -93,8 +93,12 @@ void ObjectsListModel::configureHeader(const QString &search_attr)
 {
 	QFontMetrics fm(qApp->font());
 	ItemData header_dt;
-	QStringList header_texts = HeaderTexts;
+	QStringList header_texts;
 	auto [ h_margin, h_margin_no_ico, v_margin ] = getIndexMargins();
+
+	// The texts are only marked for translation where they are declared, so they are translated here
+	for(auto &text : HeaderTexts)
+		header_texts.append(UtilsNs::pgmTr(text));
 
 	// Configuring the header items
 	header_texts.append(

@@ -1,3 +1,11 @@
+# Compiling the UI translations (assets/lang/*.ts) and copying the .qm files
+# to the folder configured in PGM_LANGDIR (LANGDIR)
+file(GLOB PGM_UI_TS_FILES CONFIGURE_DEPENDS assets/lang/*.ts)
+
+if(PGM_UI_TS_FILES)
+    pgm_add_translations(translations ${PGM_LANGDIR} ${PGM_UI_TS_FILES})
+endif()
+
 # Copying the samples/*.dbm to the destination
 install(DIRECTORY assets/samples/
         DESTINATION ${PGM_SAMPLESDIR}

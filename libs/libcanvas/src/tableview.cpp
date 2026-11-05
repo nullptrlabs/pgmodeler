@@ -274,11 +274,14 @@ void TableView::configureObject()
 	configureTag();
 	configureSQLDisabledInfo();
 
-	if((old_width!=0 && this->bounding_rect.width()!=old_width) ||
-			(old_height!=0 && this->bounding_rect.height()!=old_height))
-		emit s_objectDimensionChanged();
-	else
-		requestRelationshipsUpdate();
+	if(!BaseTable::isGeomChangesIgnored())
+	{
+		if((old_width!=0 && this->bounding_rect.width()!=old_width) ||
+			 (old_height!=0 && this->bounding_rect.height()!=old_height))
+			emit s_objectDimensionChanged();
+		else
+			requestRelationshipsUpdate();
+	}
 }
 
 QPointF TableView::getConnectionPoints(TableObject *tab_obj, ConnectionPoint conn_pnt)

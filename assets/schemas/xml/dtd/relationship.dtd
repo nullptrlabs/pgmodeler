@@ -5,7 +5,10 @@
 <!ENTITY % label SYSTEM "label.dtd">
 %label;
 
-<!ELEMENT relationship (line*,label*,column*,constraint*,special-pk-cols?,expression?)>
+<!ENTITY % segment SYSTEM "segment.dtd">
+%segment;
+
+<!ELEMENT relationship (line*,label*,segment*,column*,constraint*,special-pk-cols?,expression?)>
 <!ATTLIST relationship name CDATA #REQUIRED>
 <!ATTLIST relationship layers CDATA #IMPLIED>
 <!ATTLIST relationship alias CDATA #IMPLIED>

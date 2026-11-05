@@ -315,15 +315,27 @@ QString Column::getAlterCode(BaseObject *object)
 			attribs[Attributes::Type]=col->type.getSourceCode(SchemaParser::SqlCode);
 
 		if(col->sequence)
-			def_val=NextValFuncTmpl.arg(col->sequence->getSignature());
+			def_val = NextValFuncTmpl.arg(col->sequence->getSignature());
 		else
-			def_val=col->default_value;
+			def_val = col->default_value;
 
-		bool drop_generated = this->isGenerated() && !col->isGenerated() && getPgSQLVersion().toDouble() >= 13;
-		attribs[Attributes::Generated] = (drop_generated ? Attributes::Unset : "");
+		QString this_def_val = this->default_value.simplified().toLower(),
+				col_def_val = col->getDefaultValue().simplified().toLower();
+
+		attribs[Attributes::Generated] = "";
 		attribs[Attributes::DefaultValue] = "";
-		if(!col->isGenerated() && ((!this->isGenerated() && this->default_value.simplified().toLower() != def_val.simplified().toLower()) || (drop_generated && !def_val.isEmpty())))
+
+		if(!this->isGenerated() && !col->isGenerated() && this_def_val != col_def_val)
 			attribs[Attributes::DefaultValue] = (def_val.isEmpty() ? Attributes::Unset : def_val);
+		else if(this->isGenerated() && col->isGenerated() && this_def_val != col_def_val)
+			attribs[Attributes::Generated] = col->getDefaultValue();
+		else if(this->isGenerated() && !col->isGenerated() && getPgSQLVersion().toDouble() >= 13)
+		{
+			attribs[Attributes::Generated] = Attributes::Unset;
+
+			if(!def_val.isEmpty())
+				attribs[Attributes::DefaultValue] = def_val;
+		}
 
 		if(this->not_null!=col->not_null)
 			attribs[Attributes::NotNull]=(!col->not_null ? Attributes::Unset : Attributes::True);

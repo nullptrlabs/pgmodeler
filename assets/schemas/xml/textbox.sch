@@ -3,6 +3,7 @@
 # Code generation can be broken if incorrect changes are made.
 [<textbox name=] "&{name}" [ layers=] "{layers}"
 
+%if {scene} %then [ scene=] "{scene}" %end
 %if {protected} %then [ protected=] "true" %end
 %if {italic} %then [ italic=] "true" %end
 %if {bold} %then [ bold=] "true" %end

@@ -461,7 +461,14 @@ void CodeCompletionWidget::updateList()
 	pattern.replace("*", "\\*");
 
 	if(!db_model)
+	{
+		/* The items retrieved from an external source (e.g. the live database) are reused by
+		 * filterCurrentItems() while the user types, so the list is cleared only if they are not filtered */
+		if(filterCurrentItems(tc))
+			return;
+
 		name_list->clear();
+	}
 	else
 	{
 		//Negative qualifying level means that user called the completion before a space (empty word)
@@ -513,7 +520,7 @@ void CodeCompletionWidget::updateList()
 		populateNameList(objects, word);
 	}
 
-	if(filterCurrentItems(tc))
+	if(db_model && filterCurrentItems(tc))
 		return;
 
 	// Retrieving object names from a external source (e.g. live database)

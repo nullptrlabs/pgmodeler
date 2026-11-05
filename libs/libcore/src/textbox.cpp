@@ -45,6 +45,7 @@ QString Textbox::getSourceCode(SchemaParser::CodeType def_type)
 	setPositionAttribute();
 	setFadedOutAttribute();
 	setLayersAttribute();
+	setSceneIndexAttribute();
 
 	if(text_attributes[ItalicText])
 		attributes[Attributes::Italic]=Attributes::True;

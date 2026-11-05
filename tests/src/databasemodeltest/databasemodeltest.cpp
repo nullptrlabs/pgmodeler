@@ -21,6 +21,7 @@
 
 #include <QtTest/QtTest>
 #include "databasemodel.h"
+#include "table.h"
 #include "pgmodelerunittest.h"
 
 class DatabaseModelTest: public QObject, public PgModelerUnitTest {
@@ -33,6 +34,7 @@ class DatabaseModelTest: public QObject, public PgModelerUnitTest {
 		void saveObjectsMetadata();
 		void loadObjectsMetadata();
 		void saveSplitSQLDefinition();
+		void getObjectIndexTreatsRemovedObjectsAsOutsideTheModel();
 };
 
 void DatabaseModelTest::saveObjectsMetadata()
@@ -101,6 +103,40 @@ void DatabaseModelTest::saveSplitSQLDefinition()
 	{
 		out << e.getExceptionsText() << Qt::endl;
 		QCOMPARE(false, true);
+	}
+}
+
+void DatabaseModelTest::getObjectIndexTreatsRemovedObjectsAsOutsideTheModel()
+{
+	try
+	{
+		DatabaseModel model;
+		Table *table = new Table;
+
+		model.createSystemObjects(true);
+		table->setName("tab");
+		table->setSchema(model.getObject("public", ObjectType::Schema));
+		model.addTable(table);
+		QCOMPARE(model.getObjectIndex(table), 0);
+
+		//Removed but still allocated (what the operation list's pool holds)
+		model.removeTable(table);
+		QCOMPARE(model.getObjectIndex(table), -1);
+
+		//Put back (undo of a removal)
+		model.addTable(table);
+		QCOMPARE(model.getObjectIndex(table), 0);
+
+		/* Removed and then deleted: the pointer dangles but must still be reported as outside
+		 * the model without being dereferenced */
+		model.removeTable(table);
+		BaseObject *dangling = table;
+		delete table;
+		QCOMPARE(model.getObjectIndex(dangling), -1);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
 	}
 }
 

@@ -133,7 +133,9 @@ AppearanceConfigWidget::AppearanceConfigWidget(QWidget *parent) : BaseConfigWidg
 			/* 61 */ Attributes::ForeignTableExtBody,
 			/* 62 */ Attributes::ForeignTableTitle,
 			/* 63 */ Attributes::ForeignTableTogglerButtons,
-			/* 64 */ Attributes::ForeignTableTogglerBody };
+			/* 64 */ Attributes::ForeignTableTogglerBody,
+			/* 65 */ Attributes::RelMarker,
+			/* 66 */ Attributes::RelMarker };
 
 	int i = 0, count = element_cmb->count();
 
@@ -141,7 +143,7 @@ AppearanceConfigWidget::AppearanceConfigWidget(QWidget *parent) : BaseConfigWidg
 	std::vector<int> obj_conf_ids { 2, 3, 5, 7, 8, 11, 12, 13, 14, 15,
 																	17, 19, 21, 23, 25, 28, 29, 30,
 																	34, 35, 36, 37, 39, 43, 45, 47, 49,
-																	50, 52, 54, 56, 57, 60, 61, 62, 63, 64 };
+																	50, 52, 54, 56, 57, 60, 61, 62, 63, 64, 66 };
 
 	conf_items.resize(count);
 
@@ -280,6 +282,9 @@ CREATE TABLE public.table_b (\n \
 
 	connect(min_obj_opacity_spb, &QSpinBox::valueChanged, this, [this]()
 					{ setConfigurationChanged(true); });
+
+	connect(obj_border_width_spb, &QSpinBox::valueChanged, this, &AppearanceConfigWidget::previewBorderWidths);
+	connect(rel_border_width_spb, &QSpinBox::valueChanged, this, &AppearanceConfigWidget::previewBorderWidths);
 
 	connect(ext_attribs_per_page_spb, &QSpinBox::valueChanged, this, [this]()
 					{ setConfigurationChanged(true); });
@@ -662,11 +667,22 @@ void AppearanceConfigWidget::loadConfiguration()
 	}
 }
 
+bool AppearanceConfigWidget::isRelBorderWidthChanged()
+{
+	return rel_border_width_changed;
+}
+
 void AppearanceConfigWidget::applyDesignCodeStyle()
 {
 	grid_pattern_cmb->setCurrentIndex((config_params[Attributes::Design][Attributes::GridPattern].isEmpty() || config_params[Attributes::Design][Attributes::GridPattern] == Attributes::Square) ? 0 : 1);
 	grid_size_spb->setValue((config_params[Attributes::Design][Attributes::GridSize]).toUInt());
 	min_obj_opacity_spb->setValue(config_params[Attributes::Design][Attributes::MinObjectOpacity].toUInt());
+
+	// Missing values (configuration files from older versions) fall back to the default width (100%)
+	obj_border_width_spb->setValue(config_params[Attributes::Design].count(Attributes::ObjBorderWidth) ?
+																 config_params[Attributes::Design][Attributes::ObjBorderWidth].toUInt() : 100);
+	rel_border_width_spb->setValue(config_params[Attributes::Design].count(Attributes::RelBorderWidth) ?
+																 config_params[Attributes::Design][Attributes::RelBorderWidth].toUInt() : 100);
 	attribs_per_page_spb->setValue(config_params[Attributes::Design][Attributes::AttribsPerPage].toUInt());
 	ext_attribs_per_page_spb->setValue(config_params[Attributes::Design][Attributes::ExtAttribsPerPage].toUInt());
 
@@ -797,6 +813,8 @@ void AppearanceConfigWidget::saveConfiguration()
 		attribs[Attributes::CanvasColor] = canvas_color_cp->getColor(0).name();
 		attribs[Attributes::DelimitersColor] = delimiters_color_cp->getColor(0).name();
 		attribs[Attributes::ExpansionFactor] = QString::number(expansion_factor_spb->value());
+		attribs[Attributes::ObjBorderWidth] = QString::number(obj_border_width_spb->value());
+		attribs[Attributes::RelBorderWidth] = QString::number(rel_border_width_spb->value());
 		config_params[Attributes::Design] = attribs;
 		attribs.clear();
 
@@ -856,6 +874,14 @@ void AppearanceConfigWidget::saveConfiguration()
 
 		config_params[Attributes::Objects] = attribs;
 		BaseConfigWidget::saveConfiguration(GlobalAttributes::AppearanceConf, config_params);
+
+		/* The border widths are applied here (and not only in applyConfiguration()) because
+		 * this method is the one called when the user applies the settings. The flag tells
+		 * the main window to redraw the relationships lines of the opened models */
+		rel_border_width_changed = (static_cast<unsigned>(rel_border_width_spb->value()) != applied_rel_border_width);
+		applied_rel_border_width = rel_border_width_spb->value();
+		BaseObjectView::setBorderWidthPercent(obj_border_width_spb->value());
+		RelationshipView::setBorderWidthPercent(rel_border_width_spb->value());
 
 		QString hl_theme = getThemeId();
 
@@ -1013,6 +1039,11 @@ void AppearanceConfigWidget::applyConfiguration()
 	BaseTableView::setAttributesPerPage(BaseTable::ExtAttribsSection, ext_attribs_per_page_spb->value());
 	ModelWidget::setMinimumObjectOpacity(min_obj_opacity_spb->value());
 	ObjectsScene::setExpansionFactor(expansion_factor_spb->value());
+
+	rel_border_width_changed = false;
+	applied_rel_border_width = rel_border_width_spb->value();
+	BaseObjectView::setBorderWidthPercent(obj_border_width_spb->value());
+	RelationshipView::setBorderWidthPercent(rel_border_width_spb->value());
 	GuiUtilsNs::updateDropShadows(qApp->allWidgets());
 
 	loadExampleModel();
@@ -1110,6 +1141,19 @@ void AppearanceConfigWidget::previewCanvasColors()
 	ObjectsScene::setPageDelimitersColor(delimiters_color_cp->getColor(0));
 	ObjectsScene::setGridSize(grid_size_spb->value());
 
+	scene->update();
+	setConfigurationChanged(true);
+}
+
+void AppearanceConfigWidget::previewBorderWidths()
+{
+	BaseObjectView::setBorderWidthPercent(obj_border_width_spb->value());
+	RelationshipView::setBorderWidthPercent(rel_border_width_spb->value());
+
+	// The relationships lines are only redrawn when their route is invalidated
+	model->setObjectsModified();
+	scene->invalidateRelationshipsRoutes(true);
+	updatePlaceholderItem();
 	scene->update();
 	setConfigurationChanged(true);
 }

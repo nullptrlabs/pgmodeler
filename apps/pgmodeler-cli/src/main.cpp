@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
 		GlobalAttributes::init(argv[0], false);
 		PgModelerCliApp pgmodeler_cli(argc, argv);
-		pgmodeler_cli.loadTranslations(QLocale::system().name(), true);
+		pgmodeler_cli.loadTranslations(true);
 
 		//Executes the cli
 		return pgmodeler_cli.exec();
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 	{
 		out << Qt::endl;
 		out << e.getExceptionsText();
-		out << QT_TR_NOOP("** pgmodeler-cli aborted due to critical error(s). **") << Qt::endl << Qt::endl;
+		out << UtilsNs::pgmTr(PGM_TR2("Global", "** pgmodeler-cli aborted due to critical error(s). **")) << Qt::endl << Qt::endl;
 		return (e.getErrorCode()==ErrorCode::Custom ? -1 : enum_t(e.getErrorCode()));
 	}
 }

@@ -43,6 +43,7 @@ https://www.fluentcpp.com/2017/05/12/curiously-recurring-template-pattern/
 
 #include "../coreglobal.h"
 #include <QStringList>
+#include "utilsns.h"
 #include "exception.h"
 
 template<class Class>
@@ -132,7 +133,7 @@ unsigned TemplateType<Class>::setType(unsigned type_id, const QStringList &type_
 	if(!isTypeValid(type_id, type_list))
 	{
 		throw Exception(ErrorCode::AsgInvalidTypeObject, PGM_FUNC, PGM_FILE, PGM_LINE,
-										nullptr, QString(QT_TR_NOOP("Type id: %1")).arg(static_cast<int>(type_id)));
+										nullptr, UtilsNs::pgmTr(PGM_TR2("Global", "Type id: %1")).arg(static_cast<int>(type_id)));
 	}
 
 	type_idx = type_id;
@@ -149,7 +150,7 @@ unsigned TemplateType<Class>::setType(const QString &type_name, const QStringLis
 	catch(Exception &e)
 	{
 		throw Exception(e.getErrorMessage(), e.getErrorCode(),PGM_FUNC,PGM_FILE,PGM_LINE, &e,
-										QString(QT_TR_NOOP("Type name: %1")).arg(type_name));
+										UtilsNs::pgmTr(PGM_TR2("Global", "Type name: %1")).arg(type_name));
 	}
 }
 

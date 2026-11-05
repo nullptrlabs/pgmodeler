@@ -23,6 +23,7 @@
 #include "schema.h"
 #include "tag.h"
 #include "physicaltable.h"
+#include "databasemodel.h"
 
 TableTitleView::TableTitleView() : BaseObjectView(nullptr)
 {
@@ -93,7 +94,12 @@ void TableTitleView::configureObject(BaseGraphicObject *object)
 	else
 		schema_name->setBrush(tag->getElementColor(schema_name_attrib, ColorId::FillColor1));
 
-	if(schema->isRectVisible())
+	/* When segmentation mode is turned on (by schema or threshold) the schema
+	 * name is always visible because schemas rectangle are hidden
+	 * by design in thes modes */
+	if(schema->isRectVisible() && schema->getDatabase() &&
+		 dynamic_cast<DatabaseModel *>(schema->getDatabase())->getSegmentationMode() ==
+		 DatabaseModel::NoSegmentation)
 		schema_name->setText(" ");
 	else
 	{

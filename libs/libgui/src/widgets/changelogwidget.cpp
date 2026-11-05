@@ -196,7 +196,7 @@ void ChangelogWidget::inspectChangelog()
 		Messagebox::error(e, PGM_FUNC, PGM_FILE, PGM_LINE);
 	}
 
-	data_tbw->setWindowTitle("Changelog entries");
+	data_tbw->setWindowTitle(tr("Changelog entries"));
 	base_form.setMainWidget(data_tbw);
 	base_form.setButtonConfiguration(Messagebox::OkButton);
 	base_form.accept_btn->setShortcut(QKeySequence("Enter"));

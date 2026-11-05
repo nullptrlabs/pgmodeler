@@ -27,6 +27,7 @@
 #ifndef PHYSICAL_TABLE_H
 #define PHYSICAL_TABLE_H
 
+#include <QCoreApplication>
 #include <QStringList>
 #include "basegraphicobject.h"
 #include "basetable.h"
@@ -38,6 +39,9 @@
 #include "pgsqltypes/partitioningtype.h"
 
 class __libcore PhysicalTable: public BaseTable {
+	//! \brief Gives the class its own tr(), so the texts it translates are in the context PhysicalTable
+	Q_DECLARE_TR_FUNCTIONS(PhysicalTable)
+
 	protected:
 		//! \brief Specifies the table from which columns are copied
 		PhysicalTable *copy_table;

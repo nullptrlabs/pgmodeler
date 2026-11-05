@@ -6,7 +6,7 @@
 [ Unexpected results may occur if the code is changed deliberately.] \n
 [-->] \n
 
-<relationships \s link-mode="{link-mode}" > \n
+<relationships \s link-mode="{link-mode}" \s line-style="{line-style}" > \n
     
 \t [<foreign-keys deferrable=] "{deferrable}" 
 

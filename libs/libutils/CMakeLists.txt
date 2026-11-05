@@ -12,6 +12,7 @@ pgm_add_library(utils
     src/globalattributes.cpp src/globalattributes.h
     src/pgmodelerplugin.cpp src/pgmodelerplugin.h
     src/pgsqlversions.cpp src/pgsqlversions.h
+    src/secretsns.cpp src/secretsns.h
     src/utilsglobal.h
     src/utilsns.cpp src/utilsns.h)
 

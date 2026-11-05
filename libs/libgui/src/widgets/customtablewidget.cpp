@@ -164,7 +164,12 @@ QTableWidgetItem *CustomTableWidget::getItem(unsigned row_idx, unsigned col_idx)
 	if(col_idx >= static_cast<unsigned>(table_tbw->columnCount()))
 		throw Exception(ErrorCode::RefColObjectTabInvalidIndex,PGM_FUNC,PGM_FILE,PGM_LINE);
 
-	return table_tbw->item(row_idx, col_idx);
+	QTableWidgetItem *item = table_tbw->item(row_idx, col_idx);
+
+	if(!item)
+		throw Exception(ErrorCode::OprNotAllocatedObject,PGM_FUNC,PGM_FILE,PGM_LINE);
+
+	return item;
 }
 
 void CustomTableWidget::updateVerticalHeader()

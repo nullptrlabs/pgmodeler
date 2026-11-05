@@ -23,8 +23,8 @@ if(APPLE)
 	set(PGSQL_INC /Library/PostgreSQL/17/include)
 	set(PGSQL_LIBS /Library/PostgreSQL/17/lib/libpq.dylib)
 
-	set(XML2_INC /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libxml2)
-	set(XML2_LIBS /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/libxml2.tbd)
+	set(XML2_INC ${CMAKE_OSX_SYSROOT}/usr/include/libxml2)
+	set(XML2_LIBS ${CMAKE_OSX_SYSROOT}/usr/lib/libxml2.tbd)
 else()
 	# Searching for PostgreSQL headers/libraries
 	# This command attempts to find the library, REQUIRED argument is optional

@@ -1,0 +1,12 @@
+<!--
+  CAUTION: Do not modify this file directly on it's code unless you know what you are doing.
+           Unexpected results may occur if the code is changed deliberately.
+-->
+<!ELEMENT scenes (scene*)>
+
+<!ELEMENT scene EMPTY>
+<!ATTLIST scene id CDATA #REQUIRED>
+<!ATTLIST scene left CDATA #REQUIRED>
+<!ATTLIST scene top CDATA #REQUIRED>
+<!ATTLIST scene right CDATA #REQUIRED>
+<!ATTLIST scene bottom CDATA #REQUIRED>
