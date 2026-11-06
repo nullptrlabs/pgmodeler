@@ -105,7 +105,7 @@ class __libutils GlobalAttributes {
 		 * to avoid writting the extension in the last parameter of the parameter pack pth_elems.
 		 * The parameter root_path is the base path where the file name (and eventually subfolders) will be appended
 		 * The parameter subfolder is a base subfolder where the file is located
-		 * The paramter pack ...pth_elems is the last part of the complete file path. By using this, one can form a path with a
+		 * The parameter pack ...pth_elems is the last part of the complete file path. By using this, one can form a path with a
 		 * variable number of subfolders. The last element of the parameter pack will be ALWAYS the file that is needed to be retrieved.
 		 *
 		 * Example:
