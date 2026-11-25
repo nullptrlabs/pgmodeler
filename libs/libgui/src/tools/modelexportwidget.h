@@ -43,6 +43,11 @@ class __libgui ModelExportWidget: public QWidget, public Ui::ModelExportWidget {
 		static constexpr int StandaloneFile = 0,
 		SplitFiles = 1;
 
+		//! \brief Indexes of the formats in the graphics file format combo
+		static constexpr int PngFormat = 0,
+		SvgFormat = 1,
+		PdfFormat = 2;
+
 		/*! \brief Indicates if the full output generated during the process should be displayed
 		 * When this attribute is true, only errors and some key info messages are displayed. */
 		static bool low_verbosity;

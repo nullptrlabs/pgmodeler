@@ -1998,7 +1998,9 @@ void MainWindow::printModel()
 	{
 		QPrintDialog print_dlg;
 		QPrinter *printer=nullptr;
-		QPageLayout curr_page_lt, orig_page_lt;
+		QPageLayout curr_page_lt, orig_page_lt, base_page_lt;
+		QPrinter::OutputFormat orig_format;
+		QString orig_printer_name;
 		GeneralConfigWidget *conf_wgt = configuration_wgt->getConfigurationWidget<GeneralConfigWidget>();
 
 		print_dlg.setOption(QAbstractPrintDialog::PrintCurrentPage, false);
@@ -2010,8 +2012,24 @@ void MainWindow::printModel()
 		//Get a reference to the printer
 		printer = print_dlg.printer();
 
-		//Sets the printer options based upon the configurations from the scene
+		/* Sets the printer options based upon the configurations from the scene. The printer can refuse part
+		 * of the layout (e.g. margins smaller than its hardware minimum), so the layout it actually holds is
+		 * the reference used to detect changes made by the user in the dialog */
 		printer->setPageLayout(orig_page_lt);
+		base_page_lt = printer->pageLayout();
+		orig_format = printer->outputFormat();
+		orig_printer_name = printer->printerName();
+
+		//Allows the user to print only a range of the model's pages
+		unsigned page_cnt = current_model->getPrintPageCount(base_page_lt, action_lock_delim->isChecked());
+
+		if(page_cnt > 0)
+		{
+			print_dlg.setOption(QAbstractPrintDialog::PrintPageRange, true);
+			print_dlg.setMinMax(1, page_cnt);
+			print_dlg.setFromTo(1, page_cnt);
+		}
+
 		print_dlg.exec();
 
 		//If the user confirms the printing
@@ -2019,12 +2037,21 @@ void MainWindow::printModel()
 		{
 			Messagebox msg_box;
 
+			/* When the destination is changed in the dialog (e.g. to PDF) Qt matches the paper against the sizes of the
+			 * new destination and may replace it (e.g. A4 -> Letter) even though the user didn't touch the paper settings.
+			 * In this case the scene's layout is applied again to the new destination */
+			if(printer->outputFormat() != orig_format || printer->printerName() != orig_printer_name)
+			{
+				printer->setPageLayout(orig_page_lt);
+				base_page_lt = printer->pageLayout();
+			}
+
 			// Checking If the user modified the default settings on the printer overriding the scene configurations
 			curr_page_lt = printer->pageLayout();
 
-			if(orig_page_lt.marginsPoints() != curr_page_lt.marginsPoints() ||
-				 orig_page_lt.pageSize().id() != curr_page_lt.pageSize().id() ||
-				 orig_page_lt.pageSize().rectPoints() != curr_page_lt.pageSize().rectPoints())
+			if(base_page_lt.marginsPoints() != curr_page_lt.marginsPoints() ||
+				 base_page_lt.pageSize().id() != curr_page_lt.pageSize().id() ||
+				 base_page_lt.pageSize().rectPoints() != curr_page_lt.pageSize().rectPoints())
 			{
 				msg_box.show("", tr("Changes were detected in the definitions of paper/margin which may cause the incorrect printing of the objects. Which configurations do you want to use?"),
 										 Messagebox::Alert, Messagebox::AllButtons,
@@ -2037,8 +2064,8 @@ void MainWindow::printModel()
 			{
 				if(msg_box.isRejected())
 				{
-					// Retore the page configuration to the scene's default
-					printer->setPageLayout(orig_page_lt);
+					// Retore the page configuration to the scene's default (as accepted by the printer)
+					printer->setPageLayout(base_page_lt);
 				}
 
 				current_model->printModel(printer,

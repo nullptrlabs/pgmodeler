@@ -47,6 +47,8 @@ add_subdirectory(src/clitest)
 add_subdirectory(src/relationshippersistencetest)
 add_subdirectory(src/beziercurveitemtest)
 add_subdirectory(src/relationshiplinestest)
+add_subdirectory(src/objectsscenetest)
+add_subdirectory(src/pgsqltypetest)
 add_subdirectory(src/relationshipsettingstest)
 
 # The SQL execution tool is part of the private core. Its leak checks need the LeakSanitizer runtime (USE_ADDR_SANITIZER)

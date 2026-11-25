@@ -1138,6 +1138,11 @@
                          <string>SVG</string>
                         </property>
                        </item>
+                       <item>
+                        <property name="text">
+                         <string>PDF</string>
+                        </property>
+                       </item>
                       </widget>
                      </item>
                     </layout>
@@ -1245,7 +1250,7 @@
                           </sizepolicy>
                          </property>
                          <property name="toolTip">
-                          <string>Exporting the model page by page will generate files with a &lt;strong&gt;_p[n]&lt;/strong&gt; suffix where &lt;strong&gt;n&lt;/strong&gt; is the page id. Check if the current user has write permission on output folder.</string>
+                          <string>&lt;p&gt;&lt;strong&gt;PNG:&lt;/strong&gt; exporting the model page by page will generate files with a &lt;strong&gt;_p[n]&lt;/strong&gt; suffix where &lt;strong&gt;n&lt;/strong&gt; is the page id. Check if the current user has write permission on output folder.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;PDF:&lt;/strong&gt; by default the whole model is drawn in a single page. When this option is checked, the model is split in pages according to the paper settings and all of them are written to the same file.&lt;/p&gt;</string>
                          </property>
                          <property name="statusTip">
                           <string/>

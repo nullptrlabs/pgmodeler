@@ -44,11 +44,11 @@ class __libcore PgSqlType: public TemplateType<PgSqlType>{
 
 		//! \brief Offset for oid types
 		static constexpr unsigned OidStart = 94,
-		OidEnd = 108;
+		OidEnd = 110;
 
 		//! \brief Offset for pseudo types
-		static constexpr unsigned PseudoStart = 109,
-		PseudoEnd = 133;
+		static constexpr unsigned PseudoStart = 111,
+		PseudoEnd = 135;
 
 		//! \brief Configuration for user defined types
 		static std::vector<UserTypeConfig> user_types;

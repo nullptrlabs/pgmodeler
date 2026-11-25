@@ -353,7 +353,9 @@ class RelationshipLinesTest: public QObject, public PgModelerUnitTest {
 		void theSimpleRouteKeepsTheRoomForTheStubsWhenThereIsSpace();
 		void appliedShiftsAlwaysGiveAValidRoute();
 		void randomScenesKeepEveryInvariantWhateverTheUserDoes_data();
+		void removingThePointsAffectsOnlyTheSelectedRelationships();
 		void randomScenesKeepEveryInvariantWhateverTheUserDoes();
+		void theDragOfSegmentsAndJogsCanBeUndone();
 	// SLOTS-END
 };
 
@@ -5810,6 +5812,148 @@ void RelationshipLinesTest::theDescriptorMovesAwayFromTheCornersOfTheRoute()
 }
 
 // TESTS-END
+
+void RelationshipLinesTest::removingThePointsAffectsOnlyTheSelectedRelationships()
+{
+	try
+	{
+		RelationshipView::setLineStyle(RelationshipView::StraightLines);
+
+		Rig rig;
+		std::vector<Relationship *> rels;
+		std::vector<std::vector<QPointF>> points;
+		auto points_of = [&](unsigned idx) { return rels[idx]->getPoints(); };
+
+		for(int i = 0; i < 4; i++)
+		{
+			Table *tab_a = addTable(rig, QString("tab_a%1").arg(i), QPointF(0, i * 300), 2),
+					*tab_b = addTable(rig, QString("tab_b%1").arg(i), QPointF(800, i * 300), 2);
+
+			rels.push_back(addRel(rig, tab_a, tab_b));
+			points.push_back({ QPointF(300, (i * 300) + 10), QPointF(500, (i * 300) + 20) });
+			rels.back()->setPoints(points.back());
+		}
+
+		settle();
+
+		// The first two and the protected one are selected, the third one is not
+		rels[3]->setProtected(true);
+		rig.wgt.selected_objects = { rels[0], rels[1], rels[3] };
+		rig.wgt.action_remove_rel_points->setData(QVariant());
+		rig.wgt.action_remove_rel_points->trigger();
+		settle();
+
+		QVERIFY(points_of(0).empty() && points_of(1).empty());
+		QVERIFY(points_of(2) == points[2]);
+		QVERIFY(points_of(3) == points[3]);
+
+		rig.wgt.op_list->undoOperation();
+		settle();
+
+		for(unsigned i = 0; i < rels.size(); i++)
+			QVERIFY(points_of(i) == points[i]);
+
+		// Only one relationship, defined in the data of the action
+		rig.wgt.selected_objects = { rels[2] };
+		rig.wgt.action_remove_rel_points->setData(QVariant::fromValue<void *>(static_cast<BaseRelationship *>(rels[2])));
+		rig.wgt.action_remove_rel_points->trigger();
+		settle();
+
+		QVERIFY(points_of(2).empty());
+		QVERIFY(points_of(0) == points[0] && points_of(1) == points[1]);
+
+		// Nothing to remove registers nothing
+		int op_idx = rig.wgt.op_list->getCurrentIndex();
+
+		rig.wgt.action_remove_rel_points->trigger();
+		settle();
+		QCOMPARE(rig.wgt.op_list->getCurrentIndex(), op_idx);
+		rels[3]->setProtected(false);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
+
+void RelationshipLinesTest::theDragOfSegmentsAndJogsCanBeUndone()
+{
+	try
+	{
+		applyMode(RelationshipView::ConnectTableEdges, false);
+
+		Rig rig;
+		ZLayout z = makeZ(rig);
+		RelationshipView *rv = z.rv;
+		std::vector<std::map<unsigned, BaseRelationship::SegmentShift>> states;
+		std::vector<std::vector<QPointF>> routes;
+
+		auto store = [&]() {
+			settle();
+			states.push_back(z.rel->getSegmentShifts());
+			routes.push_back(rv->route_points);
+		};
+
+		auto drag = [&](const QPointF &from, const QPointF &delta) {
+			rv->setSelected(true);
+			dragSegment(rv, from, from + delta, Qt::ShiftModifier);
+			store();
+		};
+
+		store();
+
+		// An inner segment, moved twice, and then an end segment, which gets a jog
+		drag(segmentMiddle(rv, 1), QPointF(30, 0));
+		drag(segmentMiddle(rv, 1), QPointF(25, 0));
+		drag(segmentMiddle(rv, 0), QPointF(0, 35));
+
+		for(size_t idx = 1; idx < states.size(); idx++)
+			QVERIFY2(states[idx] != states[idx - 1], qPrintable(QString("drag %1 changed nothing").arg(idx)));
+
+		// The jog itself is dragged along the line
+		auto jog = std::find(rv->route_seg_keys.begin(), rv->route_seg_keys.end(), rv->getJogKey(0, false));
+		QVERIFY(jog != rv->route_seg_keys.end());
+
+		drag(segmentMiddle(rv, jog - rv->route_seg_keys.begin()), QPointF(20, 0));
+		QVERIFY(states.back() != states[states.size() - 2]);
+
+		for(int idx = states.size() - 2; idx >= 0; idx--)
+		{
+			QVERIFY(rig.wgt.op_list->isUndoAvailable());
+			rig.wgt.op_list->undoOperation();
+			settle();
+			QVERIFY2(z.rel->getSegmentShifts() == states[idx], qPrintable(QString("undo to state %1").arg(idx)));
+			QVERIFY2(rv->route_points == routes[idx], qPrintable(QString("route not restored at state %1").arg(idx)));
+		}
+
+		for(size_t idx = 1; idx < states.size(); idx++)
+		{
+			rig.wgt.op_list->redoOperation();
+			settle();
+			QVERIFY2(z.rel->getSegmentShifts() == states[idx], qPrintable(QString("redo to state %1").arg(idx)));
+			QVERIFY2(rv->route_points == routes[idx], qPrintable(QString("route not restored at state %1").arg(idx)));
+		}
+
+		// A drag that goes back to where it started registers nothing
+		int op_idx = rig.wgt.op_list->getCurrentIndex();
+		QPointF pnt = segmentMiddle(rv, 0);
+
+		rv->setSelected(true);
+		sendMouse(rv, QEvent::GraphicsSceneMousePress, pnt, Qt::LeftButton, Qt::LeftButton, Qt::ShiftModifier);
+		sendMouse(rv, QEvent::GraphicsSceneMouseMove, pnt + QPointF(0, 15), Qt::NoButton, Qt::LeftButton, Qt::ShiftModifier);
+		sendMouse(rv, QEvent::GraphicsSceneMouseMove, pnt, Qt::NoButton, Qt::LeftButton, Qt::ShiftModifier);
+		sendMouse(rv, QEvent::GraphicsSceneMouseRelease, pnt, Qt::LeftButton, Qt::NoButton, Qt::ShiftModifier);
+		settle();
+
+		QVERIFY(z.rel->getSegmentShifts() == states.back());
+		QVERIFY(rv->route_points == routes.back());
+		QCOMPARE(rig.wgt.op_list->getCurrentIndex(), op_idx);
+	}
+	catch(Exception &e)
+	{
+		QFAIL(e.getExceptionsText().toStdString().c_str());
+	}
+}
 
 QTEST_MAIN(RelationshipLinesTest)
 #include "relationshiplinestest.moc"

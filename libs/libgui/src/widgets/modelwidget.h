@@ -938,6 +938,13 @@ class __libgui ModelWidget: public QWidget {
 		void loadModel(const QString &filename, bool check_alt_seg_mode = false);
 		void saveModel(const QString &filename);
 		void saveModel();
+
+		/*! \brief Returns the total of pages (considering all scenes) that printModel() generates for the
+		 * specified page layout. The page numbers of the printer's page range refer to this count */
+		unsigned getPrintPageCount(const QPageLayout &page_lt, bool resize_delims);
+
+		/*! \brief Prints the pages of all scenes. When the printer's range is QPrinter::PageRange only the pages
+		 * in that range are printed. The user can cancel the printing between pages */
 		void printModel(QPrinter *printer, bool print_grid, bool print_page_nums, bool resize_delims);
 		void update();
 		void bringToFront();

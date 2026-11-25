@@ -56,6 +56,7 @@ class __libcli PgModelerCliPlugin: public PgModelerPlugin {
 			ExportToFile, // Export to SQL script
 			ExportToPng, // Export to PNG image
 			ExportToSvg, // Export to SVG file
+			ExportToPdf, // Export to PDF file
 			ExportToDbms, // Export directly to database server
 			ExportToDict, // Export to data dictionary (.html)
 			ImportDb,

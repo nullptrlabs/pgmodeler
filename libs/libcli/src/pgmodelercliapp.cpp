@@ -50,6 +50,7 @@ const QString PgModelerCliApp::InputDb {"--input-db"};
 const QString PgModelerCliApp::ExportToFile {"--export-to-file"};
 const QString PgModelerCliApp::ExportToPng {"--export-to-png"};
 const QString PgModelerCliApp::ExportToSvg {"--export-to-svg"};
+const QString PgModelerCliApp::ExportToPdf {"--export-to-pdf"};
 const QString PgModelerCliApp::ExportToDbms {"--export-to-dbms"};
 const QString PgModelerCliApp::ExportToDict {"--export-to-dict"};
 const QString PgModelerCliApp::ImportDb {"--import-db"};
@@ -152,7 +153,7 @@ QString PgModelerCliApp::getFileAssociationMsg(const QString &msg_tmpl)
 
 std::map<QString, bool> PgModelerCliApp::long_opts {
 	{ Input, true }, { Output, true }, { InputDb, true },
-	{ ExportToFile, false },	{ ExportToPng, false },	{ ExportToSvg, false },
+	{ ExportToFile, false },	{ ExportToPng, false },	{ ExportToSvg, false },	{ ExportToPdf, false },
 	{ ExportToDbms, false },	{ ImportDb, false },	{ Diff, false },
 	{ DropDatabase, false },	{ DropObjects, false },	{ PgSqlVer, true },
 	{ Help, false },	{ Version, false }, { ShowGrid, false },	{ ShowDelimiters, false },
@@ -180,7 +181,7 @@ std::map<QString, bool> PgModelerCliApp::long_opts {
 
 attribs_map PgModelerCliApp::short_opts {
 	{ Input, "-if" },		{ Output, "-of" },	{ InputDb, "-id" },
-	{ ExportToFile, "-ef" },	{ ExportToPng, "-ep" },	{ ExportToSvg, "-es" },
+	{ ExportToFile, "-ef" },	{ ExportToPng, "-ep" },	{ ExportToSvg, "-es" },	{ ExportToPdf, "-ea" },
 	{ ExportToDbms, "-ed" },	{ ExportToDict, "-ec" },	{ ImportDb, "-im" },
 	{ Diff, "-df" },	{ DropDatabase, "-dd" },	{ DropObjects, "-do" },
 	{ PgSqlVer, "-pv" },	{ Help, "-h" },	{ Version, "-v" }, { ShowGrid, "-sg" },
@@ -213,6 +214,7 @@ std::map<QString, QStringList> PgModelerCliApp::accepted_opts {
 	{{ ExportToFile }, { Input, Output, PgSqlVer, Split, DependenciesSql, ChildrenSql, GroupByType, GenDropScript, NoEscapeComments }},
 	{{ ExportToPng },  { Input, Output, ShowGrid, ShowDelimiters, PageByPage, ZoomFactor, OverrideBgColor }},
 	{{ ExportToSvg },  { Input, Output, ShowGrid, ShowDelimiters }},
+	{{ ExportToPdf },  { Input, Output, ShowGrid, ShowDelimiters, PageByPage, OverrideBgColor }},
 	{{ ExportToDict }, { Input, Output, Split, NoIndex, Markdown }},
 
 	{{ ExportToDbms }, { Input, PgSqlVer, IgnoreDuplicates, IgnoreErrorCodes,
@@ -321,8 +323,8 @@ PgModelerCliApp::PgModelerCliApp(int argc, char **argv) : Application(argc, argv
 			xmlparser=input_model->getXMLParser();
 			silent_mode=(parsed_opts.count(Silent));
 
-			//If the export is to png or svg loads additional configurations
-			if(parsed_opts.count(ExportToPng) || parsed_opts.count(ExportToSvg) || parsed_opts.count(ImportDb))
+			//If the export is to png, svg or pdf loads additional configurations
+			if(parsed_opts.count(ExportToPng) || parsed_opts.count(ExportToSvg) || parsed_opts.count(ExportToPdf) || parsed_opts.count(ImportDb))
 			{
 				connect(input_model, &DatabaseModel::s_objectAdded, this, &PgModelerCliApp::handleObjectAddition);
 				connect(input_model, &DatabaseModel::s_objectRemoved, this, &PgModelerCliApp::handleObjectRemoval);
@@ -666,6 +668,7 @@ void PgModelerCliApp::showMenu()
 	menu_items.append(MenuItem(ExportToFile, "", tr("Exports the input model to SQL script file(s).")));
 	menu_items.append(MenuItem(ExportToPng, "", tr("Exports the input model to a PNG image.")));
 	menu_items.append(MenuItem(ExportToSvg, "", tr("Exports the input model to an SVG file.")));
+	menu_items.append(MenuItem(ExportToPdf, "", tr("Exports the input model to a PDF file.")));
 	menu_items.append(MenuItem(ExportToDict, "", tr("Exports the input model to a data dictionary in HTML format.")));
 	menu_items.append(MenuItem(ExportToDbms, "", tr("Exports the input model directly to a PostgreSQL server.")));
 
@@ -690,7 +693,7 @@ void PgModelerCliApp::showMenu()
 	menu_items.append(MenuItem(tr("General options")));
 	menu_items.append(MenuItem(Input, "[FILE]", tr("Input model file (%1). Required for export and model fix operations.").arg(GlobalAttributes::DbModelExt)));
 	menu_items.append(MenuItem(InputDb, "[DBNAME]", tr("Input database name. Required for import operation.")));
-	menu_items.append(MenuItem(Output, "[FILE|DIRECTORY]", tr("Output file or directory. Required for model fix or export to SQL, HTML, PNG, SVG.")));
+	menu_items.append(MenuItem(Output, "[FILE|DIRECTORY]", tr("Output file or directory. Required for model fix or export to SQL, HTML, PNG, SVG, PDF.")));
 	menu_items.append(MenuItem(PgSqlVer, "", tr("Forces PostgreSQL syntax to the specified version when generating SQL code. Version format: [major].[minor], e.g., %1.").arg(PgSqlVersions::DefaulVersion)));
 	menu_items.append(MenuItem(NoEscapeComments, "", tr("Disables E'' escape-string syntax on COMMENT ON statements during export. All comments are written in the common string syntax.")));
 	menu_items.append(MenuItem(Silent, "", tr("Silent execution. Only critical messages and errors are displayed.")));
@@ -705,12 +708,12 @@ void PgModelerCliApp::showMenu()
 	menu_items.append(MenuItem(GenDropScript, "", tr("Creates a separate script with DROP commands. Used to destroy database objects.")));
 	menu_items.append(MenuItem());
 	
-	// PNG and SVG export options
-	menu_items.append(MenuItem(tr("PNG and SVG export options")));
+	// PNG, SVG and PDF export options
+	menu_items.append(MenuItem(tr("PNG, SVG and PDF export options")));
 	menu_items.append(MenuItem(ShowGrid, "", tr("Draws the grid in the exported image.")));
 	menu_items.append(MenuItem(ShowDelimiters, "", tr("Draws the page delimiters in the exported image.")));
-	menu_items.append(MenuItem(PageByPage, "", tr("Each page will be exported as a separate image. Only for PNG images.")));
-	menu_items.append(MenuItem(OverrideBgColor, "", tr("Overrides the original canvas color using a white background. PNG images only.")));
+	menu_items.append(MenuItem(PageByPage, "", tr("Each page will be exported as a separate image (PNG) or as a separate page of the same file (PDF). By default, a PDF has the whole model in a single page. Not available for SVG.")));
+	menu_items.append(MenuItem(OverrideBgColor, "", tr("Overrides the original canvas color using a white background. PNG and PDF only.")));
 	menu_items.append(MenuItem(ZoomFactor, "[FACTOR]", tr("Applies zoom before exporting to an image. Accepted range: %1 to %2 (PNG only).").arg(ModelWidget::MinimumZoom).arg(ModelWidget::MaximumZoom)));
 	menu_items.append(MenuItem());
 	
@@ -958,7 +961,7 @@ void PgModelerCliApp::parseOptions(attribs_map &opts)
 		conn_conf->getConnections(connections, false);
 	}
 	//Loading general and relationship settings when exporting to image formats
-	else if(opts.count(ExportToPng) || opts.count(ExportToSvg))
+	else if(opts.count(ExportToPng) || opts.count(ExportToSvg) || opts.count(ExportToPdf))
 	{
 		general_conf = new GeneralConfigWidget;
 		rel_conf = new RelationshipConfigWidget;
@@ -970,7 +973,7 @@ void PgModelerCliApp::parseOptions(attribs_map &opts)
 	//Creating the export/import/diff helpers when one of the operations are specified
 	if(opts.count(ExportToDbms) || opts.count(ExportToFile) ||
 		 opts.count(ExportToPng) || opts.count(ExportToSvg) ||
-		 opts.count(ExportToDict) || opts.count(ImportDb) ||
+		 opts.count(ExportToPdf) || opts.count(ExportToDict) || opts.count(ImportDb) ||
 		 opts.count(Diff))
 	{
 		#ifdef PRIV_CODE_SYMBOLS
@@ -1011,8 +1014,8 @@ void PgModelerCliApp::parseOptions(attribs_map &opts)
 			curr_op_mode = itr.first;
 
 			if(itr.first == ExportToFile || itr.first == ExportToPng ||
-				 itr.first == ExportToSvg || itr.first == ExportToDbms ||
-				 itr.first == ExportToDict)
+				 itr.first == ExportToSvg || itr.first == ExportToPdf ||
+				 itr.first == ExportToDbms || itr.first == ExportToDict)
 			{
 				exp_mode_cnt++;
 				export_op = true;
@@ -2437,6 +2440,17 @@ void PgModelerCliApp::exportModel()
 													 parsed_opts.count(ShowGrid) > 0,
 													 parsed_opts.count(ShowDelimiters) > 0);
 	}
+	//Export to PDF
+	else if(parsed_opts.count(ExportToPdf))
+	{
+		printMessage(tr("Exporting to PDF file: %1").arg(parsed_opts[Output]));
+
+		export_hlp->exportToPDF(scene, parsed_opts[Output],
+														parsed_opts.count(ShowGrid) > 0,
+														parsed_opts.count(ShowDelimiters) > 0,
+														parsed_opts.count(PageByPage) > 0,
+														parsed_opts.count(OverrideBgColor) > 0);
+	}
 	//Export to SQL file
 	else if(parsed_opts.count(ExportToFile))
 	{
@@ -3047,13 +3061,14 @@ int PgModelerCliApp::definePluginsExecOrder(const attribs_map &opts)
 
 	QStringList valid_opts, export_ops = {
 		ExportToFile, ExportToPng, ExportToSvg,
-		ExportToDbms, ExportToDict
+		ExportToPdf, ExportToDbms, ExportToDict
 	};
 
 	std::map<PgModelerCliPlugin::OperationId, QString> cli_ops = {
 		{ PgModelerCliPlugin::ExportToFile, ExportToFile},
 		{ PgModelerCliPlugin::ExportToPng, ExportToPng },
 		{ PgModelerCliPlugin::ExportToSvg, ExportToSvg },
+		{ PgModelerCliPlugin::ExportToPdf, ExportToPdf },
 		{ PgModelerCliPlugin::ExportToDbms, ExportToDbms },
 		{ PgModelerCliPlugin::ExportToDict, ExportToDict },
 		{ PgModelerCliPlugin::ImportDb, ImportDb },

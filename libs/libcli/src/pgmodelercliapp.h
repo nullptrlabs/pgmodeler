@@ -247,6 +247,7 @@ class __libcli PgModelerCliApp: public Application {
 		ExportToFile,
 		ExportToPng,
 		ExportToSvg,
+		ExportToPdf,
 		ExportToDbms,
 		ExportToDict,
 		ImportDb,
