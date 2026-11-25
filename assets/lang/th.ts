@@ -7503,7 +7503,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>เนื่องจากคุณใช้เวอร์ชันทดลองอยู่ โปรดรีสตาร์ท pgModeler เพื่อให้เปิดใช้งานทุกฟีเจอร์อย่างถูกต้อง</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Message returned by the DBMS: `%1&apos;</source>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>คุณกำลังใช้&lt;strong&gt;เวอร์ชันทดลอง&lt;/strong&gt;ของ pgModeler Plus เวอร์ชันนี้มีไว้เพื่อการประเมินเท่านั้น และคุณลักษณะบางอย่างมีข้อจำกัด:
+
+• โมเดลที่เปิดได้: %1
+• การดำเนินการนำเข้า: %2
+• การดำเนินการเปรียบเทียบ: %3
+• การดำเนินการส่งออก: %4
+• ปิดการส่งออกไปยัง DBMS 
+• ปิดการพิมพ์โมเดล 
+• วัตถุต่อโมเดล: %5
+• ไม่สามารถบันทึกโมเดลที่นำเข้าลงไฟล์ได้
+• ไม่สามารถบันทึกโมเดลที่มีจำนวนเกินขีดจำกัด &lt;strong&gt;%5 วัตถุ&lt;/strong&gt; ลงไฟล์ได้</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>การพิมพ์โมเดลไม่มีให้ใช้ในเวอร์ชันทดลอง อัปเกรดใบอนุญาตของคุณเพื่อเปิดใช้งานฟีเจอร์นี้</translation>
     </message>
     <message>
         <source>&lt;!--

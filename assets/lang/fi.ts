@@ -7503,7 +7503,7 @@ Tietokannan hallintajärjestelmän palauttama viesti: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Koska käytit kokeiluversiota, käynnistä pgModeler uudelleen, jotta kaikki toiminnot otetaan käyttöön oikein.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Tietokannan hallintajärjestelmän palauttama viesti: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Käytät pgModeler Plusin &lt;strong&gt;kokeiluversiota&lt;/strong&gt;. Tämä versio on tarkoitettu vain arviointiin, ja joihinkin ominaisuuksiin liittyy rajoituksia:
+
+• Avoimet mallit: %1
+• Tuontitoiminnot: %2
+• Vertailutoiminnot: %3
+• Vientitoiminnot: %4
+• Vienti tietokannan hallintajärjestelmään on poistettu käytöstä. 
+• Mallien tulostus on poistettu käytöstä. 
+• Objektit mallia kohden: %5
+• Tuotuja malleja ei voi tallentaa tiedostoon.
+• Malleja, jotka ylittävät &lt;strong&gt;%5 objektin&lt;/strong&gt; rajan, ei voi tallentaa tiedostoon.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ käytettävissä oleville tärkeimmille toiminnoille. Kaikki käytettävissä ol
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Mallien tulostus ei ole käytettävissä kokeiluversiossa. Päivitä lisenssisi ottaaksesi tämän toiminnon käyttöön.</translation>
     </message>
     <message>
         <source>&lt;!--

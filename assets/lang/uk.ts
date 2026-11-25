@@ -7503,7 +7503,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Оскільки ви користувалися пробною версією, перезапустіть pgModeler, щоб усі функції було правильно ввімкнено.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Message returned by the DBMS: `%1&apos;</source>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ви використовуєте &lt;strong&gt;пробну версію&lt;/strong&gt; pgModeler Plus. Ця версія призначена лише для ознайомлення, і деякі можливості обмежено:
+
+• Відкриті моделі: %1
+• Операції імпорту: %2
+• Операції порівняння: %3
+• Операції експорту: %4
+• Експорт до СКБД вимкнено. 
+• Друк моделей вимкнено. 
+• Об&apos;єктів у моделі: %5
+• Імпортовані моделі не можна зберегти у файл.
+• Моделі, що перевищують межу у &lt;strong&gt;%5 об&apos;єктів&lt;/strong&gt;, не можна зберегти у файл.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Друк моделей недоступний у пробній версії. Оновіть ліцензію, щоб увімкнути цю функцію.</translation>
     </message>
     <message>
         <source>&lt;!--

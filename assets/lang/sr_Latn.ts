@@ -7503,7 +7503,7 @@ Poruka koju je vratio SUBP: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pošto ste koristili probnu verziju, ponovo pokrenite pgModeler da bi sve funkcije bile ispravno omogućene.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Poruka koju je vratio SUBP: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pokrenuli ste &lt;strong&gt;probnu verziju&lt;/strong&gt; programa pgModeler Plus. Ova verzija je namenjena samo za procenu, a neke mogućnosti su ograničene:
+
+• Otvoreni modeli: %1
+• Operacije uvoza: %2
+• Operacije poređenja: %3
+• Operacije izvoza: %4
+• Izvoz u SUBP je onemogućen. 
+• Štampanje modela je onemogućeno. 
+• Objekata po modelu: %5
+• Uvezeni modeli ne mogu biti sačuvani u datoteku.
+• Modeli koji premašuju ograničenje od &lt;strong&gt;%5 objekata&lt;/strong&gt; ne mogu biti sačuvani u datoteku.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Štampanje modela nije dostupno u probnoj verziji. Nadogradite licencu da biste omogućili ovu funkciju.</translation>
     </message>
     <message>
         <source>&lt;!--

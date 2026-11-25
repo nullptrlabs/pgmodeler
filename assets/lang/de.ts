@@ -7503,7 +7503,7 @@ Vom DBMS zurückgegebene Meldung: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Da Sie die Testversion verwendet haben, starten Sie pgModeler bitte neu, damit alle Funktionen korrekt aktiviert werden.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Vom DBMS zurückgegebene Meldung: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Sie verwenden die &lt;strong&gt;Testversion&lt;/strong&gt; von pgModeler Plus. Diese Version dient nur zu Testzwecken, und einige Funktionen unterliegen Einschränkungen:
+
+• Geöffnete Modelle: %1
+• Importvorgänge: %2
+• Vergleichsvorgänge: %3
+• Exportvorgänge: %4
+• Der Export in das DBMS ist deaktiviert. 
+• Das Drucken von Modellen ist deaktiviert. 
+• Objekte pro Modell: %5
+• Importierte Modelle können nicht in einer Datei gespeichert werden.
+• Modelle, die das Limit von &lt;strong&gt;%5 Objekten&lt;/strong&gt; überschreiten, können nicht in einer Datei gespeichert werden.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ die in der GUI verfügbar sind. Alle verfügbaren Optionen sind unten beschriebe
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Das Drucken von Modellen ist in der Testversion nicht verfügbar. Aktualisieren Sie Ihre Lizenz, um diese Funktion zu aktivieren.</translation>
     </message>
     <message>
         <source>&lt;!--

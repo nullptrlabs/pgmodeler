@@ -7503,7 +7503,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Тъй като използвахте пробната версия, моля, рестартирайте pgModeler, за да бъдат правилно разрешени всички функции.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Message returned by the DBMS: `%1&apos;</source>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Използвате &lt;strong&gt;пробната версия&lt;/strong&gt; на pgModeler Plus. Тази версия е предназначена само за оценка и някои функции са ограничени:
+
+• Отворени модели: %1
+• Операции по импортиране: %2
+• Операции по сравнение: %3
+• Операции по експортиране: %4
+• Експортирането към СУБД е изключено. 
+• Отпечатването на модели е изключено. 
+• Обекти на модел: %5
+• Импортираните модели не могат да бъдат запазени във файл.
+• Модели, надвишаващи ограничението от &lt;strong&gt;%5 обекта&lt;/strong&gt;, не могат да бъдат запазени във файл.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Отпечатването на модели не е налично в пробната версия. Надградете лиценза си, за да разрешите тази функция.</translation>
     </message>
     <message>
         <source>&lt;!--

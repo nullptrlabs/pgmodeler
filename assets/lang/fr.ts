@@ -7503,7 +7503,7 @@ Message renvoyé par le SGBD : `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Comme vous utilisiez la version d&apos;essai, veuillez redémarrer pgModeler afin que toutes les fonctionnalités soient correctement activées.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Message renvoyé par le SGBD : `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vous utilisez la &lt;strong&gt;version d&apos;essai&lt;/strong&gt; de pgModeler Plus. Cette version est destinée uniquement à l&apos;évaluation et certaines fonctionnalités sont limitées :
+
+• Modèles ouverts : %1
+• Opérations d&apos;import : %2
+• Opérations de comparaison : %3
+• Opérations d&apos;export : %4
+• L&apos;export vers le SGBD est désactivé. 
+• L&apos;impression des modèles est désactivée. 
+• Objets par modèle : %5
+• Les modèles importés ne peuvent pas être enregistrés dans un fichier.
+• Les modèles dépassant la limite de &lt;strong&gt;%5 objets&lt;/strong&gt; ne peuvent pas être enregistrés dans un fichier.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ disponibles dans l&apos;interface graphique. Toutes les options disponibles sont
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>L&apos;impression des modèles n&apos;est pas disponible dans la version d&apos;essai. Mettez à niveau votre licence pour activer cette fonctionnalité.</translation>
     </message>
     <message>
         <source>&lt;!--

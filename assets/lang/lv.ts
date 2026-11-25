@@ -7503,7 +7503,7 @@ DBVS atgrieztais ziņojums: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tā kā izmantojāt izmēģinājuma versiju, lūdzu, restartējiet pgModeler, lai visas funkcijas tiktu pareizi iespējotas.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ DBVS atgrieztais ziņojums: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Jūs izmantojat pgModeler Plus &lt;strong&gt;izmēģinājuma versiju&lt;/strong&gt;. Šī versija paredzēta tikai novērtēšanai, un dažām funkcijām ir ierobežojumi:
+
+• Atvērtie modeļi: %1
+• Importēšanas darbības: %2
+• Salīdzināšanas darbības: %3
+• Eksportēšanas darbības: %4
+• Eksportēšana uz DBVS ir atspējota. 
+• Modeļu drukāšana ir atspējota. 
+• Objekti uz modeli: %5
+• Importētos modeļus nevar saglabāt failā.
+• Modeļus, kas pārsniedz &lt;strong&gt;%5 objektu&lt;/strong&gt; ierobežojumu, nevar saglabāt failā.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Modeļu drukāšana nav pieejama izmēģinājuma versijā. Jauniniet savu licenci, lai iespējotu šo funkciju.</translation>
     </message>
     <message>
         <source>&lt;!--

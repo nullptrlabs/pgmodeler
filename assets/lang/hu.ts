@@ -7503,7 +7503,7 @@ Az adatbázis-kezelő által visszaadott üzenet: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Mivel a próbaverziót használta, indítsa újra a pgModelert, hogy minden funkció megfelelően engedélyezve legyen.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Az adatbázis-kezelő által visszaadott üzenet: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>A &lt;strong&gt;próbaverziót&lt;/strong&gt; használja a pgModeler Plus programból. Ez a verzió kizárólag kiértékelési célokra szolgál, és egyes funkciók korlátozottak:
+
+• Megnyitott modellek: %1
+• Importálási műveletek: %2
+• Összehasonlítási műveletek: %3
+• Exportálási műveletek: %4
+• Az adatbázis-kezelőbe exportálás le van tiltva. 
+• A modellek nyomtatása le van tiltva. 
+• Objektumok modellenként: %5
+• Az importált modellek nem menthetők fájlba.
+• A &lt;strong&gt;%5 objektumos&lt;/strong&gt; korlátot meghaladó modellek nem menthetők fájlba.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>A modellek nyomtatása a próbaverzióban nem érhető el. A funkció engedélyezéséhez frissítse licencét.</translation>
     </message>
     <message>
         <source>&lt;!--

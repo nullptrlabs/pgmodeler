@@ -7503,7 +7503,7 @@ DBMS 返回的消息：`%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>由于您之前使用的是试用版,请重新启动 pgModeler,以便正确启用所有功能。</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ DBMS 返回的消息：`%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>您正在使用 pgModeler Plus 的&lt;strong&gt;试用版&lt;/strong&gt;。此版本仅供评估之用，部分功能受到限制：
+
+• 打开的模型数：%1
+• 导入操作数：%2
+• 比较操作数：%3
+• 导出操作数：%4
+• 导出到 DBMS 已禁用。 
+• 打印模型已禁用。 
+• 每个模型的对象数：%5
+• 导入的模型无法保存到文件。
+• 超过 &lt;strong&gt;%5 个对象&lt;/strong&gt;限制的模型无法保存到文件。</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>试用版不提供模型打印功能。请升级您的许可证以启用此功能。</translation>
     </message>
     <message>
         <source>&lt;!--

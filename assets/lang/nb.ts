@@ -7503,7 +7503,7 @@ Melding returnert av DBMS-en: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Siden du brukte prøveversjonen, må du starte pgModeler på nytt slik at alle funksjoner aktiveres riktig.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Melding returnert av DBMS-en: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du bruker &lt;strong&gt;prøveversjonen&lt;/strong&gt; av pgModeler Plus. Denne versjonen er bare ment for evaluering, og enkelte funksjoner har begrensninger:
+
+• Åpne modeller: %1
+• Importoperasjoner: %2
+• Sammenligningsoperasjoner: %3
+• Eksportoperasjoner: %4
+• Eksport til DBMS-en er deaktivert. 
+• Utskrift av modeller er deaktivert. 
+• Objekter per modell: %5
+• Importerte modeller kan ikke lagres i en fil.
+• Modeller som overskrider grensen på &lt;strong&gt;%5 objekter&lt;/strong&gt;, kan ikke lagres i en fil.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ som er tilgjengelige i det grafiske brukergrensesnittet. Alle tilgjengelige alte
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Utskrift av modeller er ikke tilgjengelig i prøveversjonen. Oppgrader lisensen din for å aktivere denne funksjonen.</translation>
     </message>
     <message>
         <source>&lt;!--

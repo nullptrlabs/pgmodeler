@@ -7503,7 +7503,7 @@ DBMS가 반환한 메시지: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>평가판을 사용 중이었으므로 모든 기능이 올바르게 활성화되도록 pgModeler를 다시 시작하십시오.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ DBMS가 반환한 메시지: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>pgModeler Plus &lt;strong&gt;평가판&lt;/strong&gt;을 사용 중입니다. 이 버전은 평가 목적으로만 제공되며 일부 기능에 제한이 있습니다:
+
+• 열 수 있는 모델: %1
+• 가져오기 작업: %2
+• 비교 작업: %3
+• 내보내기 작업: %4
+• DBMS로 내보내기는 사용할 수 없습니다. 
+• 모델 인쇄는 사용할 수 없습니다. 
+• 모델당 객체 수: %5
+• 가져온 모델은 파일로 저장할 수 없습니다.
+• &lt;strong&gt;객체 %5개&lt;/strong&gt; 제한을 초과하는 모델은 파일로 저장할 수 없습니다.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>모델 인쇄는 평가판에서 사용할 수 없습니다. 이 기능을 사용하려면 라이선스를 업그레이드하십시오.</translation>
     </message>
     <message>
         <source>&lt;!--

@@ -7503,7 +7503,7 @@ Mesajul returnat de SGBD: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Deoarece ați folosit versiunea de încercare, reporniți pgModeler pentru ca toate funcțiile să fie activate corect.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Mesajul returnat de SGBD: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Rulați &lt;strong&gt;versiunea de încercare&lt;/strong&gt; a pgModeler Plus. Această versiune este destinată doar evaluării, iar unele funcționalități sunt supuse unor limitări:
+
+• Modele deschise: %1
+• Operații de import: %2
+• Operații de comparare: %3
+• Operații de export: %4
+• Exportul către SGBD este dezactivat. 
+• Imprimarea modelelor este dezactivată. 
+• Obiecte per model: %5
+• Modelele importate nu pot fi salvate într-un fișier.
+• Modelele care depășesc limita de &lt;strong&gt;%5 obiecte&lt;/strong&gt; nu pot fi salvate într-un fișier.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Imprimarea modelelor nu este disponibilă în versiunea de încercare. Faceți upgrade la licență pentru a activa această funcție.</translation>
     </message>
     <message>
         <source>&lt;!--

@@ -7503,7 +7503,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Επειδή χρησιμοποιούσατε τη δοκιμαστική έκδοση, επανεκκινήστε το pgModeler ώστε να ενεργοποιηθούν σωστά όλες οι λειτουργίες.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Message returned by the DBMS: `%1&apos;</source>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Εκτελείτε τη &lt;strong&gt;δοκιμαστική έκδοση&lt;/strong&gt; του pgModeler Plus. Αυτή η έκδοση προορίζεται μόνο για αξιολόγηση και ορισμένα χαρακτηριστικά υπόκεινται σε περιορισμούς:
+
+• Ανοιχτά μοντέλα: %1
+• Λειτουργίες εισαγωγής: %2
+• Λειτουργίες σύγκρισης: %3
+• Λειτουργίες εξαγωγής: %4
+• Η εξαγωγή σε DBMS είναι απενεργοποιημένη. 
+• Η εκτύπωση μοντέλων είναι απενεργοποιημένη. 
+• Αντικείμενα ανά μοντέλο: %5
+• Τα εισαγόμενα μοντέλα δεν μπορούν να αποθηκευτούν σε αρχείο.
+• Τα μοντέλα που υπερβαίνουν το όριο των &lt;strong&gt;%5 αντικειμένων&lt;/strong&gt; δεν μπορούν να αποθηκευτούν σε αρχείο.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Η εκτύπωση μοντέλων δεν είναι διαθέσιμη στη δοκιμαστική έκδοση. Αναβαθμίστε την άδεια χρήσης σας για να ενεργοποιήσετε αυτή τη λειτουργία.</translation>
     </message>
     <message>
         <source>&lt;!--

@@ -7503,7 +7503,7 @@ Thông báo do DBMS trả về: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vì bạn đã dùng bản dùng thử, vui lòng khởi động lại pgModeler để tất cả tính năng được bật đúng cách.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Thông báo do DBMS trả về: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Bạn đang chạy &lt;strong&gt;phiên bản dùng thử&lt;/strong&gt; của pgModeler Plus. Phiên bản này chỉ nhằm mục đích đánh giá và một số tính năng bị giới hạn:
+
+• Mô hình đang mở: %1
+• Thao tác nhập: %2
+• Thao tác so sánh: %3
+• Thao tác xuất: %4
+• Xuất sang DBMS bị tắt. 
+• Tính năng in mô hình bị tắt. 
+• Số đối tượng mỗi mô hình: %5
+• Mô hình đã nhập không thể được lưu vào tệp.
+• Mô hình vượt quá giới hạn &lt;strong&gt;%5 đối tượng&lt;/strong&gt; không thể được lưu vào tệp.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tính năng in mô hình không khả dụng trong bản dùng thử. Hãy nâng cấp giấy phép để bật tính năng này.</translation>
     </message>
     <message>
         <source>&lt;!--

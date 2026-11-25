@@ -7503,7 +7503,7 @@ Meddelande som returnerats av DBMS:en: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Eftersom du använde provversionen måste du starta om pgModeler så att alla funktioner aktiveras korrekt.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Meddelande som returnerats av DBMS:en: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du använder &lt;strong&gt;provversionen&lt;/strong&gt; av pgModeler Plus. Den här versionen är endast avsedd för utvärdering och vissa funktioner har begränsningar:
+
+• Öppna modeller: %1
+• Importåtgärder: %2
+• Jämförelseåtgärder: %3
+• Exportåtgärder: %4
+• Export till DBMS:en är inaktiverad. 
+• Utskrift av modeller är inaktiverad. 
+• Objekt per modell: %5
+• Importerade modeller kan inte sparas i en fil.
+• Modeller som överskrider gränsen på &lt;strong&gt;%5 objekt&lt;/strong&gt; kan inte sparas i en fil.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ som finns i det grafiska användargränssnittet. Alla tillgängliga alternativ b
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Utskrift av modeller är inte tillgängligt i provversionen. Uppgradera din licens för att aktivera den här funktionen.</translation>
     </message>
     <message>
         <source>&lt;!--

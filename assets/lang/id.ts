@@ -7503,7 +7503,7 @@ Pesan yang dikembalikan oleh DBMS: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Karena Anda menggunakan versi percobaan, harap mulai ulang pgModeler agar semua fitur diaktifkan dengan benar.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Pesan yang dikembalikan oleh DBMS: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Anda menjalankan &lt;strong&gt;versi percobaan&lt;/strong&gt; pgModeler Plus. Versi ini hanya ditujukan untuk evaluasi, dan beberapa fitur memiliki batasan:
+
+• Model terbuka: %1
+• Operasi impor: %2
+• Operasi diff: %3
+• Operasi ekspor: %4
+• Ekspor ke DBMS dinonaktifkan. 
+• Pencetakan model dinonaktifkan. 
+• Objek per model: %5
+• Model yang diimpor tidak dapat disimpan ke berkas.
+• Model yang melebihi batas &lt;strong&gt;%5 objek&lt;/strong&gt; tidak dapat disimpan ke berkas.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ yang tersedia di GUI. Semua opsi yang tersedia dijelaskan di bawah.</translation
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pencetakan model tidak tersedia pada versi percobaan. Tingkatkan lisensi Anda untuk mengaktifkan fitur ini.</translation>
     </message>
     <message>
         <source>&lt;!--

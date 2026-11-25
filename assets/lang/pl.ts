@@ -7503,7 +7503,7 @@ Komunikat zwrócony przez SZBD: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ponieważ używano wersji próbnej, uruchom ponownie pgModeler, aby wszystkie funkcje zostały prawidłowo włączone.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Komunikat zwrócony przez SZBD: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Używasz &lt;strong&gt;wersji próbnej&lt;/strong&gt; pgModeler Plus. Ta wersja jest przeznaczona wyłącznie do oceny, a niektóre funkcje podlegają ograniczeniom:
+
+• Otwarte modele: %1
+• Operacje importu: %2
+• Operacje porównywania: %3
+• Operacje eksportu: %4
+• Eksport do SZBD jest wyłączony. 
+• Drukowanie modeli jest wyłączone. 
+• Obiekty w modelu: %5
+• Zaimportowanych modeli nie można zapisać w pliku.
+• Modeli przekraczających limit &lt;strong&gt;%5 obiektów&lt;/strong&gt; nie można zapisać w pliku.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ dostępnych w GUI. Wszystkie dostępne opcje opisano poniżej.</translation>
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Drukowanie modeli nie jest dostępne w wersji próbnej. Zaktualizuj licencję, aby włączyć tę funkcję.</translation>
     </message>
     <message>
         <source>&lt;!--

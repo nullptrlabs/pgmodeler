@@ -7503,7 +7503,7 @@ DBMS&apos;nin döndürdüğü ileti: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Deneme sürümünü kullandığınız için, tüm özelliklerin doğru şekilde etkinleştirilmesi amacıyla lütfen pgModeler&apos;ı yeniden başlatın.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ DBMS&apos;nin döndürdüğü ileti: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>pgModeler Plus&apos;ın &lt;strong&gt;deneme sürümünü&lt;/strong&gt; çalıştırıyorsunuz. Bu sürüm yalnızca değerlendirme amaçlıdır ve bazı özellikler sınırlamalara tabidir:
+
+• Açık modeller: %1
+• İçe aktarma işlemleri: %2
+• Karşılaştırma işlemleri: %3
+• Dışa aktarma işlemleri: %4
+• DBYS&apos;ye dışa aktarma devre dışıdır. 
+• Modellerin yazdırılması devre dışıdır. 
+• Model başına nesneler: %5
+• İçe aktarılan modeller bir dosyaya kaydedilemez.
+• &lt;strong&gt;%5 nesne&lt;/strong&gt; sınırını aşan modeller bir dosyaya kaydedilemez.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ bir komut satırı arayüzü sağlar. Kullanılabilir tüm seçenekler aşağıd
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Modellerin yazdırılması deneme sürümünde kullanılamaz. Bu özelliği etkinleştirmek için lisansınızı yükseltin.</translation>
     </message>
     <message>
         <source>&lt;!--

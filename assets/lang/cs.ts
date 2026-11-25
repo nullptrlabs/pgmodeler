@@ -7503,7 +7503,7 @@ Zpráva vrácená DBMS: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Protože jste používali zkušební verzi, restartujte pgModeler, aby byly správně povoleny všechny funkce.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Zpráva vrácená DBMS: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Používáte &lt;strong&gt;zkušební verzi&lt;/strong&gt; pgModeler Plus. Tato verze je určena pouze k vyzkoušení a některé funkce jsou omezeny:
+
+• Otevřené modely: %1
+• Operace importu: %2
+• Operace porovnání: %3
+• Operace exportu: %4
+• Export do DBMS je vypnut. 
+• Tisk modelů je vypnut. 
+• Objekty v modelu: %5
+• Importované modely nelze uložit do souboru.
+• Modely překračující limit &lt;strong&gt;%5 objektů&lt;/strong&gt; nelze uložit do souboru.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ dostupné v GUI. Všechny dostupné volby jsou popsány níže.</translation>
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tisk modelů není ve zkušební verzi k dispozici. Chcete-li tuto funkci povolit, upgradujte licenci.</translation>
     </message>
     <message>
         <source>&lt;!--

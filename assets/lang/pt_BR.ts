@@ -7503,7 +7503,7 @@ Mensagem retornada pelo SGBD: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Como você estava usando a versão de avaliação, reinicie o pgModeler para que todos os recursos sejam habilitados corretamente.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Mensagem retornada pelo SGBD: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Você está executando a &lt;strong&gt;versão de avaliação&lt;/strong&gt; do pgModeler Plus. Esta versão destina-se apenas a fins de avaliação, e alguns recursos estão sujeitos a limitações:
+
+• Modelos abertos: %1
+• Operações de importação: %2
+• Operações de comparação: %3
+• Operações de exportação: %4
+• A exportação para SGBD está desabilitada. 
+• A impressão de modelos está desabilitada. 
+• Objetos por modelo: %5
+• Modelos importados não podem ser salvos em arquivo.
+• Modelos que excedem o limite de &lt;strong&gt;%5 objetos&lt;/strong&gt; não podem ser salvos em arquivo.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ disponíveis na GUI. Todas as opções disponíveis estão descritas abaixo.</tr
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>A impressão de modelos não está disponível na versão de avaliação. Faça upgrade da sua licença para habilitar este recurso.</translation>
     </message>
     <message>
         <source>&lt;!--

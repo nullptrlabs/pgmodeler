@@ -7503,7 +7503,7 @@ DBMS から返されたメッセージ: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>体験版をお使いだったため、すべての機能を正しく有効にするには pgModeler を再起動してください。</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ DBMS から返されたメッセージ: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>pgModeler Plus の&lt;strong&gt;体験版&lt;/strong&gt;を使用しています。このバージョンは評価目的専用で、一部の機能に制限があります:
+
+• 開けるモデル数: %1
+• インポート操作: %2
+• 比較操作: %3
+• エクスポート操作: %4
+• DBMS へのエクスポートは無効です。 
+• モデルの印刷は無効です。 
+• モデルあたりのオブジェクト数: %5
+• インポートしたモデルはファイルに保存できません。
+• &lt;strong&gt;%5 個のオブジェクト&lt;/strong&gt;の上限を超えるモデルはファイルに保存できません。</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>モデルの印刷は体験版では利用できません。この機能を有効にするにはライセンスをアップグレードしてください。</translation>
     </message>
     <message>
         <source>&lt;!--

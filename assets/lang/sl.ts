@@ -7503,7 +7503,7 @@ Sporočilo, ki ga je vrnil SUPB: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ker ste uporabljali preizkusno različico, znova zaženite pgModeler, da bodo vse funkcije pravilno omogočene.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Sporočilo, ki ga je vrnil SUPB: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Izvajate &lt;strong&gt;preizkusno različico&lt;/strong&gt; programa pgModeler Plus. Ta različica je namenjena samo ocenjevanju, nekatere zmožnosti pa so omejene:
+
+• Odprti modeli: %1
+• Operacije uvoza: %2
+• Operacije primerjave: %3
+• Operacije izvoza: %4
+• Izvoz v SUPB je onemogočen. 
+• Tiskanje modelov je onemogočeno. 
+• Objektov na model: %5
+• Uvoženih modelov ni mogoče shraniti v datoteko.
+• Modelov, ki presegajo omejitev &lt;strong&gt;%5 objektov&lt;/strong&gt;, ni mogoče shraniti v datoteko.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ ki so na voljo v grafičnem vmesniku. Vse razpoložljive možnosti so opisane sp
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tiskanje modelov v preizkusni različici ni na voljo. Za omogočitev te funkcije nadgradite licenco.</translation>
     </message>
     <message>
         <source>&lt;!--

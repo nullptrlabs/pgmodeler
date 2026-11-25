@@ -7503,7 +7503,7 @@ Message returned by the DBMS: `%1&apos;</source>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Пошто сте користили пробну верзију, поново покрените pgModeler да би све функције биле исправно омогућене.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Message returned by the DBMS: `%1&apos;</source>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Покренули сте &lt;strong&gt;пробну верзију&lt;/strong&gt; програма pgModeler Plus. Ова верзија је намењена само за процену, а неке могућности су ограничене:
+
+• Отворени модели: %1
+• Операције увоза: %2
+• Операције поређења: %3
+• Операције извоза: %4
+• Извоз у СУБП је онемогућен. 
+• Штампање модела је онемогућено. 
+• Објеката по моделу: %5
+• Увезени модели не могу бити сачувани у датотеку.
+• Модели који премашују ограничење од &lt;strong&gt;%5 објеката&lt;/strong&gt; не могу бити сачувани у датотеку.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ available in GUI. All available options are described below.</source>
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Штампање модела није доступно у пробној верзији. Надоградите лиценцу да бисте омогућили ову функцију.</translation>
     </message>
     <message>
         <source>&lt;!--

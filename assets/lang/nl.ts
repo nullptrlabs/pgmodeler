@@ -7503,7 +7503,7 @@ Door het DBMS geretourneerd bericht: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Omdat u de proefversie gebruikte, moet u pgModeler opnieuw starten zodat alle functies correct worden ingeschakeld.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Door het DBMS geretourneerd bericht: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>U gebruikt de &lt;strong&gt;proefversie&lt;/strong&gt; van pgModeler Plus. Deze versie is uitsluitend bedoeld voor evaluatie en sommige functies hebben beperkingen:
+
+• Geopende modellen: %1
+• Importbewerkingen: %2
+• Vergelijkingsbewerkingen: %3
+• Exportbewerkingen: %4
+• Export naar het DBMS is uitgeschakeld. 
+• Het afdrukken van modellen is uitgeschakeld. 
+• Objecten per model: %5
+• Geïmporteerde modellen kunnen niet in een bestand worden opgeslagen.
+• Modellen die de limiet van &lt;strong&gt;%5 objecten&lt;/strong&gt; overschrijden, kunnen niet in een bestand worden opgeslagen.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ die in de GUI beschikbaar zijn. Alle beschikbare opties worden hieronder beschre
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Het afdrukken van modellen is niet beschikbaar in de proefversie. Upgrade uw licentie om deze functie in te schakelen.</translation>
     </message>
     <message>
         <source>&lt;!--

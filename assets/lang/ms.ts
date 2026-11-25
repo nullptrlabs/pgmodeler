@@ -7503,7 +7503,7 @@ Mesej yang dikembalikan oleh DBMS: `%1&apos;</translation>
     </message>
     <message>
         <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Oleh kerana anda menggunakan versi percubaan, sila mulakan semula pgModeler supaya semua ciri didayakan dengan betul.</translation>
     </message>
     <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
@@ -7573,7 +7573,17 @@ Mesej yang dikembalikan oleh DBMS: `%1&apos;</translation>
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Anda menjalankan &lt;strong&gt;versi percubaan&lt;/strong&gt; pgModeler Plus. Versi ini hanya bertujuan untuk penilaian dan beberapa ciri tertakluk kepada had:
+
+• Model dibuka: %1
+• Operasi import: %2
+• Operasi diff: %3
+• Operasi eksport: %4
+• Eksport ke DBMS dilumpuhkan. 
+• Pencetakan model dilumpuhkan. 
+• Objek bagi setiap model: %5
+• Model yang diimport tidak boleh disimpan ke fail.
+• Model yang melebihi had &lt;strong&gt;%5 objek&lt;/strong&gt; tidak boleh disimpan ke fail.</translation>
     </message>
     <message>
         <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
@@ -14974,7 +14984,7 @@ yang terdapat dalam GUI. Semua pilihan yang tersedia diterangkan di bawah.</tran
     </message>
     <message>
         <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pencetakan model tidak tersedia dalam versi percubaan. Naik taraf lesen anda untuk mendayakan ciri ini.</translation>
     </message>
     <message>
         <source>&lt;!--
