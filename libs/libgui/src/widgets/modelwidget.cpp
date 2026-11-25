@@ -6791,34 +6791,35 @@ void ModelWidget::removeRelationshipPoints()
 		QAction *action=dynamic_cast<QAction *>(sender());
 		BaseRelationship *rel=reinterpret_cast<BaseRelationship *>(action->data().value<void *>());
 
-		//Remove points from all selected relationships
-		if(!rel && !selected_objects.empty())
+		std::vector<BaseRelationship *> rels;
+
+		//Without a relationship in the action's data, the points of all the selected relationships are removed
+		if(rel)
+			rels.push_back(rel);
+		else
 		{
-			std::vector<BaseObject *> rels;
-
-			rels = *db_model->getObjectList(ObjectType::BaseRelationship);
-			rels.insert(rels.end(), db_model->getObjectList(ObjectType::Relationship)->begin(),  db_model->getObjectList(ObjectType::Relationship)->end());
-
-			op_list->startOperationChain();
-			for(auto &obj : rels)
+			for(auto &obj : selected_objects)
 			{
 				rel = dynamic_cast<BaseRelationship *>(obj);
 
-				if(!rel->isProtected())
-				{
-					op_list->registerObject(rel, Operation::ObjModified);
-					rel->setPoints({});
-					rel->setModified(true);
-				}
+				if(rel)
+					rels.push_back(rel);
 			}
-			op_list->finishOperationChain();
 		}
-		else
+
+		op_list->startOperationChain();
+
+		for(auto &base_rel : rels)
 		{
-			op_list->registerObject(rel, Operation::ObjModified);
-			rel->setPoints({});
-			rel->setModified(true);
+			if(base_rel->isProtected() || base_rel->getPoints().empty())
+				continue;
+
+			op_list->registerObject(base_rel, Operation::ObjModified);
+			base_rel->setPoints({});
+			base_rel->setModified(true);
 		}
+
+		op_list->finishOperationChain();
 
 		scene->clearSelection();
 		this->setModified(true);
