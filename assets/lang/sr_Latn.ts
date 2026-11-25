@@ -733,7 +733,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>%1 properties</source>
-        <translation>Svojstva: %1</translation>
+        <translation type="vanished">Svojstva: %1</translation>
     </message>
 </context>
 <context>
@@ -3394,7 +3394,7 @@ Referencirana kolona(e): %2</translation>
     </message>
     <message>
         <source>The demonstration version can create only `%1&apos; instances of each object type! You&apos;ve reach this limit for the type: `%2&apos;</source>
-        <translation>Demonstraciona verzija može kreirati samo `%1&apos; instanci svakog tipa objekta! Dostigli ste ovo ograničenje za tip: `%2&apos;</translation>
+        <translation type="vanished">Demonstraciona verzija može kreirati samo `%1&apos; instanci svakog tipa objekta! Dostigli ste ovo ograničenje za tip: `%2&apos;</translation>
     </message>
 </context>
 <context>
@@ -5734,11 +5734,11 @@ Poruka koju je vratio SUBP: `%1&apos;</translation>
     </message>
     <message>
         <source>Replaces any straight line in relationship by curved ones in order to improve the model&apos;s visualization.</source>
-        <translation>Zamenjuje sve prave linije u odnosima zakrivljenim radi boljeg prikaza modela.</translation>
+        <translation type="vanished">Zamenjuje sve prave linije u odnosima zakrivljenim radi boljeg prikaza modela.</translation>
     </message>
     <message>
         <source>Use curved lines for relationships</source>
-        <translation>Koristi zakrivljene linije za odnose</translation>
+        <translation type="vanished">Koristi zakrivljene linije za odnose</translation>
     </message>
     <message>
         <source>&lt;p&gt;Forces the escaping of line breaks and tabulations in objects&apos; comments during SQL code generation. This option produces a more compact SQL code since all comments will be presented in one line. Despite changing the presentation this option does not affect the final semantics of multilined comments.&lt;/p&gt;</source>
@@ -7180,7 +7180,7 @@ Poruka koju je vratio SUBP: `%1&apos;</translation>
     </message>
     <message>
         <source>Failed to validate the pgModeler Plus license! You have to validate it in the GUI before using the command-line interface.</source>
-        <translation>Validacija licence za pgModeler Plus nije uspela! Morate je validirati u grafičkom interfejsu pre korišćenja interfejsa komandne linije.</translation>
+        <translation type="vanished">Validacija licence za pgModeler Plus nije uspela! Morate je validirati u grafičkom interfejsu pre korišćenja interfejsa komandne linije.</translation>
     </message>
     <message>
         <source>License error code: %1</source>
@@ -7188,11 +7188,11 @@ Poruka koju je vratio SUBP: `%1&apos;</translation>
     </message>
     <message>
         <source>The command-line interface is not available in trial version! Upgrade your license to use it.</source>
-        <translation>Interfejs komandne linije nije dostupan u probnoj verziji! Nadogradite licencu da biste ga koristili.</translation>
+        <translation type="vanished">Interfejs komandne linije nije dostupan u probnoj verziji! Nadogradite licencu da biste ga koristili.</translation>
     </message>
     <message>
         <source>The offline usage period has ended! You have to validate the license in the GUI to keep using the command-line interface.</source>
-        <translation>Period van mrežnog korišćenja je istekao! Morate validirati licencu u grafičkom interfejsu da biste nastavili da koristite interfejs komandne linije.</translation>
+        <translation type="vanished">Period van mrežnog korišćenja je istekao! Morate validirati licencu u grafičkom interfejsu da biste nastavili da koristite interfejs komandne linije.</translation>
     </message>
     <message>
         <source>A valid pgModeler Plus license is required to use this feature.</source>
@@ -7502,6 +7502,10 @@ Poruka koju je vratio SUBP: `%1&apos;</translation>
         <translation>Validacija licence u toku...</translation>
     </message>
     <message>
+        <source>Since you were using the trial version, please restart pgModeler so all features are correctly enabled.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Your license was successfully validated! Enjoy pgModeler Plus.</source>
         <translation>Licenca je uspešno validirana! Uživajte u programu pgModeler Plus.</translation>
     </message>
@@ -7565,10 +7569,24 @@ Poruka koju je vratio SUBP: `%1&apos;</translation>
 • Diff operations: %3
 • Export operations: %4
 • Export to DBMS is disabled. 
+• Printing models is disabled. 
 • Objects per model: %5
 • Models imported cannot be saved to a file.
 • Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
-        <translation>Pokrenuli ste &lt;strong&gt;probnu verziju&lt;/strong&gt; programa pgModeler Plus. Ova verzija je namenjena samo za procenu, a neke mogućnosti su ograničene:
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You are running the &lt;strong&gt;trial version&lt;/strong&gt; of pgModeler Plus. This version is intended for evaluation purposes only, and some features are subject to limitations:
+
+• Open models: %1
+• Import operations: %2
+• Diff operations: %3
+• Export operations: %4
+• Export to DBMS is disabled. 
+• Objects per model: %5
+• Models imported cannot be saved to a file.
+• Models exceeding the limit of &lt;strong&gt;%5 objects&lt;/strong&gt; cannot be saved to a file.</source>
+        <translation type="vanished">Pokrenuli ste &lt;strong&gt;probnu verziju&lt;/strong&gt; programa pgModeler Plus. Ova verzija je namenjena samo za procenu, a neke mogućnosti su ograničene:
 
 • Otvoreni modeli: %1
 • Operacije uvoza: %2
@@ -8658,6 +8676,22 @@ Poruka koju je vratio SUBP: `%1&apos;</translation>
         <translation>Izlazna datoteka `%1&apos; je uspešno zapisana.</translation>
     </message>
     <message>
+        <source>Exporting model to PDF file.</source>
+        <translation>Izvoz modela u PDF datoteku.</translation>
+    </message>
+    <message>
+        <source>PDF representation of database model</source>
+        <translation>PDF prikaz modela baze podataka</translation>
+    </message>
+    <message>
+        <source>PDF file generated by pgModeler</source>
+        <translation>PDF datoteka koju je generisao pgModeler</translation>
+    </message>
+    <message>
+        <source>Rendering objects to a single page.</source>
+        <translation>Iscrtavanje objekata na jednoj stranici.</translation>
+    </message>
+    <message>
         <source>Starting export to DBMS.</source>
         <translation>Pokretanje izvoza u SUBP.</translation>
     </message>
@@ -8925,6 +8959,10 @@ Poruka koju je vratio SUBP: `%1&apos;</translation>
         <translation>SVG</translation>
     </message>
     <message>
+        <source>PDF</source>
+        <translation>PDF</translation>
+    </message>
+    <message>
         <source>Zoom</source>
         <translation>Zum</translation>
     </message>
@@ -8937,8 +8975,12 @@ Poruka koju je vratio SUBP: `%1&apos;</translation>
         <translation>Prikaži ograničavače</translation>
     </message>
     <message>
+        <source>&lt;p&gt;&lt;strong&gt;PNG:&lt;/strong&gt; exporting the model page by page will generate files with a &lt;strong&gt;_p[n]&lt;/strong&gt; suffix where &lt;strong&gt;n&lt;/strong&gt; is the page id. Check if the current user has write permission on output folder.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;PDF:&lt;/strong&gt; by default the whole model is drawn in a single page. When this option is checked, the model is split in pages according to the paper settings and all of them are written to the same file.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;&lt;strong&gt;PNG:&lt;/strong&gt; Izvoz modela stranicu po stranicu generisaće datoteke sa sufiksom &lt;strong&gt;_p[n]&lt;/strong&gt;, gde je &lt;strong&gt;n&lt;/strong&gt; ID stranice. Proverite da li trenutni korisnik ima dozvolu pisanja u izlaznom folderu.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;PDF:&lt;/strong&gt; po podrazumevanim podešavanjima ceo model se crta na jednoj stranici. Kada je ova opcija označena, model se deli na stranice prema podešavanjima papira i sve se upisuju u istu datoteku.&lt;/p&gt;</translation>
+    </message>
+    <message>
         <source>Exporting the model page by page will generate files with a &lt;strong&gt;_p[n]&lt;/strong&gt; suffix where &lt;strong&gt;n&lt;/strong&gt; is the page id. Check if the current user has write permission on output folder.</source>
-        <translation>Izvoz modela stranicu po stranicu generisaće datoteke sa sufiksom &lt;strong&gt;_p[n]&lt;/strong&gt;, gde je &lt;strong&gt;n&lt;/strong&gt; ID stranice. Proverite da li trenutni korisnik ima dozvolu pisanja u izlaznom folderu.</translation>
+        <translation type="vanished">Izvoz modela stranicu po stranicu generisaće datoteke sa sufiksom &lt;strong&gt;_p[n]&lt;/strong&gt;, gde je &lt;strong&gt;n&lt;/strong&gt; ID stranice. Proverite da li trenutni korisnik ima dozvolu pisanja u izlaznom folderu.</translation>
     </message>
     <message>
         <source>Page by page</source>
@@ -9976,6 +10018,14 @@ Zatražena veličina %1 x %2 bila je prevelika i nije bilo dovoljno memorije za 
     <message>
         <source>Loading database model</source>
         <translation>Učitavanje modela baze podataka</translation>
+    </message>
+    <message>
+        <source>Printing database model</source>
+        <translation>Štampanje modela baze podataka</translation>
+    </message>
+    <message>
+        <source>Printing page %1 (%2/%3)...</source>
+        <translation>Štampanje stranice %1 (%2/%3)...</translation>
     </message>
     <message>
         <source>Page #%1 / X:%2 Y:%3</source>
@@ -11341,6 +11391,10 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
         <translation>Izvozi ulazni model u SVG datoteku.</translation>
     </message>
     <message>
+        <source>Exports the input model to a PDF file.</source>
+        <translation>Izvozi ulazni model u PDF datoteku.</translation>
+    </message>
+    <message>
         <source>Exports the input model to a data dictionary in HTML format.</source>
         <translation>Izvozi ulazni model u rečnik podataka u HTML formatu.</translation>
     </message>
@@ -11394,7 +11448,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     </message>
     <message>
         <source>Output file or directory. Required for model fix or export to SQL, HTML, PNG, SVG.</source>
-        <translation>Izlazna datoteka ili direktorijum. Obavezni za popravku modela ili izvoz u SQL, HTML, PNG, SVG.</translation>
+        <translation type="vanished">Izlazna datoteka ili direktorijum. Obavezni za popravku modela ili izvoz u SQL, HTML, PNG, SVG.</translation>
     </message>
     <message>
         <source>Forces PostgreSQL syntax to the specified version when generating SQL code. Version format: [major].[minor], e.g., %1.</source>
@@ -11434,7 +11488,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     </message>
     <message>
         <source>PNG and SVG export options</source>
-        <translation>Opcije izvoza u PNG i SVG</translation>
+        <translation type="vanished">Opcije izvoza u PNG i SVG</translation>
     </message>
     <message>
         <source>Draws the grid in the exported image.</source>
@@ -11446,11 +11500,27 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     </message>
     <message>
         <source>Each page will be exported as a separate image. Only for PNG images.</source>
-        <translation>Svaka stranica biće izvezena kao zasebna slika. Samo za PNG slike.</translation>
+        <translation type="vanished">Svaka stranica biće izvezena kao zasebna slika. Samo za PNG slike.</translation>
     </message>
     <message>
         <source>Overrides the original canvas color using a white background. PNG images only.</source>
-        <translation>Zamenjuje izvornu boju platna belom pozadinom. Samo za PNG slike.</translation>
+        <translation type="vanished">Zamenjuje izvornu boju platna belom pozadinom. Samo za PNG slike.</translation>
+    </message>
+    <message>
+        <source>Output file or directory. Required for model fix or export to SQL, HTML, PNG, SVG, PDF.</source>
+        <translation>Izlazna datoteka ili direktorijum. Obavezni za popravku modela ili izvoz u SQL, HTML, PNG, SVG, PDF.</translation>
+    </message>
+    <message>
+        <source>PNG, SVG and PDF export options</source>
+        <translation>Opcije izvoza u PNG, SVG i PDF</translation>
+    </message>
+    <message>
+        <source>Each page will be exported as a separate image (PNG) or as a separate page of the same file (PDF). By default, a PDF has the whole model in a single page. Not available for SVG.</source>
+        <translation>Svaka stranica će biti izvezena kao posebna slika (PNG) ili kao posebna stranica iste datoteke (PDF). Po podrazumevanim podešavanjima PDF sadrži ceo model na jednoj stranici. Nije dostupno za SVG.</translation>
+    </message>
+    <message>
+        <source>Overrides the original canvas color using a white background. PNG and PDF only.</source>
+        <translation>Zamenjuje izvornu boju platna belom pozadinom. Samo za PNG i PDF.</translation>
     </message>
     <message>
         <source>Applies zoom before exporting to an image. Accepted range: %1 to %2 (PNG only).</source>
@@ -12055,6 +12125,10 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     <message>
         <source>Exporting to SVG file: %1</source>
         <translation>Izvoz u SVG datoteku: %1</translation>
+    </message>
+    <message>
+        <source>Exporting to PDF file: %1</source>
+        <translation>Izvoz u PDF datoteku: %1</translation>
     </message>
     <message>
         <source>Exporting to SQL script file: %1</source>
@@ -13631,7 +13705,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     </message>
     <message>
         <source>&lt;p&gt;Hides the relationships between tables of the same scene. They are represented by the relationship marker of each table, whose details are shown by double-clicking it. Intended for large models, where the drawn relationships lose their purpose.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The change takes effect only after saving and reloading the model.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Skriva odnose između tabela iste scene. Predstavljeni su oznakom odnosa svake tabele, čiji se detalji prikazuju dvostrukim klikom. Namenjeno velikim modelima u kojima nacrtani odnosi gube svrhu.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NAPOMENA:&lt;/strong&gt; Promena stupa na snagu tek nakon čuvanja i ponovnog učitavanja modela.&lt;/p&gt;</translation>
+        <translation type="vanished">&lt;p&gt;Skriva odnose između tabela iste scene. Predstavljeni su oznakom odnosa svake tabele, čiji se detalji prikazuju dvostrukim klikom. Namenjeno velikim modelima u kojima nacrtani odnosi gube svrhu.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;NAPOMENA:&lt;/strong&gt; Promena stupa na snagu tek nakon čuvanja i ponovnog učitavanja modela.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14508,7 +14582,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     <name>TableRelsWidget</name>
     <message>
         <source>Cross-scene relationships</source>
-        <translation>Odnosi između scena</translation>
+        <translation type="vanished">Odnosi između scena</translation>
     </message>
     <message>
         <source>Table relationships</source>
@@ -14516,7 +14590,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     </message>
     <message>
         <source>Table:</source>
-        <translation>Tabela:</translation>
+        <translation type="vanished">Tabela:</translation>
     </message>
     <message>
         <source>Relationships</source>
@@ -14524,7 +14598,7 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     </message>
     <message>
         <source>Cross rels.</source>
-        <translation>Unakr. odnosi</translation>
+        <translation type="vanished">Unakr. odnosi</translation>
     </message>
     <message>
         <source>Relationship</source>
@@ -14897,6 +14971,10 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
     <message>
         <source>The database model has exceeded the maximum number of objects allowed in the trial version. The save to file feature has been disabled for this model.</source>
         <translation>Model baze podataka je premašio maksimalan broj objekata dozvoljen u probnoj verziji. Funkcija čuvanja u datoteku je onemogućena za ovaj model.</translation>
+    </message>
+    <message>
+        <source>Printing models is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&lt;!--

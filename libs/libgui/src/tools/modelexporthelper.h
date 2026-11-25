@@ -84,7 +84,7 @@ class __libgui ModelExportHelper: public QObject {
 		//! \brief Indicates if the original background (canvas) color should be used in the graphics file
 		override_bg_color,
 
-		//! \brief Indicates if the export to png should be done pageby page
+		//! \brief Indicates if the export to png/pdf should be done page by page
 		page_by_page,
 
 		//! \brief Indicates if the data dictionary or sql export should be split into separated files
@@ -176,6 +176,10 @@ class __libgui ModelExportHelper: public QObject {
 		void handleSQLError(Exception &e, const QString &sql_cmd, bool ignore_dup);
 
 	public:
+		/*! \brief Maximum size (in points) of a PDF page side. Most PDF readers don't handle
+		 * pages larger than 200 inches, so bigger models are scaled down to this size in the PDF export */
+		static constexpr double MaxPdfPageSize {14400};
+
 		ModelExportHelper(QObject *parent = nullptr);
 
 		/*! \brief Determines which error codes must be ignored during the export process.
@@ -197,6 +201,14 @@ class __libgui ModelExportHelper: public QObject {
 
 		//! \brief Exports the model to a named SVG file.
 		void exportToSVG(ObjectsScene *scene, const QString &filename, bool show_grid, bool show_delim);
+
+		/*! \brief Exports the model to a named PDF file. The boolean parameters control the grid exhibition,
+		 * the page delimiters and the use of a white background instead of the canvas color. By default the whole
+		 * model is drawn in a single page sized after the model (vector output, so it can be zoomed freely). The
+		 * page size is reduced to MaxPdfPageSize when the model is larger than that. When page_by_page is true,
+		 * the model is split in the pages defined by the scene's page layout, all of them written to the same file */
+		void exportToPDF(ObjectsScene *scene, const QString &filename, bool show_grid, bool show_delim,
+										 bool page_by_page, bool override_bg_color);
 
 		/*! \brief Exports the model directly to the DBMS. A valid connection must be specified. The PostgreSQL
 		version is optional, since the helper identifies the version from the server. The boolean parameter
@@ -235,6 +247,11 @@ class __libgui ModelExportHelper: public QObject {
 		This form receive the objects scene, the output filename, grid options. */
 		void setExportToSVGParams(ObjectsScene *scene, const QString &filename, bool show_grid, bool show_delim);
 
+		/*! \brief Configures the PDF export params before start the export thread (when in thread mode).
+		This form receive the objects scene, the output filename, grid options, page by page and background options. */
+		void setExportToPDFParams(ObjectsScene *scene, const QString &filename, bool show_grid, bool show_delim,
+															bool page_by_page, bool override_bg_color);
+
 		/*! \brief Configures the Data Dictionary export params before start the export thread (when in thread mode).
 		This form receive the database model, the output path and browsabe and split options. */
 		void setExportToDataDictParams(DatabaseModel *db_model, const QString &path, bool browsable, bool split, bool md_format);
@@ -259,6 +276,7 @@ class __libgui ModelExportHelper: public QObject {
 		void exportToDBMS();
 		void exportToPNG();
 		void exportToSVG();
+		void exportToPDF();
 		void exportToSQL();
 		void exportToDataDict();
 		void cancelExport();

@@ -141,8 +141,10 @@ ModelExportWidget::ModelExportWidget(QWidget *parent) : QWidget(parent)
 			export_hlp.exportToDBMS();
 		else if(export_to_img_tb->isChecked())
 		{
-			if(img_fmt_cmb->currentIndex() == 0)
+			if(img_fmt_cmb->currentIndex() == PngFormat)
 				export_hlp.exportToPNG();
+			else if(img_fmt_cmb->currentIndex() == PdfFormat)
+				export_hlp.exportToPDF();
 			else
 				export_hlp.exportToSVG();
 		}
@@ -308,7 +310,7 @@ void ModelExportWidget::exportModel()
 			int file_idx = 0;
 
 			/* Due to the nature of Qt Graphics Scene thread affinity limitations,
-			 * the export to png/svg runs sincronously even in GUI. A scene from
+			 * the export to png/svg/pdf runs sincronously even in GUI. A scene from
 			 * a thread cannot be rendered outside its own thread, when that happens
 			 * Qt raises warnings in console. So to avoid this kind of problem the
 			 * export to image runs in a single shot, not giving the user a chance
@@ -338,13 +340,20 @@ void ModelExportWidget::exportModel()
 
 				QGraphicsView *viewp = new QGraphicsView(scn);
 
-				if(img_fmt_cmb->currentIndex() == 0)
+				if(img_fmt_cmb->currentIndex() == PngFormat)
 				{
 					export_hlp.setExportToPNGParams(scn, viewp, out_path,
 																					zoom_cmb->itemData(zoom_cmb->currentIndex()).toDouble(),
 																					show_grid_chk->isChecked(), show_delim_chk->isChecked(),
 																					 page_by_page_chk->isChecked(), override_bg_color_chk->isChecked());
 					export_hlp.exportToPNG();
+				}
+				else if(img_fmt_cmb->currentIndex() == PdfFormat)
+				{
+					export_hlp.setExportToPDFParams(scn, out_path,
+																					show_grid_chk->isChecked(), show_delim_chk->isChecked(),
+																					page_by_page_chk->isChecked(), override_bg_color_chk->isChecked());
+					export_hlp.exportToPDF();
 				}
 				else
 				{
@@ -530,24 +539,29 @@ void ModelExportWidget::enableExport()
 
 void ModelExportWidget::selectImageFormat()
 {
-	bool is_png = img_fmt_cmb->currentIndex() == 0;
+	int fmt = img_fmt_cmb->currentIndex();
+	bool is_png = (fmt == PngFormat), is_pdf = (fmt == PdfFormat);
 
 	if(is_png)
 	{
 		img_file_sel->setMimeTypeFilters({"image/png", "application/octet-stream"});
 		img_file_sel->setDefaultSuffix("png");
-		override_bg_color_chk->setEnabled(true);
+	}
+	else if(is_pdf)
+	{
+		img_file_sel->setMimeTypeFilters({"application/pdf", "application/octet-stream"});
+		img_file_sel->setDefaultSuffix("pdf");
 	}
 	else
 	{
 		img_file_sel->setMimeTypeFilters({"image/svg+xml", "application/octet-stream"});
 		img_file_sel->setDefaultSuffix("svg");
-		override_bg_color_chk->setEnabled(false);
 	}
 
+	override_bg_color_chk->setEnabled(is_png || is_pdf);
 	zoom_cmb->setEnabled(is_png);
 	zoom_lbl->setEnabled(is_png);
-	page_by_page_chk->setEnabled(is_png);
+	page_by_page_chk->setEnabled(is_png || is_pdf);
 }
 
 void ModelExportWidget::selectDataDictMode()
