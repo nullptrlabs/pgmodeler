@@ -1588,8 +1588,14 @@ void RelationshipView::finishSegmentDrag()
 										(cur_shift != shifts.end() ? cur_shift->second.jog : 0) };
 	}
 
-	base_rel->setSegmentShifts(shifts);
-	emit s_relationshipModified(base_rel);
+	// A drag that ends where it started changes nothing
+	if(shifts != base_rel->getSegmentShifts())
+	{
+		/* The signal is emitted before the change since the relationship is registered
+		 * for the undo as it is when the signal is emitted */
+		emit s_relationshipModified(base_rel);
+		base_rel->setSegmentShifts(shifts);
+	}
 
 	/* While the objects are being moved the scene disables the obstacles avoidance, so the line is only
 	 * reconfigured (descriptors, labels, hops) after the scene finishes the movement */

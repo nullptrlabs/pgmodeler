@@ -60,6 +60,11 @@ class __libcore BaseRelationship: public BaseGraphicObject  {
 			Qt::Orientation orientation;
 			double value;
 			double jog { 0 };
+
+			bool operator == (const SegmentShift &other) const
+			{
+				return orientation == other.orientation && value == other.value && jog == other.jog;
+			}
 		};
 
 	protected:
