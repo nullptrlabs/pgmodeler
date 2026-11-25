@@ -2031,11 +2031,12 @@ void ObjectsScene::clearSelection()
 QList<QRectF> ObjectsScene::getPagesForPrinting(const QPageLayout &page_lt, unsigned &h_page_cnt, unsigned &v_page_cnt, double scale)
 {
 	QList<QRectF> pages;
-	QRectF page_rect, scn_rect = sceneRect(),
-			items_rect = itemsBoundingRect(true);
+	QRectF page_rect, items_rect = itemsBoundingRect(true);
 	double page_w = 0, page_h = 0;
 	int start_h = 0, start_v = 0,
 			end_h = 0, end_v = 0;
+
+	h_page_cnt = v_page_cnt = 0;
 
 	if(scale < MinScaleFactor)
 		scale = MinScaleFactor;
@@ -2048,25 +2049,23 @@ QList<QRectF> ObjectsScene::getPagesForPrinting(const QPageLayout &page_lt, unsi
 	page_h = page_lt.paintRect(QPageLayout::Point).height();
 	page_h /= scale;
 
-	/* If the origin point is before (0,0) we have to calculate the number
-	 * pages are before that coordinate */
-	if(scn_rect.top() < 0 || scn_rect.left() < 0)
-	{
-		start_h = round(scn_rect.left() / page_w) - 1;
-		start_v = round(scn_rect.top() / page_h) - 1;
-	}
+	if(items_rect.isNull() || page_w <= 0 || page_h <= 0)
+		return pages;
 
-	/* Calculates the horizontal and vertical page count to iterate
-	 * based upon the passed paper size and scene rect.
-	 * This is not the real page count since we still need to detect
-	 * empty pages that don't need to be printed */
-	h_page_cnt = round(scn_rect.width() / page_w) + 1;
-	v_page_cnt = round(scn_rect.height() / page_h) + 1;
+	/* Pages are aligned to the origin (0,0) of the scene, so the range of page
+	 * indexes to be iterated (start inclusive, end exclusive) is obtained by flooring the
+	 * items rect edges. This works for any sign of the coordinates (infinite canvas) and
+	 * for any page size (e.g. when the delimiters size is locked and the pages are scaled).
+	 * The start edge is shifted by one unit because the page rects below are one unit larger
+	 * than the page size. Pages that end up not intersecting the items are discarded, so
+	 * this range doesn't need to be tight. */
+	start_h = floor((items_rect.left() - 1) / page_w);
+	start_v = floor((items_rect.top() - 1) / page_h);
+	end_h = floor(items_rect.right() / page_w) + 1;
+	end_v = floor(items_rect.bottom() / page_h) + 1;
 
-	end_h = start_h + h_page_cnt;
-	end_v = start_v + v_page_cnt;
-
-	QList<QPoint> pg_ids;
+	int min_h = 0, max_h = 0, min_v = 0, max_v = 0;
+	bool first = true;
 
 	for(int curr_v = start_v; curr_v < end_v; curr_v++)
 	{
@@ -2080,21 +2079,31 @@ QList<QRectF> ObjectsScene::getPagesForPrinting(const QPageLayout &page_lt, unsi
 			 * This will avoid printing extra/uneeded pages */
 			if(items_rect.intersects(page_rect))
 			{
-				/* Store the page position so we can calculate the exact number
-				 * of pages to be printed */
-				pg_ids.append(QPoint(curr_h, curr_v));
+				/* Store the extreme page indexes so we can calculate the exact number
+				 * of pages (horizontally and vertically) to be printed */
+				if(first)
+				{
+					min_h = max_h = curr_h;
+					min_v = max_v = curr_v;
+					first = false;
+				}
+				else
+				{
+					min_h = std::min(min_h, curr_h);
+					max_h = std::max(max_h, curr_h);
+					min_v = std::min(min_v, curr_v);
+					max_v = std::max(max_v, curr_v);
+				}
+
 				pages.append(page_rect);
 			}
 		}
 	}
 
-	if(pg_ids.isEmpty())
-		h_page_cnt = v_page_cnt = 0;
-	else
+	if(!pages.isEmpty())
 	{
-		QPoint f_id = pg_ids.first(), l_id = pg_ids.last();
-		h_page_cnt = (l_id.x() - f_id.x()) + 1;
-		v_page_cnt = (l_id.y() - f_id.y()) + 1;
+		h_page_cnt = (max_h - min_h) + 1;
+		v_page_cnt = (max_v - min_v) + 1;
 	}
 
 	return pages;

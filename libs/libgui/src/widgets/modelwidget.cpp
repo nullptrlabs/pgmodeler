@@ -2853,7 +2853,7 @@ void ModelWidget::printModel(QPrinter *printer, bool print_grid, bool print_page
 		return;
 
 	bool show_grid = false, show_delims = false, first_page = true;
-	unsigned page = 0, h_page_cnt = 0, v_page_cnt = 0, h_pg_id = 0, v_pg_id = 0, global_page = 0;
+	unsigned page = 0, h_page_cnt = 0, v_page_cnt = 0, global_page = 0;
 	QList<QRectF> pages;
 	QMarginsF margins;
 	QFont font;
@@ -2894,7 +2894,25 @@ void ModelWidget::printModel(QPrinter *printer, bool print_grid, bool print_page
 		pages = scn->getPagesForPrinting(printer->pageLayout(), h_page_cnt, v_page_cnt,
 																			resize_delims && current_zoom < 1 ? current_zoom : 1);
 
-		for(page = 0, h_pg_id = 1, v_pg_id = 1; page < static_cast<unsigned>(pages.size()); page++, global_page++)
+		/* The X/Y page ids are derived from the page position relative to the top-left most
+		 * page, so they stay correct even when some pages in the grid are skipped for being empty */
+		double min_left = 0, min_top = 0, pg_w = 1, pg_h = 1;
+
+		if(!pages.isEmpty())
+		{
+			pg_w = pages.first().width() - 1;
+			pg_h = pages.first().height() - 1;
+			min_left = pages.first().left();
+			min_top = pages.first().top();
+
+			for(auto &pg : pages)
+			{
+				min_left = std::min(min_left, pg.left());
+				min_top = std::min(min_top, pg.top());
+			}
+		}
+
+		for(page = 0; page < static_cast<unsigned>(pages.size()); page++, global_page++)
 		{
 			if(!first_page)
 				printer->newPage();
@@ -2907,7 +2925,9 @@ void ModelWidget::printModel(QPrinter *printer, bool print_grid, bool print_page
 			//Print the current page number if this option is marked
 			if(print_page_nums)
 			{
-				page_info = tr("Page #%1 / X:%2 Y:%3").arg(QString::number(global_page + 1)).arg(h_pg_id).arg(v_pg_id);
+				page_info = tr("Page #%1 / X:%2 Y:%3").arg(QString::number(global_page + 1))
+											.arg(qRound((pages[page].left() - min_left) / pg_w) + 1)
+											.arg(qRound((pages[page].top() - min_top) / pg_h) + 1);
 				color = ObjectsScene::getGridColor().darker();
 				color.setAlpha(128);
 				painter.setBrush(color);
@@ -2920,14 +2940,6 @@ void ModelWidget::printModel(QPrinter *printer, bool print_grid, bool print_page
 				painter.drawRect(brect);
 				painter.drawText(0, 0, page_info);
 				painter.restore();
-
-				h_pg_id++;
-
-				if(h_pg_id > h_page_cnt)
-				{
-					h_pg_id = 1;
-					v_pg_id++;
-				}
 			}
 		}
 	}
