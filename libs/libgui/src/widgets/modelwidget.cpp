@@ -2847,19 +2847,34 @@ void ModelWidget::expandSceneRect(ObjectsScene::ExpandDirection exp_dir)
 	scene->expandSceneRect(exp_dir);
 }
 
+unsigned ModelWidget::getPrintPageCount(const QPageLayout &page_lt, bool resize_delims)
+{
+	unsigned h_page_cnt = 0, v_page_cnt = 0, count = 0;
+
+	for(auto &scn : scenes)
+	{
+		count += scn->getPagesForPrinting(page_lt, h_page_cnt, v_page_cnt,
+																			resize_delims && current_zoom < 1 ? current_zoom : 1).size();
+	}
+
+	return count;
+}
+
 void ModelWidget::printModel(QPrinter *printer, bool print_grid, bool print_page_nums, bool resize_delims)
 {
 	if(!printer)
 		return;
 
-	bool show_grid = false, show_delims = false, first_page = true;
-	unsigned page = 0, h_page_cnt = 0, v_page_cnt = 0, global_page = 0;
-	QList<QRectF> pages;
+	bool show_grid = false, show_delims = false, first_page = true, canceled = false;
+	unsigned page = 0, h_page_cnt = 0, v_page_cnt = 0, global_page = 0,
+					 total_pages = 0, from_page = 1, to_page = 0, printed_pages = 0, pages_to_print = 0;
+	std::vector<QList<QRectF>> scenes_pages;
 	QMarginsF margins;
 	QFont font;
 	QString page_info;
 	QColor color, bg_color;
 	QRectF brect;
+	TaskProgressWidget task_prog_wgt(this);
 
 	//Make a backup of the current grid options
 	bg_color = ObjectsScene::getCanvasColor();
@@ -2876,72 +2891,120 @@ void ModelWidget::printModel(QPrinter *printer, bool print_grid, bool print_page
 		scn->setShowSceneLimits(false);
 		scn->update();
 		scn->clearSelection();
+
+		//Get the pages rect for printing
+		scenes_pages.push_back(scn->getPagesForPrinting(printer->pageLayout(), h_page_cnt, v_page_cnt,
+																										resize_delims && current_zoom < 1 ? current_zoom : 1));
+		total_pages += scenes_pages.back().size();
 	}
 
-	//Creates a painter to draw the model directly on the printer
-	QPainter painter(printer);
-	painter.setRenderHint(QPainter::Antialiasing);
-	font.setPointSizeF(BaseObjectView::DefaultFontSize * 0.75);
-	font.setBold(true);
-	painter.setFont(font);
+	//The page numbers of the range are the ones that are printed in the pages (starting at 1 across all scenes)
+	to_page = total_pages;
 
-	margins = printer->pageLayout().marginsPoints();
-
-	//Print every scene's pages in sequence onto the same printer job, one page after another
-	for(auto &scn : scenes)
+	if(printer->printRange() == QPrinter::PageRange && printer->fromPage() > 0)
 	{
-		//Get the pages rect for printing
-		pages = scn->getPagesForPrinting(printer->pageLayout(), h_page_cnt, v_page_cnt,
-																			resize_delims && current_zoom < 1 ? current_zoom : 1);
+		from_page = printer->fromPage();
 
-		/* The X/Y page ids are derived from the page position relative to the top-left most
-		 * page, so they stay correct even when some pages in the grid are skipped for being empty */
-		double min_left = 0, min_top = 0, pg_w = 1, pg_h = 1;
+		if(printer->toPage() > 0)
+			to_page = std::min(static_cast<unsigned>(printer->toPage()), total_pages);
+	}
 
-		if(!pages.isEmpty())
+	if(to_page >= from_page)
+		pages_to_print = to_page - from_page + 1;
+
+	if(pages_to_print > 0)
+	{
+		task_prog_wgt.addIcon(enum_t(ObjectType::BaseObject), GuiUtilsNs::getIcon("print"));
+		task_prog_wgt.setWindowTitle(tr("Printing database model"));
+		task_prog_wgt.setCancelable(true);
+		task_prog_wgt.show();
+
+		//Creates a painter to draw the model directly on the printer
+		QPainter painter(printer);
+		painter.setRenderHint(QPainter::Antialiasing);
+		font.setPointSizeF(BaseObjectView::DefaultFontSize * 0.75);
+		font.setBold(true);
+		painter.setFont(font);
+
+		margins = printer->pageLayout().marginsPoints();
+
+		//Print every scene's pages in sequence onto the same printer job, one page after another
+		for(int scn_idx = 0; scn_idx < scenes.size() && !canceled; scn_idx++)
 		{
-			pg_w = pages.first().width() - 1;
-			pg_h = pages.first().height() - 1;
-			min_left = pages.first().left();
-			min_top = pages.first().top();
+			ObjectsScene *scn = scenes[scn_idx];
+			QList<QRectF> &pages = scenes_pages[scn_idx];
 
-			for(auto &pg : pages)
+			/* The X/Y page ids are derived from the page position relative to the top-left most
+			 * page, so they stay correct even when some pages in the grid are skipped for being empty */
+			double min_left = 0, min_top = 0, pg_w = 1, pg_h = 1;
+
+			if(!pages.isEmpty())
 			{
-				min_left = std::min(min_left, pg.left());
-				min_top = std::min(min_top, pg.top());
+				pg_w = pages.first().width() - 1;
+				pg_h = pages.first().height() - 1;
+				min_left = pages.first().left();
+				min_top = pages.first().top();
+
+				for(auto &pg : pages)
+				{
+					min_left = std::min(min_left, pg.left());
+					min_top = std::min(min_top, pg.top());
+				}
+			}
+
+			for(page = 0; page < static_cast<unsigned>(pages.size()); page++, global_page++)
+			{
+				//Pages outside the range chosen by the user aren't sent to the printer
+				if(global_page + 1 < from_page || global_page + 1 > to_page)
+					continue;
+
+				//Updating the progress also gives the cancel button the chance to be handled
+				task_prog_wgt.updateProgress((printed_pages * 100) / pages_to_print,
+																		 tr("Printing page %1 (%2/%3)...").arg(global_page + 1).arg(printed_pages + 1).arg(pages_to_print),
+																		 enum_t(ObjectType::BaseObject));
+
+				if(task_prog_wgt.wasCanceled())
+				{
+					canceled = true;
+					break;
+				}
+
+				if(!first_page)
+					printer->newPage();
+
+				first_page = false;
+
+				//Render the current page on the printer
+				scn->render(&painter, QRect(), pages[page]);
+				printed_pages++;
+
+				//Print the current page number if this option is marked
+				if(print_page_nums)
+				{
+					page_info = tr("Page #%1 / X:%2 Y:%3").arg(QString::number(global_page + 1))
+												.arg(qRound((pages[page].left() - min_left) / pg_w) + 1)
+												.arg(qRound((pages[page].top() - min_top) / pg_h) + 1);
+					color = ObjectsScene::getGridColor().darker();
+					color.setAlpha(128);
+					painter.setBrush(color);
+					painter.setPen(ObjectsScene::getGridColor().lighter());
+					brect = painter.fontMetrics().boundingRect(page_info);
+					brect.adjust(-5, 0, 5, 0);
+
+					painter.save();
+					painter.translate(-margins.left() / 2, -margins.top() / 2);
+					painter.drawRect(brect);
+					painter.drawText(0, 0, page_info);
+					painter.restore();
+				}
 			}
 		}
 
-		for(page = 0; page < static_cast<unsigned>(pages.size()); page++, global_page++)
-		{
-			if(!first_page)
-				printer->newPage();
+		//Discards the print job when the user cancels it
+		if(canceled)
+			printer->abort();
 
-			first_page = false;
-
-			//Render the current page on the printer
-			scn->render(&painter, QRect(), pages[page]);
-
-			//Print the current page number if this option is marked
-			if(print_page_nums)
-			{
-				page_info = tr("Page #%1 / X:%2 Y:%3").arg(QString::number(global_page + 1))
-											.arg(qRound((pages[page].left() - min_left) / pg_w) + 1)
-											.arg(qRound((pages[page].top() - min_top) / pg_h) + 1);
-				color = ObjectsScene::getGridColor().darker();
-				color.setAlpha(128);
-				painter.setBrush(color);
-				painter.setPen(ObjectsScene::getGridColor().lighter());
-				brect = painter.fontMetrics().boundingRect(page_info);
-				brect.adjust(-5, 0, 5, 0);
-
-				painter.save();
-				painter.translate(-margins.left() / 2, -margins.top() / 2);
-				painter.drawRect(brect);
-				painter.drawText(0, 0, page_info);
-				painter.restore();
-			}
-		}
+		task_prog_wgt.close();
 	}
 
 	//Restore the grid option backup
