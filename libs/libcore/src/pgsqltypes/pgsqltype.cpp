@@ -63,15 +63,15 @@ const QStringList PgSqlType::type_names {
 	"tstzmultirange",
 
 	//Object Identification type (OID)
-	//offsets 94 to 108
-	"oid", "regproc", "regprocedure",
+	//offsets 94 to 110
+	"oid", "oid8", "regproc", "regprocedure",
 	"regoper", "regoperator", "regclass",
-	"regrole", "regnamespace", "regtype",
+	"regrole", "regnamespace", "regdatabase", "regtype",
 	"regconfig", "regdictionary", "xid", "cid",
 	"tid", "oidvector",
 
 	//Pseudo-types
-	//offsets 109 to 133
+	//offsets 111 to 135
 	"\"any\"", "anyelement", "anyarray", "anynonarray", "anyenum",
 	"anyrange", "anymultirange", "anycompatible", "anycompatiblearray",
 	"anycompatiblenonarray", "anycompatiblerange", "anycompatiblemultirange",
