@@ -14987,6 +14987,10 @@ dostupné v GUI. Všetky dostupné voľby sú popísané nižšie.</translation>
         <translation>Tlač modelov nie je v skúšobnej verzii k dispozícii. Ak chcete túto funkciu povoliť, upgradujte licenciu.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Export modelov do PDF nie je v skúšobnej verzii k dispozícii. Ak chcete túto funkciu povoliť, upgradujte licenciu.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

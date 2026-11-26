@@ -14987,6 +14987,10 @@ som er tilgjengelige i det grafiske brukergrensesnittet. Alle tilgjengelige alte
         <translation>Utskrift av modeller er ikke tilgjengelig i prøveversjonen. Oppgrader lisensen din for å aktivere denne funksjonen.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Eksport av modeller til PDF er ikke tilgjengelig i prøveversjonen. Oppgrader lisensen din for å aktivere denne funksjonen.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

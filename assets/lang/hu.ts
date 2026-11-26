@@ -14987,6 +14987,10 @@ elérhető fő műveletekhez. Az összes elérhető beállítás leírása aláb
         <translation>A modellek nyomtatása a próbaverzióban nem érhető el. A funkció engedélyezéséhez frissítse licencét.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>A modellek PDF-be exportálása a próbaverzióban nem érhető el. A funkció engedélyezéséhez frissítse licencét.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

@@ -14987,6 +14987,10 @@ available in GUI. All available options are described below.</source>
         <translation>モデルの印刷は体験版では利用できません。この機能を有効にするにはライセンスをアップグレードしてください。</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>モデルのPDFへのエクスポートは体験版では利用できません。この機能を有効にするにはライセンスをアップグレードしてください。</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

@@ -14987,6 +14987,10 @@ available in GUI. All available options are described below.</source>
         <translation>모델 인쇄는 평가판에서 사용할 수 없습니다. 이 기능을 사용하려면 라이선스를 업그레이드하십시오.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>모델을 PDF로 내보내기는 평가판에서 사용할 수 없습니다. 이 기능을 사용하려면 라이선스를 업그레이드하십시오.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

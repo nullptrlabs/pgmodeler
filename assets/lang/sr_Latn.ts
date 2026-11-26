@@ -14987,6 +14987,10 @@ dostupne u grafičkom interfejsu. Sve dostupne opcije opisane su ispod.</transla
         <translation>Štampanje modela nije dostupno u probnoj verziji. Nadogradite licencu da biste omogućili ovu funkciju.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Izvoz modela u PDF nije dostupan u probnoj verziji. Nadogradite licencu da biste omogućili ovu funkciju.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

@@ -1,6 +1,23 @@
 Changelog
 ---------
 
+v2.0.1
+------
+*Release date: November 27, 2026*
+
+* [New] Added initial support for PostgreSQL 19, including the object identifier types `oid8` and `regdatabase`.
+* [New] Added the PDF format to the graphics file export. The model can be exported to a vector PDF file, in a single page sized after the model or split according to the paper settings (page by page option).
+* [New] Added the `--export-to-pdf` (`-ea`) option to `pgmodeler-cli`, which accepts `--show-grid`, `--show-delimiters`, `--page-by-page` and `--override-bg-color`.
+* [New] Added the selection of a range of pages to the model printing.
+* [New] Added a progress window to the model printing, which can be cancelled between pages.
+* [New] Added unit tests for the pages computation (`objectsscenetest`) and the PostgreSQL types and versions (`pgsqltypetest`).
+* [Change] PostgreSQL 19 is now the default version.
+* [Change] Updated the UI dictionaries of all languages with the new texts of the PDF export and of the printing progress.
+* [Fix] Fixed pages being skipped when printing or exporting scenes with negative coordinates or scaled pages.
+* [Fix] Fixed a false warning about changed paper or margin settings displayed when the printer refused part of the page layout or the print destination was switched.
+* [Fix] Fixed a bug in `ModelWidget::removeRelationshipPoints` that was removing the points of all relationships of the model when several relationships were selected.
+* [Fix] Fixed the undo of the segments and jogs of orthogonal relationship lines moved by the user, which restored nothing.
+
 v2.0.0
 ------
 *Release date: October 30, 2026*

@@ -14987,6 +14987,10 @@ yang tersedia di GUI. Semua opsi yang tersedia dijelaskan di bawah.</translation
         <translation>Pencetakan model tidak tersedia pada versi percobaan. Tingkatkan lisensi Anda untuk mengaktifkan fitur ini.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Ekspor model ke PDF tidak tersedia pada versi percobaan. Tingkatkan lisensi Anda untuk mengaktifkan fitur ini.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

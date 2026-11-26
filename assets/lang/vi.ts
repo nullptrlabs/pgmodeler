@@ -14987,6 +14987,10 @@ sẵn có trong giao diện đồ họa. Tất cả các tùy chọn khả dụn
         <translation>Tính năng in mô hình không khả dụng trong bản dùng thử. Hãy nâng cấp giấy phép để bật tính năng này.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Tính năng xuất mô hình ra PDF không khả dụng trong bản dùng thử. Hãy nâng cấp giấy phép để bật tính năng này.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

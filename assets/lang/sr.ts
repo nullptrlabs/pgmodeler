@@ -14987,6 +14987,10 @@ available in GUI. All available options are described below.</source>
         <translation>Штампање модела није доступно у пробној верзији. Надоградите лиценцу да бисте омогућили ову функцију.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Извоз модела у PDF није доступан у пробној верзији. Надоградите лиценцу да бисте омогућили ову функцију.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

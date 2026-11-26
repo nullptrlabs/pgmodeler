@@ -14987,6 +14987,10 @@ kas pieejamas grafiskajā saskarnē. Visas pieejamās opcijas ir aprakstītas t�
         <translation>Modeļu drukāšana nav pieejama izmēģinājuma versijā. Jauniniet savu licenci, lai iespējotu šo funkciju.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Modeļu eksportēšana uz PDF nav pieejama izmēģinājuma versijā. Jauniniet savu licenci, lai iespējotu šo funkciju.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

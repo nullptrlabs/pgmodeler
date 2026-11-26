@@ -14987,6 +14987,10 @@ disponibili nella GUI. Tutte le opzioni disponibili sono descritte di seguito.</
         <translation>La stampa dei modelli non è disponibile nella versione di prova. Aggiornare la licenza per abilitare questa funzionalità.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>L&apos;esportazione dei modelli in PDF non è disponibile nella versione di prova. Aggiornare la licenza per abilitare questa funzionalità.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *
