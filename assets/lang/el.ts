@@ -14987,6 +14987,10 @@ available in GUI. All available options are described below.</source>
         <translation>Η εκτύπωση μοντέλων δεν είναι διαθέσιμη στη δοκιμαστική έκδοση. Αναβαθμίστε την άδεια χρήσης σας για να ενεργοποιήσετε αυτή τη λειτουργία.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Η εξαγωγή μοντέλων σε PDF δεν είναι διαθέσιμη στη δοκιμαστική έκδοση. Αναβαθμίστε την άδεια χρήσης σας για να ενεργοποιήσετε αυτή τη λειτουργία.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

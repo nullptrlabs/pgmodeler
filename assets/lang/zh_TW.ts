@@ -14987,6 +14987,10 @@ available in GUI. All available options are described below.</source>
         <translation>試用版無法列印模型。請升級授權以啟用此功能。</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>試用版無法將模型匯出為 PDF。請升級授權以啟用此功能。</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

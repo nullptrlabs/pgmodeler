@@ -14987,6 +14987,10 @@ dostępnych w GUI. Wszystkie dostępne opcje opisano poniżej.</translation>
         <translation>Drukowanie modeli nie jest dostępne w wersji próbnej. Zaktualizuj licencję, aby włączyć tę funkcję.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Eksport modeli do PDF nie jest dostępny w wersji próbnej. Zaktualizuj licencję, aby włączyć tę funkcję.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

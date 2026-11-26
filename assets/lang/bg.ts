@@ -14987,6 +14987,10 @@ available in GUI. All available options are described below.</source>
         <translation>Отпечатването на модели не е налично в пробната версия. Надградете лиценза си, за да разрешите тази функция.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Експортирането на модели в PDF не е налично в пробната версия. Надградете лиценза си, за да разрешите тази функция.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

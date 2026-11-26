@@ -14987,6 +14987,10 @@ ki so na voljo v grafičnem vmesniku. Vse razpoložljive možnosti so opisane sp
         <translation>Tiskanje modelov v preizkusni različici ni na voljo. Za omogočitev te funkcije nadgradite licenco.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Izvoz modelov v PDF v preizkusni različici ni na voljo. Za omogočitev te funkcije nadgradite licenco.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

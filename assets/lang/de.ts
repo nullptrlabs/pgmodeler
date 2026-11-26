@@ -14987,6 +14987,10 @@ die in der GUI verfügbar sind. Alle verfügbaren Optionen sind unten beschriebe
         <translation>Das Drucken von Modellen ist in der Testversion nicht verfügbar. Aktualisieren Sie Ihre Lizenz, um diese Funktion zu aktivieren.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Das Exportieren von Modellen als PDF ist in der Testversion nicht verfügbar. Aktualisieren Sie Ihre Lizenz, um diese Funktion zu aktivieren.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

@@ -14987,6 +14987,10 @@ käytettävissä oleville tärkeimmille toiminnoille. Kaikki käytettävissä ol
         <translation>Mallien tulostus ei ole käytettävissä kokeiluversiossa. Päivitä lisenssisi ottaaksesi tämän toiminnon käyttöön.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Mallien vienti PDF-muotoon ei ole käytettävissä kokeiluversiossa. Päivitä lisenssisi ottaaksesi tämän toiminnon käyttöön.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

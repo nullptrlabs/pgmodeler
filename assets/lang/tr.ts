@@ -14987,6 +14987,10 @@ bir komut satırı arayüzü sağlar. Kullanılabilir tüm seçenekler aşağıd
         <translation>Modellerin yazdırılması deneme sürümünde kullanılamaz. Bu özelliği etkinleştirmek için lisansınızı yükseltin.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Modellerin PDF olarak dışa aktarılması deneme sürümünde kullanılamaz. Bu özelliği etkinleştirmek için lisansınızı yükseltin.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

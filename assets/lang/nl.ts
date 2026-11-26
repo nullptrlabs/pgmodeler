@@ -14987,6 +14987,10 @@ die in de GUI beschikbaar zijn. Alle beschikbare opties worden hieronder beschre
         <translation>Het afdrukken van modellen is niet beschikbaar in de proefversie. Upgrade uw licentie om deze functie in te schakelen.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Het exporteren van modellen naar PDF is niet beschikbaar in de proefversie. Upgrade uw licentie om deze functie in te schakelen.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

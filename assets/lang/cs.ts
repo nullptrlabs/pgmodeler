@@ -14987,6 +14987,10 @@ dostupné v GUI. Všechny dostupné volby jsou popsány níže.</translation>
         <translation>Tisk modelů není ve zkušební verzi k dispozici. Chcete-li tuto funkci povolit, upgradujte licenci.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Export modelů do PDF není ve zkušební verzi k dispozici. Chcete-li tuto funkci povolit, upgradujte licenci.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *

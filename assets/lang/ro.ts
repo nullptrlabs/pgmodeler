@@ -14987,6 +14987,10 @@ disponibile în interfața grafică. Toate opțiunile disponibile sunt descrise 
         <translation>Imprimarea modelelor nu este disponibilă în versiunea de încercare. Faceți upgrade la licență pentru a activa această funcție.</translation>
     </message>
     <message>
+        <source>Exporting models to PDF is not available in the trial version. Upgrade your license to enable this feature.</source>
+        <translation>Exportul modelelor în PDF nu este disponibil în versiunea de încercare. Faceți upgrade la licență pentru a activa această funcție.</translation>
+    </message>
+    <message>
         <source>&lt;!--
 *******************************************************
 * ATTENTION: The XML code of the objects is purposely *
