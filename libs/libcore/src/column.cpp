@@ -319,21 +319,22 @@ QString Column::getAlterCode(BaseObject *object)
 		else
 			def_val = col->default_value;
 
-		QString this_def_val = this->default_value.simplified().toLower().toLower(),
+		QString this_def_val = this->default_value.simplified().toLower(),
 				col_def_val = col->getDefaultValue().simplified().toLower();
 
 		attribs[Attributes::Generated] = "";
+		attribs[Attributes::DefaultValue] = "";
 
 		if(!this->isGenerated() && !col->isGenerated() && this_def_val != col_def_val)
 			attribs[Attributes::DefaultValue] = (def_val.isEmpty() ? Attributes::Unset : def_val);
 		else if(this->isGenerated() && col->isGenerated() && this_def_val != col_def_val)
 			attribs[Attributes::Generated] = col->getDefaultValue();
-		else if(this->isGenerated() && !col->isGenerated())
+		else if(this->isGenerated() && !col->isGenerated() && getPgSQLVersion().toDouble() >= 13)
 		{
 			attribs[Attributes::Generated] = Attributes::Unset;
 
-			if(!col->getDefaultValue().isEmpty())
-				attribs[Attributes::DefaultValue] = col->getDefaultValue();
+			if(!def_val.isEmpty())
+				attribs[Attributes::DefaultValue] = def_val;
 		}
 
 		if(this->not_null!=col->not_null)
